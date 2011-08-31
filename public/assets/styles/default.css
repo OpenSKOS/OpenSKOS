@@ -1,0 +1,43 @@
+@CHARSET "UTF-8";
+
+body {
+	font: 0.9em Arial, Helvetica, sans-serif;
+	color: #444;
+}
+
+a {
+	color: #0087D5;
+	text-decoration: none;
+}
+
+a:visted {
+	color: #0050d5;
+}
+
+a:HOVER {
+	text-decoration: underline;
+}
+
+#content {
+	font-size: 1.1em;
+	line-height: 1.5;
+	text-align: left;
+}
+h1, h2, h3, h4 {
+	color: #0398CA;
+	font-weight: bold;
+	font-size:1em;
+}
+
+h1 {
+	font-size: 180%;
+	color: #0398CA;
+	font-weight: bold;
+	border-bottom: 2px solid #D1DDE0;
+	margin: 0.5em 0 0.5em 0;
+}
+
+h2 {
+	border-bottom: 1px solid #0398CA;
+	margin: 0.5em 0 0.5em 0;
+}

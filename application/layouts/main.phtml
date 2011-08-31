@@ -1,0 +1,34 @@
+<?php
+/* echo '<?xml version="1.0" encoding="UTF-8" ?>'; */
+echo $this->doctype() ;
+$baseUrl = $this->url(array(), 'default', true);
+if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
+
+$lang = (string)Zend_Registry::get('Zend_Locale');
+
+?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lang?>" lang="<?php echo $lang?>">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/default.css" type="text/css" media="all" />
+		<link rel="shortcut icon" href="<?php echo $baseUrl?>assets/favicon.ico" />
+		<?php
+    	echo $this->headMeta();
+    	echo $this->headScript();
+		echo $this->headTitle();
+		echo $this->headLink();
+	    echo $this->headStyle();
+	    ?>
+
+	</head>
+
+	<body>
+		<div id="header">
+			<?php echo $this->placeholder('header')?>
+	    </div>
+	    <div id="content">
+   		<?php echo $this->render('flashmessenger.phtml')?>
+                <?php echo $this->layout()->content?>
+		</div>
+	</body>
+</html>

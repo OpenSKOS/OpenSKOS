@@ -1,0 +1,72 @@
+<?php
+/**
+ * 
+ * @var Api_Models_Concept
+ */
+$concept = &$this->concept;
+
+$title = $concept['prefLabel'][0];
+if (null !== ($lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang'))) {
+	$fieldname = "prefLabel@{$lang}";	
+	if (isset($concept[$fieldname])) {
+		$title = $concept[$fieldname][0];
+	}
+}
+$this->headTitle($title);
+
+$this->placeholder ( 'header' )->captureStart ()?>
+<h1><?php echo $this->escape($title)?></h1>
+<p class="uri">
+	<a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a>
+</p>
+<?php
+$this->placeholder ( 'header' )->captureEnd ();
+?>
+<?php foreach (
+	array(
+		'prefLabel' => 'Prefered labels',
+		'altLabel' => 'Alternative labels',
+		'hiddenLabel' => 'Hidden labels'
+	) as $fieldname => $h2) :?>
+<?php if (null !== ($langValues = $concept->getLangValues($fieldname, $lang))):?>
+<h2><?php echo $h2?></h2>
+<ul class="altLabel">
+	<?php foreach ($langValues as $lang => $values):?>
+		<?php foreach ($values as $value):?>
+	<li class="altLabel">
+		<span class="label" xml:lang="<?php echo $lang?>"><?php echo $this->escape($value)?></span>
+		<span class="lang"><span>(<?php echo $lang?>)</span></span>
+	</li>
+		<?php endforeach?>
+	<?php endforeach?>
+</ul>
+<?php endif?>
+<?php endforeach?>
+
+<?php foreach (
+	array(
+		'related' => 'Related concepts',
+		'broader' => 'Broader concepts',
+		'broaderTransitive' => 'Broader concepts (transitive)',
+		'narrower' => 'Narrower concepts',
+		'narrowerTransitive' => 'Narrower concepts (transitive)',
+		'semanticRelation' => 'Semantically related concepts',
+	) as $relation => $h2):?>
+<?php if (null !== ($relations = $concept->getRelations($relation, $lang))):?>
+<h2><?php echo $h2?></h2>
+<ul class="<?php echo $relation?>">
+<?php foreach ($relations as $relationConcept):?>
+	<?php foreach ($relationConcept->getLangValues('prefLabel', $lang) as $lang => $values):?>
+		<?php foreach ($values as $value):?>
+		<li class="prefLabel">
+			<span class="label" xml:lang="<?php echo $lang?>">
+				<a href="<?php echo $this->url(array('id'=>$relationConcept['uuid']))?>"><?php echo $this->escape($value)?></a>
+			</span>
+			<span class="lang"><span>(<?php echo $lang?>)</span></span>
+		</li>
+		<?php endforeach?>
+	<?php endforeach?>
+<?php endforeach?>
+</ul>
+<?php endif?>
+<?php endforeach?>
