@@ -10,10 +10,10 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 	
 	public function init()
 	{
+		parent::init();
 		$this->model = Api_Models_Concepts::factory()->setQueryParams(
 			$this->getRequest()->getParams()
 		);
-		parent::init();
 		$this->_helper->contextSwitch()
 			->initContext($this->getRequest()->getParam('format', 'json'));
 	}
@@ -39,8 +39,10 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 		$id = $this->getRequest()->getParam('id');
 		$concept = $this->model->getConcept($id);
 		if ($this->_helper->contextSwitch()->getCurrentContext()==='json') {
-			foreach ($concept as $key => $var) {
-				$this->view->$key = $var;
+			if (null !== $concept) {
+				foreach ($concept as $key => $var) {
+					$this->view->$key = $var;
+				}
 			}
 		} else {
 			$this->view->concept = $concept;

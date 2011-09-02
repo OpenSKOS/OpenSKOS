@@ -118,6 +118,7 @@ class OpenSKOS_Solr
 		} else {
 			$key = 'uri';
 		}
+
 		$response = $this->search($key . ':"' . $id.'"', $extraParams);
 		if (isset($extraParams['wt']) && $extraParams['wt']=='xml') {
 			return DOMDocument::loadXML($response->saveXml($response->getElementsByTagName('doc')->item(0)));
@@ -176,4 +177,23 @@ class OpenSKOS_Solr
 		return $client;
 	}
 	
+	/**
+	 * Load the uses Solr Schema from the server
+	 * @param bool $asDom
+	 * @return mixed a DOMDocument if $asDom===true, else a XML string
+	 */
+	public function getSchema($asDom = true)
+	{
+		$response = $this->_getClient()
+			->setUri($this->getUri('/admin/file/?file=schema.xml'))
+			->request('GET');
+			
+		if ($response->isError()) {
+			throw new OpenSKOS_Solr_Exception('Failed to load `schema.xml` from the Solr server');
+		}
+		return $asDom === true 
+			? DOMDocument::loadXML($response->getBody())
+			: $response->getBody();
+			
+	}
 }
