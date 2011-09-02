@@ -27,7 +27,7 @@ var SkosConcept = new Class({
 	load: function(fields)
 	{
 		if (!fields) fields='*';
-		var url = '/api/findConcepts';
+		var url = '/api/find-concepts';
 		var self=this;
 		new Request.JSON({
 			url: url,
@@ -39,7 +39,6 @@ var SkosConcept = new Class({
 				} catch (e) {}
 			},
 			onSuccess: function(response) {
-				console.log(response);
 				self = Object.merge(self, response);
 				self.fireEvent('complete', []);
 			}
