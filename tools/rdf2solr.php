@@ -1,4 +1,13 @@
+#!/usr/local/zend/bin/php
 <?php
+/**
+#BASH SCRIPT
+seq -w 0 173 | while read i
+do 
+	./rdf2solr.php /Users/mlindeman/Downloads/gtaanew.rdf $i | curl http://localhost:8983/solr/update?commit=true -H 'Content-Type:text/xml' --data-binary @-
+done
+
+ */
 define('DEFAULT_LANG', 'nl');
 $stopAt = 1000;
 
@@ -19,7 +28,6 @@ $simpleMapping = array(
 	'SKOS:RELATED' => 'related',
 	'SKOS:BROADERTRANSITIVE' => 'broaderTransitive',
 	'SKOS:NARROWERTRANSITIVE' => 'narrowerTransitive',
-	'SKOS:NOTATION' => 'notation'
 );
 
 $langMapping = array(
@@ -33,18 +41,26 @@ $langMapping = array(
 	'SKOS:EXAMPLE' => 'example',
 	'SKOS:HISTORYNOTE' => 'historyNote',
 	'SKOS:SCOPENOTE' => 'scopeNote',
+	'SKOS:NOTATION' => 'notation'
 );
 
 function startElement($parser, $name, $attrs) 
 {
 	global $docCounter, $startAt, $simpleMapping, $langMapping;
 	
+	$DATA = '';
 	if (isset($simpleMapping[$name])) {
 		$name = $simpleMapping[$name];
+		if (!isset($attrs['RDF:RESOURCE'])) {
+			print_r($attrs);
+			exit($name."\n");
+		}
 		$DATA = $attrs['RDF:RESOURCE'];
 	} elseif (isset($langMapping[$name])) {
-		$lang = isset($attrs['XML:LANG']) ? $attrs['XML:LANG'] : DEFAULT_LANG;
-		$name = $langMapping[$name].'@'.$lang;
+		$name = $langMapping[$name];
+		if (isset($attrs['XML:LANG'])) {
+			$name .= '@'.$attrs['XML:LANG'];
+		}
 	} elseif (0 === strpos($name, 'DC:')) {
 		$name = strtolower(str_replace('DC:', 'dc_', $name));
 	}
@@ -58,12 +74,14 @@ function startElement($parser, $name, $attrs)
 				return;
 			}
 			echo "  <doc>";
-			printElement($parser, 'tenant', 'gtaa');
-			printElement($parser, 'uri', $attrs['RDF:ABOUT']);
-			printElement($parser, 'uuid', md5_uuid($attrs['RDF:ABOUT']));
+			echo "\n    <field name=\"tenant\">gtaa</field>";
+			echo "\n    <field name=\"uri\">{$attrs['RDF:ABOUT']}</field>";
+			echo "\n    <field name=\"uuid\">".md5_uuid($attrs['RDF:ABOUT'])."</field>";
 			break;
 		case 'RDF:TYPE';
-			break;
+			$urlParts = parse_url($attrs['RDF:RESOURCE']);
+			echo "\n    <field name=\"class\">{$urlParts['fragment']}</field>";
+		break;
 		default:
 			if ($docCounter <= $startAt) return;
 			echo "\n    <field name=\"{$name}\">{$DATA}";

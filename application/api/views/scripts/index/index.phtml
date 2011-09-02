@@ -1,0 +1,169 @@
+<?php
+$exampleWordAutocomplete = 'dood';
+$exampleWordFindConcepts = $exampleWordAutocomplete;
+$exampleWordFindConceptsAltLabel = 'kruisigingen';
+$exampleWordFindConceptsAltLabelTruncated = 'kr*';
+$exampleWordFindConceptsPrefLabelDutch = 'doodstraf';
+
+$exampleResolveURI = 'http://data.beeldengeluid.nl/gtaa/28586';
+$exampleResolveUUID = '82c2614c-3859-ed11-4e55-e993c06fd9fe';
+$exampleResolveLabel = 'doodstraf';
+
+$exampleURI = 'http://data.beeldengeluid.nl/gtaa/215866';
+$exampleUUID = '0a39cbfc-a491-75f8-60b2-6b50418e299d';
+
+$this->headTitle('Welcome to the OpenSKOS API');
+
+?>
+<h2><?php echo $this->escape('Welcome to the OpenSKOS API')?></h2>
+<ul>
+	<li><a href="#about-the-openskos-api">About the OpenSKOS API</a></li>
+	<li>
+		<a href="#examples">Examples</a>
+		<ul>
+			<li><a href="#autocomlete">Autocomplete</a></li>
+			<li><a href="#find-concepts">Find concepts</a></li>
+			<li><a href="#concept-resolver">Concept resolver</a></li>
+		</ul>
+	</li>
+</ul>
+<h3 id="about-the-openskos-api">About the OpenSKOS API</h3>
+<p>The OpenSKOS API is a RESTful webservice.</p>
+<h3 id="examples">Examples</h3>
+<h4 id="autocomlete">Autocomplete</h4>
+<p>The autocomplete API is a simplified version of the <a href="#find-concepts"><em>Find concepts</em></a> API.
+You can use the autocomplete API in your projects, 
+for example with as Javascript based autocompete field.</p>
+<ul class="api-examples">
+	<li>
+		<p>Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
+			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>">
+				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>
+			</a>
+		</p>
+		<div class="note">
+			<p>This method returns all labels, including hiddenLabels and altLabels. This means it is possible that the service returns labels that do not match your pattern.</p>
+		</div>
+	</li>
+	<li>
+		<p>Get only lexical labels with languagecode "<em>nl</em>" in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
+			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>">?lang=nl
+				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?lang=nl
+			</a>
+		</p>
+	</li>
+	<li>
+		<p>Get all lexical labels in JSON format, with a word in one in the prefLabels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
+			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?searchLabel=prefLabel">
+				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?searchLabel=prefLabel
+			</a>
+		</p>
+	</li>
+	<li>
+		<p>Get only prefLabels in JSON format, with a word in one in the labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
+			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?returnLabel=prefLabel">
+				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?returnLabel=prefLabel
+			</a>
+		</p>
+	</li>
+</ul>
+
+<h4 id="find-concepts">Find concepts</h4>
+<ul class="api-examples">
+	<li>
+		<p>Find concepts that have a lexical label that matches the word "<em><?php echo $exampleWordFindConcepts?></em>":</p>
+		<ul>
+			<li>
+				in JSON format: <a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
+			</li>
+			<li>
+				in XML format: <a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
+			</li>
+		</ul>
+	</li>
+	<li>
+		<p>Fetch a single concept:</p>
+		<ul>
+			<li>by URI: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleURI), 'rest')?>?id=<?php echo $exampleURI?>"><?php echo $this->url(array('controller' => 'findConcepts'), 'rest')?>?id=<?php echo $exampleURI?></a></li>
+			<li>by UUID: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>"><?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?></a></li>
+			<li>by UUID in XML format: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>
+		</ul>
+	</li>
+	<li>
+		<p>Advanced queries:</p>
+		<ul>
+			<li>
+				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
+					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
+						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>
+					</a>
+			</li>
+			<li>
+				Search for concepts in prefLabels in Dutch, in a case-insensitive way, matching the word "<em><?php echo $exampleWordFindConceptsPrefLabelDutch?></em>":
+					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>">
+						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>
+					</a>
+			</li>
+			<li>
+				Search for concepts in altLabels, in a case-insensitive way, matching a word starting with "<em><?php echo $exampleWordFindConceptsAltLabelTruncated?></em>":
+					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabelTruncated?>">
+						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabelText:<?php echo $exampleWordFindConceptsAltLabelTruncated?>
+					</a>
+			</li>
+			<li>
+				Search for concepts ithat have a <em>notation</em> value:
+					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=notation:[* TO *]">
+						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=notation:[* TO *]
+					</a>
+			</li>
+			<li>
+				Search for concepts that have a <em>scopeNote</em> value, returning only the uri and prefLabels and scopeNotes in dutch:
+					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=scopeNote:[* TO *]&fl=uri,scopeNote@nl,prefLabel@nl">
+						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
+					</a>
+			</li>
+		</ul>
+		<div class="note">
+			<p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>
+			All classes of the SKOS vocabulary are supported. Classes can be search in a case-sensitive or case-insenitive way. Supported classes can be search limited to specific language codes.
+			If You're Familiar with <a rel="external" href="http://lucene.apache.org/solr/">Apache Solr</a> you can have lok at our <a href="<?php echo $this->url(array('controller' => 'solrSchema'))?>">Solr Schema</a>.
+			</p>
+		</div>
+	</li>
+</ul>
+
+<h4 id="concept-resolver">Concept resolver</h4>
+<ul>
+	<li>
+		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
+		<ul>
+			<li>
+			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html</a>
+			</li>
+			<li>
+			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json</a>
+			</li>
+			<li>
+			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
+			</li>
+			<li>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
+			</li>
+		</ul>
+		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
+		<ul>
+			<li>
+			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
+			</li>
+			<li>
+			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
+			</li>
+			<li>
+			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=xml"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=xml</a>
+			</li>
+			<li>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=rdf"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=rdf</a>
+			</li>
+		</ul>
+	</li>
+</ul>

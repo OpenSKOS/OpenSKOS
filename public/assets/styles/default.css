@@ -2,16 +2,16 @@
 
 body {
 	font: 0.9em Arial, Helvetica, sans-serif;
-	color: #444;
+	color: #3c1038;
 }
 
 a {
-	color: #0087D5;
+	color: #822966;
 	text-decoration: none;
 }
 
 a:visted {
-	color: #0050d5;
+	color: #3c1038;
 }
 
 a:HOVER {
@@ -19,25 +19,78 @@ a:HOVER {
 }
 
 #content {
-	font-size: 1.1em;
+	font-size: 1.0em;
 	line-height: 1.5;
 	text-align: left;
 }
 h1, h2, h3, h4 {
-	color: #0398CA;
+	color: #822966;
 	font-weight: bold;
 	font-size:1em;
 }
 
 h1 {
 	font-size: 180%;
-	color: #0398CA;
 	font-weight: bold;
-	border-bottom: 2px solid #D1DDE0;
-	margin: 0.5em 0 0.5em 0;
+	border-bottom: 2px solid #3c1038;
+	margin: 0.5em 0 1em 0;
+	overflow: auto;
+}
+
+h1 img {
+	display: block;
+	float: left;
+	margin-bottom: 10px;
+}
+
+h1 span {
+	padding: 15px 0 0 20px;
+	display: block;
+	float: left;
 }
 
 h2 {
-	border-bottom: 1px solid #0398CA;
+	border-bottom: 1px solid #3c1038;
+	font-size: 140%;
 	margin: 0.5em 0 0.5em 0;
+}
+
+h3 {
+	font-size: 120%;
+}
+
+h4 {
+	font-size: 90%;
+}
+
+
+footer {
+	border-top: 1px solid #3c1038;
+	margin: 0.5em 0 1em 0;
+	padding: 5px;
+}
+
+footer p {
+	font-size: 85%;
+}
+
+footer p#colofon { float: left; }
+footer p#copyright { float: right;}
+
+div.note {
+	background: transparent url(../images/tip.png) top left no-repeat;
+}
+div.note p {
+	font-style: italic;
+	font-size: 85%;
+	font-color: #666;
+	padding-left: 20px;
+}
+
+.api-examples a {white-space: nowrap;}
+
+a.resolvable-concept.loading
+{
+	padding-right: 15px;
+	background: transparent url(../images/spinner.gif) center right no-repeat;
 }

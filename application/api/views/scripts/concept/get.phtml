@@ -13,60 +13,66 @@ if (null !== ($lang = Zend_Controller_Front::getInstance()->getRequest()->getPar
 	}
 }
 $this->headTitle($title);
-
-$this->placeholder ( 'header' )->captureStart ()?>
-<h1><?php echo $this->escape($title)?></h1>
-<p class="uri">
-	<a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a>
-</p>
-<?php
-$this->placeholder ( 'header' )->captureEnd ();
 ?>
-<?php foreach (
-	array(
-		'prefLabel' => 'Prefered labels',
-		'altLabel' => 'Alternative labels',
-		'hiddenLabel' => 'Hidden labels'
-	) as $fieldname => $h2) :?>
-<?php if (null !== ($langValues = $concept->getLangValues($fieldname, $lang))):?>
-<h2><?php echo $h2?></h2>
-<ul class="altLabel">
-	<?php foreach ($langValues as $lang => $values):?>
-		<?php foreach ($values as $value):?>
-	<li class="altLabel">
-		<span class="label" xml:lang="<?php echo $lang?>"><?php echo $this->escape($value)?></span>
-		<span class="lang"><span>(<?php echo $lang?>)</span></span>
-	</li>
-		<?php endforeach?>
-	<?php endforeach?>
-</ul>
-<?php endif?>
-<?php endforeach?>
+<h2><?php echo $this->escape($title)?></h2>
+<dl>
+	<dd>URI:</dd>
+	<dl><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dl>
+	<dd>SKOS Class:</dd>
+	<dl><a rel="external" href="<?php echo $concept->getClassUri()?>"><?php echo $concept->getClass()?></a></dl>
+</dl>
 
-<?php foreach (
-	array(
-		'related' => 'Related concepts',
-		'broader' => 'Broader concepts',
-		'broaderTransitive' => 'Broader concepts (transitive)',
-		'narrower' => 'Narrower concepts',
-		'narrowerTransitive' => 'Narrower concepts (transitive)',
-		'semanticRelation' => 'Semantically related concepts',
-	) as $relation => $h2):?>
-<?php if (null !== ($relations = $concept->getRelations($relation, $lang))):?>
-<h2><?php echo $h2?></h2>
-<ul class="<?php echo $relation?>">
-<?php foreach ($relations as $relationConcept):?>
-	<?php foreach ($relationConcept->getLangValues('prefLabel', $lang) as $lang => $values):?>
-		<?php foreach ($values as $value):?>
-		<li class="prefLabel">
-			<span class="label" xml:lang="<?php echo $lang?>">
-				<a href="<?php echo $this->url(array('id'=>$relationConcept['uuid']))?>"><?php echo $this->escape($value)?></a>
-			</span>
-			<span class="lang"><span>(<?php echo $lang?>)</span></span>
+<?php foreach (Api_Models_Concept::$classes as $className => $subClasses):?>
+	<?php if ($concept->hasClass($className)): ?>
+<h3><?php echo $this->concept->translate($className)?></h3>
+		<?php foreach ($subClasses as $subClass):?>
+			<?php if (!Api_Models_Concept::isLanguageSensitiveClass($className)):?>
+				<?php if (null !== ($values = $concept->getValues($subClass, $lang))):?>
+	<h4><?php echo $this->translate('skos:'.$subClass)?></h4>
+		<ul class="<?php echo $subClass?>">
+					<?php foreach ($values as $value):?>
+			<li><a class="resolvable-concept" href="<?php echo $this->url(array('controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $value?>"><?php echo $this->escape($value)?></a></li>
+					<?php endforeach?>
+		</ul>
+		
+				<?php endif?>
+			<?php else:?>
+			<?php if (null !== ($langValues = $concept->getLangValues($subClass, $lang))):?>
+	<h4><?php echo $this->concept->translate('skos:'.$subClass)?></h4>
+	<ul class="<?php echo $subClass?>">
+		<?php foreach ($langValues as $lang => $values):?>
+			<?php foreach ($values as $value):?>
+		<li>
+			<span class="label" xml:lang="<?php echo $lang?>"><?php echo $this->escape($value)?></span>
+			<span class="lang <?php echo $lang?>"><span>(<?php echo $lang?>)</span></span>
 		</li>
+			<?php endforeach?>
 		<?php endforeach?>
+	</ul>
+				<?php endif?>
+			<?php endif?>
+		<?php endforeach?>
+	<?php endif?>
+<?php endforeach?>
+<?php if (null !== ($relations = $concept->getImplicitRelations())):?>
+<h3>Implicit Semantic Relations</h3>
+<?php foreach ($relations as $relationName => $relatedConcepts):?>
+<h4><?php echo $this->translate('skos:'.$relationName)?></h4>
+<ul>
+	<?php foreach ($relatedConcepts as $relatedConcept):?>
+	<li><a href="<?php echo $this->url(array('id' => $relatedConcept['uuid']), 'rest')?>"><?php echo isset($relatedConcept['prefLabel'])
+		?$this->escape($relatedConcept['prefLabel'][0])
+		:(isset($relatedConcept['dc_title']) ? $this->escape($relatedConcept['dc_title']['0']): $relatedConcept['uri'])?></a></li>
 	<?php endforeach?>
-<?php endforeach?>
 </ul>
-<?php endif?>
 <?php endforeach?>
+<?php endif?>
+
+<h3>Alternative formats</h3>
+<ul>
+	<li><a class="xml" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=xml">XML</a></li>
+	<li><a class="json" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=json">JSON</a></li>
+	<li><a class="rdf" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=rdf">RDF</a></li>
+</ul>
+</p>
+

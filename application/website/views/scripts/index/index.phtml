@@ -1,19 +1,14 @@
 <?php
 $this->headTitle ( 'Welkom to OpenSKOS' );
 ?>
-<?php
-
-$this->placeholder ( 'header' )->captureStart ()?>
-<h1>Welcome to OpenSKOS</h1>
-<?php
-$this->placeholder ( 'header' )->captureEnd ()?>
+<h2>Welcome to OpenSKOS</h2>
 <ul>
 	<li><a href="#what-is-OpenSKOS">What is OpenSKOS?</a></li>
 	<li><a href="#get-started">Get started</a></li>
-	<li><a href="#news">News</a></li>
+	<li><a href="#api">API</a></li>
 </ul>
 
-<h2 id="what-is-OpenSKOS">What is OpenSKOS?</h2>
+<h3 id="what-is-OpenSKOS">What is OpenSKOS?</h3>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
 fermentum urna vel nisl scelerisque vulputate eget at felis. Vivamus
 cursus imperdiet dui, eu ullamcorper magna semper ut. Suspendisse
@@ -36,7 +31,7 @@ mattis tempor pellentesque. Maecenas vitae sodales velit. Sed ac lacinia
 velit. Phasellus nec sapien dolor. Aliquam a augue nec nisi eleifend
 tincidunt. Cras tincidunt adipiscing blandit.</p>
 
-<h2 id="get-started">Get Started</h2>
+<h3 id="get-started">Get Started</h3>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
 fermentum urna vel nisl scelerisque vulputate eget at felis. Vivamus
 cursus imperdiet dui, eu ullamcorper magna semper ut. Suspendisse
@@ -46,15 +41,6 @@ eget tellus nec ipsum cursus vehicula quis eget arcu. Mauris vitae sem
 diam, at pulvinar tellus. Sed at molestie arcu. Quisque varius sodales
 felis, ultricies pretium ante mollis vel. Mauris iaculis posuere urna,
 ac aliquam nisl mattis in.</p>
-<p>Aliquam consectetur nisi eget nunc lobortis
-id elementum leo imperdiet. Suspendisse varius lectus id nulla pulvinar
-vel malesuada mi pulvinar. Vestibulum placerat commodo neque, id
-imperdiet quam rutrum in. Phasellus tincidunt dolor in lectus cursus
-quis volutpat turpis pulvinar. Donec blandit consequat ipsum, sed
-gravida urna pharetra et. Etiam pretium, diam at lobortis molestie,
-tortor turpis posuere lorem, at porta odio purus eget nulla. Ut aliquet
-malesuada fringilla. Integer urna neque, accumsan vel laoreet in,
-aliquam eget purus. Sed in orci a lorem dapibus ullamcorper. Maecenas
-mattis tempor pellentesque. Maecenas vitae sodales velit. Sed ac lacinia
-velit. Phasellus nec sapien dolor. Aliquam a augue nec nisi eleifend
-tincidunt. Cras tincidunt adipiscing blandit.</p>
+
+<h3 id="api">API</h3>
+<p>Visit to the <a href="<?php echo $this->url(array('controller' => 'api'))?>">OpenSKOS API section &raquo;</a></p>

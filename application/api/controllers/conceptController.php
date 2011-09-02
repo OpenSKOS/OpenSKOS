@@ -25,7 +25,15 @@ class Api_ConceptController extends OpenSKOS_Rest_Controller {
 		if (null === ($concept = $this->model->getConcept($id))) {
 			throw new Zend_Controller_Action_Exception('Concept not found', 404);
 		}
-		$this->view->concept = $concept;
+		if ($this->_helper->contextSwitch()->getCurrentContext()==='json') {
+			if (null !== $concept) {
+				foreach ($concept as $key => $var) {
+					$this->view->$key = $var;
+				}
+			}
+		} else {
+			$this->view->concept = $concept;
+		}
 	}
 
 	public function postAction() {

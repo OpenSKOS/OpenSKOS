@@ -9,6 +9,19 @@ class Api_Models_Concepts
 		return $this;
 	}
 	
+	public function getQueryParam($key, $default = null)
+	{
+		return isset($this->_queryParameters[$key])
+			? $this->_queryParameters[$key]
+			: $default;
+	}
+	
+	public function setQueryParam($key, $value)
+	{
+		$this->_queryParameters[$key] = $value;
+		return $this;
+	}
+	
 	/**
 	 * @return Dashboard_Models_Concepts
 	 */
@@ -26,7 +39,7 @@ class Api_Models_Concepts
 		$params = array('wt' => $this->format === 'xml' ? 'xml' : 'phps') + $this->_queryParameters;
 		
 		if (isset($this->_queryParameters['lang'])) {
-			$q='labelsText@'.$lang.':('.$q.')';
+			$q='LexicalLabelsText@'.$lang.':('.$q.')';
 		}
 		
 		return $solr->search($q, $params);
@@ -36,21 +49,38 @@ class Api_Models_Concepts
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
-		$labelSearchField = 'labelsText' . (null===$lang?'':'@'.$lang);
-		$labelreturnField = 'labels' . (null===$lang?'':'@'.$lang);
+		$labelSearchField = 'LexicalLabelsText';
+		$labelReturnField = 'LexicalLabels';
+		
+		if (null !== ($labelField = $this->getQueryParam('searchLabel'))) {
+			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
+				$labelSearchField = $labelField.'Text';
+			}
+		}
+		
+		if (null !== ($labelField = $this->getQueryParam('returnLabel'))) {
+			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
+				$labelReturnField = $labelField;
+			}
+		}
+		
+		$labelSearchField .= null===$lang?'':'@'.$lang;
+		$labelReturnField .= null===$lang?'':'@'.$lang;
+		
 		$q = "{$labelSearchField}:{$label}*";
 		$params = array(
 			'facet' => 'true',
-			'facet.field' => $labelreturnField,
+			'facet.field' => $labelReturnField,
 			'fq' => $q,
 			'facet.mincount' => 1
 		);
+		
 		$response = $this->solr()
-			->setFields(array('uuid', $labelreturnField))
+			->setFields(array('uuid', $labelReturnField))
 			->limit(0,0)
 			->search($q, $params);
 		$labels = array();
-		foreach ($response['facet_counts']['facet_fields'][$labelreturnField] as $label => $count) {
+		foreach ($response['facet_counts']['facet_fields'][$labelReturnField] as $label => $count) {
 			$labels[] = $label;
 		}
 		return $labels;
@@ -88,7 +118,7 @@ class Api_Models_Concepts
 				$q[] = 'uri:"'.$uri.'"';
 			}
 		}
-		$fields = array('uuid', 'url', 'prefLabel');
+		$fields = array('uuid', 'uri', 'prefLabel');
 		if (null !== $lang) $fields[] ='prefLabel@'.$lang;
 		
 		return $this->solr()
@@ -101,11 +131,11 @@ class Api_Models_Concepts
 	{
 		$data = $this->solr()->get($id, array(
 			'wt' => $this->format === 'xml' ? 'xml' : 'phps',
-			'fl' => '*'
+			'fl' => $this->getQueryParam('fl', '*')
 			)
 		);
 		if (null === $data) return;
-		return is_object($data) ? $data : new Api_Models_Concept($data);
+		return is_object($data) ? $data : new Api_Models_Concept($data, $this);
 	}
 	
 	public function __get($key)
