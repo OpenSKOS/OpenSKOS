@@ -74,19 +74,19 @@ for example with as Javascript based autocompete field.</p>
 		<p>Find concepts that have a lexical label that matches the word "<em><?php echo $exampleWordFindConcepts?></em>":</p>
 		<ul>
 			<li>
-				in JSON format: <a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
+				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
 			</li>
 			<li>
-				in XML format: <a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'findConcepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
+				in XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
 			</li>
 		</ul>
 	</li>
 	<li>
 		<p>Fetch a single concept:</p>
 		<ul>
-			<li>by URI: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleURI), 'rest')?>?id=<?php echo $exampleURI?>"><?php echo $this->url(array('controller' => 'findConcepts'), 'rest')?>?id=<?php echo $exampleURI?></a></li>
-			<li>by UUID: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>"><?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?></a></li>
-			<li>by UUID in XML format: <a href="<?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'findConcepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>
+			<li>by URI: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleURI), 'rest')?>?id=<?php echo $exampleURI?>"><?php echo $this->url(array('controller' => 'find-concepts'), 'rest')?>?id=<?php echo $exampleURI?></a></li>
+			<li>by UUID: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?></a></li>
+			<li>by UUID in XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>
 		</ul>
 	</li>
 	<li>
@@ -94,39 +94,39 @@ for example with as Javascript based autocompete field.</p>
 		<ul>
 			<li>
 				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
-						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>
 					</a>
 			</li>
 			<li>
 				Search for concepts in prefLabels in Dutch, in a case-insensitive way, matching the word "<em><?php echo $exampleWordFindConceptsPrefLabelDutch?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>">
-						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>
 					</a>
 			</li>
 			<li>
 				Search for concepts in altLabels, in a case-insensitive way, matching a word starting with "<em><?php echo $exampleWordFindConceptsAltLabelTruncated?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabelTruncated?>">
-						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=altLabelText:<?php echo $exampleWordFindConceptsAltLabelTruncated?>
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabelTruncated?>">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabelText:<?php echo $exampleWordFindConceptsAltLabelTruncated?>
 					</a>
 			</li>
 			<li>
 				Search for concepts ithat have a <em>notation</em> value:
-					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=notation:[* TO *]">
-						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=notation:[* TO *]
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]
 					</a>
 			</li>
 			<li>
 				Search for concepts that have a <em>scopeNote</em> value, returning only the uri and prefLabels and scopeNotes in dutch:
-					<a href="<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=scopeNote:[* TO *]&fl=uri,scopeNote@nl,prefLabel@nl">
-						<?php echo $this->url(array('controller' => 'findConcepts'))?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=scopeNote:[* TO *]&fl=uri,scopeNote@nl,prefLabel@nl">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
 					</a>
 			</li>
 		</ul>
 		<div class="note">
 			<p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>
 			All classes of the SKOS vocabulary are supported. Classes can be search in a case-sensitive or case-insenitive way. Supported classes can be search limited to specific language codes.
-			If You're Familiar with <a rel="external" href="http://lucene.apache.org/solr/">Apache Solr</a> you can have lok at our <a href="<?php echo $this->url(array('controller' => 'solrSchema'))?>">Solr Schema</a>.
+			If You're Familiar with <a rel="external" href="http://lucene.apache.org/solr/">Apache Solr</a> you can have lok at our <a href="<?php echo $this->url(array('controller' => 'solr-schema'))?>">Solr Schema</a>.
 			</p>
 		</div>
 	</li>
