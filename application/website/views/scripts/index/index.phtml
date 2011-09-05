@@ -31,6 +31,7 @@ lorem dapibus ullamcorper. Maecenas mattis tempor pellentesque. Maecenas
 vitae sodales velit. Sed ac lacinia velit. Phasellus nec sapien dolor.
 Aliquam a augue nec nisi eleifend tincidunt. Cras tincidunt adipiscing
 blandit.</p>
+<p>[<a href="#top">top</a>]</p>
 
 <h3 id="get-started">Get Started</h3>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
@@ -42,12 +43,14 @@ eget tellus nec ipsum cursus vehicula quis eget arcu. Mauris vitae sem
 diam, at pulvinar tellus. Sed at molestie arcu. Quisque varius sodales
 felis, ultricies pretium ante mollis vel. Mauris iaculis posuere urna,
 ac aliquam nisl mattis in.</p>
+<p>[<a href="#top">top</a>]</p>
 
 <h3 id="api">API</h3>
 <p>Visit to the <a
 	href="<?php
 	echo $this->url ( array ('controller' => 'api' ) )?>">OpenSKOS
 API section &raquo;</a></p>
+<p>[<a href="#top">top</a>]</p>
 
 <h3 id="oai-pmh">OAI-PMH</h3>
 <p>The <a rel="external" href="http://www.openarchives.org/pmh/">Open Archives Initiative Protocol for Metadata Harvesting</a>
@@ -67,11 +70,18 @@ invoked within HTTP.</p>
 	<li>List Concepts:<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc</a>
 	</li>
-	<li>List Concepts in ConceptScheme "<em>GeografischeNamen</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=3fe93807-8ad0-2828-ffb2-6b1226846f05"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;3fe93807-8ad0-2828-ffb2-6b1226846f05</a>
+	<li>List Concepts moddified since <em>2011-09-01 12:00:00</em>:<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01T12:00:00Z"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01T12:00:00Z</a>
 	</li>
-	<li>Get Concepts "<em>Roemenië</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=3fe93807-8ad0-2828-ffb2-6b1226846f05"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;3fe93807-8ad0-2828-ffb2-6b1226846f05</a>
+	<li>List Concepts moddified between <em>2011-09-01</em> and <em>2011-09-10</em>:<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01&until=2011-09-10"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01&amp;until=2011-09-10</a>
+	</li>
+	<li>List Concepts in ConceptScheme "<em>GeografischeNamen</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=3fe93807-8ad0-2828-ffb2-6b1226846f05"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=3fe93807-8ad0-2828-ffb2-6b1226846f05</a>
+	</li>
+	<li>Get Concepts "<em>A.G. Wildervankkanaal</em>" (uuid 238c8bfb-8915-0379-b52e-0885bfc9e500):<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&metadataPrefix=oai_dc&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&amp;metadataPrefix=oai_dc&amp;identifier=238c8bfb-8915-0379-b52e-0885bfc9e500</a>
 	</li>
 	
 </ul>
+<p>[<a href="#top">top</a>]</p>
