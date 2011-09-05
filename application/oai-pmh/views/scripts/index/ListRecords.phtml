@@ -19,7 +19,7 @@
 	</metadata>
 	<about>
 		<?php 
-			$rdf = Api_Models_Concept::factory($doc)->toRDF(false);
+			$rdf = Api_Models_Concept::factory($doc)->toRDF(false, true);
 			echo $rdf->saveXML($rdf->documentElement);
 		?>
 	</about>
