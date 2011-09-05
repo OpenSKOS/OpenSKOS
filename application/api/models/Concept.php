@@ -274,10 +274,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     /**
      * @return DOMDocument
      */
-    public function toRDF($withDublinCore = true)
+    public function toRDF($withDublinCore = true, $noCache = false)
     {
     	static $rdf;
-    	if (null === $rdf) {
+    	if (true === $noCache || null === $rdf) {
     		$router = Zend_Controller_Front::getInstance()->getRouter();
     		$UriPattern = 'http' . ($_SERVER['SERVER_PORT']==443?'s':'').'://' . $_SERVER['HTTP_HOST']
     			. $router->assemble(array('module' => 'api', 'controller' => 'concept', 'id' => 'ID'), 'rest', true);
