@@ -1,0 +1,33 @@
+<?php require_once APPLICATION_PATH . '/api/models/Concept.php'?>
+<<?php echo $this->parameters['verb']?>>
+<?php foreach ($this->data as $doc):?>
+<record>
+	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc))?>
+	<metadata>
+		<oai_dc:dc 
+		         xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+		         xmlns:dc="http://purl.org/dc/elements/1.1/" 
+		<?php if ($this->count==0):?>
+		         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+		         http://www.openarchives.org/OAI/2.0/oai_dc.xsd"
+		<?php endif?>>
+		<dc:title><?php echo $this->escape($doc['prefLabel'][0])?></dc:title>
+		<dc:identifier><?php echo $this->escape($doc['uri'])?></dc:identifier>
+		<dc:type>skos:<?php echo $this->escape($doc['class'])?></dc:type>
+		</oai_dc:dc>
+	</metadata>
+	<about>
+		<?php 
+			$rdf = Api_Models_Concept::factory($doc)->toRDF(false);
+			echo $rdf->saveXML($rdf->documentElement);
+		?>
+	</about>
+</record>
+<?php endforeach?>
+<?php
+if ($this->parameters['verb']!='GetRecord'):
+	echo $this->render('index/resumptionToken.phtml');
+endif;
+?>
+</<?php echo $this->parameters['verb']?>>

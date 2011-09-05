@@ -1,0 +1,6 @@
+<ListIdentifiers>
+<?php foreach ($this->data as $doc):?>
+	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc))?>
+<?php endforeach?>
+<?php echo $this->render('index/resumptionToken.phtml')?>
+</ListIdentifiers>

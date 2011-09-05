@@ -22,6 +22,16 @@ class OpenSKOS_Solr
 	}
 	
 	/**
+	 * @return OpenSKOS_Solr
+	 */
+	public static function getInstance()
+	{
+		if (Zend_Registry::isRegistered('OpenSKOS_Solr')) {
+			return Zend_Registry::get('OpenSKOS_Solr');
+		}
+	}
+	
+	/**
 	 * 
 	 * @param array $options
 	 * @return OpenSKOS_Solr
@@ -110,6 +120,16 @@ class OpenSKOS_Solr
 		return (boolean)preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid);
 	}
     
+	public static function md5_uuid($value)
+	{
+		$hash = md5($value);
+		return substr($hash, 0, 8) . '-' . substr($hash, 8, 4) 
+			. '-' . substr($hash, 12, 4)
+			. '-' . substr($hash, 16, 4)
+			. '-' . substr($hash, 20);
+	}
+
+	
 	public function get($id, Array $extraParams = array())
 	{
 		//concept by uuid or uri?

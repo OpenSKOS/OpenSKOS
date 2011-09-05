@@ -74,11 +74,22 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * @param array $data
 	 * @param Api_Models_Concepts $model
 	 */
-	public function __construct(Array $data, Api_Models_Concepts $model)
+	public function __construct(Array $data, Api_Models_Concepts $model = null)
 	{
 		$this->data = $data;
 		$this->model = $model;
 		$this->fieldnames = array_keys($data);
+	}
+	
+	/**
+	 * 
+	 * @param array $data
+	 * @param Api_Models_Concepts $model
+	 * @return Api_Models_Concept
+	 */
+	public static function factory($data, Api_Models_Concepts $model = null)
+	{
+		return new Api_Models_Concept($data, $model);
 	}
 	
 	public function getClass()
@@ -263,7 +274,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     /**
      * @return DOMDocument
      */
-    public function toRDF()
+    public function toRDF($withDublinCore = true)
     {
     	static $rdf;
     	if (null === $rdf) {
@@ -273,7 +284,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		$rdf = new DOMDocument();
     		$root = $rdf->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, 'rdf:RDF'));
     		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:skos', self::SKOS_NAMESPACE);
-    		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:dc', self::DC_NAMESPACE);
+    		
+    		if (true === $withDublinCore) {
+	    		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:dc', self::DC_NAMESPACE);
+    		}
     		
     		$Description = $root->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, 'rdf:Description'));
     		$Description->setAttribute('rdf:about', str_replace('ID', $this['uuid'], $UriPattern));
@@ -313,14 +327,16 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     				}
     			}
     		}
-    		//Dublin Core:
-    		reset($this->fieldnames);
-    		foreach ($this->fieldnames as $fieldname) {
-    			if (0 !== strpos($fieldname, 'dc_')) continue;
-    			if (null === ($values = $this->getValues($fieldname))) continue;
-    			foreach ($values as $value) {
-    				$Description->appendChild($rdf->createElement(str_replace('dc_', 'dc:', $fieldname), $value));
-    			}
+    		if (true === $withDublinCore) {
+	    		//Dublin Core:
+	    		reset($this->fieldnames);
+	    		foreach ($this->fieldnames as $fieldname) {
+	    			if (0 !== strpos($fieldname, 'dc_')) continue;
+	    			if (null === ($values = $this->getValues($fieldname))) continue;
+	    			foreach ($values as $value) {
+	    				$Description->appendChild($rdf->createElement(str_replace('dc_', 'dc:', $fieldname), $value));
+	    			}
+	    		}
     		}
     	}
     	return $rdf;

@@ -6,6 +6,7 @@ $this->headTitle ( 'Welkom to OpenSKOS' );
 	<li><a href="#what-is-OpenSKOS">What is OpenSKOS?</a></li>
 	<li><a href="#get-started">Get started</a></li>
 	<li><a href="#api">API</a></li>
+	<li><a href="#api">OAI-PMH</a></li>
 </ul>
 
 <h3 id="what-is-OpenSKOS">What is OpenSKOS?</h3>
@@ -18,18 +19,18 @@ eget tellus nec ipsum cursus vehicula quis eget arcu. Mauris vitae sem
 diam, at pulvinar tellus. Sed at molestie arcu. Quisque varius sodales
 felis, ultricies pretium ante mollis vel. Mauris iaculis posuere urna,
 ac aliquam nisl mattis in.</p>
-<p>Aliquam consectetur nisi eget nunc lobortis
-id elementum leo imperdiet. Suspendisse varius lectus id nulla pulvinar
-vel malesuada mi pulvinar. Vestibulum placerat commodo neque, id
-imperdiet quam rutrum in. Phasellus tincidunt dolor in lectus cursus
-quis volutpat turpis pulvinar. Donec blandit consequat ipsum, sed
-gravida urna pharetra et. Etiam pretium, diam at lobortis molestie,
-tortor turpis posuere lorem, at porta odio purus eget nulla. Ut aliquet
-malesuada fringilla. Integer urna neque, accumsan vel laoreet in,
-aliquam eget purus. Sed in orci a lorem dapibus ullamcorper. Maecenas
-mattis tempor pellentesque. Maecenas vitae sodales velit. Sed ac lacinia
-velit. Phasellus nec sapien dolor. Aliquam a augue nec nisi eleifend
-tincidunt. Cras tincidunt adipiscing blandit.</p>
+<p>Aliquam consectetur nisi eget nunc lobortis id elementum leo
+imperdiet. Suspendisse varius lectus id nulla pulvinar vel malesuada mi
+pulvinar. Vestibulum placerat commodo neque, id imperdiet quam rutrum
+in. Phasellus tincidunt dolor in lectus cursus quis volutpat turpis
+pulvinar. Donec blandit consequat ipsum, sed gravida urna pharetra et.
+Etiam pretium, diam at lobortis molestie, tortor turpis posuere lorem,
+at porta odio purus eget nulla. Ut aliquet malesuada fringilla. Integer
+urna neque, accumsan vel laoreet in, aliquam eget purus. Sed in orci a
+lorem dapibus ullamcorper. Maecenas mattis tempor pellentesque. Maecenas
+vitae sodales velit. Sed ac lacinia velit. Phasellus nec sapien dolor.
+Aliquam a augue nec nisi eleifend tincidunt. Cras tincidunt adipiscing
+blandit.</p>
 
 <h3 id="get-started">Get Started</h3>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
@@ -43,4 +44,34 @@ felis, ultricies pretium ante mollis vel. Mauris iaculis posuere urna,
 ac aliquam nisl mattis in.</p>
 
 <h3 id="api">API</h3>
-<p>Visit to the <a href="<?php echo $this->url(array('controller' => 'api'))?>">OpenSKOS API section &raquo;</a></p>
+<p>Visit to the <a
+	href="<?php
+	echo $this->url ( array ('controller' => 'api' ) )?>">OpenSKOS
+API section &raquo;</a></p>
+
+<h3 id="oai-pmh">OAI-PMH</h3>
+<p>The <a rel="external" href="http://www.openarchives.org/pmh/">Open Archives Initiative Protocol for Metadata Harvesting</a>
+(OAI-PMH) is a low-barrier mechanism for repository interoperability.
+Data Providers are repositories that expose structured metadata via
+OAI-PMH. Service Providers then make OAI-PMH service requests to harvest
+that metadata. OAI-PMH is a set of six verbs or services that are
+invoked within HTTP.</p>
+<p>OpenSKOS implements a Service Provider:</p>
+<ul>
+	<li>Identify:<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=Identify"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=Identify</a>
+	</li>
+	<li>List ConceptSchemes (as OAI-PMH "sets"):<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets</a>
+	</li>
+	<li>List Concepts:<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc</a>
+	</li>
+	<li>List Concepts in ConceptScheme "<em>GeografischeNamen</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=3fe93807-8ad0-2828-ffb2-6b1226846f05"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;3fe93807-8ad0-2828-ffb2-6b1226846f05</a>
+	</li>
+	<li>Get Concepts "<em>Roemenië</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=3fe93807-8ad0-2828-ffb2-6b1226846f05"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;3fe93807-8ad0-2828-ffb2-6b1226846f05</a>
+	</li>
+	
+</ul>

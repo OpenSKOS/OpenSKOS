@@ -1,0 +1,27 @@
+<ListSets>
+<?php foreach ($this->sets['docs'] as $set):?>
+  <set>
+    <setSpec><?php echo $set['uuid']?></setSpec>
+    <setName><?php echo $this->escape($set['dc_title'][0])?></setName>
+    <?php if (isset($set['dc'])):?>
+    <setDescription>
+	<oai_dc:dc 
+	          xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+	          xmlns:dc="http://purl.org/dc/elements/1.1/" 
+	          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	          xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+	          http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+	 <?php foreach (OaiPmh::$dcFields as $dc_field): 
+	 	if (!isset($set[$dc_field])) continue;
+	 	$key = str_replace('dc_', '', $dc_field); 
+	 ?>
+    <?php foreach ($set[$dc_field] as $value):?>
+    	<dc:<?php echo $key?>><?php echo $this->escape($value)?></dc:<?php echo $key?>>
+    <?php endforeach?>
+    <?php endforeach?>
+    </oai_dc:dc>
+    </setDescription>
+    <?php endif?>
+  </set>
+<?php endforeach?>
+</ListSets>

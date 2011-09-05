@@ -1,0 +1,9 @@
+<?php 
+$resumptionToken = $this->oai->getResumptionToken();
+if (!$resumptionToken) return;
+$completeListSize = $this->data->count();
+$cursor = ($this->data->getCurrentPageNumber()  - 1 ) * $this->data->getItemCountPerPage();
+?>
+<resumptionToken  
+      completeListSize="<?php echo $completeListSize?>" 
+      cursor="<?php echo $cursor < $completeListSize ? $cursor : $completeListSize?>"><?php echo $this->data->getItemCountPerPage() + $cursor < $completeListSize ? $resumptionToken : ''?></resumptionToken>

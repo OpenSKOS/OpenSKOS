@@ -1,0 +1,13 @@
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>' ?>
+
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd"
+	     xmlns:dc="http://dublincore.org/documents/dcmi-namespace/">
+ <responseDate><?php echo $this->responseDate?></responseDate>
+ <request
+ 	<?php foreach ($this->oai->getParams() as $key => $value):?>
+ 	<?php echo $key?>="<?php echo $value instanceof Zend_Date ? $value->toString(Zend_Date::ISO_8601) : $value?>"
+ 	<?php endforeach?>><?php echo $this->baseUrl?></request> 
+ <?php echo $this->oai?>
+</OAI-PMH>      
