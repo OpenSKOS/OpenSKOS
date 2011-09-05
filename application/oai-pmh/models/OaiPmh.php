@@ -340,6 +340,20 @@ class OaiPmh
 			$q = '*:*';
 		}
 		
+		$from = $this->getParam('from');
+		$until = $this->getParam('until');
+		if (null !== $from && null !== $until) {
+			$from = date('Y-m-d\TH:i:m\Z', $from->toString(Zend_Date::TIMESTAMP));
+			$until = date('Y-m-d\TH:i:m\Z', $until->toString(Zend_Date::TIMESTAMP));
+			$q = "({$q}) AND (timestamp:[{$from} TO {$until}])";
+		} elseif (null!==$from) {
+			$from = date('Y-m-d\TH:i:m\Z', $from->toString(Zend_Date::TIMESTAMP));
+			$q = "({$q}) AND (timestamp:[{$from} TO *])";
+		} elseif (null!==$until) {
+			$until = date('Y-m-d\TH:i:m\Z', $until->toString(Zend_Date::TIMESTAMP));
+			$q = "({$q}) AND (timestamp:[* TO {$until}])";
+		}
+		
 		$params = array(
 			'sort' => 'prefLabel asc',
 			'fl' => false === $onlyIdentifiers ? '*' : 'uuid,timestamp,ConceptSchemes'
