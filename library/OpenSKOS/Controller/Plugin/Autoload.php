@@ -8,8 +8,10 @@ class OpenSKOS_Controller_Plugin_Autoload extends Zend_Controller_Plugin_Abstrac
 			APPLICATION_PATH . '/' . $request->getModuleName(),
 			get_include_path() 
 		)));
-		$namespacePrefix = ucfirst($request->getModuleName()).'_';
-//			exit($namespacePrefix.'Forms_');
+		$parts = explode('-', $request->getModuleName());
+		array_walk($parts, create_function('&$v', '$v=ucfirst($v);'));
+		
+		$namespacePrefix = implode('', $parts).'_';
 		$loader = new OpenSKOS_Autoloader();
 		
 		Zend_Loader_Autoloader::getInstance()

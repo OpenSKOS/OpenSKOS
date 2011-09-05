@@ -1,0 +1,11 @@
+<ListMetadataFormats>
+<?php foreach ($this->metadataFormats as $prefix => $metadataformat):?>
+<metadataFormat>
+	<?php 
+	foreach($metadataformat as $key=>$value):
+		printf('<%1$s>%2$s</%1$s>', $key, $value);
+	endforeach
+	?>
+</metadataFormat>
+<?php endforeach?>
+</ListMetadataFormats>
