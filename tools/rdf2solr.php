@@ -8,6 +8,7 @@ do
 done
 
  */
+define('TENANT', 'nyc');
 define('DEFAULT_LANG', 'nl');
 $stopAt = 1000;
 
@@ -61,8 +62,14 @@ function startElement($parser, $name, $attrs)
 		if (isset($attrs['XML:LANG'])) {
 			$name .= '@'.$attrs['XML:LANG'];
 		}
-	} elseif (0 === strpos($name, 'DC:')) {
-		$name = strtolower(str_replace('DC:', 'dc_', $name));
+	} elseif ($name == 'RDF:RDF' || $name == 'RDF:DESCRIPTION' || $name == 'RDF:TYPE') {
+		
+	} else {
+		$name = strtolower(str_replace(':', '_', $name));
+		if (isset($attrs['RDF:RESOURCE'])) {
+			$DATA = $attrs['RDF:RESOURCE'];
+		}
+		
 	}
 	switch ($name) {
 		case 'RDF:RDF':
@@ -74,14 +81,14 @@ function startElement($parser, $name, $attrs)
 				return;
 			}
 			echo "  <doc>";
-			echo "\n    <field name=\"tenant\">gtaa</field>";
+			echo "\n    <field name=\"tenant\">".TENANT."</field>";
 			echo "\n    <field name=\"uri\">{$attrs['RDF:ABOUT']}</field>";
 			echo "\n    <field name=\"uuid\">".md5_uuid($attrs['RDF:ABOUT'])."</field>";
 			break;
 		case 'RDF:TYPE';
 			$urlParts = parse_url($attrs['RDF:RESOURCE']);
 			echo "\n    <field name=\"class\">{$urlParts['fragment']}</field>";
-		break;
+			break;
 		default:
 			if ($docCounter <= $startAt) return;
 			echo "\n    <field name=\"{$name}\">{$DATA}";

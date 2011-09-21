@@ -122,6 +122,12 @@ for example with as Javascript based autocompete field.</p>
 						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
 					</a>
 			</li>
+			<li>
+				Count concepts that match the query "<em>washington</em>":
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0
+					</a>
+			</li>
 		</ul>
 		<div class="note">
 			<p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>
