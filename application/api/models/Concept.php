@@ -274,7 +274,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     /**
      * @return DOMDocument
      */
-    public function toRDF($withDublinCore = true, $noCache = false)
+    public function toRDF($withDublinCore = true, $noCache = false, $namespace = 'rdf')
     {
     	static $rdf;
     	if (true === $noCache || null === $rdf) {
@@ -282,18 +282,18 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		$UriPattern = 'http' . ($_SERVER['SERVER_PORT']==443?'s':'').'://' . $_SERVER['HTTP_HOST']
     			. $router->assemble(array('module' => 'api', 'controller' => 'concept', 'id' => 'ID'), 'rest', true);
     		$rdf = new DOMDocument();
-    		$root = $rdf->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, 'rdf:RDF'));
+    		$root = $rdf->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':RDF'));
     		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:skos', self::SKOS_NAMESPACE);
     		
     		if (true === $withDublinCore) {
 	    		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:dc', self::DC_NAMESPACE);
     		}
     		
-    		$Description = $root->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, 'rdf:Description'));
-    		$Description->setAttribute('rdf:about', str_replace('ID', $this['uuid'], $UriPattern));
+    		$Description = $root->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':Description'));
+    		$Description->setAttribute($namespace.':about', str_replace('ID', $this['uuid'], $UriPattern));
     		
-    		$Description->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, 'rdf:type'))
-    			->setAttribute('rdf:type', self::SKOS_NAMESPACE . '#'. $this['class']);
+    		$Description->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':type'))
+    			->setAttribute($namespace.':type', self::SKOS_NAMESPACE . '#'. $this['class']);
     		
     		foreach (self::$classes as $className => $classes) {
     			if (!$this->hasClass($className)) continue;
@@ -302,7 +302,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     					if (null === ($values = $this->getValues($class))) continue;
     					foreach ($values as $value) {
 				    		$Description->appendChild($rdf->createElement('skos:'.$class))
-				    			->setAttribute('rdf:resource', $value);
+				    			->setAttribute($namespace.':resource', $value);
     					}
     				}
     			} else {
