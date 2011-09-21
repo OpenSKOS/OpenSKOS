@@ -1,1 +1,12 @@
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'?>
+<rdf:RDF
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+        xmlns:dc="http://purl.org/dc/elements/1.1/">
 <?php
+foreach ($this->response['response']['docs'] as $doc) {
+	$rdf = Api_Models_Concept::factory($doc)->toRDF(false, true);
+	echo $rdf->saveXML($rdf->documentElement);
+}
+?>
+</rdf:RDF>
