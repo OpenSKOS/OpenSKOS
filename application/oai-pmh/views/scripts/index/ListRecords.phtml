@@ -4,6 +4,12 @@
 <record>
 	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc))?>
 	<metadata>
+		<?php if ($this->metadataPrefix === 'oai_rdf'):?>
+		<?php 
+			$rdf = Api_Models_Concept::factory($doc)->toRDF(false, true, $this->metadataPrefix);
+			echo $rdf->saveXML($rdf->documentElement);
+		?>
+		<?php else:?>
 		<oai_dc:dc 
 		         xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
 		         xmlns:dc="http://purl.org/dc/elements/1.1/" 
@@ -16,13 +22,8 @@
 		<dc:identifier><?php echo $this->escape($doc['uri'])?></dc:identifier>
 		<dc:type>skos:<?php echo $this->escape($doc['class'])?></dc:type>
 		</oai_dc:dc>
+		<?php endif?>
 	</metadata>
-	<about>
-		<?php 
-			$rdf = Api_Models_Concept::factory($doc)->toRDF(false, true);
-			echo $rdf->saveXML($rdf->documentElement);
-		?>
-	</about>
 </record>
 <?php endforeach?>
 <?php

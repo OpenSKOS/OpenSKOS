@@ -340,6 +340,7 @@ class OaiPmh
 			$q = '*:*';
 		}
 		
+		
 		$from = $this->getParam('from');
 		$until = $this->getParam('until');
 		if (null !== $from && null !== $until) {
@@ -365,6 +366,7 @@ class OaiPmh
 			->setCurrentPageNumber($this->getPage());
 			
 		$this->_view->data = $paginator;
+		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
 		return $this->_view->render('index/List'.(false === $onlyIdentifiers ? 'Records' : 'Identifiers').'.phtml');
 	}
 	
@@ -421,7 +423,14 @@ class OaiPmh
 					);
 					return $this->_view->render('index/error.phtml');
 				}
-				return $this->$verb();
+				try {
+					return $this->$verb();
+				} catch (Exception $e) {
+					$this->_view->errors = array(
+						$e->getCodeAsString() => $e->getMessage()
+					);
+					return $this->_view->render('index/error.phtml');
+				}
 			} catch (OaiPmh_Exception $e) {
 				$this->_view->errors = array(
 					$e->getCodeAsString() => $e->getMessage()
@@ -431,27 +440,8 @@ class OaiPmh
 				$this->_view->errors = array(
 					'badArgument' => $e->getMessage()
 				);
-				$this->_view->content = $this->_view->render('index/error.phtml');
+				return $this->_view->render;
 			}
-		}
-		if ($this->_cleanOutput === true) {
-			ob_start();
-			echo $this->_view->render($this->_template);
-			$xml = ob_get_contents();
-			ob_end_clean(); 
-			$config = array(
-				'indent' => true,
-				'input-xml' => true,
-				'output-xml' => true,
-				'wrap' => 200);
-
-				// Tidy
-				$tidy = new tidy;
-				$tidy->parseString($xml, $config, "utf8");
-				$tidy->cleanRepair();
-				return (string)$tidy;
-		} else {
-			return $this->_view->render($this->_template);
 		}
 	}
 }
