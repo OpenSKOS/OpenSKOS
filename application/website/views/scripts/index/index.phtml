@@ -58,11 +58,14 @@ API section &raquo;</a></p>
 Data Providers are repositories that expose structured metadata via
 OAI-PMH. Service Providers then make OAI-PMH service requests to harvest
 that metadata. OAI-PMH is a set of six verbs or services that are
-invoked within HTTP.</p>
+invoked within HTTP. The OpenSKOS project supports 2 <a rel="external" href="http://www.openarchives.org/OAI/openarchivesprotocol.html#MetadataNamespaces">metadataPrefixes</a>: <em>oai_dc</em> and <em>oai_rdf</em>.</p>
 <p>OpenSKOS implements a Service Provider:</p>
 <ul>
 	<li>Identify:<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=Identify"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=Identify</a>
+	</li>
+	<li>List metadataPrefixes:<br/>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListMetadataFormats"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListMetadataFormats</a>
 	</li>
 	<li>List ConceptSchemes (as OAI-PMH "sets"):<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets</a>
@@ -70,10 +73,10 @@ invoked within HTTP.</p>
 	<li>List Concepts:<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc</a>
 	</li>
-	<li>List Concepts moddified since <em>2011-09-01 12:00:00</em>:<br/>
+	<li>List Concepts modified since <em>2011-09-01 12:00:00</em>:<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01T12:00:00Z"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01T12:00:00Z</a>
 	</li>
-	<li>List Concepts moddified between <em>2011-09-01</em> and <em>2011-09-10</em>:<br/>
+	<li>List Concepts modified between <em>2011-09-01</em> and <em>2011-09-10</em>:<br/>
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01&until=2011-09-10"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01&amp;until=2011-09-10</a>
 	</li>
 	<li>List Concepts in ConceptScheme "<em>GeografischeNamen</em>" (uuid 3fe93807-8ad0-2828-ffb2-6b1226846f05):<br/>
