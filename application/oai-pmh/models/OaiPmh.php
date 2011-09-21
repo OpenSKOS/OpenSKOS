@@ -46,10 +46,10 @@ class OaiPmh
 			'schema' => 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
 			'metadataNamespace' => 'http://www.openarchives.org/OAI/2.0/oai_dc/'
 		),
-		'oai_skos_rdf' => array(
-			'metadataPrefix' => 'oai__rdf',
-			'schema' => 'http://www.OpenSKOS-maior.nl/schemas/mmm-3.0.xsd',
-			'metadataNamespace' => 'http://www.OpenSKOS-maior.nl/schemas/3.0'
+		'oai_rdf' => array(
+			'metadataPrefix' => 'oai_rdf',
+			'schema' => 'http://www.openarchives.org/OAI/2.0/rdf.xsd',
+			'metadataNamespace' => 'http://www.w3.org/2004/02/skos/core#'
 		)
 	);
 	
@@ -303,9 +303,9 @@ class OaiPmh
 			);
 		}
 		
-		$this->getPlugin()->ListMetadataFormats();
-		$this->getView()->metadataFormats = $this->getPlugin()->getMetadataFormats($this->getParam('identifier'));
-		return $this->_view->render('ListMetadataFormats.phtml');
+		$this->_view->metadataFormats = $this->_metadataFormats;
+		
+		return $this->_view->render('index/ListMetadataFormats.phtml');
 	}
 	
 	public function ListSets()
