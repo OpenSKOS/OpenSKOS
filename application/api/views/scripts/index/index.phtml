@@ -77,7 +77,10 @@ for example with as Javascript based autocompete field.</p>
 				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
 			</li>
 			<li>
-				in XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
+				in (internal) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
+			</li>
+			<li>
+				in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=rdf"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=rdf</a>
 			</li>
 		</ul>
 	</li>
@@ -86,7 +89,8 @@ for example with as Javascript based autocompete field.</p>
 		<ul>
 			<li>by URI: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleURI), 'rest')?>?id=<?php echo $exampleURI?>"><?php echo $this->url(array('controller' => 'find-concepts'), 'rest')?>?id=<?php echo $exampleURI?></a></li>
 			<li>by UUID: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?></a></li>
-			<li>by UUID in XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>
+			<li>by UUID in (native) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>
+			<li>by UUID in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.rdf"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.rdf</a></li>
 		</ul>
 	</li>
 	<li>
