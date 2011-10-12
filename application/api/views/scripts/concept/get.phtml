@@ -60,7 +60,7 @@ $this->headTitle($title);
 <h4><?php echo $this->translate('skos:'.$relationName)?></h4>
 <ul>
 	<?php foreach ($relatedConcepts as $relatedConcept):?>
-	<li><a href="<?php echo $this->url(array('id' => $relatedConcept['uuid']), 'rest')?>"><?php echo isset($relatedConcept['prefLabel'])
+	<li><a href="<?php echo $this->url(array('id' => $relatedConcept['uuid']), 'rest')?>.html"><?php echo isset($relatedConcept['prefLabel'])
 		?$this->escape($relatedConcept['prefLabel'][0])
 		:(isset($relatedConcept['dc_title']) ? $this->escape($relatedConcept['dc_title']['0']): $relatedConcept['uri'])?></a></li>
 	<?php endforeach?>

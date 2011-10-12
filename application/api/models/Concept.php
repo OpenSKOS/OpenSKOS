@@ -81,6 +81,16 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		$this->fieldnames = array_keys($data);
 	}
 	
+	public function getNamespaces()
+	{
+		$model = new OpenSKOS_Db_Table_Namespaces();
+		$prefixes = $this['xmlns'];
+		foreach ($prefixes as &$prefix) {
+			$prefix = $model->getAdapter()->quote($prefix);
+		} 
+		return $model->fetchPairs($model->select()->where('prefix IN ('.implode(',', $prefixes).')'));
+	}
+	
 	/**
 	 * 
 	 * @param array $data
@@ -274,71 +284,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     /**
      * @return DOMDocument
      */
-    public function toRDF($withDublinCore = true, $noCache = false, $namespace = 'rdf')
+    public function toRDF()
     {
-    	static $rdf;
-    	if (true === $noCache || null === $rdf) {
-    		$router = Zend_Controller_Front::getInstance()->getRouter();
-    		$UriPattern = 'http' . ($_SERVER['SERVER_PORT']==443?'s':'').'://' . $_SERVER['HTTP_HOST']
-    			. $router->assemble(array('module' => 'api', 'controller' => 'concept', 'id' => 'ID'), 'rest', true);
-    		$rdf = new DOMDocument();
-    		$root = $rdf->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':RDF'));
-    		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:skos', self::SKOS_NAMESPACE);
-    		
-    		if (true === $withDublinCore) {
-	    		$root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:dc', self::DC_NAMESPACE);
-    		}
-    		
-    		$Description = $root->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':Description'));
-    		$Description->setAttribute($namespace.':about', str_replace('ID', $this['uuid'], $UriPattern));
-    		
-    		$Description->appendChild($rdf->createElementNS(self::RDF_NAMESPACE, $namespace.':type'))
-    			->setAttribute($namespace.':type', self::SKOS_NAMESPACE . '#'. $this['class']);
-    		
-    		foreach (self::$classes as $className => $classes) {
-    			if (!$this->hasClass($className)) continue;
-    			if (!in_array($className, self::$languageSensitiveClasses)) {
-    				foreach ($classes as $class) {
-    					if (null === ($values = $this->getValues($class))) continue;
-    					foreach ($values as $value) {
-				    		$Description->appendChild($rdf->createElement('skos:'.$class))
-				    			->setAttribute($namespace.':resource', $value);
-    					}
-    				}
-    			} else {
-    				foreach ($classes as $class) {
-    					if (null === ($values = $this->getValues($class))) continue;
-    					//collect field that have a language:
-    					$done = array();
-    					foreach ($this->fieldnames as $fieldname) {
-    						if (0 === strpos($fieldname, $class.'@')) {
-    							$done = array_merge($done, $values);
-    							foreach ($values as $value) {
-				    				$Description->appendChild($rdf->createElement('skos:'.$class, $value))
-				    					->setAttribute('xml:lang', str_replace($class.'@', '', $fieldname));
-    							}
-        					}
-    					}
-    					reset($values);
-    					foreach ($values as $value) {
-    						if (in_array($value, $done)) continue;
-		    				$Description->appendChild($rdf->createElement('skos:'.$class, $value));
-    					}
-    				}
-    			}
-    		}
-    		if (true === $withDublinCore) {
-	    		//Dublin Core:
-	    		reset($this->fieldnames);
-	    		foreach ($this->fieldnames as $fieldname) {
-	    			if (0 !== strpos($fieldname, 'dc_')) continue;
-	    			if (null === ($values = $this->getValues($fieldname))) continue;
-	    			foreach ($values as $value) {
-	    				$Description->appendChild($rdf->createElement(str_replace('dc_', 'dc:', $fieldname), $value));
-	    			}
-	    		}
-    		}
+    	$xml = '<rdf:RDF';
+    	foreach ($this->getNamespaces() as $prefix => $uri) {
+    		$xml .= ' xmlns:'.$prefix.'="'.$uri.'"';
     	}
-    	return $rdf;
+    	$xml .='>';
+    	$xml .= $this['xml'];
+    	$xml .= '</rdf:RDF>';
+    	return DOMDocument::loadXml($xml);
     }
 }

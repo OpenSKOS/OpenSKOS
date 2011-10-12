@@ -8,9 +8,10 @@ do
 done
 
  */
-define('TENANT', 'nyc');
+define('TENANT', 'beg');
+define('COLLECTION', 'gtaa');
 define('DEFAULT_LANG', 'nl');
-$stopAt = 1000;
+$stopAt = 10;
 
 $startAt = $stopAt * (isset($argv[2]) ? (int)$argv[2] : 0);
 
@@ -45,54 +46,82 @@ $langMapping = array(
 	'SKOS:NOTATION' => 'notation'
 );
 
+$namespaces = array('dc', 'dcterms', 'rdfs');
+$usedNamespaces = array();
+$xml = '';
 function startElement($parser, $name, $attrs) 
 {
-	global $docCounter, $startAt, $simpleMapping, $langMapping;
+	$originalName = $name;
+	global $docCounter, $startAt, $simpleMapping, $langMapping, $SKIP, $namespaces, $xml, $usedNamespaces;
+
+	$name = strtoupper($name);
+	if ($name == 'RDF:DESCRIPTION') {
+		$xml = '';
+		$usedNamespaces = array();
+	}
 	
+	
+	$xml .= "<{$originalName}";
+	foreach ($attrs as $key => $value) $xml.= " {$key}=\"{$value}\"";
+	$xml .='>';
+	
+	$SKIP = false;
 	$DATA = '';
+	$ns = strtolower(preg_replace('/\:.+/', '', $name));
+	$usedNamespaces[] = $ns;
+	
 	if (isset($simpleMapping[$name])) {
 		$name = $simpleMapping[$name];
-		if (!isset($attrs['RDF:RESOURCE'])) {
+		if (!isset($attrs['rdf:resource'])) {
 			print_r($attrs);
 			exit($name."\n");
 		}
-		$DATA = $attrs['RDF:RESOURCE'];
+		$DATA = $attrs['rdf:resource'];
 	} elseif (isset($langMapping[$name])) {
 		$name = $langMapping[$name];
-		if (isset($attrs['XML:LANG'])) {
-			$name .= '@'.$attrs['XML:LANG'];
+		if (isset($attrs['xml:lang'])) {
+			$name .= '@'.$attrs['xml:lang'];
+		}
+	} elseif (in_array($ns, $namespaces)) {
+		$name = strtolower(str_replace(':', '_', $name));
+		if (isset($attrs['rdf:resource'])) {
+			$DATA = $attrs['rdf:resource'];
 		}
 	} elseif ($name == 'RDF:RDF' || $name == 'RDF:DESCRIPTION' || $name == 'RDF:TYPE') {
-		
+		$SKIP = false;
+	} elseif (isset($attrs['rdf:resource'])) {
+		$SKIP = false;
+		$DATA = $attrs['rdf:resource'];
+		$name = 'resource_' . $ns . '@' . strtolower(preg_replace('/.+\:/', '', $name));
 	} else {
-		$name = strtolower(str_replace(':', '_', $name));
-		if (isset($attrs['RDF:RESOURCE'])) {
-			$DATA = $attrs['RDF:RESOURCE'];
-		}
-		
+		$SKIP = true;
 	}
-	switch ($name) {
-		case 'RDF:RDF':
-			echo "<add>\n";
-			break;
-		case 'RDF:DESCRIPTION':
-			$docCounter++;
-			if ($docCounter <= $startAt) {
-				return;
-			}
-			echo "  <doc>";
-			echo "\n    <field name=\"tenant\">".TENANT."</field>";
-			echo "\n    <field name=\"uri\">{$attrs['RDF:ABOUT']}</field>";
-			echo "\n    <field name=\"uuid\">".md5_uuid($attrs['RDF:ABOUT'])."</field>";
-			break;
-		case 'RDF:TYPE';
-			$urlParts = parse_url($attrs['RDF:RESOURCE']);
-			echo "\n    <field name=\"class\">{$urlParts['fragment']}</field>";
-			break;
-		default:
-			if ($docCounter <= $startAt) return;
-			echo "\n    <field name=\"{$name}\">{$DATA}";
-			break;
+	if (false === $SKIP) {
+		switch ($name) {
+			case 'RDF:RDF':
+				echo "<add>\n";
+				break;
+			case 'RDF:DESCRIPTION':
+				$docCounter++;
+				if ($docCounter <= $startAt) {
+					return;
+				}
+				echo "  <doc>";
+				echo "\n    <field name=\"tenant\">".TENANT."</field>";
+				echo "\n    <field name=\"collection\">".COLLECTION."</field>";
+				echo "\n    <field name=\"uri\">{$attrs['rdf:about']}</field>";
+				echo "\n    <field name=\"uuid\">".md5_uuid($attrs['rdf:about'])."</field>";
+				
+				break;
+			case 'RDF:TYPE';
+				$urlParts = parse_url($attrs['rdf:resource']);
+				echo "\n    <field name=\"class\">{$urlParts['fragment']}</field>";
+				break;
+			default:
+				if ($docCounter <= $startAt) return;
+				echo "\n    <field name=\"{$name}\">{$DATA}";
+				break;
+		}
 	}
 }
 
@@ -114,38 +143,52 @@ function printElement($parser, $name, $value)
 
 function endElement($parser, $name) 
 {
-	global $docCounter, $stopAt, $startAt, $simpleMapping, $langMapping;
-	if (isset($simpleMapping[$name])) $name = $simpleMapping[$name];
-	switch ($name) {
-		case 'RDF:RDF':
-			echo "</add>\n";
-			break;
-		case 'RDF:DESCRIPTION':
-			if ($docCounter <= $startAt) return;
-			echo "\n  </doc>\n";
-			if ($docCounter >= $stopAt + $startAt) {
-				endElement($parser, 'RDF:RDF');
-				exit;
-			}
-			break;
-		case 'RDF:TYPE';
-			break;
-		default:
-			if ($docCounter <= $startAt) return;
-			echo "</field>";
-			break;
+	global $docCounter, $stopAt, $startAt, $simpleMapping, $langMapping, $SKIP, $xml, $NODATA, $usedNamespaces;
+	$xml .= "</{$name}>";
+	$name = strtoupper($name);
+	if (false === $SKIP) {
+		if (isset($simpleMapping[$name])) $name = $simpleMapping[$name];
+		switch ($name) {
+			case 'RDF:RDF':
+				echo "</add>\n";
+				break;
+			case 'RDF:DESCRIPTION':
+				if ($docCounter <= $startAt) return;
+				foreach(array_unique($usedNamespaces) as $ns) {
+					echo "\n   <field name=\"xmlns\">{$ns}</field>";
+				}
+				
+				echo "\n   <field name=\"xml\"><![CDATA[".$xml."]]></field>";
+				echo "\n  </doc>\n";
+				if ($docCounter >= $stopAt + $startAt) {
+					endElement($parser, 'RDF:RDF');
+					exit;
+				}
+				break;
+			case 'RDF:TYPE';
+				break;
+			default:
+				if ($docCounter <= $startAt) return;
+				echo "</field>";
+				break;
+		}
 	}
 }
 
 function characterData($parser, $data) 
 {
-	global $docCounter, $startAt;
-	if ($docCounter <= $startAt) return;
-	else echo trim($data) == '{}' ? '' : htmlspecialchars(trim($data));
+	global $docCounter, $startAt, $SKIP, $xml, $NODATA;
+	$xml .= $data;
+
+	if (false === $SKIP) {
+		if ($docCounter <= $startAt) return;
+		else echo trim($data) == '{}' ? '' : htmlspecialchars(trim($data));
+	}
 }
 
 $xml_parser = xml_parser_create();
 xml_parser_set_option( $xml_parser, XML_OPTION_SKIP_WHITE, 1 );
+xml_parser_set_option( $xml_parser, XML_OPTION_CASE_FOLDING, 0);
 xml_set_element_handler($xml_parser, "startElement", "endElement");
 xml_set_character_data_handler($xml_parser, "characterData");
 if (!($fp = fopen($argv[1], "r"))) {
@@ -160,3 +203,4 @@ while ($data = fread($fp, 4096)) {
     }
 }
 xml_parser_free($xml_parser);
+

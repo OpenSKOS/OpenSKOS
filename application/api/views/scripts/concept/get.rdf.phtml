@@ -1,4 +1,2 @@
 <?php
-$concept = &$this->concept;
-
-echo $concept->toRDF()->saveXml($concept->toRDF()->documentElement);
+echo $this->concept->toRDF()->saveXml();

@@ -67,7 +67,16 @@ for example with as Javascript based autocompete field.</p>
 		</p>
 	</li>
 </ul>
-
+<p>Once the user selects a label from the autocomplete list, you have to lookup the matching Concept. 
+You can do this by querying the find API with the selected label, for example if the user selects the label "Dantons Dood":<br/>
+	<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:%22Dantons%20Dood%22&fl=uri">
+		<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:"Dantons Dood"&fl=uri
+	</a>
+</p>
+<div class="note">
+	<p>Please note: in the second call to the find API, it's possible the API returns multiple concepts.
+	You should implement methods to handle this!</p>
+</div>
 <h4 id="find-concepts">Find concepts</h4>
 <ul class="api-examples">
 	<li>
@@ -115,7 +124,7 @@ for example with as Javascript based autocompete field.</p>
 					</a>
 			</li>
 			<li>
-				Search for concepts ithat have a <em>notation</em> value:
+				Search for concepts that have a <em>notation</em> value:
 					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]">
 						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]
 					</a>
@@ -148,6 +157,9 @@ for example with as Javascript based autocompete field.</p>
 		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
 		<ul>
 			<li>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
+			</li>
+			<li>
 			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html</a>
 			</li>
 			<li>
@@ -156,23 +168,20 @@ for example with as Javascript based autocompete field.</p>
 			<li>
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
 			</li>
-			<li>
-			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
-			</li>
 		</ul>
 		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
 		<ul>
 			<li>
-			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
+			</li>
+			<li>
+			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=html"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=html</a>
 			</li>
 			<li>
 			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
 			</li>
 			<li>
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=xml"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=xml</a>
-			</li>
-			<li>
-			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=rdf"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=rdf</a>
 			</li>
 		</ul>
 	</li>

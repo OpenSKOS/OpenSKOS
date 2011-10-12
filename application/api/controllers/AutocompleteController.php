@@ -25,13 +25,7 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller {
 
 	public function getAction() {
 		$this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-		echo '[';
-		$labels = array();
-		foreach ($this->model->autocomplete($this->getRequest()->getParam('id')) as $label) {
-			$labels[] = '"' . addslashes($label) .'"';
-		}
-		echo implode(',', $labels);
-		echo ']';
+		echo json_encode($this->model->autocomplete($this->getRequest()->getParam('id')));
 	}
 
 	public function postAction() {

@@ -22,5 +22,5 @@ $application = new Zend_Application(
     APPLICATION_ENV,
     APPLICATION_PATH . '/configs/application.ini'
 );
-$application->bootstrap()
-            ->run();
+$application->bootstrap();
+if (PHP_SAPI !== 'cli') $application->run();

@@ -15,7 +15,12 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 			$this->getRequest()->getParams()
 		);
 		$this->_helper->contextSwitch()
-			->initContext($this->getRequest()->getParam('format', 'json'));
+			->initContext($this->getRequest()->getParam('format', 'rdf'));
+		
+		if('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
+			//enable layout:
+			$this->getHelper('layout')->enableLayout();
+		}
 	}
 	
 	public function indexAction() {
@@ -25,11 +30,21 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 			throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
 		}
 		$concepts = $this->model->getConcepts($q);
-		if ($this->getRequest()->getParam('format') === 'json') {
+		$context = $this->_helper->contextSwitch()->getCurrentContext();
+		if ($context === 'json') {
 			foreach ($concepts as $key => $val) {
+				foreach ($val['docs'] as &$doc) unset($doc['xml']);
 				$this->view->$key = $val;
 			}
+		} elseif ($context === 'xml') {
+			$xpath = new DOMXPath($concepts);
+			foreach ($xpath->query('/response/result/doc/str[@name="xml"]') as $node) {
+				$node->parentNode->removeChild($node);
+			}
+			$this->view->response = $concepts;
 		} else {
+			$model = new OpenSKOS_Db_Table_Namespaces();
+			$this->view->namespaces = $model->fetchPairs();
 			$this->view->response = $concepts;
 		}
 	}
@@ -41,9 +56,16 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 		if ($this->_helper->contextSwitch()->getCurrentContext()==='json') {
 			if (null !== $concept) {
 				foreach ($concept as $key => $var) {
+					if ($key == 'xml') continue;
 					$this->view->$key = $var;
 				}
 			}
+		} elseif ($this->_helper->contextSwitch()->getCurrentContext()==='xml') {
+			$xpath = new DOMXPath($concept);
+			foreach ($xpath->query('/doc/str[@name="xml"]') as $node) {
+				$node->parentNode->removeChild($node);
+			}
+			$this->view->concept = $concept;
 		} else {
 			$this->view->concept = $concept;
 		}
