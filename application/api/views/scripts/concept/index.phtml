@@ -1,0 +1,43 @@
+<?php 
+$exampleResolveURI = 'http://data.beeldengeluid.nl/gtaa/28586';
+$exampleResolveUUID = '82c2614c-3859-ed11-4e55-e993c06fd9fe';
+$exampleResolveLabel = 'doodstraf';
+?>
+<h2><?php echo $this->escape('OpenSKOS Concept resolver')?></h2>
+<p>Use this API to resolve a concept.</p>
+<h3 id="concept-resolver">Concept resolver</h3>
+<ul>
+	<li>
+		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
+		<ul>
+			<li>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
+			</li>
+			<li>
+			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html</a>
+			</li>
+			<li>
+			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json</a>
+			</li>
+			<li>
+			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
+			</li>
+		</ul>
+		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
+		<ul>
+			<li>
+			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=rdf"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=rdf</a>
+			</li>
+			<li>
+			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
+			</li>
+			<li>
+			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
+			</li>
+			<li>
+			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=xml"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=xml</a>
+			</li>
+		</ul>
+	</li>
+</ul>
+

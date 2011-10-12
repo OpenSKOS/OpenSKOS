@@ -9,7 +9,7 @@ window.addEvent('load', function(){
 				a.set('title', a.get('text'))
 					.set('text', concept.getTitle());
 				}
-				a.set('href', '/api/concept/' + concept.uuid);
+				a.set('href', '/api/concept/' + concept.uuid + '.html');
 				a.removeClass('loading');
 		});
 		concept.load('uuid,uri,prefLabel,class,dc_title');
@@ -42,7 +42,7 @@ var SkosConcept = new Class({
 				self = Object.merge(self, response);
 				self.fireEvent('complete', []);
 			}
-		}).get('fl='+fields+'&id=' + this.id);
+		}).get('format=json&fl='+fields+'&id=' + this.id);
 	},
 	
 	getTitle: function()

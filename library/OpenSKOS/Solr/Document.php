@@ -74,7 +74,14 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
     	$doc = DOMDocument::loadXML('<doc/>');
     	foreach ($this->fieldnames as $fieldname) {
     		foreach ($this->data[$fieldname] as $value) {
-    			$doc->documentElement->appendChild($doc->createElement('field', $value))->setAttribute('name', $fieldname);
+    			$node = $doc->documentElement->appendChild($doc->createElement('field'));
+    			$htmlSafeValue = htmlspecialchars($value);
+    			if ($htmlSafeValue == $value) {
+	    			$node->appendChild($doc->createTextNode($htmlSafeValue));
+    			} else {
+    				$node->appendChild($doc->createCDataSection($value));
+    			}
+    			$node->setAttribute('name', $fieldname);
     		}
     	}
     	return $doc->saveXml($doc->documentElement);

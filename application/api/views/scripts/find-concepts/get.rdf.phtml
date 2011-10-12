@@ -1,4 +1,2 @@
 <?php
-$concept = &$this->concept;
-
-echo $concept->toRDF()->saveXml($concept->toRDF()->documentElement);
+include dirname(__FILE__) . '/../concept/' . basename(__FILE__);

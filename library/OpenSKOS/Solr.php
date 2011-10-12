@@ -155,14 +155,21 @@ class OpenSKOS_Solr
 		if (is_a($documents, 'OpenSKOS_Solr_Document')) {
 			$documents = new OpenSKOS_Solr_Documents($documents);
 		} elseif(is_a($documents, 'OpenSKOS_Solr_Documents')) {
-			//do nothing
+			//do nothing, just use magic __toString
+		} elseif (is_a($documents, 'OpenSKOS_Rdf_Parser_Helper')) {
+			//do nothing, just use magic __toString
 		} else {
-			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document` or a `OpenSKOS_Solr_Documents` collection, got a `'.get_class($doc).'`');
+			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document|OpenSKOS_Solr_Documents|OpenSKOS_Rdf_Parser_Helper` object, got a `'.get_class($documents).'`');
 		}
 		
+		return $this->postXml((string)$documents);
+	}
+	
+	public function postXml($xml)
+	{
 		$response = $this->_getClient()
 			->setUri($this->getUri('update'))
-			->setRawData((string)$documents)
+			->setRawData($xml)
 			->setEncType('text/xml')
 			->request('POST');
 		if ($response->isError()) {
@@ -170,6 +177,68 @@ class OpenSKOS_Solr
 			throw new OpenSKOS_Solr_Exception($doc->getElementsByTagName('pre')->item(0)->nodeValue);
 		}
 		return $this;
+	}
+	
+	protected function _commit_or_update($action , Array $options)
+	{
+		$updateMsg = '<' . $action;
+		foreach ($options as $key => $value) {
+			switch($key) {
+				case 'waitFlush':
+				case 'waitSearcher':
+				case 'softCommit':
+					$boolValue = (bool)$value === true ? 'true' : 'false';
+					$updateMsg .= " {$key}=\"{$boolValue}\"";
+					break;
+				case 'expungeDeletes':
+					if ($action === 'commit') {
+						$boolValue = (bool)$value === true ? 'true' : 'false';
+						$updateMsg .= " {$key}=\"{$boolValue}\"";
+					} else {
+						throw new OpenSKOS_Solr_Exception('Unkown attribute `'.$key.'` for <'.$action.'/>');
+					}
+					break;
+				case 'maxSegments':
+					if ($action === 'optimize') {
+						if (!preg_match('/^\d+$/', $value)) {
+							throw new OpenSKOS_Solr_Exception('Expexted a number for attribute `'.$key.'` for <'.$action.'/>');
+						}
+						$updateMsg .= " {$key}=\"{$value}\"";
+					} else {
+						throw new OpenSKOS_Solr_Exception('Unkown attribute `'.$key.'` for <'.$action.'/>');
+					}
+					break;
+				default:
+					throw new OpenSKOS_Solr_Exception('Unkown attribute `'.$key.'` for <'.$action.'/>');
+					
+			}
+		}
+		$updateMsg .= '/>';
+		return $this->postXml($updateMsg);
+	}
+	
+	public function delete($query)
+	{
+		if (preg_match('/^(?:uu)?id\:(.+)/', $query, $match)) {
+			if (self::isValidUuid($match[1])) {
+				$deleteMsg = '<id>'.$match[1].'</id>';
+			} else {
+				$deleteMsg = '<query>'.$query.'</query>';
+			}
+		} else {
+			$deleteMsg = '<query>'.$query.'</query>';
+		}
+		return $this->postXml('<delete>'.$deleteMsg.'</delete>');
+	}
+	
+	public function commit(Array $options = array())
+	{
+		return $this->_commit_or_update('commit', $options);
+	}
+	
+	public function optimize(Array $options = array())
+	{
+		return $this->_commit_or_update('optimize', $options);
 	}
 	
 	public function getUri($path = null)
