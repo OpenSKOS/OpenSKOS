@@ -1,4 +1,5 @@
 <?php 
+require_once dirname(__FILE__) . '/Parser/Exception.php';
 
 class OpenSKOS_Rdf_Parser implements Countable
 {
@@ -393,7 +394,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 		   $opts->parse();
 		} catch (Zend_Console_Getopt_Exception $e) {
 		    echo str_replace('[ options ]', '[ options ] file', $e->getUsageMessage());
-		    require_once dirname(__FILE__) . '/Parser/Exception.php';
 			throw new OpenSKOS_Rdf_Parser_Exception($e->getMessage());
 		}
 		

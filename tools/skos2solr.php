@@ -4,9 +4,8 @@ require_once 'Zend/Console/Getopt.php';
 
 $opts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
 
-$parser = OpenSKOS_Rdf_Parser::factory($opts);
-
 try {
+	$parser = OpenSKOS_Rdf_Parser::factory($opts);
 	$parser->process();
 } catch (OpenSKOS_Rdf_Parser_Exception $e) {
 	fwrite(STDERR, $e->getMessage()."\n");
