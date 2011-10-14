@@ -2,4 +2,32 @@
 <?php echo $this->render('menu.phtml');?>
 <h2><?php echo $this->translate('Manage users')?></h2>
 
-
+<?php if (!count($this->users)):?>
+<div class="note">
+	<p><?php echo $this->translate('No users to manage.')?></p>
+</div>
+<?php else:?>
+<p><?php echo $this->translate('Click on a name to edit the user.')?></p>
+<table class="users">
+	<thead>
+		<tr>
+			<th>#</th>
+			<th>Name</th>
+			<th>Email</th>
+			<th>Usertype</th>
+			<th>API key</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($this->users as $i => $user):?>
+		<tr class="<?php echo $i % 2 ? 'even' : 'uneven'?>">
+			<th scope="row"><?php echo $i+1?></th>
+			<td><a href="<?php echo $this->url(array('action' => 'edit', 'user' => $user->id))?>"><?php echo $user->name?></a></td>
+			<td><?php echo $user->email?></td>
+			<td><?php echo $user->type?></td>
+			<td><?php echo $user->apikey?></td>
+		</tr>
+		<?php endforeach?>
+	</tbody>
+</table>
+<?php endif?>
