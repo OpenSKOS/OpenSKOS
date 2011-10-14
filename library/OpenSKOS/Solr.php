@@ -218,6 +218,11 @@ class OpenSKOS_Solr
 		return $this->postXml($updateMsg);
 	}
 	
+	/**
+	 * 
+	 * @param string $query
+	 * @return OpenSKOS_Solr
+	 */
 	public function delete($query)
 	{
 		if (preg_match('/^(?:uu)?id\:(.+)/', $query, $match)) {
