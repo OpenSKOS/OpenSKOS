@@ -69,7 +69,7 @@ form dd ul.errors li {
 form input[type=text],form input[type=password],form textarea,form select
 	{
 	width: 100%;
-	max-width: 350px;
+	max-width: 450px;
 	padding: 0.5em;
 	color: #555;
 	font-size: 1em;
@@ -105,7 +105,7 @@ form input[type=text].error,form input[type=password].error,form select.error,fo
 	background: #fee;
 }
 
-form input[type=submit] {
+form input[type=submit], form input[type=reset] {
 	margin-top: -10px;
 	padding: 0.4em 1.2em;
 	color: #666;
@@ -124,24 +124,16 @@ form input[type=submit] {
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f6f8f9),
 		color-stop(50%, #e5ebee), color-stop(51%, #d7dee3),
 		color-stop(100%, #f5f7f9) ); /* webkit */
-	filter: progid :   DXImageTransform.Microsoft.gradient (  
+	filter: progid :     DXImageTransform.Microsoft.gradient (   
                                                             
-		 startColorstr =   '#f6f8f9', endColorstr =   '#f5f7f9', GradientType
-		=   0 ); /* ie */
+		  startColorstr =     '#f6f8f9', endColorstr =     '#f5f7f9',
+		GradientType =     0 ); /* ie */
 }
 
-form input[type=submit]:hover {
+form input[type=submit]:hover, form input[type=reset]:hover {
 	color: #fff;
-	background: #bfd255; /* old browsers */
-	background: -moz-linear-gradient(top, #bfd255 0%, #8eb92a 50%, #72aa00 51%, #9ecb2d
-		100%); /* firefox */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #bfd255),
-		color-stop(50%, #8eb92a), color-stop(51%, #72aa00),
-		color-stop(100%, #9ecb2d) ); /* webkit */
-	filter: progid :   DXImageTransform.Microsoft.gradient (  
-                                                            
-		 startColorstr =   '#bfd255', endColorstr =   '#9ecb2d', GradientType
-		=   0 ); /* ie */
+	background: #822966; 
+
 }
 
 form.allInDisplayGroups>dl>dd>fieldset>legend {
@@ -163,10 +155,10 @@ form.elementsOnly,form.subformsOnly fieldset,form.allInDisplayGroups fieldset fi
 	/* firefox */
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff),
 		color-stop(100%, #e5e5e5) ); /* webkit */
-	filter: progid :   DXImageTransform.Microsoft.gradient (   
+	filter: progid :     DXImageTransform.Microsoft.gradient (    
                                                             
-		 startColorstr =   '#ffffff', endColorstr =   '#e5e5e5', GradientType
-		=   0 ); /* ie */
+		  startColorstr =     '#ffffff', endColorstr =     '#e5e5e5',
+		GradientType =     0 ); /* ie */
 }
 
 form.subformsOnly fieldset dd:last-of-type,form.allInDisplayGroups fieldset fieldset dd:last-of-type,form.subformAndDisplayGroups fieldset dd:last-of-type
@@ -194,10 +186,10 @@ form.subformsOnly fieldset legend,form.allInDisplayGroups fieldset fieldset lege
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f6f8f9),
 		color-stop(50%, #e5ebee), color-stop(51%, #d7dee3),
 		color-stop(100%, #f5f7f9) ); /* webkit */
-	filter: progid :   DXImageTransform.Microsoft.gradient (   
+	filter: progid :     DXImageTransform.Microsoft.gradient (    
                                                             
-		 startColorstr =   '#f6f8f9', endColorstr =   '#f5f7f9', GradientType
-		=   0 ); /* ie */
+		  startColorstr =     '#f6f8f9', endColorstr =     '#f5f7f9',
+		GradientType =     0 ); /* ie */
 }
 
 form.subformsOnly fieldset label,form.allInDisplayGroups fieldset fieldset label,form.subformAndDisplayGroups fieldset label
@@ -220,9 +212,9 @@ form.twoColumns.subformsOnly dl.zend_form>dd>fieldset,form.twoColumns.subformAnd
 	width: 48%;
 }
 
-form.twoColumns.subformsOnly dl.zend_form>dd:nth-of-type  (2n+ 1)>fieldset,form.twoColumns.subformAndDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
-	 (2n+ 1)>fieldset,form.twoColumns.allInDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
-	 (2n+ 1)>fieldset {
+form.twoColumns.subformsOnly dl.zend_form>dd:nth-of-type   (2n+ 1)>fieldset,form.twoColumns.subformAndDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
+	  (2n+ 1)>fieldset,form.twoColumns.allInDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
+	  (2n+ 1)>fieldset {
 	margin-right: 3%;
 }
 
@@ -241,4 +233,25 @@ form.inlineLabels input[type=text],form.inlineLabels input[type=password],form.i
 
 form.inlineLabels select {
 	max-width: 265px;
+}
+
+fieldset#fieldset-buttons {
+	margin: 0;
+	padding: 0;
+}
+fieldset#fieldset-buttons dl {
+}
+
+fieldset#fieldset-buttons dd {
+	float: left;
+	margin-right: 10px;
+}
+
+fieldset#fieldset-buttons dt {
+	display: none;
+}
+
+/* Specific form elements */
+#code {
+	width: 80px;
 }

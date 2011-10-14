@@ -211,7 +211,19 @@ class OpenSKOS_Rdf_Parser implements Countable
 				$xpath->registerNamespace($prefix, $uri);
 			}
 		} 
+		
+		if ($type = ($xpath->query('./rdf:type', $Description)->item(0))) {
+			$resource = $type->getAttributeNS(self::$namespaces['rdf'], 'resource');
+			if (0!==strpos($resource, self::$namespaces['skos'])) {
+				return;
+			}
+			$className = parse_url($resource, PHP_URL_FRAGMENT);
+			$document->class =parse_url($type->getAttributeNS(self::$namespaces['rdf'], 'resource'), PHP_URL_FRAGMENT);
+		} else {
+			throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:type');
+		}
 
+		
 		$skosElements = $xpath->query('./skos:*', $Description);
 		foreach ($skosElements as $skosElement) {
 			$fieldname = str_replace('skos:', '', $skosElement->nodeName);
@@ -294,11 +306,12 @@ class OpenSKOS_Rdf_Parser implements Countable
 			
 			$data = array(
 				'tenant' => $this->getOpt('tenant'),
-				'collection' => $this->getOpt('collection'),
+				'collection' => $this->_collection->id,
 			);
 			$document = self::DomNode2SolrDocument($Description, $data);
-						
-			$documents->add($document);
+			if ($document) {
+				$documents->add($document);
+			}
 		}
 		
 		if (null!==$this->getOpt('commit')) {

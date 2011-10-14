@@ -12,4 +12,3 @@ try {
 	fwrite(STDERR, $e->getMessage()."\n");
 	exit(5);
 }
-	

@@ -1,7 +1,7 @@
 <?php 
 $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
 ?>
-<ul id="dashboard-menu">
+<ul id="dashboard-menu" class="box">
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'index'), null, true)?>" <?php if ($controller === 'index') echo 'class="active"'?>><?php echo $this->translate('Dashboard')?></a></li>
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'institution'), null, true)?>" <?php if ($controller === 'institution') echo 'class="active"'?>><?php echo $this->translate('Manage institution')?></a></li>
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'collections'), null, true)?>" <?php if ($controller === 'collections') echo 'class="active"'?>><?php echo $this->translate('Manage collections')?></a></li>

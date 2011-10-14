@@ -1,7 +1,7 @@
 @CHARSET "UTF-8";
 
 body {
-	font: 0.9em Arial, Helvetica, sans-serif;
+	font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
 	color: #3c1038;
 }
 
@@ -16,6 +16,10 @@ a:visted {
 
 a:HOVER {
 	text-decoration: underline;
+}
+
+a.block {
+	display: block;
 }
 
 #content {
@@ -66,6 +70,26 @@ h4 {
 
 pre {
 	
+}
+
+/* Tables */
+table {
+	width: auto;
+	border-collapse: collapse;
+}
+
+td,th {
+	border: 1px solid #822966;
+	padding: 3px 7px 2px 7px;
+}
+
+thead tr th {
+	background-color: #a1568a;
+	color: #fff;
+}
+
+tr.even {
+	background-color: #fff5fc;
 }
 
 /* GESHI CSS */
@@ -149,22 +173,31 @@ div.error {
 	background: url('../images/warning.png') 0px 5px no-repeat;
 }
 
+div.error p {
+	color: Red;
+	font-style: italic;
+}
+
 div.message {
 	background: url('../images/notice_note.png') center left no-repeat;
 }
 
-ul#dashboard-menu {
-	list-style: none;
-	margin: 0 0 5px 0;
+.box {
 	padding: 5px;
 	background: #fff5fc;
 	border: 1px solid #999;
 	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+ul#dashboard-menu {
+	list-style: none;
+	margin: 0 0 5px 0;
 	overflow: auto;
 	float: left;
 }
+
 ul#dashboard-menu li {
 	float: left;
 	margin: 5px;
@@ -177,11 +210,27 @@ ul#dashboard-menu li a {
 ul#dashboard-menu li a.active {
 	font-weight: bold;
 }
+
 ul#dashboard-menu li a.active:hover {
 	text-decoration: none;
 	cursor: default;
 }
+
 ul#dashboard-menu li a:hover {
+	
 }
 
-.clear {clear: both; overflow: auto;}
+.clear {
+	clear: both;
+	overflow: auto;
+}
+
+#collection-form {
+	float: left;
+	width: 70%;
+}
+
+#collection-stats {
+	float: right;
+	width: auto;
+}

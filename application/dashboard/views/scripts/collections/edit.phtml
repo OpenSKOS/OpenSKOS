@@ -1,0 +1,25 @@
+<?php if ($this->collection->id):?>
+<?php $this->headTitle ($this->translate('Edit collection'))?>
+<?php echo $this->render('menu.phtml');?>
+<h2><?php echo $this->translate('Edit collection')?></h2>
+<?php else:?>
+<?php $this->headTitle ($this->translate('Create collection'))?>
+<?php echo $this->render('menu.phtml');?>
+<h2><?php echo $this->translate('Create collection')?></h2>
+<?php endif?>
+
+<div class="clear">
+	<div id="collection-form">
+	<?php echo $this->collection->getForm()->setAction($this->url(array('action' => 'save')))?>
+	</div>
+	<?php if ($this->collection->id):?>
+	<div id="collection-stats" class="box">
+		<h3>SKOS Concepts per class:</h3>
+		<ul>
+			<?php foreach ($this->collection->getClasses() as $class => $count):?>
+			<li><?php echo OpenSKOS_Rdf_Parser::$namespaces['skos'].$class?>: <?php echo number_format($count, 0)?></li>
+			<?php endforeach?>
+		</ul>
+	</div>
+	<?php endif?>
+</div>
