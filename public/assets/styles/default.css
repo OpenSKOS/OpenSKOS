@@ -23,10 +23,11 @@ a:HOVER {
 	line-height: 1.5;
 	text-align: left;
 }
-h1, h2, h3, h4 {
+
+h1,h2,h3,h4 {
 	color: #822966;
 	font-weight: bold;
-	font-size:1em;
+	font-size: 1em;
 }
 
 h1 {
@@ -63,7 +64,43 @@ h4 {
 	font-size: 90%;
 }
 
+pre {
+	
+}
 
+/* GESHI CSS */
+div.example {
+	background: #fff5fc;
+	border: 1px solid #999;
+	margin: 1.5em 0;
+	padding: 1.25em 1.25em 0.75em;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+div.example p.title {
+	font-weight: bold;
+}
+
+div.example div.code {
+	margin: 1.5em 0;
+	padding: 1em 1.25em 0.75em;
+	background: #FAFBFC;
+	border: 1px solid #AAA;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+
+div.example div.code ol {
+	list-style: decimal outside;
+	padding: 0 0 1em 25px;
+}
+
+
+/* END GESHI CSS */
 footer {
 	border-top: 1px solid #3c1038;
 	margin: 0.5em 0 1em 0;
@@ -74,12 +111,18 @@ footer p {
 	font-size: 85%;
 }
 
-footer p#colofon { float: left; }
-footer p#copyright { float: right;}
+footer p#colofon {
+	float: left;
+}
+
+footer p#copyright {
+	float: right;
+}
 
 div.note {
 	background: transparent url(../images/tip.png) top left no-repeat;
 }
+
 div.note p {
 	font-style: italic;
 	font-size: 85%;
@@ -87,10 +130,26 @@ div.note p {
 	padding-left: 20px;
 }
 
-.api-examples a {white-space: nowrap;}
+.api-examples a {
+	white-space: nowrap;
+}
 
-a.resolvable-concept.loading
-{
+a.resolvable-concept.loading {
 	padding-right: 15px;
-	background: transparent url(../images/spinner.gif) center right no-repeat;
+	background: transparent url(../images/spinner.gif) center right
+		no-repeat;
+}
+
+div.message, div.error {
+	font-size: 18px;
+	font-weight: 500;
+	padding-left: 30px;
+	line-height: 30px;
+}
+
+div.error {
+	background: url('../images/warning.png') 0px 5px no-repeat;
+}
+div.message {
+	background: url('../images/notice_note.png') center left no-repeat;
 }

@@ -4,6 +4,7 @@ class Dashboard_LoginController extends Zend_Controller_Action {
 	
 	public function init() {
 		if (Zend_Auth::getInstance ()->hasIdentity ()) {
+			$this->getHelper ( 'FlashMessenger' )->addMessage ( 'You are already logged in' );
 			$this->_helper->redirector ( 'index', 'index' );
 		}
 	}
@@ -31,7 +32,17 @@ class Dashboard_LoginController extends Zend_Controller_Action {
 		$login = new Dashboard_Models_Login ();
 		$login->setData ($tenant, $username, $password );
 		if ($login->isValid ()) {
-			$this->getHelper ( 'FlashMessenger' )->addMessage ( 'Succesfully logged in' );
+			
+			$session = new Zend_Session_Namespace('Zend_Auth');
+            // Set the time of user logged in
+            $session->setExpirationSeconds(12*3600);
+            
+            // If "remember" was marked
+            if ((int)$form->getValue ('rememberme')) {
+                Zend_Session::rememberMe();
+            }
+            
+            $this->getHelper ( 'FlashMessenger' )->addMessage ( 'Succesfully logged in' );
 			$this->_helper->redirector ( 'index', 'index' );
 		} else {
     		$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(array_pop($login->getMessages()));

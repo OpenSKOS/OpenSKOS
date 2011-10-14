@@ -23,7 +23,15 @@ $this->headTitle('Welcome to the OpenSKOS API');
 		<ul>
 			<li><a href="#autocomlete">Autocomplete</a></li>
 			<li><a href="#find-concepts">Find concepts</a></li>
-			<li><a href="#concept-resolver">Concept resolver</a></li>
+			<li>
+				<a href="#concept-crud">Create/Retrieve/Update/Delete Concepts</a>
+				<ul>
+					<li><a href="#concept-create">Create Concepts</a></li>
+					<li><a href="#concept-retrieve">Retrieve Concepts</a></li>
+					<li><a href="#concept-update">Update Concepts</a></li>
+					<li><a href="#concept-delete">Delete Concepts</a></li>
+				</ul>
+			</li>
 		</ul>
 	</li>
 </ul>
@@ -151,10 +159,66 @@ You can do this by querying the find API with the selected label, for example if
 	</li>
 </ul>
 
-<h4 id="concept-resolver">Concept resolver</h4>
+<h4 id="concept-crud">Create/Retrieve/Update/Delete Concepts</h4>
+<p>The OpenSKOS API provides a complete <abbr title="Create/Retrieve/Update/Delete">CRUD</abbr> API through RESTful HTTP calls. 
+All actions except the Retrieve action require a valid API key.</p>
+<?php $this
+	->highlight('xml')
+	->setTitle('Example Concept in RDF-XML')
+	->captureStart()?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+  <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+    <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+    <skos:notation>28586</skos:notation>
+  </rdf:Description>
+</rdf:RDF>
+<?php echo $this->highlight('xml')->captureEnd() ?>
+
+<h5 id="concept-create">Create Concepts</h5>
+<p>You can create a Concept by sending a POST request with a valid RDF XML document and some extra required parameters:</p>
+<ul>
+	<li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
+	<li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
+	<li><strong>key</strong> A valid API key</li>
+</ul>
+
+
+<?php $this
+	->highlight('php')
+	->setTitle('Example: create a new SKOS concept with <a href="http://framework.zend.com/manual/en/zend.http.client.html" rel="external">Zend Framework\'s HTTP Client</a>')
+	->captureStart()
+?>
+$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
+    'maxredirects' => 0,
+    'timeout'      => 30));
+$response = $client
+    ->setEncType('text/xml')
+    ->setRawData($xml)
+    ->setParameterGet('tenant', 'beg')
+    ->setParameterGet('collection', 'gtaa')
+    ->setParameterGet('key', 'your-valid-api-key')
+    ->request('POST');
+if ($response->isSuccessful()) {
+    echo 'Concept created';
+} else {
+	echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
+}
+<?php echo $this->highlight()->captureEnd()?>
+<p>You will get an error with the appropriate HTTP Status code. Errors will occur if a concept already exists, invalid XML or missing/non-existing collection/tenant and/or api-key</p>
+<h5 id="concept-retrieve">Retrieve Concepts</h5>
+<p>You can retrieve a concept by sending a GET request with a valid identifier.</p>
 <ul>
 	<li>
-		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
+		<p>Retrieve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
 		<ul>
 			<li>
 			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
@@ -169,7 +233,7 @@ You can do this by querying the find API with the selected label, for example if
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
 			</li>
 		</ul>
-		<p>Resolve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
+		<p>Retrieve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
 		<ul>
 			<li>
 			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
@@ -186,3 +250,54 @@ You can do this by querying the find API with the selected label, for example if
 		</ul>
 	</li>
 </ul>
+
+<h5 id="concept-update">Update Concepts</h5>
+<p>The <em>Update</em> action works almost the same as the <em><a href="#concept-create">Create</a></em> action, but by sending a <em>PUT</em> request with an existing Concept identifier.</p>
+<?php $this
+	->highlight('php')
+	->setTitle("Example: update an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
+	->captureStart()
+?>
+$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
+    'maxredirects' => 0,
+    'timeout'      => 30));
+$response = $client
+    ->setEncType('text/xml')
+    ->setRawData($xml)
+    ->setParameterGet('tenant', 'beg')
+    ->setParameterGet('collection', 'gtaa')
+    ->setParameterGet('key', 'your-valid-api-key')
+    ->request('PUT');
+if ($response->isSuccessful()) {
+    echo 'Concept created';
+} else {
+    echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
+}
+<?php echo $this->highlight()->captureEnd()?>
+
+<h5 id="concept-delete">Delete Concepts</h5>
+<p>By sending a DELETE request to the API with a valid, existing identifier, a Concept will be deleteded from the system.</p>
+<?php $this
+	->highlight('php')
+	->setTitle("Example: deleting an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
+	->captureStart()
+?>
+$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
+    'maxredirects' => 0,
+    'timeout'      => 30));
+$response = $client
+    ->setParameterGet('tenant', 'beg')
+    ->setParameterGet('collection', 'gtaa')
+    ->setParameterGet('key', 'your-valid-api-key')
+    ->setParameterGet('id', 'http://data.beeldengeluid.nl/gtaa/28586')
+    ->request('DELETE');
+if ($response->isSuccessful()) {
+    echo 'Concept deleted';
+} else {
+    echo 'Failed to delete concept: ' . $response->getHeader('X-Error-Msg');
+}
+<?php echo $this->highlight()->captureEnd()?>
+
+
+
+

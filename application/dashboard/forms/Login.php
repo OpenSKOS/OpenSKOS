@@ -12,9 +12,9 @@ class Dashboard_Forms_Login extends Zend_Form
         ));
         $this->addElement('text', 'username', array(
             'filters' => array('StringTrim', 'StringToLower'),
-            'validators' => array(array('StringLength', false, array(2, 10))),
+            'validators' => array(array('EmailAddress')),
             'required' => true,
-            'label' => 'Username',
+            'label' => 'E-mail',
         ));
         $this->addElement('password', 'password', array(
             'filters' => array('StringTrim'),
@@ -22,12 +22,14 @@ class Dashboard_Forms_Login extends Zend_Form
             'required' => true,
             'label' => 'Password',
         ));
-//        $this->addElement('hash', 'csrf', array('ignore' => true));
+        $this->addElement('checkbox', 'rememberme', array('label' => 'Remember me'));
+        $this->getElement('rememberme')->setChecked(true);
         $this->addElement('submit', 'login', array(
             'required' => false,
             'ignore' => true,
             'label' => 'Login',
         ));
+        
     }
     
     /**

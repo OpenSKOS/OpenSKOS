@@ -23,9 +23,7 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
 			if (preg_match('/\.(xml|rdf|html|json)$/', $id, $match)) {
 				$id = preg_replace('/\.(xml|rdf|html|json)$/', '', $id);
 				$format = $match[1];
-//				if ($format != 'html') {
-					$this->getRequest()->setParam('format', $format);				
-//				}
+				$this->getRequest()->setParam('format', $format);				
 			}
 			$this->getRequest()->setParam('id', $id);
 		}

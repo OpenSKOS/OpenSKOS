@@ -127,6 +127,11 @@ class Api_Models_Concepts
 			->search(implode(' OR ', $q));
 	}
 	
+	/**
+	 * 
+	 * @param uuid $id
+	 * @return Api_Models_Concept
+	 */
 	public function getConcept($id)
 	{
 		$data = $this->solr()->get($id, array(

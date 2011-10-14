@@ -6,9 +6,9 @@ class Dashboard_Models_Login extends Zend_Auth {
 
     public function __construct() {
         $this->_authAdapter = new Dashboard_Models_Login_AuthAdapter();
-        $this->_authAdapter->setTableName('users')
+        $this->_authAdapter->setTableName('user')
         	->setTenantColumn('tenant')
-        	->setIdentityColumn('username')
+        	->setIdentityColumn('email')
         	->setCredentialColumn('password');
     }
 

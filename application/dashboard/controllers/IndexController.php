@@ -1,18 +1,11 @@
 <?php
 
-class Dashboard_IndexController extends Zend_Controller_Action
+class Dashboard_IndexController extends OpenSKOS_Controller_Dashboard
 {
-
-    public function init()
-    {
-        /* Initialize action controller here */
-    }
-
-    public function indexAction()
-    {
-        // action body
-    }
-
+	public function indexAction()
+	{
+		
+	}
 
 }
 
