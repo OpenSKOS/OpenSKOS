@@ -4,7 +4,7 @@ if (!$OPTS) {
 	exit(9);
 }
 
-if ($OPTS->env) define('APPLICATION_ENV', $this->_opts->env);
+if ($OPTS->env) define('APPLICATION_ENV', $OPTS->env);
 //bootstrap the application:
 include dirname(__FILE__) . '/../public/index.php';
 error_reporting(E_ALL);
