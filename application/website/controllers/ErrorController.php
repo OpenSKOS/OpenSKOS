@@ -7,6 +7,9 @@ class ErrorController extends Zend_Controller_Action
     {
         $errors = $this->_getParam('error_handler');
         
+        $this->getHelper('layout')->enableLayout();
+        $this->getResponse()->setHeader('Content-Type', 'text/html; charset="utf-8"', true);
+        
         switch ($errors->type) {
             case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE:
             case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_CONTROLLER:
@@ -16,10 +19,17 @@ class ErrorController extends Zend_Controller_Action
                 $this->getResponse()->setHttpResponseCode(404);
                 $this->view->message = 'Page not found';
                 break;
+            
             default:
-                // application error
-                $this->getResponse()->setHttpResponseCode(500);
-                $this->view->message = 'Application error';
+            	$code = (int)$errors->exception->getCode();
+            	if ((100 > $code) || (599 < $code)) {
+                	$this->getResponse()->setHttpResponseCode(500);
+	                $this->view->message = 'Application error';
+            	} else {
+            		$this->getResponse()->setHttpResponseCode($code);
+	                $this->view->message = $errors->exception->getMessage();
+            	}
+            	
                 break;
         }
         
@@ -32,8 +42,17 @@ class ErrorController extends Zend_Controller_Action
         if ($this->getInvokeArg('displayExceptions') == true) {
             $this->view->exception = $errors->exception;
         }
+		$this->getResponse()
+			->setHeader('X-Error-Msg', $errors->exception->getMessage());
         
-        $this->view->request   = $errors->request;
+        if ($this->view->errorOnly) {
+	        $this->getResponse()->setHeader('Content-Type', 'text/plain; charset="utf-8"', true);
+       		$this->getHelper('layout')->disableLayout();
+ 	        $this->getHelper('viewRenderer')->setNoRender(true);
+			echo $errors->exception->getMessage()."\n"; 
+        }
+        
+		$this->view->request   = $errors->request;
     }
 
     public function getLog()

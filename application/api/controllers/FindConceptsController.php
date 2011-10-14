@@ -51,8 +51,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
 	public function getAction() {
 		
-		$id = $this->getRequest()->getParam('id');
-		$concept = $this->model->getConcept($id);
+		$concept = $this->_fetchConcept();
 		if ($this->_helper->contextSwitch()->getCurrentContext()==='json') {
 			if (null !== $concept) {
 				foreach ($concept as $key => $var) {
@@ -76,11 +75,28 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 	}
 
 	public function putAction() {
-		$this->_501('POST');
+		$this->_501('PUT');
 	}
 
 	public function deleteAction() {
 		$this->_501('DELETE');
+	}
+	
+	/**
+	 * @return Api_Models_Concept
+	 */
+	protected function _fetchConcept()
+	{
+		$id = $this->getRequest()->getParam('id');
+		if (null === $id) {
+			throw new Zend_Controller_Exception('No id `'.$id.'` provided', 400);
+		}
+		
+		$concept = $this->model->getConcept($id);
+		if (null === $concept) {
+			throw new Zend_Controller_Exception('Concept `'.$id.'` not found', 404);
+		}
+		return $concept;
 	}
 
 }

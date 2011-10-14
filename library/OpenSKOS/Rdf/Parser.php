@@ -187,6 +187,10 @@ class OpenSKOS_Rdf_Parser implements Countable
 		Array $extradata = array(), 
 		DOMXPath $xpath = null)
 	{
+		if ($Description->nodeName != 'rdf:Description') {
+			throw new OpenSKOS_Rdf_Parser_Exception('wring nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
+		}
+		
 		$document = new OpenSKOS_Solr_Document();
 		foreach ($extradata as $key => $var) {
 			$document->$key = $var;

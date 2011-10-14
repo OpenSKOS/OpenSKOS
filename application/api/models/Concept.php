@@ -276,6 +276,32 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	return $doc;
 	}
 	
+	/**
+	 * @return Api_Models_Concept
+	 */
+	public function delete()
+	{
+		//delete this document from Solr:
+		$solr = $this->solr()->delete('uuid:'.(is_array($this['uuid']) ? $this['uuid'][0] : $this['uuid']));
+		return $this;
+	}
+	
+	
+	public function save()
+	{
+		//add document to Solr:
+		$this->solr()->add(new OpenSKOS_Solr_Documents($this));
+		return $this;
+	}
+	
+	/**
+	 * @return OpenSKOS_Solr
+	 */
+	protected function solr()
+	{
+		return Zend_Registry::get('OpenSKOS_Solr');
+	}
+	
 	public function __toString()
     {
     	return $this->toDom()->saveXml($this->toDom()->documentElement);
@@ -291,7 +317,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		$xml .= ' xmlns:'.$prefix.'="'.$uri.'"';
     	}
     	$xml .='>';
-    	$xml .= $this['xml'];
+    	$xml .= is_array($this['xml']) ? $this['xml'][0] : $this['xml'];
     	$xml .= '</rdf:RDF>';
     	return DOMDocument::loadXml($xml);
     }

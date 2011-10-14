@@ -2,7 +2,7 @@
 $flashMessenger = new Zend_Controller_Action_Helper_FlashMessenger();
 if($flashMessenger->hasMessages()):
 ?>
-<div class="boodschap noprint">
+<div class="message">
 		<?php if(count($flashMessenger->getMessages())==1):?>
 <p><?php echo implode('', $flashMessenger->getMessages())?></p>
 		<?php else:?>
@@ -16,7 +16,7 @@ if($flashMessenger->hasMessages()):
 <?php endif;?>
 
 <?php if ($flashMessenger->setNamespace('error')->hasMessages()):?>
-<div class="waarschuwing noprint">
+<div class="error">
 		<?php if(count($flashMessenger->getMessages())==1):?>
 <p><?php echo implode('', $flashMessenger->getMessages())?></p>
 		<?php else:?>

@@ -171,6 +171,7 @@ class OpenSKOS_Solr
 			->setUri($this->getUri('update'))
 			->setRawData($xml)
 			->setEncType('text/xml')
+			->setHeaders('Content-Type', 'text/xml')
 			->request('POST');
 		if ($response->isError()) {
 			$doc = DOMDocument::loadHtml($response->getBody());
@@ -228,7 +229,19 @@ class OpenSKOS_Solr
 		} else {
 			$deleteMsg = '<query>'.$query.'</query>';
 		}
-		return $this->postXml('<delete>'.$deleteMsg.'</delete>');
+		$deleteMsg = '<delete>' . $deleteMsg .'</delete>';
+		
+		$response = $this->_getClient()
+			->setUri($this->getUri('update'))
+			->setParameterGet('stream.body', $deleteMsg)
+			->request('GET');
+		
+		if ($response->isError()) {
+			$doc = DOMDocument::loadHtml($response->getBody());
+			throw new OpenSKOS_Solr_Exception('Delete failed: '.$doc->getElementsByTagName('pre')->item(0)->nodeValue);
+		}
+		
+		return $this;
 	}
 	
 	public function commit(Array $options = array())
