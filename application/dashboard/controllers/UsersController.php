@@ -21,6 +21,16 @@ class Dashboard_UsersController extends OpenSKOS_Controller_Dashboard
 		$user = $this->_getuser();
 		
 		if (null!==$this->getRequest()->getParam('delete')) {
+			if (!$user->id) {
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete an empty user.');
+				$this->_helper->redirector('index');
+			}
+			
+			if ($user->id == Zend_Auth::getInstance()->getIdentity()->id) {
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete yourself.');
+				$this->_helper->redirector('index');
+			}
+			
 			$user->delete();
 			$this->getHelper('FlashMessenger')->addMessage('The user has been deleted.');
 			$this->_helper->redirector('index');
