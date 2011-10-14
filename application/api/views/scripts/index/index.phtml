@@ -32,6 +32,7 @@ $this->headTitle('Welcome to the OpenSKOS API');
 					<li><a href="#concept-delete">Delete Concepts</a></li>
 				</ul>
 			</li>
+			<li><a href="#institutions">Institutions</a></li>
 		</ul>
 	</li>
 </ul>
@@ -299,5 +300,33 @@ if ($response->isSuccessful()) {
 <?php echo $this->highlight()->captureEnd()?>
 
 
-
+<h4 id="institutions">Institutions</h4>
+<ul>
+	<li>Fetch all Institutions in this repository
+		<ul>
+			<li>
+				in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>"><?php echo $this->url(array('controller' => 'institutions'))?></a>
+			</li>
+			<li>
+				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=json"><?php echo $this->url(array('controller' => 'institutions'))?>?format=json</a>
+			</li>
+			<li>
+				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=html"><?php echo $this->url(array('controller' => 'institutions'))?>?format=html</a>
+			</li>
+		</ul>
+	 </li>
+	<li>Fetch a single Institute from this repository
+		<ul>
+			<li>
+				in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?></a>
+			</li>
+			<li>
+				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json</a>
+			</li>
+			<li>
+				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html</a>
+			</li>
+		</ul>
+	 </li>
+</ul>
 
