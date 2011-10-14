@@ -13,6 +13,8 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 				->addElement('hidden', 'id', array('required' => $this->id ? true : false))
 				->addElement('text', 'name', array('label' => 'Name', 'required' => true))
 				->addElement('text', 'email', array('label' => 'E-mail', 'required' => true))
+				->addElement('password', 'pw1', array('label' => 'Password', 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw2')))))
+				->addElement('password', 'pw2', array('label' => 'Password (check)', 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
 				->addElement('radio', 'type', array('label' => 'Usertype', 'required' => true))
 				->addElement('text', 'apikey', array('label' => 'API Key (required for API users)', 'required' => false))
 				->addElement('submit', 'submit', array('label'=>'Submit'))
@@ -24,6 +26,14 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			$form->getElement('type')
 				->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$types, OpenSKOS_Db_Table_Users::$types))
 				->setSeparator(' ');
+			
+			if (!$this->id || (Zend_Auth::getInstance()->hasIdentity() && Zend_Auth::getInstance()->getIdentity()->id == $this->id)) {
+				$form->removeElement('delete');
+			}
+			
+			if (!$this->id) {
+				$form->getElement('pw1')->setRequired(true);
+			}
 			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEmail'));
 			$validator
@@ -37,9 +47,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			$validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
 			$validator
 				->setMessage("An API Key is required for users that have access to the API", Zend_Validate_Callback::INVALID_VALUE);
-			$form->getElement('type')
-				->addValidator($validator);
 				
+			$form->getElement('type')
+				->addValidator($validator, true);
+								
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueApiKey'));
 			$validator
 				->setMessage("there is already a user with API key '%value%'", Zend_Validate_Callback::INVALID_VALUE);
@@ -50,6 +61,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			
 			$form->setDefaults($this->toArray());
 		}
+		
 		return $form;
 	}
 	
@@ -60,6 +72,14 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 		} else {
 			return true;
 		}
+	}
+	
+	public function doNotBlockYourselfFromTheDashboard($type, $data)
+	{
+		if (!Zend_Auth::getInstance()->hasIdentity() || !$data['id']) return true;
+		$id = Zend_Auth::getInstance()->getIdentity()->id;
+		if ($id != $data['id']) return true;
+		return OpenSKOS_Db_Table_Users::isDashboardAllowed($type);
 	}
 	
 }

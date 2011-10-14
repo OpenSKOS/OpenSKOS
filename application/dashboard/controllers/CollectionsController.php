@@ -24,6 +24,10 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 		$collection = $this->_getCollection();
 		
 		if (null!==$this->getRequest()->getParam('delete')) {
+			if (!$collection->id) {
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete an empty collection.');
+				$this->_helper->redirector('index');
+			}
 			$collection->delete();
 			$this->getHelper('FlashMessenger')->addMessage('The collection has been deleted, it might take a while before changes are committed to our system.');
 			$this->_helper->redirector('index');

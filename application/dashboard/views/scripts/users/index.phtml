@@ -1,7 +1,7 @@
 <?php $this->headTitle ($this->translate('Manage users'))?>
 <?php echo $this->render('menu.phtml');?>
 <h2><?php echo $this->translate('Manage users')?></h2>
-
+<p><a href="<?php echo $this->url(array('action' => 'edit'))?>"><?php echo $this->translate('Create a new user')?>&raquo;</a></p>
 <?php if (!count($this->users)):?>
 <div class="note">
 	<p><?php echo $this->translate('No users to manage.')?></p>

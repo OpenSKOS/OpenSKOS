@@ -6,6 +6,5 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'institution'), null, true)?>" <?php if ($controller === 'institution') echo 'class="active"'?>><?php echo $this->translate('Manage institution')?></a></li>
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'collections'), null, true)?>" <?php if ($controller === 'collections') echo 'class="active"'?>><?php echo $this->translate('Manage collections')?></a></li>
 	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'users'), null, true)?>" <?php if ($controller === 'users') echo 'class="active"'?>><?php echo $this->translate('Manage users')?></a></li>
-	<li><a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'api-keys'), null, true)?>" <?php if ($controller === 'api-keys') echo 'class="active"'?>><?php echo $this->translate('Manage API keys')?></a></li>
 </ul>
 <div class="clear"></div>

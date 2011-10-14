@@ -73,6 +73,10 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('submit', 'delete', array('label'=>'Delete', 'onclick' => 'return confirm(\'Are you sure you want to delete this collection and all of it\\\'s Concepts?\');'))
 				->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
 				;
+
+			if (!$this->id) {
+				$form->removeElement('delete');
+			}
 			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
 			$validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
