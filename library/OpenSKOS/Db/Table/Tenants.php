@@ -14,6 +14,9 @@ class OpenSKOS_Db_Table_Tenants extends Zend_Db_Table
     
     protected $_dependentTables = array('OpenSKOS_Db_Table_Collections');
 
+    /**
+     * @return OpenSKOS_Db_Table_Row_Tenant
+     */
     public static function fromIdentity()
     {
     	if (!Zend_Auth::getInstance()->hasIdentity()) {

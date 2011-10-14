@@ -93,12 +93,10 @@ div.example div.code {
 	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
-
 div.example div.code ol {
 	list-style: decimal outside;
 	padding: 0 0 1em 25px;
 }
-
 
 /* END GESHI CSS */
 footer {
@@ -140,7 +138,7 @@ a.resolvable-concept.loading {
 		no-repeat;
 }
 
-div.message, div.error {
+div.message,div.error {
 	font-size: 18px;
 	font-weight: 500;
 	padding-left: 30px;
@@ -150,6 +148,40 @@ div.message, div.error {
 div.error {
 	background: url('../images/warning.png') 0px 5px no-repeat;
 }
+
 div.message {
 	background: url('../images/notice_note.png') center left no-repeat;
 }
+
+ul#dashboard-menu {
+	list-style: none;
+	margin: 0 0 5px 0;
+	padding: 5px;
+	background: #fff5fc;
+	border: 1px solid #999;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	overflow: auto;
+	float: left;
+}
+ul#dashboard-menu li {
+	float: left;
+	margin: 5px;
+}
+
+ul#dashboard-menu li a {
+	display: block;
+}
+
+ul#dashboard-menu li a.active {
+	font-weight: bold;
+}
+ul#dashboard-menu li a.active:hover {
+	text-decoration: none;
+	cursor: default;
+}
+ul#dashboard-menu li a:hover {
+}
+
+.clear {clear: both; overflow: auto;}

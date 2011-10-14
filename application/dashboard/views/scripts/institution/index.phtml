@@ -1,3 +1,5 @@
+<?php $this->headTitle ($this->translate('Manage institution'))?>
+<?php echo $this->render('menu.phtml');?>
 <h2><?php echo $this->translate('Manage institution')?></h2>
 <?php echo $this->tenant->getForm()?>
-<?php Zend_Debug::dump($this->tenant->toArray());?>
+
