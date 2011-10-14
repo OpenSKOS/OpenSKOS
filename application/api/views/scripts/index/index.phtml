@@ -192,6 +192,31 @@ All actions except the Retrieve action require a valid API key.</p>
 	<li><strong>key</strong> A valid API key</li>
 </ul>
 
+<p>For your convenience, it is also possible to send the tenant, collection and key in the XML document, by setting the appropriate attributes in the openskos namespace.</p>
+<?php $this
+	->highlight('xml')
+	->setTitle('Example Concept in RDF-XML, with tenant, collection and key embeded')
+	->captureStart()?>
+<rdf:RDF 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+  xmlns:openskos="http://openskos.org/xmlns#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
+  <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+    <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+    <skos:notation>28586</skos:notation>
+  </rdf:Description>
+</rdf:RDF>
+<?php echo $this->highlight('xml')->captureEnd() ?>
 
 <?php $this
 	->highlight('php')

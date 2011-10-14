@@ -29,6 +29,18 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
 		)
 	);
 	
+	/**
+	 * 
+	 * @param string $apikey
+	 * @return OpenSKOS_Db_Table_Row_User
+	 */
+	public static function fetchByApiKey($apikey)
+	{
+		$classname = __CLASS__;
+		$model = new $classname();
+		return $model->fetchRow($model->select()->where('apikey=?', $apikey));
+	}
+	
 	public static function isDashboardAllowed($usertype)
 	{
 		return $usertype == self::USER_TYPE_BOTH || $usertype == self::USER_TYPE_DASHBOARD;

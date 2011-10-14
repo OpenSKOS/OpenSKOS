@@ -74,6 +74,16 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 		}
 	}
 	
+	public function isDashboardAllowed()
+	{
+		return OpenSKOS_Db_Table_Users::isDashboardAllowed($this->type);
+	}
+	
+	public function isApiAllowed()
+	{
+		return OpenSKOS_Db_Table_Users::isApiAllowed($this->type);
+	}
+	
 	public function doNotBlockYourselfFromTheDashboard($type, $data)
 	{
 		if (!Zend_Auth::getInstance()->hasIdentity() || !$data['id']) return true;

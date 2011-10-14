@@ -16,7 +16,7 @@ $namespaces = array_unique($namespaces);
 		printf('xmlns:%s="%s" ', $prefix, $this->namespaces[$prefix]);
 	endforeach
 	?>
-	xmlns:openskos="http://openskos.org/xmlns/"
+	xmlns:openskos="http://openskos.org/xmlns#"
 	<?php foreach ($this->response['response'] as $key => $var): if ($key == 'docs') continue;?>
 	openskos:<?php echo $key?>="<?php echo $var?>"
 	<?php endforeach?>
