@@ -1,0 +1,244 @@
+@CHARSET "UTF-8";
+
+/**
+ * Universal Zend_Form styling
+ * For proper looks you need to include attached javascript file!
+ * @author Wojtek Iskra 
+ * @version 1.0.1, 2011-05-05
+ */ /**
+ * This is to avoid horizontal scroll appearing, may not be necessary
+ */
+form {
+	width: 98%;
+	margin: 0 auto;
+	overflow: auto;
+}
+
+form label {
+	color: #666;
+}
+
+/**
+     * Adding red star after label of each required Zend_Form_Element
+     */
+form label.required:after {
+	color: red;
+	content: "*";
+}
+
+/**
+     * Horizontally centering submit button, 'submit-container' class added by jquery
+     */
+form dd.submit-container {
+	clear: both;
+	text-align: center;
+}
+
+form fieldset {
+	border: none;
+}
+
+form dd {
+	margin: 0 0 0.7em 0;
+}
+
+form dd p.description {
+	width: 100%;
+	max-width: 350px;
+	margin: 0.2em 0 0 0.2em;
+	padding: 0;
+	color: #999;
+	font-size: 0.85em;
+}
+
+form dd ul.errors {
+	margin: 0 0 0 1.6em;
+	padding: 0;
+}
+
+form dd ul.errors li {
+	width: 100%;
+	max-width: 350px;
+	margin-top: 0.2em;
+	margin: 0.2em 0 0 0;
+	padding: 0;
+	color: red;
+	font-size: 0.9em;
+}
+
+form input[type=text],form input[type=password],form textarea,form select
+	{
+	width: 100%;
+	max-width: 350px;
+	padding: 0.5em;
+	color: #555;
+	font-size: 1em;
+	background: #fff;
+	border: 1px #ddd solid;
+	-webkit-box-shadow: 0px 0px 4px #aaa;
+	-moz-box-shadow: 0px 0px 4px #aaa;
+	box-shadow: 0px 0px 4px #aaa;
+}
+
+/**
+     * Highlighting current element
+     */
+form input[type=text]:focus,form input[type=password]:focus,form select:focus,form textarea:focus
+	{
+	background: #FFFFE0;
+}
+
+form select {
+	max-width: 365px;
+}
+
+form textarea {
+	height: 100px;
+}
+
+/**
+     * Highlighting elements that were found invalid.
+     * 'error' class added by jquery.
+     */
+form input[type=text].error,form input[type=password].error,form select.error,form textarea.error
+	{
+	background: #fee;
+}
+
+form input[type=submit] {
+	margin-top: -10px;
+	padding: 0.4em 1.2em;
+	color: #666;
+	font-size: 14px;
+	font-size: 1.25em;
+	border-radius: 5px;
+	-moz-border-radius: 5px 5px 5px 5px;
+	border: 0 none;
+	cursor: pointer;
+	-webkit-box-shadow: 2px 2px 2px #666;
+	-moz-box-shadow: 2px 2px 2px #666;
+	box-shadow: 2px 2px 2px #666;
+	background: #f6f8f9; /* old browsers */
+	background: -moz-linear-gradient(top, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9
+		100%); /* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f6f8f9),
+		color-stop(50%, #e5ebee), color-stop(51%, #d7dee3),
+		color-stop(100%, #f5f7f9) ); /* webkit */
+	filter: progid :   DXImageTransform.Microsoft.gradient (  
+                                                            
+		 startColorstr =   '#f6f8f9', endColorstr =   '#f5f7f9', GradientType
+		=   0 ); /* ie */
+}
+
+form input[type=submit]:hover {
+	color: #fff;
+	background: #bfd255; /* old browsers */
+	background: -moz-linear-gradient(top, #bfd255 0%, #8eb92a 50%, #72aa00 51%, #9ecb2d
+		100%); /* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #bfd255),
+		color-stop(50%, #8eb92a), color-stop(51%, #72aa00),
+		color-stop(100%, #9ecb2d) ); /* webkit */
+	filter: progid :   DXImageTransform.Microsoft.gradient (  
+                                                            
+		 startColorstr =   '#bfd255', endColorstr =   '#9ecb2d', GradientType
+		=   0 ); /* ie */
+}
+
+form.allInDisplayGroups>dl>dd>fieldset>legend {
+	font-size: 1.4em;
+}
+
+form.elementsOnly,form.subformsOnly fieldset,form.allInDisplayGroups fieldset fieldset,form.subformAndDisplayGroups fieldset
+	{
+	margin-bottom: 2.5em;
+	padding: 1em 0;
+	background-color: #eee;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-box-shadow: 3px 3px 10px #666;
+	-moz-box-shadow: 3px 3px 10px #666;
+	box-shadow: 3px 3px 10px #666;
+	background: #ffffff; /* old browsers */
+	background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%);
+	/* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff),
+		color-stop(100%, #e5e5e5) ); /* webkit */
+	filter: progid :   DXImageTransform.Microsoft.gradient (   
+                                                            
+		 startColorstr =   '#ffffff', endColorstr =   '#e5e5e5', GradientType
+		=   0 ); /* ie */
+}
+
+form.subformsOnly fieldset dd:last-of-type,form.allInDisplayGroups fieldset fieldset dd:last-of-type,form.subformAndDisplayGroups fieldset dd:last-of-type
+	{
+	margin-bottom: 0;
+}
+
+form.subformsOnly fieldset legend,form.allInDisplayGroups fieldset fieldset legend,form.subformAndDisplayGroups fieldset legend
+	{
+	width: 100%;
+	margin-top: -1em;
+	margin-bottom: 1em;
+	padding: 0.2em 0;
+	color: #666;
+	font-size: 1.25em;
+	text-align: center;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-box-shadow: 2px 2px 2px #666;
+	-moz-box-shadow: 2px 2px 2px #666;
+	box-shadow: 2px 2px 2px #666;
+	background: #f6f8f9; /* old browsers */
+	background: -moz-linear-gradient(top, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9
+		100%); /* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f6f8f9),
+		color-stop(50%, #e5ebee), color-stop(51%, #d7dee3),
+		color-stop(100%, #f5f7f9) ); /* webkit */
+	filter: progid :   DXImageTransform.Microsoft.gradient (   
+                                                            
+		 startColorstr =   '#f6f8f9', endColorstr =   '#f5f7f9', GradientType
+		=   0 ); /* ie */
+}
+
+form.subformsOnly fieldset label,form.allInDisplayGroups fieldset fieldset label,form.subformAndDisplayGroups fieldset label
+	{
+	font-size: 1.1em;
+	line-height: 1.8em;
+}
+
+form.elementsOnly dl,form.subformsOnly fieldset dl,form.allInDisplayGroups fieldset fieldset dl,form.subformAndDisplayGroups fieldset dl
+	{
+	margin: 0 1.6em 1.2em;
+}
+
+/**
+ * Two-column layout
+ */
+form.twoColumns.subformsOnly dl.zend_form>dd>fieldset,form.twoColumns.subformAndDisplayGroups dl.zend_form>dd>fieldset>dl>dd>fieldset,form.twoColumns.allInDisplayGroups dl.zend_form>dd>fieldset>dl>dd>fieldset
+	{
+	float: left;
+	width: 48%;
+}
+
+form.twoColumns.subformsOnly dl.zend_form>dd:nth-of-type  (2n+ 1)>fieldset,form.twoColumns.subformAndDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
+	 (2n+ 1)>fieldset,form.twoColumns.allInDisplayGroups dl.zend_form>dd>fieldset>dl>dd:nth-of-type
+	 (2n+ 1)>fieldset {
+	margin-right: 3%;
+}
+
+/**
+ * In-line labels
+ */
+form.inlineLabels dt {
+	float: left;
+	width: 40%;
+}
+
+form.inlineLabels input[type=text],form.inlineLabels input[type=password],form.inlineLabels textarea,form.inlineLabels select
+	{
+	max-width: 250px;
+}
+
+form.inlineLabels select {
+	max-width: 265px;
+}
