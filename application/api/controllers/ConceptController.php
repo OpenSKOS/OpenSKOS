@@ -14,9 +14,6 @@ class Api_ConceptController extends Api_FindConceptsController {
 			throw new Zend_Controller_Action_Exception('No RDF-XML recieved', 412);
 		}
 		
-		$tenant = $this->_getTenant();
-		$collection = $this->_getCollection();
-		
 		// @TODO: move this code to transform Text-XML to object to library
 		$doc = new DOMDocument();
 		if (!@$doc->loadXML($xml)) { 
@@ -32,6 +29,18 @@ class Api_ConceptController extends Api_FindConceptsController {
 		if ($Descriptions->length != 1) {
 			throw new Zend_Controller_Action_Exception('Expected exactly one /rdf:RDF/rdf:Description, got '.$Descriptions->length, 412);
 		}
+		
+		//is a tenant, collection or api key set in the XML?
+		foreach (array('tenant', 'collection', 'key') as $attributeName) {
+			$value = $doc->documentElement->getAttributeNS(OpenSKOS_Rdf_Parser::$namespaces['openskos'], $attributeName);
+			if ($value) {
+				$this->getRequest()->setParam($attributeName, $value);
+			}
+		}
+		
+		$tenant = $this->_getTenant();
+		$collection = $this->_getCollection();
+		$user = $this->_getUser();
 		
 		$data = array(
 			'tenant' => $tenant->code,
@@ -103,15 +112,19 @@ class Api_ConceptController extends Api_FindConceptsController {
 	 */
 	protected function _getTenant()
 	{
-		//need a tenant and a collection:
-		$tenantCode = $this->getRequest()->getParam('tenant');
-		if (!$tenantCode) {
-			throw new Zend_Controller_Action_Exception('No tenant specified', 412);
-		}
-		$model = new OpenSKOS_Db_Table_Tenants();
-		$tenant = $model->find($tenantCode)->current();
+		static $tenant;
+		
 		if (null === $tenant) {
-			throw new Zend_Controller_Action_Exception('No such tenant: `'.$tenantCode.'`', 404);
+			//need a tenant and a collection:
+			$tenantCode = $this->getRequest()->getParam('tenant');
+			if (!$tenantCode) {
+				throw new Zend_Controller_Action_Exception('No tenant specified', 412);
+			}
+			$model = new OpenSKOS_Db_Table_Tenants();
+			$tenant = $model->find($tenantCode)->current();
+			if (null === $tenant) {
+				throw new Zend_Controller_Action_Exception('No such tenant: `'.$tenantCode.'`', 404);
+			}
 		}
 		
 		return $tenant;
@@ -128,12 +141,38 @@ class Api_ConceptController extends Api_FindConceptsController {
 		}
 		
 		$model = new OpenSKOS_Db_Table_Collections();
-		$collection = $model->findByCode($collectionCode, $tenant->code);
+		$collection = $model->findByCode($collectionCode, $this->_getTenant());
 		if (null === $collection) {
 			throw new Zend_Controller_Action_Exception('No such collection: `'.$collectionCode.'`', 404);
 		}
 		return $collection;
 	}
+	
+	/**
+	 * @return OpenSKOS_Db_Table_Row_User
+	 */
+	protected function _getUser()
+	{
+		$apikey = $this->getRequest()->getParam('key');
+		if (!$apikey) {
+			throw new Zend_Controller_Action_Exception('No key specified', 412);
+		}
+		$user = OpenSKOS_Db_Table_Users::fetchByApiKey($apikey);
+		if (null === $user) {
+			throw new Zend_Controller_Action_Exception('No such API-key: `'.$apikey.'`', 401);
+		}
+		
+		if (!$user->isApiAllowed()) {
+			throw new Zend_Controller_Action_Exception('Your user account is not allowed to use the API', 401);
+		}
+		
+		if ($user->active != 'Y') {
+			throw new Zend_Controller_Action_Exception('Your user account is blocked', 401);
+		}
+		
+		return $user;
+	}
+	
 	
 
 }
