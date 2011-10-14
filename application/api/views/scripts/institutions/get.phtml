@@ -1,0 +1,42 @@
+<?php $this->headTitle ($this->tenant->name)?>
+
+<h2><?php echo $this->escape($this->tenant->name)?></h2>
+<ul>
+	<?php foreach ($this->tenant as $key => $val): if ($key == 'name' || !$val) continue;
+		switch ($key) {
+			case 'email':
+				$val = '<a href="mailto:' . $val.'">'.$val.'</a>';
+				break;
+			case 'website':
+				$val = '<a href="' . $val.'">'.$val.'</a>';
+				break;
+			default:
+				$val = $this->escape($val);
+		}
+	?>
+	<li><em><?php echo $key?></em>: <?php echo $val?></li>
+	<?php endforeach?>
+</ul>
+<h3><?php echo $this->translate('Collections')?></h3>
+<?php 
+	$collections = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
+	$conceptsPerCollection = $this->tenant->getConceptsPerCollection();
+?>
+<ul id="collections-per-institute">
+<?php foreach ($collections as $collection):?>
+	<li>
+		<p class="dc_title"><?php echo $collection->dc_title?> (<?php echo isset($conceptsPerCollection[$collection->id]) ? number_format($conceptsPerCollection[$collection->id], 0) : 0?> Concepts)</p>
+	<?php if ($collection->dc_description):?>
+		<p class="dc_description"><?php echo nl2br($collection->dc_description, true)?></p>
+	<?php endif?>
+	<?php if ($collection->website):?>
+		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $collection->website?>"><?php echo $collection->website?></a></p>
+	<?php endif?>
+	</li>
+<?php endforeach?>
+</ul>
+<h3>Alternative formats</h3>
+<ul>
+	<li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url())?>">JSON</a></li>
+	<li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url())?>">RDF</a></li>
+</ul>

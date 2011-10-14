@@ -35,7 +35,7 @@ class Api_ConceptController extends Api_FindConceptsController {
 		
 		$data = array(
 			'tenant' => $tenant->code,
-			'collection' => $collection->code
+			'collection' => $collection->id
 		);
 		
 		try {

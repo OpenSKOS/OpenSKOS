@@ -234,3 +234,9 @@ ul#dashboard-menu li a:hover {
 	float: right;
 	width: auto;
 }
+
+#collections-per-institute .dc_description {
+	margin-top: 0px;
+	padding-top: 0px;
+	color: #888;
+}
