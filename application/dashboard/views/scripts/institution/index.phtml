@@ -3,3 +3,9 @@
 <h2><?php echo $this->translate('Manage institution')?></h2>
 <?php echo $this->tenant->getForm()?>
 
+<p>You can share this information via the OpenSKOS API:</p>
+<ul>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.rdf">in RDF (VCard)</a></li>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.html">in HTML</a></li>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.json">in JSON</a></li>
+</ul>
