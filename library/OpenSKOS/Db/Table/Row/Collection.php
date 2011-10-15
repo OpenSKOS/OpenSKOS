@@ -67,6 +67,9 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('text', 'dc_title', array('label' => 'Title', 'required' => true))
 				->addElement('textarea', 'dc_description', array('label' => 'Description', 'cols' => 80, 'row' => 5))
 				->addElement('text', 'website', array('label' => 'Website'))
+				->addElement('select', 'license', array('label' => 'Standard Licence'))
+				->addElement('text', 'license_name', array('label' => 'Custom Licence (name)'))
+				->addElement('text', 'license_url', array('label' => 'Custom (URL)'))
 				->addElement('submit', 'submit', array('label'=>'Submit'))
 				->addElement('reset', 'reset', array('label'=>'Reset'))
 				->addElement('submit', 'cancel', array('label'=>'Cancel'))
@@ -76,6 +79,13 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 
 			if (!$this->id) {
 				$form->removeElement('delete');
+			}
+			$l = $form->getElement('license')->setOptions(
+				array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
+			);
+			$l->addMultiOption('', 'choose a standard license  or type a custom one:', '');
+			foreach (OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
+				$l->addMultiOption($value, $key);
 			}
 			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
@@ -112,7 +122,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$doc->appendChild($doc->createElement('rdf:RDF'));
 		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
-		$doc->documentElement->setAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
+		$doc->documentElement->setAttribute('xmlns:dcterms', 'http://purl.org/dc/terms/');
 		
 		return $doc;
 	}
@@ -130,17 +140,25 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$root = $doc->documentElement->appendChild($doc->createElement('rdf:Description'));
 		$root->setAttribute('rdf:about', $about);
 		$root->appendChild($doc->createElement('rdf:type'))->setAttribute('rdf:resource', 'http://www.w3.org/2002/07/owl#Ontology');
-		$root->appendChild($doc->createElement('dc:title', $data['dc_title']));
+		$root->appendChild($doc->createElement('dcterms:title', $data['dc_title']));
 		if ($data['dc_description']) {
-			$root->appendChild($doc->createElement('dc:description', $data['dc_description']));
+			$root->appendChild($doc->createElement('dcterms:description', $data['dc_description']));
 		}
 		if ($data['website']) {
-			$root->appendChild($doc->createElement('dc:source', $data['website']));
+			$root->appendChild($doc->createElement('dcterms:source', $data['website']));
+		}
+		
+		if ($data['license_name'] || $data['license_url']) {
+			$node = $root->appendChild($doc->createElement('dcterms:licence', @$data['license_name']));
+			if ($data['license_url']) {
+				$node->setAttribute('rdf:about', $data['license_url']);
+				
+			}
 		}
 		
 		if ($withCreator) {
 			$tenant = $this->getTenant();
-			$root->appendChild($doc->createElement('dc:creator', htmlspecialchars($tenant->name)))
+			$root->appendChild($doc->createElement('dcterms:creator', htmlspecialchars($tenant->name)))
 				->setAttribute('rdf:about', $helper->serverUrl('/api/institution/'.$tenant->code));
 		}
 		return $doc;

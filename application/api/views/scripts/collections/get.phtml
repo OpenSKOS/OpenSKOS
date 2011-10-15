@@ -10,6 +10,13 @@
 	<?php if ($this->collection->website):?>
 		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $this->collection->website?>"><?php echo $this->collection->website?></a></p>
 	<?php endif?>
+	<?php if ($this->collection->license_name && $this->collection->license_url):?>
+		<p class="licence"><?php echo $this->translate('License')?>: <a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_name?></a></p>
+	<?php elseif ($this->collection->license_name):?>
+		<p class="licence"><?php echo $this->translate('License')?>: <?php echo $this->collection->license_name?></p>
+	<?php elseif ($this->collection->license_url):?>
+		<p class="licence"><?php echo $this->translate('License')?>: <a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_url?></a></p>
+	<?php endif?>
 	</div>
 	<div id="collection-stats" class="box">
 		<h3>SKOS Concepts per class:</h3>

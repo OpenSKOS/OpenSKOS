@@ -26,6 +26,16 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 		)
 	);
 	
+	public static $licences = array(
+		'Open Database License (ODbL) v1.0' => 'http://opendatacommons.org/licenses/odbl/1.0/',
+		'Attribution (CC BY)' => 'http://creativecommons.org/licenses/by/3.0/legalcode',
+		'Attribution Share Alike (CC BY-SA)' => 'http://creativecommons.org/licenses/by-sa/3.0/legalcode',
+		'Attribution No Derivatives (CC BY-ND)' => 'http://creativecommons.org/licenses/by-nd/3.0/legalcode',
+		'Attribution Non-Commercial (CC BY-NC)' => 'http://creativecommons.org/licenses/by-nc/3.0/legalcode',
+		'Attribution Non-Commercial Share Alike (CC BY-NC-SA)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode',
+		'Attribution Non-Commercial No Derivatives (CC BY-NC-ND)' => 'http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode'
+	);
+	
 	protected $_dependentTables = array('OpenSKOS_Db_Table_CollectionHasNamespaces');
 	
 	public function findByCode($code, $tenant = null) {
