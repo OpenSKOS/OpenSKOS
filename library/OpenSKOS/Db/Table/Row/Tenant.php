@@ -99,7 +99,15 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 			$VCard->appendChild($adr);
 		}
 		
-		
 		return $doc;
 	}
+
+	public function delete()
+	{
+		$tenant = $this->code;
+		$result = parent::delete();
+		$solr = OpenSKOS_Solr::getInstance()->delete('tenant:'.$tenant);
+		return $result;
+	}
+		
 }
