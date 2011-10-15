@@ -11,6 +11,13 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 	 */
 	protected $_rowClass = 'OpenSKOS_Db_Table_Row_Collection';
 	
+    /**
+     * Classname for rowset
+     *
+     * @var string
+     */
+    protected $_rowsetClass = 'OpenSKOS_Db_Table_Rowset_Collection';
+
 	protected $_referenceMap = array (
 		'Tenant' => array (
 			'columns' => 'tenant', 
@@ -60,4 +67,16 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 		return count($this->fetchAll($select)) === 0;
 	}
 	
+}
+
+class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset
+{
+	public function toRdf()
+	{
+		$doc = OpenSKOS_Db_Table_Row_Collection::getRdfDocument();
+		foreach($this as $collection) {
+			$doc->documentElement->appendChild($doc->importNode($collection->toRdf()->getElementsByTagname('rdf:Description')->item(0), true));
+		}
+		return $doc;
+	}
 }

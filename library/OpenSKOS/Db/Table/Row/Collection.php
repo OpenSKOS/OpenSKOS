@@ -94,4 +94,55 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$solr = OpenSKOS_Solr::getInstance()->delete('collection:'.$collection_id);
 		return $result;
 	}
+	
+	/**
+	 * @return OpenSKOS_Db_Table_Row_Tenant
+	 */
+	public function getTenant()
+	{
+		return $this->findParentRow('OpenSKOS_Db_Table_Tenants');
+	}
+
+	/**
+	 * @return DOMDocument;
+	 */
+	public static function getRdfDocument()
+	{
+		$doc = new DOMDocument();
+		$doc->appendChild($doc->createElement('rdf:RDF'));
+		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
+		$doc->documentElement->setAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
+		
+		return $doc;
+	}
+	
+	public function toRdf($withCreator = true)
+	{
+		$helper = new Zend_View_Helper_ServerUrl();
+		$about = $helper->serverUrl('/api/collection/'.$this->getId());
+		$data = array();
+		foreach ($this as $key => $val) {
+			$data[$key] = htmlspecialchars($val);
+		}
+		
+		$doc = self::getRdfDocument();
+		$root = $doc->documentElement->appendChild($doc->createElement('rdf:Description'));
+		$root->setAttribute('rdf:about', $about);
+		$root->appendChild($doc->createElement('rdf:type'))->setAttribute('rdf:resource', 'http://www.w3.org/2002/07/owl#Ontology');
+		$root->appendChild($doc->createElement('dc:title', $data['dc_title']));
+		if ($data['dc_description']) {
+			$root->appendChild($doc->createElement('dc:description', $data['dc_description']));
+		}
+		if ($data['website']) {
+			$root->appendChild($doc->createElement('dc:source', $data['website']));
+		}
+		
+		if ($withCreator) {
+			$tenant = $this->getTenant();
+			$root->appendChild($doc->createElement('dc:creator', htmlspecialchars($tenant->name)))
+				->setAttribute('rdf:about', $helper->serverUrl('/api/institution/'.$tenant->code));
+		}
+		return $doc;
+	}
 }
