@@ -36,6 +36,14 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 				<img src="<?php echo $baseUrl?>assets/images/logo-open-skos.png" alt="OpenSKOS logo"/>
 				<span>OpenSKOS: Simple Knowledge Organization System Repository</span>
 			</h1>
+			<?php if (Zend_Auth::getInstance()->hasIdentity()):
+				$identity = Zend_Auth::getInstance()->getIdentity();
+			?>
+			<div id="identity">
+				<?php echo $this->translate('Welcome')?> <a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'users', 'action' => 'edit', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a>
+				[<a href=""><?php echo $this->translate('logout')?></a>]
+			</div>
+			<?php endif?>
 	    </header>
 	    <section id="content">
    		<?php echo $this->render('flashmessenger.phtml')?>
