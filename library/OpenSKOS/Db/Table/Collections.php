@@ -36,7 +36,10 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 		'Attribution Non-Commercial No Derivatives (CC BY-NC-ND)' => 'http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode'
 	);
 	
-	protected $_dependentTables = array('OpenSKOS_Db_Table_CollectionHasNamespaces');
+	protected $_dependentTables = array(
+		'OpenSKOS_Db_Table_CollectionHasNamespaces', 
+		'OpenSKOS_Db_Table_Jobs'
+	);
 	
 	public function findByCode($code, $tenant = null) {
 		$select = $this->select ()->where ( 'code=?', $code );

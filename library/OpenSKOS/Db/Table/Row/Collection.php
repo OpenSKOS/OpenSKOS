@@ -30,6 +30,26 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		return $this;
 	}
 	
+	/**
+	 * @return Zend_Form
+	 */
+	public function getUploadForm()
+	{
+		static $form;
+		if (null === $form) {
+			$form = new Zend_Form();
+			$form
+				->setAttrib('enctype', 'multipart/form-data')
+				->addElement('file', 'xml', array('label'=>'File', 'required' => true, 'validators' => array('NotEmpty'=>array())))	
+				->addElement('checkbox', 'delete-before-import', array('label' => 'delete concepts in this collection before import'))
+				->addElement('submit', 'submit', array('label'=>'Submit'));		
+			$form->getElement('delete-before-import')->setValue(1);
+		}
+		
+		
+		return $form;
+	}
+	
 	public function getId()
 	{
 		return $this->tenant.':'.$this->code;

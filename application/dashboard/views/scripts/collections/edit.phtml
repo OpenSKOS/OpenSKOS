@@ -20,6 +20,34 @@
 			<li><?php echo OpenSKOS_Rdf_Parser::$namespaces['skos'].$class?>: <?php echo number_format($count, 0)?></li>
 			<?php endforeach?>
 		</ul>
+		<h3><?php echo $this->translate('Import new data')?></h3>
+		<p>Upload a file in (optionaly zipped) rdf-xml format
+		(max. <?php echo ini_get('upload_max_filesize')?>).</br>
+		See <a href="<?php echo $this->url(array('module' => 'api'), null, true)?>#concept-crud">API documentation</a> for supported formats.</p>
+		<?php echo $this->collection->getUploadform()->setAction($this->url(array('action' => 'import')))?>
+		<?php if (count($this->jobs)):?>
+		<h3><?php echo $this->translate('Current import jobs for this collection')?></h3>
+		<table style="width: 100%;">
+			<thead>
+				<tr>
+					<th>Created</th>
+					<th>Started</th>
+					<th>Filename</th>
+					<th>Size</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ($this->jobs as $job):?>
+				<tr>
+					<td><?php echo $job->created?></td>
+					<td><?php echo $job->started?$job->started:'-'?></td>
+					<td><?php echo basename($job->getParam('name'))?></td>
+					<td><?php echo $this->HumanFilesize($job->getParam('size'), 1)?></td>
+				</tr>
+			<?php endforeach?>
+			</tbody>
+		</table>
+		<?php endif?>
 	</div>
 	<?php endif?>
 </div>
