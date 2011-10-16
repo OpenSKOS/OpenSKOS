@@ -6,9 +6,17 @@
 	<metadata>
 		<?php if ($this->metadataPrefix === 'oai_rdf'):?>
 		<?php 
-			$rdf = Api_Models_Concept::factory($doc)->toRDF(false, true, $this->metadataPrefix);
-			echo $rdf->saveXML($rdf->documentElement);
+			//get all namespaces from this collection:
 		?>
+		<rdf:RDF
+			xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+			<?php foreach ($this->namespacesByCollection[$doc['collection']] as $ns):
+			?>
+	         xmlns:<?php echo $ns['prefix']?>="<?php echo $ns['uri']?>" 
+			<?php endforeach?>
+		>
+		<?php echo $doc['xml']?>
+		</rdf:RDF>
 		<?php else:?>
 		<oai_dc:dc 
 		         xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
@@ -20,7 +28,8 @@
 		<?php endif?>>
 		<dc:title><?php echo $this->escape($doc['prefLabel'][0])?></dc:title>
 		<dc:identifier><?php echo $this->escape($doc['uri'])?></dc:identifier>
-		<dc:type>skos:<?php echo $this->escape($doc['class'])?></dc:type>
+		<dc:type>http://www.w3.org/2004/02/skos/core#<?php echo $this->escape($doc['class'])?></dc:type>
+		<dc:source><?php echo $this->escape($doc['uri'])?></dc:source>
 		</oai_dc:dc>
 		<?php endif?>
 	</metadata>

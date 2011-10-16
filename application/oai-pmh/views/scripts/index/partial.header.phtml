@@ -1,9 +1,11 @@
 	<header>
 		<identifier><?php echo $this->doc['uuid']?></identifier>
 		<datestamp><?php echo $this->doc['timestamp']?></datestamp>
-		<?php if(isset($this->doc['ConceptSchemes'])):?>
+		<?php if(false && isset($this->doc['ConceptSchemes'])):?>
 		<?php foreach ($this->doc['ConceptSchemes'] as $ConceptScheme):?>
 		<setSpec><?php echo OpenSKOS_Solr::md5_uuid($ConceptScheme)?></setSpec>
 		<?php endforeach?>
 		<?php endif?>
+		<setSpec><?php echo $this->doc['tenant']?></setSpec>
+		<setSpec><?php echo $this->doc['tenant'].':'.$this->doc['collection']?></setSpec>
 	</header>

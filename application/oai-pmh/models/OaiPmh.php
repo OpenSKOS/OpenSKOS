@@ -310,18 +310,11 @@ class OaiPmh
 	
 	public function ListSets()
 	{
-		$response = OpenSKOS_Solr::getInstance()
-			->search('class:ConceptScheme', array(
-				'fl' => '*',
-				'rows' => 10000
-			));
-		if (!count($response['response']['docs'])) {
-			throw new OaiPmh_Exception(
-				'This repository does not support sets', 
-				OaiPmh_Exception::noSetHierarchy
-			);
-		}
-		$this->_view->sets = $response['response'];
+		$model = new OpenSKOS_Db_Table_Collections();
+		$this->_view->collections = $model->fetchAll();
+		
+		$model = new OpenSKOS_Db_Table_Tenants();
+		$this->_view->tenants = $model->fetchAll();
 		return $this->_view->render('index/ListSets.phtml');
 	}
 	
@@ -334,12 +327,14 @@ class OaiPmh
 	{
 		$solr = OpenSKOS_Solr::getInstance();
 		
+		$q = '*:*';
 		if (null!==$this->_set) {
-			$q = "class:Concept ConceptSchemes:\"{$this->_set['uri']}\"";
-		} else {
-			$q = '*:*';
+			if (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Tenant')) {
+				$q = "tenant:\"{$this->_set->code}\"";
+			} elseif (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Collection')) {
+				$q = "collection:\"{$this->_set->id}\"";
+			}
 		}
-		
 		
 		$from = $this->getParam('from');
 		$until = $this->getParam('until');
@@ -365,6 +360,7 @@ class OaiPmh
 			->setItemCountPerPage(self::LIMIT)
 			->setCurrentPageNumber($this->getPage());
 			
+		$this->_view->namespacesByCollection = OpenSKOS_Db_Table_Namespaces::getNamespacesByCollection();
 		$this->_view->data = $paginator;
 		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
 		return $this->_view->render('index/List'.(false === $onlyIdentifiers ? 'Records' : 'Identifiers').'.phtml');
@@ -372,9 +368,12 @@ class OaiPmh
 	
 	public function getSet($set)
 	{
-		$solr = OpenSKOS_Solr::getInstance();
-		$result = $solr->search('class:ConceptScheme uuid:'.$set, array('rows' => 1, 'fl' => 'uuid,uri'));
-		return $result['response']['numFound'] ? $result['response']['docs'][0]: null;
+		if (preg_match('/^\d+$/', $set)) {
+			$model = new OpenSKOS_Db_Table_Collections();
+		} else {
+			$model = new OpenSKOS_Db_Table_Tenants();
+		}
+		return $model->find($set)->current();
 	}
 	
 	public function GetRecord()
@@ -390,6 +389,8 @@ class OaiPmh
 			->setCurrentPageNumber($this->getPage());
 			
 		$this->_view->data = $paginator;
+		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
+		$this->_view->namespacesByCollection = OpenSKOS_Db_Table_Namespaces::getNamespacesByCollection();
 		return $this->_view->render('index/ListRecords.phtml');
 	}
 	
