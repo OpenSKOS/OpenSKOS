@@ -32,4 +32,24 @@ class OpenSKOS_Db_Table_Namespaces extends Zend_Db_Table
 		return $namespaces;
 	}
 	
+	public static function getNamespacesByCollection()
+	{
+		$db = self::getDefaultAdapter();
+		$select = $db->select()
+			->from('collection_has_namespace', array('collection'))
+			->join('namespace', 'namespace=prefix');
+		$rows = $db->fetchAssoc($select);
+		$namespaces = array();
+		foreach ($rows as $row) {
+			if (!isset($namespaces[$row['collection']])) {
+				$namespaces[$row['collection']] = array();
+			}
+			$namespaces[$row['collection']][] = array(
+				'prefix' => $row['prefix'],
+				'uri' => $row['uri']
+			);
+		}
+		return $namespaces;
+	}
+	
 }

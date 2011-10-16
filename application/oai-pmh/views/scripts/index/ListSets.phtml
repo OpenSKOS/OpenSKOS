@@ -1,27 +1,24 @@
 <ListSets>
-<?php foreach ($this->sets['docs'] as $set):?>
+<?php foreach ($this->tenants as $tenant):
+	$rdf = $tenant->toRdf();
+?>
   <set>
-    <setSpec><?php echo $set['uuid']?></setSpec>
-    <setName><?php echo $this->escape($set['dc_title'][0])?></setName>
-    <?php if (isset($set['dc'])):?>
+    <setSpec><?php echo $tenant->code?></setSpec>
+    <setName><?php echo $this->escape($tenant->name)?></setName>
     <setDescription>
-	<oai_dc:dc 
-	          xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
-	          xmlns:dc="http://purl.org/dc/elements/1.1/" 
-	          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	          xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
-	          http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-	 <?php foreach (OaiPmh::$dcFields as $dc_field): 
-	 	if (!isset($set[$dc_field])) continue;
-	 	$key = str_replace('dc_', '', $dc_field); 
-	 ?>
-    <?php foreach ($set[$dc_field] as $value):?>
-    	<dc:<?php echo $key?>><?php echo $this->escape($value)?></dc:<?php echo $key?>>
-    <?php endforeach?>
-    <?php endforeach?>
-    </oai_dc:dc>
+    	<?php echo $rdf->saveXml($rdf->documentElement)?>
     </setDescription>
-    <?php endif?>
+  </set>
+<?php endforeach?>
+<?php foreach ($this->collections as $collection):
+	$rdf = $collection->toRdf();
+?>
+  <set>
+    <setSpec><?php echo $collection->id?></setSpec>
+    <setName><?php echo $this->escape($collection->dc_title)?></setName>
+    <setDescription>
+    	<?php echo $rdf->saveXml($rdf->documentElement)?>
+    </setDescription>
   </set>
 <?php endforeach?>
 </ListSets>

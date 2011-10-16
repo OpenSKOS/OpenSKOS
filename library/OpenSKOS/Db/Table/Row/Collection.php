@@ -121,7 +121,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$doc = new DOMDocument();
 		$doc->appendChild($doc->createElement('rdf:RDF'));
 		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
-		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
+//		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
 		$doc->documentElement->setAttribute('xmlns:dcterms', 'http://purl.org/dc/terms/');
 		
 		return $doc;
