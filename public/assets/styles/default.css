@@ -123,6 +123,13 @@ div.example div.code ol {
 }
 
 /* END GESHI CSS */
+
+#identity {
+	font-size: 85%;
+	float: right;
+	margin-right: 5px;
+}
+
 footer {
 	border-top: 1px solid #3c1038;
 	margin: 0.5em 0 1em 0;
