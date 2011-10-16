@@ -15,12 +15,12 @@ class OpenSKOS_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
         	if($authInstance->getIdentity()->active != 'Y') {
 				Zend_Auth::getInstance()->clearIdentity();
 				Zend_Session::forgetMe();
-				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage('Your account is blocked.');
+				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Your account is blocked.'));
         		Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'index', 'website');
         	} elseif (!OpenSKOS_Db_Table_Users::isDashboardAllowed($authInstance->getIdentity()->type)) {
 				Zend_Auth::getInstance()->clearIdentity();
 				Zend_Session::forgetMe();
-				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage('Your account is not allowed to use the dasboard.');
+				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Your account is not allowed to use the dasboard.'));
         		Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'index', 'website');
         	}
         } else {

@@ -41,7 +41,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form
 				->setAttrib('enctype', 'multipart/form-data')
 				->addElement('file', 'xml', array('label'=>'File', 'required' => true, 'validators' => array('NotEmpty'=>array())))	
-				->addElement('checkbox', 'delete-before-import', array('label' => 'delete concepts in this collection before import'))
+				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
 				->addElement('submit', 'submit', array('label'=>'Submit'));		
 			$form->getElement('delete-before-import')->setValue(1);
 		}
@@ -83,17 +83,17 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form = new Zend_Form();
 			$form
 				->addElement('hidden', 'id', array('required' => $this->id ? true : false))
-				->addElement('text', 'code', array('label' => 'Code', 'required' => true))
-				->addElement('text', 'dc_title', array('label' => 'Title', 'required' => true))
-				->addElement('textarea', 'dc_description', array('label' => 'Description', 'cols' => 80, 'row' => 5))
-				->addElement('text', 'website', array('label' => 'Website'))
-				->addElement('select', 'license', array('label' => 'Standard Licence'))
-				->addElement('text', 'license_name', array('label' => 'Custom Licence (name)'))
-				->addElement('text', 'license_url', array('label' => 'Custom (URL)'))
-				->addElement('submit', 'submit', array('label'=>'Submit'))
-				->addElement('reset', 'reset', array('label'=>'Reset'))
-				->addElement('submit', 'cancel', array('label'=>'Cancel'))
-				->addElement('submit', 'delete', array('label'=>'Delete', 'onclick' => 'return confirm(\'Are you sure you want to delete this collection and all of it\\\'s Concepts?\');'))
+				->addElement('text', 'code', array('label' => _('Code'), 'required' => true))
+				->addElement('text', 'dc_title', array('label' => _('Title'), 'required' => true))
+				->addElement('textarea', 'dc_description', array('label' => _('Description'), 'cols' => 80, 'row' => 5))
+				->addElement('text', 'website', array('label' => _('Website')))
+				->addElement('select', 'license', array('label' => _('Standard Licence')))
+				->addElement('text', 'license_name', array('label' => _('Custom Licence (name)')))
+				->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
+				->addElement('submit', 'submit', array('label'=>_('Submit')))
+				->addElement('reset', 'reset', array('label'=>_('Reset')))
+				->addElement('submit', 'cancel', array('label'=>_('Cancel')))
+				->addElement('submit', 'delete', array('label'=>_('Delete'), 'onclick' => 'return confirm(\''._('Are you sure you want to delete this collection and corresponding Concepts?').'\');'))
 				->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
 				;
 
@@ -103,7 +103,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$l = $form->getElement('license')->setOptions(
 				array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
 			);
-			$l->addMultiOption('', 'choose a standard license  or type a custom one:', '');
+			$l->addMultiOption('', _('choose a standard license  or type a custom one:'), '');
 			foreach (OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
 				$l->addMultiOption($value, $key);
 			}

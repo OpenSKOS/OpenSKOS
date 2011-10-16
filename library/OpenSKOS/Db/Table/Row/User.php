@@ -11,16 +11,16 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			$form = new Zend_Form();
 			$form
 				->addElement('hidden', 'id', array('required' => $this->id ? true : false))
-				->addElement('text', 'name', array('label' => 'Name', 'required' => true))
-				->addElement('text', 'email', array('label' => 'E-mail', 'required' => true))
-				->addElement('password', 'pw1', array('label' => 'Password', 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw2')))))
-				->addElement('password', 'pw2', array('label' => 'Password (check)', 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
-				->addElement('radio', 'type', array('label' => 'Usertype', 'required' => true))
-				->addElement('text', 'apikey', array('label' => 'API Key (required for API users)', 'required' => false))
-				->addElement('submit', 'submit', array('label'=>'Submit'))
-				->addElement('reset', 'reset', array('label'=>'Reset'))
-				->addElement('submit', 'cancel', array('label'=>'Cancel'))
-				->addElement('submit', 'delete', array('label'=>'Delete', 'onclick' => 'return confirm(\'Are you sure you want to delete this user?\');'))
+				->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
+				->addElement('text', 'email', array('label' => _('E-mail'), 'required' => true))
+				->addElement('password', 'pw1', array('label' => _('Password'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw2')))))
+				->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
+				->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
+				->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
+				->addElement('submit', 'submit', array('label'=>_('Submit')))
+				->addElement('reset', 'reset', array('label'=>_('Reset')))
+				->addElement('submit', 'cancel', array('label'=>_('Cancel')))
+				->addElement('submit', 'delete', array('label'=>_('Delete'), 'onclick' => 'return confirm(\''._('Are you sure you want to delete this user?').'\');'))
 				->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
 				;
 			$form->getElement('type')
@@ -37,7 +37,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEmail'));
 			$validator
-				->setMessage("there is already a user with e-mail address '%value%'", Zend_Validate_Callback::INVALID_VALUE);
+				->setMessage(_("there is already a user with e-mail address '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
 
 			$form->getElement('email')
 				->addValidator($validator)
@@ -46,14 +46,14 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			
 			$validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
 			$validator
-				->setMessage("An API Key is required for users that have access to the API", Zend_Validate_Callback::INVALID_VALUE);
+				->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
 				
 			$form->getElement('type')
 				->addValidator($validator, true);
 								
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueApiKey'));
 			$validator
-				->setMessage("there is already a user with API key '%value%'", Zend_Validate_Callback::INVALID_VALUE);
+				->setMessage(_("there is already a user with API key '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
 			$form->getElement('apikey')
 				->addValidator(new Zend_Validate_Alnum())
 				->addValidator($validator)

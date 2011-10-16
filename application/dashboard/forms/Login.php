@@ -8,26 +8,26 @@ class Dashboard_Forms_Login extends Zend_Form
             'filters' => array('StringTrim', 'StringToLower'),
             'validators' => array(array('StringLength', false, array(2, 10))),
             'required' => true,
-            'label' => 'Institution code',
+            'label' => _('Institution code'),
         ));
         $this->addElement('text', 'username', array(
             'filters' => array('StringTrim', 'StringToLower'),
             'validators' => array(array('EmailAddress')),
             'required' => true,
-            'label' => 'E-mail',
+            'label' => _('E-mail'),
         ));
         $this->addElement('password', 'password', array(
             'filters' => array('StringTrim'),
             'validators' => array(array('StringLength', false, array(4, 30))),
             'required' => true,
-            'label' => 'Password',
+            'label' => _('Password'),
         ));
-        $this->addElement('checkbox', 'rememberme', array('label' => 'Remember me'));
+        $this->addElement('checkbox', 'rememberme', array('label' => _('Remember me')));
         $this->getElement('rememberme')->setChecked(true);
         $this->addElement('submit', 'login', array(
             'required' => false,
             'ignore' => true,
-            'label' => 'Login',
+            'label' => _('Login'),
         ));
         
     }

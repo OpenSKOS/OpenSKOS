@@ -31,7 +31,7 @@ class Dashboard_JobsController extends OpenSKOS_Controller_Dashboard
 			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
 			$this->_helper->redirector('index');
 		}
-		$this->getHelper('FlashMessenger')->addMessage('Job removed');
+		$this->getHelper('FlashMessenger')->addMessage(_('Job removed'));
 		$this->_helper->redirector('index');
 	}
 	
@@ -41,23 +41,23 @@ class Dashboard_JobsController extends OpenSKOS_Controller_Dashboard
 	protected function _getJob()
 	{
 		if (null === ($id = $this->getRequest()->getParam('job'))) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('No job defined');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No job defined'));
 			$this->_helper->redirector('index');
 		}
 		$model = new OpenSKOS_Db_Table_Jobs();
 		$job = $model->find($id)->current();
 		if (null === $job) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('Job not found');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Job not found'));
 			$this->_helper->redirector('index');
 		}
 		
 		$collection = $job->getCollection();
 		if (null === $collection) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('Collection not found');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Collection not found'));
 			$this->_helper->redirector('index');
 		}
 		if ($collection->tenant != $this->_tenant->code) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('It is not very nice to remove other people\'s jobs, is it?');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You are not allowed to edit this job.'));
 			$this->_helper->redirector('index');
 		} 
 		return $job;
