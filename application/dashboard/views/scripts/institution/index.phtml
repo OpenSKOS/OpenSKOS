@@ -6,7 +6,7 @@
 		<?php echo $this->tenant->getForm()?>
 	</div>
 	<div id="collection-stats" class="box">
-		<p>You can share this information via the OpenSKOS API:</p>
+		<p><?php echo $this->translate('You can share this information via the OpenSKOS API')?>:</p>
 		<ul>
 			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.rdf">in RDF (VCard)</a></li>
 			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.html">in HTML</a></li>

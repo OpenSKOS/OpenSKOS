@@ -20,7 +20,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	{
 		$params = $this->getParams();
 		if (!@unlink($params['destination'] .'/'.$params['name'])) {
-			throw new Zend_Db_Table_Row_Exception('Failed to delete file `'.$params['name'].'`');
+			throw new Zend_Db_Table_Row_Exception(_('Failed to delete file').' `'.$params['name'].'`');
 		}
 		return parent::delete();
 	}

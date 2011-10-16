@@ -29,7 +29,7 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 			$tenant_path = $path .'/'.$collection->tenant;
 			if (!is_dir($tenant_path)) {
 				if (!@mkdir($tenant_path)) {
-					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('Failed to create upload folder');
+					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Failed to create upload folder'));
 					$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
 					return;
 				}
@@ -44,7 +44,7 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 	 			$form->getElement('xml')->setErrors(array($e->getMessage()));
 				return $this->_forward('edit');
 	 		} catch (Zend_Filter_Exception $e) {
-	 			$form->getElement('xml')->setErrors(array('A file with that name is already scheduled for import'));
+	 			$form->getElement('xml')->setErrors(array(_('A file with that name is already scheduled for import')));
 				return $this->_forward('edit');
 	 		}
 	 		$model = new OpenSKOS_Db_Table_Jobs();
@@ -59,25 +59,25 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 		} else {
 			return $this->_forward('edit');
 		}
-		$this->getHelper('FlashMessenger')->addMessage('An import job is scheduled');
+		$this->getHelper('FlashMessenger')->addMessage(_('An import job is scheduled'));
 		$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
 	}
 
 	public function saveAction()
 	{
 		if (!$this->getRequest()->isPost()) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('No POST data recieved');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
 			$this->_helper->redirector('index');
 		}
 		$collection = $this->_getCollection();
 		
 		if (null!==$this->getRequest()->getParam('delete')) {
 			if (!$collection->id) {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete an empty collection.');
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty collection.'));
 				$this->_helper->redirector('index');
 			}
 			$collection->delete();
-			$this->getHelper('FlashMessenger')->addMessage('The collection has been deleted, it might take a while before changes are committed to our system.');
+			$this->getHelper('FlashMessenger')->addMessage(_('The collection has been deleted, it might take a while before changes are committed to our system.'));
 			$this->_helper->redirector('index');
 		}
 		
@@ -111,7 +111,7 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 		} else {
 			$collection = $model->findByCode($code, $this->_tenant->code);
 			if (null === $collection) {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('Collection `'.$code.'` not found');
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(sprintf(_('Collection `%s` not found', $code)));
 				$this->_helper->redirector('index');
 			}
 		}

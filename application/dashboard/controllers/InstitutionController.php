@@ -10,7 +10,7 @@ class Dashboard_InstitutionController extends OpenSKOS_Controller_Dashboard
 	public function saveAction()
 	{
 		if (!$this->getRequest()->isPost()) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('No POST data recieved');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
 			$this->_helper->redirector('index');
 		}
 		$form = $this->_tenant->getForm();
@@ -18,7 +18,7 @@ class Dashboard_InstitutionController extends OpenSKOS_Controller_Dashboard
 			return $this->_forward('index');
 		} else {
 			$this->_tenant->setFromArray($form->getValues())->save();
-			$this->getHelper('FlashMessenger')->addMessage('Data saved');
+			$this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
 			$this->_helper->redirector('index');
 		}
 	}

@@ -15,24 +15,24 @@ class Dashboard_UsersController extends OpenSKOS_Controller_Dashboard
 	public function saveAction()
 	{
 		if (!$this->getRequest()->isPost()) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('No POST data recieved');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
 			$this->_helper->redirector('index');
 		}
 		$user = $this->_getuser();
 		
 		if (null!==$this->getRequest()->getParam('delete')) {
 			if (!$user->id) {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete an empty user.');
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty user.'));
 				$this->_helper->redirector('index');
 			}
 			
 			if ($user->id == Zend_Auth::getInstance()->getIdentity()->id) {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You can not delete yourself.');
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete yourself.'));
 				$this->_helper->redirector('index');
 			}
 			
 			$user->delete();
-			$this->getHelper('FlashMessenger')->addMessage('The user has been deleted.');
+			$this->getHelper('FlashMessenger')->addMessage(_('The user has been deleted.'));
 			$this->_helper->redirector('index');
 		}
 		
@@ -49,7 +49,7 @@ class Dashboard_UsersController extends OpenSKOS_Controller_Dashboard
 				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
 				return $this->_forward('edit');
 			}
-			$this->getHelper('FlashMessenger')->addMessage('Data saved');
+			$this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
 			$this->_helper->redirector('index');
 		}
 	}
@@ -66,13 +66,13 @@ class Dashboard_UsersController extends OpenSKOS_Controller_Dashboard
 		} else {
 			$user = $model->find((int)$id)->current();
 			if (null === $user) {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('User `'.$id.'` not found');
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('User not found'));
 				$this->_helper->redirector('index');
 			}
 		}
 		
 		if ($user->tenant != $this->_tenant->code) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('You are not allowed to edit this user.');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You are not allowed to edit this user.'));
 			$this->_helper->redirector('index');
 		}
 		return $user;

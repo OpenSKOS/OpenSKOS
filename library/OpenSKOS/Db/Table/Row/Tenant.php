@@ -10,15 +10,15 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 		if (null === $form) {
 			$form = new Zend_Form();
 			$form
-				->addElement('text', 'name', array('label' => 'Name', 'required' => true))
-				->addElement('text', 'organisationUnit', array('label' => 'Organisation unit'))
-				->addElement('text', 'website', array('label' => 'Website'))
-				->addElement('text', 'email', array('label' => 'E-mail'))
-				->addElement('text', 'streetAddress', array('label' => 'Street Address'))
-				->addElement('text', 'locality', array('label' => 'Locality'))
-				->addElement('text', 'postalCode', array('label' => 'Postal Code'))
-				->addElement('text', 'countryName', array('label' => 'Country Name'))
-				->addElement('submit', 'submit', array('label'=>'Submit'))
+				->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
+				->addElement('text', 'organisationUnit', array('label' => _('Organisation unit')))
+				->addElement('text', 'website', array('label' => _('Website')))
+				->addElement('text', 'email', array('label' => _('E-mail')))
+				->addElement('text', 'streetAddress', array('label' => _('Street Address')))
+				->addElement('text', 'locality', array('label' => _('Locality')))
+				->addElement('text', 'postalCode', array('label' => _('Postal Code')))
+				->addElement('text', 'countryName', array('label' => _('Country Name')))
+				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				;
 			
 			$form->getElement('email')->addValidator(new Zend_Validate_EmailAddress());

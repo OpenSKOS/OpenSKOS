@@ -4,7 +4,7 @@ class Dashboard_LoginController extends Zend_Controller_Action {
 	
 	public function init() {
 		if (Zend_Auth::getInstance ()->hasIdentity ()) {
-			$this->getHelper ( 'FlashMessenger' )->addMessage ( 'You are already logged in' );
+			$this->getHelper ( 'FlashMessenger' )->addMessage (_('You are already logged in'));
 			$this->_helper->redirector ( 'index', 'index' );
 		}
 	}
@@ -42,7 +42,7 @@ class Dashboard_LoginController extends Zend_Controller_Action {
                 Zend_Session::rememberMe();
             }
             
-            $this->getHelper ( 'FlashMessenger' )->addMessage ( 'Succesfully logged in' );
+            $this->getHelper ( 'FlashMessenger' )->addMessage (_('Succesfully logged in'));
 			$this->_helper->redirector ( 'index', 'index' );
 		} else {
     		$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(array_pop($login->getMessages()));
