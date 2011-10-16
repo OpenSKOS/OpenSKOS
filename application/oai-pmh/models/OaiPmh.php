@@ -352,7 +352,7 @@ class OaiPmh
 		
 		$params = array(
 			'sort' => 'prefLabel asc',
-			'fl' => false === $onlyIdentifiers ? '*' : 'uuid,timestamp,ConceptSchemes'
+			'fl' => false === $onlyIdentifiers ? '*' : 'uuid,timestamp,ConceptSchemes,tenant,collection'
 		);
 		
 		$paginator = new Zend_Paginator(new OpenSKOS_Solr_Paginator($q, $params));

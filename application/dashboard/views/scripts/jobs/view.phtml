@@ -1,0 +1,52 @@
+<?php $this->headTitle ($this->translate('Job details'))?>
+<?php echo $this->render('menu.phtml');?>
+<h2><?php echo $this->translate('Job details')?></h2>
+<ul>
+	<li>
+		<em><?php echo $this->translate('Collection')?>:</em>
+		<a href="<?php echo $this->url(array('controller' => 'collections', 'action' => 'edit', 'collection' => $this->collection->code))?>"><?php echo $this->collection->dc_title?></a>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Created')?>:</em>
+		<?php echo $this->job->created?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Created by')?>:</em>
+		<a href="<?php echo $this->url(array('controller' => 'users', 'action' => 'edit', 'user' => $this->user->id))?>"><?php echo $this->user->name?></a>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Started')?>:</em>
+		<?php echo $this->job->started ? $this->job->started  : '-'?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Finished')?>:</em>
+		<?php echo $this->job->finished ? $this->job->finished  : '-'?>
+	</li>
+	<?php if ($this->job->info):?>
+	<li>
+		<em><?php echo $this->translate('Info')?>:</em>
+		<?php echo $this->job->info?>
+	</li>
+	<?php endif?>
+
+
+</ul>
+<h2><?php echo $this->translate('File details')?></h2>
+<ul>
+	<li>
+		<em><?php echo $this->translate('Name')?>:</em>
+		<?php echo $this->job->getParam('name')?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Type')?>:</em>
+		<?php echo $this->job->getParam('type')?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Filesize')?>:</em>
+		<?php echo $this->HumanFilesize($this->job->getParam('size'), 1)?>
+		(<?php echo number_format($this->job->getParam('size'))?> bytes)
+	</li>
+</ul>
+<form method="post" action="<?php echo $this->url(array('action' => 'delete'))?>">
+	<p><input type="submit" value="<?php echo $this->translate('Remove job')?>" /></p>
+</form>

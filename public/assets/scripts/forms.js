@@ -67,7 +67,7 @@ window.addEvent('load', function() {
          * Hiding dt element with label for hidden input fields - rather useless
          */
     	form.getElements('input[type=hidden]').each(function(el){
-    		el.getParent().getPrevious().setStyle('display', 'none');
+//    		el.getParent().getPrevious().setStyle('display', 'none');
     	});
     });
      

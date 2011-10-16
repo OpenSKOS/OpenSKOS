@@ -7,12 +7,60 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 		$this->view->collections = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
 		
 		$model = new OpenSKOS_Db_Table_Collections();
-		
 	}
 	
 	public function editAction()
 	{
-		$this->view->assign('collection', $this->_getCollection());
+		$collection = $this->_getCollection();
+		$this->view->assign('collection', $collection);
+		$this->view->assign('jobs', $collection->findDependentRowset('OpenSKOS_Db_Table_Jobs'));
+		
+		$this->view->assign('max_upload_size', Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('max_upload_size'));
+	}
+	
+	public function importAction()
+	{
+		$collection = $this->_getCollection();
+		$form = $collection->getUploadForm();
+		$formData = $this->_request->getPost();
+		if ($form->isValid($formData)) {
+			$upload = new Zend_File_Transfer_Adapter_Http();
+			$path = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('upload_path');
+			$tenant_path = $path .'/'.$collection->tenant;
+			if (!is_dir($tenant_path)) {
+				if (!@mkdir($tenant_path)) {
+					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('Failed to create upload folder');
+					$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+					return;
+				}
+			}
+			try {
+				$upload
+					->addFilter('Rename', array(
+						'target' => $tenant_path . '/' . $_FILES['xml']['name'], 
+						'overwrite' => false))
+					->receive();
+			} catch (Zend_File_Transfer_Exception $e) {
+	 			$form->getElement('xml')->setErrors(array($e->getMessage()));
+				return $this->_forward('edit');
+	 		} catch (Zend_Filter_Exception $e) {
+	 			$form->getElement('xml')->setErrors(array('A file with that name is already scheduled for import'));
+				return $this->_forward('edit');
+	 		}
+	 		$model = new OpenSKOS_Db_Table_Jobs();
+	 		$fileinfo = $upload->getFileInfo('xml');
+	 		$job = $model->fetchNew()->setFromArray(array(
+	 			'collection' => $collection->id,
+	 			'user' => Zend_Auth::getInstance()->getIdentity()->id,
+	 			'task' => 'import',
+	 			'parameters' => serialize($fileinfo['xml']),
+	 			'created' => new Zend_Db_Expr('NOW()')
+	 		))->save();
+		} else {
+			return $this->_forward('edit');
+		}
+		$this->getHelper('FlashMessenger')->addMessage('An import job is scheduled');
+		$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
 	}
 
 	public function saveAction()
