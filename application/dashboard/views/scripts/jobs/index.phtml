@@ -1,6 +1,13 @@
 <?php $this->headTitle ($this->translate('Manage jobs'))?>
 <?php echo $this->render('menu.phtml');?>
 <h2><?php echo $this->translate('Manage jobs')?></h2>
+<p>
+<?php if ($this->hideFinishedJobs):?>
+<a href="<?php echo $this->url(array('hide-finished-jobs' => null))?>"><?php echo $this->translate('Show finished jobs')?></a>
+<?php else:?>
+<a href="<?php echo $this->url(array('hide-finished-jobs' => 1))?>"><?php echo $this->translate('Hide finished jobs')?></a>
+<?php endif?>
+</p>
 <?php if (!count($this->jobs)):?>
 <p><?php echo $this->translate('There are no jobs scheduled.')?></p>
 <?php else:?>

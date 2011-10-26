@@ -8,10 +8,12 @@ class Dashboard_JobsController extends OpenSKOS_Controller_Dashboard
 			->from('job')
 			->join('user', 'user.id=job.user', array('user' => 'name'))
 			->join('collection', 'collection.id=job.collection', array('collection' => 'dc_title'))
-//			->where('finished IS NULL')
 			->where('collection.tenant=?', $this->_tenant->code)
 			->order('created desc')
 			->order('started asc');
+		if (null!== ($this->view->hideFinishedJobs = $this->getRequest()->getParam('hide-finished-jobs'))) {
+			$select->where('finished IS NULL');
+		}
 		$this->view->assign('jobs', new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select)));
 	}
 	
