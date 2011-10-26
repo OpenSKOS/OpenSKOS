@@ -31,6 +31,20 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	}
 	
 	/**
+	 * @return Zend_Db_Table_Rowset
+	 */
+	public function getJobs()
+	{
+		$model = new OpenSKOS_Db_Table_Jobs();
+		$select = $model->select()
+			->where('collection=?', $this->id)
+			->where('finished IS NULL')
+			->order('created desc')
+			->order('started asc');
+		return $model->fetchAll($select);
+	}
+	
+	/**
 	 * @return Zend_Form
 	 */
 	public function getUploadForm()

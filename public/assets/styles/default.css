@@ -247,3 +247,11 @@ ul#dashboard-menu li a:hover {
 	padding-top: 0px;
 	color: #888;
 }
+
+.job-status-error {
+	color: Red;
+}
+
+.job-status-success {
+	color: Green;
+}
