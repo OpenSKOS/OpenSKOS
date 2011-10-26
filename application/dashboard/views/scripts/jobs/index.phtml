@@ -3,9 +3,9 @@
 <h2><?php echo $this->translate('Manage jobs')?></h2>
 <p>
 <?php if ($this->hideFinishedJobs):?>
-<a href="<?php echo $this->url(array('hide-finished-jobs' => null))?>"><?php echo $this->translate('Show finished jobs')?></a>
+<a href="<?php echo $this->url(array('hide-finished-jobs' => null))?>"><?php echo $this->translate('Show finished jobs')?> &raquo;</a>
 <?php else:?>
-<a href="<?php echo $this->url(array('hide-finished-jobs' => 1))?>"><?php echo $this->translate('Hide finished jobs')?></a>
+<a href="<?php echo $this->url(array('hide-finished-jobs' => 1))?>"><?php echo $this->translate('Hide finished jobs')?> &raquo;</a>
 <?php endif?>
 </p>
 <?php if (!count($this->jobs)):?>

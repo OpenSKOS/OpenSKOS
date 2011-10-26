@@ -43,6 +43,9 @@ class Dashboard_UsersController extends OpenSKOS_Controller_Dashboard
 			$user
 				->setFromArray($form->getValues())
 				->setFromArray(array('tenant' => $this->_tenant->code));
+			if ($pw =$form->getValue('pw1')) {
+				$user->setPassword($pw);
+			}
 			try {
 				$user->save();
 			} catch (Zend_Db_Statement_Exception $e) {
