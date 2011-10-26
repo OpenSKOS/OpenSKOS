@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSKOS Dutch translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-20 08:35+0100\n"
-"PO-Revision-Date: 2011-10-20 08:35+0100\n"
+"POT-Creation-Date: 2011-10-26 11:23+0100\n"
+"PO-Revision-Date: 2011-10-26 11:23+0100\n"
 "Last-Translator: Mark Lindeman <mark@lindeman.nu>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,89 @@ msgstr ""
 "X-Poedit-SearchPath-0: /usr/local/zend/apache2/htdocs/openSKOS/library\n"
 "X-Poedit-SearchPath-1: /usr/local/zend/apache2/htdocs/openSKOS/application\n"
 
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:8
+msgid "dashboard"
+msgstr "dashboard"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:9
+msgid "api"
+msgstr "api"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:10
+msgid "both"
+msgstr "beiden"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:11
+msgid "Supplied credential is invalid."
+msgstr "Ongeldige aanmeldgegevens."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:12
+msgid "Authentication successful."
+msgstr "Authenticatie succesvol."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:13
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:22
+msgid "Invalid type given, value should be a string"
+msgstr "Ongeldig type, de waarde moet een tekenreeks zijn."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:14
+msgid "'%value%' is no valid email address in the basic format local-part@hostname"
+msgstr "'%value%' is geen geldig e-mailadres volgens het basis-formaat gebruiker@hostnaam"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:15
+msgid "'%hostname%' is no valid hostname for email address '%value%'"
+msgstr "'%hostname%' is geen geldige hostname voor e-mailadres '%value%'"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:16
+msgid "'%hostname%' does not appear to have a valid MX record for the email address '%value%'"
+msgstr "'%hostname%' lijkt geen geldig MX record te hebben voor het e-mailadres '%value%'"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:17
+msgid "'%hostname%' is not in a routable network segment. The email address '%value%' should not be resolved from public network."
+msgstr "'%hostname%' zit niet in een routeerbaar network segment. Het e-mailadres '%value%' kan niet gevonden worden via het publieke netwerk."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:18
+#, php-format
+msgid "'%localPart%' can not be matched against dot-atom format"
+msgstr "'%localPart%' can not be matched against dot-atom format"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:19
+#, php-format
+msgid "'%localPart%' can not be matched against quoted-string format"
+msgstr "'%localPart%' can not be matched against quoted-string format"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:20
+msgid "'%localPart%' is no valid local part for email address '%value%'"
+msgstr "'%localPart%' is geen geldige gebruikersnaam voor het e-mailadres '%value%'"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:21
+msgid "'%value%' exceeds the allowed length"
+msgstr "'%value%' bevat teveel tekens"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:23
+msgid "'%value%' is less than %min% characters long"
+msgstr "'%value%' bevat minder dan %min% tekens"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:24
+msgid "'%value%' is more than %max% characters long"
+msgstr "'%value%' bevat meer dan %max% tekens"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:25
+msgid "Value is required and can't be empty"
+msgstr "Waarde is verplicht en mag niet leeg zijn"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:26
+msgid "The token '%token%' does not match the given token '%value%'"
+msgstr "Het wachtwoord '%token%' verschilt van het controle-wachtwoord '%value%'"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:27
+msgid "No token was provided to match against"
+msgstr "Geen controle-wachtwoord opgegeven"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:28
+msgid "The two given tokens do not match"
+msgstr "De twee opgegeven wachtwoorden zijn niet gelijk"
+
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:18
 msgid "Your account is blocked."
 msgstr "Uw account is geblokkeerd."
@@ -25,77 +108,77 @@ msgstr "Uw account is geblokkeerd."
 msgid "Your account is not allowed to use the dasboard."
 msgstr "Het is niet toegestaan om met uw account hete dashboard gebruiken."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:43
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:57
 msgid "File"
 msgstr "Bestand"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:44
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:58
 msgid "delete concepts in this collection before import"
 msgstr "verwijder concepten voordat er geimporteerd wordt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:86
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:100
 msgid "Code"
 msgstr "Code"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:87
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:101
 msgid "Title"
 msgstr "Titel"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:88
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:102
 msgid "Description"
 msgstr "Beschrijving"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:89
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:103
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:15
 msgid "Website"
 msgstr "Website"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:90
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:104
 msgid "Standard Licence"
 msgstr "Standaard licentie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:91
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:105
 msgid "Custom Licence (name)"
 msgstr "Aangepaste licentie (naam)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:92
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:106
 msgid "Custom (URL)"
 msgstr "Aangepast (URL)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:93
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:107
 msgid "OAI baseURL"
 msgstr "OAI basis URL"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:94
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:108
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:21
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:20
 msgid "Submit"
 msgstr "Verstuur"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:95
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:109
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:21
 msgid "Reset"
 msgstr "Herstel"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:96
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:110
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:22
 msgid "Cancel"
 msgstr "Annuleer"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:97
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:111
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:23
 msgid "Delete"
 msgstr "Verwijder"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:97
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:111
 msgid "Are you sure you want to delete this collection and corresponding Concepts?"
 msgstr "Weet u zeker dat u deze collectie en alle bijbehorende concepten wilt verwijderen?"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:107
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:121
 msgid "choose a standard license  or type a custom one:"
 msgstr "kies een standaard licentie of typ een aangepaste:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Job.php:23
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Job.php:26
 msgid "Failed to delete file"
 msgstr "Kon bestand niet verwijderen"
 
@@ -193,27 +276,27 @@ msgid "Collection `%s` not found"
 msgstr "Collectie `%s` niet gevonden"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/InstitutionController.php:21
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:52
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:55
 msgid "Data saved"
 msgstr "Gegevens opgeslagen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:35
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:37
 msgid "Job removed"
 msgstr "Taak verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:45
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:47
 msgid "No job defined"
 msgstr "Geen taak gedefineerd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:51
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:53
 msgid "Job not found"
 msgstr "Taak niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:57
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:59
 msgid "Collection not found"
 msgstr "Collectie niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:61
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:63
 msgid "You are not allowed to edit this job."
 msgstr "U mag deze taak niet bewerken"
 
@@ -237,11 +320,11 @@ msgstr "U kunt uzelf niet verwijderen"
 msgid "The user has been deleted."
 msgstr "De gebruiker is verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:69
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:72
 msgid "User not found"
 msgstr "Gebruiker niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:75
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:78
 msgid "You are not allowed to edit this user."
 msgstr "U mag deze gebruiker niet bewerken"
 
@@ -275,7 +358,7 @@ msgstr "Licentie"
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:41
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:60
 msgid "skos:"
-msgstr ""
+msgstr "skos:"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/institutions/get.phtml:20
 msgid "Collections"
@@ -287,22 +370,31 @@ msgid "Institutions"
 msgstr "Instellingen"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:5
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/index/index.phtml:3
 msgid "Dashboard"
 msgstr "Dashboard"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:6
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/institution/index.phtml:1
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/institution/index.phtml:3
 msgid "Manage institution"
 msgstr "Beheer instelling"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:7
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:1
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:3
 msgid "Manage collections"
 msgstr "Beheer collecties"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:8
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:1
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:3
 msgid "Manage users"
 msgstr "Beheer gebruikers"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:9
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:1
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:3
 msgid "Manage jobs"
 msgstr "Beheer taken"
 
@@ -363,30 +455,48 @@ msgstr "Welkom bij het OpenSKOS Dashboard. U kunt nu een taak uit het menu kieze
 msgid "You can share this information via the OpenSKOS API"
 msgstr "U kunt deze informatie delen via de OpenSKOS API"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:5
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:6
+msgid "Show finished jobs"
+msgstr "Toon taken die gereed zijn"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:8
+msgid "Hide finished jobs"
+msgstr "Verberg taken die gereed zijn"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:12
 msgid "There are no jobs scheduled."
 msgstr "Er zijn geen taken gepland."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:10
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:17
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:6
 msgid "Collection"
 msgstr "Collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:11
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:18
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:14
 msgid "Created"
 msgstr "Aangemaakt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:12
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:19
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:22
 msgid "Started"
 msgstr "Gestart"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:13
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:20
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:26
+msgid "Finished"
+msgstr "Gereed"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:21
 msgid "Filename"
 msgstr "Bestandsnaam"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:26
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:22
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:30
+msgid "Status"
+msgstr "Status"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:37
 msgid "details"
 msgstr "details"
 
@@ -411,27 +521,23 @@ msgstr "nee"
 msgid "Created by"
 msgstr "Aangemaakt door"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:26
-msgid "Finished"
-msgstr "Gereed"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:31
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:35
 msgid "Info"
 msgstr "Info"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:38
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:42
 msgid "File details"
 msgstr "Bestandsgegevens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:45
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:49
 msgid "Type"
 msgstr "Type"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:49
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:53
 msgid "Filesize"
 msgstr "Bestandsgrootte"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:55
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:59
 msgid "Remove job"
 msgstr "Verwijder taak"
 
