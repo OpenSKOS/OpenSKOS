@@ -40,7 +40,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form = new Zend_Form();
 			$form
 				->setAttrib('enctype', 'multipart/form-data')
-				->addElement('file', 'xml', array('label'=>'File', 'required' => true, 'validators' => array('NotEmpty'=>array())))	
+				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())))	
 				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
 				->addElement('submit', 'submit', array('label'=>'Submit'));		
 			$form->getElement('delete-before-import')->setValue(1);
@@ -90,6 +90,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('select', 'license', array('label' => _('Standard Licence')))
 				->addElement('text', 'license_name', array('label' => _('Custom Licence (name)')))
 				->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
+				->addElement('text', 'OAI_baseURL', array('label' => _('OAI baseURL')))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
 				->addElement('submit', 'cancel', array('label'=>_('Cancel')))

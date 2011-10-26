@@ -27,13 +27,16 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 	);
 	
 	public static $licences = array(
+		'Creative Commons Zero (CC0)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
+		'Creative Commons Attribution (CC BY)' => 'http://creativecommons.org/licenses/by/3.0/legalcode',
+		'Creative Commons Attribution Share Alike (CC BY-SA)' => 'http://creativecommons.org/licenses/by-sa/3.0/legalcode',
+//		'Creative Commons Attribution No Derivatives (CC BY-ND)' => 'http://creativecommons.org/licenses/by-nd/3.0/legalcode',
+//		'Creative Commons Attribution Non-Commercial (CC BY-NC)' => 'http://creativecommons.org/licenses/by-nc/3.0/legalcode',
+//		'Creative Commons Attribution Non-Commercial Share Alike (CC BY-NC-SA)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode',
+//		'Creative Commons Attribution Non-Commercial No Derivatives (CC BY-NC-ND)' => 'http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode',
 		'Open Database License (ODbL) v1.0' => 'http://opendatacommons.org/licenses/odbl/1.0/',
-		'Attribution (CC BY)' => 'http://creativecommons.org/licenses/by/3.0/legalcode',
-		'Attribution Share Alike (CC BY-SA)' => 'http://creativecommons.org/licenses/by-sa/3.0/legalcode',
-		'Attribution No Derivatives (CC BY-ND)' => 'http://creativecommons.org/licenses/by-nd/3.0/legalcode',
-		'Attribution Non-Commercial (CC BY-NC)' => 'http://creativecommons.org/licenses/by-nc/3.0/legalcode',
-		'Attribution Non-Commercial Share Alike (CC BY-NC-SA)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode',
-		'Attribution Non-Commercial No Derivatives (CC BY-NC-ND)' => 'http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode'
+		'Open Data Commons Public Domain Dedication and Licence (PDDL)' => 'http://opendatacommons.org/licenses/pddl/1.0/',
+		'Open Data Commons Attribution License (ODC-By) v1.0' => 'http://opendatacommons.org/licenses/by/1.0/'
 	);
 	
 	protected $_dependentTables = array(

@@ -89,7 +89,7 @@ form input[type=text]:focus,form input[type=password]:focus,form select:focus,fo
 }
 
 form select {
-	max-width: 365px;
+	max-width: 450px;
 }
 
 form textarea {

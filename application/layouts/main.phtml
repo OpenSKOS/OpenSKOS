@@ -41,7 +41,7 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 			?>
 			<div id="identity">
 				<?php echo $this->translate('Welcome')?> <a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'users', 'action' => 'edit', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a>
-				[<a href=""><?php echo $this->translate('logout')?></a>]
+				[<a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'logout'), 'default', true)?>"><?php echo $this->translate('logout')?></a>]
 			</div>
 			<?php endif?>
 	    </header>

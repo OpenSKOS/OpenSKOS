@@ -9,7 +9,6 @@
 		<tr>
 			<th><?php echo $this->translate('Collection')?></th>
 			<th><?php echo $this->translate('Created')?></th>
-			<th><?php echo $this->translate('Created by')?></th>
 			<th><?php echo $this->translate('Started')?></th>
 			<th><?php echo $this->translate('Filename')?></th>
 			<th>&nbsp;</th>
@@ -20,7 +19,6 @@
 		<tr>
 			<td><?php echo $job['collection']?></td>
 			<td><?php echo $job['created']?></td>
-			<td><?php echo $job['user']?></td>
 			<td><?php echo $job['started']?$job['started']:'-'?></td>
 			<td><?php echo OpenSKOS_Db_Table_Jobs::getParam($job['parameters'], 'name')?></td>
 			<td>

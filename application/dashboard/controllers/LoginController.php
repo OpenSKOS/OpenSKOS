@@ -35,12 +35,13 @@ class Dashboard_LoginController extends Zend_Controller_Action {
 			
 			$session = new Zend_Session_Namespace('Zend_Auth');
             // Set the time of user logged in
-            $session->setExpirationSeconds(12*3600);
+            $session->setExpirationSeconds(30*24*3600);
             
             // If "remember" was marked
             if ((int)$form->getValue ('rememberme')) {
                 Zend_Session::rememberMe();
             }
+            
             
             $this->getHelper ( 'FlashMessenger' )->addMessage (_('Succesfully logged in'));
 			$this->_helper->redirector ( 'index', 'index' );

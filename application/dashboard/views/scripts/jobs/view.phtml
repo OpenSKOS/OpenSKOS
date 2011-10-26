@@ -7,6 +7,10 @@
 		<a href="<?php echo $this->url(array('controller' => 'collections', 'action' => 'edit', 'collection' => $this->collection->code))?>"><?php echo $this->collection->dc_title?></a>
 	</li>
 	<li>
+		<em><?php echo $this->translate('Delete before import')?>:</em>
+		<?php echo $this->job->getParam('deletebeforeimport') ? $this->translate('yes') : $this->translate('no')?>
+	</li>
+	<li>
 		<em><?php echo $this->translate('Created')?>:</em>
 		<?php echo $this->job->created?>
 	</li>

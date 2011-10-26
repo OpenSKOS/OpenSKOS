@@ -14,7 +14,6 @@ class Api_ConceptController extends Api_FindConceptsController {
 			throw new Zend_Controller_Action_Exception('No RDF-XML recieved', 412);
 		}
 		
-		// @TODO: move this code to transform Text-XML to object to library
 		$doc = new DOMDocument();
 		if (!@$doc->loadXML($xml)) { 
 			throw new Zend_Controller_Action_Exception('Recieved RDF-XML is not valid XML', 412);
@@ -99,7 +98,6 @@ class Api_ConceptController extends Api_FindConceptsController {
 		
 		$concept = $this->_fetchConcept();
 		
-		var_dump($concept['tenant'], $concept['collection']);
 		$this->getResponse()
 			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
 			->setHttpResponseCode(202);
@@ -172,8 +170,5 @@ class Api_ConceptController extends Api_FindConceptsController {
 		
 		return $user;
 	}
-	
-	
-
 }
 
