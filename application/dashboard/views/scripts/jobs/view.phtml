@@ -24,7 +24,11 @@
 	</li>
 	<li>
 		<em><?php echo $this->translate('Finished')?>:</em>
-		<?php echo $this->job->finished ? $this->job->finished  : '-'?>
+		<?php echo $this->job->finished ? $this->job->finished : '-'?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Status')?>:</em>
+		<?php echo $this->job->status ? '<span class="job-status-'.strtolower($this->job->status).'">' . $this->job->status  .'</span>'  : '-'?>
 	</li>
 	<?php if ($this->job->info):?>
 	<li>

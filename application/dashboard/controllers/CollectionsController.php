@@ -13,7 +13,7 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 	{
 		$collection = $this->_getCollection();
 		$this->view->assign('collection', $collection);
-		$this->view->assign('jobs', $collection->findDependentRowset('OpenSKOS_Db_Table_Jobs'));
+		$this->view->assign('jobs', $collection->getJobs());
 		
 		$this->view->assign('max_upload_size', Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('max_upload_size'));
 	}
