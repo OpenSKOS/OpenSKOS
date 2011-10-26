@@ -26,7 +26,12 @@ class OpenSKOS_Db_Table_Jobs extends Zend_Db_Table
 
 	public static function getParam($parameters, $key)
 	{
-		$params = unserialize($parameters);
+		$params = self::getParams($parameters);
 		return $params && isset($params[$key]) ? $params[$key] : null;
+	}
+
+	public static function getParams($parameters)
+	{
+		return unserialize($parameters);
 	}
 }

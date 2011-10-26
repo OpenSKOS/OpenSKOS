@@ -1,5 +1,4 @@
 <?php
-//commits the solr index
 require_once 'Zend/Console/Getopt.php';
 $opts = array(
 	'help|?' => 'Print this usage message',

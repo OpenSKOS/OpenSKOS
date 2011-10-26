@@ -49,11 +49,18 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 	 		}
 	 		$model = new OpenSKOS_Db_Table_Jobs();
 	 		$fileinfo = $upload->getFileInfo('xml');
+	 		$parameters = array(
+	 			'name' => $fileinfo['xml']['name'],
+	 			'type' => $fileinfo['xml']['type'],
+	 			'size' => $fileinfo['xml']['size'],
+	 			'destination' => $fileinfo['xml']['destination'],
+	 			'deletebeforeimport' => (int)$formData['deletebeforeimport'] == 1
+	 		);
 	 		$job = $model->fetchNew()->setFromArray(array(
 	 			'collection' => $collection->id,
 	 			'user' => Zend_Auth::getInstance()->getIdentity()->id,
 	 			'task' => 'import',
-	 			'parameters' => serialize($fileinfo['xml']),
+	 			'parameters' => serialize($parameters),
 	 			'created' => new Zend_Db_Expr('NOW()')
 	 		))->save();
 		} else {
