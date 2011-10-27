@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSKOS Dutch translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-26 11:23+0100\n"
-"PO-Revision-Date: 2011-10-26 11:23+0100\n"
+"POT-Creation-Date: 2011-10-27 17:12+0100\n"
+"PO-Revision-Date: 2011-10-27 17:15+0100\n"
 "Last-Translator: Mark Lindeman <mark@lindeman.nu>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "MIME-Version: 1.0\n"
@@ -100,6 +100,14 @@ msgstr "Geen controle-wachtwoord opgegeven"
 msgid "The two given tokens do not match"
 msgstr "De twee opgegeven wachtwoorden zijn niet gelijk"
 
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:29
+msgid "'%value%' is not a valid URL."
+msgstr "'%value%' is geen geldige URL."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:30
+msgid "'%value%' is not a valid date string."
+msgstr "'%value%' is geen geldige datum tekenreeks"
+
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:18
 msgid "Your account is blocked."
 msgstr "Uw account is geblokkeerd."
@@ -108,77 +116,86 @@ msgstr "Uw account is geblokkeerd."
 msgid "Your account is not allowed to use the dasboard."
 msgstr "Het is niet toegestaan om met uw account hete dashboard gebruiken."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:57
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:60
 msgid "File"
 msgstr "Bestand"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:58
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:61
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:77
 msgid "delete concepts in this collection before import"
 msgstr "verwijder concepten voordat er geimporteerd wordt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:100
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:86
+msgid "choose optional set:"
+msgstr "kies eventueel een set:"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:89
+msgid "Failed to load sets from OAI!"
+msgstr "Kon geen OAI sets inladen!"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:127
 msgid "Code"
 msgstr "Code"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:101
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:128
 msgid "Title"
 msgstr "Titel"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:102
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:129
 msgid "Description"
 msgstr "Beschrijving"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:103
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:130
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:15
 msgid "Website"
 msgstr "Website"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:104
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:131
 msgid "Standard Licence"
 msgstr "Standaard licentie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:105
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:132
 msgid "Custom Licence (name)"
 msgstr "Aangepaste licentie (naam)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:106
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:133
 msgid "Custom (URL)"
 msgstr "Aangepast (URL)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:107
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:134
 msgid "OAI baseURL"
 msgstr "OAI basis URL"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:108
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:135
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:21
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:20
 msgid "Submit"
 msgstr "Verstuur"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:109
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:136
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:21
 msgid "Reset"
 msgstr "Herstel"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:110
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:137
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:22
 msgid "Cancel"
 msgstr "Annuleer"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:111
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:138
 #: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:23
 msgid "Delete"
 msgstr "Verwijder"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:111
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:138
 msgid "Are you sure you want to delete this collection and corresponding Concepts?"
 msgstr "Weet u zeker dat u deze collectie en alle bijbehorende concepten wilt verwijderen?"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:121
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:148
 msgid "choose a standard license  or type a custom one:"
 msgstr "kies een standaard licentie of typ een aangepaste:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Job.php:26
+#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Job.php:30
 msgid "Failed to delete file"
 msgstr "Kon bestand niet verwijderen"
 
@@ -244,33 +261,45 @@ msgstr "Een API sleutel is nodig voor gebruikers die toegang hebben tot de API h
 msgid "there is already a user with API key '%value%'"
 msgstr "er bestaat al een gebruiker met API sleutel '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:32
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:25
+msgid "This collection does not appear to have a OAI Server as source."
+msgstr "Deze collectie lijkt geen OAI Server als bron te hebben."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:62
+msgid "An OAI Harvest job is scheduled"
+msgstr "Er is een OAI harvest taak gepland"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:70
+msgid "Since this collection has an OAI Server as source, you can not upload files for import."
+msgstr "Omdat de collectie een OAI bron gebruikt, kunt u geen bestanden uploaden om te importeren."
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:82
 msgid "Failed to create upload folder"
 msgstr "Kon upload map niet aanmaken"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:47
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:97
 msgid "A file with that name is already scheduled for import"
 msgstr "Er is al een taak gepland met een bestand met dezelfde naam"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:69
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:119
 msgid "An import job is scheduled"
 msgstr "Er is een taak gepland"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:76
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:126
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/InstitutionController.php:13
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:18
 msgid "No POST data recieved"
 msgstr "Geen POST data ontvangen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:83
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:133
 msgid "You can not delete an empty collection."
 msgstr "U kunt geen lege collectie verwijderen."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:87
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:137
 msgid "The collection has been deleted, it might take a while before changes are committed to our system."
 msgstr "De collectie is verwijderd, het kan even duren voor wijzigingen zijn doorgevoerd in ons systeem."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:121
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:171
 #, php-format
 msgid "Collection `%s` not found"
 msgstr "Collectie `%s` niet gevonden"
@@ -387,8 +416,6 @@ msgid "Manage collections"
 msgstr "Beheer collecties"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:8
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:3
 msgid "Manage users"
 msgstr "Beheer gebruikers"
 
@@ -409,25 +436,28 @@ msgid "Create collection"
 msgstr "Maak collectie"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:24
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:27
+msgid "Schedule an OAI Harvest job"
+msgstr "Plan een OAI Harvest taak"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:32
+msgid "An OAI Harvest job has already been scheduled<br/> on %started% by %user%"
+msgstr "Er is al een OAI Harvest taak gepland<br/> door %user% op %started%"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:39
 msgid "Import new data"
 msgstr "Importeer nieuwe gegevens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:25
-msgid "Since this collection has an OAI Server as source,<br/>you can not upload files for import."
-msgstr "Omdat de collectie een OAI bron gebruikt,<br/>kunt u geen bestanden uploaden om te importeren."
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:28
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:40
 #, php-format
 msgid "Upload a file in (optionaly zipped) rdf-xml format (max. %s)."
 msgstr "Upload een bestand in een (eventueel ge-zipt) rdf-xml formaat (max. %s)."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:30
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:42
 #, php-format
 msgid "See <a href=\"%s\">API documentation</a> for supported formats."
 msgstr "Zie <a href=\"%s\">API documentatie</a> voor ondersteunde formaten."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:34
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:46
 msgid "Current import jobs for this collection"
 msgstr "Lopende import-taken voor deze collectie"
 
@@ -488,8 +518,8 @@ msgid "Finished"
 msgstr "Gereed"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:21
-msgid "Filename"
-msgstr "Bestandsnaam"
+msgid "Task"
+msgstr "Taak"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:22
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:30
@@ -525,19 +555,43 @@ msgstr "Aangemaakt door"
 msgid "Info"
 msgstr "Info"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:42
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:43
 msgid "File details"
 msgstr "Bestandsgegevens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:49
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:50
 msgid "Type"
 msgstr "Type"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:53
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:54
 msgid "Filesize"
 msgstr "Bestandsgrootte"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:59
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:60
+msgid "Harvest details"
+msgstr "Harvest details"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:69
+msgid "OAI Base URL"
+msgstr "OAI basis URL"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:73
+msgid "SetSpec"
+msgstr "SetSpec"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:80
+msgid "From"
+msgstr "Vanaf"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:86
+msgid "Until"
+msgstr "Tot en met"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:92
+msgid "URL used for Harvesting"
+msgstr "URL gebruikt voor het harvesten"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:95
 msgid "Remove job"
 msgstr "Verwijder taak"
 
@@ -580,3 +634,5 @@ msgstr "Welkom"
 msgid "logout"
 msgstr "afmelden"
 
+#~ msgid "Filename"
+#~ msgstr "Bestandsnaam"
