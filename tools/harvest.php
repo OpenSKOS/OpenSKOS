@@ -5,8 +5,10 @@ $opts = array(
 	'env|e=s' => 'The environment to use (defaults to "production")',
 	'collection|c=s' => 'Collection id or code (required)',
 	'tenant|t=s' => 'Tenant code (required if a collection code is used)',
-	'from|f=s' => 'The OAI `from` argument (defaults to the last date from Solr, use null to harvest all records)',
-	'until|u=s' => 'The OAI `until` argument (defaults to null)',
+	'metadataPrefix=s' => 'The OAI `metadataPrefix` argument (defaults to `oai_rdf`)',
+	'set=s' => 'The OAI `set` argument',
+	'from=s' => 'The OAI `from` argument (defaults to the last date from Solr, use null to harvest all records)',
+	'until=s' => 'The OAI `until` argument (defaults to null)',
 	'query|q=s' => 'Optional Solr query',
 	'rows|r' => 'Optional maximum number of records to harvest per page'
 );
@@ -102,6 +104,7 @@ $params = array();
 $harvester = OpenSKOS_Oai_Pmh_Harvester::factory($collection)
 	->setFrom($from)
 	->setUntil($until)
+	->setOption('set', $OPTS->set)
 	->setOption('q', $OPTS->query)
 	->setOption('rows', $OPTS->rows);
 

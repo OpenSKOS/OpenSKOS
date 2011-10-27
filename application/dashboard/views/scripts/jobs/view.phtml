@@ -39,6 +39,7 @@
 
 
 </ul>
+<?php if ($this->job->task === OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT):?>
 <h2><?php echo $this->translate('File details')?></h2>
 <ul>
 	<li>
@@ -55,6 +56,41 @@
 		(<?php echo number_format($this->job->getParam('size'))?> bytes)
 	</li>
 </ul>
+<?php elseif($this->job->task === OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST):?>
+<h2><?php echo $this->translate('Harvest details')?></h2>
+<?php 
+$url = rtrim($this->job->getParam('url'),'?').'?verb=ListRecords';
+if ($this->job->getParam('set')) $url .= '&set=' . $this->job->getParam('set');
+if ($this->job->getParam('from')) $url .= '&from=' . $this->job->getParam('from');
+if ($this->job->getParam('until')) $url .= '&until=' . $this->job->getParam('until');
+?>
+<ul>
+	<li>
+		<em><?php echo $this->translate('OAI Base URL')?>:</em>
+		<?php echo $this->job->getParam('url')?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('SetSpec')?>:</em>
+		<?php echo $this->job->getParam('set')?>
+		<?php if ($this->job->getParam('set')):?>
+		(<?php echo $this->job->getParam('setName')?>)
+		<?php endif?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('From')?>:</em>
+		<?php echo $this->job->getParam('from')
+			? date('r', $this->job->getParam('from'))
+			: '-' ?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Until')?>:</em>
+		<?php echo $this->job->getParam('until')
+			? date('r', $this->job->getParam('until'))
+			: '-' ?>
+	</li>
+</ul>
+<p><?php echo $this->translate('URL used for Harvesting')?>: <a href="<?php echo $url?>" rel="external"><?php echo $this->escape($url)?></a></p>
+<?php endif?>
 <form method="post" action="<?php echo $this->url(array('action' => 'delete'))?>">
 	<p><input type="submit" value="<?php echo $this->translate('Remove job')?>" /></p>
 </form>

@@ -26,5 +26,7 @@ class OpenSKOS_Strings
 		_("The token '%token%' does not match the given token '%value%'");
         _('No token was provided to match against');
         _("The two given tokens do not match");
+        _("'%value%' is not a valid URL.");
+        _("'%value%' is not a valid date string.");
 	}
 }

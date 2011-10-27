@@ -21,18 +21,14 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 	
 	protected $_resumptionToken;
 	
-	protected $_options = array();
+	protected $_options = array('metadataPrefix' => 'oai_rdf');
 	
 	/**
 	 * @param OpenSKOS_Db_Table_Row_Collection $collection
 	 */
-	public function __construct(OpenSKOS_Db_Table_Row_Collection $collection, Array $options = null)
+	public function __construct(OpenSKOS_Db_Table_Row_Collection $collection)
 	{
 		$this->_collection = $collection;
-		
-		if (null !== $options) {
-			$this->setOptions($options);
-		}
 	}
 	
 	/**
@@ -71,6 +67,24 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 			$this->_options[$key] = $value;
 		}
 		return $this;
+	}
+	
+	/**
+	 * Get SetSpecs from the repository
+	 * 
+	 * @return OpenSKOS_Oai_Pmh_Harvester_Sets
+	 */
+	public function listSets()
+	{
+		$response = $this->_getClient()
+			->setParameterGet(array(
+				'verb' => 'ListSets'
+			))->request('GET');
+		if ($response->isError()) {
+			throw new OpenSKOS_Oai_Pmh_Harvester_Exception($response->getMessage());
+		}
+		
+		return new OpenSKOS_Oai_Pmh_Harvester_Sets($response);
 	}
 	
 	/**
@@ -181,14 +195,9 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 		);
 		
 		if (null!==$resumptionToken) {
-			$params += array(
-				'resumptionToken' => $resumptionToken
-			);
+			$params['resumptionToken'] = $resumptionToken;
 		} else {
-			$params += array(
-				'metadataPrefix' => 'oai_rdf',
-				'set' => $this->_collection->id
-			) + $this->_options;
+			$params += $this->_options;
 		}
 		$response = $client->setParameterGet($params)->request('GET');
 		if ($response->isError()) {

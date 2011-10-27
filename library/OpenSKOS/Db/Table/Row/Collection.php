@@ -33,7 +33,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	/**
 	 * @return Zend_Db_Table_Rowset
 	 */
-	public function getJobs()
+	public function getJobs($task = null)
 	{
 		$model = new OpenSKOS_Db_Table_Jobs();
 		$select = $model->select()
@@ -41,6 +41,9 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			->where('finished IS NULL')
 			->order('created desc')
 			->order('started asc');
+		if (null !== $task) {
+			$select->where('task = ?', $task);
+		}
 		return $model->fetchAll($select);
 	}
 	
@@ -56,11 +59,35 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->setAttrib('enctype', 'multipart/form-data')
 				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())))	
 				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
-				->addElement('submit', 'submit', array('label'=>'Submit'));		
+				->addElement('submit', 'submit', array('label'=>'Submit'));
 			$form->getElement('delete-before-import')->setValue(1);
 		}
+		return $form;
+	}
+	
+	public function getOaiJobForm()
+	{
+		static $form;
+		if (null === $form) {
+			$form = new Zend_Form();
+			$form
+				->addElement('text', 'from', array('label' => 'Index records modified since', 'style' => 'width: 250px;'))
+				->addElement('text', 'until', array('label' => 'Index records modified until', 'style' => 'width: 250px;'))
+				->addElement('select', 'set', array('label' => 'OAI setSpec', 'style' => 'width: 250px;'))
+				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
+				->addElement('submit', 'submit', array('label'=>'Submit'));
+			$form->getElement('delete-before-import')->setValue(1);
+		}
+		$form->getElement('from')->addValidator(new OpenSKOS_Validate_Datestring());
+		$form->getElement('until')->addValidator(new OpenSKOS_Validate_Datestring());
 		
-		
+		$harvester = new OpenSKOS_Oai_Pmh_Harvester($this);
+		try {
+			$sets = array('' => _('choose optional set:')) + $harvester->listSets()->toArray();
+			$form->getElement('set')->setMultiOptions($sets);
+		} catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
+			$form->getElement('set')->setMultiOptions(array('['._('Failed to load sets from OAI!').']'));
+		}
 		return $form;
 	}
 	
@@ -127,6 +154,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
 			$form->getElement('code')->addValidator($validator);
 			
+			$form->getElement('OAI_baseURL')->addValidator(new OpenSKOS_Validate_Url());
 			$form->setDefaults($this->toArray());
 		}
 		return $form;

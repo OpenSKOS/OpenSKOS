@@ -18,7 +18,7 @@
 			<th><?php echo $this->translate('Created')?></th>
 			<th><?php echo $this->translate('Started')?></th>
 			<th><?php echo $this->translate('Finished')?></th>
-			<th><?php echo $this->translate('Filename')?></th>
+			<th><?php echo $this->translate('Task')?></th>
 			<th><?php echo $this->translate('Status')?></th>
 			<th>&nbsp;</th>
 		</tr>
@@ -30,7 +30,7 @@
 			<td><?php echo $job['created']?></td>
 			<td><?php echo $job['started']?$job['started']:'-'?></td>
 			<td><?php echo $job['finished']?$job['finished']:'-'?></td>
-			<td><?php echo OpenSKOS_Db_Table_Jobs::getParam($job['parameters'], 'name')?></td>
+			<td><?php echo $job['task']?></td>
 			<td class="job-status-<?php echo strtolower($job['status'])?>"><?php echo $job['status']?></td>
 			<td>
 			<?php if(!$this->started):?>
