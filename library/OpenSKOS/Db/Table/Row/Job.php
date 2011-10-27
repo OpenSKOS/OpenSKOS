@@ -4,6 +4,9 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	const STATUS_ERROR = 'ERROR';
 	const STATUS_SUCCESS = 'SUCCESS';
 	
+	const JOB_TASK_IMPORT = 'import';
+	const JOB_TASK_HARVEST = 'harvest';
+	
 	public function getParam($key)
 	{
 		$params = $this->getParams();
@@ -21,9 +24,11 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	
 	public function delete()
 	{
-		$params = $this->getParams();
-		if (!@unlink($params['destination'] .'/'.$params['name'])) {
-			throw new Zend_Db_Table_Row_Exception(_('Failed to delete file').' `'.$params['name'].'`');
+		if ($this->task == self::JOB_TASK_IMPORT) {
+			$params = $this->getParams();
+			if (!@unlink($params['destination'] .'/'.$params['name'])) {
+				throw new Zend_Db_Table_Row_Exception(_('Failed to delete file').' `'.$params['name'].'`');
+			}
 		}
 		return parent::delete();
 	}

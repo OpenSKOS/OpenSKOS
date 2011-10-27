@@ -21,8 +21,20 @@
 			<?php endforeach?>
 		</ul>
 		<?php if ($this->collection->OAI_baseURL):?>
-		<h3><?php echo $this->translate('Import new data')?></h3>
-		<p><?php echo $this->translate('Since this collection has an OAI Server as source,<br/>you can not upload files for import.')?></p>
+		<h3><?php echo $this->translate('Schedule an OAI Harvest job')?></h3>
+		<?php 
+			//is a OAI Harvest job already scheduled?
+			if (count($this->harvestjobs)):
+				$job = $this->harvestjobs->current();
+		?>
+		<p><?php 
+			echo str_replace(array('%started%', '%user%'), array('<em>'.$job->created.'</em>', '<em>'.$job->getUser()->name.'</em>'),
+				$this->translate('An OAI Harvest job has already been scheduled<br/> on %started% by %user%')
+			);
+		?></p>
+		<?php else:?>
+		<?php echo $this->collection->getOaiJobForm()->setAction($this->url(array('action' => 'harvest')))?>
+		<?php endif?>
 		<?php else:?>
 		<h3><?php echo $this->translate('Import new data')?></h3>
 		<p><?php echo $this->translate('Upload a file in (optionaly zipped) rdf-xml format (max. %s).', ini_get('upload_max_filesize'))?>

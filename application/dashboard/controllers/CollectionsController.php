@@ -14,13 +14,63 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 		$collection = $this->_getCollection();
 		$this->view->assign('collection', $collection);
 		$this->view->assign('jobs', $collection->getJobs());
-		
+		$this->view->assign('harvestjobs', $collection->getJobs(OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST));
 		$this->view->assign('max_upload_size', Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('max_upload_size'));
+	}
+	
+	public function harvestAction()
+	{
+		$collection = $this->_getCollection();
+		if (!$collection->OAI_baseURL) {
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('This collection does not appear to have a OAI Server as source.'));
+			$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+			return;
+		}
+		$form = $collection->getOaiJobForm();
+		$formData = $this->_request->getPost();
+		if ($form->isValid($formData)) {
+	 		$parameters = $form->getValues();
+	 		$parameters['url'] = $collection->OAI_baseURL;
+	 		if (isset($parameters['from']) && $parameters['from']) {
+	 			$parameters['from'] = strtotime($parameters['from']);
+	 		}
+	 		if (isset($parameters['until']) && $parameters['until']) {
+	 			$parameters['until'] = strtotime($parameters['until']);
+	 		}
+	 		
+	 		if (isset($parameters['set'])) {
+	 			foreach ($form->getElement('set')->getMultiOptions() as $setSpec => $setName) {
+	 				if ($setSpec == $parameters['set']) {
+	 					$parameters['setName'] = $setName;
+	 					break;
+	 				}
+	 			}
+	 		}
+	 		
+	 		$parameters['deletebeforeimport'] = (int)$parameters['deletebeforeimport'] == 1;
+	 		$model = new OpenSKOS_Db_Table_Jobs();
+	 		$job = $model->fetchNew()->setFromArray(array(
+	 			'collection' => $collection->id,
+	 			'user' => Zend_Auth::getInstance()->getIdentity()->id,
+	 			'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST,
+	 			'parameters' => serialize($parameters),
+	 			'created' => new Zend_Db_Expr('NOW()')
+	 		))->save();
+		} else {
+			return $this->_forward('edit');
+		}
+		$this->getHelper('FlashMessenger')->addMessage(_('An OAI Harvest job is scheduled'));
+		$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
 	}
 	
 	public function importAction()
 	{
 		$collection = $this->_getCollection();
+		if ($collection->OAI_baseURL) {
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Since this collection has an OAI Server as source, you can not upload files for import.'));
+			$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+			return;
+		}
 		$form = $collection->getUploadForm();
 		$formData = $this->_request->getPost();
 		if ($form->isValid($formData)) {
@@ -59,7 +109,7 @@ class Dashboard_CollectionsController extends OpenSKOS_Controller_Dashboard
 	 		$job = $model->fetchNew()->setFromArray(array(
 	 			'collection' => $collection->id,
 	 			'user' => Zend_Auth::getInstance()->getIdentity()->id,
-	 			'task' => 'import',
+	 			'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT,
 	 			'parameters' => serialize($parameters),
 	 			'created' => new Zend_Db_Expr('NOW()')
 	 		))->save();
