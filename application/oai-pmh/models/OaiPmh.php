@@ -6,8 +6,8 @@ class OaiPmh
       "ListMetadataFormats" => array('identifier'),
       "ListSets" => array('resumptionToken'),
       "GetRecord" => array('identifier', 'metadataPrefix'),
-      "ListIdentifiers" => array('from', 'until', 'metadataPrefix', 'set', 'resumptionToken'),
-      "ListRecords" => array('from', 'until', 'metadataPrefix', 'set', 'resumptionToken')
+      "ListIdentifiers" => array('from', 'until', 'metadataPrefix', 'set', 'resumptionToken', 'q', 'rows'),
+      "ListRecords" => array('from', 'until', 'metadataPrefix', 'set', 'resumptionToken', 'q', 'rows')
 	);
 	
 	protected $_validParams = array(
@@ -106,10 +106,12 @@ class OaiPmh
 		return $this;
 	}
 	
-	public function getParam($key)
+	public function getParam($key, $default = null)
 	{
 		if (isset($this->_params[$key])) {
 			return $this->_params[$key];
+		} elseif (null!==$default) {
+			return $default;
 		}
 	}
 	
@@ -327,12 +329,13 @@ class OaiPmh
 	{
 		$solr = OpenSKOS_Solr::getInstance();
 		
-		$q = '*:*';
+		$q = $this->getParam('q', '*:*');
+
 		if (null!==$this->_set) {
 			if (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Tenant')) {
-				$q = "tenant:\"{$this->_set->code}\"";
+				$q = "({$q}) AND (tenant:\"{$this->_set->code}\")";
 			} elseif (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Collection')) {
-				$q = "collection:\"{$this->_set->id}\"";
+				$q = "({$q}) AND (collection:\"{$this->_set->id}\")";
 			}
 		}
 		
@@ -344,7 +347,7 @@ class OaiPmh
 			$q = "({$q}) AND (timestamp:[{$from} TO {$until}])";
 		} elseif (null!==$from) {
 			$from = date('Y-m-d\TH:i:m\Z', $from->toString(Zend_Date::TIMESTAMP));
-			$q = "({$q}) AND (timestamp:[{$from} TO *])";
+			$q = "$_lastPage(timestamp:[{$from} TO *])";
 		} elseif (null!==$until) {
 			$until = date('Y-m-d\TH:i:m\Z', $until->toString(Zend_Date::TIMESTAMP));
 			$q = "({$q}) AND (timestamp:[* TO {$until}])";
@@ -357,7 +360,7 @@ class OaiPmh
 		
 		$paginator = new Zend_Paginator(new OpenSKOS_Solr_Paginator($q, $params));
 		$paginator
-			->setItemCountPerPage(self::LIMIT)
+			->setItemCountPerPage($this->getParam('rows', self::LIMIT))
 			->setCurrentPageNumber($this->getPage());
 			
 		$this->_view->namespacesByCollection = OpenSKOS_Db_Table_Namespaces::getNamespacesByCollection();
@@ -368,12 +371,20 @@ class OaiPmh
 	
 	public function getSet($set)
 	{
-		if (preg_match('/^\d+$/', $set)) {
+		if (preg_match('/^(([a-z0-9]+):)?\d+$/', $set)) {
 			$model = new OpenSKOS_Db_Table_Collections();
+			return $model->find($set)->current();
+		} elseif (preg_match('/^([a-z0-9]+):([a-z0-9]+)$/', $set, $match)) {
+			$model = new OpenSKOS_Db_Table_Collections();
+			list(, $tenant, $code) = $match;
+			return $model->fetchRow($model->select()
+				->where('code=?', $code)
+				->where('tenant=?', $tenant)
+			);
 		} else {
 			$model = new OpenSKOS_Db_Table_Tenants();
+			return $model->find($set)->current();
 		}
-		return $model->find($set)->current();
 	}
 	
 	public function GetRecord()
