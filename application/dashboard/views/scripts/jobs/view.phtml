@@ -61,8 +61,8 @@
 <?php 
 $url = rtrim($this->job->getParam('url'),'?').'?verb=ListRecords';
 if ($this->job->getParam('set')) $url .= '&set=' . $this->job->getParam('set');
-if ($this->job->getParam('from')) $url .= '&from=' . $this->job->getParam('from');
-if ($this->job->getParam('until')) $url .= '&until=' . $this->job->getParam('until');
+if ($this->job->getParam('from')) $url .= '&from=' . OpenSKOS_Oai_Pmh_Harvester::getOaiDate($this->job->getParam('from'));
+if ($this->job->getParam('until')) $url .= '&until=' . OpenSKOS_Oai_Pmh_Harvester::getOaiDate($this->job->getParam('until'));
 ?>
 <ul>
 	<li>

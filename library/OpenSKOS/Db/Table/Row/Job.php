@@ -92,6 +92,9 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	public function finish()
 	{
 		$this->finished = new Zend_Db_Expr('NOW()');
+		if (null === $this->status) {
+			$this->status = self::STATUS_SUCCESS;
+		}
 		return $this;
 	}
 	

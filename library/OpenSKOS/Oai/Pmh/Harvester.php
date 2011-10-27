@@ -87,6 +87,14 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 		return new OpenSKOS_Oai_Pmh_Harvester_Sets($response);
 	}
 	
+	public static function getOaiDate($ts) 
+	{
+		if (!is_int($ts)) {
+			throw new OpenSKOS_Oai_Pmh_Harvester_Exception('Expected a timestamp');
+		}
+		return date('Y-m-d\TH:i:sZ', $ts);
+	}
+	
 	/**
 	 * @return OpenSKOS_Oai_Pmh_Harvester
 	 */
@@ -97,7 +105,7 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 		}
 		
 		if (null!==$ts) {
-			$from = date('Y-m-d\TH:i:sZ', $ts);
+			$from = self::getOaiDate($ts);
 		} else {
 			$from = null;
 		}
@@ -115,11 +123,11 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 		}
 		
 		if (null!==$ts) {
-			$until = date('Y-m-d\TH:i:sZ', $ts);
+			$until = self::getOaiDate($ts);
 		} else {
 			$until = null;
 		}
-		$this->setOption('until', $ts);
+		$this->setOption('until', $until);
 		return $this;
 	}
 	
