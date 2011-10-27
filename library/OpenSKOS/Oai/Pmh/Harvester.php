@@ -118,7 +118,7 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 			if (!$this->_collection->OAI_baseURL) {
 				throw new OpenSKOS_Oai_Pmh_Harvester_Exception("Collection has no OAI base URL");
 			}
-			$this->_client = new Zend_Http_Client('http://openskos/oai-pmh'/*$this->_collection->OAI_baseURL*/, array(
+			$this->_client = new Zend_Http_Client($this->_collection->OAI_baseURL, array(
 				'maxredirects' => 0,
 				'timeout' => 60
 			));
