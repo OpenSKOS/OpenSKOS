@@ -27,26 +27,43 @@ class Dashboard_JobsController extends OpenSKOS_Controller_Dashboard
 	
 	public function deleteAction()
 	{
-		$job = $this->_getJob();
-		try {
-			$job->delete();
-		} catch (Zend_Db_Table_Row_Exception $e) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
-			$this->_helper->redirector('index');
+		if ($this->getRequest()->isPost()) {
+			$ids = $this->getRequest()->getParam('job');
+			$jobs = array();
+			foreach ($ids as $id) {
+				$jobs[] = $this->_getJob((int)$id);
+			}
+		} else {
+			$jobs = array($this->_getJob());
 		}
-		$this->getHelper('FlashMessenger')->addMessage(_('Job removed'));
+		foreach ($jobs as $job) {
+			try {
+				$job->delete();
+			} catch (Zend_Db_Table_Row_Exception $e) {
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+				$this->_helper->redirector('index');
+			}
+		}
+		if (count($jobs)>1) {
+			$this->getHelper('FlashMessenger')->addMessage(_('Jobs removed'));
+		} else {
+			$this->getHelper('FlashMessenger')->addMessage(_('Job removed'));
+		}
 		$this->_helper->redirector('index');
 	}
 	
 	/**
 	 * @return OpenSKOS_Db_Table_Row_Job
 	 */
-	protected function _getJob()
+	protected function _getJob($id = null)
 	{
-		if (null === ($id = $this->getRequest()->getParam('job'))) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No job defined'));
-			$this->_helper->redirector('index');
+		if (null === $id) {
+			if (null === ($id = $this->getRequest()->getParam('job'))) {
+				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No job defined'));
+				$this->_helper->redirector('index');
+			}
 		}
+		
 		$model = new OpenSKOS_Db_Table_Jobs();
 		$job = $model->find($id)->current();
 		if (null === $job) {
