@@ -11,9 +11,40 @@
 <?php if (!count($this->jobs)):?>
 <p><?php echo $this->translate('There are no jobs scheduled.')?></p>
 <?php else:?>
+<?php 
+$msg_0 = $this->translate('No jobs selected');
+$msg_1 = $this->translate('Are you sure you want to delete the selected job?');
+$msg_more = $this->translate('Are you sure you want to delete the selected jobs?');
+$js = <<<JS
+window.addEvent('load', function(){
+	new CheckAllBoxes(\$('checkall'), \$\$('.jobCb'));
+	\$('jobForm').addEvent('submit', function (ev){
+		var s = 0;
+		\$\$('.jobCb').each(function(el){
+			s+=el.get('checked')?1:0;
+		});
+		switch (s) {
+			case 0:
+				alert('{$msg_0}');
+				new Event(ev).stop();
+				break;
+			default:
+				if (!confirm(s==1?'{$msg_1}':'{$msg_more}')) {
+					new Event(ev).stop();
+				}
+				break;
+		}
+		console.log(s);
+	});
+});
+JS;
+$this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
+?>
+<form method="post" action="<?php echo $this->url(array('action' => 'delete'))?>" id="jobForm">
 <table>
 	<thead>
 		<tr>
+			<th><input type="checkbox" id="checkall"/></th>
 			<th><?php echo $this->translate('Collection')?></th>
 			<th><?php echo $this->translate('Created')?></th>
 			<th><?php echo $this->translate('Started')?></th>
@@ -26,6 +57,7 @@
 	<tbody>
 		<?php foreach ($this->jobs as $job):?>
 		<tr>
+			<td><input type="checkbox" class="jobCb" name="job[]" value="<?php echo $job['id']?>"/></td>
 			<td><?php echo $job['collection']?></td>
 			<td><?php echo $job['created']?></td>
 			<td><?php echo $job['started']?$job['started']:'-'?></td>
@@ -43,4 +75,8 @@
 		<?php endforeach?>
 	</tbody>
 </table>
+<p>
+	<input type="submit" value="<?php echo $this->translate('Delete selected jobs')?>"/>
+</p>
+</form>
 <?php endif?>

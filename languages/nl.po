@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSKOS Dutch translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-27 17:12+0100\n"
-"PO-Revision-Date: 2011-10-27 17:15+0100\n"
+"POT-Creation-Date: 2011-10-28 08:57+0100\n"
+"PO-Revision-Date: 2011-10-28 08:59+0100\n"
 "Last-Translator: Mark Lindeman <mark@lindeman.nu>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "MIME-Version: 1.0\n"
@@ -309,23 +309,27 @@ msgstr "Collectie `%s` niet gevonden"
 msgid "Data saved"
 msgstr "Gegevens opgeslagen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:37
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:48
+msgid "Jobs removed"
+msgstr "Taken verwijderd"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:50
 msgid "Job removed"
 msgstr "Taak verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:47
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:62
 msgid "No job defined"
 msgstr "Geen taak gedefineerd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:53
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:70
 msgid "Job not found"
 msgstr "Taak niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:59
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:76
 msgid "Collection not found"
 msgstr "Collectie niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:63
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:80
 msgid "You are not allowed to edit this job."
 msgstr "U mag deze taak niet bewerken"
 
@@ -497,38 +501,54 @@ msgstr "Verberg taken die gereed zijn"
 msgid "There are no jobs scheduled."
 msgstr "Er zijn geen taken gepland."
 
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:15
+msgid "No jobs selected"
+msgstr "Geen taken gedefineerd"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:16
+msgid "Are you sure you want to delete the selected job?"
+msgstr "Weet u zeker dat u deze taak wilt verwijderen?"
+
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:17
+msgid "Are you sure you want to delete the selected jobs?"
+msgstr "Weet u zeker dat u deze taken wilt verwijderen?"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:48
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:6
 msgid "Collection"
 msgstr "Collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:18
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:49
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:14
 msgid "Created"
 msgstr "Aangemaakt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:19
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:50
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:22
 msgid "Started"
 msgstr "Gestart"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:20
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:51
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:26
 msgid "Finished"
 msgstr "Gereed"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:21
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:52
 msgid "Task"
 msgstr "Taak"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:22
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:53
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:30
 msgid "Status"
 msgstr "Status"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:37
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:69
 msgid "details"
 msgstr "details"
+
+#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:79
+msgid "Delete selected jobs"
+msgstr "Verwijder geselecteerde taken"
 
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:1
 #: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:3

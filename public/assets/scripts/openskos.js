@@ -16,6 +16,17 @@ window.addEvent('load', function(){
 	});
 });
 
+var CheckAllBoxes = new Class({
+	initialize: function(element, elements)
+	{
+		element.addEvent('change', function(){
+			elements.each(function(el) {
+				el.set('checked', element.get('checked'));
+			});
+		}.bind(this));
+	}
+});
+
 var SkosConcept = new Class({
 	
 	Implements: Events,
