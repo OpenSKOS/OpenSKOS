@@ -487,6 +487,9 @@ class OpenSKOS_Rdf_Parser implements Countable
 		return $this;
 	}
 	
+	/**
+	 * @return Bootstrap
+	 */
 	protected function _getBootstrap()
 	{
 		return Zend_Controller_Front::getInstance()->getParam('bootstrap');		

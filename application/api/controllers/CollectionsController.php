@@ -18,10 +18,27 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
 	{
 		$model = new OpenSKOS_Db_Table_Collections();
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
+		$select = $model->select();
+		if (null !== ($allow_oai = $this->getRequest()->getParam('allow_oai'))) {
+			switch (strtolower($allow_oai)) {
+				case '1':
+				case 'yes':
+				case 'y':
+				case 'true':
+					$select->where('allow_oai=?', 'Y');
+					break;
+				case '0':
+				case 'no':
+				case 'n':
+				case 'false':
+					$select->where('allow_oai=?', 'N');
+					break;
+			}
+		}
 		if ($context == 'json') {
-			$this->view->assign('collections', $model->fetchAll()->toArray());
+			$this->view->assign('collections', $model->fetchAll($select)->toArray());
 		} else {
-			$this->view->collections = $model->fetchAll();
+			$this->view->collections = $model->fetchAll($select);
 		}
 	}
 	

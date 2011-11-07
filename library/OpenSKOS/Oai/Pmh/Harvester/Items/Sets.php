@@ -1,6 +1,6 @@
 <?php
 
-class OpenSKOS_Oai_Pmh_Harvester_Sets_Set extends DOMDocument
+class OpenSKOS_Oai_Pmh_Harvester_Items_Sets extends DOMDocument
 {
 	public function __construct(DOMNode $node)
 	{
