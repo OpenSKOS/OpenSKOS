@@ -13,9 +13,15 @@ if (null !== ($lang = Zend_Controller_Front::getInstance()->getRequest()->getPar
 	}
 }
 $this->headTitle($title);
+$collection = $concept->getCollection();
+
 ?>
 <h2><?php echo $this->escape($title)?></h2>
 <dl>
+	<dd><?php echo $this->translate('Institution')?>:</dd>
+	<dl><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dl>
+	<dd><?php echo $this->translate('Collection')?>:</dd>
+	<dl><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dl>
 	<dd>URI:</dd>
 	<dl><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dl>
 	<dd>SKOS Class:</dd>
