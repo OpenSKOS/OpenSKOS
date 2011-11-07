@@ -217,6 +217,18 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		return json_encode($this->toArray());
 	}
 	
+	public function getInstitution()
+	{
+		$model = new OpenSKOS_Db_Table_Tenants();
+		return $model->find($this->data['tenant'])->current();
+	}
+	
+	public function getCollection()
+	{
+		$model = new OpenSKOS_Db_Table_Collections();
+		return $model->find($this->data['collection'])->current();
+	}
+	
 	public function getValues($fieldname, $lang = null)
 	{
 		if (null !== $lang && self::isLanguageSensitiveClass($fieldname)) {
