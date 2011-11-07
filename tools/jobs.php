@@ -159,6 +159,7 @@ switch ($action) {
 						break;
 					default:
 						fwrite(STDERR, '@TODO: write handler for task='.$job->task."\n");
+						$job->error('No handler for this task')->finish()->save();
 						break;
 				}
 			}
