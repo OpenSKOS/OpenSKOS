@@ -22,7 +22,11 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 				;
 			
 			$form->getElement('email')->addValidator(new Zend_Validate_EmailAddress());
-			$form->getElement('postalCode')->addValidator(new Zend_Validate_PostCode());
+			try {
+    			$form->getElement('postalCode')->addValidator(new Zend_Validate_PostCode());
+			} catch (Zend_Validate_Exception $e) {
+			    //no valid locale found, so be it...
+			}
 			
 			$form->setDefaults($this->toArray());
 		}
