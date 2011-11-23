@@ -2,7 +2,7 @@
 require_once 'FindConceptsController.php';
 
 class Api_ConceptController extends Api_FindConceptsController {
-	
+
 	public function postAction() 
 	{
 		$this->getHelper('layout')->disableLayout();

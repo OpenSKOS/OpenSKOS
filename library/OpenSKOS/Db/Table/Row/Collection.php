@@ -74,6 +74,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('text', 'from', array('label' => 'Index records modified since', 'style' => 'width: 250px;'))
 				->addElement('text', 'until', array('label' => 'Index records modified until', 'style' => 'width: 250px;'))
 				->addElement('select', 'set', array('label' => 'OAI setSpec', 'style' => 'width: 250px;'))
+				->addElement('select', 'metadataPrefix', array('label' => 'OAI metadataPrefix', 'style' => 'width: 250px;'))
 				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
 				->addElement('submit', 'submit', array('label'=>'Submit'));
 			$form->getElement('delete-before-import')->setValue(1);
@@ -88,6 +89,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		} catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
 			$form->getElement('set')->setMultiOptions(array('['._('Failed to load sets from OAI!').']'));
 		}
+		
 		return $form;
 	}
 	
@@ -102,6 +104,11 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
 		}
 		return $this->getTable()->getClasses($tenant, $this);
+	}
+	
+	public function getConceptSchemes()
+	{
+		return $this->getTable()->getConceptSchemes($this);
 	}
 	
 	public function addNamespace(OpenSKOS_Db_Table_Row_Namespace $namespace)
@@ -128,10 +135,11 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('text', 'dc_title', array('label' => _('Title'), 'required' => true))
 				->addElement('textarea', 'dc_description', array('label' => _('Description'), 'cols' => 80, 'row' => 5))
 				->addElement('text', 'website', array('label' => _('Website')))
-				->addElement('select', 'license', array('label' => _('Standard Licence')))
+				->addElement('select', 'license', array('label' => _('Standard Licence'), 'style' => 'width: 450px;'))
 				->addElement('text', 'license_name', array('label' => _('Custom Licence (name)')))
 				->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
-				->addElement('text', 'OAI_baseURL', array('label' => _('OAI baseURL')))
+				->addElement('checkbox', 'allow_oai', array('label' => _('Allow OpenSKOS OAI Harvesting')))
+				->addElement('select', 'OAI_baseURL', array('label' => _('OAI baseURL'), 'style' => 'width: 450px;'))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
 				->addElement('submit', 'cancel', array('label'=>_('Cancel')))
@@ -150,14 +158,64 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				$l->addMultiOption($value, $key);
 			}
 			
+			$form->getElement('allow_oai')
+				->setCheckedValue('Y')
+				->setUncheckedValue('N');
+			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
 			$validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
 			$form->getElement('code')->addValidator($validator);
 			
 			$form->getElement('OAI_baseURL')->addValidator(new OpenSKOS_Validate_Url());
 			$form->setDefaults($this->toArray());
+			
+			//load OAI sources:
+			$bootstrap = $this->_getBootstrap();
+			$instances = $bootstrap->getOption('instances');
+			if (null !== $instances) {
+				$oai_providers = array('' => _('Pick a provider (or leave empty)...'));
+				foreach ($instances as $instance) {
+					switch ($instance['type']) {
+						case 'openskos':
+							//fetch Collections:
+							$client = new Zend_Http_Client($instance['url'].'/api/collections');
+							$response = $client
+								->setParameterGet('allow_oai', 'y')
+								->setParameterGet('format', 'json')
+								->request('GET');
+							if ($response->isError()) {
+								throw new Zend_Exception($response->getMessage(), $response->getCode());
+							}
+							foreach (json_decode($response->getBody())->collections as $collection) {
+								$uri = $instance['url'].'/oai-pmh/?set='.$collection->id;
+								$oai_providers[$uri] = $collection->dc_title;
+							}
+							break;
+						case 'external':
+							$uri = rtrim($instance['url'], '?/');
+							if ($instance['set'] || $instance['metadataPrefix']) $uri .= '?';
+							if ($instance['set']) $uri .= '&set=' . $instance['set'];
+							if ($instance['metadataPrefix']) $uri .= '&metadataPrefix=' . $instance['metadataPrefix'];
+							$oai_providers[$uri] = $instance['label'];
+							break;
+						default:
+							throw new Zend_Exception('Unkown OAI instance type: '.$instance['type']);
+					}
+				}
+				$form->getElement('OAI_baseURL')->setMultiOptions($oai_providers);
+			} else {
+				$form->removeElement('OAI_baseURL');
+			}
 		}
 		return $form;
+	}
+	
+	/**
+	 * @return Bootstrap
+	 */
+	protected function _getBootstrap()
+	{
+		return Zend_Controller_Front::getInstance()->getParam('bootstrap');		
 	}
 	
 	public function delete()
@@ -184,7 +242,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$doc = new DOMDocument();
 		$doc->appendChild($doc->createElement('rdf:RDF'));
 		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
-//		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
+		
 		$doc->documentElement->setAttribute('xmlns:dcterms', 'http://purl.org/dc/terms/');
 		
 		return $doc;
@@ -207,16 +265,18 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		if ($data['dc_description']) {
 			$root->appendChild($doc->createElement('dcterms:description', $data['dc_description']));
 		}
-		if ($data['website']) {
-			$root->appendChild($doc->createElement('dcterms:source', $data['website']));
-		}
-		
 		if ($data['license_name'] || $data['license_url']) {
 			$node = $root->appendChild($doc->createElement('dcterms:licence', @$data['license_name']));
 			if ($data['license_url']) {
 				$node->setAttribute('rdf:about', $data['license_url']);
-				
 			}
+		}
+		
+		if ($data['website']) {
+			$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
+			$node = $doc->createElement('owl:sameAs');
+			$node->setAttribute('rdf:about', $data['website']);
+			$root->appendChild($node);
 		}
 		
 		if ($withCreator) {

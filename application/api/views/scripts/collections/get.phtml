@@ -2,21 +2,45 @@
 <h2><?php echo $this->collection->dc_title?></h2>
 <div class="clear">
 	<div id="collection-form">
-<p class="dc_creator"><?echo $this->translate('Institution')?>: 
-	<em><a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $this->tenant->code))?>.html"><?php echo $this->tenant->name?></a></em></p>
+<dl>
+	<dt><?echo $this->translate('Institution')?>:</dt>
+	<dd><a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $this->tenant->code))?>.html"><?php echo $this->tenant->name?></a></dd>
+
 	<?php if ($this->collection->dc_description):?>
-		<p class="dc_description"><?php echo nl2br($this->collection->dc_description, true)?></p>
+	<dt><?echo $this->translate('Description')?>:</dt>
+	<dd><?php echo nl2br($this->collection->dc_description, true)?></dd>
 	<?php endif?>
+
+
 	<?php if ($this->collection->website):?>
-		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $this->collection->website?>"><?php echo $this->collection->website?></a></p>
+	<dt><?php echo $this->translate('Website')?>:</dt>
+	<dd><a rel="external" href="<?php echo $this->collection->website?>"><?php echo $this->collection->website?></a></dd>
 	<?php endif?>
+
 	<?php if ($this->collection->license_name && $this->collection->license_url):?>
-		<p class="licence"><?php echo $this->translate('License')?>: <a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_name?></a></p>
+	<dt><?php echo $this->translate('License')?>:</dt>
+	<dd><a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_name?></a></dd>
 	<?php elseif ($this->collection->license_name):?>
-		<p class="licence"><?php echo $this->translate('License')?>: <?php echo $this->collection->license_name?></p>
+	<dt><?php echo $this->translate('License')?>:</dt>
+	<dd><?php echo $this->collection->license_name?></dd>
 	<?php elseif ($this->collection->license_url):?>
-		<p class="licence"><?php echo $this->translate('License')?>: <a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_url?></a></p>
+	<dt><?php echo $this->translate('License')?>:</dt>
+	<dd><a rel="external" href="<?php echo $this->collection->license_url?>"><?php echo $this->collection->license_url?></a></dd>
 	<?php endif?>
+</dl>
+
+<h3><?php echo $this->translate('ConceptSchemes')?></h3>
+<ul>
+	<?php foreach ($this->collection->getConceptSchemes() as $conceptScheme):?>
+	<li>
+		<a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $conceptScheme['uuid']), 'rest')?>.html">
+			<?php echo $conceptScheme['uri']?>
+		</a>
+	</li>
+	<?php endforeach?>
+</ul>
+<?php ?>
+
 	</div>
 	<div id="collection-stats" class="box">
 		<h3>SKOS Concepts per class:</h3>

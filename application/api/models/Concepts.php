@@ -36,6 +36,12 @@ class Api_Models_Concepts
 		if (null !== ($lang = $this->lang)) {
 			$solr->setLang($lang);
 		}
+		
+		//if user request fields, make sure that some fields are always included:
+		if (isset($this->_queryParameters['fl'])) {
+			$this->_queryParameters['fl'] .= ',xmlns,xml';
+		}
+		
 		$params = array('wt' => $this->format === 'xml' ? 'xml' : 'phps') + $this->_queryParameters;
 		
 		if (isset($this->_queryParameters['lang'])) {

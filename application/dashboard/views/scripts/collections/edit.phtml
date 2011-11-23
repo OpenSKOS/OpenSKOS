@@ -21,6 +21,7 @@
 			<?php endforeach?>
 		</ul>
 		<?php if ($this->collection->OAI_baseURL):?>
+		<?php if (false):?>
 		<h3><?php echo $this->translate('Schedule an OAI Harvest job')?></h3>
 		<?php 
 			//is a OAI Harvest job already scheduled?
@@ -34,6 +35,9 @@
 		?></p>
 		<?php else:?>
 		<?php echo $this->collection->getOaiJobForm()->setAction($this->url(array('action' => 'harvest')))?>
+		<?php endif?>
+		<?php else:?>
+			<p>OAI LAST UPDATE</p>
 		<?php endif?>
 		<?php else:?>
 		<h3><?php echo $this->translate('Import new data')?></h3>

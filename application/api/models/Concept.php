@@ -239,6 +239,28 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 	}
 	
+	public function getConceptSchemes()
+	{
+		$ConceptSchemes = array();
+		foreach (self::$classes['ConceptSchemes'] as $subClass) {
+			if (isset($this->data[$subClass])) {
+				$ConceptSchemes[$subClass] = $this->data[$subClass];
+			}
+		}
+		return $ConceptSchemes;
+	}
+	
+	public function getTopConcepts()
+	{
+		$topConcepts = $this['hasTopConcept'];
+		if (!$topConcepts) return;
+		$paginator = new Zend_Paginator(new Zend_Paginator_Adapter_Array($topConcepts));
+		$paginator
+			->setItemCountPerPage(10)
+			->setCurrentPageNumber(Zend_Controller_Front::getInstance()->getRequest()->getParam('page'));
+		return $paginator;
+	}
+	
 	public function getLangValues($fieldname, $lang = null) {
 		$data = array();
 		foreach ($this as $key => $values) {
