@@ -28,5 +28,14 @@ class OpenSKOS_Strings
         _("The two given tokens do not match");
         _("'%value%' is not a valid URL.");
         _("'%value%' is not a valid date string.");
+        
+        _('code');
+        _('organisationUnit');
+        _('website');
+        _('email');
+        _('streetAddress');
+        _('locality');
+        _('postalCode');
+        _('countryName');
 	}
 }

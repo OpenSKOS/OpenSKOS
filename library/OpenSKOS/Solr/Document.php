@@ -12,13 +12,23 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
 	}
 	
 	public function offsetSet($fieldname, $value) {
+		$newField = false;
 		if (!$this->offsetExists($fieldname)) {
 			$this->fieldnames[] = $fieldname;
+			$newField = true;
 		}
 		if (!is_array($value)) {
-			$this->data[$fieldname] = array($value);
+			if (false === $newField) {
+				$this->data[$fieldname][] = $value;
+			} else {
+				$this->data[$fieldname] = array($value);
+			}
 		} else {
-			$this->data[$fieldname] = $value;
+			if (false === $newField) {
+				$this->data[$fieldname] = $this->data[$fieldname] + $value;
+			} else {
+				$this->data[$fieldname] = $value;
+			}
 		}
 	}
 	

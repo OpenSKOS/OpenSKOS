@@ -57,15 +57,19 @@
    <field name="class" type="string" indexed="true" stored="true" required="true" default="Concept" />
 
 	<!-- 4. Concept Schemes http://www.w3.org/TR/skos-reference/#schemes -->
-   <field name="ConceptSchemes" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 
+	<!-- 
+   <field name="ConceptSchemes" type="string" indexed="true" stored="true" required="false" multiValued="true"/>
+    --> 
    <field name="ConceptScheme" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 
    <field name="inScheme" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 
    <field name="hasTopConcept" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 
    <field name="topConceptOf" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 
+   <!-- 
 	<copyField source="ConceptScheme" dest="ConceptSchemes" />
 	<copyField source="inScheme" dest="ConceptSchemes" />
 	<copyField source="hasTopConcept" dest="ConceptSchemes" />
 	<copyField source="topConceptOf" dest="ConceptSchemes" />
+	-->
 	
 	<!-- 5. Lexical Labels http://www.w3.org/TR/skos-reference/#LexicalLabels -->
    <field name="LexicalLabels" type="string" indexed="true" stored="true" required="false" multiValued="true"/> 

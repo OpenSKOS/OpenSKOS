@@ -12,21 +12,32 @@ if (null !== ($lang = Zend_Controller_Front::getInstance()->getRequest()->getPar
 		$title = $concept[$fieldname][0];
 	}
 }
+if (!$title) $title = $concept['uri'];
 $this->headTitle($title);
 $collection = $concept->getCollection();
 
 ?>
 <h2><?php echo $this->escape($title)?></h2>
 <dl>
-	<dd><?php echo $this->translate('Institution')?>:</dd>
-	<dl><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dl>
-	<dd><?php echo $this->translate('Collection')?>:</dd>
-	<dl><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dl>
-	<dd>URI:</dd>
-	<dl><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dl>
-	<dd>SKOS Class:</dd>
-	<dl><a rel="external" href="<?php echo $concept->getClassUri()?>"><?php echo $concept->getClass()?></a></dl>
+	<dt><?php echo $this->translate('Institution')?>:</dt>
+	<dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dd>
+	<dt><?php echo $this->translate('Collection')?>:</dt>
+	<dd><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dd>
+	<dt>URI:</dt>
+	<dd><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dd>
+	<dt>SKOS Class:</dt>
+	<dd><a rel="external" href="<?php echo $concept->getClassUri()?>"><?php echo $concept->getClass()?></a></dd>
 </dl>
+
+<?php if ($inScheme = $concept['inScheme']):?>
+<h3><?php echo $this->translate('inScheme')?></h3>
+<ul>
+<?php foreach ($inScheme as $uri):?>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'redirect', 'action' => 'index', 'id' => null), 'default')?>?id=<?php echo $uri?>&format=html"><?php echo $uri?></a></li>
+<?php endforeach?>
+</ul>
+<?php endif?>
+
 
 <?php foreach (Api_Models_Concept::$classes as $className => $subClasses):?>
 	<?php if ($concept->hasClass($className)): ?>
@@ -60,8 +71,19 @@ $collection = $concept->getCollection();
 		<?php endforeach?>
 	<?php endif?>
 <?php endforeach?>
+
+<?php if ($topConcepts = $concept->getTopConcepts()):?>
+<h3><?php echo $this->translate('hasTopConcept')?> (<?php echo number_format($topConcepts->getTotalItemCount())?> <?php echo $this->translate('items')?>)</h3>
+<ol start="<?php echo $topConcepts->getAbsoluteItemNumber(1)?>">
+	<?php foreach ($topConcepts as $topConcept):?>
+			<li><a class="resolvable-concept" href="<?php echo $this->url(array('controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $topConcept?>"><?php echo $this->escape($topConcept)?></a></li>
+	<?php endforeach?>
+</ol>
+<?php echo $this->paginationControl($topConcepts, 'Sliding', 'pagination.phtml')?>
+<?php endif?>
+
 <?php if (null !== ($relations = $concept->getImplicitRelations())):?>
-<h3>Implicit Semantic Relations</h3>
+<h3><?php echo $this->translate('Implicit Semantic Relations')?></h3>
 <?php foreach ($relations as $relationName => $relatedConcepts):?>
 <h4><?php echo $this->translate('skos:'.$relationName)?></h4>
 <ul>
@@ -74,7 +96,7 @@ $collection = $concept->getCollection();
 <?php endforeach?>
 <?php endif?>
 
-<h3>Alternative formats</h3>
+<h3><?php echo $this->translate('Alternative formats')?></h3>
 <ul>
 	<li><a class="xml" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=xml">XML</a></li>
 	<li><a class="json" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=json">JSON</a></li>

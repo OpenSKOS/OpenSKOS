@@ -1,7 +1,7 @@
 <?php $this->headTitle ($this->tenant->name)?>
 
 <h2><?php echo $this->escape($this->tenant->name)?></h2>
-<ul>
+<dl>
 	<?php foreach ($this->tenant as $key => $val): if ($key == 'name' || !$val) continue;
 		switch ($key) {
 			case 'email':
@@ -14,9 +14,10 @@
 				$val = $this->escape($val);
 		}
 	?>
-	<li><em><?php echo $key?></em>: <?php echo $val?></li>
+	<dt><?php echo $this->translate($key)?>:</dt>
+	<dd><?php echo $val?></dd>
 	<?php endforeach?>
-</ul>
+</dl>
 <h3><?php echo $this->translate('Collections')?></h3>
 <?php 
 	$collections = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');

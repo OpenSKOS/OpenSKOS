@@ -11,9 +11,35 @@ window.addEvent('load', function(){
 				}
 				a.set('href', '/api/concept/' + concept.uuid + '.html');
 				a.removeClass('loading');
+				var a2 = new Element('a', {
+					href:  concept.uri,
+					'rel': 'external'
+				}).appendText(concept.uri);
+				new ExternalLink(a2);
+				
+				var el = new Element('span')
+					.grab(new Element('br'))
+					.appendText('(')
+					.grab(a2)
+					.appendText(')')
+					.inject(a.getParent());
+				
 		});
 		concept.load('uuid,uri,prefLabel,class,dc_title');
 	});
+	
+	$$('a[rel=external]').each(function(a) {
+		new ExternalLink(a);
+	});
+});
+
+var ExternalLink = new Class({
+	initialize: function (a) {
+		a.addEvent('click', function(ev) {
+			new Event(ev).stop();
+			window.open(this.href);
+		});
+	}
 });
 
 var CheckAllBoxes = new Class({

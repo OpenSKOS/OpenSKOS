@@ -79,8 +79,8 @@ for example with as Javascript based autocompete field.</p>
 </ul>
 <p>Once the user selects a label from the autocomplete list, you have to lookup the matching Concept. 
 You can do this by querying the find API with the selected label, for example if the user selects the label "Dantons Dood":<br/>
-	<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:%22Dantons%20Dood%22&fl=uri">
-		<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:"Dantons Dood"&fl=uri
+	<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:%22Dood%20Paard%22&fl=uri">
+		<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:"Dood Paard"&amp;fl=uri
 	</a>
 </p>
 <div class="note">
@@ -93,16 +93,16 @@ You can do this by querying the find API with the selected label, for example if
 		<p>Find concepts that have a lexical label that matches the word "<em><?php echo $exampleWordFindConcepts?></em>":</p>
 		<ul>
 			<li>
-				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
+				in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
+			</li>
+			<li>
+				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=json"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=json</a>
 			</li>
 			<!-- 
 			<li>
 				in (internal) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
 			</li>
 			 -->
-			<li>
-				in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=rdf"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=rdf</a>
-			</li>
 		</ul>
 	</li>
 	<li>

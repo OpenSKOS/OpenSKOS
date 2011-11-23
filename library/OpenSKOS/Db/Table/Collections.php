@@ -67,6 +67,16 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 		return $result['facet_counts']['facet_fields']['class'];
 	}
 	
+	public function getConceptSchemes(OpenSKOS_Db_Table_Row_Collection $collection = null)
+	{
+		$solr = OpenSKOS_Solr::getInstance();
+		$q = 'class:ConceptScheme collection:' . $collection->id;
+		$result = $solr->search($q, array(
+			'rows' => 1000
+		));
+		return new OpenSKOS_SKOS_ConceptSchemes($result);
+	}
+	
 	public function uniqueCode($code, Array $data)
 	{
 		//fetch the tenant:

@@ -22,6 +22,11 @@ a.block {
 	display: block;
 }
 
+a[rel="external"] {
+	padding-right: 13px;
+	background: url(../images/external.png) center right no-repeat;
+}
+
 #content {
 	font-size: 1.0em;
 	line-height: 1.5;
@@ -90,6 +95,26 @@ thead tr th {
 
 tr.even {
 	background-color: #fff5fc;
+}
+
+/* Definition lists */
+dl
+{
+	margin: 0;
+	padding: 0;
+}
+
+dt
+{
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+}
+
+dd
+{
+	margin: 0 0 1em 0;
+	padding: 0;
 }
 
 /* GESHI CSS */
