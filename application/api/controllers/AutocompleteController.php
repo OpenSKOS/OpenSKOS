@@ -15,8 +15,8 @@
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
- * @version    $Id: Controller.php 23953 2011-05-03 05:47:39Z ralph $
  */
 
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller {
