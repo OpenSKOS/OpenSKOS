@@ -1,4 +1,4 @@
-   /**
+/**
  * Universal Zend_Form styling
  * Javascript fixes, mootools required!
  * Here is everything needed for proper Zend_Form rendering that I couldn't achieve in CSS...
