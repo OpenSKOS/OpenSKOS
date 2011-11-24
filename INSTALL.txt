@@ -7,7 +7,12 @@ webserver's document root.
 
 1.1 Configuration
 -------------------------------------------------------------------------------
-To configure OpenSKOS edit the APPROOT/application/configs/application.ini
+To configure OpenSKOS you have to rename:
+  APPROOT/application/configs/application.ini.dist
+to
+  APPROOT/application/configs/application.ini
+
+Now you van edit the APPROOT/application/configs/application.ini
 You can have separate config settings for specific deployments. The 
 configuration section marked by the Environment Variable "APPLICATION_ENV" (see
 3.1 Setting Up Your VHOST). Most settings are self explanatory.
