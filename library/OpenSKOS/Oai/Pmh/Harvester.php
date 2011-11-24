@@ -1,6 +1,6 @@
 <?php
 
-class OpenSKOS_Oai_Pmh_Harvester implements Iterator
+class OpenSKOS_Oai_Pmh_Harvester implements Iterator, Countable
 {
 	/**
 	 * @param OpenSKOS_Db_Table_Row_Collection $collection
@@ -29,6 +29,15 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 	public function __construct(OpenSKOS_Db_Table_Row_Collection $collection)
 	{
 		$this->_collection = $collection;
+		if (!$this->_collection->OAI_baseURL) {
+		    throw new OpenSKOS_Oai_Pmh_Harvester_Exception("Collection has no OAI base URL");
+		}
+		//load options from URI:
+		$query = array();
+		parse_str(parse_url($this->_collection->OAI_baseURL, PHP_URL_QUERY), $query);
+		foreach ($query as $key => $val) {
+		    $this->setOption($key, $val);
+		}
 	}
 	
 	/**
@@ -137,9 +146,6 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 	protected function _getClient()
 	{
 		if (null === $this->_client) {
-			if (!$this->_collection->OAI_baseURL) {
-				throw new OpenSKOS_Oai_Pmh_Harvester_Exception("Collection has no OAI base URL");
-			}
 			$this->_client = new Zend_Http_Client($this->_collection->OAI_baseURL, array(
 				'maxredirects' => 0,
 				'timeout' => 60
@@ -186,9 +192,14 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 	 */
 	public function valid () 
 	{
-		return 
+	    return 
 			($this->key() == 0  || $this->_lastPage == false)
 			&& count($this->_records);
+	}
+	
+	public function count()
+	{
+	    return $this->valid() ? count($this->_records) : null;
 	}
 	
 	/**
@@ -218,6 +229,6 @@ class OpenSKOS_Oai_Pmh_Harvester implements Iterator
 
 	public function rewind () 
 	{
-		$this->_loadRecords();
+	    $this->_loadRecords();
 	}
 }

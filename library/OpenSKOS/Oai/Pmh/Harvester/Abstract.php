@@ -23,6 +23,9 @@ abstract class OpenSKOS_Oai_Pmh_Harvester_Abstract implements Iterator, Countabl
 			throw new OpenSKOS_Oai_Pmh_Harvester_Exception('Failed to load XML from responseBody');
 		}
 		
+		if ($doc->documentElement->nodeName != 'OAI-PMH') {
+		    throw new OpenSKOS_Oai_Pmh_Harvester_Exception('XML response does not appear to be a valid OAI-PMH document.');
+		}
 		
 		$this->_xpath = new DOMXPath($doc);
 		$this->_xpath->registerNamespace('oai', 'http://www.openarchives.org/OAI/2.0/');
