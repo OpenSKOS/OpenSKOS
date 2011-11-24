@@ -29,7 +29,6 @@ if ($OPTS->help) {
 
 include 'bootstrap.inc.php';
 
-
 $model = new OpenSKOS_Db_Table_Collections();
 if (null !== $OPTS->collection) {
     if (preg_match('/^\d+$/', $OPTS->collection)) {
