@@ -37,7 +37,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 				->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
 				->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
 				->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
-				->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication, use "*" to allow all)'), 'required' => false))
+				->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication)'), 'required' => false))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
 				->addElement('submit', 'cancel', array('label'=>_('Cancel')))

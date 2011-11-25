@@ -33,7 +33,7 @@ class OpenSKOS_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
 		if (isset($_SERVER['eppn'])) {
 		    //lookup user with this eduPersonPrincipalName:
 		    $model = new OpenSKOS_Db_Table_Users();
-		    $user = $model->fetchRow($model->select()->where('eppn=?', $_SERVER['eppn'])->orWhere('eppn=?', '*'));
+		    $user = $model->fetchRow($model->select()->where('eppn=?', $_SERVER['eppn']));
 		    if (null!==$user) {
             	if($user->active != 'Y') {
     				Zend_Auth::getInstance()->clearIdentity();
