@@ -256,9 +256,11 @@ class OpenSKOS_Rdf_Parser implements Countable
 				}
 			}
 			
-			$document->$fieldname = trim($skosElement->nodeValue)
-				? $skosElement->nodeValue
+			$value = trim($skosElement->nodeValue)
+				? trim($skosElement->nodeValue)
 				: $skosElement->getAttributeNS(self::$namespaces['rdf'], 'resource');
+			
+			$document->offsetSet($fieldname, $value);
 		}
 		
 		foreach (array('dc', 'dcterms') as $ns) {
@@ -276,7 +278,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 				array('dcterms:title', 'dcterms:description'),
 				$element->nodeName
 			);
-			$document->$fieldname = $element->nodeValue;
+			$document->offsetSet($fieldname, $element->nodeValue);
 		}
 		$document->xml = $Description->ownerDocument->saveXML($Description);
 		
