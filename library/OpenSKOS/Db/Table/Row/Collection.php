@@ -55,6 +55,8 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	 */
 	public function getJobs($task = null)
 	{
+	    //new records do not have jobs:
+	    if (null === $this->id) return array();
 		$model = new OpenSKOS_Db_Table_Jobs();
 		$select = $model->select()
 			->where('collection=?', $this->id)
