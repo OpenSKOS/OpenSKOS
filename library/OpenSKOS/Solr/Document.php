@@ -27,7 +27,20 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
 	
 	public function __set($fieldname, $value)
 	{
-		$this->offsetSet($fieldname, $value);
+	    //this differs from self::offsetSet:
+	    // - if a field has been set before, make this field multiValued
+	    $offsetExists = $this->offsetExists($fieldname);
+	    $value = !is_array($value) ? array($value) : $value;
+	    if (!$offsetExists) {
+	        $this->fieldnames[] = $fieldname;
+	        $this->data[$fieldname] = $value;
+	    } else {
+	        if (is_array($this->data[$fieldname])) {
+	            $this->data[$fieldname] = array_merge($this->data[$fieldname], $value);
+	        } else {
+	            $this->data[$fieldname] = array_merge(array($this->data[$fieldname]), $value);
+	        }
+	    }
 	}
 	
 	public function offsetSet($fieldname, $value) {
