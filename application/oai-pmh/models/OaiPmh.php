@@ -374,7 +374,7 @@ class OaiPmh
 		}
 		
 		$params = array(
-			'sort' => 'prefLabel asc',
+			'sort' => 'uuid asc',
 			'fl' => false === $onlyIdentifiers ? '*' : 'uuid,timestamp,ConceptSchemes,tenant,collection'
 		);
 		
