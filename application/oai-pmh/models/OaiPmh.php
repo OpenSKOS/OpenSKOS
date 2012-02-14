@@ -21,7 +21,9 @@
 
 class OaiPmh
 {
-	protected $_verbs = array(
+    const XS_DATETIME_FORMAT = "Y-m-d\TH:i:s\Z";
+    
+    protected $_verbs = array(
       "Identify" => array(),
       "ListMetadataFormats" => array('identifier'),
       "ListSets" => array('resumptionToken'),
