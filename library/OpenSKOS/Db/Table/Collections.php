@@ -112,6 +112,45 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 		return count($this->fetchAll($select)) === 0;
 	}
 	
+    /**
+     * Fetches all SQL result rows as an associative array.
+     *
+     * The first column is the key, the entire row array is the
+     * value.  You should construct the query to be sure that
+     * the first column contains unique values, or else
+     * rows with duplicate values in the first column will
+     * overwrite previous data.
+     *
+	 * @param string|array|Zend_Db_Table_Select $where  OPTIONAL An SQL WHERE clause or Zend_Db_Table_Select object.
+     * @param string|array                      $order  OPTIONAL An SQL ORDER clause.
+     * @param int                               $count  OPTIONAL An SQL LIMIT count.
+     * @param int                               $offset OPTIONAL An SQL LIMIT offset.
+     * @return array
+     */
+    public function fetchAssoc($where = null, $order = null, $count = null, $offset = null)
+    {
+        if (!($where instanceof Zend_Db_Table_Select)) {
+            $select = $this->select();
+
+            if ($where !== null) {
+                $this->_where($select, $where);
+            }
+
+            if ($order !== null) {
+                $this->_order($select, $order);
+            }
+
+            if ($count !== null || $offset !== null) {
+                $select->limit($count, $offset);
+            }
+
+        } else {
+            $select = $where;
+        }
+
+        return $this->getAdapter()->fetchAssoc($select);
+    }
+
 }
 
 class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset

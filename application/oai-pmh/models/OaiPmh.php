@@ -21,7 +21,9 @@
 
 class OaiPmh
 {
-	protected $_verbs = array(
+    const XS_DATETIME_FORMAT = "Y-m-d\TH:i:s\Z";
+    
+    protected $_verbs = array(
       "Identify" => array(),
       "ListMetadataFormats" => array('identifier'),
       "ListSets" => array('resumptionToken'),
@@ -332,11 +334,37 @@ class OaiPmh
 	
 	public function ListSets()
 	{
-		$model = new OpenSKOS_Db_Table_Collections();
-		$this->_view->collections = $model->fetchAll();
-		
 		$model = new OpenSKOS_Db_Table_Tenants();
 		$this->_view->tenants = $model->fetchAll();
+		
+	    $model = new OpenSKOS_Db_Table_Collections();
+		$collections = array();
+		foreach ($model->fetchAll() as $collection) {
+		    if (!isset($collections[$collection->tenant])) {
+		        $collections[$collection->tenant] = array();
+		    }
+		    $collections[$collection->tenant][$collection->id] = $collection;
+		}
+		$this->_view->collections = $collections;
+		
+		//load all ConceptSchemes:
+	    $limit = 20;
+	    $start = 0;
+	    $conceptSchemes = array();
+	    while (true) {
+	        $params = array('limit' => $limit, 'start' => $start, 'fl' => 'uri,uuid,xml,collection');
+    	    $response = new OpenSKOS_SKOS_ConceptSchemes(OpenSKOS_Solr::getInstance()->search('class:ConceptScheme'));
+    	    foreach ($response as $doc) {
+    	        if (!isset($conceptSchemes[$doc['collection']])) {
+    	            $conceptSchemes[$doc['collection']] = array();
+    	        }
+    	        $conceptSchemes[$doc['collection']][] = $doc;
+    	    }
+    	    $start += $limit;
+    	    if ($start >= count($response)) break;
+	    }
+	    $this->_view->assign('conceptSchemes', &$conceptSchemes);
+	
 		return $this->_view->render('index/ListSets.phtml');
 	}
 	
@@ -355,7 +383,9 @@ class OaiPmh
 			if (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Tenant')) {
 				$q = "({$q}) AND (tenant:\"{$this->_set->code}\")";
 			} elseif (is_a($this->_set, 'OpenSKOS_Db_Table_Row_Collection')) {
-				$q = "({$q}) AND (collection:\"{$this->_set->id}\")";
+				$q = "({$q}) AND (collection:{$this->_set->id}) AND (tenant:{$this->_set->tenant})";
+			} else {
+				$q = "({$q}) AND (collection:{$this->_set['collection']}) AND (tenant:{$this->_set['tenant']}) AND (inScheme:\"{$this->_set['uri']}\")";
 			}
 		}
 		
@@ -386,25 +416,43 @@ class OaiPmh
 		$this->_view->namespacesByCollection = OpenSKOS_Db_Table_Namespaces::getNamespacesByCollection();
 		$this->_view->data = $paginator;
 		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
+		$model = new OpenSKOS_Db_Table_Collections();
+		$this->_view->collections = $model->fetchAssoc();
+		
 		return $this->_view->render('index/List'.(false === $onlyIdentifiers ? 'Records' : 'Identifiers').'.phtml');
 	}
 	
 	public function getSet($set)
 	{
-		if (preg_match('/^(([a-z0-9]+):)?\d+$/', $set)) {
+	    list($tenantCode, $collectionCode, $conceptSchemaUuid) = explode(':', $set);
+	    if (null === $tenantCode) return;
+	    $model = new OpenSKOS_Db_Table_Tenants();
+	    if (null === ($tenant = $model->find($tenantCode)->current())) {
+	        return;
+	    }
+	    
+	    if (null !== $collectionCode) {
 			$model = new OpenSKOS_Db_Table_Collections();
-			return $model->find($set)->current();
-		} elseif (preg_match('/^([a-z0-9]+):([a-z0-9]+)$/', $set, $match)) {
-			$model = new OpenSKOS_Db_Table_Collections();
-			list(, $tenant, $code) = $match;
-			return $model->fetchRow($model->select()
-				->where('code=?', $code)
-				->where('tenant=?', $tenant)
-			);
-		} else {
-			$model = new OpenSKOS_Db_Table_Tenants();
-			return $model->find($set)->current();
-		}
+			$collection = $model->fetchRow($model->select()
+    			->where('code=?', $collectionCode)
+    			->where('tenant=?', $tenantCode));
+			if (null === $collection) return;
+			if (null!==$conceptSchemaUuid) {
+			    $params = array('limit' => 1, 'fl' => 'uuid');
+			    $response = new OpenSKOS_SKOS_ConceptSchemes(
+			        OpenSKOS_Solr::getInstance()->search("class:ConceptScheme AND tenant:{$tenant->code} AND collection:{$collection->id} AND uuid:{$conceptSchemaUuid}")
+			    );
+			    if(count($response)==0) {
+			        return;
+			    } else {
+			        return $response->current();
+			    }
+			} else {
+			    return $collection;
+			}
+	    } else {
+	        return $tenant;
+	    }
 	}
 	
 	public function GetRecord()

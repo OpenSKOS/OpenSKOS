@@ -26,6 +26,24 @@ abstract class OpenSKOS_SKOS_Docs_Abstract implements ArrayAccess
 	 */
 	protected $_data;
 	
+	/**
+	 * 
+	 * @var DOMDocument
+	 */
+	protected $_DomDocument;
+	
+	/**
+	 * 
+	 * @var XPath
+	 */
+	protected $_DOMXPath;
+	
+	/**
+	 * 
+	 * @var SimpleXMLElement
+	 */
+	protected $_SimpleXMLElement;
+	
 	public function __construct(array $solrDoc = array())
 	{
 		if (null !== $solrDoc) {
@@ -57,7 +75,11 @@ abstract class OpenSKOS_SKOS_Docs_Abstract implements ArrayAccess
 	 */
 	public function offsetGet ($offset) 
 	{
-		return $this->offsetExists($offset) ? $this->_data[$offset] : null;
+        if (0===strpos($offset, 'dc_')) {
+            return $this->getSimpleXMLElement()->{str_replace('dc_', '', $offset)};
+        } else {
+    	    return $this->offsetExists($offset) ? $this->_data[$offset] : null;
+        }
 	}
 
 	/**
@@ -83,4 +105,52 @@ abstract class OpenSKOS_SKOS_Docs_Abstract implements ArrayAccess
 		unset($this->_data[$offset]);
 		return $this;
 	}
+	
+	/**
+	 * Get a DOMDocument from the internal XML data
+	 * 
+	 * @throws OpenSKOS_SKOS_Exception
+	 * @return DOMDocument
+	 */
+	public function getDomDocument()
+	{
+	    if (null === $this->_DomDocument && $this['xml']) {
+	        $DomDocument = new DOMDocument('1.0', 'utf-8');
+	        if (!@$DomDocument->loadXML($this['xml'])) {
+	            throw new OpenSKOS_SKOS_Exception('Failed to load XML as a DOMDocument');
+	        }
+	        $this->_DomDocument = &$DomDocument;
+	    }
+	    return $this->_DomDocument;
+	}
+	
+	/**
+	 * Get a SimpleXML from the internal XML data
+	 * 
+	 * @throws OpenSKOS_SKOS_Exception
+	 * @return SimpleXMLElement
+	 */
+	public function getSimpleXMLElement()
+	{
+	    if (null === $this->_SimpleXMLElement && $this['xml']) {
+	        $SimpleXMLElement = @new SimpleXMLElement($this['xml']);
+	        if (!$SimpleXMLElement) {
+	            throw new OpenSKOS_SKOS_Exception('Failed to load XML as a SimpleXMLElement');
+	        }
+	        $this->_SimpleXMLElement = &$SimpleXMLElement;
+	    }
+	    return $this->_SimpleXMLElement;
+	}
+	
+	/**
+	 * @return DOMXPath
+	 */
+	public function getXPath()
+	{
+	    if (null === $this->_DOMXPath && null !== ($doc = $this->getDomDocument())) {
+	         $this->_DOMXPath = new DOMXPath($doc);
+	    }
+	    return $this->_DOMXPath;
+	}
+	
 }

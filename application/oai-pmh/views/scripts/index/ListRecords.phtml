@@ -20,10 +20,13 @@
  */
 ?>
 <?php require_once APPLICATION_PATH . '/api/models/Concept.php'?>
+<?php if ($this->parameters['verb']=='ListRecords' && 0 === count($this->data)):?>
+    <error code="noRecordsMatch">The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list.</error>
+<?php return; endif; ?>
 <<?php echo $this->parameters['verb']?>>
 <?php foreach ($this->data as $doc):?>
 <record>
-	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc))?>
+	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc, 'collections' => $this->collections))?>
 	<metadata>
 		<?php if ($this->metadataPrefix === 'oai_rdf'):?>
 		<?php 
