@@ -49,6 +49,9 @@
 	<!-- application specific fields -->
    <field name="tenant" type="string" indexed="true" stored="true" required="true" />
    <field name="collection" type="integer" indexed="true" stored="true" required="true" />
+   
+   <!-- Support for "soft" deletes: -->
+   <field name="deleted" type="boolean" indexed="true" stored="true" required="true" default="false" />
 
 	<!-- data field for the entire XML representation of the concept -->
    <field name="xml" type="string" indexed="false" stored="true" required="true" />

@@ -19,14 +19,16 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-	<header>
+	<header <?php if (true === $this->doc['deleted']) echo 'status="deleted"'?>>
 		<identifier><?php echo $this->doc['uuid']?></identifier>
 		<datestamp><?php echo $this->doc['timestamp']?></datestamp>
+		<?php if (false === $this->doc['deleted']):?>
 		<setSpec><?php echo $this->doc['tenant']?></setSpec>
 		<setSpec><?php echo $this->doc['tenant'].':'.$this->collections[$this->doc['collection']]['code']?></setSpec>
-		<?php if(isset($this->doc['ConceptSchemes'])):?>
-		<?php foreach ($this->doc['ConceptSchemes'] as $ConceptScheme):?>
+    		<?php if(isset($this->doc['ConceptSchemes'])):?>
+    		    <?php foreach ($this->doc['ConceptSchemes'] as $ConceptScheme):?>
 		<setSpec><?php echo $this->doc['tenant'].':'.$this->collections[$this->doc['collection']]['code']?>:<?php echo OpenSKOS_Solr::md5_uuid($ConceptScheme)?></setSpec>
-		<?php endforeach?>
+    		    <?php endforeach?>
+    		<?php endif?>
 		<?php endif?>
 	</header>
