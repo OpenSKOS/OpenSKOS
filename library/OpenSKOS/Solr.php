@@ -297,7 +297,7 @@ class OpenSKOS_Solr
 	{
 		static $client;
 		if (null === $client) {
-			$client = new Zend_Http_Client();
+			$client = new Zend_Http_Client(null, array('timeout' => 60));
 			$client->setUri($this->getUri());
 		}
 		return $client;
