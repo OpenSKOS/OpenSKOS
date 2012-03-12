@@ -50,7 +50,7 @@ class Api_Models_Concepts
 		return new Api_Models_Concepts();
 	}
 	
-	public function getConcepts($q)
+	public function getConcepts($q, $includeDeleted = false)
 	{
 		$solr = $this->solr();
 		if (null !== ($lang = $this->lang)) {
@@ -68,10 +68,15 @@ class Api_Models_Concepts
 			$q='LexicalLabelsText@'.$lang.':('.$q.')';
 		}
 		
+		//only return non-deleted items:
+		if (false === $includeDeleted) {
+		    $q = "($q) AND deleted:false";
+		}
+		
 		return $solr->search($q, $params);
 	}
 	
-	public function autocomplete($label)
+	public function autocomplete($label, $includeDeleted = false)
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
@@ -94,6 +99,12 @@ class Api_Models_Concepts
 		$labelReturnField .= null===$lang?'':'@'.$lang;
 		
 		$q = "{$labelSearchField}:{$label}*";
+		
+		//only return non-deleted items:
+		if (false === $includeDeleted) {
+		    $q = "($q) AND deleted:false";
+		}
+				
 		$params = array(
 			'facet' => 'true',
 			'facet.field' => $labelReturnField,
@@ -158,12 +169,13 @@ class Api_Models_Concepts
 	 * @param uuid $id
 	 * @return Api_Models_Concept
 	 */
-	public function getConcept($id)
+	public function getConcept($id, $includeDeleted = false)
 	{
 		$data = $this->solr()->get($id, array(
 			'wt' => $this->format === 'xml' ? 'xml' : 'phps',
 			'fl' => $this->getQueryParam('fl', '*')
-			)
+			),
+    		$includeDeleted
 		);
 		if (null === $data) return;
 		return is_object($data) ? $data : new Api_Models_Concept($data, $this);

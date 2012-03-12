@@ -24,9 +24,12 @@
     <error code="noRecordsMatch">The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list.</error>
 <?php return; endif; ?>
 <<?php echo $this->parameters['verb']?>>
-<?php foreach ($this->data as $doc):?>
+<?php foreach ($this->data as $doc):
+    if (!isset($doc['deleted'])) $doc['deleted'] = false;
+?>
 <record>
 	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc, 'collections' => $this->collections))?>
+	<?php if (false === $doc['deleted']):?>
 	<metadata>
 		<?php if ($this->metadataPrefix === 'oai_rdf'):?>
 		<?php 
@@ -57,6 +60,7 @@
 		</oai_dc:dc>
 		<?php endif?>
 	</metadata>
+	<?php endif?>
 </record>
 <?php endforeach?>
 <?php

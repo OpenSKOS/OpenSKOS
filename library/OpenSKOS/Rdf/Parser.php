@@ -216,7 +216,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		$document = new OpenSKOS_Solr_Document();
 		foreach ($extradata as $key => $var) {
-			$document->$key = $var;
+			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
 		}
 		
 		$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');

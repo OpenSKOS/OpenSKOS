@@ -259,6 +259,11 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 	}
 	
+	public function isDeleted()
+	{
+	    return (bool)$this['deleted'];
+	}
+	
 	public function getConceptSchemes()
 	{
 		$ConceptSchemes = array();
@@ -331,15 +336,35 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	}
 	
 	/**
+	 * Perform a "soft" delete
+	 * 
 	 * @return Api_Models_Concept
 	 */
 	public function delete()
 	{
-		//delete this document from Solr:
-		$solr = $this->solr()->delete('uuid:'.(is_array($this['uuid']) ? $this['uuid'][0] : $this['uuid']));
-		return $this;
+        $rdf = $this->toRDF();
+        $data = array(
+			'tenant' => $this['tenant'],
+			'collection' => $this['collection'],
+            'deleted' => true
+        );
+	    $solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($rdf->firstChild->firstChild, $data);
+	    $this->solr()->add($solrDocument);
+	    return $this;
+	    
 	}
 	
+	/**
+	 * Perform a "hard" delete
+	 * 
+	 * @return Api_Models_Concept
+	 */
+	public function perge()
+	{
+	    //delete this document from Solr:
+	    $solr = $this->solr()->delete('uuid:'.(is_array($this['uuid']) ? $this['uuid'][0] : $this['uuid']));
+	    return $this;
+	}
 	
 	public function save()
 	{

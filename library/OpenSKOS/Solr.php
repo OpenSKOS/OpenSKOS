@@ -149,7 +149,7 @@ class OpenSKOS_Solr
 	}
 
 	
-	public function get($id, Array $extraParams = array())
+	public function get($id, Array $extraParams = array(), $includeDeleted = false)
 	{
 		//concept by uuid or uri?
 		if (self::isValidUuid($id)) {
@@ -157,8 +157,13 @@ class OpenSKOS_Solr
 		} else {
 			$key = 'uri';
 		}
+		
+		$q = $key . ':"' . $id.'"';
+		if (false === $includeDeleted) {
+		    $q = "($q) AND deleted:false";
+		}
 
-		$response = $this->search($key . ':"' . $id.'"', $extraParams);
+		$response = $this->search($q, $extraParams);
 		if (isset($extraParams['wt']) && $extraParams['wt']=='xml') {
 			return DOMDocument::loadXML($response->saveXml($response->getElementsByTagName('doc')->item(0)));
 		} else {
@@ -175,10 +180,15 @@ class OpenSKOS_Solr
 			$documents = new OpenSKOS_Solr_Documents($documents);
 		} elseif(is_a($documents, 'OpenSKOS_Solr_Documents')) {
 			//do nothing, just use magic __toString
-		} elseif (is_a($documents, 'OpenSKOS_Rdf_Parser_Helper')) {
+		} elseif(is_a($documents, 'OpenSKOS_Solr_Documents')) {
 			//do nothing, just use magic __toString
+		} elseif (is_a($documents, 'Api_Models_Concept')) {
+		    $documents = '<add>' . $documents .'</add>';
+			//do nothing, just use magic __toString
+		} elseif (is_a($documents, 'DOMDocument')) {
+		    $documents = $documents->saveXml();
 		} else {
-			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document|OpenSKOS_Solr_Documents|OpenSKOS_Rdf_Parser_Helper` object, got a `'.get_class($documents).'`');
+			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document|OpenSKOS_Solr_Documents|OpenSKOS_Rdf_Parser_Helper|Api_Models_Concept` object, got a `'.get_class($documents).'`');
 		}
 		
 		return $this->postXml((string)$documents);
