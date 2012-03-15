@@ -24,7 +24,7 @@
 	<baseURL><?php echo $this->baseUrl?></baseURL>
 	<protocolVersion>2.0</protocolVersion>
 	<adminEmail>oai-pmh@openskos.org</adminEmail>
-	<earliestDatestamp><?php echo $this->earliestDatestamp?></earliestDatestamp>
+	<earliestDatestamp><?php echo OaiPmh::OAITimestamp($this->earliestDatestamp)?></earliestDatestamp>
 	<deletedRecord>transient</deletedRecord>
 	<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
 </Identify>
