@@ -27,7 +27,7 @@
 	     xmlns:dc="http://dublincore.org/documents/dcmi-namespace/">
  <responseDate><?php echo $this->responseDate?></responseDate>
  <request
- 	<?php foreach ($this->oai->getParams() as $key => $value):?>
+ 	<?php foreach ($this->oai->getParams(true) as $key => $value):?>
  	<?php echo $key?>="<?php echo $value instanceof Zend_Date ? $value->toString(Zend_Date::ISO_8601) : $value?>"
  	<?php endforeach?>><?php echo $this->baseUrl?></request> 
  <?php echo $this->oai?>

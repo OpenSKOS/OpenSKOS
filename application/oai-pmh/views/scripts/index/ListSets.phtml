@@ -21,25 +21,28 @@
 ?>
 <ListSets>
 <?php foreach ($this->tenants as $tenant):
-	$rdf = $tenant->toRdf();
 ?>
   <set>
     <setSpec><?php echo $tenant->code?></setSpec>
     <setName><?php echo $this->escape($tenant->name)?></setName>
-    <setDescription>
-    	<?php echo $rdf->saveXml($rdf->documentElement)?>
-    </setDescription>
   </set>
   <?php if (isset($this->collections[$tenant->code])):?>
-    <?php foreach ($this->collections[$tenant->code] as $collection):
-    	$rdf = $collection->toRdf();
-    ?>
+    <?php foreach ($this->collections[$tenant->code] as $collection): ?>
       <set>
         <setSpec><?php echo $tenant->code?>:<?php echo $collection->code?></setSpec>
         <setName><?php echo $this->escape($collection->dc_title)?></setName>
+        <?php if ($collection->dc_description):?>
         <setDescription>
-        	<?php echo $rdf->saveXml($rdf->documentElement)?>
+         <oai_dc:dc 
+              xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+              xmlns:dc="http://purl.org/dc/elements/1.1/" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+              http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+              <dc:description><?php echo $this->escape($collection->dc_description)?></dc:description>
+           </oai_dc:dc>
         </setDescription>
+        <?php endif?>
       </set>
     <?php endforeach?>
     <?php if (isset($this->conceptSchemes[$collection->id])):?>

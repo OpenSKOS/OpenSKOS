@@ -156,9 +156,37 @@ class OaiPmh
 		return $this;
 	}
 	
-	public function getParams()
+	public function getParams($filterOnValidOaiParams = false)
 	{
-		return $this->_params;
+	    if (false === $filterOnValidOaiParams) {
+    		return $this->_params;
+	    } else {
+	        $verb = $this->getParam('verb');
+	        if (! $verb|| !isset($this->_verbs[$verb])) return array();
+	        $params = array('verb' => $verb);
+	        foreach ($this->_verbs as $verb => $extraParameters) {
+	            foreach ($extraParameters as $extraParameter) {
+	                if (null !== ($param = $this->getParam($extraParameter))) {
+	                    //only valid dates!
+	                    if ($extraParameter == 'from' || $extraParameter == 'until') {
+	                        try {
+	                            new Zend_Date($param, Zend_Date::ISO_8601);
+	                            $params[$extraParameter] = $this->_params[$extraParameter];
+	                        } catch (Zend_Date_Exception $e) {
+	                            
+	                        }
+	                    } elseif ($extraParameter == 'identifier') {
+	                        if (OpenSKOS_Solr::isValidUuid($this->_params[$extraParameter])) {
+	                            $params[$extraParameter] = $this->_params[$extraParameter];
+	                        }
+	                    } else {
+	                        $params[$extraParameter] = $this->_params[$extraParameter];
+	                    }
+	                }
+	            }
+	        }
+	        return $params;
+	    }
 	}
 	
 	public function setPage($page)
@@ -175,15 +203,31 @@ class OaiPmh
 	public function checkParams($verb)
 	{
 		if (!isset($this->_verbs[$verb])) {
-			throw new OaiPmh_Exception(
+			unset($this->_params['verb']);
+		    throw new OaiPmh_Exception(
 				'Verb `'.$verb.'` is not a valid OAI-PMH verb', 
-				OaiPmh_Exception::badArgument
+				OaiPmh_Exception::badVerb
 			);
+		}
+		
+		//low level check for double parameters:
+		$queryString = '&'.ltrim($_SERVER['QUERY_STRING'], '&');
+		parse_str($queryString, $queryStringAsArray);
+		foreach ($queryStringAsArray as $qParameter => $value) {
+		    $c = 0;
+		    str_replace("&{$qParameter}=", '', $queryString, $c);
+		    if ($c > 1) {
+		        throw new OaiPmh_Exception(
+		        'You can use parameter `'.$qParameter.'` only once',
+		        OaiPmh_Exception::badArgument
+		        );
+		    }
 		}
 		
 		foreach ($this->getParams() as $key => $value) {
 			if ($key=='verb') continue;
 			if (!in_array($key, $this->_verbs[$verb])) {
+			    unset($this->_params[$key]);
 				throw new OaiPmh_Exception(
 					'Verb `'.$verb.'` may not contain parameter `'.$key.'`', 
 					OaiPmh_Exception::badArgument
@@ -214,13 +258,21 @@ class OaiPmh
 				);
 			}
 			
+			//check for other parameters (which is illegal):
+			if(count($queryStringAsArray) > 2) {
+				throw new OaiPmh_Exception(
+					'Illegal use of the resumptionToken: too many arguments, only `verb` is allowed', 
+					OaiPmh_Exception::badArgument
+				);
+			}
+			
 			$this->setParams($params);
 			return $this->checkparams($verb);
 		}
 		
-		if (null !== ($from = $this->getParam('from'))) {
+		if (null !== ($request_from = $this->getParam('from'))) {
 			try {
-				$from = new Zend_Date($from, Zend_Date::ISO_8601);
+				$from = new Zend_Date($request_from, Zend_Date::ISO_8601);
 				$this->setParam('from', $from);
 			} catch (Zend_Date_Exception $e) {
 				throw new OaiPmh_Exception(
@@ -230,12 +282,12 @@ class OaiPmh
 			}
 		}
 		
-		if (null !== ($until = $this->getParam('until'))) {
+		if (null !== ($request_until = $this->getParam('until'))) {
 			try {
-				$until = new Zend_Date($until, Zend_Date::ISO_8601);
+				$until = new Zend_Date($request_until, Zend_Date::ISO_8601);
 				$this->setParam('until', $until);
 			} catch (Zend_Date_Exception $e) {
-				throw new OaiPmh_Exception(
+			    throw new OaiPmh_Exception(
 					'Date `until` is not a valid ISO8601 format', 
 					OaiPmh_Exception::badArgument
 				);
@@ -246,6 +298,13 @@ class OaiPmh
 			if ($until->isEarlier($from)) {
 				throw new OaiPmh_Exception(
 					'The `from` argument must be less than or equal to the `until` argument', 
+					OaiPmh_Exception::badArgument
+				);
+			}
+				
+			if (strlen($request_from) != strlen($request_until)) {
+				throw new OaiPmh_Exception(
+					'The `from` and `until` argument must have the same granularity', 
 					OaiPmh_Exception::badArgument
 				);
 			}
@@ -300,6 +359,24 @@ class OaiPmh
 			$this->setParam('identifier', $identifier);
 		}
 		
+		if ($verb == 'ListMetadataFormats') {
+		    if (null !== ($identifier = $this->getParam('identifier'))) {
+    			if (!OpenSKOS_Solr::isValidUuid($identifier)) {
+				    throw new OaiPmh_Exception(
+					    'argument `identifier` is not a valid identifier (UUID:UUID)', 
+					    OaiPmh_Exception::badArgument
+				    );				
+			    }
+    		    $result = OpenSkos_Solr::getInstance()->search('uuid:'.$identifier, array('rows'=>1));
+    		    if ($result['response']['numFound']===0) {
+    		        throw new OaiPmh_Exception(
+    		            'Concept `'.$identifier.'` does not exist in this repository',
+    		            OaiPmh_Exception::idDoesNotExist
+    		        );
+    		    }
+		    }
+		}
+		
 		$this->_view->parameters = $this->getParams();
 	}
 	
@@ -314,6 +391,13 @@ class OaiPmh
 		$result = OpenSKOS_Solr::getInstance()->search('*:*', array('rows' => 1, 'fl' => 'timestamp', 'sort' => 'timestamp desc'));
 		$this->_view->earliestDatestamp = $result['response']['docs'][0]['timestamp'];
 		return $this->_view->render('index/Identify.phtml');
+	}
+	
+	public function OAITimestamp($time)
+	{
+	    $time = new DateTime($time);
+	    return $time->format(self::XS_DATETIME_FORMAT);
+	    
 	}
 	
 	public function ListMetadataFormats()
@@ -532,6 +616,7 @@ class OaiPmh_Exception extends Zend_Exception {
 	const badResumptionToken = 2;
 	const badVerb = 3;
 	const noSetHierarchy = 4;
+	const idDoesNotExist = 5;
 	
 	public function getCodeAsString()
 	{
@@ -542,7 +627,8 @@ class OaiPmh_Exception extends Zend_Exception {
 			case self::badResumptionToken: return 'badResumptionToken';
 			case self::badVerb: return 'badVerb';
 			case self::noSetHierarchy: return 'noSetHierarchy';
-			default:
+			case self::idDoesNotExist: return 'idDoesNotExist';
+		    default:
 				return 'badArgument';
 		}
 	}

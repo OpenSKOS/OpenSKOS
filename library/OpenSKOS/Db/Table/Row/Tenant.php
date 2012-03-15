@@ -69,17 +69,24 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 	/**
 	 * @return DOMDocument;
 	 */
-	public static function getRdfDocument()
+	public static function getRdfDocument($forOAI = false)
 	{
 		$doc = new DOMDocument();
-		$doc->appendChild($doc->createElement('rdf:RDF'));
-		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
-		$doc->documentElement->setAttribute('xmlns:v', 'http://www.w3.org/2006/vcard/ns#');
-		
+		if (true === $forOAI) {
+    		$doc->appendChild($doc->createElement('rdf:rdf'));
+    		$doc->documentElement->appendChild($doc->createElement('RDF'));
+    		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+    		$doc->documentElement->setAttribute('xmlns:v', 'http://www.w3.org/2006/vcard/ns#');
+		} else {
+    		$doc->appendChild($doc->createElement('rdf:RDF'));
+    		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+    		$doc->documentElement->setAttribute('xmlns:v', 'http://www.w3.org/2006/vcard/ns#');
+    	}
+    		
 		return $doc;
 	}
 	
-	public function toRdf()
+	public function toRdf($forOAI = false)
 	{
 		$helper = new Zend_View_Helper_ServerUrl();
 		$about = $helper->serverUrl('/api/institution/'.$this->code);
@@ -88,8 +95,12 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 			$data[$key] = htmlspecialchars($val);
 		}
 		
-		$doc = self::getRdfDocument();
-		$VCard = $doc->documentElement->appendChild($doc->createElement('v:Vcard'));
+		$doc = self::getRdfDocument($forOAI);
+		$rootNode = true === $forOAI 
+		    ? $doc->documentElement->firstChild
+		    : $doc->documentElement;
+		
+		$VCard = $rootNode->appendChild($doc->createElement('v:Vcard'));
 		$VCard->setAttribute('rdf:about', $about);
 		$VCard->appendChild($doc->createElement('v:fn', $data['name']));
 		
