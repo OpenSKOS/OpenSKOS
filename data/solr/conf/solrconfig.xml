@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
+  <luceneMatchVersion>LUCENE_34</luceneMatchVersion>
   <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
   <dataDir>${solr.data.dir:./openskos/data}</dataDir>
   <indexDefaults>
     <useCompoundFile>false</useCompoundFile>
-    <mergeFactor>10</mergeFactor>
+    <mergeFactor>100</mergeFactor>
     <ramBufferSizeMB>32</ramBufferSizeMB>
     <maxFieldLength>10000</maxFieldLength>
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
-    <lockType>native</lockType>
+    <lockType>simple</lockType>
   </indexDefaults>
 
   <mainIndex>
     <useCompoundFile>false</useCompoundFile>
     <ramBufferSizeMB>32</ramBufferSizeMB>
-    <mergeFactor>10</mergeFactor>
-    <unlockOnStartup>false</unlockOnStartup>
+    <mergeFactor>100</mergeFactor>
+    <unlockOnStartup>true</unlockOnStartup>
     <reopenReaders>true</reopenReaders>
   </mainIndex>
 
@@ -103,10 +104,24 @@
     </lst>
   </requestHandler>
 
-    <queryResponseWriter name="xml" class="org.apache.solr.request.XMLResponseWriter" default="true"/>
-    <queryResponseWriter name="json" class="org.apache.solr.request.JSONResponseWriter"/>
-    <queryResponseWriter name="phps" class="org.apache.solr.request.PHPSerializedResponseWriter"/>
-    <queryResponseWriter name="xslt" class="org.apache.solr.request.XSLTResponseWriter">
+  <requestHandler name="/replication" class="solr.ReplicationHandler">
+    <lst name="master">
+      <str name="enable">${replication.enablemaster:false}</str>
+      <str name="replicateAfter">startup</str>
+      <str name="replicateAfter">${replication.replicateafter:optimize}</str>
+      <str name="confFiles">solrconfig.xml,schema.xml,solrcore.properties:solrcore.properties.master,solrcore.properties.slave:solrcore.properties</str>
+    </lst>
+    <lst name="slave">
+      <str name="enable">${replication.enableslave:false}</str>
+      <str name="masterUrl">${replication.masteruri}/${solr.core.name}/replication</str>
+      <str name="pollInterval">00:00:60</str>
+    </lst>
+  </requestHandler>
+
+    <queryResponseWriter name="xml" class="org.apache.solr.response.XMLResponseWriter" default="true"/>
+    <queryResponseWriter name="json" class="org.apache.solr.response.JSONResponseWriter"/>
+    <queryResponseWriter name="phps" class="org.apache.solr.response.PHPSerializedResponseWriter"/>
+    <queryResponseWriter name="xslt" class="org.apache.solr.response.XSLTResponseWriter">
     <int name="xsltCacheLifetimeSeconds">5</int>
   </queryResponseWriter>
   <admin>

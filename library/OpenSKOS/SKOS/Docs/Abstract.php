@@ -76,6 +76,12 @@ abstract class OpenSKOS_SKOS_Docs_Abstract implements ArrayAccess
 	public function offsetGet ($offset) 
 	{
         if (0===strpos($offset, 'dc_')) {
+            $name = str_replace('dc_', '', $offset);
+            foreach ($this->getSimpleXMLElement()->children('http://purl.org/dc/elements/1.1/') as $child) {
+                if($child->getName()==$name) {
+                    return $child;
+                }
+            }
             return $this->getSimpleXMLElement()->{str_replace('dc_', '', $offset)};
         } else {
     	    return $this->offsetExists($offset) ? $this->_data[$offset] : null;
@@ -133,8 +139,9 @@ abstract class OpenSKOS_SKOS_Docs_Abstract implements ArrayAccess
 	public function getSimpleXMLElement()
 	{
 	    if (null === $this->_SimpleXMLElement && $this['xml']) {
-	        $SimpleXMLElement = @new SimpleXMLElement($this['xml']);
-	        if (!$SimpleXMLElement) {
+	        try {
+    	        $SimpleXMLElement = @new SimpleXMLElement($this['xml']);
+	        } catch (Exception $e) {
 	            throw new OpenSKOS_SKOS_Exception('Failed to load XML as a SimpleXMLElement');
 	        }
 	        $this->_SimpleXMLElement = &$SimpleXMLElement;

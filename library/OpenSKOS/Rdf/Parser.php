@@ -305,7 +305,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$xpath->registerNamespace($prefix, $uri);
 		}
 
-		$Descriptions = $xpath->query('/rdf:RDF/rdf:Description');
 		
 		//store all Namespaces used by this scheme in Database:
 		$namespaces = self::getDocNamespaces($this->getDOMDocument());
@@ -315,9 +314,47 @@ class OpenSKOS_Rdf_Parser implements Countable
 		$addDoc->appendChild($addDoc->createElement('add'));
 		$documents = new OpenSKOS_Solr_Documents();
 		
+		//sometimes the first nodes of the XML file is a ConceptScheme:
+		$ConceptScheme = $xpath->query('/rdf:RDF/skos:ConceptScheme')->item(0);
+		if ($ConceptScheme) {
+		    $doc = $this->getDOMDocument();
+		    //convert this node to a DOMstructure the parse understands:
+		    $node = $doc->createElementNS(
+		        'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 
+		        'rdf:Description'
+		    );
+		    $node->setAttributeNS(
+		        'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 
+		        'rdf:about', 
+		        $ConceptScheme->getAttribute('rdf:about')
+		    );
+		    $node->appendChild(
+		        $doc->createElementNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'rdf:type')
+		    )->setAttributeNs(
+    		    'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+		        'rdf:resource', 
+		        "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+		    );
+		    
+		    //clone all dc/dcterms nodes:
+		    $dcNodes = $xpath->query('/rdf:RDF/dc:* | /rdf:RDF/dcterms:* ');
+		    foreach ($dcNodes as $dcNode) {
+		        $node->appendChild($dcNode->cloneNode(true));
+		    }
+		    $data = array(
+				'tenant' => $this->getOpt('tenant'),
+				'collection' => $this->_collection->id,
+			);
+			$document = self::DomNode2SolrDocument($node, $data);
+			if ($document) {
+			    $documents->add($document);
+			}
+		}
+		
+		$Descriptions = $xpath->query('/rdf:RDF/rdf:Description');
 		$d = 0;
 		foreach ($Descriptions as $i => $Description) {
-			if ($i < $this->getFrom()) continue;
+		    if ($i < $this->getFrom()) continue;
 //			if ($i >= ($this->getFrom() + $this->getLimit())) break;
 			
 			if ($d >= self::MAX_LIMIT) {
@@ -339,6 +376,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		if (null!==$this->getOpt('commit')) {
 			$this->_solr()->add($documents);
+			$this->_solr()->commit();
 		} else {
 			echo $documents."\n";
 		}
@@ -419,6 +457,11 @@ class OpenSKOS_Rdf_Parser implements Countable
 			throw new OpenSKOS_Rdf_Parser_Exception($e->getMessage());
 		}
 		
+		if (null!== $opts->help) {
+		    echo str_replace('[ options ]', '[ options ] file', $opts->getUsageMessage());
+		    throw new OpenSKOS_Rdf_Parser_Exception('', 0);
+		}
+		
 		foreach (self::$required as $opt) {
 			if (null===$this->_opts->$opt) {
 				throw new OpenSKOS_Rdf_Parser_Exception("missing required parameter `{$opt}`");
@@ -442,7 +485,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		$files = $this->_opts->getRemainingArgs();
 		if (count($files)!==1) {
-			throw new OpenSKOS_Rdf_Parser_Exception('[ options ]', '[ options ] file', $this->_opts->getUsageMessage());
+			throw new OpenSKOS_Rdf_Parser_Exception(str_replace('[ options ]', '[ options ] file', $this->_opts->getUsageMessage()));
 		}
 		$this->setFiles($files);
 		
