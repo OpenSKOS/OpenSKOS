@@ -39,8 +39,8 @@ if ($this->doc['collection']) {
 		<setSpec><?php echo $this->doc['tenant']?></setSpec>
     		<?php if ($collection):?>
 		<setSpec><?php echo $this->doc['tenant'].':'.$collection?></setSpec>
-        		<?php if(isset($this->doc['ConceptSchemes'])):?>
-    	    	    <?php foreach ($this->doc['ConceptSchemes'] as $ConceptScheme):?>
+        		<?php if(isset($this->doc['inScheme'])):?>
+    	    	    <?php foreach ($this->doc['inScheme'] as $ConceptScheme):?>
 		<setSpec><?php echo $this->doc['tenant'].':'.$collection?>:<?php echo OpenSKOS_Solr::md5_uuid($ConceptScheme)?></setSpec>
     		        <?php endforeach?>
     		    <?php endif?>

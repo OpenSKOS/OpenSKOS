@@ -112,7 +112,12 @@ class OpenSKOS_Solr
 			->request('POST');
 		if ($response->isError()) {
 			$doc = DOMDocument::loadHtml($response->getBody());
-			throw new OpenSKOS_Solr_Exception($doc->getElementsByTagName('pre')->item(0)->nodeValue);
+			if ($nodes = $doc->getElementsByTagName('h1')) {
+			    $msg = $nodes->item(0)->nodeValue;
+			} else {
+			    $msg = 'Unkown Error in Solr communication';
+			}
+			throw new OpenSKOS_Solr_Exception($msg, $response->getStatus());
 		}
 		if ($params['wt'] == 'xml') {
 			$response = DOMDocument::loadXML($response->getBody());
@@ -190,6 +195,7 @@ class OpenSKOS_Solr
 		} else {
 			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document|OpenSKOS_Solr_Documents|OpenSKOS_Rdf_Parser_Helper|Api_Models_Concept` object, got a `'.get_class($documents).'`');
 		}
+		
 		
 		return $this->postXml((string)$documents);
 	}

@@ -28,6 +28,6 @@ try {
 	$parser = OpenSKOS_Rdf_Parser::factory($opts);
 	$parser->process();
 } catch (OpenSKOS_Rdf_Parser_Exception $e) {
-	fwrite(STDERR, $e->getMessage()."\n");
-	exit(5);
+	fwrite(STDERR, $e->getMessage());
+	exit($e->getCode());
 }

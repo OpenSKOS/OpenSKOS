@@ -270,6 +270,9 @@ class OaiPmh
 			return $this->checkparams($verb);
 		}
 		
+		$from = null;
+		$until = null;
+		
 		if (null !== ($request_from = $this->getParam('from'))) {
 			try {
 				$from = new Zend_Date($request_from, Zend_Date::ISO_8601);
