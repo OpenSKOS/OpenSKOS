@@ -484,7 +484,7 @@ class OaiPmh
 			$q = "({$q}) AND (timestamp:[{$from} TO {$until}])";
 		} elseif (null!==$from) {
 			$from = date('Y-m-d\TH:i:m\Z', $from->toString(Zend_Date::TIMESTAMP));
-			$q = "$_lastPage(timestamp:[{$from} TO *])";
+			$q = "({$q}) AND (timestamp:[{$from} TO *])";
 		} elseif (null!==$until) {
 			$until = date('Y-m-d\TH:i:m\Z', $until->toString(Zend_Date::TIMESTAMP));
 			$q = "({$q}) AND (timestamp:[* TO {$until}])";
@@ -511,7 +511,7 @@ class OaiPmh
 	
 	public function getSet($set)
 	{
-	    list($tenantCode, $collectionCode, $conceptSchemaUuid) = explode(':', $set);
+	    @list($tenantCode, $collectionCode, $conceptSchemaUuid) = explode(':', $set);
 	    if (null === $tenantCode) return;
 	    $model = new OpenSKOS_Db_Table_Tenants();
 	    if (null === ($tenant = $model->find($tenantCode)->current())) {
