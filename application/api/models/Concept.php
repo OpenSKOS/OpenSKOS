@@ -340,7 +340,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * 
 	 * @return Api_Models_Concept
 	 */
-	public function delete()
+	public function delete($commit = null)
 	{
         $rdf = $this->toRDF();
         $data = array(
@@ -349,7 +349,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
             'deleted' => true
         );
 	    $solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($rdf->firstChild->firstChild, $data);
-	    $this->solr()->add($solrDocument);
+	    $this->solr()->add($solrDocument, $commit);
 	    return $this;
 	    
 	}
