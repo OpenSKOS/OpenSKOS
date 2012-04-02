@@ -48,10 +48,14 @@ class OpenSKOS_Db_Table_Tenants extends Zend_Db_Table
     	if (!Zend_Auth::getInstance()->hasIdentity()) {
     		return;
     	}
-    	$identity = Zend_Auth::getInstance()->getIdentity();
-    	$className = __CLASS__;
-    	$model = new $className();
-    	return $model->find($identity->tenant)->current();
+    	return self::fromCode(Zend_Auth::getInstance()->getIdentity()->tenant);
+    }
+    
+    public static function fromCode($code)
+    {
+        $className = __CLASS__;
+        $model = new $className();
+        return $model->find($code)->current();
     }
 }
 

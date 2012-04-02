@@ -29,7 +29,7 @@ window.addEvent('load', function(){
 				a.set('title', a.get('text'))
 					.set('text', concept.getTitle());
 				}
-				a.set('href', '/api/concept/' + concept.uuid + '.html');
+				a.set('href', BASE_URL + '/api/concept/' + concept.uuid + '.html');
 				a.removeClass('loading');
 				var a2 = new Element('a', {
 					href:  concept.uri,
@@ -45,6 +45,11 @@ window.addEvent('load', function(){
 					.inject(a.getParent());
 				
 		});
+		
+		concept.addEvent('error', function (errorCode) {
+			a.removeClass('loading');
+		});
+		
 		concept.load('uuid,uri,prefLabel,class,dc_title');
 	});
 	
@@ -84,16 +89,20 @@ var SkosConcept = new Class({
 	load: function(fields)
 	{
 		if (!fields) fields='*';
-		var url = '/api/find-concepts';
+		var url = BASE_URL + '/api/find-concepts';
 		var self=this;
 		new Request.JSON({
 			url: url,
 			onFailure: function(xhr)
 			{
-				alert('A XHR error has occurred, plead look at your console for the problem');
-				try {
-					console.log(xhr);
-				} catch (e) {}
+				switch (xhr.status) {
+					case 404:
+						self.fireEvent('error', [404]);
+						break;
+					default:
+						alert('A XHR error has occurred (HTTP status '+xhr.status+'), please look at your console for the problem');
+						break;
+				}
 			},
 			onSuccess: function(response) {
 				self = Object.merge(self, response);

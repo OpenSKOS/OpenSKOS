@@ -31,6 +31,9 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta charset=utf-8 />
+		<script type="text/javascript">
+	    var BASE_URL = '<?php echo rtrim($this->url(array(), null, true), '/')?>';
+		</script>
 		<!--[if lt IE 9]>
 		<script src="<?php echo $baseUrl?>assets/scripts/html5.js"></script>
 		<![endif]-->
