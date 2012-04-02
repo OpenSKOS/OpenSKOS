@@ -124,9 +124,9 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
 		return Zend_Registry::get('OpenSKOS_Solr');
 	}
 	
-    public function save()
+    public function save($commit = null)
     {
-    	$this->solr()->add(new OpenSKOS_Solr_Documents($this));
+    	$this->solr()->add(new OpenSKOS_Solr_Documents($this), $commit);
     	return $this;
     }
     

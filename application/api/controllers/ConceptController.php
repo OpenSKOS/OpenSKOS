@@ -84,7 +84,7 @@ class Api_ConceptController extends Api_FindConceptsController {
 		}
 		
 		try {
-			$solrDocument->save();
+			$solrDocument->save(true);
 		} catch (OpenSKOS_Solr_Exception $e) {
 			throw new Zend_Controller_Action_Exception('Failed to save Concept `'.$solrDocument['uri'][0].'`: '.$e->getMessage(), 400);
 		}
@@ -122,7 +122,7 @@ class Api_ConceptController extends Api_FindConceptsController {
 			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
 			->setHttpResponseCode(202);
 		echo $concept->toRDF()->saveXml();
-		$concept->delete();
+		$concept->delete(true);
 	}
 	
 	/**

@@ -176,7 +176,7 @@ class OpenSKOS_Solr
 		}
 	}
 	
-	public function add($documents)
+	public function add($documents, $commit = null, $optimize = null)
 	{
 		if (!is_object($documents)) {
 			throw new OpenSKOS_Solr_Exception('Expected an object');
@@ -197,9 +197,18 @@ class OpenSKOS_Solr
 		}
 		
 		
-		return $this->postXml((string)$documents);
+		$this->postXml((string)$documents);
+		if (true === $commit) $this->commit();
+		if (true === $optimize) $this->optimize();
+		return $this;
 	}
 	
+	/**
+	 * 
+	 * @param string $xml
+	 * @throws OpenSKOS_Solr_Exception
+	 * @return OpenSKOS_Solr
+	 */
 	public function postXml($xml)
 	{
 		$response = $this->_getClient()
