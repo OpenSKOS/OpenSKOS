@@ -44,16 +44,15 @@
         </setDescription>
         <?php endif?>
       </set>
-    <?php endforeach?>
     <?php if (isset($this->conceptSchemes[$collection->id])):?>
-        <?php foreach ($this->conceptSchemes[$collection->id] as $conceptScheme):
-        ?>
+        <?php foreach ($this->conceptSchemes[$collection->id] as $conceptScheme): ?>
       <set>
         <setSpec><?php echo $tenant->code?>:<?php echo $collection->code?>:<?php echo $conceptScheme['uuid']?></setSpec>
         <setName><?php echo $this->escape($conceptScheme['dc_title']?$conceptScheme['dc_title']:$conceptScheme['uri'])?></setName>
       </set>
         <?php endforeach?>
     <?php endif?>
-  <?php endif?>
+  <?php endforeach?>
+    <?php endif?>
 <?php endforeach?>
 </ListSets>

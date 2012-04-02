@@ -123,6 +123,9 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	public function getClasses(OpenSKOS_Db_Table_Row_Tenant $tenant = null)
 	{
 		if (null === $tenant) {
+			$tenant = OpenSKOS_Db_Table_Tenants::fromCode($this->tenant);
+		}
+	    if (null === $tenant) {
 			$tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
 		}
 		return $this->getTable()->getClasses($tenant, $this);
