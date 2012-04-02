@@ -69,4 +69,5 @@ class OpenSKOS_Db_Table_Rowset_Tenant extends Zend_Db_Table_Rowset
 		}
 		return $doc;
 	}
+	
 }
