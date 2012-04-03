@@ -38,6 +38,7 @@
 		<rdf:RDF
 			xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
 			<?php foreach ($this->namespacesByCollection[$doc['collection']] as $ns):
+			    if (in_array($ns['prefix'], array('rdf'))) continue;
 			?>
 	         xmlns:<?php echo $ns['prefix']?>="<?php echo $ns['uri']?>" 
 			<?php endforeach?>

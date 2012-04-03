@@ -57,7 +57,7 @@ class OpenSKOS_Db_Table_Namespaces extends Zend_Db_Table
 		$select = $db->select()
 			->from('collection_has_namespace', array('collection'))
 			->join('namespace', 'namespace=prefix');
-		$rows = $db->fetchAssoc($select);
+		$rows = $db->fetchAll($select);
 		$namespaces = array();
 		foreach ($rows as $row) {
 			if (!isset($namespaces[$row['collection']])) {
