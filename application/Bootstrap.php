@@ -21,6 +21,10 @@
 
 class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
+    protected function _initDefaultTimeZone()
+    {
+        date_default_timezone_set('UTC');
+    }
 	protected function _initRestRoute()
 	{
 		$this->bootstrap('frontController');	
