@@ -243,6 +243,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$className = parse_url($resource, PHP_URL_FRAGMENT);
 			$document->class =parse_url($type->getAttributeNS(self::$namespaces['rdf'], 'resource'), PHP_URL_FRAGMENT);
 		} else {
+		    return;
 			throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:type');
 		}
 
