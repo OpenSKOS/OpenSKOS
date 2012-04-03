@@ -496,7 +496,11 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		
 		$model = new OpenSKOS_Db_Table_Collections();
-		$collection = $model->findByCode($opts->collection, $opts->tenant);
+		if (preg_match('/^\d+$/', $opts->collection)) {
+		    $collection = $model->find($opts->collection)->current();
+		} else {
+		    $collection = $model->findByCode($opts->collection, $opts->tenant);
+		}
 		if (null === $collection) {
 			throw new OpenSKOS_Rdf_Parser_Exception("No such collection: `{$opts->collection}`");
 		} else {
