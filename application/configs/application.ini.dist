@@ -18,6 +18,30 @@ autoloadernamespaces[] = Net_
 ; make sure this directory is writable by your webserver!
 upload_path = APPLICATION_PATH "/../data/uploads"
 
+editor.languages.nl="Dutch"
+editor.languages.en="English"
+
+; Concepts and Concept schemes uri configuration
+editor.conceptsBaseUris[] = "http://data.beeldengeluid.nl/gtaa/"
+editor.conceptsBaseUris[] = "http://data.beeldengeluid.nl/nongtaa/"
+editor.conceptSchemesDefaultBaseUri="http://data.beeldengeluid.nl/gtaa/"
+
+; Concept scheme icons configuration
+editor.schemeIcons.uploadPath="/../public/data/icons/uploads"
+editor.schemeIcons.uploadHttpPath="/data/icons/uploads"
+editor.schemeIcons.allowedExtensions="jpg, jpeg, png, gif"
+editor.schemeIcons.maxSize=2097152
+editor.schemeIcons.width=16
+editor.schemeIcons.height=16
+editor.schemeIcons.extension="png"
+
+; Export configuration
+editor.export.filesPath = APPLICATION_PATH "/../public/data/export"
+editor.export.filesHttpPath = "/data/export"
+
+; Api client configuration
+editor.apiclient.apiurl=http://openskos/api/
+
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
 ; see http://framework.zend.com/manual/en/zend.view.scripts.html
@@ -31,9 +55,9 @@ upload_path = APPLICATION_PATH "/../data/uploads"
 pluginPaths.OpenSKOS_Application_Resource="OpenSKOS/Application/Resource"
 
 resources.frontController.controllerDirectory.website = APPLICATION_PATH "/website/controllers"
-resources.frontController.controllerDirectory.dashboard = APPLICATION_PATH "/dashboard/controllers"
 resources.frontController.controllerDirectory.api = APPLICATION_PATH "/api/controllers"
 resources.frontController.controllerDirectory.oai-pmh = APPLICATION_PATH "/oai-pmh/controllers"
+resources.frontController.controllerDirectory.editor = APPLICATION_PATH "/editor/controllers"
 resources.frontController.defaultModule=website
 
 resources.layout.layout = "main"
@@ -47,10 +71,18 @@ resources.translate.data=APPLICATION_PATH "/../languages"
 resources.translate.options.scan=filename
 resources.translate.options.disableNotices=true
 
+; ACL
+resources.acl.foo=bar
+
 ; Solr configuration:
 resources.solr.host = localhost
 resources.solr.port = 8983
 resources.solr.context = solr
+; If you are using a dedicate write solr host uncomment the following lines
+; and configure to point to this solr instance
+;resources.solr.writeHost = localhost
+;resources.solr.writePort = 8983
+;resources.solr.writeContext = solr
 
 ; Database configuration:
 resources.db.adapter=pdo_mysql
@@ -61,12 +93,25 @@ resources.db.params.charset=utf8
 resources.db.params.dbname=openskos
 resources.db.isDefaultTableAdapter = true
 
+; Caching
+resources.cachemanager.general.frontend.name=Core
+resources.cachemanager.general.frontend.customFrontendNaming=false
+resources.cachemanager.general.frontend.options.lifetime=7200
+resources.cachemanager.general.frontend.options.automatic_serialization=true
+resources.cachemanager.general.backend.name=File
+resources.cachemanager.general.backend.customBackendNaming=false
+resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
+resources.cachemanager.general.frontendBackendAutoload=false
+
 ;; PLUGINS ;;
 resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
 resources.frontController.plugins.auth="OpenSKOS_Controller_Plugin_Auth"
 resources.frontController.plugins.locale="OpenSKOS_Controller_Plugin_Locale"
+;resources.frontController.plugins.apiclient="OpenSKOS_Controller_Plugin_ApiClient"
 resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
+
+; @extra routes here@
 
 resources.frontController.params.displayExceptions = 0
 resources.locale.default=nl_NL.utf8

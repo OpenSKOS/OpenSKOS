@@ -1,0 +1,58 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<?php $this->headTitle($this->translate('Search, browse and edit'))?>
+
+<?php $this->placeholder('lefttoppanel')->captureStart();?>
+<?php echo $this->searchForm;?>
+<?php if (! $this->disableSearchProfileChanging): ?>
+	<a href="<?php echo $this->url(array('controller' => 'search', 'action' => 'show-form'))?>"><?php  echo $this->translate('Show advanced search options')?></a>
+<?php endif?>
+<?php $this->placeholder('lefttoppanel')->captureEnd() ?>
+
+<?php $this->placeholder('leftbottompanel')->captureStart();?>
+<h2><?php echo $this->translate('Search result')?> (<?php echo $this->concepts['numFound']?>)</h2>
+<?php if ($this->concepts['numFound'] != 0) : ?>
+	<?php foreach ($this->concepts['data'] as $concept):?>
+		<div style="border-bottom:1px solid black;">
+			<a href="<?php echo $this->url(array('controller' => 'concept', 'action' => 'view', 'uuid' => $concept['uuid']))?>"><?php echo $concept->getMlField('prefLabel', Zend_Registry::get('Zend_Locale')->getLanguage()); ?></a>
+			<?php foreach ($concept['inScheme'] as $scheme):?>
+				<div style="font-size:6px;"><?php echo $scheme?></div>
+			<?php endforeach?>
+		</div>
+	<?php endforeach?>
+	
+	<?php if ($this->concepts['start'] > 0):?>
+		<a href="javascript:void(0);" onclick="searchPrevPage()"><?php echo $this->translate('< Prev page')?> </a>
+	<?php endif?>
+	<?php if ($this->concepts['numFound'] > $this->concepts['start'] + (isset($this->allSearchOptions['rows']) ? $this->allSearchOptions['rows'] : 0)):?>
+		<a href="javascript:void(0);" onclick="searchNextPage()"><?php echo $this->translate('Next page >')?> </a>
+	<?php endif?>
+<?php else:?>
+	<?php echo $this->translate('No results found for')?> 
+	<strong><?php echo (isset($this->allSearchOptions['searchText']) ? $this->allSearchOptions['searchText'] : '')?></strong>. 
+<?php endif?>
+<?php $this->placeholder('leftbottompanel')->captureEnd() ?>
+
+<?php $this->placeholder('rightpanel')->captureStart();?>
+Right panel
+<?php $this->placeholder('rightpanel')->captureEnd() ?>

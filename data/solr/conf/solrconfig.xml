@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
   <luceneMatchVersion>LUCENE_34</luceneMatchVersion>
-  <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
-  <dataDir>${solr.data.dir:./openskos/data}</dataDir>
-  <indexDefaults>
+  <dataDir>${data.dir:./openskos/data}</dataDir>
+  <indexConfig>
     <useCompoundFile>false</useCompoundFile>
     <mergeFactor>100</mergeFactor>
     <ramBufferSizeMB>32</ramBufferSizeMB>
@@ -11,15 +10,9 @@
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
     <lockType>simple</lockType>
-  </indexDefaults>
-
-  <mainIndex>
-    <useCompoundFile>false</useCompoundFile>
-    <ramBufferSizeMB>32</ramBufferSizeMB>
-    <mergeFactor>100</mergeFactor>
     <unlockOnStartup>true</unlockOnStartup>
     <reopenReaders>true</reopenReaders>
-  </mainIndex>
+  </indexConfig>
 
   <!-- the default high-performance update handler -->
   <updateHandler class="solr.DirectUpdateHandler2">
@@ -33,23 +26,9 @@
     <maxBooleanClauses>128</maxBooleanClauses>
 
 
-    <filterCache
-      class="solr.FastLRUCache"
-      size="512"
-      initialSize="512"
-      autowarmCount="0"/>
-
-    <queryResultCache
-      class="solr.LRUCache"
-      size="512"
-      initialSize="512"
-      autowarmCount="0"/>
-
-    <documentCache
-      class="solr.LRUCache"
-      size="512"
-      initialSize="512"
-      autowarmCount="0"/>
+    <filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
 
     <enableLazyFieldLoading>true</enableLazyFieldLoading>
 
@@ -113,7 +92,7 @@
     </lst>
     <lst name="slave">
       <str name="enable">${replication.enableslave:false}</str>
-      <str name="masterUrl">${replication.masteruri}/${solr.core.name}/replication</str>
+      <str name="masterUrl">${replication.masteruri:"http://localhost:8983"}/${solr.core.name:openskos}/replication</str>
       <str name="pollInterval">00:00:60</str>
     </lst>
   </requestHandler>

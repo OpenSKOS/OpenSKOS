@@ -1,0 +1,28 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<div id="export-box" class="export-box">
+    <h2><?php  echo $this->translate('Export'); ?> </h2>
+	<?php echo $this->exportForm;?>
+	<div class="limit-note"><?php echo $this->translate('Because the number of concepts is higher than '); ?> <strong><?php echo Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT; ?></strong> <?php echo $this->translate(' or because the depth is higher then 1, the export will be executed in the background. You can donwload the file once it is ready from the section'); ?> <strong><?php echo $this->translate('Manage jobs')?></strong>.</div>
+	<div class="background-job-alert do-not-show"><?php echo $this->translate('A background job will be started soon. You can track it from the section'); ?> <strong><?php echo $this->translate('Manage jobs')?></strong>.</div>
+</div>

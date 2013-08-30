@@ -1,6 +1,6 @@
 1. Install the OpenSKOS code
 ===============================================================================
-Copy the code to a location of your choise. Make sure all files are readable by
+Copy the code to a location of your choice. Make sure all files are readable by
 your webserver. Make sure the "data/uploads" directory is writable for the webserver.
 For security reasons you can place this "data" directory outside your
 webserver's document root.
@@ -86,7 +86,7 @@ The following is a sample VHOST you might want to consider for your project.
 
 4. Database setup
 ===============================================================================
-Install your choise of Zend Framework supported Database engine (see
+Install your choice of Zend Framework supported Database engine (see
 http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
 access your database can be configured in the application's configuration. 
 

@@ -57,5 +57,8 @@ class OpenSKOS_Strings
         _('locality');
         _('postalCode');
         _('countryName');
+        
+        _('guest');
+        _('administrator');
 	}
 }

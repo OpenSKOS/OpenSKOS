@@ -1,0 +1,52 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+<?php $this->headTitle($this->translate('User details'))?>
+
+<h2><?php echo $this->translate('User details')?></h2>
+<ul>
+	<li>
+		<em><?php echo $this->translate('Tenant')?>:</em>
+		<?php echo $this->user->tenant?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Name')?>:</em>
+		<?php echo $this->user->name?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Email')?>:</em>
+		<?php echo $this->user->email?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Role')?>:</em>
+		<?php echo $this->user->role?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('Type')?>:</em>
+		<?php echo $this->user->type?>
+	</li>
+	<li>
+		<em><?php echo $this->translate('API Key')?>:</em>
+		<?php echo $this->user->apikey?>
+	</li>
+</ul>
+
+<a class="edit" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'edit', 'user' => $this->user->id), 'default', true)?>"><?php echo $this->translate('Edit password')?></a>

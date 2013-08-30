@@ -1,0 +1,27 @@
+<span class="multi-field <?php echo $this->inputClasses; ?>">
+	<label class="concept-multi-label"><?php echo $this->inputLabel; ?></label>
+	<span class="concept-multi-template template">
+		<textarea name="<?php echo $this->inputName; ?>[][]" class="concept-multi-input"></textarea>
+		<span class="concept-multi-remove"></span>
+		<span class="concept-multi-add"></span>
+	</span>
+<?php if (is_array($this->inputValues)):?>
+<?php foreach ($this->inputValues as $value): ?>
+	<?php if (isset($value['languageCode'])):  ?>
+		<?php if (isset($value['value']) && is_array($value['value'])) :?>
+			<?php foreach ($value['value'] as $inputValue): ?>
+				<span class="concept-multi-template <?php echo $value['languageCode']; ?>">
+					<textarea name="<?php echo $this->inputName; ?>[<?php echo $value['languageCode']; ?>][]" class="concept-multi-input"><?php echo !empty($inputValue)? $inputValue: '';?></textarea>
+					<span class="concept-multi-remove"></span>
+					<span class="concept-multi-add"></span>
+				</span>
+			<?php endforeach?>
+		<?php else : ?>
+		<textarea name="<?php echo $this->inputName; ?>[<?php echo $value['languageCode']; ?>][]"  class="concept-multi-input"> <?php echo $value['value']; ?></textarea>
+		<?php endif?>	
+	<?php else: ?>
+	<textarea name="<?php echo $this->inputName; ?>[]" class="concept-multi-input"> <?php echo $value; ?></textarea>
+	<?php endif?>
+<?php endforeach ?>
+<?php endif?>
+</span>

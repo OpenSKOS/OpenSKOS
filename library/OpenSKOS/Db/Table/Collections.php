@@ -73,7 +73,7 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 	public function getClasses(OpenSKOS_Db_Table_Row_Tenant $tenant, OpenSKOS_Db_Table_Row_Collection $collection = null)
 	{
 		$solr = OpenSKOS_Solr::getInstance();
-		$q = 'tenant:'.$tenant->code;
+		$q = 'deleted:false tenant:'.$tenant->code;
 		if (null !== $collection) {
 			$q .= ' AND collection:' . $collection->id;
 		}
@@ -89,7 +89,7 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 	public function getConceptSchemes(OpenSKOS_Db_Table_Row_Collection $collection = null)
 	{
 		$solr = OpenSKOS_Solr::getInstance();
-		$q = 'class:ConceptScheme collection:' . $collection->id;
+		$q = 'class:ConceptScheme collection:' . $collection->id . ' AND tenant:' . $collection->tenant . ' AND deleted:false';
 		$result = $solr->search($q, array(
 			'rows' => 1000
 		));
@@ -110,6 +110,22 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 			$select->where('NOT(id=?)', $data['id']);
 		}
 		return count($this->fetchAll($select)) === 0;
+	}
+	
+	/**
+	 * Gets map with id as key and dc_title as value.
+	 * 
+	 * @param string $tenant
+	 * @return array
+	 */
+	public function getIdToTitleMap($tenant)
+	{
+		$collections = $this->fetchAll($this->select()->where('tenant=?', $tenant));
+		$collectionsMap = array();
+		foreach ($collections as $collection) {
+			$collectionsMap[$collection->id] = $collection->dc_title;
+		}
+		return $collectionsMap;
 	}
 	
     /**

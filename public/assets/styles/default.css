@@ -17,286 +17,259 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 @CHARSET "UTF-8";
-
+@CHARSET "UTF-8";
+/* line 2, src/sass/common.scss */
 body {
-	font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
-	color: #3c1038;
+  font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
+  color: #3c1038;
 }
 
+/* line 7, src/sass/common.scss */
 a {
-	color: #822966;
-	text-decoration: none;
+  color: #822966;
+  text-decoration: none;
 }
 
+/* line 12, src/sass/common.scss */
 a:visted {
-	color: #3c1038;
+  color: #3c1038;
 }
 
+/* line 16, src/sass/common.scss */
 a:HOVER {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 
+/* line 20, src/sass/common.scss */
 a.block {
-	display: block;
+  display: block;
 }
 
+/* line 24, src/sass/common.scss */
 a[rel="external"] {
-	padding-right: 13px;
-	background: url(../images/external.png) center right no-repeat;
+  padding-right: 13px;
+  background: url(../images/external.png) center right no-repeat;
 }
 
+/* line 26, src/sass/default.scss */
 #content {
-	font-size: 1.0em;
-	line-height: 1.5;
-	text-align: left;
+  font-size: 1.0em;
+  line-height: 1.5;
+  text-align: left;
 }
 
-h1,h2,h3,h4 {
-	color: #822966;
-	font-weight: bold;
-	font-size: 1em;
+/* line 32, src/sass/default.scss */
+h2, h3, h4 {
+  color: #822966;
+  font-weight: bold;
+  font-size: 1em;
 }
 
-h1 {
-	font-size: 180%;
-	font-weight: bold;
-	border-bottom: 2px solid #3c1038;
-	margin: 0.5em 0 1em 0;
-	overflow: auto;
-}
-
-h1 img {
-	display: block;
-	float: left;
-	margin-bottom: 10px;
-}
-
-h1 span {
-	padding: 15px 0 0 20px;
-	display: block;
-	float: left;
-}
-
-h2 {
-	border-bottom: 1px solid #3c1038;
-	font-size: 140%;
-	margin: 0.5em 0 0.5em 0;
-}
-
+/* line 64, src/sass/default.scss */
 h3 {
-	font-size: 120%;
+  font-size: 120%;
 }
 
+/* line 68, src/sass/default.scss */
 h4 {
-	font-size: 90%;
-}
-
-pre {
-	
+  font-size: 90%;
 }
 
 /* Tables */
+/* line 77, src/sass/default.scss */
 table {
-	width: auto;
-	border-collapse: collapse;
+  width: auto;
+  border-collapse: collapse;
 }
 
-td,th {
-	border: 1px solid #822966;
-	padding: 3px 7px 2px 7px;
+/* line 82, src/sass/default.scss */
+td, th {
+  border: 1px solid #822966;
+  padding: 3px 7px 2px 7px;
 }
 
+/* line 87, src/sass/default.scss */
 thead tr th {
-	background-color: #a1568a;
-	color: #fff;
+  background-color: #a1568a;
+  color: #fff;
 }
 
+/* line 92, src/sass/default.scss */
 tr.even {
-	background-color: #fff5fc;
+  background-color: #fff5fc;
 }
 
 /* Definition lists */
-dl
-{
-	margin: 0;
-	padding: 0;
+/* line 98, src/sass/default.scss */
+dl {
+  margin: 0;
+  padding: 0;
 }
 
-dt
-{
-	margin: 0;
-	padding: 0;
-	font-weight: bold;
+/* line 104, src/sass/default.scss */
+dt {
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
 }
 
-dd
-{
-	margin: 0 0 1em 0;
-	padding: 0;
+/* line 111, src/sass/default.scss */
+dd {
+  margin: 0 0 1em 0;
+  padding: 0;
 }
 
 /* GESHI CSS */
+/* line 117, src/sass/default.scss */
 div.example {
-	background: #fff5fc;
-	border: 1px solid #999;
-	margin: 1.5em 0;
-	padding: 1.25em 1.25em 0.75em;
-	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  background: #fff5fc;
+  border: 1px solid #999;
+  margin: 1.5em 0;
+  padding: 1.25em 1.25em 0.75em;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
+/* line 127, src/sass/default.scss */
 div.example p.title {
-	font-weight: bold;
+  font-weight: bold;
 }
 
+/* line 131, src/sass/default.scss */
 div.example div.code {
-	margin: 1.5em 0;
-	padding: 1em 1.25em 0.75em;
-	background: #FAFBFC;
-	border: 1px solid #AAA;
-	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  margin: 1.5em 0;
+  padding: 1em 1.25em 0.75em;
+  background: #FAFBFC;
+  border: 1px solid #AAA;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
+/* line 141, src/sass/default.scss */
 div.example div.code ol {
-	list-style: decimal outside;
-	padding: 0 0 1em 25px;
+  list-style: decimal outside;
+  padding: 0 0 1em 25px;
 }
 
 /* END GESHI CSS */
-
+/* line 148, src/sass/default.scss */
 #identity {
-	font-size: 85%;
-	float: right;
-	margin-right: 5px;
+  font-size: 85%;
+  float: right;
+  margin-right: 5px;
 }
 
-footer {
-	border-top: 1px solid #3c1038;
-	margin: 0.5em 0 1em 0;
-	padding: 5px;
-}
-
-footer p {
-	font-size: 85%;
-}
-
-footer p#colofon {
-	float: left;
-}
-
-footer p#copyright {
-	float: right;
-}
-
-div.note {
-	background: transparent url(../images/tip.png) top left no-repeat;
-}
-
-div.note p {
-	font-style: italic;
-	font-size: 85%;
-	font-color: #666;
-	padding-left: 20px;
-}
-
-.api-examples a {
-	white-space: nowrap;
-}
-
-a.resolvable-concept.loading {
+div#central-panel .inner-panel {
+	padding-left: 15px;
 	padding-right: 15px;
-	background: transparent url(../images/spinner.gif) center right
-		no-repeat;
+	padding-top: 10px;
 }
 
-div.message,div.error {
-	font-size: 18px;
-	font-weight: 500;
-	padding-left: 30px;
-	line-height: 30px;
+/* line 172, src/sass/default.scss */
+div.note {
+  background: transparent url(../images/tip.png) top left no-repeat;
 }
 
+/* line 176, src/sass/default.scss */
+div.note p {
+  font-style: italic;
+  font-size: 85%;
+  font-color: #666;
+  padding-left: 20px;
+}
+
+/* line 183, src/sass/default.scss */
+.api-examples a {
+  white-space: nowrap;
+}
+
+/* line 187, src/sass/default.scss */
+a.resolvable-concept.loading {
+  padding-right: 15px;
+  background: transparent url(../images/spinner.gif) center right no-repeat;
+}
+
+/* line 193, src/sass/default.scss */
+div.message, div.error {
+  font-size: 18px;
+  font-weight: 500;
+  padding-left: 30px;
+  line-height: 30px;
+}
+
+/* line 200, src/sass/default.scss */
 div.error {
-	background: url('../images/warning.png') 0px 5px no-repeat;
+  background: url("../images/warning.png") 0px 5px no-repeat;
 }
 
+/* line 204, src/sass/default.scss */
 div.error p {
-	color: Red;
-	font-style: italic;
+  color: Red;
+  font-style: italic;
 }
 
+/* line 209, src/sass/default.scss */
 div.message {
-	background: url('../images/notice_note.png') center left no-repeat;
+  background: url("../images/notice_note.png") center left no-repeat;
 }
 
+/* line 213, src/sass/default.scss */
 .box {
-	padding: 5px;
-	background: #fff5fc;
-	border: 1px solid #999;
-	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  padding: 5px;
+  background: #fff5fc;
+  border: 1px solid #999;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
-ul#dashboard-menu {
-	list-style: none;
-	margin: 0 0 5px 0;
-	overflow: auto;
-	float: left;
-}
-
-ul#dashboard-menu li {
-	float: left;
-	margin: 5px;
-}
-
-ul#dashboard-menu li a {
-	display: block;
-}
-
-ul#dashboard-menu li a.active {
-	font-weight: bold;
-}
-
-ul#dashboard-menu li a.active:hover {
-	text-decoration: none;
-	cursor: default;
-}
-
-ul#dashboard-menu li a:hover {
-	
-}
-
+/* line 251, src/sass/default.scss */
 .clear {
-	clear: both;
-	overflow: auto;
+  clear: both;
+  overflow: auto;
 }
 
+/* line 256, src/sass/default.scss */
 #collection-form {
-	float: left;
-	width: 550px;
+  float: left;
+  width: 550px;
 }
 
+/* line 261, src/sass/default.scss */
 #collection-stats {
-	float: right;
-	width: auto;
+  float: right;
+  width: auto;
 }
 
+/* line 266, src/sass/default.scss */
 #collections-per-institute .dc_description {
-	margin-top: 0px;
-	padding-top: 0px;
-	color: #888;
+  margin-top: 0px;
+  padding-top: 0px;
+  color: #888;
 }
 
+/* line 272, src/sass/default.scss */
 .job-status-error {
-	color: Red;
+  color: Red;
 }
 
+/* line 276, src/sass/default.scss */
 .job-status-success {
-	color: Green;
+  color: Green;
+}
+
+#header #breadcrumbs, #header #login_data {
+  font-size: 12px !important;
+}
+
+.login-regular,
+.login-openid {
+	float: left;
+}
+
+.login-regular {
+	width: 500px;
 }
