@@ -18,6 +18,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`tenant` (
   `locality` VARCHAR(150) NULL DEFAULT NULL ,
   `postalCode` VARCHAR(50) NULL DEFAULT NULL ,
   `countryName` VARCHAR(100) NULL DEFAULT NULL ,
+  `disableSearchInOtherTenants` BOOLEAN,
   PRIMARY KEY (`code`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -96,8 +97,13 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `tenant` CHAR(10) NOT NULL ,
   `apikey` VARCHAR(100) NULL DEFAULT NULL ,
   `active` CHAR(1) NOT NULL DEFAULT 'Y' ,
-  `type` ENUM('dashboard','api','both') NOT NULL DEFAULT 'both' ,
+  `type` ENUM('editor','api','both') NOT NULL DEFAULT 'both' ,
   `eppn` VARCHAR(100) NOT NULL ,
+  `role` varchar(25) NOT NULL DEFAULT "guest",
+  `searchOptions` BLOB,
+  `conceptsSelection` BLOB,
+  `defaultSearchProfileId` INT,
+  `disableSearchProfileChanging` BOOLEAN,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
   INDEX `fk_user_tenant` (`tenant` ASC) ,
@@ -106,6 +112,11 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )
     ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_search_profile`
+    FOREIGN KEY (`defaultSearchProfileId`)
+    REFERENCES `search_profiles` (`id`)
+    ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
@@ -145,8 +156,57 @@ ENGINE = InnoDB
 AUTO_INCREMENT = 7
 DEFAULT CHARACTER SET = utf8;
 
+-- -----------------------------------------------------
+-- Table `openskos`.`notations`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `openskos`.`notations` (
+  `notation` INT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`notation`) 
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
+-- -----------------------------------------------------
+-- Table `openskos`.`search_profiles`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `openskos`.`search_profiles` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(150) NOT NULL,
+  `searchOptions` BLOB,
+  `creatorUserId` INT,
+  `tenant` CHAR(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_search_profile_user`
+    FOREIGN KEY (`creatorUserId`)
+    REFERENCES `openskos`.`user` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_search_profile_tenant`
+    FOREIGN KEY (`tenant`)
+    REFERENCES `openskos`.`tenant` (`code`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+INSERT INTO `namespace` (`prefix`, `uri`) VALUES
+('cc', 'http://creativecommons.org/ns#'),
+('dc', 'http://purl.org/dc/elements/1.1/'),
+('dcr', 'http://www.isocat.org/ns/dcr.rdf#'),
+('dcterms', 'http://purl.org/dc/terms/'),
+('fb', 'http://rdf.freebase.com/ns/'),
+('foaf', 'http://xmlns.com/foaf/0.1/'),
+('geo', 'http://www.w3.org/2003/01/geo/wgs84_pos#'),
+('geonames', 'http://www.geonames.org/ontology#'),
+('nyt', 'http://data.nytimes.com/elements/'),
+('owl', 'http://www.w3.org/2002/07/owl#'),
+('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
+('rdfs', 'http://www.w3.org/2000/01/rdf-schema#'),
+('skos', 'http://www.w3.org/2004/02/skos/core#'),
+('time', 'http://www.w3.org/2006/time#');

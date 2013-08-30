@@ -110,8 +110,37 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 		if (null === $id) {
 			throw new Zend_Controller_Exception('No id `'.$id.'` provided', 400);
 		}
+                
+                /*
+                 * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
+                 * with this we can create a route in the config ini like this:
+                 * 
+                 * resources.router.routes.route_id.type = "Zend_Controller_Router_Route_Regex"
+                 * resources.router.routes.route_id.route = "gtaa\/(\d+)"
+                 * resources.router.routes.route_id.defaults.module = "api"
+                 * resources.router.routes.route_id.defaults.controller = "concept"
+                 * resources.router.routes.route_id.defaults.action = "get"
+                 * resources.router.routes.route_id.defaults.id_prefix = "http://data.beeldengeluid.nl/gtaa/"
+                 * resources.router.routes.route_id.defaults.format = "html"
+                 * resources.router.routes.route_id.map.1 = "id"
+                 * resources.router.routes.route_id.reverse = "gtaa/%d"
+                 */
+                
+                
+                $id_prefix = $this->getRequest()->getParam('id_prefix');
+                if (null!==$id_prefix && !OpenSKOS_Solr::isValidUuid($id)) {
+                    $id_prefix  = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix );
+                    $id = $id_prefix . $id;
+                }
 		
-		$concept = $this->model->getConcept($id, array(), true);
+        // Tries to find any not deleted concept.
+		$concept = $this->model->getConcept($id);
+		
+		// If not deleted concept was not found - tries to find deleted one.
+		if (null === $concept) {
+			$concept = $this->model->getConcept($id, array(), true);
+		}
+		
 		if (null === $concept) {
 			throw new Zend_Controller_Exception('Concept `'.$id.'` not found', 404);
 		}

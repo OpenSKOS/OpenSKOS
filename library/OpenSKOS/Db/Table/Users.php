@@ -21,15 +21,32 @@
 
 class OpenSKOS_Db_Table_Users extends Zend_Db_Table 
 {
-	const USER_TYPE_DASHBOARD = 'dashboard';
+	const USER_TYPE_EDITOR = 'editor';
 	const USER_TYPE_API = 'api';
 	const USER_TYPE_BOTH = 'both';
 	
+	const USER_ROLE_ROOT = 'root';
+	const USER_ROLE_ADMINISTRATOR = 'administrator';
+	const USER_ROLE_EDITOR = 'editor';
+	const USER_ROLE_USER = 'user';
+	const USER_ROLE_GUEST = 'guest';
+	
+	const USER_DEFAULT_ROLE = self::USER_ROLE_GUEST;
+	
 	static $types = array(
-		self::USER_TYPE_DASHBOARD,
+		self::USER_TYPE_EDITOR,
 		self::USER_TYPE_API,
 		self::USER_TYPE_BOTH
 	);
+	
+	public static $roles = array(
+		self::USER_ROLE_GUEST,
+		self::USER_ROLE_USER,
+		self::USER_ROLE_EDITOR,
+		self::USER_ROLE_ADMINISTRATOR,
+		self::USER_ROLE_ROOT
+	);
+	
 	
 	protected $_name = 'user';
 	
@@ -60,9 +77,30 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
 		return $model->fetchRow($model->select()->where('apikey=?', $apikey));
 	}
 	
-	public static function isDashboardAllowed($usertype)
+	/**
+	 * Finds a user by id in the db. If not found an error is thrown.
+	 * 
+	 * @param int $id
+	 * @return OpenSKOS_Db_Table_Row_User
+	 * @throws Zend_Db_Select_Exception
+	 */
+	public static function requireById($id)
 	{
-		return $usertype == self::USER_TYPE_BOTH || $usertype == self::USER_TYPE_DASHBOARD;
+		$model = new self();
+		$result = $model->find($id)->current();
+		
+		if (null === $result) {
+			throw new Zend_Db_Select_Exception('User with id "' . $id . '" not found in the database.');
+		}
+		
+		return $result;
+	}
+	
+	public static function isEditorAllowed($usertype, $role)
+	{
+		return $usertype == 
+			(self::USER_TYPE_BOTH || $usertype == self::USER_TYPE_EDITOR)
+			&& Zend_Registry::get(OpenSKOS_Application_Resource_Acl::REGISTRY_KEY)->isAllowed($role, 'editor', 'view');;
 	}
 	
 	public static function isApiAllowed($usertype)
@@ -86,6 +124,31 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
 		return count($this->fetchAll($select)) === 0;
 	}
 	
+	/**
+	 * @return OpenSKOS_Db_Table_Row_User
+	 */
+	public static function fromIdentity()
+	{
+		if (!Zend_Auth::getInstance()->hasIdentity()) {
+			return;
+		}
+		$model = new self();
+		return $model->find(Zend_Auth::getInstance()->getIdentity()->id)->current();
+	}
+	
+	/**
+	 * @return OpenSKOS_Db_Table_Row_User
+	 */
+	public static function requireFromIdentity()
+	{
+		$user = self::fromIdentity();
+		if (null === $user) {
+			throw new Zend_Controller_Action_Exception('Identity user not found', 404);
+		}
+		
+		return $user;
+	}
+	
 	public function uniqueEmail($email, Array $data)
 	{
 		return $this->_uniqueFieldValue('email', $email, $data);
@@ -98,5 +161,13 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
 	
 	public static function pwgen($length) {
 		return substr(md5(rand().rand()), 0, $length);
+	}
+	
+	/**
+	 * @return array
+	 */
+	public static function getUserRoles()
+	{
+		return self::$roles;
 	}
 }

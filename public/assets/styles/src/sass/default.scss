@@ -1,0 +1,249 @@
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Mark Lindeman
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+
+@CHARSET "UTF-8";
+
+@import "common.scss";
+
+
+#content {
+	font-size: 1.0em;
+	line-height: 1.5;
+	text-align: left;
+}
+
+h1,h2,h3,h4 {
+	color: #822966;
+	font-weight: bold;
+	font-size: 1em;
+}
+
+h1 {
+	font-size: 180%;
+	font-weight: bold;
+	border-bottom: 2px solid #3c1038;
+	margin: 0.5em 0 1em 0;
+	overflow: auto;
+}
+
+h1 img {
+	display: block;
+	float: left;
+	margin-bottom: 10px;
+}
+
+h1 span {
+	padding: 15px 0 0 20px;
+	display: block;
+	float: left;
+}
+
+h2 {
+	border-bottom: 1px solid #3c1038;
+	font-size: 140%;
+	margin: 0.5em 0 0.5em 0;
+}
+
+h3 {
+	font-size: 120%;
+}
+
+h4 {
+	font-size: 90%;
+}
+
+pre {
+	
+}
+
+/* Tables */
+table {
+	width: auto;
+	border-collapse: collapse;
+}
+
+td,th {
+	border: 1px solid #822966;
+	padding: 3px 7px 2px 7px;
+}
+
+thead tr th {
+	background-color: #a1568a;
+	color: #fff;
+}
+
+tr.even {
+	background-color: #fff5fc;
+}
+
+/* Definition lists */
+dl
+{
+	margin: 0;
+	padding: 0;
+}
+
+dt
+{
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+}
+
+dd
+{
+	margin: 0 0 1em 0;
+	padding: 0;
+}
+
+/* GESHI CSS */
+div.example {
+	background: #fff5fc;
+	border: 1px solid #999;
+	margin: 1.5em 0;
+	padding: 1.25em 1.25em 0.75em;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+div.example p.title {
+	font-weight: bold;
+}
+
+div.example div.code {
+	margin: 1.5em 0;
+	padding: 1em 1.25em 0.75em;
+	background: #FAFBFC;
+	border: 1px solid #AAA;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+div.example div.code ol {
+	list-style: decimal outside;
+	padding: 0 0 1em 25px;
+}
+
+/* END GESHI CSS */
+
+#identity {
+	font-size: 85%;
+	float: right;
+	margin-right: 5px;
+}
+
+footer {
+	border-top: 1px solid #3c1038;
+	margin: 0.5em 0 1em 0;
+	padding: 5px;
+}
+
+footer p {
+	font-size: 85%;
+}
+
+footer p#colofon {
+	float: left;
+}
+
+footer p#copyright {
+	float: right;
+}
+
+div.note {
+	background: transparent url(../images/tip.png) top left no-repeat;
+}
+
+div.note p {
+	font-style: italic;
+	font-size: 85%;
+	font-color: #666;
+	padding-left: 20px;
+}
+
+.api-examples a {
+	white-space: nowrap;
+}
+
+a.resolvable-concept.loading {
+	padding-right: 15px;
+	background: transparent url(../images/spinner.gif) center right
+		no-repeat;
+}
+
+div.message,div.error {
+	font-size: 18px;
+	font-weight: 500;
+	padding-left: 30px;
+	line-height: 30px;
+}
+
+div.error {
+	background: url('../images/warning.png') 0px 5px no-repeat;
+}
+
+div.error p {
+	color: Red;
+	font-style: italic;
+}
+
+div.message {
+	background: url('../images/notice_note.png') center left no-repeat;
+}
+
+.box {
+	padding: 5px;
+	background: #fff5fc;
+	border: 1px solid #999;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+.clear {
+	clear: both;
+	overflow: auto;
+}
+
+#collection-form {
+	float: left;
+	width: 550px;
+}
+
+#collection-stats {
+	float: right;
+	width: auto;
+}
+
+#collections-per-institute .dc_description {
+	margin-top: 0px;
+	padding-top: 0px;
+	color: #888;
+}
+
+.job-status-error {
+	color: Red;
+}
+
+.job-status-success {
+	color: Green;
+}

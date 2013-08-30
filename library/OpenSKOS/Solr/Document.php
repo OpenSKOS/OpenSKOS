@@ -78,7 +78,7 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
 		unset($this->fieldnames[$ix]);
 		$fieldnames = array();
 		foreach ($this->fieldnames as $fieldname) $fieldnames[] = $fieldname;
-		$this->fieldnames = $fieldname;
+		$this->fieldnames = $fieldnames;
 		$this->rewind();
 	}
 	
@@ -130,9 +130,47 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
     	return $this;
     }
     
+    /**
+     * Registers the notation of the document in the database, or generates one if the document does not have notation.
+     * 
+     * @return OpenSKOS_Solr
+     */
+    public function registerOrGenerateNotation()
+    {   
+    	if ((isset($this->data['class']) && $this->data['class'] == 'Concept')
+    			|| (isset($this->data['class'][0]) && $this->data['class'][0] == 'Concept')) {
+    		
+    		$currentNotation = '';
+	    	if (isset($this->data['notation']) && isset($this->data['notation'][0])) {
+	    		$currentNotation = $this->data['notation'][0];
+	    	}
+	    	
+	    	if (empty($currentNotation)) {
+	    		$this->fieldnames[] = 'notation';
+	    		$this->data['notation'] = array(OpenSKOS_Db_Table_Notations::getNext());
+	    		
+	    		// Adds the notation to the xml. At the end just before </rdf:Description>
+	    		$closingTag = '</rdf:Description>';
+	    		$notationTag = '<skos:notation>' . $this->data['notation'][0] . '</skos:notation>';
+	    		$xml = $this->data['xml'];
+	    		$xml = str_replace($closingTag, $notationTag . $closingTag, $xml);
+	    		$this->data['xml'] = $xml;
+	    		
+	    	} else {
+	    		if ( ! OpenSKOS_Db_Table_Notations::isRegistered($currentNotation)) {
+	    			// If we do not have the notation registered - register it.
+	    			OpenSKOS_Db_Table_Notations::register($currentNotation);
+	    		}
+	    	}
+    	}
+    	
+    	return $this;
+    } 
+        
     public function __toString()
     {
-    	$doc = DOMDocument::loadXML('<doc/>');
+    	$doc = new DOMDocument();
+    	$doc->loadXML('<doc/>');
     	foreach ($this->fieldnames as $fieldname) {
     		foreach ($this->data[$fieldname] as $value) {
     			$node = $doc->documentElement->appendChild($doc->createElement('field'));

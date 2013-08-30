@@ -72,7 +72,32 @@ class Api_ConceptController extends Api_FindConceptsController {
 			throw new Zend_Controller_Action_Exception($e->getMessage(), 400);
 		}
 		
-		$concept = $this->model->getConcept($solrDocument['uuid'][0]);
+		//get the Concept based on it's URI:
+		$concept = $this->model->getConcept($solrDocument['uri'][0]);
+		                
+		//modify the UUID of the Solr Document:
+		if (null !== $concept) {
+			$solrDocument->offsetUnset('uuid');
+			$solrDocument->offsetSet('uuid', $concept['uuid']);
+			
+			// Preserve any old data which is not part of the rdf.
+			if (isset($concept['created_by'])) {
+				$solrDocument->offsetSet('created_by', $concept['created_by']);
+			}
+			if (isset($concept['modified_by'])) {
+				$solrDocument->offsetSet('modified_by', $concept['modified_by']);
+			}
+			if (isset($concept['approved_by'])) {
+				$solrDocument->offsetSet('approved_by', $concept['approved_by']);
+			}
+			if (isset($concept['deleted_by'])) {
+				$solrDocument->offsetSet('deleted_by', $concept['deleted_by']);
+			}
+			if (isset($concept['toBeChecked'])) {
+				$solrDocument->offsetSet('toBeChecked', $concept['toBeChecked']);
+			}
+		}
+                
 		if($this->getRequest()->getActionName() == 'put') {
 			if (!$concept) {
 				throw new Zend_Controller_Action_Exception('Concept `'.$solrDocument['uri'][0].'` does not exists, try POST-ing it to create it as a new concept.', 404);

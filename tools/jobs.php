@@ -24,7 +24,8 @@ $opts = array(
 	'help|?' => 'Print this usage message',
 	'env|e=s' => 'The environment to use (defaults to "production")',
 	'code|c=s' => 'Tenant code (optional, default is all Tenants)',
-	'job|j=i' => 'Job ID (optional, default is all Jobs)'
+	'job|j=i' => 'Job ID (optional, default is all Jobs)',
+	'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme", "all", "noExport". (optional, default is "noExport")'
 );
 
 try {
@@ -38,6 +39,10 @@ try {
 if ($OPTS->help) {
 	echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
 	exit(0);
+}
+
+if ( ! $OPTS->task) {
+	$OPTS->task = 'noExport';
 }
 
 $actions = array('list', 'delete', 'process');
@@ -58,6 +63,11 @@ if (!in_array($action, $actions)) {
 
 include 'bootstrap.inc.php';
 
+// Allow loading of application module classes.
+$autoloader = new OpenSKOS_Autoloader();
+$mainAutoloader = Zend_Loader_Autoloader::getInstance();
+$mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
+
 switch ($action) {
 	case 'list':
 		$db = Zend_Db_Table::getDefaultAdapter();
@@ -70,6 +80,14 @@ switch ($action) {
 		if ($OPTS->tenant) {
 			$select->where('collection.tenant=?', $OPTS->tenant);
 		}
+		if ($OPTS->task && $OPTS->task != 'all') {
+			if ($OPTS->task == 'noExport') {
+				$select->where('job.task!=?', OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT);
+			} else {
+				$select->where('job.task=?', $OPTS->task);
+			}		
+		}		
+		
 		$rows = $db->fetchAll($select);
 		$columns = array('id', 'tenant', 'collection', 'created         ', 'task');
 		echo fwrite(STDOUT, implode("\t", $columns)."\n");
@@ -101,10 +119,19 @@ switch ($action) {
 				exit(1);
 			}
 		} else {
-			$jobs = $model->fetchAll($model->select()
+			$select = $model->select()
 			->where('finished IS NULL')
 			->order('created asc')
-			->where('started IS NULL'));
+			->where('started IS NULL');			
+			if ($OPTS->task && $OPTS->task != 'all') {
+				if ($OPTS->task == 'noExport') {
+					$select->where('job.task!=?', OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT);
+				} else {
+					$select->where('job.task=?', $OPTS->task);
+				}
+			}
+			
+			$jobs = $model->fetchAll($select);
 		}
 		if (!count($jobs)) {
 			exit(0);
@@ -130,36 +157,125 @@ switch ($action) {
 			foreach ($jobs as $job) {
 				$collection = $job->getCollection();
 				switch ($job->task) {
-					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
-						$job->start();
+					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:						
+						$job->start()->save();
+						
+						$importFiles = array();
 						$file = $job->getFile();
-						if($job->isZip($file)) {
+						$fromZip = false;
+						if ($job->isZip($file)) {
+							$fromZip = true;
+							
 							$zip = new ZipArchive();
-							if ($zip->open($file)!==true) {
-								fwrite(STDERR, "cannot open <$file>\n");
-								$job
-									->error('cannot open ZIP')
-									->finish()->save();
+							if ($zip->open($file) !== true) {
+								fwrite(STDERR, "Can not open <$file>\n");
+								$job->error("Can not open <$file> as zip.")->finish()->save();
 								break;
 							}
 							
-							if ($zip->numFiles >= 1) {
-								$msg = _('only ZIP files with exactly one file can be processed');
-								fwrite(STDERR, "{$job->id}/{$file}: {$msg}\n");
-								$job
-									->error($msg)
-									->finish()->save();
-								break;
+							// Makes dir in which to extract the files.
+							$extractDirPath = $job->getParam('destination') . '_' . substr($job->getParam('name'), 0, strrpos($job->getParam('name'), '.'));
+							mkdir($extractDirPath);
+							
+							$zip->extractTo($extractDirPath);
+							$extractedFiles = scandir($extractDirPath);
+							foreach ($extractedFiles as $file) {
+								if ($file != '.' && $file != '..') {
+									$importFiles[] = $extractDirPath . '/' . $file;
+								}
 							}
-							for ($i=0; $i<$zip->numFiles;$i++) {
-						    	echo "index: $i\n";
-		    					print_r($zip->statIndex($i));
-							}
-							print_r($zip);
+						} else {
+							$importFiles[] = $file;
 						}
+						
+						// If delete before import option is set - remove all concepts in the collection.
+						if ((bool)$job->getParam('deletebeforeimport')) {
+							$solrClient = Zend_Registry::get('OpenSKOS_Solr');
+							$solrClient->delete('collection:' . $collection->id);
+							$solrClient->commit();
+							$solrClient->optimize();
+						}
+						
+						// Prepare import arguments and call the parser process for each file.
+						$arguments = array();
+						$arguments[] = '--env';
+						$arguments[] = $OPTS->env;
+						
+						// Collection args
+						$arguments[] = '--tenant';
+						$arguments[] = $collection->tenant;
+						$arguments[] = '--collection';
+						$arguments[] = $collection->id;
+						
+						$arguments[] = '--status';
+						$arguments[] = $job->getParam('status');
+						if ((bool)$job->getParam('ignoreIncomingStatus')) {
+							$arguments[] = '--ignoreIncomingStatus';
+						}
+						$arguments[] = '--lang';
+						$arguments[] = $job->getParam('lang');
+						if ((bool)$job->getParam('toBeChecked')) {
+							$arguments[] = '--toBeChecked';
+						}
+						if ((bool)$job->getParam('purge')) {
+							$arguments[] = '--purge';
+						}
+							
+						$arguments[] = '--commit';
+						
+						$duplicateConceptSchemes = array();
+						$notImportedNotations = array();
+						foreach ($importFiles as $filePath) {
+							$parserOpts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
+							$parserOpts->setArguments(array_merge($arguments, array($filePath))); // The last argument must be the file path.
+							try {
+								$parser = OpenSKOS_Rdf_Parser::factory($parserOpts);
+								$parser->process();
+								$duplicateConceptSchemes = array_merge($duplicateConceptSchemes, $parser->getDuplicateConceptSchemes());
+								$notImportedNotations = array_merge($notImportedNotations, $parser->getNotImportedNotations());
+							} catch (Exception $e) {
+								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+								
+								fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
+								$job->error($e->getMessage())->finish()->save();
+								exit($e->getCode());
+							}
+						}
+						
+						// Delete extracted files when done.
+						if ($fromZip) {
+							foreach ($importFiles as $filePath) {
+								unlink($filePath);
+							}
+							rmdir($extractDirPath);
+						}
+						
+						// Clears the schemes cache after import.
+						OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
+						
+						$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+						$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+						
+						$info = '';
+						if ( ! empty($duplicateConceptSchemes)) {
+							$info .= '<span class="errors">' . _('Tried to import the fallowing already existing concept schemes:') .  '"' . implode('", "', $duplicateConceptSchemes) . '"</span><br /><br />';
+						}
+						if ( ! empty($notImportedNotations)) {
+							// If there are thousands of not imported notations - show only first 100
+							if (count($notImportedNotations) > 100) {
+								$notImportedNotations = array_slice($notImportedNotations, 0, 100);
+								$notImportedNotations[] = '...';
+							}
+							$info .= _('The documents with the fallowing notations were not imported because already exist:') .  '"' . implode('", "', $notImportedNotations) . '"';
+						}
+						
+						$job->setInfo($info);
+						$job->finish()->save();
+						
 						break;
 					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
-						$job->start();
+						$job->start()->save();
 						$harvester = OpenSKOS_Oai_Pmh_Harvester::factory($collection)
 							->setFrom($job->getParam('from'))
 							->setUntil($job->getParam('until'))
@@ -173,6 +289,53 @@ switch ($action) {
 							}
 							$job->finish()->save();
 						} catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
+							fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
+							$job->error($e->getMessage())->finish()->save();
+						}
+						break;
+					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT:
+							$job->start()->save();
+							
+							$export = new Editor_Models_Export();
+							$export->setSettings($job->getParams());
+							try {
+								$resultFilePath = $export->exportToFile();
+								
+								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+								
+								$job->setInfo($resultFilePath);
+								$job->finish()->save();
+							} catch (Zend_Exception $e) {
+								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+								
+								fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
+								$job->error($e->getMessage())->finish()->save();
+							}
+							break;
+					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME:
+						$job->start()->save();
+
+						try {
+							$response = Api_Models_Concepts::factory()->getConcepts('uuid:' . $job->getParam('uuid'));
+							if ( ! isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {
+								throw new Zend_Exception('The requested concept scheme was not found');
+							}								
+							$conceptScheme = new Editor_Models_ConceptScheme(new Api_Models_Concept(array_shift($response['response']['docs'])));
+							$conceptScheme->delete(true, $job['user']);
+							
+							// Clears the schemes cache after the scheme is removed.
+							OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
+							
+							$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+							$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+							
+							$job->finish()->save();
+						} catch (Zend_Exception $e) {
+							$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+							$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+					
 							fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
 							$job->error($e->getMessage())->finish()->save();
 						}

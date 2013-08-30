@@ -24,7 +24,7 @@
 <?php return; endif; ?>
 <ListIdentifiers>
 <?php foreach ($this->data as $doc):?>
-	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc))?>
+	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc, 'conceptSchemes' => $this->conceptSchemes))?>
 <?php endforeach?>
 <?php echo $this->render('index/resumptionToken.phtml')?>
 </ListIdentifiers>

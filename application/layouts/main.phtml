@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -32,13 +32,13 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta charset=utf-8 />
 		<script type="text/javascript">
-	    var BASE_URL = '<?php echo rtrim($this->url(array(), null, true), '/')?>';
+	    var BASE_URL = '<?php echo rtrim($this->url(array(), 'default', true), '/')?>';
 		</script>
 		<!--[if lt IE 9]>
 		<script src="<?php echo $baseUrl?>assets/scripts/html5.js"></script>
 		<![endif]-->
-		<script src="<?php echo $baseUrl?>assets/scripts/mootools-core-1.3.2-full-nocompat-yc.js"></script>
-		<script src="<?php echo $baseUrl?>assets/scripts/mootools-more-1.3.2.1.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-core-1.4.5-full-nocompat.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-more-1.4.0.1.js"></script>
 		<script src="<?php echo $baseUrl?>assets/scripts/openskos.js"></script>
 		<script src="<?php echo $baseUrl?>assets/scripts/forms.js"></script>
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/default.css" type="text/css" media="all" />
@@ -64,13 +64,13 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 				$identity = Zend_Auth::getInstance()->getIdentity();
 			?>
 			<div id="identity">
-				<?php echo $this->translate('Welcome')?> <a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'users', 'action' => 'edit', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a>
-				<?php 
+				<?php echo $this->translate('Welcome')?> <a href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'edit', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a>
+				<?php
 				    //SAML users can not logout:
 				    if (isset($_SERVER['eppn'])):
 				?>
 				<?php else:?>
-				[<a href="<?php echo $this->url(array('module' => 'dashboard', 'controller' => 'logout'), 'default', true)?>"><?php echo $this->translate('logout')?></a>]
+				[<a href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><?php echo $this->translate('logout')?></a>]
 				<?php endif?>
 			</div>
 			<?php endif?>
@@ -84,7 +84,7 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 				<a href="<?php echo $baseUrl?>">OpenSKOS</a> is a <a rel="external" href="http://www.catchplus.nl/">CATCHPlus</a> project
 			</p>
 			<p id="copyright">
-				&copy; 2011 <a href="http://www.pictura-dp.nl">Pictura Database Publishing bv</a>
+                &copy; 2011-2013 <a href="http://www.picturae.nl/" target="_blank">Picturae</a>
 			</p>
 		</footer>
 	</body>
