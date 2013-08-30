@@ -64,7 +64,8 @@ class OpenSKOS_Solr_Documents implements Countable, Iterator
     
     public function __toString()
     {
-    	$doc = DOMDocument::loadXML('<add/>');
+    	$doc = new DOMDocument();
+    	$doc->loadXML('<add/>');
     	foreach ($this->documents as $document) {
     		$frag = $doc->createDocumentFragment();
     		$frag->appendXml((string)$document);

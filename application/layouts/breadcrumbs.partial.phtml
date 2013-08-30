@@ -1,0 +1,5 @@
+<ul id="breadcrumb">
+	<?php foreach ($this->pages as $page):?>
+		<li><a class="clickable" href="<?php echo $page->getHref()?>"><?php echo $this->translate((string)$page)?></a></li>
+	<?php endforeach?>
+</ul>

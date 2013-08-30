@@ -1,0 +1,101 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Mark Lindeman
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+<?php if ($this->collection->id):?>
+<?php $this->headTitle($this->translate('Edit collection'))?>
+<?php else:?>
+<?php $this->headTitle($this->translate('Create collection'))?>
+<?php endif?>
+
+<div>
+	<div id="collection-form">
+	<?php echo $this->collection->getForm()->setAction($this->url(array('action' => 'save')))?>
+	</div>
+	<?php if ($this->collection->id):?>
+	<div id="collection-stats" class="box">
+		<h3>SKOS Concepts per class:</h3>
+		<ul>
+			<?php foreach ($this->collection->getClasses() as $class => $count):?>
+			<li><?php echo OpenSKOS_Rdf_Parser::$namespaces['skos'].$class?>: <?php echo number_format($count, 0)?></li>
+			<?php endforeach?>
+		</ul>
+		<?php if ($this->collection->OAI_baseURL):?>
+		<?php if (false):?>
+		<h3><?php echo $this->translate('Schedule an OAI Harvest job')?></h3>
+		<?php 
+			//is a OAI Harvest job already scheduled?
+			if (count($this->harvestjobs)):
+				$job = $this->harvestjobs->current();
+		?>
+		<p><?php 
+			echo str_replace(array('%started%', '%user%'), array('<em>'.$job->created.'</em>', '<em>'.$job->getUser()->name.'</em>'),
+				$this->translate('An OAI Harvest job has already been scheduled<br/> on %started% by %user%')
+			);
+		?></p>
+		<?php else:?>
+		<?php echo $this->collection->getOaiJobForm()->setAction($this->url(array('action' => 'harvest')))?>
+		<?php endif?>
+		<?php else:?>
+			<p>OAI LAST UPDATE</p>
+		<?php endif?>
+		<?php else:?>
+		<h3><?php echo $this->translate('Import new data')?></h3>
+		<p><?php echo $this->translate('Upload a file in (optionaly zipped) rdf-xml format (max. %s).', ini_get('upload_max_filesize'))?>
+		<br/>
+		<?php echo $this->translate('See <a href="%s">API documentation</a> for supported formats.', $this->url(array('module' => 'api'), null, true).'#concept-crud')?>
+		</p>
+		<?php echo $this->collection->getUploadform()->setAction($this->url(array('action' => 'import')))?>
+		<?php if (count($this->jobs)):?>
+		<h3><?php echo $this->translate('Current import jobs for this collection')?></h3>
+		<table style="width: 100%;">
+			<thead>
+				<tr>
+					<th>Created</th>
+					<th>Started</th>
+					<th>Filename</th>
+					<th>Size</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ($this->jobs as $job):?>
+				<tr>
+					<td><?php echo $job->created?></td>
+					<td><?php echo $job->started?$job->started:'-'?></td>
+					<td><?php echo $job->getDisplayFileName()?></td>
+					<td><?php echo $this->HumanFilesize($job->getParam('size'), 1)?></td>
+				</tr>
+			<?php endforeach?>
+			</tbody>
+		</table>
+		<?php endif?>
+		<?php endif?>
+	</div>
+	<?php endif?>
+</div>
+
+<?php if ($this->collection->id):?>
+<p>You can share this information via the OpenSKOS API:</p>
+<ul>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.rdf">in RDF</a></li>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.html">in HTML</a></li>
+	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.json">in JSON</a></li>
+</ul>
+<?php endif?>

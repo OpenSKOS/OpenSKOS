@@ -434,25 +434,38 @@ class OaiPmh
 		}
 		$this->_view->collections = $collections;
 		
-		//load all ConceptSchemes:
-	    $limit = 20;
+	    $this->_view->assign('conceptSchemes', $this->loadAllConceptSchemes());
+	    
+	    return $this->_view->render('index/ListSets.phtml');
+	}
+	
+	public function loadAllConceptSchemes($groupByCollection = true)
+	{
+		$limit = 20;
 	    $start = 0;
 	    $conceptSchemes = array();
 	    while (true) {
-	        $params = array('limit' => $limit, 'start' => $start, 'fl' => 'uri,uuid,xml,collection');
-    	    $response = new OpenSKOS_SKOS_ConceptSchemes(OpenSKOS_Solr::getInstance()->search('class:ConceptScheme'));
+	        $params = array('limit' => $limit, 'start' => $start, 'fl' => 'uri,uuid,xml,tenant,collection,dcterms_title');
+    	    $response = new OpenSKOS_SKOS_ConceptSchemes(OpenSKOS_Solr::getInstance()->search('class:ConceptScheme', $params));
     	    foreach ($response as $doc) {
-    	        if (!isset($conceptSchemes[$doc['collection']])) {
-    	            $conceptSchemes[$doc['collection']] = array();
-    	        }
-    	        $conceptSchemes[$doc['collection']][] = $doc;
+    	    	if (!isset($conceptSchemes[$doc['tenant']])) {
+    	    		$conceptSchemes[$doc['tenant']] = array();
+    	    	}
+	    	    if ($groupByCollection) {
+		    		if (!isset($conceptSchemes[$doc['tenant']][$doc['collection']])) {
+		    	   	    $conceptSchemes[$doc['tenant']][$doc['collection']] = array();
+		    	    }
+		    	    $conceptSchemes[$doc['tenant']][$doc['collection']][$doc['uri']] = $doc;	    	        
+	    	    } else {
+	    	  		$conceptSchemes[$doc['tenant']][$doc['uri']] = $doc;
+    	    	}
+    	    }
+    	    if ($limit != count($response)) {
+    	    	break;
     	    }
     	    $start += $limit;
-    	    if ($start >= count($response)) break;
 	    }
-	    $this->_view->assign('conceptSchemes', &$conceptSchemes);
-	
-		return $this->_view->render('index/ListSets.phtml');
+	    return $conceptSchemes;
 	}
 	
 	public function ListIdentifiers()
@@ -505,6 +518,7 @@ class OaiPmh
 		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
 		$model = new OpenSKOS_Db_Table_Collections();
 		$this->_view->collections = $model->fetchAssoc();
+		$this->_view->conceptSchemes = $this->loadAllConceptSchemes(false);
 		
 		return $this->_view->render('index/List'.(false === $onlyIdentifiers ? 'Records' : 'Identifiers').'.phtml');
 	}
@@ -514,6 +528,7 @@ class OaiPmh
 	    @list($tenantCode, $collectionCode, $conceptSchemaUuid) = explode(':', $set);
 	    if (null === $tenantCode) return;
 	    $model = new OpenSKOS_Db_Table_Tenants();
+	    
 	    if (null === ($tenant = $model->find($tenantCode)->current())) {
 	        return;
 	    }
@@ -526,9 +541,11 @@ class OaiPmh
 			if (null === $collection) return;
 			if (null!==$conceptSchemaUuid) {
 			    $params = array('limit' => 1, 'fl' => 'uuid');
+			    
 			    $response = new OpenSKOS_SKOS_ConceptSchemes(
 			        OpenSKOS_Solr::getInstance()->search("class:ConceptScheme AND tenant:{$tenant->code} AND collection:{$collection->id} AND uuid:{$conceptSchemaUuid}")
 			    );
+			    			    
 			    if(count($response)==0) {
 			        return;
 			    } else {
@@ -557,6 +574,9 @@ class OaiPmh
 		$this->_view->data = $paginator;
 		$this->_view->metadataPrefix = $this->getParam('metadataPrefix');
 		$this->_view->namespacesByCollection = OpenSKOS_Db_Table_Namespaces::getNamespacesByCollection();
+		
+		$this->_view->conceptSchemes = $this->loadAllConceptSchemes(false);
+		
 		return $this->_view->render('index/ListRecords.phtml');
 	}
 	

@@ -43,16 +43,19 @@ class Api_Models_Concepts
 	}
 	
 	/**
-	 * @return Dashboard_Models_Concepts
+	 * @return Editor_Models_Concepts
 	 */
-	public function factory()
+	public static function factory()
 	{
 		return new Api_Models_Concepts();
 	}
 	
-	public function getConcepts($q, $includeDeleted = false)
-	{
+	public function getConcepts($q, $includeDeleted = false, $forAutocomplete = false)
+	{	
 		$solr = $this->solr();
+		if(true === (bool)ini_get('magic_quotes_gpc')) {
+			$q = stripslashes($q);
+		}
 		if (null !== ($lang = $this->lang)) {
 			$solr->setLang($lang);
 		}
@@ -73,7 +76,40 @@ class Api_Models_Concepts
 		    $q = "($q) AND deleted:false";
 		}
 		
+		if (true === $forAutocomplete) {
+			$labelReturnField = $this->_getLabelReturnField();
+			$params = $params + array(
+				'facet' => 'true',
+				'facet.field' => $labelReturnField,
+				'fq' => $q,
+				'facet.mincount' => 1
+			);
+			$response = $this->solr()
+				->setFields(array('uuid', $labelReturnField))
+				->limit(0,0)
+				->search($q, $params);
+			$this->solr()->setFields(array());
+			$labels = array();
+			foreach ($response['facet_counts']['facet_fields'][$labelReturnField] as $label => $count) {
+				$labels[] = $label;
+			}
+			return $labels;
+		}
+		
 		return $solr->search($q, $params);
+	}
+	
+	protected function _getLabelReturnField()
+	{
+		$labelReturnField = 'LexicalLabels';
+		if (null !== ($labelField = $this->getQueryParam('returnLabel'))) {
+			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
+				$labelReturnField = $labelField;
+			}
+		}
+		$lang = $this->lang;
+		$labelReturnField .= null===$lang?'':'@'.$lang;
+		return $labelReturnField;
 	}
 	
 	public function autocomplete($label, $includeDeleted = false)
@@ -81,7 +117,7 @@ class Api_Models_Concepts
 		$lang = $this->lang;
 		$label = strtolower($label);
 		$labelSearchField = 'LexicalLabelsText';
-		$labelReturnField = 'LexicalLabels';
+		$labelReturnField = $this->_getLabelReturnField();
 		
 		if (null !== ($labelField = $this->getQueryParam('searchLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
@@ -89,14 +125,7 @@ class Api_Models_Concepts
 			}
 		}
 		
-		if (null !== ($labelField = $this->getQueryParam('returnLabel'))) {
-			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
-				$labelReturnField = $labelField;
-			}
-		}
-		
 		$labelSearchField .= null===$lang?'':'@'.$lang;
-		$labelReturnField .= null===$lang?'':'@'.$lang;
 		
 		$q = "{$labelSearchField}:{$label}*";
 		
@@ -116,6 +145,7 @@ class Api_Models_Concepts
 			->setFields(array('uuid', $labelReturnField))
 			->limit(0,0)
 			->search($q, $params);
+		$this->solr()->setFields(array());
 		$labels = array();
 		foreach ($response['facet_counts']['facet_fields'][$labelReturnField] as $label => $count) {
 			$labels[] = $label;
@@ -128,8 +158,9 @@ class Api_Models_Concepts
 	 * @param string $uri
 	 * @param array $uris
 	 * @param string $lang
+	 * @param bool $includeDeleted, optional, default: false
 	 */
-	public function getRelations($relation, $uri, Array $uris = array(), $lang = null)
+	public function getRelations($relation, $uri, Array $uris = array(), $lang = null, $inScheme = null, $includeDeleted = false)
 	{
 		switch ($relation) {
 			case 'semanticRelation':
@@ -149,24 +180,75 @@ class Api_Models_Concepts
 				$q = array('broaderTransitive:"' . $uri.'"');
 				break;
 		}
-		
+		if (null !== $inScheme)
+			$q[0] .= ' AND inScheme:"'.$inScheme.'"';
 		if (count($uris)) {
 			foreach ($uris as $uri) {
 				$q[] = 'uri:"'.$uri.'"';
 			}
 		}
-		$fields = array('uuid', 'uri', 'prefLabel');
+	
+		$fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
 		if (null !== $lang) $fields[] ='prefLabel@'.$lang;
 		
-		return $this->solr()
+		$q = implode(' OR ', $q);
+		//only return non-deleted items:
+		if (false === $includeDeleted) {
+			$q = "($q) AND deleted:false";
+		}
+		
+		$response = $this->solr()
 			->setFields($fields)
 			->limit(1000)
-			->search(implode(' OR ', $q));
+			->search($q);
+		$this->solr()->setFields(array());
+		return $response;
+	}
+	
+	/**
+	 * Get transitive mappings.
+	 * @param string $uri
+	 * @param array $uris
+	 * @param string $lang
+	 * @param bool $includeDeleted, optional, default: false
+	 */
+	public function getMappings($mapping, $uri, Array $uris = array(), $lang = null, $inScheme = null, $includeDeleted = false)
+	{
+		switch ($mapping) {
+			case 'broadMatch':
+				$q = array('narrowMatch:"' . $uri.'"');
+				break;
+			case 'narrowMatch':
+				$q = array('broadMatch:"' . $uri.'"');
+				break;
+			default:
+				$q = array($mapping . ':"' . $uri.'"');
+				break;
+		}
+		if (null !== $inScheme)
+			$q[0] .= ' AND inScheme:"'.$inScheme.'"';
+	
+		$fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
+		if (null !== $lang) $fields[] ='prefLabel@'.$lang;
+		
+		$q = implode(' OR ', $q);
+		//only return non-deleted items:
+		if (false === $includeDeleted) {
+			$q = "($q) AND deleted:false";
+		}
+		
+		$response = $this->solr()
+			->setFields($fields)
+			->limit(1000)
+			->search($q);
+		$this->solr()->setFields(array());
+		return $response;
 	}
 	
 	/**
 	 * 
-	 * @param uuid $id
+	 * @param uuid $id (uri/uuid)
+	 * @param $includeDeleted, optional, default: false
 	 * @return Api_Models_Concept
 	 */
 	public function getConcept($id, $includeDeleted = false)
@@ -177,8 +259,85 @@ class Api_Models_Concepts
 			),
     		$includeDeleted
 		);
-		if (null === $data) return;
+		
+		if (null === $data) {
+			return null;
+		}
+		
 		return is_object($data) ? $data : new Api_Models_Concept($data, $this);
+	}
+	
+	/**
+	 * Uri wrapper around getConcept
+	 * @param uuid $id
+	 * @param bool $includeDeleted, optional, default: false
+	 * @return Api_Models_Concept
+	 */
+	public function getConceptByUri($uri, $includeDeleted = false)
+	{
+		return $this->getConcept($uri, $includeDeleted);
+	}
+	
+	/**
+	 * Get multiple concepts by list of uuids.
+	 *
+	 * @param array $uuids
+	 * @param bool $includeDeleted, optional, default: false
+	 * @return array An array of Api_Models_Concept
+	 */
+	public function getEnumeratedConcepts(array $uuids, $includeDeleted = false)
+	{
+		$query = 'uuid:"' . implode('" OR uuid:"', $uuids) . '"';
+		$this->setQueryParams(array('rows' => count($uuids)));
+		$response = $this->getConcepts($query, $includeDeleted);
+		
+		if ($response['response']['numFound'] == 0) {
+			return array();
+		}
+		
+		// Maintain the order of the given uuids.
+		$concepts = array();
+		foreach ($uuids as $uuid) {
+			foreach ($response['response']['docs'] as $j => $doc) {
+				if ($doc['uuid'] == $uuid) {
+					$concepts[] = new Api_Models_Concept($doc, $this);
+					break;
+				}
+			}
+		}
+		
+		return $concepts;
+	}
+	
+	/**
+	 * Get multiple concepts by list of uris.
+	 *
+	 * @param array $uris
+	 * @param bool $includeDeleted, optional, default: false
+	 * @return array An array of type uri => Api_Models_Concept
+	 */
+	public function getEnumeratedConceptsMapByUris(array $uris, $includeDeleted = false)
+	{
+		$query = 'uri:"' . implode('" OR uri:"', $uris) . '"';
+		$this->setQueryParams(array('rows' => count($uris)));
+		$response = $this->getConcepts($query, $includeDeleted);
+	
+		if ($response['response']['numFound'] == 0) {
+			return array();
+		}
+	
+		// Maintain the order of the given uuids.
+		$concepts = array();
+		foreach ($uris as $uri) {
+			foreach ($response['response']['docs'] as $j => $doc) {
+				if ($doc['uri'] == $uri) {
+					$concepts[$doc['uri']] = new Api_Models_Concept($doc, $this);
+					break;
+				}
+			}
+		}
+	
+		return $concepts;
 	}
 	
 	public function __get($key)
@@ -195,5 +354,4 @@ class Api_Models_Concepts
 	{
 		return Zend_Registry::get('OpenSKOS_Solr');
 	}
-
 }

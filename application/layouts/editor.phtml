@@ -1,0 +1,163 @@
+<?php
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+<?php
+$baseUrl = $this->url(array(), 'default', true);
+if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
+
+$lang = (string)Zend_Registry::get('Zend_Locale');
+
+$controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+?>
+<!DOCTYPE html>
+<html id="top" xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lang?>" lang="<?php echo $lang?>">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta charset=utf-8 />
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-core-1.4.5-full-nocompat.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-more-1.4.0.1.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-hashchange.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/resize.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/squeezebox.js"></script>
+		<script type="text/javascript">
+			var BASE_URL = '<?php echo rtrim($this->url(array(), null, true), '/')?>';
+
+			var keepAlive = new Request({method: 'get', url: BASE_URL + '/editor/keepalive'});
+			var sessionTimeout = <?php echo ini_get('session.gc_maxlifetime') - 300 ?>;
+			keepAlive.send.periodical(1000 * sessionTimeout, keepAlive);
+
+			function logout() {
+				if (confirm('<?php echo $this->translate('Are you sure you want to logout?')?>')) {
+					window.location.href = '<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>';
+				}
+			}
+		</script>
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css" type="text/css" media="all" />
+		
+		<?php $scriptsVersion = 2; // Change that if the scripts are changed.?>
+		<?php if ($controller == 'index'):?>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/search.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/control.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/concept.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/conceptScheme.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/relations.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/view.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/selection.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/tabs.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/url.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/editor/shortcuts.js?v=<?php echo $scriptsVersion;?>"></script>
+		<?php else:?>
+			<script src="<?php echo $baseUrl?>assets/scripts/openskos.js?v=<?php echo $scriptsVersion;?>"></script>
+			<script src="<?php echo $baseUrl?>assets/scripts/forms.js?v=<?php echo $scriptsVersion;?>"></script>
+			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/default.css" type="text/css" media="all" />
+			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/forms.css" type="text/css" media="screen" />
+		<?php endif?>
+
+		<?php if (isset($_GET['css'])):?>
+			<link rel="stylesheet" href="<?php echo $baseUrl?>interaction_design/themes/clean/css/main.css" type="text/css" media="all" />
+		<?php endif?>
+
+		<link rel="shortcut icon" href="<?php echo $baseUrl?>assets/images/favicon.ico" />
+
+		<?php
+    	echo $this->headMeta();
+    	echo $this->headScript();
+		echo $this->headTitle();
+		echo $this->headLink();
+	    echo $this->headStyle();
+	    ?>
+	</head>
+	<body>
+		<div id="wrapper">
+		    <div id="header">
+		        <?php echo $this->render('editor_breadcrumbs.phtml');?>
+		        <div id="login_data">
+		        	<?php if (Zend_Auth::getInstance()->hasIdentity()):
+						$identity = Zend_Auth::getInstance()->getIdentity();
+						?>
+			        	<?php echo $this->translate('Aangemeld als')?> <strong><a id="editMyProfile" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'view', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a></strong>
+			        	&nbsp;&nbsp;
+			        	<a id="logout" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><img style="vertical-align: middle;" src="<?php echo $baseUrl?>interaction_design/images/icons/logoff.gif" alt="" /></a>
+		        	<?php endif ?>
+	        	</div>
+	        	<div class="clear"></div>
+	        	<img class="logo" src="<?php echo $baseUrl?>assets/images/logo-open-skos.png" alt="OpenSKOS logo"/>
+		        <?php echo $this->render('editor_menu.phtml');?>
+		        <div class="clear"></div>
+        	</div>
+
+		    <div id="content">
+
+		    	<?php if((string)$this->placeholder('lefttoppanel') || (string)$this->placeholder('leftbottompanel')):?>
+			    	<div id="left-panel">
+			    		<div id="left-panel-resizer"></div>
+
+			    		<?php if((string)$this->placeholder('lefttoppanel')):?>
+				    	<div id="left-top-panel">
+				    		<div class="inner-panel">
+							    <div id="lefttoppanel">
+									<?php echo $this->placeholder('lefttoppanel') ?>
+							    </div>
+						    </div>
+					    </div>
+					    <?php endif?>
+
+					    <?php if((string)$this->placeholder('leftbottompanel')):?>
+						<div id="left-bottom-panel">
+							<div class="inner-panel">
+							    <div id="leftbottompanel">
+									<?php echo $this->placeholder('leftbottompanel') ?>
+							    </div>
+						    </div>
+					    </div>
+					    <?php endif?>
+					    <div class="clear"></div>
+				    </div>
+			    <?php endif?>
+
+				<div id="central-panel">
+					<div class="inner-panel">
+			    		<div id="central-content">
+			    			<?php echo $this->render('flashmessenger.phtml')?>
+			    			<?php echo $this->layout()->content?>
+						</div>
+					</div>
+					<div class="clear"></div>
+				</div>
+
+				<?php if((string)$this->placeholder('rightpanel')):?>
+				<div id="right-panel">
+					<div class="inner-panel">
+						<div id="righttoppanel">
+							<?php echo $this->placeholder('rightpanel') ?>
+					    </div>
+				    </div>
+				    <div class="clear"></div>
+			    </div>
+			    <?php endif?>
+		    </div>
+
+			<div id="footer"><div id="copyright"><span>&copy; 2011-2013 <a href="http://www.picturae.nl/" target="_blank">Picturae</a></span></div></div>
+		</div>
+	</body>
+</html>

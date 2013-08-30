@@ -39,7 +39,13 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller {
 	}
 	
 	public function indexAction() {
-		$this->_501('GET');
+		if (null === ($q = $this->getRequest()->getParam('q'))) {
+			$this->getResponse()
+				->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+			throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
+		}
+		$this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+		echo json_encode($this->model->getConcepts($q, null, true));
 	}
 
 	public function getAction() {
