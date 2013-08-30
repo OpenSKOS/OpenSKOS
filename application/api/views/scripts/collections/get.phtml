@@ -24,11 +24,11 @@
 <div class="clear">
 	<div id="collection-form">
 <dl>
-	<dt><?echo $this->translate('Institution')?>:</dt>
+	<dt><?php echo $this->translate('Institution')?>:</dt>
 	<dd><a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $this->tenant->code))?>.html"><?php echo $this->tenant->name?></a></dd>
 
 	<?php if ($this->collection->dc_description):?>
-	<dt><?echo $this->translate('Description')?>:</dt>
+	<dt><?php echo $this->translate('Description')?>:</dt>
 	<dd><?php echo nl2br($this->collection->dc_description, true)?></dd>
 	<?php endif?>
 

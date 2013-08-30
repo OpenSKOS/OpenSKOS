@@ -1,0 +1,117 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Boyan Bonev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+<?php $this->headTitle($this->translate('Advanced search options'))?>
+
+<?php foreach ($this->form->getErrorMessages() as $errorMessage): ?>
+	<p class="errors">
+		<?php echo $errorMessage?>
+	</p>
+<?php endforeach?>
+
+<?php echo $this->form;?>
+
+<?php
+	$baseUrl = $this->url(array(), 'default', true);
+	if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
+	
+	$this->headScript()->appendFile($baseUrl . 'assets/scripts/datepicker/Picker.js');
+	$this->headScript()->appendFile($baseUrl . 'assets/scripts/datepicker/Picker.Attach.js');
+	$this->headScript()->appendFile($baseUrl . 'assets/scripts/datepicker/Picker.Date.js');
+	$this->headLink()->appendStylesheet($baseUrl . 'assets/styles/datepicker/datepicker_vista.css');
+	
+	$conceptSchemeOptions = json_encode($this->conceptSchemeOptions);
+	$profilesOptions = json_encode($this->profilesOptions);
+	$collectionsConceptSchemesMap = json_encode($this->collectionsConceptSchemesMap);
+	
+$js = <<<JS
+window.addEvent('load', function() {
+	// Load datepicker
+	var dateFormat = '%d/%m/%Y';
+	Date.defineParser(dateFormat);
+	new Picker.Date($$('.datepicker'), {
+		format: dateFormat, 
+		pickerClass: 'datepicker_vista'
+	});
+	
+	if ($('searchProfileId')) {
+	
+		if ($('searchProfileId').get('value') != 'custom' && $('searchProfileId').getElement('option[value=custom]')) {
+			$('searchProfileId').getElement('option[value=custom]').hide();
+		}
+		
+		if ($('searchProfileId').get('value') != '' && $('searchProfileId').get('value') != 'custom') {
+			$('searchProfileName').set('value', $('searchProfileId').getElement('[selected="selected"]').get('text'));
+		}
+		
+		// Changing the profiles dropdown submits the form.
+		$('searchProfileId').addEvent('change', function () {			
+			if ($('searchProfileId').get('value') != 'custom') {
+				$('switchProfile').set('value', 1);
+				$('AdvancedSearchOptions').submit();
+			} else {
+				$('searchProfileName').set('value', '');
+				$('save').hide();
+				$('delete').hide();
+			}
+		});
+	}
+	
+	if ($('collections') && $('conceptScheme-element')) {
+		var collectionsConceptSchemesMap = {$collectionsConceptSchemesMap};
+		var updateConceptSchemes = function () {
+			var showConceptSchemes = [];
+			$('collections').getElements(':selected').each(function (el) {
+				if (collectionsConceptSchemesMap[el.getAttribute('value')]) {
+					showConceptSchemes = showConceptSchemes.concat(collectionsConceptSchemesMap[el.getAttribute('value')]);
+				}
+			});
+			
+			if ($('collections').getElements(':selected').length > 0) {
+				$('conceptScheme-element').getElements('input').each(function (el) {
+					if (showConceptSchemes.indexOf(el.getAttribute('value')) !== -1) {
+						el.getParent().show();
+						if (el.getParent().getNext()) {
+							el.getParent().getNext().show();
+						}
+					} else {
+						el.getParent().hide();
+						if (el.getParent().getNext()) {
+							el.getParent().getNext().hide();
+						}
+						el.set('checked', false);
+					}
+				});
+			} else {
+				$('conceptScheme-element').getElements('label, br').show();
+			}
+		};
+		$('collections').addEvent('change', updateConceptSchemes);
+		updateConceptSchemes();
+	}
+});
+
+if (parent.onAdvancedOptionsChanged) {
+	parent.onAdvancedOptionsChanged({$conceptSchemeOptions}, {$profilesOptions}, true);
+}
+JS;
+	$this->headScript()->appendScript($js);
+?>

@@ -79,10 +79,24 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form = new Zend_Form();
 			$form
 				->setAttrib('enctype', 'multipart/form-data')
-				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())))	
-				->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
-				->addElement('submit', 'submit', array('label'=>'Submit'));
-			$form->getElement('delete-before-import')->setValue(1);
+				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())));
+			
+			$availableStatuses = array();
+			$availableStatuses[] = 'candidate';
+			$availableStatuses[] = 'approved';
+			$availableStatuses[] = 'expired';
+			$form->addElement('select', 'status', array('label' => 'Status for imported concepts', 'multiOptions' => array_combine($availableStatuses, $availableStatuses)));
+			$form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
+			
+			$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');			
+			$form->addElement('select', 'lang', array('label' => 'The default language to use if no "xml:lang" attribute is found', 'multiOptions' => $editorOptions['languages']));
+						
+			$form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeCheked status of imported concepts'));			
+			$form->addElement('checkbox', 'purge', array('label' => 'Delete all concepts per ConceptSchema found in the import files'));
+			
+			$form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));
+			
+			$form->addElement('submit', 'submit', array('label'=>'Submit'));
 		}
 		return $form;
 	}
@@ -195,10 +209,11 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form->setDefaults($this->toArray());
 			
 			//load OAI sources:
+			$oai_providers = array('' => _('Pick a provider (or leave empty)...'));
+			
 			$bootstrap = $this->_getBootstrap();
 			$instances = $bootstrap->getOption('instances');
 			if (null !== $instances) {
-				$oai_providers = array('' => _('Pick a provider (or leave empty)...'));
 				foreach ($instances as $instance) {
 					switch ($instance['type']) {
 						case 'openskos':
@@ -227,10 +242,13 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 							throw new Zend_Exception('Unkown OAI instance type: '.$instance['type']);
 					}
 				}
-				$form->getElement('OAI_baseURL')->setMultiOptions($oai_providers);
-			} else {
-				$form->removeElement('OAI_baseURL');
 			}
+			
+			if ( ! isset($oai_providers[$this->OAI_baseURL])) {
+				$oai_providers[$this->OAI_baseURL] = $this->OAI_baseURL;
+			}
+			
+			$form->getElement('OAI_baseURL')->setMultiOptions($oai_providers);
 		}
 		return $form;
 	}
@@ -267,7 +285,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		$doc = new DOMDocument();
 		$doc->appendChild($doc->createElement('rdf:RDF'));
 		$doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
-		
+		$doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
 		$doc->documentElement->setAttribute('xmlns:dcterms', 'http://purl.org/dc/terms/');
 		
 		return $doc;

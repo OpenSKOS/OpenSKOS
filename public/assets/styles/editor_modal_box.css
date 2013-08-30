@@ -1,0 +1,71 @@
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+/* line 21, src/sass/editor_modal_box.scss */
+body {
+  overflow: auto !important;
+  background: #FFF !important;
+  width: 400px !important;
+}
+
+/* line 28, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions dd {
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+/* line 32, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions select {
+  width: 100%;
+}
+/* line 35, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions input[type=checkbox] {
+  margin: 4px;
+}
+/* line 38, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction {
+  margin-bottom: 20px;
+  margin-left: 40px;
+  margin-top: 10px;
+  padding: 5px 15px;
+  border: 1px solid #BABABA;
+}
+/* line 47, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction #userInteractionType-element br {
+  display: none;
+}
+/* line 51, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction #userInteractionType-label {
+  display: none;
+}
+/* line 54, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction dd {
+  margin-left: 0px;
+}
+/* line 57, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction #interactionDateFrom-label, #AdvancedSearchOptions #interaction #interactionDateFrom-element, #AdvancedSearchOptions #interaction #interactionDateTo-label, #AdvancedSearchOptions #interaction #interactionDateTo-element {
+  display: inline-block;
+}
+/* line 60, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #interaction #interactionDateTo-label {
+  margin-left: 40px;
+}
+/* line 64, src/sass/editor_modal_box.scss */
+#AdvancedSearchOptions #ok-element, #AdvancedSearchOptions #resetDefaults-label, #AdvancedSearchOptions #resetDefaults-element, #AdvancedSearchOptions #save-element, #AdvancedSearchOptions #delete-label, #AdvancedSearchOptions #delete-element {
+  display: inline-block;
+}

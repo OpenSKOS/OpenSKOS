@@ -1,0 +1,151 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<?php $this->headTitle($this->translate('Search, browse and edit'))?>
+
+<?php $this->placeholder('lefttoppanel')->captureStart();?>
+<?php echo $this->searchForm;?>
+<?php if (! $this->disableSearchProfileChanging): ?>
+	<a id="advanced-options-link" title="<?php  echo $this->translate('Show advanced search options')?>" href="<?php echo $this->url(array('controller' => 'search', 'action' => 'show-form'))?>"></a>
+<?php endif?>
+<?php $this->placeholder('lefttoppanel')->captureEnd() ?>
+
+<?php $this->placeholder('leftbottompanel')->captureStart();?>
+<div id="search-results" class="search-results">
+	<h2><?php echo $this->translate('Search result')?> <strong class="results-found"></strong></h2>
+	<div class="no-search">
+		<?php echo $this->translate('No search performed.')?>
+	</div>
+	<div class="no-results" style="display:none;">
+		<?php echo $this->translate('No results found for')?> <strong class="no-results-search-text"></strong>
+		<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'propose')): ?>
+			<div><a href="#" id="concept-add"><?php echo $this->translate('Add this term'); ?></a></div>
+		<?php endif?>
+	</div>
+	<div class="no-results-no-search-string" style="display:none;">
+		<?php echo $this->translate('No results found.')?>
+	</div>
+	<div class="errors" style="display:none;"><?php echo $this->translate('Unknown error occurred.')?></div>
+	<div class="actions" style="display:none;">
+		<button class="add-all-to-selection selection" href="#"><?php echo $this->translate('Add to selection')?></button>
+		<button class="export-search export" href="#"><?php echo $this->translate('Export'); ?></button>
+		<button class="add-relation search relate" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></button>
+	</div>
+	<ul class="concepts-list">
+		<li class="concept-link template">
+			<a class="show-narrower-relations" href="#"></a>
+			<span class="show-narrower-relations-loading" style="display:none;" href="#"></span>
+			<span class="show-narrower-relations-empty" style="display:none;" href="#"></span>
+			<a class="hide-narrower-relations" style="display:none;" href="#"></a>
+			<span class="concept-link-header"></span>
+			<span class="concept-link-content"></span>
+			<span class="uuid"></span>
+			<a class="add-to-selection" href="#" title="<?php echo $this->escape($this->translate('Add to selection'))?>"><span>(<?php echo $this->translate('Sel')?>)</span></a>
+			<a class="add-relation single" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></a>
+			<ul class="narrower-relations do-not-show"></ul>
+		</li>
+	</ul>
+	<a class="more-results" href="#"><?php echo $this->translate('More results')?> &raquo;</a>
+</div>
+<?php $this->placeholder('leftbottompanel')->captureEnd() ?>
+
+<?php $this->placeholder('rightpanel')->captureStart();?>
+<div id="right-panel-tab-container">
+	<div id="right-panel-tab-links">
+		<ul class="tab-links">
+			<li class="tab"><a id="tab-history"><?php echo $this->translate('History'); ?> (<span id="history-count"></span>)</a></li>
+			<li class="tab"><a id="tab-selection"><?php echo $this->translate('Selection'); ?> (<span id="selection-count"></span>)</a></li>
+		</ul>
+		<div class="clear"></div>
+	</div>
+	<div class="right-panel-contents">
+		<div class="right-panel-tab-container tab-content">
+			<div class="right-panel-tab" id="history">
+				<span class="right-panel-actions">
+					<button class="action-clear-history delete" href="#"><?php echo $this->translate('Clear history'); ?></button>
+					<button class="export-history export" href="#"><?php echo $this->translate('Export'); ?></button>
+				</span>
+				<ul id="history-list" class="concepts-list">
+					<li class="concept-link template">
+						<span class="concept-link-header"></span>
+						<span class="concept-link-content"></span>
+						<span class="uuid"></span>
+						<a class="add-to-selection" href="#" title="<?php echo $this->escape($this->translate('Add to selection'))?>"><span>(<?php echo $this->translate('Sel')?>)</span></a>
+					</li>
+				</ul>
+				<span class="right-panel-actions">
+					<button class="action-clear-history delete" href="#"><?php echo $this->translate('Clear history'); ?></button>
+					<button class="export-history export" href="#"><?php echo $this->translate('Export'); ?></button>
+				</span>
+			</div>
+		</div>
+		<div class="right-panel-tab-container tab-content">
+			<div class="right-panel-tab" id="selection">
+				<span class="right-panel-actions">
+					<button class="action-clear-selection delete" href="#"><?php echo $this->translate('Clear selection'); ?></button>
+					<button class="export-selection export" href="#"><?php echo $this->translate('Export'); ?></button>
+					<button class="add-relation selection relate" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></button>
+					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')): ?>
+						<button class="change-status" href="#" title="<?php echo $this->escape($this->translate('Change status'))?>"><span><?php echo $this->translate('Change status')?></span></button>
+					<?php endif?>
+				</span>
+				<ul id="selection-list" class="concepts-list">
+					<li class="concept-link template">
+						<span class="concept-link-header"></span>
+						<span class="concept-link-content"></span>
+						<span class="uuid"></span>
+						<a class="remove-link" href="#" title="<?php echo $this->escape($this->translate('Remove from selection'))?>"><span>(<?php echo $this->translate('Rem'); ?>)</span></a>
+						<a class="add-relation single" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></a>
+					</li>
+				</ul>
+				<span class="right-panel-actions">
+					<button class="action-clear-selection delete" href="#"><?php echo $this->translate('Clear selection'); ?></button>
+					<button class="export-selection export" href="#"><?php echo $this->translate('Export'); ?></button>
+					<button class="add-relation selection relate" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></button>
+					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')): ?>
+						<button class="change-status" href="#" title="<?php echo $this->escape($this->translate('Change status'))?>"><span><?php echo $this->translate('Change status')?></span></button>
+					<?php endif?>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div id="modal-boxes" class="do-not-show">
+	   <?php echo $this->render('/index/modalboxes/relations.phtml');?>
+	   <?php echo $this->render('/index/modalboxes/export.phtml');?>
+	   <?php echo $this->render('/index/modalboxes/create-confirmation.phtml');?>
+	   <?php echo $this->render('/index/modalboxes/delete.phtml');?>
+	   <?php echo $this->render('/index/modalboxes/change-status.phtml');?>
+	</div>
+</div>
+<?php $this->placeholder('rightpanel')->captureEnd() ?>
+
+<?php 
+$maxRecordsForExport = Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT;
+$areRelationsAllowed = intval(OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'full-create') || OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit'));
+
+$js = <<<JS
+// Define constants
+var MAX_RECORDS_FOR_INSTANT_EXPORT = ${maxRecordsForExport};
+var ARE_RELATIONS_ALLOWED = ${areRelationsAllowed};
+JS;
+$this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
+?>

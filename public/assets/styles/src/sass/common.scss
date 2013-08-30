@@ -1,0 +1,28 @@
+@CHARSET "UTF-8";
+body {
+	font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: #3c1038;
+}
+
+a {
+	color: #822966;
+	text-decoration: none;
+}
+
+a:visted {
+	color: #3c1038;
+}
+
+a:HOVER {
+	text-decoration: underline;
+}
+
+a.block {
+	display: block;
+}
+
+a[rel="external"] {
+	padding-right: 13px;
+	background: url(../images/external.png) center right no-repeat;
+}
+

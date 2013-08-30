@@ -31,17 +31,22 @@ if ($this->doc['collection']) {
         $collection = $this->collections[$this->doc['collection']]['code'];
     }
 }
+
+$isDeleted = (true === $this->doc['deleted'] || (isset($doc['status']) && $this->doc['status'] == 'expired'));
+
+$dateStamp = new Zend_Date(($isDeleted ? $this->doc['deleted_timestamp'] : $this->doc['timestamp']), Zend_Date::ISO_8601);
+
 ?>
-	<header <?php if (true === $this->doc['deleted']) echo 'status="deleted"'?>>
+	<header <?php if ($isDeleted) echo 'status="deleted"'?>>
 		<identifier><?php echo $this->doc['uuid']?></identifier>
-		<datestamp><?php echo $this->doc['timestamp']?></datestamp>
-		<?php if (false === $this->doc['deleted']):?>
+		<datestamp><?php echo date(OaiPmh::XS_DATETIME_FORMAT, $dateStamp->toString(Zend_Date::TIMESTAMP));?></datestamp>
+		<?php if (! $isDeleted):?>
 		<setSpec><?php echo $this->doc['tenant']?></setSpec>
     		<?php if ($collection):?>
 		<setSpec><?php echo $this->doc['tenant'].':'.$collection?></setSpec>
         		<?php if(isset($this->doc['inScheme'])):?>
     	    	    <?php foreach ($this->doc['inScheme'] as $ConceptScheme):?>
-		<setSpec><?php echo $this->doc['tenant'].':'.$collection?>:<?php echo OpenSKOS_Solr::md5_uuid($ConceptScheme)?></setSpec>
+		<setSpec><?php echo $this->doc['tenant'].':'.$collection?>:<?php echo (isset($this->conceptSchemes[$this->doc['tenant']][$ConceptScheme]) ? $this->conceptSchemes[$this->doc['tenant']][$ConceptScheme]['uuid'] : 'NA')?></setSpec>
     		        <?php endforeach?>
     		    <?php endif?>
 		    <?php endif?>

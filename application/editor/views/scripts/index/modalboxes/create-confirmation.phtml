@@ -1,0 +1,28 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<div id="create-confirmation-box" class="create-confirmation-box">
+	<div class="do-exist-message"><?php echo $this->translate('This concept already exists in one or more concept schemes. Are you sure that you want to create it?'); ?></div>
+	<div class="do-not-exist-message"><?php echo $this->translate('This is a new concept. Are you sure that you want to create it?'); ?></div>
+	<input type="button" name="no" value="<?php echo $this->translate('No'); ?>" />
+	<input type="button" name="yes" value="<?php echo $this->translate('Yes'); ?>" />
+</div>

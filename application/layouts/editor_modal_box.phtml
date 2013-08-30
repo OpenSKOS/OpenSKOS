@@ -1,0 +1,56 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+<?php
+$baseUrl = $this->url(array(), 'default', true);
+if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
+
+$lang = (string)Zend_Registry::get('Zend_Locale');
+
+?>
+<!DOCTYPE html>
+<html id="top" xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lang?>" lang="<?php echo $lang?>">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta charset=utf-8 />
+		<script type="text/javascript">
+	    var BASE_URL = '<?php echo rtrim($this->url(array(), null, true), '/')?>';
+		</script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-core-1.4.5-full-nocompat.js"></script>
+		<script src="<?php echo $baseUrl?>assets/scripts/mootools-more-1.4.0.1.js"></script>
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor_modal_box.css" type="text/css" media="all" />
+		<?php
+    	echo $this->headMeta();
+    	echo $this->headScript();
+		echo $this->headTitle();
+		echo $this->headLink();
+	    echo $this->headStyle();
+	    ?>
+	</head>
+	<body>
+        <h2><?php echo strip_tags($this->headTitle())?></h2>
+	    
+		<div id="modal-content">
+			<?php echo $this->layout()->content?>
+		</div>
+	</body>
+</html>
