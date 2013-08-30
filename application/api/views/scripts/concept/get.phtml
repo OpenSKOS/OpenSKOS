@@ -41,9 +41,9 @@ $collection = $concept->getCollection();
 <h2><?php echo $this->escape($title)?></h2>
 <dl>
 	<dt><?php echo $this->translate('Institution')?>:</dt>
-	<dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dd>
+	<dd><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dd>
 	<dt><?php echo $this->translate('Collection')?>:</dt>
-	<dd><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dd>
+	<dd><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dd>
 	<dt>URI:</dt>
 	<dd><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dd>
 	<dt>SKOS Class:</dt>
@@ -69,10 +69,11 @@ $collection = $concept->getCollection();
 	<h4><?php echo $this->translate('skos:'.$subClass)?></h4>
 		<ul class="<?php echo $subClass?>">
 					<?php foreach ($values as $value):?>
-			<li><a class="resolvable-concept" href="<?php echo $this->url(array('controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $value?>"><?php echo $this->escape($value)?></a></li>
+                <?= $value ?>
+			<li><a class="resolvable-concept" href="<?php echo $this->url(array('module' => 'api', 'controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $value?>&format=html"><?php echo $this->escape($value)?></a></li>
 					<?php endforeach?>
 		</ul>
-		
+
 				<?php endif?>
 			<?php else:?>
 			<?php if (null !== ($langValues = $concept->getLangValues($subClass, $lang))):?>

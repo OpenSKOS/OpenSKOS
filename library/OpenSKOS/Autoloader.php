@@ -23,12 +23,26 @@ class OpenSKOS_Autoloader implements Zend_Loader_Autoloader_Interface
 {
 	public function autoload($class)
 	{
-		if (preg_match('/^([a-z]+)_(forms|models|plugins)_([a-z]+)$/i', $class, $match)) {
-			list(, $module, $type, $filename) = $match;
+		if (preg_match('/^([a-z]+)_(forms|models|plugins)_([a-z]+)(_([a-z]+))?$/i', $class, $match)) {
+			
+			if (count($match) < 5) {
+				list(, $module, $type, $filenameOrFolder) = $match;
+				$subFilename = '';
+			} else {
+				list(, $module, $type, $filenameOrFolder, , $subFilename) = $match;
+			}
+			
 			$path = APPLICATION_PATH 
 				. '/' . strtolower($module) 
-				. '/' . strtolower($type) 
-				. '/' . $filename . '.php';
+				. '/' . strtolower($type);
+			
+			if (empty($subFilename)) {
+				$path .= '/' . $filenameOrFolder . '.php';
+			} else {
+				$path .= '/' . $filenameOrFolder
+						 . '/' . $subFilename . '.php';
+			} 
+				
 			if (file_exists($path)) {
 				require_once $path;
 			}

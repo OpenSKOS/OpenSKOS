@@ -24,7 +24,10 @@ class OpenSKOS_Solr
 	protected $config = array(
 		'host' => 'localhost',
 		'port' => 8983,
-		'context' => 'openskos'
+		'context' => 'openskos',
+		'writeHost' => '',
+		'writePort' => 0,
+		'writeContext' => ''
 	);
 	
 	protected $limit = 20, $offset = 0, $fields = array('*', 'score'), $langCode;
@@ -37,6 +40,17 @@ class OpenSKOS_Solr
 			} else {
 				throw new OpenSKOS_Solr_Exception('Unexpected configuration key `'.$key.'`');
 			}
+		}
+		
+		// If there is no write configuration - use the read configuration.
+		if (empty($this->config['writeHost'])) {
+			$this->config['writeHost'] = $this->config['host'];
+		}
+		if (empty($this->config['writePort'])) {
+			$this->config['writePort'] = $this->config['port'];
+		}
+		if (empty($this->config['writeContext'])) {
+			$this->config['writeContext'] = $this->config['context'];
 		}
 	}
 	
@@ -105,26 +119,50 @@ class OpenSKOS_Solr
 		$params = array_merge($params, $extraParams);
 		$params['q'] = $q;
 		
-		
 		$response = $this->_getClient()
 			->setUri($this->getUri('select'))
 			->setParameterPost($params)
 			->request('POST');
+				
 		if ($response->isError()) {
-			$doc = DOMDocument::loadHtml($response->getBody());
-			if ($nodes = $doc->getElementsByTagName('h1')) {
-			    $msg = $nodes->item(0)->nodeValue;
+			
+			if ($response->getStatus() != 400) {
+				$doc = new DOMDocument();
+				$doc->loadHtml($response->getBody());
+				if ($nodes = $doc->getElementsByTagName('h1')) {
+					$msg = $nodes->item(0)->nodeValue;
+				} else {
+					$msg = 'Unkown Error in Solr communication';
+				}
 			} else {
-			    $msg = 'Unkown Error in Solr communication';
+				$msg = 'Unkown Error in Solr communication. Probably bad query syntax.';
 			}
+			
 			throw new OpenSKOS_Solr_Exception($msg, $response->getStatus());
 		}
-		if ($params['wt'] == 'xml') {
-			$response = DOMDocument::loadXML($response->getBody());
+		
+		// In rare cases the response type differs from $params['wt'] so we must check the response content type.
+		$responseContentType = $response->getHeader('Content-type');
+		if (strpos($responseContentType, 'application/xml') !== false) {
+			$result = new DOMDocument();
+			$result->loadXML($response->getBody());
+			
+			// If required format is phps but the returned format is xml, then maybe is the case when no results are found.
+			// If that is the case then we can convert it to "No results found array".
+			if ($params['wt'] == 'phps') {				
+				$resultNode = $result->getElementsByTagName('result');
+				if ($resultNode->length > 0) {
+					$numFound = $resultNode->item(0)->attributes->getNamedItem('numFound');
+					if (null !== $numFound && $numFound->value == 0) {
+						$result = array('response' => array('numFound' => 0, 'docs' => array()));
+					}
+				} 
+			}
+			
 		} else {
-			$response = unserialize($response->getBody());
+			$result = unserialize($response->getBody());
 		}
-		return $response;
+		return $result;
 	}
 	
 	/**
@@ -169,23 +207,27 @@ class OpenSKOS_Solr
 		}
 
 		$response = $this->search($q, $extraParams);
-		if (isset($extraParams['wt']) && $extraParams['wt']=='xml') {
-			return DOMDocument::loadXML($response->saveXml($response->getElementsByTagName('doc')->item(0)));
+		if ($response instanceof DOMDocument) {
+			$doc = new DOMDocument();
+			$doc->loadXML($response->saveXml($response->getElementsByTagName('doc')->item(0)));
+			return $doc;
 		} else {
 			if ($response['response']['numFound']) return $response['response']['docs'][0];
 		}
 	}
 	
 	public function add($documents, $commit = null, $optimize = null)
-	{
+	{	
 		if (!is_object($documents)) {
 			throw new OpenSKOS_Solr_Exception('Expected an object');
 		} 
 		if (is_a($documents, 'OpenSKOS_Solr_Document')) {
+			$documents->registerOrGenerateNotation();
 			$documents = new OpenSKOS_Solr_Documents($documents);
 		} elseif(is_a($documents, 'OpenSKOS_Solr_Documents')) {
-			//do nothing, just use magic __toString
-		} elseif(is_a($documents, 'OpenSKOS_Solr_Documents')) {
+			foreach ($documents as $currentDocument) {
+				$currentDocument->registerOrGenerateNotation();
+			}
 			//do nothing, just use magic __toString
 		} elseif (is_a($documents, 'Api_Models_Concept')) {
 		    $documents = '<add>' . $documents .'</add>';
@@ -195,7 +237,6 @@ class OpenSKOS_Solr
 		} else {
 			throw new OpenSKOS_Solr_Exception('Expected a `OpenSKOS_Solr_Document|OpenSKOS_Solr_Documents|OpenSKOS_Rdf_Parser_Helper|Api_Models_Concept` object, got a `'.get_class($documents).'`');
 		}
-		
 		
 		$this->postXml((string)$documents);
 		if (true === $commit) $this->commit();
@@ -210,16 +251,16 @@ class OpenSKOS_Solr
 	 * @return OpenSKOS_Solr
 	 */
 	public function postXml($xml)
-	{
-		$response = $this->_getClient()
-			->setUri($this->getUri('update'))
+	{	
+		$response = $this->_getClient(true)
+			->setUri($this->getUri('update', true))
 			->setRawData($xml)
 			->setEncType('text/xml')
 			->setHeaders('Content-Type', 'text/xml')
 			->request('POST');
+				
 		if ($response->isError()) {
-			$doc = DOMDocument::loadHtml($response->getBody());
-			throw new OpenSKOS_Solr_Exception($doc->getElementsByTagName('pre')->item(0)->nodeValue);
+			throw new OpenSKOS_Solr_Exception($response->getMessage());
 		}
 		return $this;
 	}
@@ -280,13 +321,14 @@ class OpenSKOS_Solr
 		}
 		$deleteMsg = '<delete>' . $deleteMsg .'</delete>';
 		
-		$response = $this->_getClient()
-			->setUri($this->getUri('update'))
+		$response = $this->_getClient(true)
+			->setUri($this->getUri('update', true))
 			->setParameterGet('stream.body', $deleteMsg)
 			->request('GET');
 		
 		if ($response->isError()) {
-			$doc = DOMDocument::loadHtml($response->getBody());
+			$doc = new DOMDocument();
+			$doc->loadHtml($response->getBody());
 			throw new OpenSKOS_Solr_Exception('Delete failed: '.$doc->getElementsByTagName('pre')->item(0)->nodeValue);
 		}
 		
@@ -303,12 +345,27 @@ class OpenSKOS_Solr
 		return $this->_commit_or_update('optimize', $options);
 	}
 	
-	public function getUri($path = null)
+	/**
+	 * @param string $path, optional, Default: null.
+	 * @param bool $isForWriting, optional, Default: false. If set to true the writing configuration will be used.
+	 * @return string
+	 */
+	public function getUri($path = null, $isForWriting = false)
 	{
+		if ($isForWriting) {
+			$host = $this->config['writeHost'];
+			$port = $this->config['writePort'];
+			$context = $this->config['writeContext'];
+		} else {
+			$host = $this->config['host'];
+			$port = $this->config['port'];
+			$context = $this->config['context'];
+		}
+		
 		$uri = 'http://' 
-			. $this->config['host'] .':' 
-			. $this->config['port']
-			. '/' . ltrim($this->config['context'], '/');
+			. $host .':' 
+			. $port
+			. '/' . ltrim($context, '/');
 		if (null !== $path) {
 			$uri = rtrim($uri, '/') . '/' . ltrim($path, '/');
 		}
@@ -316,15 +373,21 @@ class OpenSKOS_Solr
 	}
 	
 	/**
+	 * @param $isForWriting bool, optional, Default: false. If set to true the writing configuration will be used.
 	 * @return Zend_Http_Client
 	 */
-	protected function _getClient()
+	protected function _getClient($isForWriting = false)
 	{
+		/* Remove client caching because there is a bug somewhere which couses problems with "select" after "postXml". The "select" is sent with empty params.
 		static $client;
 		if (null === $client) {
-			$client = new Zend_Http_Client(null, array('timeout' => 60));
-			$client->setUri($this->getUri());
+			$client = new OpenSKOS_Solr_Client(null, array('timeout' => 60));
+			$client->setUri($this->getUri(null, $isForWriting));
 		}
+		*/
+		
+		$client = new OpenSKOS_Solr_Client(null, array('timeout' => 60));
+		$client->setUri($this->getUri(null, $isForWriting));
 		return $client;
 	}
 	
@@ -342,9 +405,13 @@ class OpenSKOS_Solr
 		if ($response->isError()) {
 			throw new OpenSKOS_Solr_Exception('Failed to load `schema.xml` from the Solr server');
 		}
-		return $asDom === true 
-			? DOMDocument::loadXML($response->getBody())
-			: $response->getBody();
-			
+		
+		if ($asDom) {
+			$doc = new DOMDocument();
+			$doc->loadXML($response->getBody());
+			return $doc;
+		} else {
+			return $response->getBody();
+		}	
 	}
 }

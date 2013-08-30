@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS `notations` (
+  `notation` INT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`notation`) 
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;

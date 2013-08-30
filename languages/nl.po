@@ -2,745 +2,1486 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSKOS Dutch translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-09 14:47+0100\n"
-"PO-Revision-Date: 2011-11-09 14:48+0100\n"
-"Last-Translator: Mark Lindeman <mark@lindeman.nu>\n"
+"POT-Creation-Date: 2013-03-14 08:49+0100\n"
+"PO-Revision-Date: 2013-03-14 08:56+0100\n"
+"Last-Translator: \n"
 "Language-Team:  <mark@lindeman.nu>\n"
+"Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: _;gettext;translate\n"
 "X-Poedit-Basepath: .\n"
-"X-Poedit-Language: Dutch\n"
-"X-Poedit-Country: NETHERLANDS\n"
-"X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-SearchPath-0: /usr/local/zend/apache2/htdocs/openSKOS/library\n"
-"X-Poedit-SearchPath-1: /usr/local/zend/apache2/htdocs/openSKOS/application\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: /home/www/OpenSKOS/library/OpenSKOS\n"
+"X-Poedit-SearchPath-1: /home/www/OpenSKOS/application\n"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:8
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:28
 msgid "dashboard"
 msgstr "dashboard"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:9
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:29
 msgid "api"
 msgstr "api"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:10
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:30
 msgid "both"
 msgstr "beiden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:11
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:31
 msgid "Supplied credential is invalid."
 msgstr "Ongeldige aanmeldgegevens."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:12
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:32
 msgid "Authentication successful."
 msgstr "Authenticatie succesvol."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:13
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:22
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:33
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:42
 msgid "Invalid type given, value should be a string"
 msgstr "Ongeldig type, de waarde moet een tekenreeks zijn."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:14
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:34
 msgid "'%value%' is no valid email address in the basic format local-part@hostname"
 msgstr "'%value%' is geen geldig e-mailadres volgens het basis-formaat gebruiker@hostnaam"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:15
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:35
 msgid "'%hostname%' is no valid hostname for email address '%value%'"
 msgstr "'%hostname%' is geen geldige hostname voor e-mailadres '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:16
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:36
 msgid "'%hostname%' does not appear to have a valid MX record for the email address '%value%'"
 msgstr "'%hostname%' lijkt geen geldig MX record te hebben voor het e-mailadres '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:17
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:37
 msgid "'%hostname%' is not in a routable network segment. The email address '%value%' should not be resolved from public network."
 msgstr "'%hostname%' zit niet in een routeerbaar network segment. Het e-mailadres '%value%' kan niet gevonden worden via het publieke netwerk."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:18
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:38
 #, php-format
 msgid "'%localPart%' can not be matched against dot-atom format"
 msgstr "'%localPart%' can not be matched against dot-atom format"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:19
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:39
 #, php-format
 msgid "'%localPart%' can not be matched against quoted-string format"
 msgstr "'%localPart%' can not be matched against quoted-string format"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:20
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:40
 msgid "'%localPart%' is no valid local part for email address '%value%'"
 msgstr "'%localPart%' is geen geldige gebruikersnaam voor het e-mailadres '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:21
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:41
 msgid "'%value%' exceeds the allowed length"
 msgstr "'%value%' bevat teveel tekens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:23
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:43
 msgid "'%value%' is less than %min% characters long"
 msgstr "'%value%' bevat minder dan %min% tekens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:24
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:44
 msgid "'%value%' is more than %max% characters long"
 msgstr "'%value%' bevat meer dan %max% tekens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:25
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:45
 msgid "Value is required and can't be empty"
 msgstr "Waarde is verplicht en mag niet leeg zijn"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:26
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:46
 msgid "The token '%token%' does not match the given token '%value%'"
 msgstr "Het wachtwoord '%token%' verschilt van het controle-wachtwoord '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:27
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:47
 msgid "No token was provided to match against"
 msgstr "Geen controle-wachtwoord opgegeven"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:28
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:48
 msgid "The two given tokens do not match"
 msgstr "De twee opgegeven wachtwoorden zijn niet gelijk"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:29
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:49
 msgid "'%value%' is not a valid URL."
 msgstr "'%value%' is geen geldige URL."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:30
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:50
 msgid "'%value%' is not a valid date string."
 msgstr "'%value%' is geen geldige datum tekenreeks"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:32
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:52
 msgid "code"
 msgstr "code"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:33
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:53
 msgid "organisationUnit"
 msgstr "Afdeling"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:34
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:54
 msgid "website"
 msgstr "Website"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:35
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:55
 msgid "email"
 msgstr "E-mail"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:36
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:56
 msgid "streetAddress"
 msgstr "Straat"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:37
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:57
 msgid "locality"
 msgstr "Plaats"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:38
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:58
 msgid "postalCode"
 msgstr "Postcode"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Strings.php:39
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:59
 msgid "countryName"
 msgstr "Land"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:18
-msgid "Your account is blocked."
-msgstr "Uw account is geblokkeerd."
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:61
+msgid "guest"
+msgstr "gast"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:23
-msgid "Your account is not allowed to use the dasboard."
-msgstr "Het is niet toegestaan om met uw account hete dashboard gebruiken."
+#: /home/www/OpenSKOS/library/OpenSKOS/Strings.php:62
+msgid "administrator"
+msgstr "beheerder"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:60
-msgid "File"
-msgstr "Bestand"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:61
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:78
-msgid "delete concepts in this collection before import"
-msgstr "verwijder concepten voordat er geimporteerd wordt"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:87
-msgid "choose optional set:"
-msgstr "kies eventueel een set:"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:90
-msgid "Failed to load sets from OAI!"
-msgstr "Kon geen OAI sets inladen!"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:134
-msgid "Code"
-msgstr "Code"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:135
-msgid "Title"
-msgstr "Titel"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:136
-msgid "Description"
-msgstr "Beschrijving"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:137
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:15
-msgid "Website"
-msgstr "Website"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:138
-msgid "Standard Licence"
-msgstr "Standaard licentie"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:139
-msgid "Custom Licence (name)"
-msgstr "Aangepaste licentie (naam)"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:140
-msgid "Custom (URL)"
-msgstr "Aangepast (URL)"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:141
-msgid "Allow OpenSKOS OAI Harvesting"
-msgstr "Sta OpenSKOS OAI Harvesting toe"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:142
-msgid "OAI baseURL"
-msgstr "OAI basis URL"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:143
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:21
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:20
-msgid "Submit"
-msgstr "Verstuur"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:144
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:21
-msgid "Reset"
-msgstr "Herstel"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:145
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:22
-msgid "Cancel"
-msgstr "Annuleer"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:146
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:23
-msgid "Delete"
-msgstr "Verwijder"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:146
-msgid "Are you sure you want to delete this collection and corresponding Concepts?"
-msgstr "Weet u zeker dat u deze collectie en alle bijbehorende concepten wilt verwijderen?"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:156
-msgid "choose a standard license  or type a custom one:"
-msgstr "kies een standaard licentie of typ een aangepaste:"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:176
-#, fuzzy
-msgid "Pick a provider (or leave empty)..."
-msgstr "Kies een aanbieder..."
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Job.php:30
-msgid "Failed to delete file"
-msgstr "Kon bestand niet verwijderen"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:13
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:14
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:33
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:45
 msgid "Name"
 msgstr "Naam"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:14
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:34
 msgid "Organisation unit"
 msgstr "Afdeling"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:16
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:15
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:35
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:176
+msgid "Website"
+msgstr "Website"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:36
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:46
 msgid "E-mail"
 msgstr "E-mail"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:17
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:37
 msgid "Street Address"
 msgstr "Straat"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:18
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:38
 msgid "Locality"
 msgstr "Plaats"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:19
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:39
 msgid "Postal Code"
 msgstr "Postcode"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:20
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:40
 msgid "Country Name"
 msgstr "Land"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:16
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Tenant.php:41
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:54
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:182
+msgid "Submit"
+msgstr "Verstuur"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Job.php:75
+msgid "Failed to delete file"
+msgstr "Kon bestand niet verwijderen"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:44
+msgid "Tenant"
+msgstr "Tenant"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:47
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:17
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:48
 msgid "Password (check)"
 msgstr "Wachtwoord (controle)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:18
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:49
+msgid "Role"
+msgstr "Rol"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:50
 msgid "Usertype"
 msgstr "Gebruikerstype"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:19
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:51
 msgid "API Key (required for API users)"
 msgstr "API sleutel (verplicht voor API gebruikers)"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:23
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:52
+msgid "eduPersonPrincipalName (for SAML authentication)"
+msgstr "eduPersonPrincipalName (voor SAML authenticatie)"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:53
+msgid "Search Profile Id"
+msgstr "Zoekprofiel Id"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:55
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:183
+msgid "Reset"
+msgstr "Herstel"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:56
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:184
+msgid "Cancel"
+msgstr "Annuleer"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:57
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:185
+msgid "Delete"
+msgstr "Verwijder"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:57
 msgid "Are you sure you want to delete this user?"
 msgstr "Weet u zeker dat u deze gebruiker wilt verwijderen?"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:40
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:81
 msgid "there is already a user with e-mail address '%value%'"
 msgstr "er bestaat al een gebruiker met het e-mailadres '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:49
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:90
 msgid "An API Key is required for users that have access to the API"
 msgstr "Een API sleutel is nodig voor gebruikers die toegang hebben tot de API hebben."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/library/OpenSKOS/Db/Table/Row/User.php:56
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/User.php:97
 msgid "there is already a user with API key '%value%'"
 msgstr "er bestaat al een gebruiker met API sleutel '%value%'"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:25
-msgid "This collection does not appear to have a OAI Server as source."
-msgstr "Deze collectie lijkt geen OAI Server als bron te hebben."
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:82
+msgid "File"
+msgstr "Bestand"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:62
-msgid "An OAI Harvest job is scheduled"
-msgstr "Er is een OAI harvest taak gepland"
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:97
+msgid "Delete concepts in this collection before import"
+msgstr "Verwijder concepten voordat er geimporteerd wordt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:70
-msgid "Since this collection has an OAI Server as source, you can not upload files for import."
-msgstr "Omdat de collectie een OAI bron gebruikt, kunt u geen bestanden uploaden om te importeren."
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:114
+msgid "delete concepts in this collection before import"
+msgstr "verwijder concepten voordat er geimporteerd wordt"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:82
-msgid "Failed to create upload folder"
-msgstr "Kon upload map niet aanmaken"
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:123
+msgid "choose optional set:"
+msgstr "kies eventueel een set:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:97
-msgid "A file with that name is already scheduled for import"
-msgstr "Er is al een taak gepland met een bestand met dezelfde naam"
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:126
+msgid "Failed to load sets from OAI!"
+msgstr "Kon geen OAI sets inladen!"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:119
-msgid "An import job is scheduled"
-msgstr "Er is een taak gepland"
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:173
+msgid "Code"
+msgstr "Code"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:126
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/InstitutionController.php:13
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:18
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:174
+msgid "Title"
+msgstr "Titel"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:175
+msgid "Description"
+msgstr "Beschrijving"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:177
+msgid "Standard Licence"
+msgstr "Standaard licentie"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:178
+msgid "Custom Licence (name)"
+msgstr "Aangepaste licentie (naam)"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:179
+msgid "Custom (URL)"
+msgstr "Aangepast (URL)"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:180
+msgid "Allow OpenSKOS OAI Harvesting"
+msgstr "Sta OpenSKOS OAI Harvesting toe"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:181
+msgid "OAI baseURL"
+msgstr "OAI basis URL"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:185
+msgid "Are you sure you want to delete this collection and corresponding Concepts?"
+msgstr "Weet u zeker dat u deze collectie en alle bijbehorende concepten wilt verwijderen?"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:195
+msgid "choose a standard license  or type a custom one:"
+msgstr "kies een standaard licentie of typ een aangepaste:"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Db/Table/Row/Collection.php:212
+msgid "Pick a provider (or leave empty)..."
+msgstr "Kies een aanbieder (of laat leeg)…"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Controller/Editor.php:40
+msgid "Your access level does not allow you to use the Editor."
+msgstr "Het is niet toegestaan om met uw account de Editor te gebruiken."
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Controller/Editor.php:217
+msgid "Your access level does not allow you access to"
+msgstr "Uw toegangsniveau geeft geen toegang tot"
+
+#: /home/www/OpenSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:41
+#: /home/www/OpenSKOS/library/OpenSKOS/Controller/Plugin/Auth.php:56
+msgid "Your account is blocked."
+msgstr "Uw account is geblokkeerd."
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/UnneededDirectNarrowers.php:55
+msgid "One or more of narrower relations have also a relation via an intermediate concepts"
+msgstr "Eén of meer \"narrower\" relaties hebben ook relaties met tussenliggende concepten"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/DuplicateRelated.php:47
+msgid "Some concepts are defined more than once as related"
+msgstr "Sommige concepten zijn meer dan eens als \"related\" gedefinieerd"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/CycleInNarrowers.php:50
+msgid "One or more of the narrower relations create a cycle"
+msgstr "Eén of meer van de \"narrower\" relaties zorgen voorn een circulaire relatie"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/DuplicateBroaders.php:47
+msgid "Some concepts are defined more than once as broader"
+msgstr "Sommige concepten zijn meer dan eens als \"broader\" gedefinieerd"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/UnneededDirectBroaders.php:54
+msgid "One or more of broader relations have also a relation via an intermediate concepts"
+msgstr "Eén of meer \"broader\" relaties hebben ook relaties met tussenliggende concepten"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/SameBroaderAndNarrower.php:53
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/CycleInBroaders.php:50
+msgid "One or more of the broader relations create a cycle"
+msgstr "Eén of meer van de \"broader\" relaties zorgen voor een circulaire relatie"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/DuplicateNarrowers.php:47
+msgid "Some concepts are defined more than once as narrower"
+msgstr "Sommige concepten zijn meer dan eens als \"narrower\" gedefinieerd"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/ExpiredWithRelations.php:40
+msgid "Can not change status to \"expired\" while there are still relations to other concepts."
+msgstr "Het is niet mogelijke om dit concept de status \"vervallen\" te geven terwijl het nog steeds relaties met andere concepten heeft"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/ExpiredWithRelations.php:58
+msgid "Can not relate the concept to any expired concepts. The fallowing concepts are expired:"
+msgstr "Het is niet mogelijke om een relatie te maken met een vervallen concepten. De volgende concepten zijn vervallen:"
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/UniquePrefLabelInScheme.php:62
+msgid "There is already a concept with same preferred label in one of the schemes."
+msgstr "Er is al een concept met dezelfde preferred label in een van de schemes."
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/RelatedToItself.php:47
+msgid "The concept can not be related to itself."
+msgstr "Het concept kan niet worden gerelateerd aan zichzelf."
+
+#: /home/www/OpenSKOS/application/editor/models/ConceptValidator/IsAtLeastInOneScheme.php:41
+msgid "The concept must be included in at least one scheme."
+msgstr "Het concept moet in minstens één schema voorkomen."
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:56
+msgid "Default"
+msgstr "Herstel naar standaard"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:60
+msgid "Custom"
+msgstr "Aangepast"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:63
+msgid "Search Profile"
+msgstr "Zoekprofiel"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:69
+msgid "Search Profile Name"
+msgstr "Zoekprofiel naam"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:89
+msgid "Language"
+msgstr "Taal"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:107
+msgid "Lexical label"
+msgstr "Lexical label"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:129
+msgid "Status"
+msgstr "Status"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:139
+msgid "To be checked"
+msgstr "Te controleren"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:156
+msgid "Document properties"
+msgstr "Documenteigenschappen"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:173
+msgid "Only top concepts"
+msgstr "Alleen top-concepten"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:176
+msgid "Only orphaned concepts"
+msgstr "Alleen verweesde concepten"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:179
+msgid "Search in notation"
+msgstr "Zoek binnen notation"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:182
+msgid "Search in uri"
+msgstr "Zoek in uri"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:207
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:230
+msgid "Created, modified or approved"
+msgstr "Aangemaakt, aangepast of goedgekeurd"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:217
+msgid "Roles"
+msgstr "Rollen"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:221
+msgid "Users"
+msgstr "Gebruikers"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:243
+msgid "From"
+msgstr "Vanaf"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:254
+msgid "To"
+msgstr "Tot"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:277
+msgid "Tenants"
+msgstr "Tenants"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:290
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:111
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:135
+msgid "Ok"
+msgstr "Ok"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:294
+msgid "Reset Defaults"
+msgstr "Herstel naar standaard"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:298
+msgid "Save Profile"
+msgstr "Bewaar profiel"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:302
+msgid "Delete Profile"
+msgstr "Verwijder profiel"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:314
+msgid "Save Profile As"
+msgstr "Bewaar profiel als"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:461
+msgid "preferred"
+msgstr "preferred"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:462
+msgid "alternative"
+msgstr "alternative"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:463
+msgid "hidden"
+msgstr "hidden"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:465
+msgid "none"
+msgstr "geen"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:466
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:479
+msgid "approved"
+msgstr "goedgekeurd"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:467
+msgid "candidate"
+msgstr "kandidaat"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:468
+msgid "expired"
+msgstr "vervallen"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:470
+msgid "definition"
+msgstr "definition"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:471
+msgid "example"
+msgstr "example"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:472
+msgid "change note"
+msgstr "change note"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:473
+msgid "editorial note"
+msgstr "editorial note"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:474
+msgid "history note"
+msgstr "history note"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:475
+msgid "scope note"
+msgstr "scope note"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:477
+msgid "created"
+msgstr "aangemaakt"
+
+#: /home/www/OpenSKOS/application/editor/forms/SearchOptions.php:478
+msgid "modified"
+msgstr "gewijzigd"
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:117
+msgid "Switch to view mode"
+msgstr "Naar bekijk modus"
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:123
+msgid "Export"
+msgstr "Exporteer"
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:263
+msgid "Add documentation property"
+msgstr "Documenteigenschap toevoegen"
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:286
+msgid "Has broader"
+msgstr "Heeft \"broader\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:287
+msgid "Has narrower"
+msgstr "Heeft \"narrower\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:288
+msgid "Has related"
+msgstr "Heeft \"related\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:359
+msgid "Has broader match"
+msgstr "Heeft \"broader match\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:360
+msgid "Has narrower match"
+msgstr "Heeft \"narrower match\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:361
+msgid "Has related match"
+msgstr "Heeft \"related match\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:362
+msgid "Has mapping relation"
+msgstr "Heeft \"mapping\" relatie"
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:363
+msgid "Has close match"
+msgstr "Heeft \"close match\""
+
+#: /home/www/OpenSKOS/application/editor/forms/Concept.php:364
+msgid "Has exact match"
+msgstr "Heeft \"exact match\""
+
+#: /home/www/OpenSKOS/application/editor/forms/ConceptScheme.php:107
+msgid "Collection:"
+msgstr "Collectie:"
+
+#: /home/www/OpenSKOS/application/editor/forms/Search.php:63
+msgid "Truncate"
+msgstr "Trunceren"
+
+#: /home/www/OpenSKOS/application/editor/forms/Search.php:77
+msgid "Concept scheme"
+msgstr "Concept scheme"
+
+#: /home/www/OpenSKOS/application/editor/forms/Search.php:85
+msgid "Instant results"
+msgstr "Directe resultaten"
+
+#: /home/www/OpenSKOS/application/editor/forms/Search.php:149
+msgid "Search"
+msgstr "Zoeken"
+
+#: /home/www/OpenSKOS/application/editor/forms/UploadIcon.php:86
+msgid "Upload"
+msgstr "Upload"
+
+#: /home/www/OpenSKOS/application/editor/forms/OpenIdLogin.php:43
+#: /home/www/OpenSKOS/application/editor/forms/Login.php:45
+msgid "Remember me"
+msgstr "Onthoud mij"
+
+#: /home/www/OpenSKOS/application/editor/forms/Export.php:62
+msgid "Select one"
+msgstr "Kies"
+
+#: /home/www/OpenSKOS/application/editor/forms/Login.php:31
+msgid "Institution code"
+msgstr "Instellingscode"
+
+#: /home/www/OpenSKOS/application/editor/forms/Login.php:50
+msgid "Login"
+msgstr "Aanmelden"
+
+#: /home/www/OpenSKOS/application/editor/controllers/SearchController.php:187
+#: /home/www/OpenSKOS/application/editor/controllers/SearchController.php:208
+msgid "Please fill a profile name."
+msgstr "Vul een profielnaam in."
+
+#: /home/www/OpenSKOS/application/editor/controllers/SearchController.php:201
+msgid "You are not allowed to edit that search profile."
+msgstr "U mag deze zoekprofiel niet bewerken."
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:26
+msgid "You are already logged in"
+msgstr "U bent al aangemeld"
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:68
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:132
+msgid "Succesfully logged in"
+msgstr "Succesvol aangemeld"
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:135
+msgid "You have succesfully logged in with your Google account, but no user was found in our system with the emailaddress"
+msgstr "U hebt aangemeld met uw Google-account, maar geen gebruiker werd gevonden in ons systeem met dit e-mailadres"
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:135
+msgid "Please contact your application manager to give you access to OpenSKOS."
+msgstr "Neem contact op met uw applicatiebeheerder om toegang te krijgen tot OpenSKOS."
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:145
+msgid "Unable to verify OpenID identity"
+msgstr "Kan OpenID identiteit niet verifiëren"
+
+#: /home/www/OpenSKOS/application/editor/controllers/LoginController.php:145
+msgid "Error:"
+msgstr "Fout:"
+
+#: /home/www/OpenSKOS/application/editor/controllers/InstitutionController.php:36
+#: /home/www/OpenSKOS/application/editor/controllers/ConceptSchemeController.php:93
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:166
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:59
 msgid "No POST data recieved"
 msgstr "Geen POST data ontvangen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:133
+#: /home/www/OpenSKOS/application/editor/controllers/InstitutionController.php:44
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:123
+msgid "Data saved"
+msgstr "Gegevens opgeslagen"
+
+#: /home/www/OpenSKOS/application/editor/controllers/ConceptSchemeController.php:167
+msgid "A job for deleting the concept scheme was added."
+msgstr "Taak toegevoegd om dit concept scheme te verwijderen."
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:55
+msgid "This collection does not appear to have a OAI Server as source."
+msgstr "Deze collectie lijkt geen OAI Server als bron te hebben."
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:92
+msgid "An OAI Harvest job is scheduled"
+msgstr "Er is een OAI harvest taak gepland"
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:102
+msgid "Since this collection has an OAI Server as source, you can not upload files for import."
+msgstr "Omdat de collectie een OAI bron gebruikt, kunt u geen bestanden uploaden om te importeren."
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:114
+msgid "Failed to create upload folder"
+msgstr "Kon upload map niet aanmaken"
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:130
+msgid "A file with that name is already scheduled for import. Please delete the job if you want to import it again."
+msgstr "Er is al een taak gepland met een bestand met dezelfde naam. Verwijder dit taak en probeer het opnieuw."
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:157
+msgid "An import job is scheduled"
+msgstr "Er is een taak gepland"
+
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:173
 msgid "You can not delete an empty collection."
 msgstr "U kunt geen lege collectie verwijderen."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:137
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:177
 msgid "The collection has been deleted, it might take a while before changes are committed to our system."
 msgstr "De collectie is verwijderd, het kan even duren voor wijzigingen zijn doorgevoerd in ons systeem."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/CollectionsController.php:171
+#: /home/www/OpenSKOS/application/editor/controllers/CollectionsController.php:211
 #, php-format
 msgid "Collection `%s` not found"
 msgstr "Collectie `%s` niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/InstitutionController.php:21
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:55
-msgid "Data saved"
-msgstr "Gegevens opgeslagen"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:48
-msgid "Jobs removed"
-msgstr "Taken verwijderd"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:50
-msgid "Job removed"
-msgstr "Taak verwijderd"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:62
-msgid "No job defined"
-msgstr "Geen taak gedefineerd"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:70
-msgid "Job not found"
-msgstr "Taak niet gevonden"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:76
-msgid "Collection not found"
-msgstr "Collectie niet gevonden"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/JobsController.php:80
-msgid "You are not allowed to edit this job."
-msgstr "U mag deze taak niet bewerken"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/LoginController.php:7
-msgid "You are already logged in"
-msgstr "U bent al aangemeld"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/LoginController.php:46
-msgid "Succesfully logged in"
-msgstr "Succesvol aangemeld"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:25
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:72
 msgid "You can not delete an empty user."
 msgstr "U kunt geen lege gebruiker verwijderen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:30
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:77
 msgid "You can not delete yourself."
 msgstr "U kunt uzelf niet verwijderen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:35
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:82
 msgid "The user has been deleted."
 msgstr "De gebruiker is verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:72
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:145
 msgid "User not found"
 msgstr "Gebruiker niet gevonden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/controllers/UsersController.php:78
+#: /home/www/OpenSKOS/application/editor/controllers/UsersController.php:151
 msgid "You are not allowed to edit this user."
 msgstr "U mag deze gebruiker niet bewerken"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/forms/Login.php:11
-msgid "Institution code"
-msgstr "Instellingscode"
+#: /home/www/OpenSKOS/application/editor/controllers/ConceptController.php:292
+msgid "A concept can not be deleted while there are semantic relations or mapping properties associated with it."
+msgstr "Een concept kan niet verwijderd worden zolang er nog semantische relaties of mappen eigenschappen naar verwijzen."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/forms/Login.php:25
-msgid "Remember me"
-msgstr "Onthoud mij"
+#: /home/www/OpenSKOS/application/editor/controllers/ConceptController.php:497
+msgid "You can not edit concepts of different tenants."
+msgstr "U kunt geen concepten van verschillende tenants aanpassen."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/forms/Login.php:30
-msgid "Login"
-msgstr "Aanmelden"
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:85
+msgid "Jobs removed"
+msgstr "Taken verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:6
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:9
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:87
+msgid "Job removed"
+msgstr "Taak verwijderd"
+
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:99
+msgid "No job defined"
+msgstr "Geen taak gedefineerd"
+
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:107
+msgid "Job not found"
+msgstr "Taak niet gevonden"
+
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:113
+msgid "Collection not found"
+msgstr "Collectie niet gevonden"
+
+#: /home/www/OpenSKOS/application/editor/controllers/JobsController.php:117
+msgid "You are not allowed to edit this job."
+msgstr "U mag deze taak niet bewerken"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:27
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:30
 msgid "First"
-msgstr ""
+msgstr "Eerste"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:15
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:18
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:36
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:39
 msgid "Previous"
-msgstr ""
+msgstr "Vorige"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:35
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:38
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:56
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:59
 msgid "Next"
-msgstr ""
+msgstr "Volgende"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:46
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/pagination.phtml:49
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:67
+#: /home/www/OpenSKOS/application/api/views/scripts/pagination.phtml:70
 msgid "Last"
-msgstr ""
+msgstr "Laatste"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/collections/get.phtml:6
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:22
-msgid "Institution"
-msgstr "Instelling"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/collections/get.phtml:21
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/collections/get.phtml:24
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/collections/get.phtml:27
-msgid "License"
-msgstr "Licentie"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/collections/get.phtml:32
-msgid "ConceptSchemes"
-msgstr ""
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:24
-msgid "Collection"
-msgstr "Collectie"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:33
-msgid "inScheme"
-msgstr ""
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:48
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:58
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:88
-msgid "skos:"
-msgstr "skos:"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:76
-msgid "hasTopConcept"
-msgstr ""
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:76
-#, fuzzy
-msgid "items"
-msgstr "Titel"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:86
-msgid "Implicit Semantic Relations"
-msgstr ""
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/concept/get.phtml:99
-msgid "Alternative formats"
-msgstr ""
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/institutions/get.phtml:21
+#: /home/www/OpenSKOS/application/api/views/scripts/institutions/get.phtml:42
 msgid "Collections"
 msgstr "Collecties"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/institutions/get.phtml:34
+#: /home/www/OpenSKOS/application/api/views/scripts/institutions/get.phtml:55
 msgid "See"
 msgstr "Zie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/institutions/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/api/views/scripts/institutions/index.phtml:2
+#: /home/www/OpenSKOS/application/api/views/scripts/institutions/index.phtml:22
+#: /home/www/OpenSKOS/application/api/views/scripts/institutions/index.phtml:23
 msgid "Institutions"
 msgstr "Instellingen"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:5
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/index/index.phtml:3
-msgid "Dashboard"
-msgstr "Dashboard"
+#: /home/www/OpenSKOS/application/api/views/scripts/collections/get.phtml:27
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:43
+msgid "Institution"
+msgstr "Instelling"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:6
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/institution/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/institution/index.phtml:3
-msgid "Manage institution"
-msgstr "Beheer instelling"
+#: /home/www/OpenSKOS/application/api/views/scripts/collections/get.phtml:42
+#: /home/www/OpenSKOS/application/api/views/scripts/collections/get.phtml:45
+#: /home/www/OpenSKOS/application/api/views/scripts/collections/get.phtml:48
+msgid "License"
+msgstr "Licentie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:7
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:3
-msgid "Manage collections"
-msgstr "Beheer collecties"
+#: /home/www/OpenSKOS/application/api/views/scripts/collections/get.phtml:53
+msgid "ConceptSchemes"
+msgstr "ConceptSchemes"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:8
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:3
-msgid "Manage users"
-msgstr "Beheer gebruikers"
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:45
+msgid "Collection"
+msgstr "Collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/menu.phtml:9
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:3
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:54
+msgid "inScheme"
+msgstr "inScheme"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:69
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:79
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:109
+msgid "skos:"
+msgstr "skos:"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:97
+msgid "hasTopConcept"
+msgstr "hasTopConcept"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:97
+msgid "items"
+msgstr "items"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:107
+msgid "Implicit Semantic Relations"
+msgstr "Impliciete semantische relaties"
+
+#: /home/www/OpenSKOS/application/api/views/scripts/concept/get.phtml:120
+msgid "Alternative formats"
+msgstr "Alternatieve formaten"
+
+#: /home/www/OpenSKOS/application/layouts/editor.phtml:48
+msgid "Are you sure you want to logout?"
+msgstr "Weet u zeker dat u wilt uitloggen?"
+
+#: /home/www/OpenSKOS/application/layouts/editor.phtml:97
+msgid "Aangemeld als"
+msgstr "Aangemeld als"
+
+#: /home/www/OpenSKOS/application/layouts/main.phtml:67
+msgid "Welcome"
+msgstr "Welkom"
+
+#: /home/www/OpenSKOS/application/layouts/main.phtml:73
+msgid "logout"
+msgstr "afmelden"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:23
+msgid "Search, browse and edit"
+msgstr "Zoeken, bladeren en bewerken"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:27
+msgid "Show advanced search options"
+msgstr "Toon uitgebreide zoekmogelijkheden"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:32
+msgid "Search result"
+msgstr "Zoekresultaat"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:34
+msgid "No search performed."
+msgstr "Niet gezocht."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:37
+msgid "No results found for"
+msgstr "Geen resultaat gevonden voor"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:39
+msgid "Add this term"
+msgstr "Voeg deze term toe"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:43
+msgid "No results found."
+msgstr "Geen resultaat gevonden."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:47
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:60
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:90
+msgid "Add to selection"
+msgstr "Voeg toe aan selectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:49
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:61
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:104
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:115
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:121
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:24
+msgid "Relate to current concept"
+msgstr "Relateren aan huidige concept"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:49
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:61
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:104
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:115
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:121
+msgid "Relate"
+msgstr "Relateren"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:60
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:90
+msgid "Sel"
+msgstr "Sel"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:65
+msgid "More results"
+msgstr "Meer resultaten"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:73
+msgid "History"
+msgstr "Geschiedenis"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:74
+msgid "Selection"
+msgstr "Selectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:82
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:94
+msgid "Clear history"
+msgstr "Wis geschiedenis"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:102
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:119
+msgid "Clear selection"
+msgstr "Wis selectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:106
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:123
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/change-status.phtml:24
+msgid "Change status"
+msgstr "Status aanpassen"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:114
+msgid "Remove from selection"
+msgstr "Verwijder uit selectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/index.phtml:114
+msgid "Rem"
+msgstr "Verwijder"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/export.phtml:26
+msgid "Because the number of concepts is higher than "
+msgstr "Omdat het aantal concepten hooger is dan "
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/export.phtml:26
+msgid " or because the depth is higher then 1, the export will be executed in the background. You can donwload the file once it is ready from the section"
+msgstr " of omdat de diepte groter is dan 1, zal de uitvoer worden uitgevoerd in de achtergrond. U kunt het bestand downloaden als het eenmaal klaar is uit de sectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/export.phtml:26
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/export.phtml:27
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:22
 msgid "Manage jobs"
 msgstr "Beheer taken"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:2
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:4
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/export.phtml:27
+msgid "A background job will be started soon. You can track it from the section"
+msgstr "Een achtergrond taak zal binnenkort worden gestart. U kunt bijhouden vanuit de sectie"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/change-status.phtml:26
+msgid "Loading..."
+msgstr "Laden..."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:24
+msgid "This concept already exists in one or more concept schemes. Are you sure that you want to create it?"
+msgstr "Dit concept bestaat al in één of meerdere ConceptSchemes. Weet u zeker dat u het wilt aanmaken?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:25
+msgid "This is a new concept. Are you sure that you want to create it?"
+msgstr "Dit is een nieuw concept. Weet u zeker dat u het wilt aanmaken?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:26
+msgid "No"
+msgstr "Nee"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:27
+msgid "Yes"
+msgstr "Ja"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:28
+msgid "The collection of cocepts for the relation is not consistant. Some of them share a scheme with the current concept, some of them do not."
+msgstr "De collectie van concepten voor deze relatie is niet consistent. Sommige delen een schema met het huidige concept, andere niet."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:29
+msgid "The two concepts share a concept scheme so only semantic relations can be created."
+msgstr "De twee Concepten staan in een zelfde ConceptScheme, hierdoor kunnen alleen semantische relaties worden aangemaakt."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:30
+msgid "The two concepts do not share a concept scheme so only mapping properties can be created."
+msgstr "De twee Concepten staan in niet in hetzelfde ConceptScheme, hierdoor kunnen alleen \"mapping\" eigenschappen worden aangemaakt."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:32
+msgid "Semantic relations"
+msgstr "Semantische relaties"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:34
+msgid "Has Broader"
+msgstr "Heeft \"Broader\""
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:35
+msgid "Has Narrower"
+msgstr "Heeft \"Narrower\""
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:36
+msgid "Has Related"
+msgstr "Heeft \"related\""
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:38
+msgid "Mapping properties"
+msgstr "Mapping eigenschappen"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:49
+msgid "Relate to current concept scheme"
+msgstr "Relateer aan huidige ConceptScheme"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:54
+msgid "Top Concept"
+msgstr "Top Concept"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/relations.phtml:55
+msgid "Concept"
+msgstr "Concept"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/index/modalboxes/delete.phtml:25
+msgid "Are you sure you want to delete the concept."
+msgstr "Weet u zeker dat u dit Concept wilt verwijderen?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/save.phtml:24
+msgid "Concept scheme saved successfully."
+msgstr "ConceptSchema succesvol opgeslagen."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/show-icons.phtml:22
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:25
+msgid "Manage icons"
+msgstr "Beheer icoontjes"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/show-icons.phtml:31
+msgid "Are you sure you want to delete this icon?"
+msgstr "Weet u zeker dat u deze icoontje wilt verwijderen?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/create.phtml:24
+msgid "Create concept scheme"
+msgstr "Maak een nieuwe ConceptScheme aan"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/create.phtml:29
+msgid "The base part of the \"Uri\" is required."
+msgstr "Het eerste gedeelte van de \"Uri\" is verplicht."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/create.phtml:32
+msgid "The last part of the \"Uri\" is required."
+msgstr "Het laatste gedeelte van de \"Uri\" is verplicht."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/create.phtml:35
+msgid "The \"Title\" is required and must be filled in each language."
+msgstr "De \"Titel\" is verplicht en moet in elke taal worden ingevuld."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:22
+msgid "Manage concept schemes"
+msgstr "Beheer concept scheme"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:24
+msgid "Create new concept scheme"
+msgstr "Maak een nieuwe ConceptScheme aan"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:28
+msgid "No schemes."
+msgstr "Geen schemes."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:35
+msgid "Scheme"
+msgstr "Scheme"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:37
+msgid "Icon"
+msgstr "Icon"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:56
+msgid "Change Icon"
+msgstr "Verander icoontje"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:60
+msgid "no icon"
+msgstr "geen icoontje"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:65
+msgid "Delete concept scheme"
+msgstr "Verwijder concept scheme"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept-scheme/index.phtml:74
+msgid "Are you sure you want to delete the concept scheme?"
+msgstr "Weet u zeker dat u dit concept scheme wilt verwijderen?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/export/rtf.phtml:29
+msgid "Openskos Exported Concepts"
+msgstr "OpenSKOS geexporteerde concepten"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/export/rtf.phtml:54
+msgid "NARROWERS"
+msgstr "NARROWERS"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/institution/index.phtml:22
+msgid "Manage institution"
+msgstr "Beheer instelling"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/institution/index.phtml:29
+msgid "You can share this information via the OpenSKOS API"
+msgstr "U kunt deze informatie delen via de OpenSKOS API"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:22
+msgid "Job details"
+msgstr "Details taak"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:30
+msgid "Delete before import"
+msgstr "Verwijder voor het importeren"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:31
+msgid "yes"
+msgstr "ja"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:31
+msgid "no"
+msgstr "nee"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:34
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:69
+msgid "Created"
+msgstr "Aangemaakt"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:38
+msgid "Created by"
+msgstr "Aangemaakt door"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:42
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:70
+msgid "Started"
+msgstr "Gestart"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:46
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:71
+msgid "Finished"
+msgstr "Gereed"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:55
+msgid "Info"
+msgstr "Info"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:57
+msgid "Download the export file"
+msgstr "Download het exportbestand"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:67
+msgid "File details"
+msgstr "Bestandsgegevens"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:74
+msgid "Type"
+msgstr "Type"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:78
+msgid "Filesize"
+msgstr "Bestandsgrootte"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:84
+msgid "Harvest details"
+msgstr "Harvest details"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:93
+msgid "OAI Base URL"
+msgstr "OAI basis URL"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:97
+msgid "SetSpec"
+msgstr "SetSpec"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:110
+msgid "Until"
+msgstr "Tot en met"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:116
+msgid "URL used for Harvesting"
+msgstr "URL gebruikt voor het harvesten"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/view.phtml:119
+msgid "Remove job"
+msgstr "Verwijder taak"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:26
+msgid "Show finished jobs"
+msgstr "Toon taken die gereed zijn"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:28
+msgid "Hide finished jobs"
+msgstr "Verberg taken die gereed zijn"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:32
+msgid "There are no jobs scheduled."
+msgstr "Er zijn geen taken gepland."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:35
+msgid "No jobs selected"
+msgstr "Geen taken gedefineerd"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:36
+msgid "Are you sure you want to delete the selected job?"
+msgstr "Weet u zeker dat u deze taak wilt verwijderen?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:37
+msgid "Are you sure you want to delete the selected jobs?"
+msgstr "Weet u zeker dat u deze taken wilt verwijderen?"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:72
+msgid "Task"
+msgstr "Taak"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:89
+msgid "details"
+msgstr "details"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/jobs/index.phtml:99
+msgid "Delete selected jobs"
+msgstr "Verwijder geselecteerde taken"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/login/index.phtml:22
+msgid "Login for OpenSKOS Editor"
+msgstr "Inloggen OpenSKOS Editor"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/login/index.phtml:34
+msgid "Or, sign up with ..."
+msgstr "Of, aanmelden met ..."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/login/index.phtml:36
+msgid "Sign up with Google"
+msgstr "Aanmelden met Google"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/view.phtml:22
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/view.phtml:24
+msgid "User details"
+msgstr "Geburikersgegevens"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/view.phtml:35
+msgid "Email"
+msgstr "E-mail"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/view.phtml:47
+msgid "API Key"
+msgstr "API sleutel"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/view.phtml:52
+msgid "Edit password"
+msgstr "Wachtwoord aanpassen"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/edit.phtml:23
+msgid "Edit user"
+msgstr "Bewerk gebruiker"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/edit.phtml:25
+msgid "Create user"
+msgstr "Nieuwe gebruiker"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/index.phtml:22
+msgid "Manage users"
+msgstr "Beheer gebruikers"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/index.phtml:25
+msgid "Create a new user"
+msgstr "Maak een nieuwe gebruiker aan"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/index.phtml:30
+msgid "No users to manage."
+msgstr "Geen te beheren gebruikers."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/index.phtml:33
+msgid "Click on a name to edit the user."
+msgstr "Klik op een naam om de gebruiker te bewerken."
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/users/index.phtml:42
+msgid "API key"
+msgstr "API sleutel"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:23
 msgid "Edit collection"
 msgstr "Beheer collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:6
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:8
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:25
 msgid "Create collection"
 msgstr "Maak collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:25
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:42
 msgid "Schedule an OAI Harvest job"
 msgstr "Plan een OAI Harvest taak"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:33
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:50
 msgid "An OAI Harvest job has already been scheduled<br/> on %started% by %user%"
 msgstr "Er is al een OAI Harvest taak gepland<br/> door %user% op %started%"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:43
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:60
 msgid "Import new data"
 msgstr "Importeer nieuwe gegevens"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:44
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:61
 #, php-format
 msgid "Upload a file in (optionaly zipped) rdf-xml format (max. %s)."
 msgstr "Upload een bestand in een (eventueel ge-zipt) rdf-xml formaat (max. %s)."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:46
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:63
 #, php-format
 msgid "See <a href=\"%s\">API documentation</a> for supported formats."
 msgstr "Zie <a href=\"%s\">API documentatie</a> voor ondersteunde formaten."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/edit.phtml:50
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/edit.phtml:67
 msgid "Current import jobs for this collection"
 msgstr "Lopende import-taken voor deze collectie"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:4
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/index.phtml:22
+msgid "Manage collections"
+msgstr "Beheer collecties"
+
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/index.phtml:24
 msgid "Create a new Collection"
 msgstr "Maak een nieuwe collectie aan"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:7
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/index.phtml:27
 msgid "No collections to manage."
 msgstr "Geen te beheren collecties"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/collections/index.phtml:10
+#: /home/www/OpenSKOS/application/editor/views/scripts/collections/index.phtml:30
 msgid "Click on a code to edit the collection."
 msgstr "Klik op een code om de collectie te beheren"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/index/index.phtml:1
-msgid "OpenSKOS Dashboard"
-msgstr "OpenSKOS Dashboard"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:30
+msgid "Status:"
+msgstr "Status:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/index/index.phtml:4
-msgid "Welcome to the OpenSKOS Dashboard. Please pick a task from the menu."
-msgstr "Welkom bij het OpenSKOS Dashboard. U kunt nu een taak uit het menu kiezen."
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:31
+msgid "undefined"
+msgstr "Niet gedefineerd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/institution/index.phtml:9
-msgid "You can share this information via the OpenSKOS API"
-msgstr "U kunt deze informatie delen via de OpenSKOS API"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:34
+msgid "To be checked:"
+msgstr "Te controleren:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:6
-msgid "Show finished jobs"
-msgstr "Toon taken die gereed zijn"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:44
+msgid "Switch to edit mode"
+msgstr "Naar bewerk modus"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:8
-msgid "Hide finished jobs"
-msgstr "Verberg taken die gereed zijn"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:47
+msgid "Tenant:"
+msgstr "Tenant:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:12
-msgid "There are no jobs scheduled."
-msgstr "Er zijn geen taken gepland."
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:71
+msgid "Preferred label"
+msgstr "Preferred label"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:15
-msgid "No jobs selected"
-msgstr "Geen taken gedefineerd"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:72
+msgid "Alternative label"
+msgstr "Alternative label"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:16
-msgid "Are you sure you want to delete the selected job?"
-msgstr "Weet u zeker dat u deze taak wilt verwijderen?"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:73
+msgid "Hidden label"
+msgstr "Hidden label"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:17
-msgid "Are you sure you want to delete the selected jobs?"
-msgstr "Weet u zeker dat u deze taken wilt verwijderen?"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:76
+msgid "Scope Note"
+msgstr "Scope Note"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:49
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:14
-msgid "Created"
-msgstr "Aangemaakt"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:77
+msgid "Note"
+msgstr "Note"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:50
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:22
-msgid "Started"
-msgstr "Gestart"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:78
+msgid "Example"
+msgstr "Example"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:51
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:26
-msgid "Finished"
-msgstr "Gereed"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:79
+msgid "Definition"
+msgstr "Definition"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:52
-msgid "Task"
-msgstr "Taak"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:80
+msgid "Change note"
+msgstr "Change note"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:53
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:30
-msgid "Status"
-msgstr "Status"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:81
+msgid "Editorial note"
+msgstr "Editorial note"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:69
-msgid "details"
-msgstr "details"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:82
+msgid "History note"
+msgstr "History note"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/index.phtml:79
-msgid "Delete selected jobs"
-msgstr "Verwijder geselecteerde taken"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:156
+msgid "URI:"
+msgstr "URI:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:3
-msgid "Job details"
-msgstr "Details taak"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:160
+msgid "Notation:"
+msgstr "Notation:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:10
-msgid "Delete before import"
-msgstr "Verwijder voor het importeren"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:169
+msgid "Is top concept:"
+msgstr "Is top concept:"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:11
-msgid "yes"
-msgstr "ja"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:281
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/edit.phtml:57
+msgid "Modified"
+msgstr "Gewijzigd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:11
-msgid "no"
-msgstr "nee"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/view.phtml:286
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/edit.phtml:62
+msgid "Approved"
+msgstr "Goedgekeurd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:18
-msgid "Created by"
-msgstr "Aangemaakt door"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/edit.phtml:22
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/edit.phtml:24
+msgid "Edit concept"
+msgstr "Bewerk Concept"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:35
-msgid "Info"
-msgstr "Info"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/edit.phtml:68
+msgid "Any changes you made will not be saved. Are you sure you want to go back to view mode?"
+msgstr "Alle wijzigingen die u hebt gemaakt, worden niet opgeslagen. Weet je zeker dat je terug wilt gaan naar de view modus?"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:43
-msgid "File details"
-msgstr "Bestandsgegevens"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/create.phtml:22
+msgid "Create a concept"
+msgstr "Maak een nieuwe Concept aan"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:50
-msgid "Type"
-msgstr "Type"
+#: /home/www/OpenSKOS/application/editor/views/scripts/concept/create.phtml:24
+msgid "Create concept"
+msgstr "Nieuw Concept"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:54
-msgid "Filesize"
-msgstr "Bestandsgrootte"
+#: /home/www/OpenSKOS/application/editor/views/scripts/search/index.phtml:43
+msgid "< Prev page"
+msgstr "< Vorige pag."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:60
-msgid "Harvest details"
-msgstr "Harvest details"
+#: /home/www/OpenSKOS/application/editor/views/scripts/search/index.phtml:46
+msgid "Next page >"
+msgstr "Volgende pag. >"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:69
-msgid "OAI Base URL"
-msgstr "OAI basis URL"
+#: /home/www/OpenSKOS/application/editor/views/scripts/search/show-form.phtml:22
+msgid "Advanced search options"
+msgstr "Uitgebreide zoekmogelijkheden"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:73
-msgid "SetSpec"
-msgstr "SetSpec"
+#~ msgid "Concept scheme deleted."
+#~ msgstr "Concept scheme verwijderd"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:80
-msgid "From"
-msgstr "Vanaf"
+#~ msgid "- all -"
+#~ msgstr "- alle -"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:86
-msgid "Until"
-msgstr "Tot en met"
+#~ msgid "to be checked"
+#~ msgstr "te controleren"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:92
-msgid "URL used for Harvesting"
-msgstr "URL gebruikt voor het harvesten"
+#~ msgid "Lexical labels"
+#~ msgstr "Lexical labels"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/jobs/view.phtml:95
-msgid "Remove job"
-msgstr "Verwijder taak"
+#~ msgid "The system can export only the first"
+#~ msgstr "Het systeem kan alleen de eerste"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/login/index.phtml:1
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/login/index.phtml:2
-msgid "Login for OpenSKOS Dashboard"
-msgstr "Inloggen OpenSKOS Sashboard"
+#~ msgid " results."
+#~ msgstr "resultaten exportern."
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/edit.phtml:2
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/edit.phtml:4
-msgid "Edit user"
-msgstr "Bewerk gebruiker"
+#~ msgid "Dashboard"
+#~ msgstr "Dashboard"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/edit.phtml:6
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/edit.phtml:8
-msgid "Create user"
-msgstr "Nieuwe gebruiker"
+#~ msgid "OpenSKOS Dashboard"
+#~ msgstr "OpenSKOS Dashboard"
 
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:4
-msgid "Create a new user"
-msgstr "Maak een nieuwe gebruiker aan"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:7
-msgid "No users to manage."
-msgstr "Geen te beheren gebruikers."
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:10
-msgid "Click on a name to edit the user."
-msgstr "Klik op een naam om de gebruiker te bewerken."
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/dashboard/views/scripts/users/index.phtml:18
-msgid "API key"
-msgstr "API sleutel"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/layouts/main.phtml:43
-msgid "Welcome"
-msgstr "Welkom"
-
-#: /usr/local/zend/apache2/htdocs/openSKOS/application/layouts/main.phtml:44
-msgid "logout"
-msgstr "afmelden"
+#~ msgid "Welcome to the OpenSKOS Dashboard. Please pick a task from the menu."
+#~ msgstr ""
+#~ "Welkom bij het OpenSKOS Dashboard. U kunt nu een taak uit het menu kiezen."
 
 #~ msgid "Filename"
 #~ msgstr "Bestandsnaam"

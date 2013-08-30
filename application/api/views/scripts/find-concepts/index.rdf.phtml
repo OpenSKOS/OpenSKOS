@@ -34,7 +34,9 @@ $namespaces = array_unique($namespaces);
 <rdf:RDF
 	<?php 
 	foreach ($namespaces as $prefix):
-		printf('xmlns:%s="%s" ', $prefix, $this->namespaces[$prefix]);
+		if (isset($this->namespaces[$prefix])):
+			printf('xmlns:%s="%s" ', $prefix, $this->namespaces[$prefix]);
+		endif;
 	endforeach
 	?>
 	xmlns:openskos="http://openskos.org/xmlns#"

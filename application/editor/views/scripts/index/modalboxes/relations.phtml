@@ -1,0 +1,58 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<div id="relation-box" class="relation-box">
+	<h2><?php  echo $this->translate('Relate to current concept'); ?> </h2>
+	<span class="relation-box-section">
+		<span class="uuids do-not-show"></span>
+	
+		<div class="relation-box-message not-consistant errors"><?php echo $this->translate('The collection of cocepts for the relation is not consistant. Some of them share a scheme with the current concept, some of them do not.'); ?></div>
+		<div class="relation-box-message semantic"><?php echo $this->translate('The two concepts share a concept scheme so only semantic relations can be created.'); ?></div>
+		<div class="relation-box-message mapping"><?php echo $this->translate('The two concepts do not share a concept scheme so only mapping properties can be created.'); ?></div>
+		
+		<span class="relation-box-header"><?php echo $this->translate('Semantic relations'); ?> </span>				
+		<ul class="relation-box-list disabled semantic">
+			<li class="broader"><a href="#" class="relation-action-link"><?php echo $this->translate('Has Broader'); ?></a></li>
+			<li class="narrower"><a href="#" class="relation-action-link"><?php echo $this->translate('Has Narrower'); ?></a></li>
+			<li class="related"><a href="#" class="relation-action-link"><?php echo $this->translate('Has Related'); ?></a></li>
+		</ul>
+		<span class="relation-box-header"><?php echo $this->translate('Mapping properties'); ?> </span>
+		<ul class="relation-box-list disabled mapping">
+			<li class="exactMatch"><a href="#" class="relation-action-link"><?php echo $this->translate('Has exact match'); ?></a></li>
+			<li class="closeMatch"><a href="#" class="relation-action-link"><?php echo $this->translate('Has close match'); ?></a></li>
+			<li class="broadMatch"><a href="#" class="relation-action-link"><?php echo $this->translate('Has broader match'); ?></a></li>
+			<li class="narrowMatch"><a href="#" class="relation-action-link"><?php echo $this->translate('Has narrower match'); ?></a></li>
+			<li class="relatedMatch"><a href="#" class="relation-action-link"><?php echo $this->translate('Has related match'); ?></a></li>
+		</ul>							
+	</span>
+</div>
+<div id="relation-box-for-scheme" class="relation-box">
+	<h2><?php  echo $this->translate('Relate to current concept scheme'); ?> </h2>
+	<span class="relation-box-section">
+		<span class="uuids do-not-show"></span>
+						
+		<ul class="relation-box-list">
+			<li class="hasTopConcept"><a href="#" class="relation-action-link"><?php echo $this->translate('Top Concept'); ?></a></li>
+			<li class="includeConcepts"><a href="#" class="relation-action-link"><?php echo $this->translate('Concept'); ?></a></li>
+		</ul>
+	</span>
+</div>

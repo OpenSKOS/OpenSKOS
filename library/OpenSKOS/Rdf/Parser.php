@@ -34,8 +34,14 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'purge|P' => 'Purge all concepts per ConceptSchema found in this file',
 		'lang|l=s' => 'The default language to use if no "xml:lang" attribute is found',
 		'env|e=s' => 'The environment to use (defaults to "production")',
-		'commit' => 'Commit to Solr (default: print to STDOUT)'
+		'commit' => 'Commit to Solr (default: print to STDOUT)',
+		'status=s' => 'The status to use for concepts (candidate|approved|expired)',
+		'ignoreIncomingStatus' => 'To ignore or not the concept status which comes from the import file',
+		'toBeChecked' => 'Sets the toBeCheked status to TRUE'
 	);
+	
+	//@TODO move this to a Concept Class
+	static $statuses = array('candidate', 'approved', 'expired');
 	
 	static $namespaces = array(
 		'rdf'      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -70,7 +76,13 @@ class OpenSKOS_Rdf_Parser implements Countable
 	
 	protected $_from = 0, $_limit = 1000;
 	
+	protected $_notImportedNotations = array();
+	
+	protected $_duplicateConceptSchemes = array();
+	
 	const MAX_LIMIT = 1000;
+	
+	const SOLR_DATETIME_FORMAT = "Y-m-d\TH:i:s\Z";
 	
 	public static $required = array('tenant', 'collection');
 	
@@ -105,12 +117,13 @@ class OpenSKOS_Rdf_Parser implements Countable
 	 */
 	public function getDOMDocument()
 	{
-		static $doc;
-		if (null === $doc) {
-			$file = $this->getFile();
+		static $doc, $docFile;
+		
+		if ($docFile !== $this->getFile()) {
+			$docFile = $this->getFile();
 			$doc = new DOMDocument('1.0', 'utf-8');
-			if (!@$doc->load($file)) {
-				throw new OpenSKOS_Rdf_Parser_Exception('Failed to load `'.$file.'` as DOMDocument');
+			if (!@$doc->load($docFile)) {
+				throw new OpenSKOS_Rdf_Parser_Exception('Failed to load `'.$docFile.'` as DOMDocument');
 			}
 		}
 		return $doc;
@@ -203,29 +216,18 @@ class OpenSKOS_Rdf_Parser implements Countable
 	 * @param DOMNode $Description
 	 * @param array $extradata
 	 * @param DOMXPath $xpath
+	 * @param string $fallbackStatus The status which will be used if no other status is detected.
 	 * @return OpenSKOS_Solr_Document
 	 */
 	public static function DomNode2SolrDocument(
 		DOMNode $Description, 
 		Array $extradata = array(), 
-		DOMXPath $xpath = null)
+		DOMXPath $xpath = null,
+		$fallbackStatus = '')
 	{
 		if ($Description->nodeName != 'rdf:Description') {
-			throw new OpenSKOS_Rdf_Parser_Exception('wring nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
+			throw new OpenSKOS_Rdf_Parser_Exception('wrong nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
 		}
-		
-		$document = new OpenSKOS_Solr_Document();
-		foreach ($extradata as $key => $var) {
-			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
-		}
-		
-		$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
-		if (!$uri) {
-			throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
-		}
-		
-		$document->uri = $uri;
-		$document->uuid = self::uri2uuid($uri);
 		
 		if (null === $xpath) {
 			$xpath = new DOMXPath($Description->ownerDocument);
@@ -233,18 +235,89 @@ class OpenSKOS_Rdf_Parser implements Countable
 			foreach (self::$namespaces as $prefix => $uri) {
 				$xpath->registerNamespace($prefix, $uri);
 			}
-		} 
+		}
+		
+		// Sets created_timestamp, modified_timestamp and approved_timestamp.
+		$autoExtraData = array();
+		$dateSubmittedNodes = $xpath->query('dcterms:dateSubmitted', $Description);
+		if ($dateSubmittedNodes->length > 0) {
+			$autoExtraData['created_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateSubmittedNodes->item(0)->nodeValue));
+		} else {
+			$autoExtraData['created_timestamp'] = date(self::SOLR_DATETIME_FORMAT);
+		}
+		$dateModifiedNodes = $xpath->query('dcterms:modified', $Description);
+		if ($dateModifiedNodes->length > 0) {
+			$autoExtraData['modified_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateModifiedNodes->item(0)->nodeValue));
+		}
+		$dateAcceptedNodes = $xpath->query('dcterms:dateAccepted', $Description);
+		if ($dateAcceptedNodes->length > 0) {
+			$autoExtraData['approved_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateAcceptedNodes->item(0)->nodeValue));
+		}
+		
+		// Sets status. If we have info for date submited the status is candidate, if we have info for date accepted the status is approved.
+		if ($dateAcceptedNodes->length > 0) {
+			$autoExtraData['status'] = 'approved';
+		} else if ($dateSubmittedNodes->length > 0) {
+			$autoExtraData['status'] = 'candidate';
+		} else if ( ! empty($fallbackStatus)) {
+			$autoExtraData['status'] = $fallbackStatus;
+		}
+		
+		// Merges the incoming extra data with the auto detected extra data.
+		$extradata = array_merge($autoExtraData, $extradata);
+		
+		// Set deleted timestamp if status is expired and deleted timestamp is not already set.
+		if (! isset($extradata['deleted_timestamp']) 
+				&& ((isset($extradata['status']) && $extradata['status'] == 'expired')
+					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
+			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
+		}
+		
+		// Fix empty values
+		if (empty($extradata['approved_timestamp'])) {
+			unset($extradata['approved_timestamp']);
+		}
+		if (empty($extradata['approved_by'])) {
+			unset($extradata['approved_by']);
+		}
+		if (empty($extradata['deleted_timestamp'])) {
+			unset($extradata['deleted_timestamp']);
+		}
+		if (empty($extradata['deleted_by'])) {
+			unset($extradata['deleted_by']);
+		}
+		
+		// Creates the solr document from the description and the extra data.
+		$document = new OpenSKOS_Solr_Document();
+		foreach ($extradata as $key => $var) {
+			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
+		}
+		
+		if (!isset($extradata['uri'])) {
+			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+			if (!$uri) {
+				throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
+			}
+			$document->uri = $uri;
+		} else {
+			$uri = $extradata['uri'];
+		}
+		
+
+		if (!isset($extradata['uuid'])) {
+			$document->uuid = OpenSKOS_Utils::uuid();
+		}
 		
 		if ($type = ($xpath->query('./rdf:type', $Description)->item(0))) {
 			$resource = $type->getAttributeNS(self::$namespaces['rdf'], 'resource');
-			if (0!==strpos($resource, self::$namespaces['skos'])) {
+			if (0 !== strpos($resource, self::$namespaces['skos'])) {
 				return;
 			}
 			$className = parse_url($resource, PHP_URL_FRAGMENT);
-			$document->class =parse_url($type->getAttributeNS(self::$namespaces['rdf'], 'resource'), PHP_URL_FRAGMENT);
+			$document->class = parse_url($type->getAttributeNS(self::$namespaces['rdf'], 'resource'), PHP_URL_FRAGMENT);
 		} else {
-		    return;
 			throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:type');
+		    return;
 		}
 
 		
@@ -260,6 +333,24 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$document->$fieldname = trim($skosElement->nodeValue)
 				? trim($skosElement->nodeValue)
 				: $skosElement->getAttributeNS(self::$namespaces['rdf'], 'resource');
+
+			//store every first preflabel/notation in a sortable field:
+			if (0 === strpos($fieldname, 'prefLabel') || 0 === strpos($fieldname, 'notation')) {
+				$sortFieldName = str_replace(array('prefLabel', 'notation'), array('prefLabelSort', 'notationSort'), $fieldname);
+				if (!$document->offsetExists($sortFieldName)) {
+					$offset = $document->offsetGet($fieldname);
+					$document->$sortFieldName = array_shift($offset);
+				}
+				
+				//also store the first language in a generic field:
+				if (strpos($fieldname, '@')) {
+					$sortFieldName = preg_replace('/@.+/', 'Sort', $fieldname);
+					if (!$document->offsetExists($sortFieldName)) {
+						$offset = $document->offsetGet($fieldname);
+						$document->$sortFieldName = array_shift($offset);
+					}
+				}
+			}
 		}
 		
 		foreach (array('dc', 'dcterms') as $ns) {
@@ -291,6 +382,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 				} 
 			}
 		}
+		
 		if ($availableNamespaces) {
 			$document->xmlns = $availableNamespaces;
 		}
@@ -318,6 +410,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		//sometimes the first nodes of the XML file is a ConceptScheme:
 		$ConceptScheme = $xpath->query('/rdf:RDF/skos:ConceptScheme')->item(0);
 		if ($ConceptScheme) {
+			
 		    $doc = $this->getDOMDocument();
 		    //convert this node to a DOMstructure the parse understands:
 		    $node = $doc->createElementNS(
@@ -346,11 +439,26 @@ class OpenSKOS_Rdf_Parser implements Countable
 				'tenant' => $this->getOpt('tenant'),
 				'collection' => $this->_collection->id,
 			);
-			$document = self::DomNode2SolrDocument($node, $data);
+			if ($this->getOpt('status')) $data['status'] = (string)$this->getOpt('status');
+			if ($this->getOpt('toBeChecked')) $data['toBeChecked'] = 'true';
+			
+		    $document = self::DomNode2SolrDocument($node, $data);
+		    
 			if ($document) {
-			    $documents->add($document);
+				if ($this->validateIsUniqeScheme($document, $this->getOpt('tenant'))) {
+			    	$documents->add($document);
+				}
 			}
 		}
+		
+		$notationsCheck = array();
+		$notationsCheckQuery = 'class:Concept deleted:false tenant:' . $this->getOpt('tenant');
+		$notationsCount = $this->_solr()->limit(0)->search($notationsCheckQuery);
+		$existingNotations = $this->_solr()->limit($notationsCount['response']['numFound'])->search($notationsCheckQuery, array('fl' => 'notation'));
+		foreach ($existingNotations['response']['docs'] as $doc) {
+			$notationsCheck[$doc['notation'][0]] = true;
+		}
+		$existingNotations = null;
 		
 		$Descriptions = $xpath->query('/rdf:RDF/rdf:Description');
 		$d = 0;
@@ -358,6 +466,15 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    if ($i < $this->getFrom()) continue;
 //			if ($i >= ($this->getFrom() + $this->getLimit())) break;
 			
+		    // Ignore elements of type collection. May cause the script to hang out if it has too many members.
+		    if ($type = ($xpath->query('./rdf:type', $Description)->item(0))) {
+				$resource = $type->getAttributeNS(self::$namespaces['rdf'], 'resource');
+				$className = parse_url($resource, PHP_URL_FRAGMENT);
+				if ($className == 'Collection') {
+					continue;
+				}
+		    }
+		    
 			if ($d >= self::MAX_LIMIT) {
 				$this->_solr()->add($documents);
 				$documents = new OpenSKOS_Solr_Documents();
@@ -365,12 +482,38 @@ class OpenSKOS_Rdf_Parser implements Countable
 			}
 			$d++;
 			
+			// Check if document with same notation already exists.
+			$notationNodes = $xpath->query('skos:notation', $Description);
+			if ($notationNodes->length > 0) {
+				if (isset($notationsCheck[$notationNodes->item(0)->nodeValue])) {
+					$this->_notImportedNotations[] = $notationNodes->item(0)->nodeValue;
+					continue;
+				}
+			}
+			
 			$data = array(
 				'tenant' => $this->getOpt('tenant'),
-				'collection' => $this->_collection->id,
+				'collection' => $this->_collection->id
 			);
-			$document = self::DomNode2SolrDocument($Description, $data);
+			
+			if ($this->getOpt('toBeChecked')) {
+				$data['toBeChecked'] = 'true';
+			}
+			
+			if ($this->getOpt('ignoreIncomingStatus') && $this->getOpt('status')) {
+				$data['status'] = (string)$this->getOpt('status');
+			}
+							
+			$document = self::DomNode2SolrDocument($Description, $data, $xpath, (string)$this->getOpt('status'));
+			
 			if ($document) {
+				$class = $document->offsetGet('class');
+				if ($class[0] == 'ConceptScheme') {
+					if ( ! $this->validateIsUniqeScheme($document, $this->getOpt('tenant'))) {
+						continue;
+					}
+				}
+				
 				$documents->add($document);
 			}
 		}
@@ -381,6 +524,34 @@ class OpenSKOS_Rdf_Parser implements Countable
 		} else {
 			echo $documents."\n";
 		}
+	}
+	
+	/**
+	 * Validate if the scheme is unique in the given tenant. If not - throws error.
+	 * 
+	 * @param OpenSKOS_Solr_Document $schemeDoc
+	 * @param string $tenant
+	 * @throws OpenSKOS_SKOS_Exception
+	 */
+	public function validateIsUniqeScheme(OpenSKOS_Solr_Document $schemeDoc, $tenant)
+	{
+		$schemeUri = $schemeDoc->offsetGet('uri');
+		$existingSchemes = $this->_solr()->search('uri:"' . $schemeUri[0] . '" AND tenant:"' . $tenant . '" AND deleted:false');
+		if ($existingSchemes['response']['numFound'] > 0) {
+			$this->_duplicateConceptSchemes[] = $schemeUri[0];
+			return false;
+		}
+		return true;
+	}
+	
+	public function getDuplicateConceptSchemes() 
+	{
+		return $this->_duplicateConceptSchemes;
+	}
+	
+	public function getNotImportedNotations()
+	{
+		return $this->_notImportedNotations;
 	}
 
 	public static function uri2uuid($uri)
@@ -461,6 +632,12 @@ class OpenSKOS_Rdf_Parser implements Countable
 		if (null!== $opts->help) {
 		    echo str_replace('[ options ]', '[ options ] file', $opts->getUsageMessage());
 		    throw new OpenSKOS_Rdf_Parser_Exception('', 0);
+		}
+		
+		if ($opts->status) {
+			if (!in_array($opts->status, self::$statuses)) {
+				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', self::$statuses).'`', 0);
+			}
 		}
 		
 		foreach (self::$required as $opt) {
@@ -592,6 +769,147 @@ class OpenSKOS_Rdf_Parser implements Countable
 			exit(0);
 		}	
 	}
+		
+	public static function createLanguageField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		list($fieldName, $fieldLanguage) = explode('@', $fieldName);
+		$doc = new DOMDocument('1.0', 'utf-8');
+
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+		
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('skos:'.$fieldName);
+			$node->appendChild($doc->createTextNode($fieldValue));
+			
+			if (!empty($fieldLanguage)) {
+				$node->setAttribute('xml:lang', $fieldLanguage);
+			}
+			
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+	
+	public static function createResourceField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+		
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('skos:'.$fieldName);
+			$node->setAttribute('rdf:resource', $fieldValue);
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+	
+	/**
+	 * Creates simple skos xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 *
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createSimpleSkosField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+	
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('skos:' . $fieldName);
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+	
+	/**
+	 * Creates dcterm xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 *
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createDcTermsField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+	
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('dcterms:' . str_ireplace('dcterms_', '', $fieldName));			
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+	
+	/**
+	 * Creates dc xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 * 
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createDcField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+		
+		foreach ($fieldValues as $fieldValue) {			
+			$node = $doc->createElement('dc:' . str_ireplace('dcterms_', '', $fieldName));
+			
+			$node->setAttribute('xmlns:dc', self::$namespaces['dc']);
+			
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+	
+	/**
+	 * Creates dc xml element for a language field. $fieldValues must contain the values in all langs
+	 *
+	 * @param string $fieldName
+	 * @param array $fieldValues An assoc array of type array("en" => value, "nl" => value).
+	 */
+	public static function createDcLanguageField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if ( ! is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+		
+		foreach ($fieldValues as $languageCode => $fieldValue) {			
+			$node = $doc->createElement('dc:' . str_ireplace('dcterms_', '', $fieldName));
+			
+			$node->setAttribute('xmlns:dc', self::$namespaces['dc']);
+			
+			$node->setAttribute('xml:lang', $languageCode);
+			
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
 }
-
-

@@ -25,7 +25,11 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	const STATUS_SUCCESS = 'SUCCESS';
 	
 	const JOB_TASK_IMPORT = 'import';
+	const JOB_TASK_EXPORT = 'export';
 	const JOB_TASK_HARVEST = 'harvest';
+	const JOB_TASK_DELETE_CONCEPT_SCHEME = 'delete_concept_scheme';
+	
+	protected $parametersSerialized = null;
 	
 	public function getParam($key)
 	{
@@ -35,13 +39,34 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	
 	public function getParams()
 	{
-		static $params;
-		if (null === $params) {
-			$params = unserialize($this->parameters);
+		if (null === $this->parametersSerialized) {
+			$this->parametersSerialized = unserialize($this->parameters);
 		}
-		return $params;
+		return $this->parametersSerialized;
 	}
 	
+	/**
+	 * Sets job info.
+	 *
+	 * @param string $info
+	 * @return OpenSKOS_Db_Table_Row_Job
+	 */
+	public function setInfo($info)
+	{
+		$this->info = $info;
+		return $this;
+	}
+	
+	/**
+	 * Gets job info.
+	 * 
+	 * @return string
+	 */
+	public function getInfo()
+	{
+		return $this->info;
+	}
+		
 	public function delete()
 	{
 		if ($this->task == self::JOB_TASK_IMPORT) {
@@ -70,6 +95,17 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 		$path = realpath($this->getParam('destination').DIRECTORY_SEPARATOR.$this->getParam('name'));
 		
 		return $path ? $path : null;
+	}
+	
+	public function getDisplayFileName()
+	{
+		$name = basename($this->getParam('name'));
+		
+		// Removes uniqid prefix
+		if (strpos($name, '_') !== false) {
+			$name = substr($name, strpos($name, '_') + 1);
+		}
+		return $name;
 	}
 	
 	public function isZip($path = null)

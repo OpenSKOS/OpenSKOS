@@ -23,17 +23,23 @@ class OpenSKOS_Controller_Plugin_Autoload extends Zend_Controller_Plugin_Abstrac
 {
 	public function preDispatch(Zend_Controller_Request_Abstract $request)
 	{
-		set_include_path(implode(PATH_SEPARATOR, array(
-			APPLICATION_PATH . '/' . $request->getModuleName(),
-			get_include_path() 
-		)));
-		$parts = explode('-', $request->getModuleName());
-		array_walk($parts, create_function('&$v', '$v=ucfirst($v);'));
+		//make sure we have an Autoloader for all models in all modules:
+		$options = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('resources');
+		$modules = array_keys($options['frontController']['controllerDirectory']);
 		
-		$namespacePrefix = implode('', $parts).'_';
-		$loader = new OpenSKOS_Autoloader();
-		
-		Zend_Loader_Autoloader::getInstance()
-			->pushAutoloader($loader, $namespacePrefix);
+		foreach ($modules as $module) {
+			set_include_path(implode(PATH_SEPARATOR, array(
+				APPLICATION_PATH . '/' . $module,
+				get_include_path() 
+			)));
+			$parts = explode('-', $module);
+			array_walk($parts, create_function('&$v', '$v=ucfirst($v);'));
+			
+			$namespacePrefix = implode('', $parts).'_';
+			$loader = new OpenSKOS_Autoloader();
+			
+			Zend_Loader_Autoloader::getInstance()
+				->pushAutoloader($loader, $namespacePrefix);
+		}
 	}
 }
