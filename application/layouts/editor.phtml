@@ -97,7 +97,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 						?>
 			        	<?php echo $this->translate('Aangemeld als')?> <strong><a id="editMyProfile" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'view', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a></strong>
 			        	&nbsp;&nbsp;
-			        	<a id="logout" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><img style="vertical-align: middle;" src="<?php echo $baseUrl?>interaction_design/images/icons/logoff.gif" alt="" /></a>
+			        	<a id="logout" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><img style="vertical-align: middle;" src="<?php echo $baseUrl?>assets/images/logoff.gif" alt="" /></a>
 		        	<?php endif ?>
 	        	</div>
 	        	<div class="clear"></div>
