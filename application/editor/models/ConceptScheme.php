@@ -423,18 +423,12 @@ class Editor_Models_ConceptScheme extends Api_Models_Concept
 	 * Blank code can be passed for template uri.
 	 *
 	 * @param string $uriCode
-	 * @param string $uriBase optional
+	 * @param string $uriBase
 	 */
-	public static function buildUri($uriCode, $uriBase = '')
+	public static function buildUri($uriCode, $uriBase)
 	{
 		if (empty($uriBase)) {
-			$editorOptions = OpenSKOS_Application_BootstrapAccess::getOption('editor');
-			if (isset($editorOptions['conceptSchemesDefaultBaseUri'])) {
-				return $editorOptions['conceptSchemesDefaultBaseUri'] . $uriCode;
-			} else {
-				//!TODO is there any backup uri if no conceptSchemesDefaultBaseUri is provided.
-				return $uriCode;
-			}
+			throw new Exception('Must provide uri base.');
 		} else {
 			if (substr($uriBase, -1) != '/') {
 				$uriBase .= '/';

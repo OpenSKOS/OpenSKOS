@@ -38,6 +38,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`collection` (
   `license_url` VARCHAR(255) NULL DEFAULT NULL ,
   `OAI_baseURL` TEXT NULL DEFAULT NULL ,
   `allow_oai` ENUM('Y','N') NOT NULL DEFAULT 'Y' ,
+  `conceptsBaseUrl` VARCHAR(255) NULL DEFAULT NULL
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_collection` (`code` ASC, `tenant` ASC) ,
   INDEX `fk_collection_tenant` (`tenant` ASC) ,

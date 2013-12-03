@@ -36,11 +36,18 @@ var EditorConceptScheme = new Class({
 		Editor.Relations.enableRelationLinks(true);
 		*/
 		
+		this.bindCollectionChange();
 		this.bindAutoUriCodeGeneration();
 		this.bindTabsHover();
 		this.showLanguageLayer();
+		this.refreshConceptsBaseUrl();
 		
 		$$('input[name^=dcterms_title]').pop().focus();
+	},
+	bindCollectionChange: function () {
+		$(document.body).addEvent('change:relay(select[name=collection])', function (e) {
+			Editor.ConceptScheme.refreshConceptsBaseUrl();
+		});
 	},
 	bindAutoUriCodeGeneration: function () {
 		$(document.body).addEvent('keyup:relay(input[name^=dcterms_title])', function (e) {
@@ -65,5 +72,16 @@ var EditorConceptScheme = new Class({
 			valueToUse = valueToUse.replace(/[^(\d|\w)]+/gi, '');
 			$('uriCode').set('value', valueToUse);
 		}
+	},
+	refreshConceptsBaseUrl: function () {
+		var collectionId = $$('select[name=collection]').pop().get('value');
+		new Request.JSON({
+			url: BASE_URL + "/editor/collections/get-concepts-base-url", 
+			method: 'post',
+			data: {id: collectionId},
+			onSuccess: function(result, text) {
+				$$('input[name=uriBase]').pop().set('value', result.result);
+			}
+		}).send();
 	}
 });

@@ -292,12 +292,11 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		$this->buildMappingProperties();
 		
 		if ($this->_isCreate) {
-			$availableBaseUris = self::getAvailableBaseUris();
 			$this->addElement('select', 'baseUri', array(
 					'label' => 'Base URI:',
-					'multiOptions' => array_combine($availableBaseUris, $availableBaseUris),
 					'decorators' => array('ViewHelper', 'Label')
 			));
+			$this->getElement('baseUri')->setRegisterInArrayValidator(false);
 			
 			$this->addElement('hidden', 'hiddenBr1', array(
 					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
@@ -368,42 +367,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		}
 		
 		return $this;
-	}
-	
-	/**
-	 * Gets available base uris from configuration and existing ones.
-	 * 
-	 * @return array
-	 */
-	public static function getAvailableBaseUris() 
-	{
-		// Get uris from config
-		$availableBaseUris = array();
-		$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-		if (isset($editorOptions['conceptsBaseUris'])) {
-			$availableBaseUris = array_merge($availableBaseUris, $editorOptions['conceptsBaseUris']);
-		}
-		
-		// Get already used base uris from solr (used for schemes)
-		$conceptSchemes = Editor_Models_ApiClient::factory()->getConceptSchemes();
-		foreach ($conceptSchemes as $conceptScheme) {
-			$availableBaseUris[] = substr($conceptScheme['uri'], 0, strrpos($conceptScheme['uri'], '/') + 1);
-		}
-		
-		$availableBaseUris = array_unique($availableBaseUris);
-		
-		// Backup if there is not any available url at all.
-		if (empty($availableBaseUris)) {
-			$serverUrlHelper = new Zend_View_Helper_ServerUrl();
-			$urlHelper = new Zend_View_Helper_Url();
-			$apiUrl = $serverUrlHelper->serverUrl($urlHelper->url(array(
-					'module' => 'api',
-					'controller' => 'find-concepts'
-			), null, true));
-			$availableBaseUris[] = $apiUrl . '?q=notation:';
-		}
-		
-		return $availableBaseUris;
 	}
 	
 	public static function getHelperFields ()

@@ -76,6 +76,7 @@ EditorSearch = new Class({
 			this.searchForm.getElement('[name=searchText]').addEvent('keyup', this.delayedSearch);
 			this.searchForm.getElements('[name=truncate]').addEvent('change', this.search);
 			this.searchForm.addEvent('change:relay([name="conceptScheme[]"])', this.delayedSearch);
+			this.searchForm.addEvent('change:relay([name="allowedConceptScheme[]"])', this.delayedSearch);
 			if (this.searchForm.getElement('[name="searchProfileId"]')) {
 				this.searchForm.getElements('[name="searchProfileId"]').addEvent('change', this.search);
 			}
@@ -83,6 +84,7 @@ EditorSearch = new Class({
 			this.searchForm.getElement('[name=searchText]').removeEvent('keyup', this.delayedSearch);
 			this.searchForm.getElements('[name=truncate]').removeEvent('change', this.search);
 			this.searchForm.getElements('[name="conceptScheme[]"]').removeEvent('change', this.delayedSearch);
+			this.searchForm.getElements('[name="allowedConceptScheme[]"]').removeEvent('change', this.delayedSearch);
 			if (this.searchForm.getElement('[name="searchProfileId"]')) {
 				this.searchForm.getElements('[name="searchProfileId"]').removeEvent('change', this.search);
 			}
