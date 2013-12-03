@@ -22,8 +22,6 @@ editor.languages.nl="Dutch"
 editor.languages.en="English"
 
 ; Concepts and Concept schemes uri configuration
-editor.conceptsBaseUris[] = "http://data.beeldengeluid.nl/gtaa/"
-editor.conceptsBaseUris[] = "http://data.beeldengeluid.nl/nongtaa/"
 editor.conceptSchemesDefaultBaseUri="http://data.beeldengeluid.nl/gtaa/"
 
 ; Concept scheme icons configuration
