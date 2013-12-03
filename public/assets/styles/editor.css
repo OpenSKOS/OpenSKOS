@@ -256,8 +256,10 @@ div#content {
   width: 9px;
 }
 
-/* line 214, src/sass/editor.scss */
-#left-top-panel #conceptScheme-element, #AdvancedSearchOptions #conceptScheme-element {
+/* line 215, src/sass/editor.scss */
+#left-top-panel #conceptScheme-element,
+#left-top-panel #allowedConceptScheme-element, #AdvancedSearchOptions #conceptScheme-element,
+#AdvancedSearchOptions #allowedConceptScheme-element {
   background-color: #fff;
   height: 96px;
   width: 90%;
@@ -266,37 +268,37 @@ div#content {
   margin-bottom: 14px;
 }
 
-/* line 224, src/sass/editor.scss */
+/* line 225, src/sass/editor.scss */
 #left-top-panel {
   background: url("../images/left-top-panel.png") #ebebeb no-repeat right bottom;
   border-top: solid 1px #fff;
   border-bottom: solid 1px #b8b8b8;
 }
-/* line 230, src/sass/editor.scss */
+/* line 231, src/sass/editor.scss */
 #left-top-panel .inner-panel {
   padding: 13px 20px 20px 20px;
 }
-/* line 233, src/sass/editor.scss */
+/* line 234, src/sass/editor.scss */
 #left-top-panel #lefttoppanel {
   position: relative;
 }
-/* line 237, src/sass/editor.scss */
+/* line 238, src/sass/editor.scss */
 #left-top-panel form,
 #left-top-panel .zend_form {
   margin: 0px;
   padding: 0px;
   border: 0px;
 }
-/* line 242, src/sass/editor.scss */
+/* line 243, src/sass/editor.scss */
 #left-top-panel #searchText-label, #left-top-panel #start-element, #left-top-panel #start-label, #left-top-panel #rows-label, #left-top-panel #rows-element, #left-top-panel #user-label, #left-top-panel #user-element, #left-top-panel #searchButton-element, #left-top-panel #searchButton-label {
   display: none;
 }
-/* line 245, src/sass/editor.scss */
+/* line 246, src/sass/editor.scss */
 #left-top-panel #searchText-element {
   margin: 0px 0px 8px 0px;
   display: inline;
 }
-/* line 248, src/sass/editor.scss */
+/* line 249, src/sass/editor.scss */
 #left-top-panel #searchText-element input {
   width: 222px;
   height: 22px;
@@ -305,28 +307,30 @@ div#content {
   padding-right: 24px;
   margin-bottom: 9px;
 }
-/* line 257, src/sass/editor.scss */
-#left-top-panel #conceptScheme-label {
+/* line 259, src/sass/editor.scss */
+#left-top-panel #conceptScheme-label,
+#left-top-panel #allowedConceptScheme-label {
   float: left;
   padding-top: 5px;
   padding-right: 5px;
 }
-/* line 262, src/sass/editor.scss */
-#left-top-panel #conceptScheme-element {
+/* line 265, src/sass/editor.scss */
+#left-top-panel #conceptScheme-element,
+#left-top-panel #allowedConceptScheme-element {
   margin-left: 0px;
   width: 255px;
 }
-/* line 266, src/sass/editor.scss */
+/* line 269, src/sass/editor.scss */
 #left-top-panel #searchProfileId-element {
   margin-left: 0px;
 }
-/* line 268, src/sass/editor.scss */
+/* line 271, src/sass/editor.scss */
 #left-top-panel #searchProfileId-element select {
   width: 255px;
   visibility: visible !important;
   /* Fix for squeezbox visibility hidden for selects */
 }
-/* line 273, src/sass/editor.scss */
+/* line 276, src/sass/editor.scss */
 #left-top-panel a#advanced-options-link {
   background: url("../images/show-advanced-search-options-2.png") no-repeat center center;
   position: absolute;
@@ -337,31 +341,31 @@ div#content {
   height: 16px;
 }
 
-/* line 285, src/sass/editor.scss */
+/* line 288, src/sass/editor.scss */
 #left-bottom-panel {
   overflow-y: scroll;
 }
-/* line 287, src/sass/editor.scss */
+/* line 290, src/sass/editor.scss */
 #left-bottom-panel h2 {
   margin: 0 0 7px 0;
   font-size: 1em;
 }
-/* line 291, src/sass/editor.scss */
+/* line 294, src/sass/editor.scss */
 #left-bottom-panel .actions {
   margin-bottom: 10px;
 }
-/* line 293, src/sass/editor.scss */
+/* line 296, src/sass/editor.scss */
 #left-bottom-panel .actions button {
   margin-top: 3px;
 }
 
-/* line 299, src/sass/editor.scss */
+/* line 302, src/sass/editor.scss */
 #central-panel {
   float: left;
   overflow: auto;
 }
 
-/* line 304, src/sass/editor.scss */
+/* line 307, src/sass/editor.scss */
 #right-panel {
   float: right;
   width: 300px !important;
@@ -370,24 +374,24 @@ div#content {
   overflow: auto;
 }
 
-/* line 316, src/sass/editor.scss */
+/* line 319, src/sass/editor.scss */
 .template {
   display: none !important;
 }
 
 /* Search results */
-/* line 321, src/sass/editor.scss */
+/* line 324, src/sass/editor.scss */
 .search-results {
   font-size: 13px;
   padding: 8px 0px 0px 6px;
 }
 
-/* line 326, src/sass/editor.scss */
+/* line 329, src/sass/editor.scss */
 a.more-results {
   float: right;
   display: none;
 }
-/* line 327, src/sass/editor.scss */
+/* line 330, src/sass/editor.scss */
 a.more-results margin {
   top: 10px;
   right: 6px;
@@ -395,35 +399,35 @@ a.more-results margin {
 }
 
 /* Right panels */
-/* line 337, src/sass/editor.scss */
+/* line 340, src/sass/editor.scss */
 .right-panel-contents {
   padding: 0px 0px 0px 12px;
 }
 
-/* line 341, src/sass/editor.scss */
+/* line 344, src/sass/editor.scss */
 .right-panel-tab-links {
   border-bottom: 1px solid #ccc;
   margin-bottom: 10px;
 }
 
-/* line 346, src/sass/editor.scss */
+/* line 349, src/sass/editor.scss */
 .right-panel-tab-links .tab-links li {
   float: left;
 }
 
-/* line 351, src/sass/editor.scss */
+/* line 354, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-/* line 355, src/sass/editor.scss */
+/* line 358, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li {
   float: left;
   width: 50%;
   height: 28px;
 }
-/* line 359, src/sass/editor.scss */
+/* line 362, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a {
   color: #333;
   display: block;
@@ -437,7 +441,7 @@ div#right-panel-tab-links ul.tab-links li a {
   border-top: 1px solid #fff;
   border-bottom: 1px solid #666;
 }
-/* line 374, src/sass/editor.scss */
+/* line 377, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a:HOVER {
   text-decoration: none;
   background-color: #fff;
@@ -445,23 +449,23 @@ div#right-panel-tab-links ul.tab-links li a:HOVER {
   border-bottom: none;
   padding-bottom: 1px;
 }
-/* line 383, src/sass/editor.scss */
+/* line 386, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a#tab-history {
   background-image: url("../images/history-tab.png");
 }
-/* line 386, src/sass/editor.scss */
+/* line 389, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a#tab-history:HOVER {
   background-image: url("../images/history-tab-active.png");
 }
-/* line 389, src/sass/editor.scss */
+/* line 392, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a#tab-selection {
   background-image: url("../images/selection-tab.png");
 }
-/* line 392, src/sass/editor.scss */
+/* line 395, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li a#tab-selection:HOVER {
   background-image: url("../images/selection-tab-active.png");
 }
-/* line 396, src/sass/editor.scss */
+/* line 399, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li.active a {
   border-top: 1px solid #666;
   border-right: 1px solid #666;
@@ -470,7 +474,7 @@ div#right-panel-tab-links ul.tab-links li.active a {
   background-color: #fff;
   padding-bottom: 1px;
 }
-/* line 406, src/sass/editor.scss */
+/* line 409, src/sass/editor.scss */
 div#right-panel-tab-links ul.tab-links li:last-child.active a {
   border-top: 1px solid #666;
   border-left: 1px solid #666;
@@ -480,13 +484,13 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   padding-bottom: 1px;
 }
 
-/* line 419, src/sass/editor.scss */
+/* line 422, src/sass/editor.scss */
 .right-panel-actions {
   display: block;
   padding-top: 8px;
   padding-bottom: 15px;
 }
-/* line 423, src/sass/editor.scss */
+/* line 426, src/sass/editor.scss */
 .right-panel-actions a {
   font-size: 80%;
   padding-left: 25px;
@@ -494,37 +498,37 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   background-repeat: no-repeat;
   background-position: 5px center;
 }
-/* line 430, src/sass/editor.scss */
+/* line 433, src/sass/editor.scss */
 .right-panel-actions a:HOVER {
   background-image: url("../images/remove-active.png");
 }
-/* line 433, src/sass/editor.scss */
+/* line 436, src/sass/editor.scss */
 .right-panel-actions button {
   margin-top: 3px;
 }
 
 /* Concept View */
-/* line 441, src/sass/editor.scss */
+/* line 444, src/sass/editor.scss */
 #concept-view,
 #concept-edit-form,
 #concept-scheme-edit-form {
   padding: 11px 28px;
 }
-/* line 443, src/sass/editor.scss */
+/* line 446, src/sass/editor.scss */
 #concept-view h2,
 #concept-edit-form h2,
 #concept-scheme-edit-form h2 {
   padding-left: 6px;
   color: #6b1750;
 }
-/* line 447, src/sass/editor.scss */
+/* line 450, src/sass/editor.scss */
 #concept-view ul,
 #concept-edit-form ul,
 #concept-scheme-edit-form ul {
   list-style-type: none !important;
   margin: 0px;
 }
-/* line 451, src/sass/editor.scss */
+/* line 454, src/sass/editor.scss */
 #concept-view select,
 #concept-edit-form select,
 #concept-scheme-edit-form select {
@@ -532,12 +536,12 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   /* Fix for squeezbox visibility hidden for selects */
 }
 
-/* line 456, src/sass/editor.scss */
+/* line 459, src/sass/editor.scss */
 #concept-view {
   position: relative;
 }
 
-/* line 461, src/sass/editor.scss */
+/* line 464, src/sass/editor.scss */
 #concept-edit-header,
 #concept-header {
   padding: 10px 4px 4px 20px;
@@ -545,35 +549,35 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   margin-bottom: 22px;
 }
 
-/* line 467, src/sass/editor.scss */
+/* line 470, src/sass/editor.scss */
 #concept-checked, #concept-status {
   width: 200px;
   float: left;
   clear: both;
 }
 
-/* line 473, src/sass/editor.scss */
+/* line 476, src/sass/editor.scss */
 #concept-action {
   float: right;
 }
 
-/* line 477, src/sass/editor.scss */
+/* line 480, src/sass/editor.scss */
 #concept-checked span, #concept-status span {
   font-weight: bold;
 }
 
-/* line 482, src/sass/editor.scss */
+/* line 485, src/sass/editor.scss */
 #concept-view-scheme-tabs,
 #concept-view-language-tabs {
   background-color: #eeeeee;
 }
 
-/* line 486, src/sass/editor.scss */
+/* line 489, src/sass/editor.scss */
 #concept-view-scheme-tabs {
   margin-bottom: 14px;
 }
 
-/* line 491, src/sass/editor.scss */
+/* line 494, src/sass/editor.scss */
 #tab-links-language,
 #tab-links-scheme {
   padding: 6px 0px 0px 0px;
@@ -584,13 +588,13 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   border-left: 1px solid #bababa;
   border-bottom: 1px solid #666;
 }
-/* line 502, src/sass/editor.scss */
+/* line 505, src/sass/editor.scss */
 #tab-links-language .concept-tab-link,
 #tab-links-scheme .concept-tab-link {
   display: inline;
   margin-right: -4px !important;
 }
-/* line 508, src/sass/editor.scss */
+/* line 511, src/sass/editor.scss */
 #tab-links-language .concept-tab-link a,
 #tab-links-scheme .concept-tab-link a {
   border-right: 1px solid #bababa;
@@ -598,7 +602,7 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   color: #333;
   text-decoration: none;
 }
-/* line 519, src/sass/editor.scss */
+/* line 522, src/sass/editor.scss */
 #tab-links-language .concept-tab-link a:hover,
 #tab-links-language .concept-tab-link.active a,
 #tab-links-scheme .concept-tab-link a:hover,
@@ -611,7 +615,7 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   background-color: #fff;
 }
 
-/* line 533, src/sass/editor.scss */
+/* line 536, src/sass/editor.scss */
 .concept-form-left,
 #concept-content-left,
 #concept-edit-left {
@@ -619,7 +623,7 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   float: left;
 }
 
-/* line 540, src/sass/editor.scss */
+/* line 543, src/sass/editor.scss */
 .concept-form-right,
 #concept-content-right,
 #concept-edit-right {
@@ -627,33 +631,33 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   float: right;
 }
 
-/* line 544, src/sass/editor.scss */
+/* line 547, src/sass/editor.scss */
 #concept-content-right {
   margin-bottom: 80px;
   position: relative;
   top: 0px;
   left: 0px;
 }
-/* line 549, src/sass/editor.scss */
+/* line 552, src/sass/editor.scss */
 #concept-content-right .concept-scheme-uri, #concept-content-right .concept-scheme-notation, #concept-content-right .concept-scheme-istop {
   position: absolute;
   left: 0px;
   right: 0px;
 }
-/* line 554, src/sass/editor.scss */
+/* line 557, src/sass/editor.scss */
 #concept-content-right .concept-scheme-uri {
   bottom: -30px;
 }
-/* line 557, src/sass/editor.scss */
+/* line 560, src/sass/editor.scss */
 #concept-content-right .concept-scheme-notation {
   bottom: -48px;
 }
-/* line 560, src/sass/editor.scss */
+/* line 563, src/sass/editor.scss */
 #concept-content-right .concept-scheme-istop {
   bottom: -76px;
 }
 
-/* line 567, src/sass/editor.scss */
+/* line 570, src/sass/editor.scss */
 .concept-scheme-uri,
 .concept-scheme-notation,
 .concept-scheme-istop {
@@ -662,53 +666,53 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   padding-right: 14px;
   line-height: 1.5em;
 }
-/* line 574, src/sass/editor.scss */
+/* line 577, src/sass/editor.scss */
 .concept-scheme-uri span,
 .concept-scheme-notation span,
 .concept-scheme-istop span {
   font-weight: 600;
 }
 
-/* line 579, src/sass/editor.scss */
+/* line 582, src/sass/editor.scss */
 .concept-scheme-uri {
   padding-top: 10px;
 }
 
-/* line 583, src/sass/editor.scss */
+/* line 586, src/sass/editor.scss */
 .concept-scheme-istop {
   padding-bottom: 10px;
 }
 
-/* line 587, src/sass/editor.scss */
+/* line 590, src/sass/editor.scss */
 .concept-scheme-mappings {
   padding-top: 16px;
 }
 
-/* line 591, src/sass/editor.scss */
+/* line 594, src/sass/editor.scss */
 #concept-footer {
   padding: 12px;
   background-color: #ebebeb;
   margin-top: 22px;
   margin-bottom: 22px;
 }
-/* line 598, src/sass/editor.scss */
+/* line 601, src/sass/editor.scss */
 #concept-footer div.section {
   display: inline-block;
   width: 30%;
   line-height: 10px;
   padding-left: 1%;
 }
-/* line 603, src/sass/editor.scss */
+/* line 606, src/sass/editor.scss */
 #concept-footer div.section br {
   line-height: 20px;
 }
-/* line 607, src/sass/editor.scss */
+/* line 610, src/sass/editor.scss */
 #concept-footer div#modified {
   border-left: 1px solid #bababa;
   border-right: 1px solid #bababa;
 }
 
-/* line 614, src/sass/editor.scss */
+/* line 617, src/sass/editor.scss */
 .concept-item-title,
 legend {
   font-size: 1.1em !important;
@@ -716,65 +720,65 @@ legend {
   padding: 0px 0px 16px 0px !important;
 }
 
-/* line 621, src/sass/editor.scss */
+/* line 624, src/sass/editor.scss */
 .concept-item-subtitle,
 .concept-complex-title {
   font-size: 1em !important;
   font-weight: bold;
   margin-bottom: 10px;
 }
-/* line 625, src/sass/editor.scss */
+/* line 628, src/sass/editor.scss */
 .concept-item-subtitle .relations-count,
 .concept-complex-title .relations-count {
   color: #999;
   font-size: 0.8em;
 }
 
-/* line 631, src/sass/editor.scss */
+/* line 634, src/sass/editor.scss */
 .concept-left {
   padding: 24px 0px;
   border-bottom: 1px solid #dddddd;
 }
-/* line 634, src/sass/editor.scss */
+/* line 637, src/sass/editor.scss */
 .concept-left ul {
   padding: 0px;
   margin: 0px;
 }
 
-/* line 641, src/sass/editor.scss */
+/* line 644, src/sass/editor.scss */
 .concept-lexical-field,
 .concept-document-field {
   font-weight: 600;
   line-height: 1.5em;
 }
 
-/* line 646, src/sass/editor.scss */
+/* line 649, src/sass/editor.scss */
 .concept-lexical-field {
   float: left;
   width: 140px;
 }
 
-/* line 651, src/sass/editor.scss */
+/* line 654, src/sass/editor.scss */
 .concept-lexical-values {
   float: left;
 }
 
-/* line 655, src/sass/editor.scss */
+/* line 658, src/sass/editor.scss */
 .concept-document-values {
   margin-bottom: 12px;
 }
 
-/* line 659, src/sass/editor.scss */
+/* line 662, src/sass/editor.scss */
 .concept-scheme-header {
   background-color: #eeeeee;
 }
 
-/* line 663, src/sass/editor.scss */
+/* line 666, src/sass/editor.scss */
 .concept-scheme-relations {
   margin-top: 22px;
 }
 
-/* line 667, src/sass/editor.scss */
+/* line 670, src/sass/editor.scss */
 .concept-scheme-relation-grid {
   padding-left: 22px;
   padding-bottom: 16px;
@@ -782,47 +786,47 @@ legend {
   border-bottom: 1px solid #dddddd;
   background: url("../images/related-icon.png") no-repeat;
 }
-/* line 673, src/sass/editor.scss */
+/* line 676, src/sass/editor.scss */
 .concept-scheme-relation-grid ul {
   padding: 0px;
   margin: 0px;
 }
 
-/* line 680, src/sass/editor.scss */
+/* line 683, src/sass/editor.scss */
 .concept-scheme-relation-grid.broader,
 .concept-scheme-relation-grid.broadMatch {
   background: url("../images/broader-arrow.png") no-repeat;
 }
 
-/* line 685, src/sass/editor.scss */
+/* line 688, src/sass/editor.scss */
 .concept-scheme-relation-grid.narrower,
 .concept-scheme-relation-grid.narrowMatch {
   background: url("../images/narrower-arrow.png") no-repeat;
 }
 
-/* line 838, src/sass/editor.scss */
+/* line 841, src/sass/editor.scss */
 span.concept-link-header {
   display: inline-block;
 }
-/* line 840, src/sass/editor.scss */
+/* line 843, src/sass/editor.scss */
 span.concept-link-header img {
   vertical-align: middle;
   margin-left: 2px;
 }
 
-/* line 846, src/sass/editor.scss */
+/* line 849, src/sass/editor.scss */
 ul.concepts-list {
   font-size: 13px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 851, src/sass/editor.scss */
+/* line 854, src/sass/editor.scss */
 ul.concepts-list li {
   clear: both;
   overflow: hidden;
 }
-/* line 854, src/sass/editor.scss */
+/* line 857, src/sass/editor.scss */
 ul.concepts-list li > span, ul.concepts-list li a {
   overflow: hidden;
   display: block;
@@ -832,54 +836,54 @@ ul.concepts-list li > span, ul.concepts-list li a {
   padding: 2px;
   margin-bottom: 1px;
 }
-/* line 865, src/sass/editor.scss */
+/* line 868, src/sass/editor.scss */
 ul.concepts-list li:nth-child(odd) > span, ul.concepts-list li:nth-child(odd) a {
   background-color: #f7f7f7;
 }
-/* line 870, src/sass/editor.scss */
+/* line 873, src/sass/editor.scss */
 ul.concepts-list li.active > span, ul.concepts-list li.active a {
   background-color: #eacce1;
   color: #9a0057;
 }
 
-/* line 693, src/sass/editor.scss */
+/* line 696, src/sass/editor.scss */
 div#search-results ul.concepts-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-/* line 698, src/sass/editor.scss */
+/* line 701, src/sass/editor.scss */
 div#search-results ul.concepts-list .concept-link .uuid {
   display: none;
 }
-/* line 701, src/sass/editor.scss */
+/* line 704, src/sass/editor.scss */
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-/* line 704, src/sass/editor.scss */
+/* line 707, src/sass/editor.scss */
 div#search-results ul.concepts-list .concept-link.status-expired .concept-link-content a {
   color: red;
 }
-/* line 708, src/sass/editor.scss */
+/* line 711, src/sass/editor.scss */
 div#search-results ul.concepts-list span.concept-link-header {
   margin-right: 1px;
   width: 54px;
   overflow: hidden;
 }
-/* line 716, src/sass/editor.scss */
+/* line 719, src/sass/editor.scss */
 div#search-results ul.concepts-list span.concept-link-content {
   width: 131px;
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 720, src/sass/editor.scss */
+/* line 723, src/sass/editor.scss */
 div#search-results ul.concepts-list span.concept-link-content a {
   width: 98%;
 }
-/* line 723, src/sass/editor.scss */
+/* line 726, src/sass/editor.scss */
 div#search-results ul.concepts-list span.concept-link-content a:hover {
   color: #bb1a88;
 }
-/* line 728, src/sass/editor.scss */
+/* line 731, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-to-selection, div#search-results ul.concepts-list a.add-relation, div#search-results ul.concepts-list a.remove-link, div#search-results ul.concepts-list a.show-narrower-relations, div#search-results ul.concepts-list span.show-narrower-relations-loading, div#search-results ul.concepts-list span.show-narrower-relations-empty, div#search-results ul.concepts-list a.hide-narrower-relations {
   display: inline-block;
   width: 22px;
@@ -889,35 +893,35 @@ div#search-results ul.concepts-list a.add-to-selection, div#search-results ul.co
   background-position: center center;
   margin-bottom: 1px;
 }
-/* line 736, src/sass/editor.scss */
+/* line 739, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-to-selection span, div#search-results ul.concepts-list a.add-relation span, div#search-results ul.concepts-list a.remove-link span, div#search-results ul.concepts-list a.show-narrower-relations span, div#search-results ul.concepts-list span.show-narrower-relations-loading span, div#search-results ul.concepts-list span.show-narrower-relations-empty span, div#search-results ul.concepts-list a.hide-narrower-relations span {
   display: none;
 }
-/* line 740, src/sass/editor.scss */
+/* line 743, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-to-selection {
   background-image: url("../images/voegtoeaanselectie.png");
 }
-/* line 743, src/sass/editor.scss */
+/* line 746, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-to-selection:HOVER {
   background-image: url("../images/voegtoeaanselectie_active.png");
 }
-/* line 746, src/sass/editor.scss */
+/* line 749, src/sass/editor.scss */
 div#search-results ul.concepts-list a.remove-link {
   background-image: url("../images/verwijderuitselectie.png");
 }
-/* line 749, src/sass/editor.scss */
+/* line 752, src/sass/editor.scss */
 div#search-results ul.concepts-list a.remove-link:HOVER {
   background-image: url("../images/verwijderuitselectie_active.png");
 }
-/* line 752, src/sass/editor.scss */
+/* line 755, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-relation {
   background-image: url("../images/relations.png");
 }
-/* line 755, src/sass/editor.scss */
+/* line 758, src/sass/editor.scss */
 div#search-results ul.concepts-list a.add-relation:HOVER {
   background-image: url("../images/relations_active.png");
 }
-/* line 761, src/sass/editor.scss */
+/* line 764, src/sass/editor.scss */
 div#search-results ul.concepts-list a.show-narrower-relations,
 div#search-results ul.concepts-list a.hide-narrower-relations,
 div#search-results ul.concepts-list span.show-narrower-relations-loading,
@@ -925,32 +929,32 @@ div#search-results ul.concepts-list span.show-narrower-relations-empty {
   width: 16px !important;
   background-position: 5px 7px !important;
 }
-/* line 765, src/sass/editor.scss */
+/* line 768, src/sass/editor.scss */
 div#search-results ul.concepts-list a.show-narrower-relations {
   background-image: url("../images/plus.png");
 }
-/* line 768, src/sass/editor.scss */
+/* line 771, src/sass/editor.scss */
 div#search-results ul.concepts-list span.show-narrower-relations-loading {
   background-image: url("../images/spinner.gif");
 }
-/* line 771, src/sass/editor.scss */
+/* line 774, src/sass/editor.scss */
 div#search-results ul.concepts-list span.show-narrower-relations-empty {
   background-image: url("../images/plus-empty.png");
 }
-/* line 774, src/sass/editor.scss */
+/* line 777, src/sass/editor.scss */
 div#search-results ul.concepts-list a.hide-narrower-relations {
   background-image: url("../images/minus.png");
 }
-/* line 778, src/sass/editor.scss */
+/* line 781, src/sass/editor.scss */
 div#search-results ul.concepts-list ul.narrower-relations {
   padding: 0px;
   list-style-type: none;
 }
-/* line 781, src/sass/editor.scss */
+/* line 784, src/sass/editor.scss */
 div#search-results ul.concepts-list ul.narrower-relations li:last-child {
   border-bottom: 1px solid #bababa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul span.show-narrower-relations-loading,
@@ -958,19 +962,19 @@ div#search-results ul.concepts-list > li > ul span.show-narrower-relations-empty
   width: 26px !important;
   background-position: 15px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul span.concept-link-content {
   width: 121px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul li > span, div#search-results ul.concepts-list > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul span.show-narrower-relations-loading,
@@ -978,19 +982,19 @@ div#search-results ul.concepts-list > li > ul > li > ul span.show-narrower-relat
   width: 36px !important;
   background-position: 25px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul span.concept-link-content {
   width: 111px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul a {
   background-color: #dbdbdb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -998,19 +1002,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul span.show-narr
   width: 46px !important;
   background-position: 35px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul span.concept-link-content {
   width: 101px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul a {
   background-color: #cbcbcb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1018,19 +1022,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul span
   width: 56px !important;
   background-position: 45px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 91px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1038,19 +1042,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 66px !important;
   background-position: 55px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 81px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1058,19 +1062,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 76px !important;
   background-position: 65px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 71px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1078,19 +1082,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 86px !important;
   background-position: 75px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 61px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #d5d5d5;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1098,19 +1102,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 96px !important;
   background-position: 85px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 51px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #c3c3c3;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1118,19 +1122,19 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 106px !important;
   background-position: 95px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 41px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1138,57 +1142,57 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 116px !important;
   background-position: 105px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 31px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
 
-/* line 693, src/sass/editor.scss */
+/* line 696, src/sass/editor.scss */
 ul#selection-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-/* line 698, src/sass/editor.scss */
+/* line 701, src/sass/editor.scss */
 ul#selection-list .concept-link .uuid {
   display: none;
 }
-/* line 701, src/sass/editor.scss */
+/* line 704, src/sass/editor.scss */
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-/* line 704, src/sass/editor.scss */
+/* line 707, src/sass/editor.scss */
 ul#selection-list .concept-link.status-expired .concept-link-content a {
   color: red;
 }
-/* line 708, src/sass/editor.scss */
+/* line 711, src/sass/editor.scss */
 ul#selection-list span.concept-link-header {
   margin-right: 1px;
   width: 54px;
   overflow: hidden;
 }
-/* line 716, src/sass/editor.scss */
+/* line 719, src/sass/editor.scss */
 ul#selection-list span.concept-link-content {
   width: 146px;
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 720, src/sass/editor.scss */
+/* line 723, src/sass/editor.scss */
 ul#selection-list span.concept-link-content a {
   width: 98%;
 }
-/* line 723, src/sass/editor.scss */
+/* line 726, src/sass/editor.scss */
 ul#selection-list span.concept-link-content a:hover {
   color: #bb1a88;
 }
-/* line 728, src/sass/editor.scss */
+/* line 731, src/sass/editor.scss */
 ul#selection-list a.add-to-selection, ul#selection-list a.add-relation, ul#selection-list a.remove-link, ul#selection-list a.show-narrower-relations, ul#selection-list span.show-narrower-relations-loading, ul#selection-list span.show-narrower-relations-empty, ul#selection-list a.hide-narrower-relations {
   display: inline-block;
   width: 22px;
@@ -1198,35 +1202,35 @@ ul#selection-list a.add-to-selection, ul#selection-list a.add-relation, ul#selec
   background-position: center center;
   margin-bottom: 1px;
 }
-/* line 736, src/sass/editor.scss */
+/* line 739, src/sass/editor.scss */
 ul#selection-list a.add-to-selection span, ul#selection-list a.add-relation span, ul#selection-list a.remove-link span, ul#selection-list a.show-narrower-relations span, ul#selection-list span.show-narrower-relations-loading span, ul#selection-list span.show-narrower-relations-empty span, ul#selection-list a.hide-narrower-relations span {
   display: none;
 }
-/* line 740, src/sass/editor.scss */
+/* line 743, src/sass/editor.scss */
 ul#selection-list a.add-to-selection {
   background-image: url("../images/voegtoeaanselectie.png");
 }
-/* line 743, src/sass/editor.scss */
+/* line 746, src/sass/editor.scss */
 ul#selection-list a.add-to-selection:HOVER {
   background-image: url("../images/voegtoeaanselectie_active.png");
 }
-/* line 746, src/sass/editor.scss */
+/* line 749, src/sass/editor.scss */
 ul#selection-list a.remove-link {
   background-image: url("../images/verwijderuitselectie.png");
 }
-/* line 749, src/sass/editor.scss */
+/* line 752, src/sass/editor.scss */
 ul#selection-list a.remove-link:HOVER {
   background-image: url("../images/verwijderuitselectie_active.png");
 }
-/* line 752, src/sass/editor.scss */
+/* line 755, src/sass/editor.scss */
 ul#selection-list a.add-relation {
   background-image: url("../images/relations.png");
 }
-/* line 755, src/sass/editor.scss */
+/* line 758, src/sass/editor.scss */
 ul#selection-list a.add-relation:HOVER {
   background-image: url("../images/relations_active.png");
 }
-/* line 761, src/sass/editor.scss */
+/* line 764, src/sass/editor.scss */
 ul#selection-list a.show-narrower-relations,
 ul#selection-list a.hide-narrower-relations,
 ul#selection-list span.show-narrower-relations-loading,
@@ -1234,32 +1238,32 @@ ul#selection-list span.show-narrower-relations-empty {
   width: 16px !important;
   background-position: 5px 7px !important;
 }
-/* line 765, src/sass/editor.scss */
+/* line 768, src/sass/editor.scss */
 ul#selection-list a.show-narrower-relations {
   background-image: url("../images/plus.png");
 }
-/* line 768, src/sass/editor.scss */
+/* line 771, src/sass/editor.scss */
 ul#selection-list span.show-narrower-relations-loading {
   background-image: url("../images/spinner.gif");
 }
-/* line 771, src/sass/editor.scss */
+/* line 774, src/sass/editor.scss */
 ul#selection-list span.show-narrower-relations-empty {
   background-image: url("../images/plus-empty.png");
 }
-/* line 774, src/sass/editor.scss */
+/* line 777, src/sass/editor.scss */
 ul#selection-list a.hide-narrower-relations {
   background-image: url("../images/minus.png");
 }
-/* line 778, src/sass/editor.scss */
+/* line 781, src/sass/editor.scss */
 ul#selection-list ul.narrower-relations {
   padding: 0px;
   list-style-type: none;
 }
-/* line 781, src/sass/editor.scss */
+/* line 784, src/sass/editor.scss */
 ul#selection-list ul.narrower-relations li:last-child {
   border-bottom: 1px solid #bababa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul span.show-narrower-relations-loading,
@@ -1267,19 +1271,19 @@ ul#selection-list > li > ul span.show-narrower-relations-empty {
   width: 26px !important;
   background-position: 15px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul span.concept-link-content {
   width: 136px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul li > span, ul#selection-list > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1287,19 +1291,19 @@ ul#selection-list > li > ul > li > ul span.show-narrower-relations-empty {
   width: 36px !important;
   background-position: 25px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul span.concept-link-content {
   width: 126px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul a {
   background-color: #dbdbdb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1307,19 +1311,19 @@ ul#selection-list > li > ul > li > ul > li > ul span.show-narrower-relations-emp
   width: 46px !important;
   background-position: 35px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul span.concept-link-content {
   width: 116px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul a {
   background-color: #cbcbcb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1327,19 +1331,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul span.show-narrower-rel
   width: 56px !important;
   background-position: 45px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 106px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1347,19 +1351,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul span.show-na
   width: 66px !important;
   background-position: 55px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 96px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1367,19 +1371,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul sp
   width: 76px !important;
   background-position: 65px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 86px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1387,19 +1391,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 86px !important;
   background-position: 75px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 76px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #d5d5d5;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1407,19 +1411,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 96px !important;
   background-position: 85px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 66px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #c3c3c3;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1427,19 +1431,19 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 106px !important;
   background-position: 95px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 56px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1447,57 +1451,57 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 116px !important;
   background-position: 105px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 46px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
 
-/* line 693, src/sass/editor.scss */
+/* line 696, src/sass/editor.scss */
 ul#history-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-/* line 698, src/sass/editor.scss */
+/* line 701, src/sass/editor.scss */
 ul#history-list .concept-link .uuid {
   display: none;
 }
-/* line 701, src/sass/editor.scss */
+/* line 704, src/sass/editor.scss */
 ul#history-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-/* line 704, src/sass/editor.scss */
+/* line 707, src/sass/editor.scss */
 ul#history-list .concept-link.status-expired .concept-link-content a {
   color: red;
 }
-/* line 708, src/sass/editor.scss */
+/* line 711, src/sass/editor.scss */
 ul#history-list span.concept-link-header {
   margin-right: 1px;
   width: 54px;
   overflow: hidden;
 }
-/* line 716, src/sass/editor.scss */
+/* line 719, src/sass/editor.scss */
 ul#history-list span.concept-link-content {
   width: 174px;
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 720, src/sass/editor.scss */
+/* line 723, src/sass/editor.scss */
 ul#history-list span.concept-link-content a {
   width: 98%;
 }
-/* line 723, src/sass/editor.scss */
+/* line 726, src/sass/editor.scss */
 ul#history-list span.concept-link-content a:hover {
   color: #bb1a88;
 }
-/* line 728, src/sass/editor.scss */
+/* line 731, src/sass/editor.scss */
 ul#history-list a.add-to-selection, ul#history-list a.add-relation, ul#history-list a.remove-link, ul#history-list a.show-narrower-relations, ul#history-list span.show-narrower-relations-loading, ul#history-list span.show-narrower-relations-empty, ul#history-list a.hide-narrower-relations {
   display: inline-block;
   width: 22px;
@@ -1507,35 +1511,35 @@ ul#history-list a.add-to-selection, ul#history-list a.add-relation, ul#history-l
   background-position: center center;
   margin-bottom: 1px;
 }
-/* line 736, src/sass/editor.scss */
+/* line 739, src/sass/editor.scss */
 ul#history-list a.add-to-selection span, ul#history-list a.add-relation span, ul#history-list a.remove-link span, ul#history-list a.show-narrower-relations span, ul#history-list span.show-narrower-relations-loading span, ul#history-list span.show-narrower-relations-empty span, ul#history-list a.hide-narrower-relations span {
   display: none;
 }
-/* line 740, src/sass/editor.scss */
+/* line 743, src/sass/editor.scss */
 ul#history-list a.add-to-selection {
   background-image: url("../images/voegtoeaanselectie.png");
 }
-/* line 743, src/sass/editor.scss */
+/* line 746, src/sass/editor.scss */
 ul#history-list a.add-to-selection:HOVER {
   background-image: url("../images/voegtoeaanselectie_active.png");
 }
-/* line 746, src/sass/editor.scss */
+/* line 749, src/sass/editor.scss */
 ul#history-list a.remove-link {
   background-image: url("../images/verwijderuitselectie.png");
 }
-/* line 749, src/sass/editor.scss */
+/* line 752, src/sass/editor.scss */
 ul#history-list a.remove-link:HOVER {
   background-image: url("../images/verwijderuitselectie_active.png");
 }
-/* line 752, src/sass/editor.scss */
+/* line 755, src/sass/editor.scss */
 ul#history-list a.add-relation {
   background-image: url("../images/relations.png");
 }
-/* line 755, src/sass/editor.scss */
+/* line 758, src/sass/editor.scss */
 ul#history-list a.add-relation:HOVER {
   background-image: url("../images/relations_active.png");
 }
-/* line 761, src/sass/editor.scss */
+/* line 764, src/sass/editor.scss */
 ul#history-list a.show-narrower-relations,
 ul#history-list a.hide-narrower-relations,
 ul#history-list span.show-narrower-relations-loading,
@@ -1543,32 +1547,32 @@ ul#history-list span.show-narrower-relations-empty {
   width: 16px !important;
   background-position: 5px 7px !important;
 }
-/* line 765, src/sass/editor.scss */
+/* line 768, src/sass/editor.scss */
 ul#history-list a.show-narrower-relations {
   background-image: url("../images/plus.png");
 }
-/* line 768, src/sass/editor.scss */
+/* line 771, src/sass/editor.scss */
 ul#history-list span.show-narrower-relations-loading {
   background-image: url("../images/spinner.gif");
 }
-/* line 771, src/sass/editor.scss */
+/* line 774, src/sass/editor.scss */
 ul#history-list span.show-narrower-relations-empty {
   background-image: url("../images/plus-empty.png");
 }
-/* line 774, src/sass/editor.scss */
+/* line 777, src/sass/editor.scss */
 ul#history-list a.hide-narrower-relations {
   background-image: url("../images/minus.png");
 }
-/* line 778, src/sass/editor.scss */
+/* line 781, src/sass/editor.scss */
 ul#history-list ul.narrower-relations {
   padding: 0px;
   list-style-type: none;
 }
-/* line 781, src/sass/editor.scss */
+/* line 784, src/sass/editor.scss */
 ul#history-list ul.narrower-relations li:last-child {
   border-bottom: 1px solid #bababa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul a.show-narrower-relations,
 ul#history-list > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul span.show-narrower-relations-loading,
@@ -1576,19 +1580,19 @@ ul#history-list > li > ul span.show-narrower-relations-empty {
   width: 26px !important;
   background-position: 15px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul span.concept-link-content {
   width: 164px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul li > span, ul#history-list > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1596,19 +1600,19 @@ ul#history-list > li > ul > li > ul span.show-narrower-relations-empty {
   width: 36px !important;
   background-position: 25px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul span.concept-link-content {
   width: 154px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul a {
   background-color: #dbdbdb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1616,19 +1620,19 @@ ul#history-list > li > ul > li > ul > li > ul span.show-narrower-relations-empty
   width: 46px !important;
   background-position: 35px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul span.concept-link-content {
   width: 144px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul a {
   background-color: #cbcbcb;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1636,19 +1640,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul span.show-narrower-relat
   width: 56px !important;
   background-position: 45px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 134px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1656,19 +1660,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narr
   width: 66px !important;
   background-position: 55px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 124px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1676,19 +1680,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span
   width: 76px !important;
   background-position: 65px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 114px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #ebeaea;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1696,19 +1700,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 86px !important;
   background-position: 75px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 104px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #d5d5d5;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1716,19 +1720,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 96px !important;
   background-position: 85px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 94px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #c3c3c3;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1736,19 +1740,19 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 106px !important;
   background-position: 95px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 84px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #b9b9b9;
 }
-/* line 823, src/sass/editor.scss */
+/* line 826, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.show-narrower-relations-loading,
@@ -1756,20 +1760,20 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 116px !important;
   background-position: 105px 7px !important;
 }
-/* line 827, src/sass/editor.scss */
+/* line 830, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content {
   width: 74px;
 }
-/* line 829, src/sass/editor.scss */
+/* line 832, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
-/* line 833, src/sass/editor.scss */
+/* line 836, src/sass/editor.scss */
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
   background-color: #aaaaaa;
 }
 
-/* line 892, src/sass/editor.scss */
+/* line 895, src/sass/editor.scss */
 #concept-edit-form form,
 #concept-edit-form .zend_form,
 #concept-scheme-edit-form form,
@@ -1778,56 +1782,56 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   padding: 0px;
   border: 0px;
 }
-/* line 897, src/sass/editor.scss */
+/* line 900, src/sass/editor.scss */
 #concept-edit-form div.errors,
 #concept-scheme-edit-form div.errors {
   margin-bottom: 16px;
 }
-/* line 899, src/sass/editor.scss */
+/* line 902, src/sass/editor.scss */
 #concept-edit-form div.errors ul,
 #concept-scheme-edit-form div.errors ul {
   padding: 0px 0px 16px 0px;
 }
-/* line 903, src/sass/editor.scss */
+/* line 906, src/sass/editor.scss */
 #concept-edit-form #concept-edit-header,
 #concept-scheme-edit-form #concept-edit-header {
   height: 62px;
 }
-/* line 906, src/sass/editor.scss */
+/* line 909, src/sass/editor.scss */
 #concept-edit-form #uuid-label,
 #concept-scheme-edit-form #uuid-label {
   display: none;
 }
-/* line 910, src/sass/editor.scss */
+/* line 913, src/sass/editor.scss */
 #concept-edit-form #status-label,
 #concept-edit-form #concept-edit-checked > label,
 #concept-scheme-edit-form #status-label,
 #concept-scheme-edit-form #concept-edit-checked > label {
   font-weight: bold;
 }
-/* line 914, src/sass/editor.scss */
+/* line 917, src/sass/editor.scss */
 #concept-edit-form #status-label,
 #concept-edit-form #concept-edit-status,
 #concept-scheme-edit-form #status-label,
 #concept-scheme-edit-form #concept-edit-status {
   display: inline !important;
 }
-/* line 917, src/sass/editor.scss */
+/* line 920, src/sass/editor.scss */
 #concept-edit-form #concept-edit-checked,
 #concept-scheme-edit-form #concept-edit-checked {
   display: block;
 }
-/* line 920, src/sass/editor.scss */
+/* line 923, src/sass/editor.scss */
 #concept-edit-form #concept-edit-action,
 #concept-scheme-edit-form #concept-edit-action {
   float: right;
 }
-/* line 923, src/sass/editor.scss */
+/* line 926, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs,
 #concept-scheme-edit-form #concept-edit-tabs {
   overflow: hidden;
 }
-/* line 925, src/sass/editor.scss */
+/* line 928, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .multi-field-hidden,
 #concept-scheme-edit-form #concept-edit-tabs .multi-field-hidden {
   padding: 2px 0px 0px 0px;
@@ -1838,7 +1842,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   border-bottom: 1px solid #666;
   background-color: #eee;
 }
-/* line 936, src/sass/editor.scss */
+/* line 939, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-template,
 #concept-scheme-edit-form #concept-edit-tabs .concept-multi-hidden-template {
   margin-right: -4px !important;
@@ -1847,7 +1851,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   color: #333;
   text-decoration: none;
 }
-/* line 944, src/sass/editor.scss */
+/* line 947, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-template.isHover,
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-template.isOpen,
 #concept-scheme-edit-form #concept-edit-tabs .concept-multi-hidden-template.isHover,
@@ -1859,33 +1863,33 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   margin-left: -1px;
   background-color: #fff !important;
 }
-/* line 954, src/sass/editor.scss */
+/* line 957, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-label,
 #concept-scheme-edit-form #concept-edit-tabs .concept-multi-hidden-label {
   cursor: pointer;
 }
-/* line 957, src/sass/editor.scss */
+/* line 960, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-remove,
 #concept-scheme-edit-form #concept-edit-tabs .concept-multi-hidden-remove {
   position: relative;
   top: 3px;
   left: 3px;
 }
-/* line 962, src/sass/editor.scss */
+/* line 965, src/sass/editor.scss */
 #concept-edit-form #concept-edit-tabs .concept-multi-hidden-add,
 #concept-scheme-edit-form #concept-edit-tabs .concept-multi-hidden-add {
   position: relative;
   top: 3px;
   left: 9px;
 }
-/* line 970, src/sass/editor.scss */
+/* line 973, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right,
 #concept-edit-form #concept-edit-left,
 #concept-scheme-edit-form #concept-edit-right,
 #concept-scheme-edit-form #concept-edit-left {
   padding: 24px 0px;
 }
-/* line 974, src/sass/editor.scss */
+/* line 977, src/sass/editor.scss */
 #concept-edit-form .concept-multi-hidden-remove, #concept-edit-form .concept-multi-remove, #concept-edit-form .concept-link-remove-action,
 #concept-scheme-edit-form .concept-multi-hidden-remove,
 #concept-scheme-edit-form .concept-multi-remove,
@@ -1896,7 +1900,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   display: inline-block;
   cursor: pointer;
 }
-/* line 982, src/sass/editor.scss */
+/* line 985, src/sass/editor.scss */
 #concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add,
 #concept-scheme-edit-form .concept-multi-add,
 #concept-scheme-edit-form .concept-multi-hidden-add {
@@ -1906,14 +1910,14 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   display: inline-block;
   cursor: pointer;
 }
-/* line 990, src/sass/editor.scss */
+/* line 993, src/sass/editor.scss */
 #concept-edit-form .concept-multi-add.warning, #concept-edit-form .concept-multi-hidden-add.warning,
 #concept-scheme-edit-form .concept-multi-add.warning,
 #concept-scheme-edit-form .concept-multi-hidden-add.warning {
   border: 2px dashed red;
   background-color: yellow;
 }
-/* line 995, src/sass/editor.scss */
+/* line 998, src/sass/editor.scss */
 #concept-edit-form .concept-multi-hidden-container,
 #concept-scheme-edit-form .concept-multi-hidden-container {
   border-bottom: 0px;
@@ -1922,14 +1926,14 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   border-right: 1px solid black;
   padding: 2px 2px 2px 5px;
 }
-/* line 1003, src/sass/editor.scss */
+/* line 1006, src/sass/editor.scss */
 #concept-edit-form fieldset,
 #concept-scheme-edit-form fieldset {
   border: 0px;
   margin: 0px;
   padding: 0px;
 }
-/* line 1009, src/sass/editor.scss */
+/* line 1012, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-labels,
 #concept-scheme-edit-form #concept-edit-language-labels {
   padding-bottom: 34px;
@@ -1937,61 +1941,61 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   border-bottom: 1px solid #ddd;
   clear: both;
 }
-/* line 1014, src/sass/editor.scss */
+/* line 1017, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-labels .multi-field,
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field {
   display: block;
   clear: both;
 }
-/* line 1017, src/sass/editor.scss */
+/* line 1020, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-labels .multi-field .concept-multi-template,
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field .concept-multi-template {
   clear: both;
   float: right;
   width: 70%;
 }
-/* line 1022, src/sass/editor.scss */
+/* line 1025, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-labels .multi-field .concept-multi-template textarea,
 #concept-edit-form #concept-edit-language-labels .multi-field .concept-multi-template input,
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field .concept-multi-template textarea,
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field .concept-multi-template input {
   width: 70%;
 }
-/* line 1029, src/sass/editor.scss */
+/* line 1032, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-properties,
 #concept-scheme-edit-form #concept-edit-language-properties {
   clear: both;
   margin-bottom: 12px;
 }
-/* line 1032, src/sass/editor.scss */
+/* line 1035, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-properties .multi-field,
 #concept-scheme-edit-form #concept-edit-language-properties .multi-field {
   display: block;
   clear: both;
 }
-/* line 1035, src/sass/editor.scss */
+/* line 1038, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-properties .multi-field label,
 #concept-scheme-edit-form #concept-edit-language-properties .multi-field label {
   display: block;
 }
-/* line 1040, src/sass/editor.scss */
+/* line 1043, src/sass/editor.scss */
 #concept-edit-form #concept-edit-language-properties .multi-field .concept-multi-template textarea,
 #concept-edit-form #concept-edit-language-properties .multi-field .concept-multi-template input,
 #concept-scheme-edit-form #concept-edit-language-properties .multi-field .concept-multi-template textarea,
 #concept-scheme-edit-form #concept-edit-language-properties .multi-field .concept-multi-template input {
   width: 80%;
 }
-/* line 1047, src/sass/editor.scss */
+/* line 1050, src/sass/editor.scss */
 #concept-edit-form #conceptPropertySelect,
 #concept-scheme-edit-form #conceptPropertySelect {
   margin-bottom: 4px;
 }
-/* line 1051, src/sass/editor.scss */
+/* line 1054, src/sass/editor.scss */
 #concept-edit-form #conceptPropertyContent,
 #concept-scheme-edit-form #conceptPropertyContent {
   width: 80%;
 }
-/* line 1059, src/sass/editor.scss */
+/* line 1062, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right label[for=baseUri],
 #concept-edit-form #concept-edit-right label[for=uri],
 #concept-edit-form #concept-edit-right label[for=notation],
@@ -2003,27 +2007,27 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   display: inline-block;
   width: 80px;
 }
-/* line 1063, src/sass/editor.scss */
+/* line 1066, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #uri, #concept-edit-form #concept-edit-right #baseUri,
 #concept-scheme-edit-form #concept-edit-right #uri,
 #concept-scheme-edit-form #concept-edit-right #baseUri {
   width: 70%;
   margin-bottom: 4px;
 }
-/* line 1067, src/sass/editor.scss */
+/* line 1070, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #notation,
 #concept-scheme-edit-form #concept-edit-right #notation {
   width: 56px;
   margin-bottom: 4px;
 }
-/* line 1073, src/sass/editor.scss */
+/* line 1076, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #concept-edit-scheme-properties br,
 #concept-edit-form #concept-edit-right #concept-edit-scheme-properties fieldset,
 #concept-scheme-edit-form #concept-edit-right #concept-edit-scheme-properties br,
 #concept-scheme-edit-form #concept-edit-right #concept-edit-scheme-properties fieldset {
   display: none;
 }
-/* line 1079, src/sass/editor.scss */
+/* line 1082, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #concept-edit-scheme-relations fieldset,
 #concept-edit-form #concept-edit-right #concept-edit-mapping-properties fieldset,
 #concept-scheme-edit-form #concept-edit-right #concept-edit-scheme-relations fieldset,
@@ -2032,7 +2036,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   padding: 0px;
   margin: 0px;
 }
-/* line 1084, src/sass/editor.scss */
+/* line 1087, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #concept-edit-scheme-relations .multi-field-list,
 #concept-edit-form #concept-edit-right #concept-edit-mapping-properties .multi-field-list,
 #concept-scheme-edit-form #concept-edit-right #concept-edit-scheme-relations .multi-field-list,
@@ -2042,7 +2046,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   margin-bottom: 16px;
   border-bottom: 1px solid #ddd;
 }
-/* line 1090, src/sass/editor.scss */
+/* line 1093, src/sass/editor.scss */
 #concept-edit-form #concept-edit-right #concept-edit-scheme-relations .concept-link-remove-action,
 #concept-edit-form #concept-edit-right #concept-edit-mapping-properties .concept-link-remove-action,
 #concept-scheme-edit-form #concept-edit-right #concept-edit-scheme-relations .concept-link-remove-action,
@@ -2050,20 +2054,20 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   position: relative;
   top: 3px;
 }
-/* line 1097, src/sass/editor.scss */
+/* line 1100, src/sass/editor.scss */
 #concept-edit-form .concept-complex-title,
 #concept-scheme-edit-form .concept-complex-title {
   padding-left: 22px;
   background: url("../images/related-icon.png") no-repeat;
 }
-/* line 1103, src/sass/editor.scss */
+/* line 1106, src/sass/editor.scss */
 #concept-edit-form .concept-complex-title.broader,
 #concept-edit-form .concept-complex-title.broadMatch,
 #concept-scheme-edit-form .concept-complex-title.broader,
 #concept-scheme-edit-form .concept-complex-title.broadMatch {
   background: url("../images/broader-arrow.png") no-repeat;
 }
-/* line 1108, src/sass/editor.scss */
+/* line 1111, src/sass/editor.scss */
 #concept-edit-form .concept-complex-title.narrower,
 #concept-edit-form .concept-complex-title.narrowMatch,
 #concept-scheme-edit-form .concept-complex-title.narrower,
@@ -2071,87 +2075,87 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   background: url("../images/narrower-arrow.png") no-repeat;
 }
 
-/* line 1114, src/sass/editor.scss */
+/* line 1117, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-header {
   height: auto;
   padding: 10px;
 }
-/* line 1117, src/sass/editor.scss */
+/* line 1120, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-header label {
   display: inline-block;
 }
-/* line 1120, src/sass/editor.scss */
+/* line 1123, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-header select {
   display: inline-block;
 }
-/* line 1123, src/sass/editor.scss */
+/* line 1126, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-header input[name=uriBase], #concept-scheme-edit-form #concept-edit-header input[name=uriCode] {
   width: 185px;
 }
-/* line 1127, src/sass/editor.scss */
+/* line 1130, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-tabs {
   width: 100%;
   margin-bottom: 24px;
 }
-/* line 1130, src/sass/editor.scss */
+/* line 1133, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-edit-tabs .multi-field-hidden {
   width: auto;
   display: block;
   float: none;
 }
-/* line 1139, src/sass/editor.scss */
+/* line 1142, src/sass/editor.scss */
 #concept-scheme-edit-form #concept-scheme-edit-dcterms .multi-field .concept-multi-remove,
 #concept-scheme-edit-form #concept-scheme-edit-dcterms .multi-field .concept-multi-add {
   display: none;
 }
-/* line 1144, src/sass/editor.scss */
+/* line 1147, src/sass/editor.scss */
 #concept-scheme-edit-form .multi-field {
   display: block !important;
   margin-bottom: 8px;
 }
-/* line 1147, src/sass/editor.scss */
+/* line 1150, src/sass/editor.scss */
 #concept-scheme-edit-form .multi-field label {
   display: inline-block;
   width: 88px;
 }
-/* line 1152, src/sass/editor.scss */
+/* line 1155, src/sass/editor.scss */
 #concept-scheme-edit-form .multi-field input[type=text],
 #concept-scheme-edit-form .multi-field textarea {
   width: 30%;
 }
-/* line 1156, src/sass/editor.scss */
+/* line 1159, src/sass/editor.scss */
 #concept-scheme-edit-form .multi-field-list {
   padding-left: 22px;
   padding-bottom: 16px;
   margin-bottom: 16px;
   border-bottom: 1px solid #ddd;
 }
-/* line 1162, src/sass/editor.scss */
+/* line 1165, src/sass/editor.scss */
 #concept-scheme-edit-form .concept-link-remove-action {
   position: relative;
   top: 3px;
 }
 
 /* Modal boxes */
-/* line 1169, src/sass/editor.scss */
+/* line 1172, src/sass/editor.scss */
 .export-box {
   width: 280px;
 }
 
 /* Class for hiding elements */
-/* line 1174, src/sass/editor.scss */
+/* line 1177, src/sass/editor.scss */
 .do-not-show {
   display: none;
 }
 
 /* Errors */
-/* line 1179, src/sass/editor.scss */
+/* line 1182, src/sass/editor.scss */
 .errors {
   color: red;
 }
 
 /* line 193, src/sass/default.scss */
-/* line 1184, src/sass/editor.scss */
+/* line 1187, src/sass/editor.scss */
 div.error {
   font-size: 18px;
   font-weight: 500;
@@ -2160,20 +2164,20 @@ div.error {
 }
 
 /* line 200, src/sass/default.scss */
-/* line 1192, src/sass/editor.scss */
+/* line 1195, src/sass/editor.scss */
 div.error {
   background: url("../images/warning.png") 0px 5px no-repeat;
 }
 
 /* line 204, src/sass/default.scss */
-/* line 1197, src/sass/editor.scss */
+/* line 1200, src/sass/editor.scss */
 div.error p {
   color: Red;
   font-style: italic;
 }
 
 /* Relation box */
-/* line 1209, src/sass/editor.scss */
+/* line 1212, src/sass/editor.scss */
 .relation-box-list.disabled a,
 .relation-box-list.disabled a:hover,
 .relation-box-list.disabled a:visited,
@@ -2186,13 +2190,13 @@ a:visited.disabled {
   color: #3C1038 !important;
 }
 
-/* line 1215, src/sass/editor.scss */
+/* line 1218, src/sass/editor.scss */
 .relation-box-message {
   margin-bottom: 10px;
 }
 
 /* Buttons */
-/* line 1243, src/sass/editor.scss */
+/* line 1246, src/sass/editor.scss */
 button,
 input[type=button],
 input[type=submit] {
@@ -2211,86 +2215,86 @@ input[type=submit] {
   padding-right: 18px;
   padding-bottom: 1px;
 }
-/* line 1265, src/sass/editor.scss */
+/* line 1268, src/sass/editor.scss */
 button.hover,
 input[type=button].hover,
 input[type=submit].hover {
   color: #bb1a88;
 }
-/* line 1269, src/sass/editor.scss */
+/* line 1272, src/sass/editor.scss */
 button.selection,
 input[type=button].selection,
 input[type=submit].selection {
   padding-left: 20px;
   background: url("../images/button-background-selection.png") white no-repeat left bottom;
 }
-/* line 1272, src/sass/editor.scss */
+/* line 1275, src/sass/editor.scss */
 button.switch,
 input[type=button].switch,
 input[type=submit].switch {
   background: url("../images/button-background-switch.png") white no-repeat left bottom;
 }
-/* line 1275, src/sass/editor.scss */
+/* line 1278, src/sass/editor.scss */
 button.export,
 input[type=button].export,
 input[type=submit].export {
   background: url("../images/button-background-export.png") white no-repeat left bottom;
 }
-/* line 1278, src/sass/editor.scss */
+/* line 1281, src/sass/editor.scss */
 button.delete,
 input[type=button].delete,
 input[type=submit].delete {
   background: url("../images/button-background-export.png") white no-repeat left bottom;
 }
-/* line 1281, src/sass/editor.scss */
+/* line 1284, src/sass/editor.scss */
 button.relate,
 input[type=button].relate,
 input[type=submit].relate {
   background: url("../images/button-background-relate.png") white no-repeat left bottom;
 }
 
-/* line 1287, src/sass/editor.scss */
+/* line 1290, src/sass/editor.scss */
 #concept-edit,
 #conceptSwitch {
   background: url("../images/button-background-switch.png") white no-repeat left bottom;
 }
 
-/* line 1291, src/sass/editor.scss */
+/* line 1294, src/sass/editor.scss */
 #conceptExport {
   background: url("../images/button-background-export.png") white no-repeat left bottom;
 }
 
-/* line 1295, src/sass/editor.scss */
+/* line 1298, src/sass/editor.scss */
 #conceptDelete {
   background: url("../images/button-background-clear.png") white no-repeat left bottom;
 }
 
 /* Export box */
-/* line 1301, src/sass/editor.scss */
+/* line 1304, src/sass/editor.scss */
 .export-box dt, .export-box dd {
   display: inline-block;
   margin: 0px;
 }
-/* line 1305, src/sass/editor.scss */
+/* line 1308, src/sass/editor.scss */
 .export-box label {
   display: inline-block;
   width: 64px;
 }
-/* line 1310, src/sass/editor.scss */
+/* line 1313, src/sass/editor.scss */
 .export-box input[type=text],
 .export-box select {
   width: 200px;
 }
-/* line 1313, src/sass/editor.scss */
+/* line 1316, src/sass/editor.scss */
 .export-box .fields-selector {
   display: none;
   padding-bottom: 10px;
 }
-/* line 1316, src/sass/editor.scss */
+/* line 1319, src/sass/editor.scss */
 .export-box .fields-selector label {
   width: 150px;
 }
-/* line 1319, src/sass/editor.scss */
+/* line 1322, src/sass/editor.scss */
 .export-box .fields-selector ul {
   list-style-type: none;
   margin-top: 4px;
@@ -2300,12 +2304,12 @@ input[type=submit].relate {
   overflow-y: scroll;
   border: 1px solid #bababa;
 }
-/* line 1327, src/sass/editor.scss */
+/* line 1330, src/sass/editor.scss */
 .export-box .fields-selector ul li {
   cursor: move;
   clear: both;
 }
-/* line 1330, src/sass/editor.scss */
+/* line 1333, src/sass/editor.scss */
 .export-box .fields-selector ul li .fields-to-export-remove {
   background-image: url(../../interaction_design/images/icons/verwijder.gif);
   width: 16px;
@@ -2315,40 +2319,40 @@ input[type=submit].relate {
   position: relative;
   top: 3px;
 }
-/* line 1342, src/sass/editor.scss */
+/* line 1345, src/sass/editor.scss */
 .export-box .depth-selector {
   display: none;
 }
 
 /* Concept Scheme Icons Management */
-/* line 1350, src/sass/editor.scss */
+/* line 1353, src/sass/editor.scss */
 .manage-icons-list,
 .assign-icons-box {
   width: 550px;
   padding: 8px 0px;
 }
-/* line 1353, src/sass/editor.scss */
+/* line 1356, src/sass/editor.scss */
 .manage-icons-list img,
 .assign-icons-box img {
   cursor: pointer;
   margin: 4px;
 }
 
-/* line 1359, src/sass/editor.scss */
+/* line 1362, src/sass/editor.scss */
 .manage-icons-list {
   border-bottom: 1px solid #bababa;
 }
 
-/* line 1363, src/sass/editor.scss */
+/* line 1366, src/sass/editor.scss */
 form#uploadicon {
   margin: 0px;
   padding: 8px 0px;
 }
-/* line 1366, src/sass/editor.scss */
+/* line 1369, src/sass/editor.scss */
 form#uploadicon dt#uploadButton-label {
   display: none;
 }
-/* line 1369, src/sass/editor.scss */
+/* line 1372, src/sass/editor.scss */
 form#uploadicon dd {
   float: left;
 }

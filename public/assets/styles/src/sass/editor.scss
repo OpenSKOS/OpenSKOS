@@ -211,7 +211,8 @@ div#content {
 }
 
 #left-top-panel, #AdvancedSearchOptions {
-	#conceptScheme-element {
+	#conceptScheme-element,
+	#allowedConceptScheme-element {
 		background-color: #fff;
 		height: 96px;
 		width: 90%;
@@ -254,12 +255,14 @@ div#content {
 			margin-bottom: 9px;
 		}
 	};
-	#conceptScheme-label {
+	#conceptScheme-label,
+	#allowedConceptScheme-label {
 		float: left;
 		padding-top: 5px;
 		padding-right: 5px;
 	};
-	#conceptScheme-element {
+	#conceptScheme-element,
+	#allowedConceptScheme-element {
 		margin-left: 0px;
 		width: 255px;
 	}

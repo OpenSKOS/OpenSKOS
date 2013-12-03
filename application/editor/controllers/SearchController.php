@@ -75,7 +75,9 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 		// Select the concepts
 		$apiClient = new Editor_Models_ApiClient();
 		try {
-			$conceptsRaw = $apiClient->searchConcepts(array_merge($searchOptions, $detailedSearchOptions));
+			$conceptsRaw = $apiClient->searchConcepts(
+				Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions)
+			);
 		} catch (Exception $ex) {
 			$this->getHelper('json')->sendJson(array('status' => 'error', 'message' => 'Bad query syntax.'));			
 		}

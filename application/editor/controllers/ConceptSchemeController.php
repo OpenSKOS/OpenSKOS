@@ -297,6 +297,15 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 		$this->getHelper('json')->sendJson(array('status' => 'ok'));
 	}
 	
+	public function getConceptsBaseUrlAction()
+	{
+		$conceptScheme = $this->_getConceptScheme();
+		
+		$conceptsBaseUrl = $conceptScheme->getCollection()->getConceptsBaseUri();
+	
+		$this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $conceptsBaseUrl));
+	}
+	
 	/**
 	 * Get an array of the uploaded icons paths.
 	 * 
