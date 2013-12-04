@@ -23,6 +23,7 @@ var EditorControl = new Class({
 	        'loadHistory',
 	        'loadConcept'],
     loadedConcept: '',
+	loadingTimeoutHandle: null,
 	_statusSuccess: 'ok',
 	initialize: function () {
 		
@@ -90,10 +91,12 @@ var EditorControl = new Class({
 		
 		Editor.Relations.disableRelationLinks();
 		
-		var self = this;
+		var self = this;		
+		self.showLoading();
 		new Request.HTML({
 			url: BASE_URL + '/editor/concept/view/uuid/' + uuid,
 			onSuccess: function(responseTree, responseElements, responseHTML, responseJavaScript) {
+				self.stopLoading();
 				
 				$('central-content').empty();
 				$('central-content').set('html', responseHTML);
@@ -109,9 +112,12 @@ var EditorControl = new Class({
 		}).get();
 	},
 	editConcept: function (uuid) {
+		var self = this;
+		self.showLoading();
 		new Request.HTML({
 			url: BASE_URL + '/editor/concept/edit/uuid/' + uuid,
 			onSuccess: function(responseTree, responseElements, responseHTML, responseJavaScript) {
+				self.stopLoading();
 				
 				$('central-content').empty();
 				$('central-content').set('html', responseHTML);
@@ -134,8 +140,11 @@ var EditorControl = new Class({
 		}).get();
 	},
 	saveConcept: function () {
+		var self = this;
 		$('Editconcept').set('send', {
 			onComplete: function (responseHTML) {
+				self.stopLoading();
+				
 				$('central-content').empty();
 				$('central-content').set('html', responseHTML);
 				if (null !== $('Editconcept')) {
@@ -149,9 +158,7 @@ var EditorControl = new Class({
 		});
 		$('Editconcept').send();
 		
-		// Show loading
-		$('central-content').empty();
-		$('central-content').adopt(new Element('div').addClass('loading').set('text', 'Loading...'));
+		self.showLoading();
 	},
 	checkNewConcept: function() {
 		
@@ -312,5 +319,15 @@ var EditorControl = new Class({
 		} else {
 			$('sbox-content').getElement('.errors').set('html', data.message);
 		}
+	},
+	showLoading: function () {
+		// Show loading
+		this.loadingTimeoutHandle = setTimeout(function () {
+			$('central-content').empty();
+			$('central-content').adopt(new Element('div').addClass('loading').set('text', 'Loading...'));
+		}, 1000);
+	},
+	stopLoading: function () {
+		clearTimeout(this.loadingTimeoutHandle);
 	}
 });
