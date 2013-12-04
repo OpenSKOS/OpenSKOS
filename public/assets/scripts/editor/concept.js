@@ -65,7 +65,9 @@ var EditorConcept = new Class({
 
 		$(document.body).addEvent('click:relay(#conceptSave)', function (e) {
 			e.stop();
-			Editor.Control.saveConcept();
+			if (Editor.Concept.confirmDocPropertiesAreSaved()) {
+				Editor.Control.saveConcept();
+			}
 		});
 		
 		$(document.body).addEvent("click:relay(.delete-concept)", function (e) {
@@ -429,6 +431,15 @@ var EditorConcept = new Class({
 			}
 		}
 		return prefLabelText;
+	},
+	
+	confirmDocPropertiesAreSaved: function () {
+		// If we have content in conceptPropertyContent and conceptPropertySelect is selected - we need to confirm that the user don't want it.
+		if ($('conceptPropertySelect').get('value') !== '' && $('conceptPropertyContent').get('value') !== '') {
+			return confirm($('doc-properties-not-saved-confirmation').get('text'));
+		} else {
+			return true;
+		}
 	},
 	
 	_getOpenTab: function (inputName) {
