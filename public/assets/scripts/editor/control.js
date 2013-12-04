@@ -153,6 +153,7 @@ var EditorControl = new Class({
 					Editor.Control.loadHistory($('history-list'), $('concept-view').getElement('#uuid').get('value'));
 					new TabPane('concept-language-tab-container', {}, false);
 					new TabPane('concept-scheme-tab-container', {}, false);
+					Editor.Relations.disableRelationLinks();
 				}
 			}
 		});
