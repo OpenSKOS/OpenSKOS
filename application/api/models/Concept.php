@@ -306,20 +306,34 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 */
 	public function getInternalAssociation($fieldName, $conceptScheme = null)
 	{
-		$q = array();
-		if (!isset($this[$fieldName]) || !is_array($this[$fieldName]))
+		if (!isset($this[$fieldName]) || !is_array($this[$fieldName])) {
 			return array();
-		foreach ($this[$fieldName] as $conceptUri)
-			$q[] = 'uri:"'.$conceptUri.'"';
-		$query = implode(' OR ', $q);
+		}
 		
-		if (null !== $conceptScheme)
-			$query = 'inScheme:"'.$conceptScheme.'" AND ('.$query.')';
+		$docs = array();
+		$chunkSize = 50;
+		for ($chunkStart = 0; $chunkStart < count($this[$fieldName]); $chunkStart += $chunkSize) {
+			
+			$chunkOfUris = array_slice($this[$fieldName], $chunkStart, $chunkSize);
+			
+			$queryParts = array();
+			foreach ($chunkOfUris as $conceptUri) {
+				$queryParts[] = 'uri:"' . $conceptUri . '"';
+			}
+			$query = implode(' OR ', $queryParts);
+
+			if (null !== $conceptScheme) {
+				$query = 'inScheme:"' . $conceptScheme . '" AND (' . $query . ')';
+			}
+
+			$response = Api_Models_Concepts::factory()->getConcepts($query);
+
+			if ($response['response']['numFound'] > 0) {
+				$docs = array_merge($docs, $response['response']['docs']);
+			}
+		}
 		
-		$response = Api_Models_Concepts::factory()->getConcepts($query);
-		
-		if (!$response['response']['numFound']) return array();
-		return $response['response']['docs']; 
+		return $docs;
 	}
 	/**
 	 * @TODO This could be used to easily refactor the concept View.
