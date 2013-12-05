@@ -1,3 +1,5 @@
 rsync.sh
 application/configs/application.ini
 .idea
+cache/
+.sass-cache/
