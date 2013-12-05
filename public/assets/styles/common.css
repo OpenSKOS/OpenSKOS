@@ -1,32 +1,26 @@
 @CHARSET "UTF-8";
-/* line 2, src/sass/common.scss */
 body {
   font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
   color: #3c1038;
 }
 
-/* line 7, src/sass/common.scss */
 a {
   color: #822966;
   text-decoration: none;
 }
 
-/* line 12, src/sass/common.scss */
 a:visted {
   color: #3c1038;
 }
 
-/* line 16, src/sass/common.scss */
 a:HOVER {
   text-decoration: underline;
 }
 
-/* line 20, src/sass/common.scss */
 a.block {
   display: block;
 }
 
-/* line 24, src/sass/common.scss */
 a[rel="external"] {
   padding-right: 13px;
   background: url(../images/external.png) center right no-repeat;
