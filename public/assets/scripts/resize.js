@@ -18,16 +18,16 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 window.addEvent('domready', function() {
-	fitCentralPanelWidth();
 	fitPanelHeights();
+	fitCentralPanelWidth();
 	if ($('left-panel')) {
 		makeLeftPanelResizable();
 	}
 });
 
 window.addEvent('resize', function() {
-	fitCentralPanelWidth();
 	fitPanelHeights();
+	fitCentralPanelWidth();
 });
 
 function fitCentralPanelWidth() {
@@ -40,7 +40,9 @@ function fitCentralPanelWidth() {
 	
 	var rightPanelWidth = 0;
 	if ($('right-panel')) {
+		$('right-panel').setStyle('overflow', 'hidden');
 		rightPanelWidth = $('right-panel').getStyle('width').toInt() + $('right-panel').getStyle('border-left').toInt() + $('right-panel').getStyle('border-right').toInt();
+		$('right-panel').setStyle('overflow', 'auto');
 	}
 	
 	if ($('central-panel')) {
