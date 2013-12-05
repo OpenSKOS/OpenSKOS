@@ -127,7 +127,12 @@ var EditorControl = new Class({
 				
 					$('central-content').empty();
 					$('central-content').set('html', responseHTML);
-					$('conceptSave').addEvent('click', function (e) { e.stop(); Editor.Control.checkNewConcept(); })
+					$('conceptSave').addEvent('click', function (e) {
+						e.stop();
+						if (Editor.Concept.confirmDocPropertiesAreSaved()) {
+							Editor.Control.checkNewConcept(); 
+						}
+					});
 					Editor.Concept.initConceptForm();
 					Editor.View.markConceptActive('no-uuid');
 				}
