@@ -254,7 +254,8 @@ class Editor_Models_Concept extends Api_Models_Concept
 		foreach ($formData as $key => $value) {
 			if (in_array($key, $formMapping['languageFields'])) {
 				foreach ($formData[$key] as $languageCode => $values) {
-					if (!empty($languageCode) && array_filter($values)) {
+					$values = array_filter($values);
+					if (!empty($languageCode) && ! empty($values)) {
 						$formData[$key.'@'.$languageCode] = $values;
 					}
 				}
