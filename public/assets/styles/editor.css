@@ -1557,7 +1557,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form .concept-multi-hidden-remove,
 #concept-scheme-edit-form .concept-multi-remove,
 #concept-scheme-edit-form .concept-link-remove-action {
-  background-image: url(../../interaction_design/images/icons/verwijder.gif);
+  background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1566,7 +1566,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add,
 #concept-scheme-edit-form .concept-multi-add,
 #concept-scheme-edit-form .concept-multi-hidden-add {
-  background-image: url(../../interaction_design/images/icons/nieuw.gif);
+  background-image: url(../images/nieuw.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1912,7 +1912,7 @@ input[type=submit].relate {
   clear: both;
 }
 .export-box .fields-selector ul li .fields-to-export-remove {
-  background-image: url(../../interaction_design/images/icons/verwijder.gif);
+  background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;

@@ -975,7 +975,7 @@ ul#history-list {
 	};
 	
 	.concept-multi-hidden-remove, .concept-multi-remove, .concept-link-remove-action {
-		 background-image: url(../../interaction_design/images/icons/verwijder.gif);
+		 background-image: url(../images/verwijder.gif);
 		 width: 16px;
 		 height: 16px;
 		 display: inline-block;
@@ -983,7 +983,7 @@ ul#history-list {
 	};
 	
 	.concept-multi-add, .concept-multi-hidden-add {
-		 background-image: url(../../interaction_design/images/icons/nieuw.gif);
+		 background-image: url(../images/nieuw.gif);
 		 width: 16px;
 		 height: 16px;
 		 display: inline-block;
@@ -1331,7 +1331,7 @@ input[type=submit] {
 				cursor: move;
 				clear: both;
 				.fields-to-export-remove {
-					background-image: url(../../interaction_design/images/icons/verwijder.gif);
+					background-image: url(../images/verwijder.gif);
 					width: 16px;
 					height: 16px;
 					display: inline-block;
