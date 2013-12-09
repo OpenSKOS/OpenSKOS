@@ -312,10 +312,12 @@ var EditorControl = new Class({
 		
 		conceptLi.getElement('.narrower-relations').hide();
 	},
-	conceptDeleted: function(response) {		
+	conceptDeleted: function(response) {
 		var data = JSON.decode(response);
 		if (data.status == 'ok') {
+			var message = $('concept-deleted-successfully').get('text');
 			$('central-content').empty();
+			$('central-content').adopt(new Element('div').addClass('message').set('text', message));
 			Editor.Control.loadHistory($('history-list'));		
 			Editor.ConceptsSelection.load();
 			if (Editor.Search.getSearchResultsCount() > 0) {
