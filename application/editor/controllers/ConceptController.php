@@ -32,8 +32,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		$this->_helper->_layout->setLayout('editor_central_content');
 		
 		$notation = OpenSKOS_Db_Table_Notations::getNext();
+		
+		$initialLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();		
+		$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+		if (! empty($editorOptions['languages']) && ! in_array($initialLanguage, $editorOptions['languages'])) { // If the browser language is supported
+			$initialLanguage = key($editorOptions['languages']);
+		}
+		
 		$concept = new Editor_Models_Concept(new Api_Models_Concept(array(
-				'prefLabel@'.Zend_Registry::get('Zend_Locale')->getLanguage() => array($this->getRequest()->getParam('label')),
+				'prefLabel@'.$initialLanguage => array($this->getRequest()->getParam('label')),
 				'notation' => array($notation)
 		)));
 		
