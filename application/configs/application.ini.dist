@@ -34,8 +34,8 @@ editor.schemeIcons.height=16
 editor.schemeIcons.extension="png"
 
 ; Export configuration
-editor.export.filesPath = APPLICATION_PATH "/../public/data/export"
-editor.export.filesHttpPath = "/data/export"
+editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
+editor.export.filesHttpPath = "/data/export/"
 
 ; Api client configuration
 editor.apiclient.apiurl=http://openskos/api/
