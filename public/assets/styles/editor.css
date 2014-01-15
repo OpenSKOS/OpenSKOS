@@ -1454,6 +1454,10 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   background-color: #aaaaaa;
 }
 
+#concept-edit-form,
+#concept-scheme-edit-form {
+  /* Pref label is not multivalued per language */
+}
 #concept-edit-form form,
 #concept-edit-form .zend_form,
 #concept-scheme-edit-form form,
@@ -1557,7 +1561,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form .concept-multi-hidden-remove,
 #concept-scheme-edit-form .concept-multi-remove,
 #concept-scheme-edit-form .concept-link-remove-action {
-  background-image: url(../../interaction_design/images/icons/verwijder.gif);
+  background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1566,7 +1570,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add,
 #concept-scheme-edit-form .concept-multi-add,
 #concept-scheme-edit-form .concept-multi-hidden-add {
-  background-image: url(../../interaction_design/images/icons/nieuw.gif);
+  background-image: url(../images/nieuw.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1712,6 +1716,11 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form .concept-complex-title.narrower,
 #concept-scheme-edit-form .concept-complex-title.narrowMatch {
   background: url("../images/narrower-arrow.png") no-repeat;
+}
+#concept-edit-form .multi-field.prefLabel .concept-multi-add, #concept-edit-form .multi-field.prefLabel .concept-multi-remove,
+#concept-scheme-edit-form .multi-field.prefLabel .concept-multi-add,
+#concept-scheme-edit-form .multi-field.prefLabel .concept-multi-remove {
+  display: none;
 }
 
 #concept-scheme-edit-form #concept-edit-header {
@@ -1912,7 +1921,7 @@ input[type=submit].relate {
   clear: both;
 }
 .export-box .fields-selector ul li .fields-to-export-remove {
-  background-image: url(../../interaction_design/images/icons/verwijder.gif);
+  background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
