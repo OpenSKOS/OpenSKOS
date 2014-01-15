@@ -25,6 +25,7 @@ EditorSearch = new Class({
 	defaultUser: null,
 	defaultRowsCount: null,
 	appendResults: false,
+	moreResultsProccessing: false,
 	searchFromUrl: false,
 	resultsFound: 0,
 	delayedSearchDelay: 500,
@@ -153,6 +154,10 @@ EditorSearch = new Class({
 					this.toggleMoreResultsLink(0);
 				}
 				
+				if (this.moreResultsProccessing) {
+					this.moreResultsProccessing = false;
+				}
+				
 				this.setConceptSchemeOptions(data.conceptSchemeOptions);
 				this.setProfilesOptions(data.profileOptions);
 			} else {
@@ -173,17 +178,20 @@ EditorSearch = new Class({
 		this.searchResults.getElement('.errors').show();
 	},
 	showMoreResults: function (ev) {
-		var rows = parseInt(this.searchForm.getElement('[name=rows]').value);
-		// Gets the next defaultRowsCount rows.
-		this.searchForm.getElement('[name=start]').value = rows;
-		this.searchForm.getElement('[name=rows]').value = this.defaultRowsCount;
-		
-		this.appendResults = true; // We need to add the new results to the current results.
-		this.searchForm.send();
-		
-		// Gets all the results if new search is performed.
-		this.searchForm.getElement('[name=start]').value = 0;
-		this.searchForm.getElement('[name=rows]').value = rows + this.defaultRowsCount;
+		if (! this.moreResultsProccessing) {
+			this.moreResultsProccessing = true;
+			var rows = parseInt(this.searchForm.getElement('[name=rows]').value);
+			// Gets the next defaultRowsCount rows.
+			this.searchForm.getElement('[name=start]').value = rows;
+			this.searchForm.getElement('[name=rows]').value = this.defaultRowsCount;
+
+			this.appendResults = true; // We need to add the new results to the current results.
+			this.searchForm.send();
+
+			// Gets all the results if new search is performed.
+			this.searchForm.getElement('[name=start]').value = 0;
+			this.searchForm.getElement('[name=rows]').value = rows + this.defaultRowsCount;
+		}
 	},
 	toggleMoreResultsLink: function (numFound) {
 		if (numFound > this.searchForm.getElement('[name=rows]').value) {
