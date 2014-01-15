@@ -3,3 +3,4 @@ application/configs/application.ini
 .idea
 cache/
 .sass-cache/
+public/data/export/*
