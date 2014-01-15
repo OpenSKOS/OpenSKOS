@@ -35,7 +35,7 @@ class OpenSKOS_Form extends Zend_Form
 	{
 		foreach ($elementData as $elementName => $elementLabel) {
 			$element = new $elementClass($elementName, $elementLabel);
-			$element->setCssClasses($cssClasses);
+			$element->setCssClasses(array_merge($cssClasses, array($elementName)));
 			$this->addElement($element);
 		}
 		if (null !== $wrapperId) {
