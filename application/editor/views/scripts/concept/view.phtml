@@ -160,6 +160,13 @@
 						<span><?php echo $this->translate('Notation:'); ?> </span>
 						<?php echo $this->currentConcept->getMlField('notation'); ?>
 					</div>
+					<?php if (isset($this->currentConcept['dcterms_contributor'])): ?>
+						<div class="concept-contributor">
+							<span><?php echo $this->translate('Contributor:'); ?> </span>
+							<?php echo implode(', ', $this->currentConcept['dcterms_contributor'])?>
+						</div>
+					<?php endif ?>
+					
 					<?php if (is_array($this->schemeUris)): ?>
 					<?php foreach($this->schemeUris as $key => $conceptScheme): ?>
 					<?php $conceptSchemeTitle = isset($this->conceptSchemes[$conceptScheme]['dcterms_title'][0])  ? $this->conceptSchemes[$conceptScheme] : 'NA'; ?>
@@ -169,6 +176,7 @@
 								<span><?php echo $this->translate('Is top concept:'); ?> </span>
 								<?php echo $this->currentConcept->isTopConceptOf($conceptScheme) ? $this->translate('Yes'): $this->translate('No'); ?>
 							</div>
+							
 							<div class="concept-scheme-relations">
 								<?php $relationNames = array(
 										'broader' => _('Has broader'),
