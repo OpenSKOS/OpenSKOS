@@ -538,7 +538,7 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
 }
 
 #concept-content-right {
-  margin-bottom: 80px;
+  margin-bottom: 172px;
   position: relative;
   top: 0px;
   left: 0px;
@@ -550,6 +550,13 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
 }
 #concept-content-right .concept-scheme-uri {
   bottom: -30px;
+}
+#concept-content-right .concept-contributor {
+  background-color: #F0F0F0;
+  padding: 14px;
+  padding-right: 14px;
+  position: absolute;
+  bottom: -178px;
 }
 #concept-content-right .concept-scheme-notation {
   bottom: -48px;
