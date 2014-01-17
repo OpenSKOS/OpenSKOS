@@ -326,7 +326,9 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 				$query = 'inScheme:"' . $conceptScheme . '" AND (' . $query . ')';
 			}
 
-			$response = Api_Models_Concepts::factory()->getConcepts($query);
+			$apiModel = Api_Models_Concepts::factory();
+			$apiModel->setQueryParam('fl', 'uri, uuid');
+			$response = $apiModel->getConcepts($query);
 
 			if ($response['response']['numFound'] > 0) {
 				$docs = array_merge($docs, $response['response']['docs']);
@@ -343,11 +345,11 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * @param callback $implicitCallback
 	 * @return array
 	 */
-	public function getRelationsArray($fieldNames, $conceptScheme = null, $implicitCallback = null)
+	public function getRelationsArray($fieldNames, $conceptScheme = null, $implicitCallback = null, $fieldsToFetch = array())
 	{
 		$relations = array();
 		foreach ($fieldNames as $fieldName) {
-			$relations[$fieldName] = $this->getRelationsByField($fieldName, $conceptScheme, $implicitCallback);
+			$relations[$fieldName] = $this->getRelationsByField($fieldName, $conceptScheme, $implicitCallback, $fieldsToFetch);
 		}
 		return $relations;
 	}
@@ -363,19 +365,18 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * @param bool $sortByPrevLabel optional, Default: true.
 	 * @return array
 	 */
-	public function getRelationsByField($fieldName, $conceptScheme = null, $implicitCallback = null, $sortByPrevLabel = true)
-	{ 
-		if (null === $this->model)
-			$this->model = Api_Models_Concepts::factory();
+	public function getRelationsByField($fieldName, $conceptScheme = null, $implicitCallback = null, $sortByPrevLabel = true, $fieldsToFetch = array())
+	{
 		$relations = array();
 		$relations = $this->getInternalAssociation($fieldName, $conceptScheme);
+		
 		if (null !== $implicitCallback) {
 			$implicitRelations = call_user_func_array($implicitCallback, array($fieldName, $conceptScheme));
 			if (!empty($implicitRelations))
 				$relations = array_merge($relations, $implicitRelations);
 		}
-		$unique = array();
 		
+		$unique = array();		
 		reset($relations);
 		$relations = array_filter($relations, function ($element) use (&$unique) {
 			if (in_array($element['uri'], $unique)) {
@@ -384,9 +385,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			$unique[] = $element['uri'];
 			return true;
 		});
+		
 		$concepts = array();
-		foreach ($relations as $relation)
-			$concepts[] = $this->model->getConcept($relation['uuid']);
+		$apiModel = Api_Models_Concepts::factory();
+		if (! empty($fieldsToFetch)) {
+			$apiModel->setQueryParam('fl', implode(', ', $fieldsToFetch));
+		}
+		foreach ($relations as $relation) {
+			$concepts[] = $apiModel->getConcept($relation['uuid']);
+		}
 		
 		if ($sortByPrevLabel) {
 			usort($concepts, array('Api_Models_Concept', 'compareByPreviewLabel'));
