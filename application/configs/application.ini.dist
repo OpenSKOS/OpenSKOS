@@ -20,6 +20,7 @@ upload_path = APPLICATION_PATH "/../data/uploads"
 
 editor.languages.nl="Dutch"
 editor.languages.en="English"
+editor.languages.fr="French"
 
 ; Concepts and Concept schemes uri configuration
 editor.conceptSchemesDefaultBaseUri="http://data.beeldengeluid.nl/gtaa/"
