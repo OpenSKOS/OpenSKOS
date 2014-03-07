@@ -53,11 +53,12 @@ class Editor_Forms_Search extends Zend_Form
 		$user = OpenSKOS_Db_Table_Users::requireFromIdentity();
 		
 		if ($user->disableSearchProfileChanging) {
-			$this->buildAllowedConceptScheme();
+                    $this->buildAllowedConceptScheme();
 		} else {
-			$this->buildConceptScheme();
-			$this->buildSearchProfiles();
+                    $this->buildConceptScheme();			
 		}
+                
+                $this->buildSearchProfiles();
 		
 		$this->buildSearchButton();
 	}
@@ -130,26 +131,29 @@ class Editor_Forms_Search extends Zend_Form
 	
 	protected function buildAllowedConceptScheme()
 	{
-		$loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
 		$userForSearch = $this->getUserForSearch();
-		$userOptions = $userForSearch->getSearchOptions($loggedUser['id'] != $userForSearch['id']);
+                
+                $allowedConceptSchemes = array();
+                
+                foreach ($userForSearch->listDefaultSearchProfiles() as $profile) {
+                    $profileOptions = $profile->getSearchOptions();
 	
-		$inCollections = array();
-		if (isset($userOptions['collections'])) {
-			$inCollections = $userOptions['collections'];
-		}
-	
-		$apiClient = new Editor_Models_ApiClient();
-		$allConceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
-	
-		$allowedConceptSchemes = array();
-		if (isset($userOptions['conceptScheme'])) {
-			foreach ($userOptions['conceptScheme'] as $allowedConceptSchemeUri) {
-				$allowedConceptSchemes[$allowedConceptSchemeUri] = $allConceptSchemes[$allowedConceptSchemeUri];
-			}
-		} else {
-			$allowedConceptSchemes = $allConceptSchemes;
-		}
+                    $inCollections = array();
+                    if (isset($profileOptions['collections'])) {
+                            $inCollections = $profileOptions['collections'];
+                    }
+
+                    $apiClient = new Editor_Models_ApiClient();
+                    $allConceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+
+                    if (isset($profileOptions['conceptScheme'])) {
+                            foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {
+                                    $allowedConceptSchemes[$allowedConceptSchemeUri] = $allConceptSchemes[$allowedConceptSchemeUri];
+                            }
+                    } else {
+                            $allowedConceptSchemes = $allConceptSchemes;
+                    }
+                }
 	
 		$this->addElement('multiCheckbox', 'allowedConceptScheme', array(
 				'label' => _('Concept scheme'),
@@ -191,15 +195,21 @@ class Editor_Forms_Search extends Zend_Form
 		
 		$user = OpenSKOS_Db_Table_Users::requireFromIdentity();
 		
-		$profilesOptions = array();		
+		$profilesOptions = array();
 		$profilesOptions[''] = _('Default');
 		foreach ($profiles as $profile) {
 			$profilesOptions[$profile->id] = $profile->name;
 		}
 		$profilesOptions['custom'] = _('Custom');
 		
-		$userOptions = $user->getSearchOptions();
-	
+                // Check which profiles are allowed for the user.
+                foreach (array_keys($profilesOptions) as $profileKey) {
+                    if (! $user->isAllowedToUseSearchProfile($profileKey)) {
+                        unset($profilesOptions[$profileKey]);
+                    }
+                } 
+                
+		$userOptions = $user->getSearchOptions();	
 		$this->addElement('select', 'searchProfileId', array(
 			'label' => _('Search Profile'),
 			'multiOptions' => $profilesOptions,
@@ -300,15 +310,12 @@ class Editor_Forms_Search extends Zend_Form
 	 */
 	public static function mergeSearchOptions($formOptions, $profileOptions)
 	{
-		// Merge concept schemes options.
-		if (isset($formOptions['allowedConceptScheme']) && isset($profileOptions['conceptScheme'])) {
-			$profileOptions['conceptScheme'] = array_intersect(
-				$profileOptions['conceptScheme'],
-				$formOptions['allowedConceptScheme']				
-			);
-			unset($formOptions['allowedConceptScheme']);
-		}
-		
-		return array_merge($formOptions, $profileOptions);
+            // Merge concept schemes options.
+            if (isset($formOptions['allowedConceptScheme'])) {
+                $profileOptions['conceptScheme'] = $formOptions['allowedConceptScheme'];
+                unset($formOptions['allowedConceptScheme']);
+            }
+
+            return array_merge($formOptions, $profileOptions);
 	}
 }

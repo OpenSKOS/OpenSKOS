@@ -103,7 +103,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `role` varchar(25) NOT NULL DEFAULT "guest",
   `searchOptions` BLOB,
   `conceptsSelection` BLOB,
-  `defaultSearchProfileId` INT,
+  `defaultSearchProfileIds` INT,
   `disableSearchProfileChanging` BOOLEAN,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
@@ -113,11 +113,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_user_search_profile`
-    FOREIGN KEY (`defaultSearchProfileId`)
-    REFERENCES `search_profiles` (`id`)
-    ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
