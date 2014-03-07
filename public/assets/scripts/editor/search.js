@@ -70,6 +70,8 @@ EditorSearch = new Class({
 		if (this.searchForm.getElement('[name=searchText]').value) {
 			this.search();
 		}
+                
+                this.hideProfilesSelectIfNoOptions();
 	},
 	toggleInstantResults: function () {
 		if ( ! this.searchForm.getElement('[type=checkbox][name=instantResults]') || 
@@ -254,14 +256,19 @@ EditorSearch = new Class({
 		return uuids;
 	},
 	setConceptSchemeOptions: function (conceptSchemeOptions) {
-		if (this.searchForm.getElement('#conceptScheme-element')) {
-			var conceptSchemeElement = this.searchForm.getElement('#conceptScheme-element');
+                var elementPrefix = 'conceptScheme';
+                if (! this.searchForm.getElement('#' + elementPrefix + '-element')) {
+                    elementPrefix = 'allowedConceptScheme';
+                }
+                
+		if (this.searchForm.getElement('#' + elementPrefix + '-element')) {
+			var conceptSchemeElement = this.searchForm.getElement('#' + elementPrefix + '-element');
 			conceptSchemeElement.empty();
 			
 			for (var i = 0; i < conceptSchemeOptions.length; i ++) {
-				var optionKey = 'conceptScheme-' + conceptSchemeOptions[i].id.replace(/[^\w]/g, '');
+				var optionKey = elementPrefix + '-' + conceptSchemeOptions[i].id.replace(/[^\w]/g, '');
 				var label = new Element('label', {'for': optionKey});
-				var checkbox = new Element('input', {'type': 'checkbox', 'name': 'conceptScheme[]', 'id': optionKey, 'value': conceptSchemeOptions[i].id});
+				var checkbox = new Element('input', {'type': 'checkbox', 'name': elementPrefix + '[]', 'id': optionKey, 'value': conceptSchemeOptions[i].id});
 				if (conceptSchemeOptions[i].selected) {
 					checkbox.setAttribute('checked', 'checked');
 				}
@@ -283,14 +290,19 @@ EditorSearch = new Class({
 				var option = new Element('option', {value: profilesOptions[i].id, text: profilesOptions[i].name, selected: profilesOptions[i].selected});
 				option.inject(searchDropdown);
 			}
-	
-			if (searchDropdown.getElements('option').length > 2) {
-				$('search-profile-selector').show();
-			} else {
-				$('search-profile-selector').hide();
-			}
+                        this.hideProfilesSelectIfNoOptions();
 		}
 	},
+        hideProfilesSelectIfNoOptions: function() {
+            var searchDropdown = this.searchForm.getElement('select[name=searchProfileId]');
+            if (searchDropdown) {
+                if (searchDropdown.getElements('option').length > 1) {
+                        $('search-profile-selector').show();
+                } else {
+                        $('search-profile-selector').hide();
+                }
+            }
+        },
 	hideCustomProfileIfNotSelected: function () {
 		if (this.searchForm.getElement('select[name=searchProfileId]') && this.searchForm.getElement('select[name=searchProfileId]').get('value') != 'custom' && this.searchForm.getElement('select[name=searchProfileId]').getElement('option[value=custom]')) {
 			this.searchForm.getElement('select[name=searchProfileId]').getElement('option[value=custom]').hide();
