@@ -45,9 +45,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 		
 		// Change search profile if needed and allowed. Change concept schemes if needed.
 		if ($loggedUser['id'] == $userForSearch['id']) {
-			if (! $loggedUser->disableSearchProfileChanging) {			
-				$profileId = $this->getRequest()->getParam('searchProfileId', '');
-				
+                        $profileId = $this->getRequest()->getParam('searchProfileId', '');
+			if ($loggedUser->isAllowedToUseSearchProfile($profileId)) {
 				if ($detailedSearchOptions['searchProfileId'] != $profileId
 						 || ! isset($detailedSearchOptions['searchProfileId'])) {
 					
@@ -62,7 +61,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 					$detailedSearchOptions['searchProfileId'] = $profileId;
 					$loggedUser->setSearchOptions($detailedSearchOptions);
 					
-				} elseif ($searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
+				} elseif (isset($searchOptions['conceptScheme']) && isset($detailedSearchOptions['conceptScheme'])
+                                            && $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
 					
 					// Change concept schemes selection
 					$detailedSearchOptions['searchProfileId'] = 'custom';
@@ -187,11 +187,12 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 		
 		// Reset defaults
 		if ((bool)$this->getRequest()->getParam('resetDefaults', false)) {
-			if (isset($user['defaultSearchProfileId']) && ! empty($user['defaultSearchProfileId'])) {
-				return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => $user['defaultSearchProfileId']));
-			} else {
-				return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => ''));
-			}
+                    $defaultProfile = $user->getFirstDefaultSearchProfile();
+                    if ($defaultProfile !== null) {
+                            return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => $defaultProfile->id));
+                    } else {
+                            return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => ''));
+                    }
 		}
 		
 		// Switch profile.
@@ -278,16 +279,29 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 	private function _getConceptSchemeOptions()
 	{
 		$conceptSchemeOptions = array();
-	
-		if (! $this->getCurrentUser()->disableSearchProfileChanging) {
-			$userOptions = $this->getCurrentUser()->getSearchOptions();
-			$searchForm = Editor_Forms_Search::factory();
-			$rawOptions = $searchForm->getElement('conceptScheme')->getAttrib('options');
-				
-			foreach ($rawOptions as $id => $name) {
-				$conceptSchemeOptions[] = array('id' => $id, 'name' => $name, 'selected' => (isset($userOptions['conceptScheme']) && in_array($id, $userOptions['conceptScheme'])));
-			}
-		}
+                
+                $userOptions = $this->getCurrentUser()->getSearchOptions();
+                $searchForm = Editor_Forms_Search::factory();
+                
+                if ($this->getCurrentUser()->disableSearchProfileChanging) {
+                    $searchForm->populate($this->getRequest()->getPost());
+                    $userOptions['allowedConceptScheme'] = $searchForm->getElement('allowedConceptScheme')->getValue();
+                    
+                    $conceptSchemesKey = 'allowedConceptScheme';
+		    $conceptSchemesEl = $searchForm->getElement('allowedConceptScheme');
+		} else {
+                    $conceptSchemesKey = 'conceptScheme';
+                    $conceptSchemesEl = $searchForm->getElement('conceptScheme');
+                }
+                
+                $rawOptions = $conceptSchemesEl->getAttrib('options');
+                foreach ($rawOptions as $id => $name) {
+                        $conceptSchemeOptions[] = array(
+                            'id' => $id,
+                            'name' => $name,
+                            'selected' => (isset($userOptions[$conceptSchemesKey]) && in_array($id, $userOptions[$conceptSchemesKey]))
+                        );
+                }
 	
 		return $conceptSchemeOptions;
 	}
@@ -296,15 +310,13 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 	{
 		$profilesOptions = array();
 		
-		if (! $this->getCurrentUser()->disableSearchProfileChanging) {
-			$userOptions = $this->getCurrentUser()->getSearchOptions();
-			$searchForm = Editor_Forms_Search::factory();
-			$rawOptions = $searchForm->getElement('searchProfileId')->getAttrib('options');
-			
-			foreach ($rawOptions as $id => $name) {
-				$profilesOptions[] = array('id' => $id, 'name' => $name, 'selected' => (isset($userOptions['searchProfileId']) && $userOptions['searchProfileId'] == $id));
-			}
-		}
+                $userOptions = $this->getCurrentUser()->getSearchOptions();
+                $searchForm = Editor_Forms_Search::factory();
+                $rawOptions = $searchForm->getElement('searchProfileId')->getAttrib('options');
+
+                foreach ($rawOptions as $id => $name) {
+                        $profilesOptions[] = array('id' => $id, 'name' => $name, 'selected' => (isset($userOptions['searchProfileId']) && $userOptions['searchProfileId'] == $id));
+                }
 		
 		return $profilesOptions;
 	}

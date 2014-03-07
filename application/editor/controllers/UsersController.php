@@ -90,9 +90,15 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
 			
 			if ($userFromIdentity->isAllowed('editor.users', 'manage')) {
 				$formData = $form->getValues();
-				if (isset($formData['defaultSearchProfileId']) && empty($formData['defaultSearchProfileId'])) {
-					$formData['defaultSearchProfileId'] = null;
+                                
+				if (isset($formData['defaultSearchProfileIds'])) {
+                                    if (! empty($formData['defaultSearchProfileIds'])) {
+					$formData['defaultSearchProfileIds'] = implode(', ', $formData['defaultSearchProfileIds']);
+                                    } else {
+                                        $formData['defaultSearchProfileIds'] = null;
+                                    }
 				}
+                                
 				$user
 					->setFromArray($formData)
 					->setFromArray(array('tenant' => $this->_tenant->code));
