@@ -62,7 +62,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 					$detailedSearchOptions['searchProfileId'] = $profileId;
 					$loggedUser->setSearchOptions($detailedSearchOptions);
 					
-				} elseif ($searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
+				} elseif (isset($searchOptions['conceptScheme']) && isset($detailedSearchOptions['conceptScheme'])
+                                            && $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
 					
 					// Change concept schemes selection
 					$detailedSearchOptions['searchProfileId'] = 'custom';
