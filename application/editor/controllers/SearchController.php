@@ -42,7 +42,6 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 		$searchOptions = $this->view->searchForm->getValues();
 		$detailedSearchOptions = $userForSearch->getSearchOptions(true);
 		
-		
 		// Change search profile if needed and allowed. Change concept schemes if needed.
 		if ($loggedUser['id'] == $userForSearch['id']) {
                         $profileId = $this->getRequest()->getParam('searchProfileId', '');
@@ -61,13 +60,20 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 					$detailedSearchOptions['searchProfileId'] = $profileId;
 					$loggedUser->setSearchOptions($detailedSearchOptions);
 					
-				} elseif (isset($searchOptions['conceptScheme']) && isset($detailedSearchOptions['conceptScheme'])
-                                            && $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
+				} elseif ((!isset($searchOptions['conceptScheme']) || !isset($detailedSearchOptions['conceptScheme'])) 
+                                        || $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
 					
-					// Change concept schemes selection
-					$detailedSearchOptions['searchProfileId'] = 'custom';
-					$detailedSearchOptions['conceptScheme'] = $searchOptions['conceptScheme'];
-					$loggedUser->setSearchOptions($detailedSearchOptions);
+                                        if ($loggedUser->isAllowedToUseSearchProfile('custom')) {
+                                            // Change concept schemes selection
+                                            $detailedSearchOptions['searchProfileId'] = 'custom';
+                                            if (isset($searchOptions['conceptScheme'])) {
+                                                $detailedSearchOptions['conceptScheme'] = $searchOptions['conceptScheme'];
+                                            } else {
+                                                $detailedSearchOptions['conceptScheme'] = array();
+                                            }
+
+                                            $loggedUser->setSearchOptions($detailedSearchOptions);
+                                        }
 				}
 			}
 		}
