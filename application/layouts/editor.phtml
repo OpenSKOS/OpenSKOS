@@ -53,7 +53,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css" type="text/css" media="all" />
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css" type="text/css" media="all" />
 		
-		<?php $scriptsVersion = 3; // Change that if the scripts are changed.?>
+		<?php $scriptsVersion = 4; // Change that if the scripts are changed.?>
 		<?php if ($controller == 'index'):?>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/search.js?v=<?php echo $scriptsVersion;?>"></script>
