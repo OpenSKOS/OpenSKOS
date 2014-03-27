@@ -136,28 +136,27 @@ class Editor_Forms_Search extends Zend_Form
                 $userOptions = $userForSearch->getSearchOptions($loggedUser['id'] != $userForSearch['id']);
                 
                 $allowedConceptSchemes = array();
-                
-                foreach ($userForSearch->listDefaultSearchProfiles() as $profile) {
-                    $profileOptions = $profile->getSearchOptions();
-	
-                    $inCollections = array();
-                    if (isset($profileOptions['collections'])) {
-                            $inCollections = $profileOptions['collections'];
-                    }
-
-                    $apiClient = new Editor_Models_ApiClient();
-                    $allConceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
-
-                    if (isset($profileOptions['conceptScheme'])) {
-                            foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {
-                                    $allowedConceptSchemes[$allowedConceptSchemeUri] = $allConceptSchemes[$allowedConceptSchemeUri];
-                            }
-                    } else {
-                            $allowedConceptSchemes = $allConceptSchemes;
+                if (isset($userOptions['searchProfileId'])) {
+                    $profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
+                    $profile = $profilesModel->find($userOptions['searchProfileId'])->current();
+                    
+                    if (null !== $profile) {
+                        $detailedSearchOptions = $profile->getSearchOptions();
+                        
+                        $apiClient = new Editor_Models_ApiClient();
+                        
+                        $inCollections = array();
+                        if (isset($userOptions['collections'])) {
+                                $inCollections = $userOptions['collections'];
+                        }
+                        
+                        $allConceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+                        
+                        foreach ($detailedSearchOptions['conceptScheme'] as $allowedConceptSchemeUri) {
+                            $allowedConceptSchemes[$allowedConceptSchemeUri] = $allConceptSchemes[$allowedConceptSchemeUri];
+                        }
                     }
                 }
-                
-                asort($allowedConceptSchemes);
                 
                 $selectedAllowedConceptSchemes = array();
 		if (isset($userOptions['conceptScheme'])) {
