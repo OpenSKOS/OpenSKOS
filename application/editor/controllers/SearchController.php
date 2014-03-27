@@ -60,6 +60,10 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 					$detailedSearchOptions['searchProfileId'] = $profileId;
 					$loggedUser->setSearchOptions($detailedSearchOptions);
 					
+                                        if ($loggedUser->disableSearchProfileChanging) {
+                                            $searchOptions['allowedConceptScheme'] = $detailedSearchOptions['conceptScheme'];
+                                        }
+                                        
 				} elseif ((!isset($searchOptions['conceptScheme']) || !isset($detailedSearchOptions['conceptScheme'])) 
                                         || $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
 					
@@ -98,7 +102,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 				'status' => 'ok',
 				'numFound' => $conceptsRaw['numFound'],
 				'concepts' => $concepts,
-				'conceptSchemeOptions' => $this->_getConceptSchemeOptions(),
+				'conceptSchemeOptions' => $this->_getConceptSchemeOptions($searchOptions),
 				'profileOptions' => $this->_getProfilesSelectOptions()
 			)
 		);
@@ -282,7 +286,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
 		$this->_helper->_layout->setLayout('editor_modal_box');
 	}
 	
-	private function _getConceptSchemeOptions()
+	private function _getConceptSchemeOptions($searchOptions)
 	{
 		$conceptSchemeOptions = array();
                 
@@ -290,8 +294,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
                 $searchForm = Editor_Forms_Search::factory();
                 
                 if ($this->getCurrentUser()->disableSearchProfileChanging) {
-                    $searchForm->populate($this->getRequest()->getPost());
-                    $userOptions['allowedConceptScheme'] = $searchForm->getElement('allowedConceptScheme')->getValue();
+                    $userOptions['allowedConceptScheme'] = $searchOptions['allowedConceptScheme'];
                     
                     $conceptSchemesKey = 'allowedConceptScheme';
 		    $conceptSchemesEl = $searchForm->getElement('allowedConceptScheme');
