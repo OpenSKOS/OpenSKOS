@@ -131,7 +131,9 @@ class Editor_Forms_Search extends Zend_Form
 	
 	protected function buildAllowedConceptScheme()
 	{
+                $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
 		$userForSearch = $this->getUserForSearch();
+                $userOptions = $userForSearch->getSearchOptions($loggedUser['id'] != $userForSearch['id']);
                 
                 $allowedConceptSchemes = array();
                 
@@ -154,11 +156,18 @@ class Editor_Forms_Search extends Zend_Form
                             $allowedConceptSchemes = $allConceptSchemes;
                     }
                 }
-	
+                
+                asort($allowedConceptSchemes);
+                
+                $selectedAllowedConceptSchemes = array();
+		if (isset($userOptions['conceptScheme'])) {
+			$selectedAllowedConceptSchemes = array_intersect($userOptions['conceptScheme'], array_keys($allowedConceptSchemes));
+		}
+                
 		$this->addElement('multiCheckbox', 'allowedConceptScheme', array(
 				'label' => _('Concept scheme'),
 				'multiOptions' => $allowedConceptSchemes,
-				//'value' => $selectedAllowedConceptSchemes
+				'value' => $selectedAllowedConceptSchemes
 		));
 		return $this;
 	}
