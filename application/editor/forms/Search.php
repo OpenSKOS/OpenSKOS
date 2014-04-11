@@ -141,21 +141,24 @@ class Editor_Forms_Search extends Zend_Form
             $profile = $profilesModel->find($userOptions['searchProfileId'])->current();
 
             if (null !== $profile) {
-                $detailedSearchOptions = $profile->getSearchOptions();
+                $profileOptions = $profile->getSearchOptions();
 
                 $apiClient = new Editor_Models_ApiClient();
 
                 $inCollections = array();
-                if (isset($userOptions['collections'])) {
-                    $inCollections = $userOptions['collections'];
+                if (isset($profileOptions['collections'])) {
+                    $inCollections = $profileOptions['collections'];
                 }
 
-                $allConceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+                $conceptSchemesInCollections = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
 
-                if (!empty($detailedSearchOptions['conceptScheme'])) {
-                    foreach ($detailedSearchOptions['conceptScheme'] as $allowedConceptSchemeUri) {
-                        $allowedConceptSchemes[$allowedConceptSchemeUri] = $allConceptSchemes[$allowedConceptSchemeUri];
+                if (!empty($profileOptions['conceptScheme'])) {
+                    foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {
+                        $allowedConceptSchemes[$allowedConceptSchemeUri] = $conceptSchemesInCollections[$allowedConceptSchemeUri];
                     }
+                } else {
+                    // If we don't have concept schemes checked - then all concept schemes in the collections are allowed.
+                    $allowedConceptSchemes = $conceptSchemesInCollections;
                 }
             }
         }
