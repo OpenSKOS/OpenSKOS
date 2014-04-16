@@ -1,8 +1,12 @@
 1. Install the OpenSKOS code
 ===============================================================================
-Copy the code to a location of your choice. Make sure all files are readable by
-your webserver. Make sure the "data/uploads" directory is writable for the webserver.
-For security reasons you can place this "data" directory outside your
+Copy the code to a location of your choice. 
+
+Make sure all files are readable by your webserver. Make sure the directories
+"data/uploads", "cache", "public/data/icons/assigned" and 
+"public/data/icons/uploads" are writable for the webserver.
+
+For security reasons you can place the "data" directory outside your
 webserver's document root.
 
 1.1 Configuration
