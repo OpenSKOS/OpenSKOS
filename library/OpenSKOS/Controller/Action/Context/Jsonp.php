@@ -99,7 +99,7 @@ class OpenSKOS_Controller_Action_Context_Jsonp
         $response = $this->contextSwitch->getResponse();        
         
         $response->setBody(
-            $this->callbackFunction . '(' . $response->getBody() . ')'
+            $this->callbackFunction . '(' . $response->getBody() . ');'
         );
     }
     
