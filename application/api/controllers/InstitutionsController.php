@@ -37,7 +37,7 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
 	{
 		$model = new OpenSKOS_Db_Table_Tenants();
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
-		if ($context == 'json') {
+		if ($context == 'json' || $context == 'jsonp') {
 			$this->view->assign('institutions', $model->fetchAll()->toArray());
 		} else {
 			$this->view->tenants = $model->fetchAll();
@@ -53,7 +53,7 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
 			throw new Zend_Controller_Action_Exception('Insitution `'.$code.'` not found', 404);
 		}
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
-		if ($context == 'json') {
+		if ($context == 'json' || $context == 'jsonp') {
 			foreach ($tenant as $key => $val) {
 				$this->view->assign($key, $val);
 			}
