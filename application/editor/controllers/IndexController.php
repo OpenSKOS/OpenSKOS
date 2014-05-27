@@ -26,7 +26,7 @@ class Editor_IndexController extends OpenSKOS_Controller_Editor
 		$user =  OpenSKOS_Db_Table_Users::requireFromIdentity();
 		$apiClient = new Editor_Models_ApiClient();;
 		$this->view->assign('conceptSchemes', $apiClient->getAllConceptSchemeUriTitlesMap());
-		$this->view->assign('conceptSchemesId',  $apiClient->getConceptSchemeMap('uri', 'uuid'));		
+		$this->view->assign('conceptSchemesId',  $apiClient->getConceptSchemeMap('uri', 'uuid'));
 		$this->view->assign('disableSearchProfileChanging', $user->disableSearchProfileChanging);
 		$this->view->assign('exportForm', Editor_Forms_Export::getInstance());
 		$this->view->assign('deleteForm', Editor_Forms_Delete::getInstance());		

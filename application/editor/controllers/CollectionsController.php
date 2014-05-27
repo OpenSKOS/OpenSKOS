@@ -196,6 +196,16 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 		}
 	}
 	
+	public function getConceptsBaseUrlAction()
+	{
+		$model = new OpenSKOS_Db_Table_Collections();
+		$collection = $model->find($this->getRequest()->getParam('id'))->current();
+		
+		$conceptsBaseUrl = $collection->getConceptsBaseUri();
+		
+		$this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $conceptsBaseUrl));
+	}
+	
 	/**
 	 * @return OpenSKOS_Db_Table_Row_Collection
 	 */

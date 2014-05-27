@@ -119,6 +119,9 @@ You can do this by querying the find API with the selected label, for example if
 			<li>
 				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=json"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=json</a>
 			</li>
+                        <li>
+				in JSONP format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
+			</li>
 			<!-- 
 			<li>
 				in (internal) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
@@ -279,6 +282,9 @@ if ($response->isSuccessful()) {
 			<li>
 			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json</a>
 			</li>
+                        <li>
+			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234</a>
+			</li>
 			<!-- 
 			<li>
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
@@ -295,6 +301,9 @@ if ($response->isSuccessful()) {
 			</li>
 			<li>
 			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
+			</li>
+                        <li>
+			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
 			</li>
 			<!-- 
 			<li>
@@ -363,6 +372,9 @@ if ($response->isSuccessful()) {
 			<li>
 				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=json"><?php echo $this->url(array('controller' => 'institutions'))?>?format=json</a>
 			</li>
+                        <li>
+				in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions'))?>?format=jsonp&amp;callback=myCallback_1234</a>
+			</li>
 			<li>
 				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=html"><?php echo $this->url(array('controller' => 'institutions'))?>?format=html</a>
 			</li>
@@ -375,6 +387,9 @@ if ($response->isSuccessful()) {
 			</li>
 			<li>
 				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json</a>
+			</li>
+                        <li>
+				in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.jsonp?callback=myCallback_1234</a>
 			</li>
 			<li>
 				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html</a>
@@ -393,6 +408,9 @@ if ($response->isSuccessful()) {
 			<li>
 				in JSON: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=json"><?php echo $this->url(array('controller' => 'collections'))?>?format=json</a>
 			</li>
+                        <li>
+				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&amp;callback=myCallback_1234</a>
+			</li>
 			<li>
 				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=html"><?php echo $this->url(array('controller' => 'collections'))?>?format=html</a>
 			</li>
@@ -405,6 +423,9 @@ if ($response->isSuccessful()) {
 			</li>
 			<li>
 				in JSON: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.json"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.json</a>
+			</li>
+                        <li>
+				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234</a>
 			</li>
 			<li>
 				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html</a>

@@ -18,16 +18,16 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 window.addEvent('domready', function() {
-	fitCentralPanelWidth();
 	fitPanelHeights();
+	fitCentralPanelWidth();
 	if ($('left-panel')) {
 		makeLeftPanelResizable();
 	}
 });
 
 window.addEvent('resize', function() {
-	fitCentralPanelWidth();
 	fitPanelHeights();
+	fitCentralPanelWidth();
 });
 
 function fitCentralPanelWidth() {
@@ -40,7 +40,9 @@ function fitCentralPanelWidth() {
 	
 	var rightPanelWidth = 0;
 	if ($('right-panel')) {
+		$('right-panel').setStyle('overflow', 'hidden');
 		rightPanelWidth = $('right-panel').getStyle('width').toInt() + $('right-panel').getStyle('border-left').toInt() + $('right-panel').getStyle('border-right').toInt();
+		$('right-panel').setStyle('overflow', 'auto');
 	}
 	
 	if ($('central-panel')) {
@@ -110,7 +112,16 @@ function makeLeftPanelResizable()
 	var subConceptsOffset = 10;
 	var initialLeftColumnWidth = $('left-panel').getStyle('width').toInt();
 	var initialSearchTextWidth = $('left-panel').getElement('input[name="searchText"]').getStyle('width').toInt();
-	var initialConceptSchemeWidth = $('left-panel').getElement('#conceptScheme-element').getStyle('width').toInt();
+	if ($('left-panel').getElement('#conceptScheme-element')) {
+		var initialConceptSchemeWidth = $('left-panel').getElement('#conceptScheme-element').getStyle('width').toInt();
+	} else {
+		var initialConceptSchemeWidth = 0;
+	}
+	if ($('left-panel').getElement('#allowedConceptScheme-element')) {
+		var initialAllowedConceptSchemeSchemeWidth = $('left-panel').getElement('#allowedConceptScheme-element').getStyle('width').toInt();
+	} else {
+		var initialAllowedConceptSchemeSchemeWidth = 0;
+	}
 	var initialConceptLinkContentWidth = $('left-panel').getElement('.concept-link-content').getStyle('width').toInt();
 	if ($('left-panel').getElement('#searchProfileId-element select')) {
 		var initialProfilesSelectWidth = $('left-panel').getElement('#searchProfileId-element select').getStyle('width').toInt();
@@ -148,6 +159,14 @@ function makeLeftPanelResizable()
 		
 		$('left-panel').getElements('#conceptScheme-element').each(function (el) {
 			el.setStyle('width', initialConceptSchemeWidth + newWidth - initialLeftColumnWidth + 12); // +12 for scroller.
+		});
+		
+		$('left-panel').getElements('#allowedConceptScheme-element').each(function (el) {
+			el.setStyle('width', initialAllowedConceptSchemeSchemeWidth + newWidth - initialLeftColumnWidth);
+		});
+		
+		$('left-panel').getElements('#allowedConceptScheme-element').each(function (el) {
+			el.setStyle('width', initialAllowedConceptSchemeSchemeWidth + newWidth - initialLeftColumnWidth + 12); // +12 for scroller.
 		});
 		
 		$('left-panel').getElements('#searchProfileId-element select').each(function (el) {

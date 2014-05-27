@@ -50,10 +50,12 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 				}
 			}
 		</script>
-		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css" type="text/css" media="all" />
-		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css" type="text/css" media="all" />
+                
+		<?php $scriptsVersion = 5; // Change that if the scripts are changed.?>
+                
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
+		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
 		
-		<?php $scriptsVersion = 2; // Change that if the scripts are changed.?>
 		<?php if ($controller == 'index'):?>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/search.js?v=<?php echo $scriptsVersion;?>"></script>
@@ -69,12 +71,8 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 		<?php else:?>
 			<script src="<?php echo $baseUrl?>assets/scripts/openskos.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/forms.js?v=<?php echo $scriptsVersion;?>"></script>
-			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/default.css" type="text/css" media="all" />
-			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/forms.css" type="text/css" media="screen" />
-		<?php endif?>
-
-		<?php if (isset($_GET['css'])):?>
-			<link rel="stylesheet" href="<?php echo $baseUrl?>interaction_design/themes/clean/css/main.css" type="text/css" media="all" />
+			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/default.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
+			<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/forms.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="screen" />
 		<?php endif?>
 
 		<link rel="shortcut icon" href="<?php echo $baseUrl?>assets/images/favicon.ico" />
@@ -97,7 +95,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 						?>
 			        	<?php echo $this->translate('Aangemeld als')?> <strong><a id="editMyProfile" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'view', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a></strong>
 			        	&nbsp;&nbsp;
-			        	<a id="logout" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><img style="vertical-align: middle;" src="<?php echo $baseUrl?>interaction_design/images/icons/logoff.gif" alt="" /></a>
+			        	<a id="logout" href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><img style="vertical-align: middle;" src="<?php echo $baseUrl?>assets/images/logoff.gif" alt="" /></a>
 		        	<?php endif ?>
 	        	</div>
 	        	<div class="clear"></div>

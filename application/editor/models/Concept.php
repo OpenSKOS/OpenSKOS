@@ -254,7 +254,8 @@ class Editor_Models_Concept extends Api_Models_Concept
 		foreach ($formData as $key => $value) {
 			if (in_array($key, $formMapping['languageFields'])) {
 				foreach ($formData[$key] as $languageCode => $values) {
-					if (!empty($languageCode) && array_filter($values)) {
+					$values = array_filter($values);
+					if (!empty($languageCode) && ! empty($values)) {
 						$formData[$key.'@'.$languageCode] = $values;
 					}
 				}
@@ -465,16 +466,20 @@ class Editor_Models_Concept extends Api_Models_Concept
 			$callback = array($this, 'getAllMappings');
 		}
 		
-		$concepts = $this->getRelationsByField($relation, $schemeUri,  $callback);
-		 
-		if (empty($concepts))
+		$currentLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();
+		
+		$fieldsToFetch = array('uuid', 'uri', 'prefLabel', 'prefLabel@' . $currentLanguage, 'inScheme');
+		
+		$concepts = $this->getRelationsByField($relation, $schemeUri,  $callback, true, $fieldsToFetch);
+		if (empty($concepts)) {
 			return array();
+		}
 		 
 		foreach ($concepts as $concept) {
 			$schemesData = array();
 			$schemesData = $apiClient->getConceptSchemes($concept['inScheme']);
 			
-			$previewLabel = $concept->getMlField('prefLabel', Zend_Registry::get('Zend_Locale')->getLanguage());
+			$previewLabel = $concept->getMlField('prefLabel', $currentLanguage);
 			$isInternal = $this->isInternalRelation($concept['uri'], $relation);
 			if (!$isInternal) {
 				$previewLabel .= '*';
