@@ -19,109 +19,117 @@
  */
 @CHARSET "UTF-8";
 @CHARSET "UTF-8";
-/* line 2, src/sass/common.scss */
 body {
   font: 0.9em "Trebuchet MS", Arial, Helvetica, sans-serif;
   color: #3c1038;
 }
 
-/* line 7, src/sass/common.scss */
 a {
   color: #822966;
   text-decoration: none;
 }
 
-/* line 12, src/sass/common.scss */
 a:visted {
   color: #3c1038;
 }
 
-/* line 16, src/sass/common.scss */
 a:HOVER {
   text-decoration: underline;
 }
 
-/* line 20, src/sass/common.scss */
 a.block {
   display: block;
 }
 
-/* line 24, src/sass/common.scss */
 a[rel="external"] {
   padding-right: 13px;
   background: url(../images/external.png) center right no-repeat;
 }
 
-/* line 26, src/sass/default.scss */
 #content {
   font-size: 1.0em;
   line-height: 1.5;
   text-align: left;
 }
 
-/* line 32, src/sass/default.scss */
-h2, h3, h4 {
+h1, h2, h3, h4 {
   color: #822966;
   font-weight: bold;
   font-size: 1em;
 }
 
-/* line 64, src/sass/default.scss */
+h1 {
+  font-size: 180%;
+  font-weight: bold;
+  border-bottom: 2px solid #3c1038;
+  margin: 0.5em 0 1em 0;
+  overflow: auto;
+}
+
+h1 img {
+  display: block;
+  float: left;
+  margin-bottom: 10px;
+}
+
+h1 span {
+  padding: 15px 0 0 20px;
+  display: block;
+  float: left;
+}
+
+h2 {
+  border-bottom: 1px solid #3c1038;
+  font-size: 140%;
+  margin: 0.5em 0 0.5em 0;
+}
+
 h3 {
   font-size: 120%;
 }
 
-/* line 68, src/sass/default.scss */
 h4 {
   font-size: 90%;
 }
 
 /* Tables */
-/* line 77, src/sass/default.scss */
 table {
   width: auto;
   border-collapse: collapse;
 }
 
-/* line 82, src/sass/default.scss */
 td, th {
   border: 1px solid #822966;
   padding: 3px 7px 2px 7px;
 }
 
-/* line 87, src/sass/default.scss */
 thead tr th {
   background-color: #a1568a;
   color: #fff;
 }
 
-/* line 92, src/sass/default.scss */
 tr.even {
   background-color: #fff5fc;
 }
 
 /* Definition lists */
-/* line 98, src/sass/default.scss */
 dl {
   margin: 0;
   padding: 0;
 }
 
-/* line 104, src/sass/default.scss */
 dt {
   margin: 0;
   padding: 0;
   font-weight: bold;
 }
 
-/* line 111, src/sass/default.scss */
 dd {
   margin: 0 0 1em 0;
   padding: 0;
 }
 
 /* GESHI CSS */
-/* line 117, src/sass/default.scss */
 div.example {
   background: #fff5fc;
   border: 1px solid #999;
@@ -132,12 +140,10 @@ div.example {
   -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
-/* line 127, src/sass/default.scss */
 div.example p.title {
   font-weight: bold;
 }
 
-/* line 131, src/sass/default.scss */
 div.example div.code {
   margin: 1.5em 0;
   padding: 1em 1.25em 0.75em;
@@ -148,32 +154,40 @@ div.example div.code {
   -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
-/* line 141, src/sass/default.scss */
 div.example div.code ol {
   list-style: decimal outside;
   padding: 0 0 1em 25px;
 }
 
 /* END GESHI CSS */
-/* line 148, src/sass/default.scss */
 #identity {
   font-size: 85%;
   float: right;
   margin-right: 5px;
 }
 
-div#central-panel .inner-panel {
-	padding-left: 15px;
-	padding-right: 15px;
-	padding-top: 10px;
+footer {
+  border-top: 1px solid #3c1038;
+  margin: 0.5em 0 1em 0;
+  padding: 5px;
 }
 
-/* line 172, src/sass/default.scss */
+footer p {
+  font-size: 85%;
+}
+
+footer p#colofon {
+  float: left;
+}
+
+footer p#copyright {
+  float: right;
+}
+
 div.note {
   background: transparent url(../images/tip.png) top left no-repeat;
 }
 
-/* line 176, src/sass/default.scss */
 div.note p {
   font-style: italic;
   font-size: 85%;
@@ -181,18 +195,15 @@ div.note p {
   padding-left: 20px;
 }
 
-/* line 183, src/sass/default.scss */
 .api-examples a {
   white-space: nowrap;
 }
 
-/* line 187, src/sass/default.scss */
 a.resolvable-concept.loading {
   padding-right: 15px;
   background: transparent url(../images/spinner.gif) center right no-repeat;
 }
 
-/* line 193, src/sass/default.scss */
 div.message, div.error {
   font-size: 18px;
   font-weight: 500;
@@ -200,23 +211,19 @@ div.message, div.error {
   line-height: 30px;
 }
 
-/* line 200, src/sass/default.scss */
 div.error {
   background: url("../images/warning.png") 0px 5px no-repeat;
 }
 
-/* line 204, src/sass/default.scss */
 div.error p {
   color: Red;
   font-style: italic;
 }
 
-/* line 209, src/sass/default.scss */
 div.message {
   background: url("../images/notice_note.png") center left no-repeat;
 }
 
-/* line 213, src/sass/default.scss */
 .box {
   padding: 5px;
   background: #fff5fc;
@@ -226,50 +233,31 @@ div.message {
   -moz-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
-/* line 251, src/sass/default.scss */
 .clear {
   clear: both;
   overflow: auto;
 }
 
-/* line 256, src/sass/default.scss */
 #collection-form {
   float: left;
   width: 550px;
 }
 
-/* line 261, src/sass/default.scss */
 #collection-stats {
   float: right;
   width: auto;
 }
 
-/* line 266, src/sass/default.scss */
 #collections-per-institute .dc_description {
   margin-top: 0px;
   padding-top: 0px;
   color: #888;
 }
 
-/* line 272, src/sass/default.scss */
 .job-status-error {
   color: Red;
 }
 
-/* line 276, src/sass/default.scss */
 .job-status-success {
   color: Green;
-}
-
-#header #breadcrumbs, #header #login_data {
-  font-size: 12px !important;
-}
-
-.login-regular,
-.login-openid {
-	float: left;
-}
-
-.login-regular {
-	width: 500px;
 }

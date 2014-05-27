@@ -54,7 +54,7 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
 					break;
 			}
 		}
-		if ($context == 'json') {
+		if ($context == 'json' || $context == 'jsonp') {
 			$this->view->assign('collections', $model->fetchAll($select)->toArray());
 		} else {
 			$this->view->collections = $model->fetchAll($select);
@@ -81,7 +81,7 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
 		}
 		
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
-		if ($context == 'json') {
+		if ($context == 'json' || $context == 'jsonp') {
 			foreach ($collection as $key => $val) {
 				$this->view->assign($key, $val);
 			}

@@ -331,6 +331,8 @@ class Editor_Models_Export
 			$mainDirPath = APPLICATION_PATH . '/../public/data/export';
 		}
 	
+		$mainDirPath = rtrim($mainDirPath, '/') . '/';
+		
 		return $mainDirPath;
 	}
 	

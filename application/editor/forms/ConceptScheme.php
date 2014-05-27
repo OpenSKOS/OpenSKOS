@@ -113,11 +113,10 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
 		$this->addElement('text', 'uriBase', array(
 				'label' => 'URI: ',
 				'decorators' => array('ViewHelper', 'Label'),
-				'filters' => array('StringTrim'),
-				'value' => Editor_Models_ConceptScheme::buildUri('')
+				'filters' => array('StringTrim')
 		));
 		$this->getElement('uriBase')->setRequired(true);
-				
+		
 		$this->addElement('text', 'uriCode', array(
 				'decorators' => array('ViewHelper'),
 				'filters' => array('StringTrim')

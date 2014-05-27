@@ -150,6 +150,20 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		return $this->getTable()->getConceptSchemes($this);
 	}
 	
+	public function getConceptsBaseUri()
+	{
+		if (isset($this->conceptsBaseUrl) && !empty($this->conceptsBaseUrl)) {
+			return $this->conceptsBaseUrl;
+		} else {
+			$editorOptions = OpenSKOS_Application_BootstrapAccess::getOption('editor');
+			if (isset($editorOptions['conceptSchemesDefaultBaseUri'])) {
+				return $editorOptions['conceptSchemesDefaultBaseUri'];
+			} else {
+				return '';
+			}
+		}
+	}
+	
 	public function addNamespace(OpenSKOS_Db_Table_Row_Namespace $namespace)
 	{
 		$model = new OpenSKOS_Db_Table_CollectionHasNamespaces();
@@ -179,6 +193,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
 				->addElement('checkbox', 'allow_oai', array('label' => _('Allow OpenSKOS OAI Harvesting')))
 				->addElement('select', 'OAI_baseURL', array('label' => _('OAI baseURL'), 'style' => 'width: 450px;'))
+				->addElement('text', 'conceptsBaseUrl', array('label' => _('Concepts base url'), 'style' => 'width: 450px;'))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
 				->addElement('submit', 'cancel', array('label'=>_('Cancel')))

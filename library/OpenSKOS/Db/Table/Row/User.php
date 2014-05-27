@@ -50,7 +50,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 				->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
 				->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
 				->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication)'), 'required' => false))
-				->addElement('select', 'defaultSearchProfileId', array('label' => _('Search Profile Id'), 'required' => false))
+				->addElement('multiselect', 'defaultSearchProfileIds', array('label' => _('Search Profile Id'), 'required' => false))
 				->addElement('checkbox', 'disableSearchProfileChanging', array('label' => _('Disable changing search profile'), 'required' => false))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
@@ -71,11 +71,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 			}
 			$searchProfiles = $searchProfilesModel->fetchAll($select);
 			$searchProfilesOptions = array();
-			$searchProfilesOptions[''] = '';
 			foreach ($searchProfiles as $profile) {
 				$searchProfilesOptions[$profile->id] = $profile->name;
 			}
-			$form->getElement('defaultSearchProfileId')->addMultiOptions($searchProfilesOptions);
+			$form->getElement('defaultSearchProfileIds')->addMultiOptions($searchProfilesOptions);
 			
 			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEmail'));
 			$validator
@@ -101,7 +100,9 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 				->addValidator($validator)
 				->addValidator(new Zend_Validate_StringLength(array('min' => 6)));
 			
-			$form->setDefaults($this->toArray());
+                        $userData = $this->toArray();
+                        $userData['defaultSearchProfileIds'] = explode(', ', $userData['defaultSearchProfileIds']);
+			$form->setDefaults($userData);
 			
 			if (!$this->id || (Zend_Auth::getInstance()->hasIdentity() && Zend_Auth::getInstance()->getIdentity()->id == $this->id)) {
 				$form->removeElement('delete');
@@ -113,7 +114,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 					$form->removeElement('type');
 					$form->removeElement('apikey');
 					$form->removeElement('eppn');
-					$form->removeElement('defaultSearchProfileId');
+					$form->removeElement('defaultSearchProfileIds');
 					$form->removeElement('disableSearchProfileChanging');
 				}
 			}
@@ -121,7 +122,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 		
 		return $form;
 	}
-	
+        	
 	public function needApiKey($usertype, Array $data)
 	{
 		if (OpenSKOS_Db_Table_Users::isApiAllowed($usertype)) {
@@ -165,49 +166,56 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 	
 	public function setSearchOptions($optionsData)
 	{
-		$this->searchOptions = serialize($optionsData);
-		$this->save();
-		
-		$userOptions = new Zend_Session_Namespace('userOptions');
-		$userOptions->searchOptions = $optionsData;
-		
-		return $this;
+            if (isset($optionsData['searchProfileId'])
+                    && ! $this->isAllowedToUseSearchProfile($optionsData['searchProfileId'])) {
+                
+                throw new Exception('The selected search profile is not allowed for that user.');
+            }
+            
+            $this->searchOptions = serialize($optionsData);
+            $this->save();
+
+            $userOptions = new Zend_Session_Namespace('userOptions');
+            $userOptions->searchOptions = $optionsData;
+
+            return $this;
 	}
 	
 	public function getSearchOptions($loadFromDb = false)
 	{
-		if ($this->disableSearchProfileChanging) {
-			$profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
-			$profile = $profilesModel->find($this->defaultSearchProfileId)->current();
-			if (null !== $profile) {
-				return $profile->getSearchOptions();
-			} else {
-				return array();
-			}
-		} else if ( ! $loadFromDb) {
-			$userOptions = new Zend_Session_Namespace('userOptions');
-			if (isset($userOptions->searchOptions)) {
-				return $userOptions->searchOptions;
-			} else {
-				if ( ! empty($this->searchOptions)) {
-					$optionsData = unserialize($this->searchOptions);
-					$userOptions->searchOptions = $optionsData;
-					if ( ! empty($optionsData)) {
-						return $optionsData;
-					} else {
-						return array();
-					}
-				} else {
-					return array();
-				}
-			}
-		} else {
-			if ( ! empty($this->searchOptions)) {
-				return unserialize($this->searchOptions);
-			} else {
-				return array();
-			}
-		}
+            $searchOptions = array();
+            if ( ! $loadFromDb) {
+                $userOptions = new Zend_Session_Namespace('userOptions');
+                if (isset($userOptions->searchOptions)) {
+                    $searchOptions = $userOptions->searchOptions;
+                } else {
+                    if ( ! empty($this->searchOptions)) {
+                        $optionsData = unserialize($this->searchOptions);
+                        $userOptions->searchOptions = $optionsData;
+                        if ( ! empty($optionsData)) {
+                            $searchOptions = $optionsData;
+                        }
+                    }
+                }
+            } else {
+                if ( ! empty($this->searchOptions)) {
+                    $searchOptions = unserialize($this->searchOptions);
+                }
+            }
+
+            // If the user has old search profile settings wich are not allowed for him - use the first of the default search profiles.
+            if (isset($searchOptions['searchProfileId'])
+                && ! $this->isAllowedToUseSearchProfile($searchOptions['searchProfileId'])) {
+                
+                $searchOptions = array();
+                
+                $firstProfile = $this->getFirstDefaultSearchProfile();                
+                if ($firstProfile !== null) {
+                    $searchOptions = $firstProfile->getSearchOptions();
+                }
+            }
+            
+            return $searchOptions;
 	}
 	
 	public function getUserHistory()
@@ -340,13 +348,65 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 	 */
 	public function applyDefaultSearchProfile()
 	{
-		if ( ! empty($this->defaultSearchProfileId) && empty($this->searchOptions)) {
-			$profilesModels = new OpenSKOS_Db_Table_SearchProfiles();
-			$profile = $profilesModels->find($this->defaultSearchProfileId)->current();
+		if ( ! empty($this->defaultSearchProfileIds) && empty($this->searchOptions)) {
+			$profile = $this->getFirstDefaultSearchProfile();
 			$options = unserialize($profile->searchOptions);
-			$options['searchProfileId'] = $this->defaultSearchProfileId;
+			$options['searchProfileId'] = $profile->id;
 			$this->searchOptions = serialize($options);
 			$this->save();
 		}
 	}
+        
+        /**
+         * Gets list of the search profiles for the user.
+         * @return OpenSKOS_Db_Table_Row_SearchProfile[]
+         */
+        public function listDefaultSearchProfiles()
+        {
+            $profiles = array();
+            if (! empty($this->defaultSearchProfileIds)) {
+                $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);
+                
+                $profilesModels = new OpenSKOS_Db_Table_SearchProfiles();
+                
+                foreach ($defaultSearchProfilesIds as $profileId) {
+                    $profiles[] = $profilesModels->find($profileId)->current();
+                }
+            }
+            
+            return $profiles;
+        }
+        
+        /**
+         * Gets the first of the search profiles for the user.
+         * @return OpenSKOS_Db_Table_Row_SearchProfile
+         */
+        public function getFirstDefaultSearchProfile()
+        {
+            if (! empty($this->defaultSearchProfileIds)) {
+                $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);
+                
+                $profilesModels = new OpenSKOS_Db_Table_SearchProfiles();
+                
+                return $profilesModels->find($defaultSearchProfilesIds[0])->current();
+            } else {
+                return null;
+            }
+        }
+        
+        /**
+         * Gets the first of the search profiles for the user.
+         * @return OpenSKOS_Db_Table_Row_SearchProfile
+         */
+        public function isAllowedToUseSearchProfile($profileKey)
+        {
+            if ($this->disableSearchProfileChanging 
+                    && ! empty($this->defaultSearchProfileIds)) {
+                
+                $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);                
+                return in_array($profileKey, $defaultSearchProfilesIds);
+            } else {
+                return true;
+            }
+        }
 }

@@ -72,6 +72,7 @@ div.message {
 	font-size: 1.2em;
 }
 
+div.message,
 div.loading {
 	padding: 16px;
 	font-size: 1.2em;
@@ -211,7 +212,8 @@ div#content {
 }
 
 #left-top-panel, #AdvancedSearchOptions {
-	#conceptScheme-element {
+	#conceptScheme-element,
+	#allowedConceptScheme-element {
 		background-color: #fff;
 		height: 96px;
 		width: 90%;
@@ -254,12 +256,14 @@ div#content {
 			margin-bottom: 9px;
 		}
 	};
-	#conceptScheme-label {
+	#conceptScheme-label,
+	#allowedConceptScheme-label {
 		float: left;
 		padding-top: 5px;
 		padding-right: 5px;
 	};
-	#conceptScheme-element {
+	#conceptScheme-element,
+	#allowedConceptScheme-element {
 		margin-left: 0px;
 		width: 255px;
 	}
@@ -542,7 +546,7 @@ div#right-panel-tab-links {
 	float: right;
 }
 #concept-content-right {
-	margin-bottom: 80px;
+	margin-bottom: 172px;
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -554,6 +558,13 @@ div#right-panel-tab-links {
 	.concept-scheme-uri {
 		bottom: -30px;
 	};
+	.concept-contributor {
+		background-color: #F0F0F0;
+		padding: 14px;
+		padding-right: 14px;
+		position: absolute;
+		bottom: -178px;
+	}
 	.concept-scheme-notation {
 		bottom: -48px;
 	};
@@ -972,7 +983,7 @@ ul#history-list {
 	};
 	
 	.concept-multi-hidden-remove, .concept-multi-remove, .concept-link-remove-action {
-		 background-image: url(../../interaction_design/images/icons/verwijder.gif);
+		 background-image: url(../images/verwijder.gif);
 		 width: 16px;
 		 height: 16px;
 		 display: inline-block;
@@ -980,7 +991,7 @@ ul#history-list {
 	};
 	
 	.concept-multi-add, .concept-multi-hidden-add {
-		 background-image: url(../../interaction_design/images/icons/nieuw.gif);
+		 background-image: url(../images/nieuw.gif);
 		 width: 16px;
 		 height: 16px;
 		 display: inline-block;
@@ -1107,7 +1118,14 @@ ul#history-list {
 	.concept-complex-title.narrower,
 	.concept-complex-title.narrowMatch {
 		background: url('../images/narrower-arrow.png') no-repeat;
-	}		
+	}
+
+	/* Pref label is not multivalued per language */
+	.multi-field.prefLabel {
+		.concept-multi-add, .concept-multi-remove {
+			display: none;
+		}
+	}
 }
 
 #concept-scheme-edit-form {
@@ -1328,7 +1346,7 @@ input[type=submit] {
 				cursor: move;
 				clear: both;
 				.fields-to-export-remove {
-					background-image: url(../../interaction_design/images/icons/verwijder.gif);
+					background-image: url(../images/verwijder.gif);
 					width: 16px;
 					height: 16px;
 					display: inline-block;

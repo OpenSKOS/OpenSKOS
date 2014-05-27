@@ -50,7 +50,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 		}
 		$concepts = $this->model->getConcepts($q);
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
-		if ($context === 'json') {
+		if ($context === 'json' || $context === 'jsonp') {
 			foreach ($concepts as $key => $val) {
 				foreach ($val['docs'] as &$doc) unset($doc['xml']);
 				$this->view->$key = $val;
@@ -71,7 +71,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 	public function getAction() {
 		
 		$concept = $this->_fetchConcept();
-		if ($this->_helper->contextSwitch()->getCurrentContext()==='json') {
+                $context = $this->_helper->contextSwitch()->getCurrentContext();
+		if ($context == 'json' || $context == 'jsonp') {
 			if (null !== $concept) {
 				foreach ($concept as $key => $var) {
 					if ($key == 'xml') continue;

@@ -32,9 +32,9 @@ if ($this->doc['collection']) {
     }
 }
 
-$isDeleted = (true === $this->doc['deleted'] || (isset($doc['status']) && $this->doc['status'] == 'expired'));
+$isDeleted = (true === $this->doc['deleted'] || (isset($this->doc['status']) && $this->doc['status'] == 'expired'));
 
-$dateStamp = new Zend_Date(($isDeleted ? $this->doc['deleted_timestamp'] : $this->doc['timestamp']), Zend_Date::ISO_8601);
+$dateStamp = new Zend_Date(($isDeleted && ! empty($this->doc['deleted_timestamp']) ? $this->doc['deleted_timestamp'] : $this->doc['timestamp']), Zend_Date::ISO_8601);
 
 ?>
 	<header <?php if ($isDeleted) echo 'status="deleted"'?>>

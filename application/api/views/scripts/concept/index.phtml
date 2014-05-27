@@ -40,6 +40,9 @@ $exampleResolveLabel = 'doodstraf';
 			<li>
 			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json</a>
 			</li>
+                        <li>
+			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234</a>
+			</li>
 			<li>
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
 			</li>
@@ -54,6 +57,9 @@ $exampleResolveLabel = 'doodstraf';
 			</li>
 			<li>
 			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
+			</li>
+                        <li>
+			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=jsonp?callback=myCallback_1234</a>
 			</li>
 			<li>
 			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=xml"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=xml</a>

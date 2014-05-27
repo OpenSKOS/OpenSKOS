@@ -32,8 +32,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		$this->_helper->_layout->setLayout('editor_central_content');
 		
 		$notation = OpenSKOS_Db_Table_Notations::getNext();
+		
+		$initialLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();		
+		$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+		if (! empty($editorOptions['languages']) && ! in_array($initialLanguage, $editorOptions['languages'])) { // If the browser language is supported
+			$initialLanguage = key($editorOptions['languages']);
+		}
+		
 		$concept = new Editor_Models_Concept(new Api_Models_Concept(array(
-				'prefLabel@'.Zend_Registry::get('Zend_Locale')->getLanguage() => array($this->getRequest()->getParam('label')),
+				'prefLabel@'.$initialLanguage => array($this->getRequest()->getParam('label')),
 				'notation' => array($notation)
 		)));
 		
@@ -343,19 +350,12 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 			case 'search' : {
 				$searchFormData = Zend_Json::decode($this->getRequest()->getPost('additionalData'), Zend_Json::TYPE_ARRAY); // We have the json encoded search form data in additionalData.
 
-				// Fix conceptScheme[] which is not serialized correctly.
-				if (isset($searchFormData['conceptScheme[]'])) {
-					if (is_array($searchFormData['conceptScheme[]'])) {
-						$searchFormData['conceptScheme'] = $searchFormData['conceptScheme[]'];
-					} else {
-						$searchFormData['conceptScheme'] = array($searchFormData['conceptScheme[]']);
-					}
-					unset($searchFormData['conceptScheme[]']);
-				}
+				$searchFormData = $this->_fixJsSerializedArrayData('conceptScheme', $searchFormData);
+				$searchFormData = $this->_fixJsSerializedArrayData('allowedConceptScheme', $searchFormData);
 				
 				$userForSearch = OpenSKOS_Db_Table_Users::requireById($searchFormData['user']);
 				$userSearchOptions = $userForSearch->getSearchOptions($user['id'] != $userForSearch['id']);
-				$export->set('searchOptions', array_merge($searchFormData, $userSearchOptions));
+				$export->set('searchOptions', Editor_Forms_Search::mergeSearchOptions($searchFormData, $userSearchOptions));
 			} break;
 		}
 		
@@ -498,5 +498,23 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				$this->_helper->redirector('view', 'concept', 'editor', array('uuid' => $this->getRequest()->getParam('uuid')));
 			}
 		}
+	}
+	
+	/**
+	 * Fix key[] which is not serialized correctly.
+	 * @param array $key
+	 * @param array $data
+	 */
+	protected function _fixJsSerializedArrayData($key, $data)
+	{
+		if (isset($data[$key . '[]'])) {
+			if (is_array($data[$key . '[]'])) {
+				$data[$key] = $data[$key . '[]'];
+			} else {
+				$data[$key] = array($data[$key . '[]']);
+			}
+			unset($data[$key . '[]']);
+		}
+		return $data;
 	}
 }
