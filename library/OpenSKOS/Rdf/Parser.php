@@ -370,6 +370,29 @@ class OpenSKOS_Rdf_Parser implements Countable
 			);
 			$document->$fieldname = trim($element->nodeValue);
 		}
+		
+		//infer dcterms:title from skos:prefLabel if not already present, using the first
+		// prefLabel found matching one of the following criteria, checked in this order:
+		// 1. with xml:lang=XY where XY is lang option (if set)
+		// 2. without an xml:lang attribute
+		// 3. any prefLabel
+		if (!isset($document->dcterms_title)) {
+			$prefLabelXpathQueries = array(
+				'./skos:prefLabel[not(@xml:lang)]',
+				'./skos:prefLabel',
+			);
+			if (!empty($extradata['lang'])) {
+				array_unshift($prefLabelXpathQueries, "./skos:prefLabel[@xml:lang='".$extradata['lang']."']");
+			}
+			foreach ($prefLabelXpathQueries as $xpathQuery) {
+				if ($prefLabelElement = ($xpath->query($xpathQuery, $Description)->item(0))) {
+					$prefLabel = trim($prefLabelElement->nodeValue);
+					$document->dcterms_title = $prefLabel;
+					break;
+				}
+			}
+		}
+		
 		$document->xml = $Description->ownerDocument->saveXML($Description);
 		
 		//store namespaces:
@@ -438,6 +461,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    $data = array(
 				'tenant' => $this->getOpt('tenant'),
 				'collection' => $this->_collection->id,
+				'lang' => $this->getOpt('lang'),
 			);
 			if ($this->getOpt('status')) $data['status'] = (string)$this->getOpt('status');
 			if ($this->getOpt('toBeChecked')) $data['toBeChecked'] = 'true';
@@ -493,7 +517,8 @@ class OpenSKOS_Rdf_Parser implements Countable
 			
 			$data = array(
 				'tenant' => $this->getOpt('tenant'),
-				'collection' => $this->_collection->id
+				'collection' => $this->_collection->id,
+				'lang' => $this->getOpt('lang'),
 			);
 			
 			if ($this->getOpt('toBeChecked')) {
