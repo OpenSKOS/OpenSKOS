@@ -110,7 +110,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 			$path = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('upload_path');
 			$tenant_path = $path .'/'.$collection->tenant;
 			if (!is_dir($tenant_path)) {
-				if (!@mkdir($tenant_path)) {
+				if (!@mkdir($tenant_path, 0777, true)) {
 					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Failed to create upload folder'));
 					$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
 					return;
@@ -142,7 +142,8 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
  				'ignoreIncomingStatus' => (int)$formData['ignoreIncomingStatus'] == 1,
  				'lang' => $formData['lang'],
  				'toBeChecked' => (int)$formData['toBeChecked'] == 1,
-	 			'purge' => (int)$formData['purge'] == 1
+	 			'purge' => (int)$formData['purge'] == 1,
+	 			'onlyNewConcepts' => (int)$formData['onlyNewConcepts'] == 1
 	 		);
 	 		$job = $model->fetchNew()->setFromArray(array(
 	 			'collection' => $collection->id,
