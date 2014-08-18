@@ -4,3 +4,5 @@ application/configs/application.ini
 cache/
 .sass-cache/
 public/data/export/*
+/data/uploads/
+/public/data/icons/
