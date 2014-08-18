@@ -220,9 +220,12 @@ switch ($action) {
 						if ((bool)$job->getParam('purge')) {
 							$arguments[] = '--purge';
 						}
+                        if ((bool)$job->getParam('onlyNewConcepts')) {
+							$arguments[] = '--onlyNewConcepts';
+						}
 							
 						$arguments[] = '--commit';
-						
+                        
 						$duplicateConceptSchemes = array();
 						$notImportedNotations = array();
 						foreach ($importFiles as $filePath) {
