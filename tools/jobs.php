@@ -233,7 +233,7 @@ switch ($action) {
 							$parserOpts->setArguments(array_merge($arguments, array($filePath))); // The last argument must be the file path.
 							try {
 								$parser = OpenSKOS_Rdf_Parser::factory($parserOpts);
-								$parser->process();
+								$parser->process($job['user']);
 								$duplicateConceptSchemes = array_merge($duplicateConceptSchemes, $parser->getDuplicateConceptSchemes());
 								$notImportedNotations = array_merge($notImportedNotations, $parser->getNotImportedNotations());
 							} catch (Exception $e) {
