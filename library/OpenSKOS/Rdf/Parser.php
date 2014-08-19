@@ -31,7 +31,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'limit=i' => 'Stop at this SKOS "record"',
 		'tenant|t=s' => 'The tenant this file belongs to',
 		'collection|c=s' => 'The collection this file belongs to',
-		'purge|P' => 'Purge all concepts per ConceptSchema found in this file',
+		'purge|P' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)',
 		'lang|l=s' => 'The default language to use if no "xml:lang" attribute is found',
 		'env|e=s' => 'The environment to use (defaults to "production")',
 		'commit' => 'Commit to Solr (default: print to STDOUT)',
@@ -160,41 +160,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 	public function process_with_xml_parser()
 	{
 		trigger_error(__METHOD__ .' is deprecated, use '.__CLASS__.'::process()');
-		$parser = xml_parser_create_ns();
-		xml_parser_set_option( $parser, XML_OPTION_SKIP_WHITE, 1 );
-		xml_parser_set_option( $parser, XML_OPTION_CASE_FOLDING, 0);
-		
-		$helper = new OpenSKOS_Rdf_Parser_Helper($this);
-		xml_set_element_handler($parser, array($helper, "startTag"), array($helper, "endTag"));
-		xml_set_character_data_handler($parser, array($helper, "characterData")); 
-		xml_set_start_namespace_decl_handler($parser, array($helper, "startNameSpaceDeclaration")); 
-		xml_set_end_namespace_decl_handler($parser, array($helper, "endNameSpaceDeclaration")); 
-		
-		$fp = $this->_getFilePointer();
-		while ($data = fread($fp, 4096)) {
-			try {
-				if (!xml_parse($parser, $data, feof($fp))) {
-					throw new OpenSKOS_Rdf_Parser_Exception(sprintf("XML error: %s at line %d", xml_error_string(xml_get_error_code($parser)), xml_get_current_line_number($parser)));
-				}
-			} catch (OpenSKOS_Rdf_Parser_Helper_Exception $e) {
-				//end reached, no problem
-				break;
-			}
-		}
-		fclose($fp);
-		
-		xml_parser_free($parser);
-		
-		if ($this->_opts->commit) {
-			$solr = $this->_solr();
-			$solr->add($helper);
-		} else {
-			echo $helper;
-		}
-		
-//		var_dump($helper->getNamespaces());
-		
-		return $this;
 	}
 	
 	public static function getDocNamespaces(DOMDocument $doc)
@@ -391,7 +356,11 @@ class OpenSKOS_Rdf_Parser implements Countable
 		return $document;
 	}
 	
-	public function process()
+    /**
+     * Processes an import file.
+     * @param int $byUserId, optional If specified some actions inside the processing will be linked to that user
+     */
+	public function process($byUserId = null)
 	{
 		$xpath = new DOMXPath($this->getDOMDocument());
 		//support for only these namespaces:
@@ -446,20 +415,13 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    $document = self::DomNode2SolrDocument($node, $data);
 		    
 			if ($document) {
-				if ($this->validateIsUniqeScheme($document, $this->getOpt('tenant'))) {
+				if ($this->handleUniqueConceptScheme($document, $byUserId)) {
 			    	$documents->add($document);
 				}
 			}
 		}
 		
-		$notationsCheck = array();
-		$notationsCheckQuery = 'class:Concept deleted:false tenant:' . $this->getOpt('tenant');
-		$notationsCount = $this->_solr()->limit(0)->search($notationsCheckQuery);
-		$existingNotations = $this->_solr()->limit($notationsCount['response']['numFound'])->search($notationsCheckQuery, array('fl' => 'notation, uuid'));
-		foreach ($existingNotations['response']['docs'] as $doc) {
-			$notationsCheck[$doc['notation'][0]] = $doc['uuid'];
-		}
-		$existingNotations = null;
+		$notationsCheck = $this->fetchNotationsCheck();
 		
 		$Descriptions = $xpath->query('/rdf:RDF/rdf:Description');
 		$d = 0;
@@ -491,23 +453,9 @@ class OpenSKOS_Rdf_Parser implements Countable
             
 			// Check if document with same notation already exists.
 			$notationNodes = $xpath->query('skos:notation', $Description);
-			if ($notationNodes->length > 0) {
-                $notation = $notationNodes->item(0)->nodeValue;
-				if (isset($notationsCheck[$notation])) {                    
-                    if ($this->getOpt('onlyNewConcepts')) {
-                        $this->_notImportedNotations[] = $notation;
-                        continue;
-                    } else {
-                        $existingConcept = Api_Models_Concepts::factory()->getConcept(
-                            $notationsCheck[$notation]
-                        );
-                        
-                        $existingConcept->purge();
-                        
-                        $data['uuid'] = $existingConcept['uuid'];
-                    }
-				}
-			}
+			if (!$this->handleUniqueNotation($data, $notationNodes, $notationsCheck)) {
+                continue;
+            }
 			
             // Prepare the document to insert
 			if ($this->getOpt('toBeChecked')) {
@@ -517,13 +465,13 @@ class OpenSKOS_Rdf_Parser implements Countable
 			if ($this->getOpt('ignoreIncomingStatus') && $this->getOpt('status')) {
 				$data['status'] = (string)$this->getOpt('status');
 			}
-							
+			
 			$document = self::DomNode2SolrDocument($Description, $data, $xpath, (string)$this->getOpt('status'));
 			
 			if ($document) {                
 				$class = $document->offsetGet('class');
 				if ($class[0] == 'ConceptScheme') {
-					if ( ! $this->validateIsUniqeScheme($document, $this->getOpt('tenant'))) {
+					if (!$this->handleUniqueConceptScheme($document, $byUserId)) {
 						continue;
 					}
 				}
@@ -539,25 +487,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 			echo $documents."\n";
 		}
 	}
-	
-	/**
-	 * Validate if the scheme is unique in the given tenant. If not - throws error.
-	 * 
-	 * @param OpenSKOS_Solr_Document $schemeDoc
-	 * @param string $tenant
-	 * @throws OpenSKOS_SKOS_Exception
-	 */
-	public function validateIsUniqeScheme(OpenSKOS_Solr_Document $schemeDoc, $tenant)
-	{
-		$schemeUri = $schemeDoc->offsetGet('uri');
-		$existingSchemes = $this->_solr()->search('uri:"' . $schemeUri[0] . '" AND tenant:"' . $tenant . '" AND deleted:false');
-		if ($existingSchemes['response']['numFound'] > 0) {
-			$this->_duplicateConceptSchemes[] = $schemeUri[0];
-			return false;
-		}
-		return true;
-	}
-	
+    
 	public function getDuplicateConceptSchemes() 
 	{
 		return $this->_duplicateConceptSchemes;
@@ -928,4 +858,98 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		return $nodes;
 	}
+    
+    /**
+	 * Validate if the scheme is unique in the given tenant. 
+     * If not - checks if it should be perged. If not adds it to the _duplicateConceptSchemes and return false.
+	 * 
+	 * @param OpenSKOS_Solr_Document $schemeDoc
+	 * @param int $byUserId, optional
+     * @return bool If the document can be inserted
+	 */
+	protected function handleUniqueConceptScheme(OpenSKOS_Solr_Document $schemeDoc, $byUserId = null)
+	{
+        $canInsertDocument = true;
+        
+		$schemeUri = $schemeDoc->offsetGet('uri');
+		$schemesCheck = $this->_solr()
+            ->limit(1)
+            ->search(
+                'uri:"' . $schemeUri[0] . '" '
+                . 'AND tenant:"' . $this->getOpt('tenant') . '" '
+                . 'AND deleted:false '
+                . 'AND collection:' . $this->getCollection()->id
+            );
+        
+		if ($schemesCheck['response']['numFound'] > 0) {
+            if (!$this->getOpt('purge')) {
+                $this->_duplicateConceptSchemes[] = $schemeUri[0];
+                $canInsertDocument = false;
+            } else {
+                $conceptScheme = new Editor_Models_ConceptScheme(
+                    new Api_Models_Concept(
+                        array_shift($schemesCheck['response']['docs'])
+                    )
+                );
+                $conceptScheme->delete(true, $byUserId);
+            }
+		}
+        
+		return $canInsertDocument;
+	}
+	
+    /**
+	 * Validate if the concept has unique notation.
+     * If not - checks if it should be perged. If not adds it to the _notImportedNotations and return false.
+	 * 
+     * @param array $data
+     * @param DOMNodeList $notationNodes
+     * @param array $notationsCheck
+     * @return boolean If the document can be inserted
+     */
+	protected function handleUniqueNotation(array &$data, DOMNodeList $notationNodes, array $notationsCheck)
+	{
+        $canInsertDocument = true;
+        
+		if ($notationNodes->length > 0) {
+            $notation = $notationNodes->item(0)->nodeValue;
+            if (isset($notationsCheck[$notation])) {
+                if ($this->getOpt('onlyNewConcepts')) {
+                    $this->_notImportedNotations[] = $notation;
+                    $canInsertDocument = false;
+                } else {
+                    $existingConcept = Api_Models_Concepts::factory()->getConcept(
+                        $notationsCheck[$notation]
+                    );
+
+                    $existingConcept->purge();
+
+                    $data['uuid'] = $existingConcept['uuid'];
+                }
+            }
+        }
+        
+        return $canInsertDocument;
+	}
+    
+    /**
+     * Fetch existing notations and the uuid of the concepts having them.
+     * @return array
+     */
+    protected function fetchNotationsCheck()
+    {
+        $notationsCheck = array();
+        $notationsCheckQuery = 'class:Concept '
+            . 'AND deleted:false '
+            . 'AND tenant:' . $this->getOpt('tenant') . ' '
+            . 'AND collection:' . $this->getCollection()->id;
+        
+		$notationsCount = $this->_solr()->limit(0)->search($notationsCheckQuery);
+		$existingNotations = $this->_solr()->limit($notationsCount['response']['numFound'])->search($notationsCheckQuery, array('fl' => 'notation, uuid'));
+		foreach ($existingNotations['response']['docs'] as $doc) {
+			$notationsCheck[$doc['notation'][0]] = $doc['uuid'];
+		}
+        
+        return $notationsCheck;
+    }
 }
