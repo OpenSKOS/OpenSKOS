@@ -20,7 +20,7 @@
  */
 
 /**
- * Validates that the concept is at least in one scheme. 
+ * Validates that the concept has unique pref label inside the scheme. 
  * 
  */
 class Editor_Models_ConceptValidator_UniquePrefLabelInScheme extends Editor_Models_ConceptValidator
