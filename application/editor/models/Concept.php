@@ -469,16 +469,14 @@ class Editor_Models_Concept extends Api_Models_Concept
 		
 		$currentLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();
 		
-		$fieldsToFetch = array('uuid', 'uri', 'prefLabel', 'prefLabel@' . $currentLanguage, 'inScheme');
-		
-		$concepts = $this->getRelationsByField($relation, $schemeUri,  $callback, true, $fieldsToFetch);
+		$concepts = $this->getRelationsByField($relation, $schemeUri,  $callback, true);
 		if (empty($concepts)) {
 			return array();
 		}
 		 
 		foreach ($concepts as $concept) {
-			$schemesData = array();
-			$schemesData = $apiClient->getConceptSchemes($concept['inScheme']);
+//			$schemesData = array();
+//			$schemesData = $apiClient->getConceptSchemes($concept['inScheme']);
 			
 			$previewLabel = $concept->getMlField('prefLabel', $currentLanguage);
 			$isInternal = $this->isInternalRelation($concept['uri'], $relation);
@@ -492,7 +490,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 							'uri' => $concept['uri'],
 							'previewLabel' =>  $previewLabel,
 							'remove' =>  $isInternal),
-					'schemes' => $schemesData);
+					'schemes' => []);
 		}
 		return $relationData;
 	}
