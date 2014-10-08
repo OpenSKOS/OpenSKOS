@@ -289,15 +289,40 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 */
 	protected function getExternalRelations($fieldName, $conceptScheme = null, $fname)
 	{
-		if (null === $this->model)
+		if (null === $this->model) {
 			$this->model = Api_Models_Concepts::factory();
-		$response = $this->model->$fname($fieldName, $this['uri'], array(), null, $conceptScheme);
-		if (!$response['response']['numFound']) return array();
-		$records = $response['response']['docs'];
-		foreach ($records as &$doc)
-			$doc['isImplicit'] = true;
-		return $records;		
+        }
+        
+        $docs = [];
+        $chunkStart = 0;
+        $chunkSize = 50;
+		do {
+            $response = $this->model->$fname(
+                $fieldName,
+                $this['uri'],
+                array(),
+                null,
+                $conceptScheme,
+                false,
+                $chunkStart,
+                $chunkSize
+            );
+
+            if ($response['response']['numFound'] > 0) {
+				$docs = array_merge($docs, $response['response']['docs']);
+			}
+            
+            $chunkStart += $chunkSize;
+        } while ($chunkStart < $response['response']['numFound']);
+        
+        
+        foreach ($docs as &$doc) {
+            $doc['isImplicit'] = true;
+        }
+                
+		return $docs;		
 	}
+    
 	/**
 	 *  Returns the data for concepts associated with an internal field (e.g. broader)
 	 * @param string $fieldName
