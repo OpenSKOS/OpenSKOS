@@ -160,7 +160,16 @@ class Api_Models_Concepts
 	 * @param string $lang
 	 * @param bool $includeDeleted, optional, default: false
 	 */
-	public function getRelations($relation, $uri, Array $uris = array(), $lang = null, $inScheme = null, $includeDeleted = false)
+	public function getRelations(
+        $relation,
+        $uri,
+        Array $uris = array(),
+        $lang = null,
+        $inScheme = null,
+        $includeDeleted = false,
+        $offset = 0,
+        $limit = 1000
+    )
 	{
 		switch ($relation) {
 			case 'semanticRelation':
@@ -199,7 +208,7 @@ class Api_Models_Concepts
 		
 		$response = $this->solr()
 			->setFields($fields)
-			->limit(1000)
+			->limit($limit, $offset)
 			->search($q);
 		$this->solr()->setFields(array());
 		return $response;
@@ -212,7 +221,16 @@ class Api_Models_Concepts
 	 * @param string $lang
 	 * @param bool $includeDeleted, optional, default: false
 	 */
-	public function getMappings($mapping, $uri, Array $uris = array(), $lang = null, $inScheme = null, $includeDeleted = false)
+	public function getMappings(
+        $mapping,
+        $uri,
+        Array $uris = array(),
+        $lang = null,
+        $inScheme = null,
+        $includeDeleted = false,
+        $offset = 0,
+        $limit = 1000
+    )
 	{
 		switch ($mapping) {
 			case 'broadMatch':
@@ -239,7 +257,7 @@ class Api_Models_Concepts
 		
 		$response = $this->solr()
 			->setFields($fields)
-			->limit(1000)
+			->limit($limit, $offset)
 			->search($q);
 		$this->solr()->setFields(array());
 		return $response;
