@@ -334,11 +334,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			return array();
 		}
 		
+        $relationsUris = array_filter($this[$fieldName]);
+        
 		$docs = array();
 		$chunkSize = 50;
-		for ($chunkStart = 0; $chunkStart < count($this[$fieldName]); $chunkStart += $chunkSize) {
+		for ($chunkStart = 0; $chunkStart < count($relationsUris); $chunkStart += $chunkSize) {
 			
-			$chunkOfUris = array_slice($this[$fieldName], $chunkStart, $chunkSize);
+			$chunkOfUris = array_filter(
+                array_slice($relationsUris, $chunkStart, $chunkSize)
+            );
 			
 			$queryParts = array();
 			foreach ($chunkOfUris as $conceptUri) {
@@ -352,13 +356,16 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 
 			$apiModel = Api_Models_Concepts::factory();
             
+            
+            //!NOTE prefLabel@en can cause error "can not use FieldCache on multivalued field: prefLabel" on solr 4
             $fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
             if (null !== $this->getCurrentLanguage()) {
                 $fields[] = 'prefLabel@' . $this->getCurrentLanguage();
             }
-            
 			$apiModel->setQueryParam('fl', implode(', ', $fields));
-			$response = $apiModel->getConcepts($query);
+            
+            
+            $response = $apiModel->getConcepts($query);
 
 			if ($response['response']['numFound'] > 0) {
 				$docs = array_merge($docs, $response['response']['docs']);
