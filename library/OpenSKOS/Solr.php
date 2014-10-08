@@ -73,6 +73,15 @@ class OpenSKOS_Solr
 	{
 		return new OpenSKOS_Solr($options);
 	}
+    
+    /**
+     * Creates new OpenSKOS_Solr with the configuration of the current one.
+	 * @return OpenSKOS_Solr
+	 */
+	public function cleanCopy()
+	{
+		return new OpenSKOS_Solr($this->config);
+	}
 	
 	/**
 	 * 

@@ -22,6 +22,11 @@
 class Api_Models_Concepts
 {
 	protected $_queryParameters = array();
+    
+    /**
+     * @var OpenSKOS_Solr 
+     */
+    protected $_solr;
 	
 	public function setQueryParams(Array $parameters)
 	{
@@ -198,7 +203,9 @@ class Api_Models_Concepts
 		}
 	
 		$fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
-		if (null !== $lang) $fields[] ='prefLabel@'.$lang;
+		if (null !== $lang) {
+            $fields[] = 'prefLabel@' . $lang;
+        }
 		
 		$q = implode(' OR ', $q);
 		//only return non-deleted items:
@@ -245,9 +252,11 @@ class Api_Models_Concepts
 		}
 		if (null !== $inScheme)
 			$q[0] .= ' AND inScheme:"'.$inScheme.'"';
-	
+        
 		$fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
-		if (null !== $lang) $fields[] ='prefLabel@'.$lang;
+		if (null !== $lang) {
+            $fields[] ='prefLabel@' . $lang;
+        }
 		
 		$q = implode(' OR ', $q);
 		//only return non-deleted items:
@@ -370,6 +379,10 @@ class Api_Models_Concepts
 	 */
 	protected function solr()
 	{
-		return Zend_Registry::get('OpenSKOS_Solr');
+        if (null === $this->_solr) {
+            $this->_solr = OpenSKOS_Solr::getInstance()->cleanCopy();
+        }
+        
+		return $this->_solr;
 	}
 }
