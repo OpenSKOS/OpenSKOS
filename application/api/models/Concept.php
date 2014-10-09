@@ -289,15 +289,39 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 */
 	protected function getExternalRelations($fieldName, $conceptScheme = null, $fname)
 	{
-		if (null === $this->model)
+		if (null === $this->model) {
 			$this->model = Api_Models_Concepts::factory();
-		$response = $this->model->$fname($fieldName, $this['uri'], array(), null, $conceptScheme);
-		if (!$response['response']['numFound']) return array();
-		$records = $response['response']['docs'];
-		foreach ($records as &$doc)
-			$doc['isImplicit'] = true;
-		return $records;		
+        }
+        
+        $docs = [];
+        $chunkStart = 0;
+        $chunkSize = 50;
+		do {
+            $response = $this->model->$fname(
+                $fieldName,
+                $this['uri'],
+                array(),
+                null,
+                $conceptScheme,
+                false,
+                $chunkStart,
+                $chunkSize
+            );
+
+            if ($response['response']['numFound'] > 0) {
+				$docs = array_merge($docs, $response['response']['docs']);
+			}
+            
+            $chunkStart += $chunkSize;
+        } while ($chunkStart < $response['response']['numFound']);
+        
+        foreach ($docs as &$doc) {
+            $doc['isImplicit'] = true;
+        }
+        
+		return $docs;
 	}
+    
 	/**
 	 *  Returns the data for concepts associated with an internal field (e.g. broader)
 	 * @param string $fieldName
@@ -310,11 +334,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			return array();
 		}
 		
+        $relationsUris = array_filter($this[$fieldName]);
+        
 		$docs = array();
 		$chunkSize = 50;
-		for ($chunkStart = 0; $chunkStart < count($this[$fieldName]); $chunkStart += $chunkSize) {
+		for ($chunkStart = 0; $chunkStart < count($relationsUris); $chunkStart += $chunkSize) {
 			
-			$chunkOfUris = array_slice($this[$fieldName], $chunkStart, $chunkSize);
+			$chunkOfUris = array_filter(
+                array_slice($relationsUris, $chunkStart, $chunkSize)
+            );
 			
 			$queryParts = array();
 			foreach ($chunkOfUris as $conceptUri) {
@@ -327,8 +355,17 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			}
 
 			$apiModel = Api_Models_Concepts::factory();
-			$apiModel->setQueryParam('fl', 'uri, uuid');
-			$response = $apiModel->getConcepts($query);
+            
+            
+            //!NOTE prefLabel@en can cause error "can not use FieldCache on multivalued field: prefLabel" on solr 4
+            $fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
+            if (null !== $this->getCurrentLanguage()) {
+                $fields[] = 'prefLabel@' . $this->getCurrentLanguage();
+            }
+			$apiModel->setQueryParam('fl', implode(', ', $fields));
+            
+            
+            $response = $apiModel->getConcepts($query);
 
 			if ($response['response']['numFound'] > 0) {
 				$docs = array_merge($docs, $response['response']['docs']);
@@ -345,11 +382,11 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * @param callback $implicitCallback
 	 * @return array
 	 */
-	public function getRelationsArray($fieldNames, $conceptScheme = null, $implicitCallback = null, $fieldsToFetch = array())
+	public function getRelationsArray($fieldNames, $conceptScheme = null, $implicitCallback = null)
 	{
 		$relations = array();
 		foreach ($fieldNames as $fieldName) {
-			$relations[$fieldName] = $this->getRelationsByField($fieldName, $conceptScheme, $implicitCallback, $fieldsToFetch);
+			$relations[$fieldName] = $this->getRelationsByField($fieldName, $conceptScheme, $implicitCallback);
 		}
 		return $relations;
 	}
@@ -362,18 +399,19 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 * @param string $fieldName
 	 * @param string $conceptScheme
 	 * @param callback $implicitCallback
-	 * @param bool $sortByPrevLabel optional, Default: true.
+	 * @param bool $sortByPrefLabel optional, Default: true.
 	 * @return array
 	 */
-	public function getRelationsByField($fieldName, $conceptScheme = null, $implicitCallback = null, $sortByPrevLabel = true, $fieldsToFetch = array())
+	public function getRelationsByField($fieldName, $conceptScheme = null, $implicitCallback = null, $sortByPrefLabel = true)
 	{
 		$relations = array();
 		$relations = $this->getInternalAssociation($fieldName, $conceptScheme);
 		
 		if (null !== $implicitCallback) {
 			$implicitRelations = call_user_func_array($implicitCallback, array($fieldName, $conceptScheme));
-			if (!empty($implicitRelations))
+			if (!empty($implicitRelations)) {
 				$relations = array_merge($relations, $implicitRelations);
+            }
 		}
 		
 		$unique = array();		
@@ -385,17 +423,14 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			$unique[] = $element['uri'];
 			return true;
 		});
-		
+        
 		$concepts = array();
-		$apiModel = Api_Models_Concepts::factory();
-		if (! empty($fieldsToFetch)) {
-			$apiModel->setQueryParam('fl', implode(', ', $fieldsToFetch));
-		}
+		$apiModel = Api_Models_Concepts::factory();        
 		foreach ($relations as $relation) {
-			$concepts[] = $apiModel->getConcept($relation['uuid']);
+			$concepts[] = new Api_Models_Concept($relation, $apiModel);
 		}
-		
-		if ($sortByPrevLabel) {
+        
+		if ($sortByPrefLabel) {
 			usort($concepts, array('Api_Models_Concept', 'compareByPreviewLabel'));
 		}
 		
@@ -452,7 +487,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 				} else if ($field == 'previewLabel') {
 					$result[$field] = $this->getPreviewLabel();
 				} else if ($field == 'previewScopeNote') {
-					$result[$field] = $this->getMlField('scopeNote', Zend_Registry::get('Zend_Locale')->getLanguage());
+					$result[$field] = $this->getMlField('scopeNote', $this->getCurrentLanguage());
 				} else if ($field = 'schemes') {
 					$result[$field] = $this->getConceptSchemesData();
 				}	
@@ -1021,13 +1056,21 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 */	
 	public function getPreviewLabel()
 	{
-		if (Zend_Registry::isRegistered('Zend_Locale')) {
-			$lang = Zend_Registry::get('Zend_Locale')->getLanguage();
-		} else {
-			$lang = null;
-		}
-		return $this->getMlField('prefLabel', $lang);
+		return $this->getMlField('prefLabel', $this->getCurrentLanguage());
 	}
+    
+    /**
+     * 
+     * @return null|language
+     */
+    public function getCurrentLanguage()
+    {
+        if (Zend_Registry::isRegistered('Zend_Locale')) {
+			return Zend_Registry::get('Zend_Locale')->getLanguage();
+		} else {
+			return null;
+		}
+    }
 	
 	/**
 	 * Compares two Api_Models_Concept classes by their uuids.

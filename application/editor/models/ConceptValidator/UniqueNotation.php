@@ -39,6 +39,7 @@ class Editor_Models_ConceptValidator_UniqueNotation extends Editor_Models_Concep
         } else {
             
             $query = 'notation:"' . $concept['notation'] . '"';
+            $query .= ' tenant:"' . OpenSKOS_Db_Table_Tenants::fromIdentity()->code . '"';
 			$query .= ' -uuid:"' . $concept['uuid'] . '"';
 
 			$response = Api_Models_Concepts::factory()->setQueryParams(array('rows' => 0))->getConcepts($query);
