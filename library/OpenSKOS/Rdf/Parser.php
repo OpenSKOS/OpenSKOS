@@ -362,6 +362,13 @@ class OpenSKOS_Rdf_Parser implements Countable
      */
 	public function process($byUserId = null)
 	{
+        // Set our Reconnecting adapter. It will try to reconnect if the db goes away.
+        Zend_Db_Table::setDefaultAdapter(
+            OpenSKOS_Db_Adapter_Pdo_Mysql_Reconnecting::createFromPdoMysql(
+                Zend_Db_Table::getDefaultAdapter()
+            )
+        );
+        
 		$xpath = new DOMXPath($this->getDOMDocument());
 		//support for only these namespaces:
 		foreach (self::$namespaces as $prefix => $uri) {
