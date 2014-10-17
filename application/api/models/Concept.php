@@ -24,19 +24,19 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	protected $data = array(), $fieldnames = array();
 	protected $position = 0;
 	protected $rdfModelNs;
-	
+
 	const RDF_NAMESPACE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 	const SKOS_NAMESPACE = 'http://www.w3.org/2004/02/skos/core';
 	const DC_NAMESPACE = 'http://purl.org/dc/elements/1.1/';
 
 	const SKOS_CLASS_URI = 'http://www.w3.org/2009/08/skos-reference/skos.html';
-	
+
 	public static $languageSensitiveClasses = array(
 		'LexicalLabels',
 		'Notations',
 		'DocumentationProperties'
 	);
-	
+
 	public static $classes = array(
 		'ConceptSchemes' => array(
 			'conceptScheme',
@@ -90,36 +90,36 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			'dcterms_creator'
 		)
 	);
-	
+
 	protected static $_defaultConceptData = array(
 		'xmlns' => array('rdf', 'skos', 'dcterms'),
 		'class' => 'Concept'
 	);
-	
+
 	/**
 	 * Holds an array of the fields which must be set each time a document is edited in solr.
 	 * @var array
 	 */
 	protected $_requiredFields = array ('tenant', 'collection', 'uuid', 'uri', 'notation');
-	
+
 	/**
 	 * @var $model Api_Models_Concepts
 	 */
 	protected $model;
-	
+
 	/**
 	 * @var DOMDocument
-	 */	
+	 */
 	protected $_rdfDocument;
-	
+
 	/**
 	 * @var array
 	 * Holds the concept languages that have defined fields for the concept;
 	 */
 	protected $_conceptLanguages;
-	
+
 	/**
-	 * 
+	 *
 	 * @param array $data
 	 * @param Api_Models_Concepts $model
 	 */
@@ -135,22 +135,22 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		$this->fieldnames = array_keys($data);
 		$this->_conceptLanguages = null;
 	}
-	
+
 	public function getData()
 	{
 		return $this->data;
 	}
-	
+
 	public function getFields()
 	{
 		return array_keys($this->data);
 	}
-	
+
 	public function getModel()
 	{
 		return $this->model;
 	}
-	
+
 	public function getNamespaces()
 	{
 		$model = new OpenSKOS_Db_Table_Namespaces();
@@ -158,12 +158,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		$prefixes = array_merge($this['xmlns'], array('dc', 'dcterms', 'skos'));
 		foreach ($prefixes as &$prefix) {
 			$prefix = $model->getAdapter()->quote($prefix);
-		} 
+		}
 		return $model->fetchPairs($model->select()->where('prefix IN ('.implode(',', $prefixes).')'));
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param array $data
 	 * @param Api_Models_Concepts $model
 	 * @return Api_Models_Concept
@@ -172,17 +172,17 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	{
 		return new Api_Models_Concept($data, $model);
 	}
-	
+
 	public function getClass()
 	{
 		return self::SKOS_NAMESPACE .'#' . $this->data['class'];
 	}
-	
+
 	public function getClassUri()
 	{
 		return self::SKOS_CLASS_URI .'#' . $this->data['class'];
 	}
-	
+
 	public function hasClass($className)
 	{
 		if (!isset(self::$classes[$className])) {
@@ -190,47 +190,47 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return isset($this->data[$className]) && count($this->data[$className]);
 	}
-	
+
 	public static function isLanguageSensitiveClass($className)
 	{
 		return in_array($className, self::$languageSensitiveClasses);
 	}
-	
+
 	public static function isResolvableUriClass($className)
 	{
 		return !in_array($className, self::$languageSensitiveClasses);
 	}
-	
+
 	public static function translate($label)
 	{
 		return $label;
 	}
-	
+
 	public function __set($fieldname, $value)
 	{
 		$this->offsetSet($fieldname, $value);
 	}
-	
+
 	public function offsetSet($fieldname, $value) {
 		throw new Zend_Exception('You are not allowed to set values');
 	}
-	
+
 	public function offsetExists($fieldname) {
 		return isset($this->data[$fieldname]);
 	}
-	
+
 	public function offsetUnset($fieldname) {
 		throw new Zend_Exception('You are not allowed to unset values');
 	}
-	
+
 	public function offsetGet($fieldname) {
 		return $this->offsetExists($fieldname) ? $this->data[$fieldname] : null;
 	}
-	
+
 	public function getImplicitRelation($relationName)
 	{
 		$relations = $this->getAllRelations($relationName);
-		if (empty($relations)) 
+		if (empty($relations))
 			return ;
 		if (!isset($this->data[$relationName])) return $relations;
 		//dedup
@@ -240,46 +240,46 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 				$docs[] = $doc;
 			}
 		}
-		
+
 		return count($docs) ? $docs : null;
 	}
-	
+
 	/**
 	 * The function tests if a particular URI(established relation) is also internal.
 	 * @return boolean isImplicit
 	 */
-	public function isInternalRelation($uri, $relationName) 
+	public function isInternalRelation($uri, $relationName)
 	{
 		if (isset($this[$relationName]) && is_array($this[$relationName])) {
 			return in_array($uri, $this[$relationName]);
-		}	
+		}
 		return false;
 	}
-	
+
 	/**
 	 * Gets all external transitive relations
 	 * @param string $relationName
 	 * @param string $conceptScheme
 	 * @return array of concept records
-	 */	
+	 */
 
 	public function getAllRelations($relationName, $conceptScheme = null)
 	{
-		return $this->getExternalRelations($relationName, $conceptScheme, 'getRelations');		
+		return $this->getExternalRelations($relationName, $conceptScheme, 'getRelations');
 	}
-	
+
 	/**
 	 * Gets al external transitive mappings.
 	 * @param string $mappingName
 	 * @param string $conceptScheme
 	 * @return array
 	 */
-	
-	public function getAllMappings($mappingName, $conceptScheme = null) 
+
+	public function getAllMappings($mappingName, $conceptScheme = null)
 	{
 		return $this->getExternalRelations($mappingName, $conceptScheme, 'getMappings');
 	}
-	
+
 	/**
 	 * Wrapper for getting the concepts with external transitive relations.
 	 * @param string $fieldName
@@ -292,8 +292,8 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		if (null === $this->model) {
 			$this->model = Api_Models_Concepts::factory();
         }
-        
-        $docs = [];
+
+        $docs = array();
         $chunkStart = 0;
         $chunkSize = 50;
 		do {
@@ -311,17 +311,17 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
             if ($response['response']['numFound'] > 0) {
 				$docs = array_merge($docs, $response['response']['docs']);
 			}
-            
+
             $chunkStart += $chunkSize;
         } while ($chunkStart < $response['response']['numFound']);
-        
+
         foreach ($docs as &$doc) {
             $doc['isImplicit'] = true;
         }
-        
+
 		return $docs;
 	}
-    
+
 	/**
 	 *  Returns the data for concepts associated with an internal field (e.g. broader)
 	 * @param string $fieldName
@@ -333,17 +333,17 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		if (!isset($this[$fieldName]) || !is_array($this[$fieldName])) {
 			return array();
 		}
-		
+
         $relationsUris = array_filter($this[$fieldName]);
-        
+
 		$docs = array();
 		$chunkSize = 50;
 		for ($chunkStart = 0; $chunkStart < count($relationsUris); $chunkStart += $chunkSize) {
-			
+
 			$chunkOfUris = array_filter(
                 array_slice($relationsUris, $chunkStart, $chunkSize)
             );
-			
+
 			$queryParts = array();
 			foreach ($chunkOfUris as $conceptUri) {
 				$queryParts[] = 'uri:"' . $conceptUri . '"';
@@ -355,28 +355,28 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			}
 
 			$apiModel = Api_Models_Concepts::factory();
-            
-            
+
+
             //!NOTE prefLabel@en can cause error "can not use FieldCache on multivalued field: prefLabel" on solr 4
             $fields = array('uuid', 'uri', 'prefLabel', 'inScheme');
             if (null !== $this->getCurrentLanguage()) {
                 $fields[] = 'prefLabel@' . $this->getCurrentLanguage();
             }
 			$apiModel->setQueryParam('fl', implode(', ', $fields));
-            
-            
+
+
             $response = $apiModel->getConcepts($query);
 
 			if ($response['response']['numFound'] > 0) {
 				$docs = array_merge($docs, $response['response']['docs']);
 			}
 		}
-		
+
 		return $docs;
 	}
 	/**
 	 * @TODO This could be used to easily refactor the concept View.
-	 * 
+	 *
 	 * @param array $fieldNames
 	 * @param string $conceptScheme
 	 * @param callback $implicitCallback
@@ -390,12 +390,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return $relations;
 	}
-	
+
 	/**
 	 * Traces all bi-directional relations for a particular fieldname and returns an array holding unique related docs.
 	 * e.g. $concept->getRelationsByField('broader', $conceptSchemeUri, array($concept, 'getAllRelations'));
 	 * will return transitive broader/narrower relation of the Concept.
-	 * 
+	 *
 	 * @param string $fieldName
 	 * @param string $conceptScheme
 	 * @param callback $implicitCallback
@@ -406,15 +406,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	{
 		$relations = array();
 		$relations = $this->getInternalAssociation($fieldName, $conceptScheme);
-		
+
 		if (null !== $implicitCallback) {
 			$implicitRelations = call_user_func_array($implicitCallback, array($fieldName, $conceptScheme));
 			if (!empty($implicitRelations)) {
 				$relations = array_merge($relations, $implicitRelations);
             }
 		}
-		
-		$unique = array();		
+
+		$unique = array();
 		reset($relations);
 		$relations = array_filter($relations, function ($element) use (&$unique) {
 			if (in_array($element['uri'], $unique)) {
@@ -423,20 +423,20 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			$unique[] = $element['uri'];
 			return true;
 		});
-        
+
 		$concepts = array();
-		$apiModel = Api_Models_Concepts::factory();        
+		$apiModel = Api_Models_Concepts::factory();
 		foreach ($relations as $relation) {
 			$concepts[] = new Api_Models_Concept($relation, $apiModel);
 		}
-        
+
 		if ($sortByPrefLabel) {
 			usort($concepts, array('Api_Models_Concept', 'compareByPreviewLabel'));
 		}
-		
+
 		return $concepts;
 	}
-	
+
 	public function getImplicitRelations()
 	{
 		$relations = array();
@@ -447,12 +447,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return count($relations) ? $relations : null;
 	}
-	
+
 	public function count()
 	{
 		return count($this->fieldnames);
 	}
-	
+
     public function rewind() {
     	$this->position = 0;
     }
@@ -490,31 +490,31 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 					$result[$field] = $this->getMlField('scopeNote', $this->getCurrentLanguage());
 				} else if ($field = 'schemes') {
 					$result[$field] = $this->getConceptSchemesData();
-				}	
+				}
 			}
-			return $result;	
+			return $result;
 		} else {
 			return $this->data;
 		}
 	}
-	
+
 	public function toJson()
 	{
 		return json_encode($this->toArray());
 	}
-	
+
 	public function getInstitution()
 	{
 		$model = new OpenSKOS_Db_Table_Tenants();
 		return $model->find($this->data['tenant'])->current();
 	}
-	
+
 	public function getCollection()
 	{
 		$model = new OpenSKOS_Db_Table_Collections();
 		return $model->find($this->data['collection'])->current();
 	}
-	
+
 	public function getValues($fieldname, $lang = null)
 	{
 		if (null !== $lang && self::isLanguageSensitiveClass($fieldname)) {
@@ -524,12 +524,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			return $this->data[$fieldname];
 		}
 	}
-	
+
 	public function isDeleted()
 	{
 	    return (bool)$this['deleted'];
 	}
-	
+
 	public function getConceptSchemes()
 	{
 		$ConceptSchemes = array();
@@ -540,7 +540,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return $ConceptSchemes;
 	}
-	
+
 	public function getTopConcepts()
 	{
 		$topConcepts = $this['hasTopConcept'];
@@ -551,7 +551,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			->setCurrentPageNumber(Zend_Controller_Front::getInstance()->getRequest()->getParam('page'));
 		return $paginator;
 	}
-	
+
 	public function getLangValues($fieldname, $lang = null) {
 		$data = array();
 		foreach ($this as $key => $values) {
@@ -563,14 +563,14 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return count($data) ? $data : null;
 	}
-	
+
 	public function getRelations($relation, $lang = null)
 	{
 		$model = new Api_Models_Concepts();
 		$response = $model->getRelations(
 			$relation,
-			$this->data['uri'], 
-			isset($this->data[$relation]) ? $this->data[$relation] : array(), 
+			$this->data['uri'],
+			isset($this->data[$relation]) ? $this->data[$relation] : array(),
 			$lang
 		);
 		$docs = array();
@@ -579,7 +579,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return count($docs) ? $docs : null;
 	}
-	
+
     /**
      * @return DOMDocument
      */
@@ -601,10 +601,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	}
     	return $doc;
 	}
-	
+
 	/**
 	 * Perform a "soft" delete
-	 * 
+	 *
 	 * @return Api_Models_Concept
 	 */
 	public function delete($commit = null)
@@ -612,24 +612,24 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
         $rdf = $this->toRDF();
         $data = $this->getCurrentRequiredData();
         $data['deleted'] = true;
-        
+
         if (isset($this->data['deleted_timestamp'])) {
         	$data['deleted_timestamp'] = $this->data['deleted_timestamp'];
         }
-        
+
 	    $solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($rdf->firstChild->firstChild, $data);
 	    $this->solr()->add($solrDocument, $commit);
-	    
+
 	    if (isset($this['inScheme']) && is_array($this['inScheme'])) {
 	    	$this->updateConceptSchemes(array(), $this['inScheme']);
 	    }
-	    
+
 	    return $this;
 	}
-	
+
 	/**
 	 * Perform a "hard" delete
-	 * 
+	 *
 	 * @return Api_Models_Concept
 	 */
 	public function purge()
@@ -638,15 +638,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	    $solr = $this->solr()->delete('uuid:'.(is_array($this['uuid']) ? $this['uuid'][0] : $this['uuid']));
 	    return $this;
 	}
-	
+
 	public function save($extraData = null, $commit = null)
-	{	
+	{
 		$document = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($this->toRDF()->documentElement->firstChild, $extraData);
-		
+
 		$this->solr()->add($document, $commit);
 		return $this;
 	}
-	
+
 	/**
 	 * @return OpenSKOS_Solr
 	 */
@@ -654,12 +654,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	{
 		return Zend_Registry::get('OpenSKOS_Solr');
 	}
-	
+
 	public function __toString()
     {
     	return $this->toDom()->saveXml($this->toDom()->documentElement);
     }
-    
+
     /**
      * @return DOMDocument
      */
@@ -676,28 +676,28 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	$doc->loadXml($xml);
     	return $doc;
     }
-    
+
     /**
-     * 
+     *
      */
     protected function getRdfMapping()
     {
     	$languageFields = OpenSKOS_Rdf_Parser::$langMapping;
     	$resourceFields = array_merge(
-    			self::$classes['SemanticRelations'], 
+    			self::$classes['SemanticRelations'],
     			self::$classes['ConceptSchemes'],
     			self::$classes['MappingProperties']
     	);
     	$dctermsDateFields = self::$classes['DctermsDateFields'];
     	$simpleSkosFields = self::$classes['Notations'];
     	return array(
-    			'languageFields' => $languageFields, 
-    			'resourceFields' => $resourceFields, 
+    			'languageFields' => $languageFields,
+    			'resourceFields' => $resourceFields,
     			'dctermsDateFields' => $dctermsDateFields,
     			'simpleSkosFields' => $simpleSkosFields,
     	);
     }
-    
+
     /**
      *
      * @param array $formData
@@ -708,47 +708,47 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     {
     	$this->stripConcept();
     	$this->data = array_merge($this->data, $formData);
-    	
+
     	// Fix for multiplying of notation
     	if (isset($this->data['notation']) && is_array($this->data['notation'])) {
     		$this->data['notation'] = array(array_shift($this->data['notation']));
     	}
-    	
+
     	$this->setDcTermsData($extraData);
-    	
+
     	$document = $this->toRDF();
-    	
+
     	$xpath = new DOMXPath($document);
-    	 
+
     	foreach ($this->getNamespaces() as $prefix => $uri) {
     		$xpath->registerNamespace($prefix, $uri);
     	}
-    	
+
     	$this->_rdfDocument = new DOMDocument('1.0', 'utf-8');
     	$this->_rdfDocument->formatOutput = true;
     	$this->_rdfDocument->preserveWhiteSpace = false;
-    	 
+
     	$this->_rdfDocument->appendChild($this->_rdfDocument->createElementNS(OpenSKOS_Rdf_Parser::$namespaces['rdf'],'rdf:Description'));
     	$this->_rdfDocument->documentElement->setAttribute('rdf:about', $this->getRdfDescriptionAbout($extraData));
-    	
+
     	$rdfType = $this->_rdfDocument->createElement('rdf:type');
     	$rdfType->setAttribute('rdf:resource', $this->getClass());
     	$this->_rdfDocument->documentElement->appendChild($rdfType);
-    
+
     	$nodes = $this->getXmlNodes($xpath);
-    	
+
     	foreach ($nodes as $node) {
     		$xmlNode = $this->_rdfDocument->importNode($node, true);
     		$this->_rdfDocument->documentElement->appendChild($xmlNode);
     	}
     	$this->data['xml'] = $this->_rdfDocument->saveXML($this->_rdfDocument->documentElement);
-    	
+
     	return $this;
     }
-    
+
     /**
      * Sets all dcterms fields.
-     * 
+     *
      * @param unknown_type $extraData
      */
     protected function setDcTermsData($extraData)
@@ -770,7 +770,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		}
     	}
     }
-    
+
     /**
      * Gets xml nodes which will be part of the concept xml
      *
@@ -781,12 +781,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     {
     	$extraNodes = $this->getExtraRdf($xpath);
     	$rdfNodes = $this->getRdfFromData();
-    	 
+
     	$nodes = array_merge($rdfNodes, $extraNodes);
-    	 
+
     	return $nodes;
     }
-    
+
     /**
      * Remove old concept data before merging form data.
      * @TODO Refactor.
@@ -799,7 +799,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     			if (isset($this->data[$fieldName.'@'.$languageCode])) {
     				unset($this->data[$fieldName.'@'.$languageCode]);
     			}
-    		} 
+    		}
     	}
     	foreach ($rdfMapping['resourceFields'] as $fieldName) {
     		if (isset($this->data[$fieldName])) {
@@ -807,10 +807,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		}
     	}
     }
-    
+
     /**
      * Translate data from rdf mapping to rdf nodes
-     * 
+     *
      * @return array
      */
     protected function getRdfFromData()
@@ -825,20 +825,20 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		} else if (in_array($docField, $rdfMapping['resourceFields'])) {
     			$rdfNodes = array_merge($rdfNodes, OpenSKOS_Rdf_Parser::createResourceField($docField, $docValue));
     		} else if (in_array($docField, $rdfMapping['dctermsDateFields'])) {
-    			
+
     			if ($docField == 'dcterms_dateAccepted' && (empty($docValue) || empty($docValue[0]))) {
     				continue;
     			}
-    			
+
     			$rdfNodes = array_merge($rdfNodes, OpenSKOS_Rdf_Parser::createDcTermsField($docField, $docValue));
-    			
+
     		} else if (in_array($docField, $rdfMapping['simpleSkosFields'])) {
     			$rdfNodes = array_merge($rdfNodes, OpenSKOS_Rdf_Parser::createSimpleSkosField($docField, $docValue));
     		}
     	}
     	return $rdfNodes;
     }
-    
+
     /**
      *
      * @param DOMXpath $xpath
@@ -851,7 +851,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	foreach ($innerDocument as $rdfContent) {
     		foreach ($rdfContent->childNodes as $childNode) {
     			if (($childNode->nodeType === XML_TEXT_NODE) || (strpos($childNode->nodeName, 'skos') !== false) || (strpos($childNode->nodeName, 'rdf:type') !== false)
-    					|| $childNode->nodeName == 'dcterms:dateSubmitted' || $childNode->nodeName == 'dcterms:dateAccepted' || $childNode->nodeName == 'dcterms:modified' 
+    					|| $childNode->nodeName == 'dcterms:dateSubmitted' || $childNode->nodeName == 'dcterms:dateAccepted' || $childNode->nodeName == 'dcterms:modified'
     					|| $childNode->nodeName == 'dcterms:creator' || $childNode->nodeName == 'skos:notation') {
     				continue;
     			}
@@ -860,7 +860,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	}
     	return $extraNodes;
     }
-    
+
     /**
      * @return string
      */
@@ -869,7 +869,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     	if ( ! empty($extraData['uri'])) {
     		return $extraData['uri'];
     	}
-    	
+
     	$doc = $this->toRDF();
     	$descriptions = $doc->documentElement->getElementsByTagNameNs(OpenSKOS_Rdf_Parser::$namespaces['rdf'],'Description');
 		if ($descriptions->length == 1) {
@@ -881,41 +881,41 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			return $url.'/'.$this->generateUUID();
 		}
     }
-    
+
     /**
-     * unique 
+     * unique
      */
     protected function generateUUID()
 	{
 		return OpenSKOS_Utils::uuid();
 	}
-		
+
 	/**
-	 * @return array 
+	 * @return array
 	 */
 	public function getConceptLanguages()
 	{
 		if ( ! empty($this->_conceptLanguages)) {
 			return $this->_conceptLanguages;
 		}
-		
+
 		return $this->setConceptLanguages();
 	}
-	
+
 	/**
 	 * @return array
 	 */
 	protected function setConceptLanguages()
 	{
 		//@FIXME it's a good idea to have a settings class that deals with .ini parameters, verification & default values.
-		
+
 		$editorSettings = OpenSKOS_Application_BootstrapAccess::getOption('editor');
 		$languages = array();
 		$this->_conceptLanguages = array();
 		if (isset($editorSettings['languages'])) {
 			$languages = $editorSettings['languages'];
 		}
-		
+
 		foreach ($languages as $languageCode => $languageName) {
 			foreach (self::$languageSensitiveClasses as $class) {
 				foreach (self::$classes[$class] as $fieldName) {
@@ -926,12 +926,12 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 				}
 			}
 		}
-		
+
 		$this->_conceptLanguages = array_unique($this->_conceptLanguages);
-		
+
 		return $this->_conceptLanguages;
 	}
-	
+
 	/**
 	 * Returns the the value of a multi language field in a specific language.
 	 * @param string $fieldName
@@ -949,10 +949,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		if (isset($this[$fieldName]) && is_array($this[$fieldName])) {
 			return $this[$fieldName][0];
 		}
-			
+
 		return null;
 	}
-	
+
 	/**
 	 * Extracts language specific fields from a concept.
 	 * @param string $class
@@ -969,9 +969,9 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return $data;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param array $conceptScheme
 	 * @return boolean
 	 */
@@ -985,11 +985,11 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			$isTopConcept = in_array($conceptScheme['uri'], $this['topConceptOf']);
 		}
 		if (isset($conceptScheme['hasTopConcept']) && is_array($conceptScheme['hasTopConcept'])) {
-			$isTopConcept = $isTopConcept || in_array($this['uri'], $conceptScheme['hasTopConcept']); 
+			$isTopConcept = $isTopConcept || in_array($this['uri'], $conceptScheme['hasTopConcept']);
 		}
 		return $isTopConcept;
 	}
-	
+
 	/**
 	 * Loading inScheme data.
 	 * This is a json utility function
@@ -1003,23 +1003,23 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		if (isset($this['inScheme']) && is_array($this['inScheme'])) {
 			$schemes = $apiClient->getConceptSchemes($this['inScheme'], $this->data['tenant']);
 		}
-			
+
 		return $schemes;
 	}
-	
+
 	/**
 	 * Remove dependencies when a concept changes schemes
 	 * @param arary - uris of all new schemes
 	 */
 	public function updateConceptSchemes($newSchemes, $oldSchemes)
-	{		
+	{
 		foreach ($oldSchemes as $schemeUri) {
 			if (!in_array($schemeUri, $newSchemes)) {
 				$this->removeFromScheme($schemeUri);
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes a concept uri from ConceptScheme resource fields.
 	 * @param string $schemeUri
@@ -1032,10 +1032,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			$conceptScheme->removeTopConcept($this['uri']);
 		}
 	}
-	
+
 	/**
 	 * Get fields that are required by the domnode2solr function.
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getCurrentRequiredData()
@@ -1048,19 +1048,19 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Gets the prefLabel of the concept for the current locale.
-	 * 
+	 *
 	 * @return string
-	 */	
+	 */
 	public function getPreviewLabel()
 	{
 		return $this->getMlField('prefLabel', $this->getCurrentLanguage());
 	}
-    
+
     /**
-     * 
+     *
      * @return null|language
      */
     public function getCurrentLanguage()
@@ -1071,10 +1071,10 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 			return null;
 		}
     }
-	
+
 	/**
 	 * Compares two Api_Models_Concept classes by their uuids.
-	 * 
+	 *
 	 * @param Api_Models_Concept $a
 	 * @param Api_Models_Concept $b
 	 */
@@ -1082,7 +1082,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	{
 		return strcasecmp($a['uuid'], $b['uuid']);
 	}
-	
+
 	/**
 	 * Compares two Api_Models_Concept classes by their preview labels.
 	 *
