@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -24,29 +24,29 @@
  * Extends Api_Models_Concept
  *
  */
-class Editor_Models_Concept extends Api_Models_Concept 
+class Editor_Models_Concept extends Api_Models_Concept
 {
 	/**
 	 * Holds errors from any kind of validation.
-	 * 
+	 *
 	 * @var array
 	 */
 	private $_errors = array();
-	
+
 	/**
 	 * Implements a copy constructor to copy from Api_Models_Concept.
-	 * 
-	 * @TODO Erorr handling on null/different object type initialization. 
+	 *
+	 * @TODO Erorr handling on null/different object type initialization.
 	 * @param Api_Models_Concept $copyFrom
 	 */
 	public function __construct(Api_Models_Concept $copyFrom)
 	{
 		parent::__construct($copyFrom->getData(), $copyFrom->getModel());
 	}
-	
+
 	/**
-	 * Checks is the concept valid and saves it if it is. 
-	 * 
+	 * Checks is the concept valid and saves it if it is.
+	 *
 	 * @see Api_Models_Concept::save()
 	 * @param array $extraData
 	 * @param bool $commit, optional To do a solr commit or not. Default: true.
@@ -62,21 +62,21 @@ class Editor_Models_Concept extends Api_Models_Concept
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Retrieve all errors if any action fails validation.
-	 * 
+	 *
 	 * @return array Array of Editor_Models_ConceptValidator_Error objects.
 	 */
 	public function getErrors()
 	{
 		return $this->_errors;
 	}
-	
+
 	/**
 	 * Validates concept for saving
-	 * 
-	 * @param array 
+	 *
+	 * @param array
 	 */
 	protected function _validateSave($extraData)
 	{
@@ -96,7 +96,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 			$this->_errors[] = $validator->getError();
 			return false;
 		}
-		
+
 		// Check for other validators.
 		$validators = array();
         $validators[] = Editor_Models_ConceptValidator_UniqueNotation::factory();
@@ -107,9 +107,9 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$validators[] = Editor_Models_ConceptValidator_DuplicateRelated::factory();
 		$validators[] = Editor_Models_ConceptValidator_UnneededDirectBroaders::factory();
 		$validators[] = Editor_Models_ConceptValidator_UnneededDirectNarrowers::factory();
-		$validators[] = Editor_Models_ConceptValidator_UniquePrefLabelInScheme::factory();		
+		$validators[] = Editor_Models_ConceptValidator_UniquePrefLabelInScheme::factory();
 		$validators[] = Editor_Models_ConceptValidator_ExpiredWithRelations::factory();
-		
+
 		$isValid = true;
 		foreach ($validators as $validator) {
 			if ( ! $validator->isValid($this, $extraData)) {
@@ -117,19 +117,19 @@ class Editor_Models_Concept extends Api_Models_Concept
 				$this->_errors[] = $validator->getError();
 			}
 		}
-		
+
 		return $isValid;
 	}
-	
+
 	/**
 	 * Searches for relation with the $searchConcept - direct or via intermidate concepts.
-	 * 
+	 *
 	 * @param string $type broader, narrower or related.
 	 * @param Editor_Models_Concept $searchConcept
 	 * @param bool $checkFirstLevel Searches only for relation with intermidiate concept.
 	 */
 	public function hasRelationInDepth($type, Editor_Models_Concept $searchConcept, $checkFirstLevel = true)
-	{	
+	{
 		$relations = $this->getRelationsByField($type, null, array($this, 'getAllRelations'));
 
 		foreach ($relations as $relation) {
@@ -144,23 +144,23 @@ class Editor_Models_Concept extends Api_Models_Concept
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
     /**
      * Translates a model concept with all relevant
-     * data to an editor form. 
+     * data to an editor form.
      * @return array that can be used directly with to populate an Editor_Forms_Concept
      */
-	
-	public function toForm() 
+
+	public function toForm()
 	{
 		$apiClient = new Editor_Models_ApiClient();
-		
+
 		$languages = $this->getConceptLanguages();
-		
+
 		$languageData = array();
 		foreach ($languages as $languageCode) {
 			$languageData[strtoupper($languageCode)] = array(strtoupper($languageCode) => $languageCode);
@@ -174,8 +174,8 @@ class Editor_Models_Concept extends Api_Models_Concept
 		} else {
 			$schemeTabs = array();
 		}
-		
-		
+
+
 		$conceptData = array(
 				'inScheme' => $schemeTabs,
 				'conceptSchemesId' => $apiClient->getConceptSchemeMap('uri', 'uuid'),
@@ -185,28 +185,28 @@ class Editor_Models_Concept extends Api_Models_Concept
 				'uuid' => $this['uuid'],
 				'notation' => $this->getMlField('notation'),
 				'conceptSchemeSelect' => $apiClient->getConceptSchemeMap('uuid', array('dcterms_title' => 0)));
-		
+
 		if (isset($this['status'])) {
 			$conceptData['status'] = $this['status'];
 		}
-		
-		$languageData = array();		
+
+		$languageData = array();
 		foreach ($languages as $languageCode) {
 			$languageData = array_merge_recursive(
 					$languageData,
 					$this->_getParsedMlProperties('LexicalLabels', $languageCode),
 					$this->_getParsedMlProperties('DocumentationProperties', $languageCode));
 		}
-		
+
 		$conceptData = array_merge($languageData, $conceptData);
 		$topConcept = array(); // use the same loop for both form elements.
-		
+
 		if (is_array($this['inScheme'])) {
 			foreach ($this['inScheme'] as $scheme) {
 				if (isset($conceptData['conceptSchemesId'][$scheme])) {
 					$topConcept[$conceptData['conceptSchemesId'][$scheme]] = $this->isTopConceptOf($scheme);
 				}
-				
+
 				foreach (self::$classes['SemanticRelations'] as $relation) {
 					if (!isset($conceptData[$relation]) || !is_array($conceptData[$relation]))
 						$conceptData[$relation] = array();
@@ -220,21 +220,21 @@ class Editor_Models_Concept extends Api_Models_Concept
 			}
 			$conceptData['topConceptOf'] = $topConcept;
 		}
-		
+
 		foreach (self::$classes['MappingProperties'] as $relation) {
 			if (!isset($conceptData[$relation]) || !is_array($conceptData[$relation])) {
 				$conceptData[$relation] = array();
-			}	
-			
+			}
+
 			$relationData = $this->_getRelationToForm($relation, null, null);
 			if (!empty($relationData)) {
 				$conceptData[$relation][] = $relationData;
 			}
 		}
-		
+
 		return $conceptData;
 	}
-	
+
 	/**
 	 * Parses all the form data and
 	 * loads it into the model.
@@ -242,16 +242,16 @@ class Editor_Models_Concept extends Api_Models_Concept
 	 * @return $sextraData
 	 */
 	public function transformFormData(array &$formData) {
-		
+
 		$formMapping = $this->_getFormMapping();
-		
+
 		// Remove notation from language fields. For editor it is not translatable.
 		$formMapping['languageFields'] = array_diff($formMapping['languageFields'], array('notation'));
-		
+
 		$extraData = array();
 		$apiClient = new Editor_Models_ApiClient();
 		$schemeMap = $apiClient->getConceptSchemeMap('uuid', 'uri');
-		
+
 		foreach ($formData as $key => $value) {
 			if (in_array($key, $formMapping['languageFields'])) {
 				foreach ($formData[$key] as $languageCode => $values) {
@@ -280,73 +280,73 @@ class Editor_Models_Concept extends Api_Models_Concept
 					$formData[$key] = array_filter(array_unique($formData[$key]));
 					foreach ($formData[$key] as $index => $value) {
 						$formData[$key][$index] = $this->_getUriFromUuid($value);
- 					} 
+ 					}
 				}
 			} else if (in_array($key, $formMapping['helperFields'])) {
 				unset($formData[$key]);
 			}
 		}
-		
+
 		foreach ($formData as $key => $value) {
 			if (in_array($key, $formMapping['extraFields'])){
 				$extraData[$key] = $formData[$key];
 				unset($formData[$key]);
 			}
 		}
-		
+
 		return $extraData;
 	}
-	
+
 	/**
 	 * Get all concepts wich are:
 	 * 1. Narrower relations.
 	 * 2. Narrower mathces and top concepts in any scheme.
-	 * 
+	 *
 	 * @param bool $sortByPrevLabel optional, Default: true
 	 * @return array Array of Editor_Models_Concepts
 	 */
 	public function getNarrowers($sortByPrevLabel = true)
 	{
 		$narrowerRelations = $this->getRelationsByField('narrower', null, array($this, 'getAllRelations'));
-		
+
 		$narrowMatches = $this->getRelationsByField('narrowMatch', null, array($this, 'getAllMappings'));
 		foreach ($narrowMatches as $key => $narrowMatch) {
 			if ( ! isset($narrowMatch['topConceptOf']) || empty($narrowMatch['topConceptOf'])) {
 				unset($narrowMatches[$key]);
 			}
 		}
-		
+
 		$narrowers = array_merge($narrowerRelations, $narrowMatches);
 
 		if ($sortByPrevLabel) {
 			usort($narrowers, array('Api_Models_Concept', 'compareByPreviewLabel'));
 		}
-		
+
 		// Copy them to Editor_Models_Concept objects.
 		foreach ($narrowers as $key => $concept) {
 			$narrowers[$key] = new Editor_Models_Concept($concept);
 		}
-				
+
 		return $narrowers;
 	}
-	
+
 	/**
-	 * Tries to perform real update over the concept without loosing any old data and properly chaning the update data. 
-	 * 
+	 * Tries to perform real update over the concept without loosing any old data and properly chaning the update data.
+	 *
 	 * @param array $updateData Leave empty array if no normal data is updated.
 	 * @param array $updateExtraData Leave empty array if no extra data is updated.
 	 * @param bool $commit, optional, Default: true
 	 * @param bool $ignoreValidation, optional, Default: false If set to true the validation on save will not be performed.
 	 * @return bool True if the save is successfull. False otherwise. You can see errors by calling getErrors();
 	 */
-	public function update($updateData, $updateExtraData, $commit, $ignoreValidation = false) 
+	public function update($updateData, $updateExtraData, $commit, $ignoreValidation = false)
 	{
 		$data = $this->getData();
 		$extraData = $this->getCurrentRequiredData();
-		
+
 		// Fix for preventing multiplying of the notation.
 		unset($extraData['notation']);
-		
+
 		//!TODO The fallowing should be added to required data or all the process of editing concept should be refactored so that old data is not lost.
 		// Data which will be lost on update if not remembered...
 		if (isset($data['toBeChecked'])) {
@@ -379,10 +379,10 @@ class Editor_Models_Concept extends Api_Models_Concept
 		if (isset($data['status'])) {
 			$extraData['status'] = $data['status'];
 		}
-		
+
 		$data = array_merge($data, $updateData);
 		$extraData = array_merge($extraData, $updateExtraData);
-		
+
 		if (isset($extraData['status'])) {
 			if ($extraData['status'] !== 'approved') {
 				$data['approved_by'] = '';
@@ -390,7 +390,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 				$extraData['approved_by'] = '';
 				$extraData['approved_timestamp'] = '';
 			}
-			
+
 			if ($extraData['status'] !== 'expired') {
 				$data['deleted_by'] = '';
 				$data['deleted_timestamp'] = '';
@@ -398,12 +398,12 @@ class Editor_Models_Concept extends Api_Models_Concept
 				$extraData['deleted_timestamp'] = '';
 			}
 		}
-		
+
 		// The actual update...
 		$this->setConceptData($data, $extraData);
 		return $this->save($extraData, $commit, $ignoreValidation);
 	}
-	
+
 	/**
 	 * Gets all relations and mapping properties - both external and internal.
 	 * @see Api_Models_Concept::getAllRelations()
@@ -414,42 +414,42 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$allMappingRelations = $this->getRelationsArray(Api_Models_Concept::$classes['MappingProperties'], null, array($this, 'getAllMappings'));;
 		return array_merge($allSemanticRelations, $allMappingRelations);
 	}
-	
+
 	/**
 	 * Wether the concept has any relations to other concepts or not.
 	 * Relations from other concepts to this concept are also counted.
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function hasAnyRelations()
 	{
 		$hasAnyRelation = false;
-		
+
 		$allRealations = $this->getAllRelationsAndMappings();
 		foreach ($allRealations as $relations) {
 			$hasAnyRelation |= ( ! empty($relations));
 		}
-		
+
 		return (bool)$hasAnyRelation;
 	}
-		
+
 	/**
 	 * This function works with uri/uuid as parameter.
 	 * @param string $uuid
 	 */
 	protected function _getUriFromUuid ($uuid)
-	{	
+	{
 		if (null === $this->model) {
 			$this->model = Api_Models_Concepts::factory();
 		}
-		
+
 		$concept = $this->model->getConcept($uuid);
 		if (null !== $concept) {
 			return $concept['uri'];
 		}
 		return '';
 	}
-	
+
 	/**
 	 * Get a relation description in a format that allows us to send it directly to the form.
 	 * @param string $relation
@@ -459,37 +459,37 @@ class Editor_Models_Concept extends Api_Models_Concept
 	protected function _getRelationToForm($relation, $schemeUuid, $schemeUri)
 	{
 		$apiClient = new Editor_Models_ApiClient();
-		 
+
 		$relationData = array('uuid' => $schemeUuid, 'concepts' => array());
 		if (in_array($relation, self::$classes['SemanticRelations'])) {
 			$callback =  array($this, 'getAllRelations');
 		} else {
 			$callback = array($this, 'getAllMappings');
 		}
-		
+
 		$currentLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();
-		
+
 		$concepts = $this->getRelationsByField($relation, $schemeUri,  $callback, true);
 		if (empty($concepts)) {
 			return array();
 		}
-		
+
         $schemesData = $apiClient->getConceptSchemes();
-        
+
 		foreach ($concepts as $concept) {
 			$previewLabel = $concept->getMlField('prefLabel', $currentLanguage);
 			$isInternal = $this->isInternalRelation($concept['uri'], $relation);
 			if (!$isInternal) {
 				$previewLabel .= '*';
-			} 
-			
-            $shemes = [];
+			}
+
+            $shemes = array();
             foreach ($schemesData as $schemeData) {
                 if (in_array($schemeData['uri'], $concept['inScheme'])) {
                     $shemes[$schemeData['uri']] = $schemeData;
                 }
             }
-            
+
 			$relationData['concepts'][] = array(
 					'concept' => array(
 							'uuid' => $concept['uuid'],
@@ -500,7 +500,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 		}
 		return $relationData;
 	}
-	
+
 	/**
 	 * Form content to model fields mapper.
 	 */
@@ -520,14 +520,14 @@ class Editor_Models_Concept extends Api_Models_Concept
 		);
 		return $mapping;
 	}
-	
+
 	/**
 	 * Gets all ML data in a specific language and formats it in a way that could be easily used by the concept form.
 	 * @param string $class
 	 * @param string $languageCode
 	 * @return array
 	 */
-	
+
 	protected function _getParsedMlProperties($class, $languageCode)
 	{
 		$data = $this->getMlProperties($class, $languageCode);
@@ -540,7 +540,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 				}
 			}
 		}
-	
+
 		$parsedData = array();
 		array_walk($data, function ($v, $k) use (&$parsedData) {
 			$k = explode('@', $k);
@@ -550,7 +550,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 				$parsedData[$key] = array();
 			$parsedData[$key][] = array('languageCode' => $languageCode, 'value' => $v);
 		});
-	
+
 		return $parsedData;
 	}
 }
