@@ -28,6 +28,19 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         'put' => array('json', 'jsonp', 'xml'),
         'delete' => array('json', 'jsonp', 'xml'),
     );
+    
+    public $typesContextsMap = array(
+        'text/rdf' => 'rdf',
+        'text/rdf+xml' => 'rdf',
+        'application/rdf+xml' => 'rdf',
+        'rdf/xml' => 'rdf',
+        
+        'text/xml' => 'rdf',
+        'application/xml' => 'rdf',
+        
+        'application/json' => 'json',
+        'application/jsonp' => 'jsonp',
+    );
 
     protected function _501($method)
     {
@@ -89,5 +102,41 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
                 break;
             }
         }
+    }
+    
+    public function getRequestedFormat()
+    {
+        $requestedFormat = $this->getRequest()->getParam('format');
+        
+        if (!empty($requestedFormat)) {
+            $format = $requestedFormat;
+        } else {
+            $acceptedFormats =  $this->getAcceptedFormats();
+            if (!empty($acceptedFormats)) {
+                $format = $acceptedFormats[0];
+            } else {
+                $format = 'rdf';
+            }
+        }
+        
+        return $format;
+    }
+    
+    protected function getAcceptedFormats()
+    {
+        $acceptedFormats = [];
+        
+        $accept = $this->getRequest()->getServer('HTTP_ACCEPT');
+        
+        foreach (explode(',', $accept) as $type) {
+            $type = substr($type, 0, strpos($type, ';')); // Remove any parts after ;
+            $type = strtolower(trim($type));
+            
+            if (isset($this->typesContextsMap[$type])) {
+                $acceptedFormats[] = $this->typesContextsMap[$type];
+            }
+        }
+        
+        return $acceptedFormats;
     }
 }
