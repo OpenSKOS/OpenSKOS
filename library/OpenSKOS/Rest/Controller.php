@@ -35,8 +35,8 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         'application/rdf+xml' => 'rdf',
         'rdf/xml' => 'rdf',
         
-        'text/xml' => 'xml',
-        'application/xml' => 'xml',
+        'text/xml' => 'rdf',
+        'application/xml' => 'rdf',
         
         'application/json' => 'json',
         'application/jsonp' => 'jsonp',
@@ -106,7 +106,6 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
     
     public function getRequestedFormat()
     {
-        
         $requestedFormat = $this->getRequest()->getParam('format');
         
         if (!empty($requestedFormat)) {
