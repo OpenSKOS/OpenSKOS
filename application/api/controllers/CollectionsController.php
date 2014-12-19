@@ -25,7 +25,7 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
 	{
 		parent::init();
 		$this->_helper->contextSwitch()
-			->initContext($this->getRequest()->getParam('format', 'rdf'));
+			->initContext($this->getRequestedFormat());
 		
 		if('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
 			//enable layout:
