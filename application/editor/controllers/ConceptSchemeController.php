@@ -111,10 +111,9 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 				$this->_requireAccess('editor.concept-schemes', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
 			}
 			
-			$extraData = array();			
 			$oldData = $conceptScheme->getData();
 			$extraData = $conceptScheme->transformFormData($formData);
-			$conceptScheme->setConceptData($formData);
+			$conceptScheme->setConceptData($formData, $extraData);
 			
 			try {
 				$user = OpenSKOS_Db_Table_Users::fromIdentity();
