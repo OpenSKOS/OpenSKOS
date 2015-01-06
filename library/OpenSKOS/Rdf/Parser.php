@@ -398,6 +398,8 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$xpath->registerNamespace($prefix, $uri);
 		}
 
+        // We need all elements inside <rdf:RDF> tags. No matter if they are on top or not. So we use // instead of /
+        $rdfRootXPath = '//rdf:RDF';
 		
 		//store all Namespaces used by this scheme in Database:
 		$namespaces = self::getDocNamespaces($this->getDOMDocument());
@@ -408,7 +410,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		$documents = new OpenSKOS_Solr_Documents();
 		
 		//sometimes the first nodes of the XML file is a ConceptScheme:
-		$ConceptScheme = $xpath->query('/rdf:RDF/skos:ConceptScheme')->item(0);
+		$ConceptScheme = $xpath->query($rdfRootXPath . '/skos:ConceptScheme')->item(0);
 		if ($ConceptScheme) {
 			
 		    $doc = $this->getDOMDocument();
@@ -431,7 +433,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    );
 		    
 		    //clone all dc/dcterms nodes:
-		    $dcNodes = $xpath->query('/rdf:RDF/dc:* | /rdf:RDF/dcterms:* ');
+		    $dcNodes = $xpath->query($rdfRootXPath . '/dc:* | ' . $rdfRootXPath . '/dcterms:* ');
 		    foreach ($dcNodes as $dcNode) {
 		        $node->appendChild($dcNode->cloneNode(true));
 		    }
@@ -454,7 +456,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		$notationsCheck = $this->fetchNotationsCheck();
 		
-		$Descriptions = $xpath->query('/rdf:RDF/rdf:Description');
+		$Descriptions = $xpath->query($rdfRootXPath . '/rdf:Description');
 		$d = 0;
 		foreach ($Descriptions as $i => $Description) {
 		    if ($i < $this->getFrom()) continue;
