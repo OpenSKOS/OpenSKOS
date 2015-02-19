@@ -66,6 +66,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	public function getIsCreate()
 	{
 		return $this->_isCreate;
+        
 	}
 	
 	/**
@@ -79,31 +80,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		$this->addElement('hidden', 'uuid', array(
 			'decorators' => array()
 		));
-
-		$availableStatuses = array();
-		$availableStatuses[] = 'candidate';		
-		
-		if ( ! $this->_isProposalOnly) {			
-			$availableStatuses[] = 'approved';
-			$availableStatuses[] = 'expired';
-			
-			$this->addElement('checkbox', 'toBeChecked', array(
-					'label' => 'To be checked:',
-					'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
-			));
-		}
-		
-		$this->addElement('radio', 'status', array(
-				'label' => 'Status:',
-				'separator' => '',
-				'multiOptions' => array_combine($availableStatuses, $availableStatuses),
-				'value' => 'candidate',
-				'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
-		));
-		
-		if ($this->_isProposalOnly) {
-			$this->getElement('status')->setValue('candidate');
-		}
+        
+        $this->buildStatuses();
+        
+        if (!$this->_isProposalOnly) {
+            $this->addElement('checkbox', 'toBeChecked', array(
+                'label' => 'To be checked:',
+                'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
+            ));
+        }
 		
 		if ( ! $this->_isCreate) {
 			
@@ -147,6 +132,26 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 					'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header')))));
 		return $this;
 	}
+    
+    protected function buildStatuses()
+    {
+		if ($this->_isProposalOnly) {
+            $availableStatuses = array(OpenSKOS_Concept_Status::CANDIDATE);
+		} else {
+			$availableStatuses = OpenSKOS_Concept_Status::getStatuses();
+        }
+		
+		$this->addElement('select', 'status', array(
+				'label' => 'Status:',
+				'multiOptions' => array_combine($availableStatuses, $availableStatuses),
+				'value' => 'candidate',
+				'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
+		));
+		
+		if ($this->_isProposalOnly) {
+			$this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
+		}
+    }
 	
 	/**
 	 * This builds the tabs control and the modals content for adding a language layer or a concept scheme layer.
