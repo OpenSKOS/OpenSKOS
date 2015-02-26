@@ -49,7 +49,7 @@ class Editor_LoginController extends Zend_Controller_Action {
 		$username = $form->getValue ( 'username' );
 		$password = $form->getValue ( 'password' );
 		$login = new Editor_Models_Login ();
-		$login->setData ($tenant, $username, $password );
+		$login->setData($tenant, $username, $password );
 		if ($login->isValid ()) {
 			
 			$session = new Zend_Session_Namespace('Zend_Auth');
@@ -74,54 +74,55 @@ class Editor_LoginController extends Zend_Controller_Action {
 	}
 	
 	/**
-	 * Starts an OpenID detection and login process.
+	 * Starts an OAuth2 detection and login process.
 	 *
 	 */
-	public function openidLoginAction() {
-		
-		$form = Editor_Forms_OpenIdLogin::getInstance();
-		if ( ! $form->isValid($this->getRequest()->getParams())) {
+	public function oauth2LoginAction() {
+		$request = $this->getRequest();        
+        
+		$form = Editor_Forms_OAuthLogin::getInstance();
+		if ( ! $form->isValid($request->getParams())) {
 			return $this->_forward('index');
 		}
-		
-		Zend_Loader::loadClass('LightOpenId_Consumer');
-		$serverUrl = new Zend_View_Helper_ServerUrl();
-		
-		$consumer = new LightOpenId_Consumer($serverUrl->getHost());
-		$consumer->identity = $this->getRequest()->getParam('openIdIdentity');
-		$consumer->returnUrl = $serverUrl->serverUrl() . $this->getHelper('url')->url(array('module' => 'editor', 'controller' => 'login', 'action' => 'openid-callback', 'rememberme' => $this->getRequest()->getParam('rememberme', 0)), 'default', true);
-		$consumer->required = array('contact/email');
-		
-		$this->_redirect($consumer->authUrl());
+        
+        $provider = $this->_getOAuth2Provider();
+        
+        $authorizationUrl = $provider->getAuthorizationUrl();
+        
+        $oAuth2State = new Zend_Session_Namespace('oAuth2State');
+        $oAuth2State->state = $provider->state;
+        
+		$this->_redirect($authorizationUrl);
 	}
 	
 	/**
-	 * When the OpenID login is ready it redirects the user to this page.
-	 * Here happens the authentication of the user if he logs in with OpenID.
+	 * When the OAuth2 login is ready it redirects the user to this page.
+	 * Here happens the authentication of the user if he logs in with OAuth2.
 	 * 
 	 */
-	public function openidCallbackAction() {
+	public function oauth2CallbackAction() {
+        $request = $this->getRequest();
+        
+        $oAuth2State = new Zend_Session_Namespace('oAuth2State');
+        
+		if ($oAuth2State->state == $request->getParam('state')) {
 			
-		Zend_Loader::loadClass('LightOpenId_Consumer');
-		$serverUrl = new Zend_View_Helper_ServerUrl();
-		$consumer = new LightOpenId_Consumer($serverUrl->getHost());
-		
-		if ($consumer->validate()) {
-			
-			$userData = $consumer->getAttributes();
-			
-			if (isset($userData['contact/email']) && ! empty($userData['contact/email'])) {
+			$provider = $this->_getOAuth2Provider();
+            $token = $provider->getAccessToken('authorization_code', ['code' => $request->getParam('code')]);                        
+            $userData = $provider->getUserDetails($token);
+            
+			if (isset($userData->email) && ! empty($userData->email)) {
 				
-				// Loads the user by its email retrieved from the OpenID provider.
-				$login = new Editor_Models_OpenIdLogin();
-				$login->setData($userData['contact/email']);
+				// Loads the user by its email retrieved from the OAuth2 provider.
+				$login = new Editor_Models_OAuthLogin();
+				$login->setData($userData->email);
 				if ($login->isValid()) {
 					$session = new Zend_Session_Namespace('Zend_Auth');
 					// Set the time of user logged in
 					$session->setExpirationSeconds(30*24*3600);
 					
 					// If "remember me" was marked
-					if ((int)$this->getRequest()->getParam('rememberme')) {
+					if ((int)$request->getParam('rememberme')) {
 						Zend_Session::rememberMe();
 					}
 					
@@ -142,8 +143,40 @@ class Editor_LoginController extends Zend_Controller_Action {
 			}
 			
 		} else {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OpenID identity') . '("' . $openIdIdentity . '"). ' . _('Error:') . ' "' . $consumer->getError() . '".');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OAuth state.'));
     		$this->_helper->redirector('index');
 		}
 	}
+    
+    /**
+     * Gets configured OAuth2 Client Provider.
+     * @param string $provider
+     * @return \League\OAuth2\Client\Provider\Google
+     */
+    protected function _getOAuth2Provider() {
+        $request = $this->getRequest();
+        $serverUrl = new Zend_View_Helper_ServerUrl();
+        
+        $provider = $request->getParam('provider');        
+        $providerClass = '\League\OAuth2\Client\Provider\\' . ucfirst($provider);
+        
+        // !TODO in config: provider.site...
+        return new $providerClass([
+            'clientId'      => '281127000043-a3bidfbbjsc5b6nd8gelipl1c3kms3cn.apps.googleusercontent.com',
+            'clientSecret'  => 'kJ2hvjpV1D_eCl6LOsYQVSBC',
+            'scopes'        => ['email'],
+            'redirectUri'   => $serverUrl->serverUrl()
+                . $this->getHelper('url')->url(
+                    [
+                        'module' => 'editor',
+                        'controller' => 'login',
+                        'action' => 'oauth2-callback',
+                        'provider' => $provider,
+                        'rememberme' => $request->getParam('rememberme', 0),
+                    ],
+                    'default',
+                    true
+                ),
+        ]);
+    }
 }
