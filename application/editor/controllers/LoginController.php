@@ -108,7 +108,7 @@ class Editor_LoginController extends Zend_Controller_Action {
 		if ($oAuth2State->state == $request->getParam('state')) {
 			
 			$provider = $this->_getOAuth2Provider();
-            $token = $provider->getAccessToken('authorization_code', ['code' => $request->getParam('code')]);                        
+            $token = $provider->getAccessToken('authorization_code', ['code' => $request->getParam('code')]);
             $userData = $provider->getUserDetails($token);
             
 			if (isset($userData->email) && ! empty($userData->email)) {
@@ -133,7 +133,11 @@ class Editor_LoginController extends Zend_Controller_Action {
 					$this->getHelper('FlashMessenger')->addMessage(_('Succesfully logged in'));
 					$this->_helper->redirector('index', 'index');
 				} else {
-					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You have succesfully logged in with your Google account, but no user was found in our system with the emailaddress') . ' "' . $userData['email'] . '". ' . _('Please contact your application manager to give you access to OpenSKOS.'));
+					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(
+                        _('You have succesfully logged in with your Google account, but no user was found in our system with the emailaddress')
+                        . ' "' . $userData->email . '". '
+                        . _('Please contact your application manager to give you access to OpenSKOS.')
+                    );
 					$this->_helper->redirector('index');
 				}
 				
@@ -157,6 +161,10 @@ class Editor_LoginController extends Zend_Controller_Action {
         $request = $this->getRequest();
         $serverUrl = new Zend_View_Helper_ServerUrl();
         
+        // When provider is google - we are using the normal oAuth2.0 endpoint for google.
+        // We do not use OpenId Connect endpoint at that point. It constantly gives some errors.
+        // A GoogleOpenId provider with the openIdConnect endpoints can be created to replace the normal oAuth provider if needed.
+        
         $provider = $request->getParam('provider');        
         $providerClass = '\League\OAuth2\Client\Provider\\' . ucfirst($provider);
         
@@ -164,7 +172,7 @@ class Editor_LoginController extends Zend_Controller_Action {
         return new $providerClass([
             'clientId'      => '281127000043-a3bidfbbjsc5b6nd8gelipl1c3kms3cn.apps.googleusercontent.com',
             'clientSecret'  => 'kJ2hvjpV1D_eCl6LOsYQVSBC',
-            'scopes'        => ['email'],
+            'scopes'        => ['openid', 'email'],
             'redirectUri'   => $serverUrl->serverUrl()
                 . $this->getHelper('url')->url(
                     [
