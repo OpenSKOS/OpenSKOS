@@ -25,7 +25,7 @@
 	<?php echo $this->form;?>
 </div>
 
-<div class="login-openid">
+<div class="login-oauth2">
 	<?php
 		$baseUrl = $this->url(array(), 'default', true);
 		if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
@@ -33,7 +33,7 @@
 	
 	<?php echo $this->translate('Or, sign up with ...')?>
 	<br />
-	<a class="open-id-sign-in" href="<?php echo $this->url(array('controller' => 'login', 'action' => 'openid-login'))?>?openIdIdentity=<?php echo urlencode('https://www.google.com/accounts/o8/id')?>" title="<?php $this->translate('Sign up with Google')?>">
+	<a class="open-id-sign-in" href="<?php echo $this->url(array('controller' => 'login', 'action' => 'oauth2-login'))?>?provider=google" title="<?php $this->translate('Sign up with Google')?>">
 		<img src="<?php echo $baseUrl?>assets/images/google.png" /> Google
 	</a>
 </div>
