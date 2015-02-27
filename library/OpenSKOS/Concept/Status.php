@@ -37,7 +37,7 @@ class OpenSKOS_Concept_Status
      * List of possible statuses
      * @var array
      */
-    protected static $statuses = array(
+    protected static $statuses = [
         self::CANDIDATE,
         self::APPROVED,
         self::REDIRECTED,
@@ -45,7 +45,47 @@ class OpenSKOS_Concept_Status
         self::REJECTED,
         self::OBSOLETE,
         self::DELETED,
-    );
+    ];
+    
+    /**
+     * Mapped of allowed transitions between statuses.
+     * @var array 
+     */
+    protected static $transitionsMap = [
+        self::CANDIDATE => [
+            self::CANDIDATE,
+            self::APPROVED,
+            self::REDIRECTED,
+            self::NOT_COMPLIANT,
+            self::REJECTED,
+        ],
+        self::APPROVED => [
+            self::APPROVED,
+            self::REDIRECTED,
+            self::OBSOLETE,
+        ],
+        self::REDIRECTED => [
+            self::REDIRECTED,
+            self::OBSOLETE,
+        ],
+        self::NOT_COMPLIANT => [
+            self::NOT_COMPLIANT,
+            self::APPROVED,
+            self::REDIRECTED,
+            self::OBSOLETE,
+        ],
+        self::REJECTED => [
+            self::REJECTED,
+            self::DELETED,
+        ],
+        self::OBSOLETE => [
+            self::OBSOLETE,
+            self::DELETED,
+        ],
+        self::DELETED => [
+            self::DELETED,
+        ],
+    ];
     
     /**
      * Gets all possible statuses
@@ -72,5 +112,36 @@ class OpenSKOS_Concept_Status
             $options[$status] = _($status);
         }
         return $options;
+    }
+    
+    /**
+     * Gets the list of all available statuses depending on the current status.
+     * @param string $currentStatus One of the statuses.
+     * @return array
+     * @throws \Exception
+     */
+    public static function getAvailableStatuses($currentStatus)
+    {
+        if (empty($currentStatus)) {
+            return self::getStatuses();
+        } elseif (isset(self::$transitionsMap[$currentStatus])) {            
+            return self::$transitionsMap[$currentStatus];
+        } else {
+            throw new \Exception(
+                'No transition info for status "' . $currentStatus . '".'
+            );
+        }
+    }
+    
+    /**
+     * Checks if the $toStatus is allowed to come after $fromStatus.
+     * @see self::$transitionsMap
+     * @param string $fromStatus
+     * @param string $toStatus
+     * @return bool
+     */
+    public static function isTransitionAllowed($fromStatus, $toStatus)
+    {
+        return in_array($toStatus, self::getAvailableStatuses($fromStatus));
     }
 }

@@ -27,6 +27,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	 * @var bool
 	 */
 	protected $_isCreate = false;
+    
+    /**
+	 * What is the current status of the concept if any.
+	 * 
+	 * @var string
+	 */
+	protected $_currentStatus = null;
 	
 	/**
 	 * A flag indicating that the form is for proposal only.
@@ -66,6 +73,27 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	public function getIsCreate()
 	{
 		return $this->_isCreate;
+        
+	}
+    
+	/**
+	 * Sets the current status of the concept. Before save or anything.
+	 * 
+	 * @param string $currentStatus
+	 */
+	public function setCurrentStatus($currentStatus)
+	{
+		$this->_currentStatus = $currentStatus;
+	}
+	
+	/**
+	 * Gets the current status of the concept. Before save or anything.
+	 *
+	 * @return string $currentStatus
+	 */
+	public function getCurrentStatus()
+	{
+		return $this->_currentStatus;
         
 	}
 	
@@ -141,7 +169,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		if ($this->_isProposalOnly) {
             $availableStatuses = [OpenSKOS_Concept_Status::CANDIDATE];
 		} else {
-			$availableStatuses = OpenSKOS_Concept_Status::getStatuses();
+			$availableStatuses = OpenSKOS_Concept_Status::getAvailableStatuses($this->getCurrentStatus());
         }
 		
 		$this->addElement('select', 'status', array(
@@ -393,14 +421,18 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	}
 
 	/**
+     * @param Editor_Models_Concept Pass the edited concept for some checks.
 	 * @return Editor_Forms_Concept
 	 */
-	public static function getInstance($isCreate = false)
+	public static function getInstance($concept = null)
 	{
 		static $instance;
 	
 		if (null === $instance) {
-			$instance = new Editor_Forms_Concept(array('isCreate' => $isCreate));
+			$instance = new Editor_Forms_Concept([
+                'isCreate' => (null === $concept),
+                'currentStatus' => (null !== $concept ? $concept['status'] : null)
+            ]);
 		}
 	
 		return $instance;

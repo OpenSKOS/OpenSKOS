@@ -44,7 +44,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				'notation' => array($notation)
 		)));
 		
-		$form = Editor_Forms_Concept::getInstance(true);
+		$form = Editor_Forms_Concept::getInstance(null);
 		$formData = $concept->toForm();
 		$form->getElement('conceptSchemeSelect')-> setMultiOptions($formData['conceptSchemeSelect']);
 		$form->populate($formData);
@@ -64,8 +64,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		}
 		
 		$this->_checkConceptTenantForEdit($concept);
-		
-		$form = Editor_Forms_Concept::getInstance(null === $concept);
+        
+		$form = Editor_Forms_Concept::getInstance($concept);
 		
 		if ( ! $this->getRequest()->isPost()) {
 			$formData = $concept->toForm();
@@ -126,7 +126,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 	{
 		$concept = $this->_getConcept();
 		
-		$form = Editor_Forms_Concept::getInstance(null === $concept);
+		$form = Editor_Forms_Concept::getInstance($concept);
 		
 		$formData = $this->getRequest()->getParams();
 
