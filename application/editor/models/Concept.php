@@ -527,7 +527,6 @@ class Editor_Models_Concept extends Api_Models_Concept
 	 * @param string $languageCode
 	 * @return array
 	 */
-
 	protected function _getParsedMlProperties($class, $languageCode)
 	{
 		$data = $this->getMlProperties($class, $languageCode);
