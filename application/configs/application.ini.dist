@@ -119,8 +119,8 @@ resources.view.encoding="UTF-8"
 resources.view.options.doctype=XHTML1_STRICT
 
 ; Client id and client secret configured in https://console.developers.google.com
-oAuth2.google.clientId = "<google-client-id>"
-oAuth2.google.clientSecret = "<google-client-secret>"
+oAuth2.google.clientId = "@google-client-id@"
+oAuth2.google.clientSecret = "@google-client-secret@"
 
 [staging : production]
 
