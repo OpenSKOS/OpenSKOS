@@ -49,7 +49,7 @@ class Editor_LoginController extends Zend_Controller_Action {
 		$username = $form->getValue ( 'username' );
 		$password = $form->getValue ( 'password' );
 		$login = new Editor_Models_Login ();
-		$login->setData ($tenant, $username, $password );
+		$login->setData($tenant, $username, $password );
 		if ($login->isValid ()) {
 			
 			$session = new Zend_Session_Namespace('Zend_Auth');
@@ -74,76 +74,134 @@ class Editor_LoginController extends Zend_Controller_Action {
 	}
 	
 	/**
-	 * Starts an OpenID detection and login process.
+	 * Starts an OAuth2 detection and login process.
 	 *
 	 */
-	public function openidLoginAction() {
-		
-		$form = Editor_Forms_OpenIdLogin::getInstance();
-		if ( ! $form->isValid($this->getRequest()->getParams())) {
+	public function oauth2LoginAction() {
+		$request = $this->getRequest();        
+        
+		$form = Editor_Forms_OAuthLogin::getInstance();
+		if ( ! $form->isValid($request->getParams())) {
 			return $this->_forward('index');
 		}
-		
-		Zend_Loader::loadClass('LightOpenId_Consumer');
-		$serverUrl = new Zend_View_Helper_ServerUrl();
-		
-		$consumer = new LightOpenId_Consumer($serverUrl->getHost());
-		$consumer->identity = $this->getRequest()->getParam('openIdIdentity');
-		$consumer->returnUrl = $serverUrl->serverUrl() . $this->getHelper('url')->url(array('module' => 'editor', 'controller' => 'login', 'action' => 'openid-callback', 'rememberme' => $this->getRequest()->getParam('rememberme', 0)), 'default', true);
-		$consumer->required = array('contact/email');
-		
-		$this->_redirect($consumer->authUrl());
+        
+        $provider = $this->_getOAuth2Provider();
+        
+        $authorizationUrl = $provider->getAuthorizationUrl();
+        
+        $oAuth2State = new Zend_Session_Namespace('oAuth2State');
+        $oAuth2State->state = $provider->state;
+        
+		$this->_redirect($authorizationUrl);
 	}
 	
 	/**
-	 * When the OpenID login is ready it redirects the user to this page.
-	 * Here happens the authentication of the user if he logs in with OpenID.
+	 * When the OAuth2 login is ready it redirects the user to this page.
+	 * Here happens the authentication of the user if he logs in with OAuth2.
 	 * 
 	 */
-	public function openidCallbackAction() {
+	public function oauth2CallbackAction() {
+        $request = $this->getRequest();
+        
+        $oAuth2State = new Zend_Session_Namespace('oAuth2State');
+        
+		if ($oAuth2State->state == $request->getParam('state')) {
 			
-		Zend_Loader::loadClass('LightOpenId_Consumer');
-		$serverUrl = new Zend_View_Helper_ServerUrl();
-		$consumer = new LightOpenId_Consumer($serverUrl->getHost());
-		
-		if ($consumer->validate()) {
-			
-			$userData = $consumer->getAttributes();
-			
-			if (isset($userData['contact/email']) && ! empty($userData['contact/email'])) {
-				
-				// Loads the user by its email retrieved from the OpenID provider.
-				$login = new Editor_Models_OpenIdLogin();
-				$login->setData($userData['contact/email']);
-				if ($login->isValid()) {
-					$session = new Zend_Session_Namespace('Zend_Auth');
-					// Set the time of user logged in
-					$session->setExpirationSeconds(30*24*3600);
-					
-					// If "remember me" was marked
-					if ((int)$this->getRequest()->getParam('rememberme')) {
-						Zend_Session::rememberMe();
-					}
-					
-					// Clears user specific options which are kept in the session if a new login is made.
-					$userOptions = new Zend_Session_Namespace('userOptions');
-					$userOptions->unsetAll();
-					
-					$this->getHelper('FlashMessenger')->addMessage(_('Succesfully logged in'));
-					$this->_helper->redirector('index', 'index');
-				} else {
-					$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You have succesfully logged in with your Google account, but no user was found in our system with the emailaddress') . ' "' . $userData['email'] . '". ' . _('Please contact your application manager to give you access to OpenSKOS.'));
-					$this->_helper->redirector('index');
-				}
-				
-			} else {
-				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('We couldn\'t retrieve your email address from google.');
-				$this->_helper->redirector('index');
-			}
+            if (!$request->getParam('error')) {
+            
+                $provider = $this->_getOAuth2Provider();
+                $token = $provider->getAccessToken('authorization_code', ['code' => $request->getParam('code')]);
+                $userData = $provider->getUserDetails($token);
+
+                if (isset($userData->email) && ! empty($userData->email)) {
+
+                    // Loads the user by its email retrieved from the OAuth2 provider.
+                    $login = new Editor_Models_OAuthLogin();
+                    $login->setData($userData->email);
+                    if ($login->isValid()) {
+                        $session = new Zend_Session_Namespace('Zend_Auth');
+                        // Set the time of user logged in
+                        $session->setExpirationSeconds(30*24*3600);
+
+                        // If "remember me" was marked
+                        if ((int)$request->getParam('rememberme')) {
+                            Zend_Session::rememberMe();
+                        }
+
+                        // Clears user specific options which are kept in the session if a new login is made.
+                        $userOptions = new Zend_Session_Namespace('userOptions');
+                        $userOptions->unsetAll();
+
+                        $this->getHelper('FlashMessenger')->addMessage(_('Succesfully logged in'));
+                        $this->_helper->redirector('index', 'index');
+                    } else {
+                        $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(
+                            _('You have succesfully logged in with your Google account, but no user was found in our system with the emailaddress')
+                            . ' "' . $userData->email . '". '
+                            . _('Please contact your application manager to give you access to OpenSKOS.')
+                        );
+                        $this->_helper->redirector('index');
+                    }
+
+                } else {
+                    $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('We couldn\'t retrieve your email address from google.');
+                    $this->_helper->redirector('index');
+                }
+            } else {
+                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(
+                    'Returned with error "' . $request->getParam('error') . '" from "' . $request->getParam('provider') . '".'
+                );
+                $this->_helper->redirector('index');
+            }
 			
 		} else {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OpenID identity') . '("' . $openIdIdentity . '"). ' . _('Error:') . ' "' . $consumer->getError() . '".');
+			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OAuth state.'));
     		$this->_helper->redirector('index');
 		}
 	}
+    
+    /**
+     * Gets configured OAuth2 Client Provider.
+     * @param string $provider
+     * @return \League\OAuth2\Client\Provider\Google
+     */
+    protected function _getOAuth2Provider() {
+        $request = $this->getRequest();
+        $serverUrl = new Zend_View_Helper_ServerUrl();
+        
+        // When provider is google - we are using the normal oAuth2.0 endpoint for google.
+        // We do not use OpenId Connect endpoint at that point. It constantly was giving "limit reached" errors.
+        // A GoogleOpenId provider with the openIdConnect endpoints can be created to replace the normal oAuth provider if needed.
+        
+        $provider = $request->getParam('provider');
+        
+        $oAuth2Options = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('oAuth2');
+        
+        if (!isset($oAuth2Options[$provider])
+                || !isset($oAuth2Options[$provider]['clientId'])
+                || !isset($oAuth2Options[$provider]['clientSecret'])) {
+            throw new \Exception(
+                'OAuth 2.0 configuration for provider "' . $provider . '" not found in application.ini or is wrong.'
+            );
+        }
+        
+        $providerClass = '\League\OAuth2\Client\Provider\\' . ucfirst($provider);
+        return new $providerClass([
+            'clientId'      => $oAuth2Options[$provider]['clientId'],
+            'clientSecret'  => $oAuth2Options[$provider]['clientSecret'],
+            'scopes'        => ['email'],
+            'redirectUri'   => $serverUrl->serverUrl()
+                . $this->getHelper('url')->url(
+                    [
+                        'module' => 'editor',
+                        'controller' => 'login',
+                        'action' => 'oauth2-callback',
+                        'provider' => $provider,
+                        'rememberme' => $request->getParam('rememberme', 0),
+                    ],
+                    'default',
+                    true
+                ),
+        ]);
+    }
 }
