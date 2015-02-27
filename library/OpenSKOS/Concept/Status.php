@@ -55,4 +55,22 @@ class OpenSKOS_Concept_Status
     {
         return self::$statuses;
     }
+    
+    /**
+     * Makes a key => translate(value) array from the statuses.
+     * @param array $statuses
+     * @return array key => translate(value) array
+     */
+    public static function statusesToOptions($statuses = null)
+    {
+        if ($statuses == null) {
+            $statuses = self::getStatuses();
+        }
+        
+        $options = [];
+        foreach ($statuses as $status) {
+            $options[$status] = _($status);
+        }
+        return $options;
+    }
 }
