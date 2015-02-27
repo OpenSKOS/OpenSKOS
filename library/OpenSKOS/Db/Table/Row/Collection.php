@@ -81,11 +81,14 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->setAttrib('enctype', 'multipart/form-data')
 				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())));
 			
-			$availableStatuses = array();
-			$availableStatuses[] = 'candidate';
-			$availableStatuses[] = 'approved';
-			$availableStatuses[] = 'expired';
-			$form->addElement('select', 'status', array('label' => 'Status for imported concepts', 'multiOptions' => array_combine($availableStatuses, $availableStatuses)));
+			$form->addElement(
+                'select',
+                'status',
+                array(
+                    'label' => 'Status for imported concepts',
+                    'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions()
+                )
+            );
 			$form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
 			
 			$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');			

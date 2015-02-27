@@ -133,17 +133,20 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		return $this;
 	}
     
+    /**
+     * Build the statuses dropdown.
+     */
     protected function buildStatuses()
     {
 		if ($this->_isProposalOnly) {
-            $availableStatuses = array(OpenSKOS_Concept_Status::CANDIDATE);
+            $availableStatuses = [OpenSKOS_Concept_Status::CANDIDATE];
 		} else {
 			$availableStatuses = OpenSKOS_Concept_Status::getStatuses();
         }
 		
 		$this->addElement('select', 'status', array(
 				'label' => 'Status:',
-				'multiOptions' => array_combine($availableStatuses, $availableStatuses),
+				'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
 				'value' => 'candidate',
 				'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
 		));

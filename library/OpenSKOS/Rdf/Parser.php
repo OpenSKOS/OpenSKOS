@@ -35,14 +35,11 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'lang|l=s' => 'The default language to use if no "xml:lang" attribute is found',
 		'env|e=s' => 'The environment to use (defaults to "production")',
 		'commit' => 'Commit to Solr (default: print to STDOUT)',
-		'status=s' => 'The status to use for concepts (candidate|approved|expired)',
+		'status=s' => 'The status to use for concepts (candidate,approved,redirected,not_compliant,rejected,obsolete,deleted)',
 		'ignoreIncomingStatus' => 'To ignore or not the concept status which comes from the import file',
 		'toBeChecked' => 'Sets the toBeCheked status to TRUE',
 		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation.',
 	);
-	
-	//@TODO move this to a Concept Class
-	static $statuses = array('candidate', 'approved', 'expired');
 	
 	static $namespaces = array(
 		'rdf'      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -588,8 +585,9 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		
 		if ($opts->status) {
-			if (!in_array($opts->status, self::$statuses)) {
-				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', self::$statuses).'`', 0);
+            $statuses = OpenSKOS_Concept_Status::getStatuses();
+			if (!in_array($opts->status, $statuses)) {
+				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', $statuses).'`', 0);
 			}
 		}
 		
