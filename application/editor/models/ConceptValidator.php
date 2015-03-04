@@ -95,8 +95,12 @@ abstract class Editor_Models_ConceptValidator
 		$this->_errorConflictedConcepts[] = $conflictedConcept;
 	}
 	
+    /**
+     * Creates validator instance.
+     * @return Editor_Models_ConceptValidator
+     */
 	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator();
-	}
+    {
+        return new self();
+    }
 }

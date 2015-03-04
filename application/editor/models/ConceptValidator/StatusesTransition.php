@@ -34,18 +34,15 @@ class Editor_Models_ConceptValidator_StatusesTransition extends Editor_Models_Co
 		
 		$isValid = true;
         
-        
-        $response  = Api_Models_Concepts::factory()->getConcepts('uuid:'.$uuid);
-		if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {			
-			throw new Zend_Exception('The requested concept was not found');
-		} else {
-			return new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
+        $oldConcept = null;
+        $response  = Api_Models_Concepts::factory()->getConcepts('uuid:' . $concept['uuid']);
+		if (isset($response['response']['docs']) && (1 === count($response['response']['docs']))) {
+			$oldConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
 		}
 		
-        $oldConcept = null;
         if (null !== $oldConcept) {
             $isValid = OpenSKOS_Concept_Status::isTransitionAllowed($oldConcept['status'], $concept['status']);
-        }        
+        }
         
 		if ( ! $isValid) {
 			$this->_setErrorMessage(

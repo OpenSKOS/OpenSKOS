@@ -100,6 +100,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 		// Check for other validators.
 		$validators = array();
         $validators[] = Editor_Models_ConceptValidator_UniqueNotation::factory();
+        $validators[] = Editor_Models_ConceptValidator_StatusesTransition::factory();
 		$validators[] = Editor_Models_ConceptValidator_RelatedToItself::factory();
 		$validators[] = Editor_Models_ConceptValidator_IsAtLeastInOneScheme::factory();
 		$validators[] = Editor_Models_ConceptValidator_DuplicateBroaders::factory();
