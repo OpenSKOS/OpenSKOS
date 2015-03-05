@@ -25,7 +25,7 @@ var EditorControl = new Class({
             'clickConcept'],
     loadedConcept: '',
 	loadingTimeoutHandle: null,
-	statusSuccess: 'ok',
+	_statusSuccess: 'ok',
     clickConceptCallback: null,
 	initialize: function () {
 		
