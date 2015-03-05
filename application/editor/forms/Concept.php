@@ -152,7 +152,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		}
 		
 		$this->addDisplayGroup(
-				array('status', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 
+				array('status', 'statusOtherConceptCancel', 'statusOtherConceptOk', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 
 				'concept-header', 
 				array(
 					'legend' => 'header',
@@ -182,6 +182,18 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		if ($this->_isProposalOnly) {
 			$this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
 		}
+        
+        $this->addElement('button', 'statusOtherConceptCancel', array(
+            'label' => _('Cancel'),
+            'class' => 'concept-edit-status-other-concept-cancel',
+            'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status-other-concept-cancel'))),
+        ));
+        
+        $this->addElement('button', 'statusOtherConceptOk', array(
+            'label' => _('Ok'),
+            'class' => 'concept-edit-status-other-concept-ok',
+            'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status-other-concept-ok'))),
+        ));
     }
 	
 	/**

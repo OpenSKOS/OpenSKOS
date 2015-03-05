@@ -79,7 +79,7 @@ var EditorConcept = new Class({
 	initConceptForm: function () {
 				
 		Editor.Relations.enableRelationLinks();
-		
+        
 		this.bindTabsHover();
 		this.showLanguageLayer();
 		this.showSchemeLayer();
@@ -87,6 +87,8 @@ var EditorConcept = new Class({
 		this.toggleConceptSchemeWarning();
 		this.showPrefLabelInTitle();
 		this._buildUri();
+        
+        Editor.ConceptStatus.listenForStatusChange();
 	},
 	
 	toggleConceptSchemeWarning: function () {
@@ -420,8 +422,8 @@ var EditorConcept = new Class({
 			if (editForm.getElement('[type=checkbox][name=toBeChecked]')) {
 				editForm.getElement('[type=checkbox][name=toBeChecked]').set('checked', false);
 			}
-			if (editForm.getElement('[type=radio][name=status][value=approved]')) {
-				editForm.getElement('[type=radio][name=status][value=approved]').set('checked', true);
+			if (editForm.getElement('[type=select][name=status]')) {
+				editForm.getElement('[type=select][name=status]').set('value', 'approved');
 			}
 		}
 	},
