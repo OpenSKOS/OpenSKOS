@@ -19,11 +19,16 @@
  */
 
 /**
- * 
+ * Handles some actions for status changes.
  */
 
 var EditorConceptStatus = new Class({
-	Binds: ['onStatusChange', 'chooseConcept'],
+	Binds: ['onStatusChange', 'closeChooseModal', 'chooseConcept', 'chooseConceptOk'],
+    
+    sboxDefaultStyles: null,
+    selectedStatus: null,
+    
+    statusesWithSecondConcept: ['redirected', 'obsolete'],
     
 	initialize: function () {
 		
@@ -34,8 +39,47 @@ var EditorConceptStatus = new Class({
     },
 	
 	onStatusChange: function (e) {
-        this.activateConceptChoose();
+        this.selectedStatus = e.target.get('value');
+        
+        if (this.statusesWithSecondConcept.indexOf(this.selectedStatus) !== -1) {
+            this.showChooseModal();
+        }
 	},
+    
+    showChooseModal: function () {
+        this.conceptChoose = $('status-other-concept').clone();
+        
+        Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 180}});
+        
+        this.conceptChoose.getElement('.choose-cancel').addEvent('click', this.closeChooseModal);
+        this.conceptChoose.getElement('.choose-ok').addEvent('click', this.chooseConceptOk);
+        this.conceptChoose.getElement('.choose-ok').hide();
+        
+        this.conceptChoose.getElements('.choose-message').hide();
+        this.conceptChoose.getElements('.choose-message.' + this.selectedStatus).show();
+        
+        var sboxOldStyles = $('sbox-overlay').getStyles('width', 'height', 'top', 'left', 'right', 'bottom');
+        SqueezeBox.addEvent('close', function() {
+            $('sbox-overlay').setStyles(sboxOldStyles);
+        });
+        
+        $('sbox-overlay').setStyles({
+            width: 'auto',
+            height: 'auto',
+            top: 90,
+            left: 300,
+            right: 300,
+            bottom: 30,
+        });
+        
+        this.activateConceptChoose();
+    },
+    
+    closeChooseModal: function () {
+        this.deactivateConceptChoose;
+        this.conceptChoose = null;
+        SqueezeBox.close();
+    },
     
     activateConceptChoose: function () {
         Editor.Control.clickConceptCallback = Editor.ConceptStatus.chooseConcept;
@@ -46,8 +90,24 @@ var EditorConceptStatus = new Class({
     },
     
     chooseConcept: function (uuid) {
-        console.log(uuid);
+        this.conceptChoose.getElement('.choose-ok').setStyle('display', 'inline-block');
+        this.conceptChoose.getElement('.chosen-concept').show();
+        this.chosenConceptUuid = uuid;
+        this.conceptChoose.getElement('.chosen-concept-label').set('html', $$('.' + uuid).pick().get('html'));
+    },
+    
+    chooseConceptOk: function () {
+        this.conceptForStatusChosen(this.chosenConceptUuid, this.selectedStatus);
+        this.closeChooseModal();
+    },
+    
+    conceptForStatusChosen: function (uuid, status) {
+        $('Editconcept').getElement('#statusOtherConcept').set('value', uuid);
         
-        this.deactivateConceptChoose();
+        var chosenConcept = this.conceptChoose.getElement('.chosen-concept').get('html');
+        (new Element('span', {'html': chosenConcept})).inject(
+            $('Editconcept').getElement('#concept-edit-status'),
+            'after'
+        );
     }
 });
