@@ -34,6 +34,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	 * @var string
 	 */
 	protected $_currentStatus = null;
+    
+    /**
+	 * Is the statuses system enabled.
+	 * 
+	 * @var bool
+	 */
+	protected $_enableStatusesSystem = false;
 	
 	/**
 	 * A flag indicating that the form is for proposal only.
@@ -84,6 +91,27 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	public function setCurrentStatus($currentStatus)
 	{
 		$this->_currentStatus = $currentStatus;
+	}
+	
+	/**
+	 * Gets is the statuses system enabled.
+	 *
+	 * @return bool $currentStatus
+	 */
+	public function getEnableStatusesSystem()
+	{
+		return $this->_enableStatusesSystem;
+        
+	}
+    
+    /**
+	 * Sets is the statuses system enabled.
+	 * 
+	 * @param bool $enableStatusesSystem
+	 */
+	public function setEnableStatusesSystem($enableStatusesSystem)
+	{
+		$this->_enableStatusesSystem = $enableStatusesSystem;
 	}
 	
 	/**
@@ -166,27 +194,34 @@ class Editor_Forms_Concept extends OpenSKOS_Form
      */
     protected function buildStatuses()
     {
-		if ($this->_isProposalOnly) {
-            $availableStatuses = [OpenSKOS_Concept_Status::CANDIDATE];
-		} else {
-			$availableStatuses = OpenSKOS_Concept_Status::getAvailableStatuses($this->getCurrentStatus());
+        if ($this->getEnableStatusesSystem()) {
+            if ($this->_isProposalOnly) {
+                $availableStatuses = [OpenSKOS_Concept_Status::CANDIDATE];
+            } else {
+                $availableStatuses = OpenSKOS_Concept_Status::getAvailableStatuses($this->getCurrentStatus());
+            }
+
+            // Fallback for expired status for beg
+            if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
+                $availableStatuses[] = OpenSKOS_Concept_Status::_EXPIRED;
+            }
+
+            $this->addElement('select', 'status', array(
+                'label' => 'Status:',
+                'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
+                'value' => 'candidate',
+                'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
+            ));
+
+            if ($this->_isProposalOnly) {
+                $this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
+            }
+        } else {
+            $this->addElement('hidden', 'status', array(
+                'decorators' => array('ViewHelper'),
+                'value' => OpenSKOS_Concept_Status::APPROVED,
+            ));
         }
-        
-        // Fallback for expired status for beg
-        if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
-            $availableStatuses[] = OpenSKOS_Concept_Status::_EXPIRED;
-        }
-		
-		$this->addElement('select', 'status', array(
-            'label' => 'Status:',
-            'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
-            'value' => 'candidate',
-            'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
-		));
-		
-		if ($this->_isProposalOnly) {
-			$this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
-		}
         
         $this->addElement('hidden', 'statusOtherConcept', array(
             'decorators' => array('ViewHelper')
@@ -436,11 +471,18 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	public static function getInstance($concept = null)
 	{
 		static $instance;
+        
+        $enableStatusesSystem = false;
+        $collection = $concept->getCollection();
+        if ($collection !== null) {
+            $enableStatusesSystem = (bool) $collection['enableStatusesSystem'];
+        }
 	
 		if (null === $instance) {
 			$instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
-                'currentStatus' => (null !== $concept ? $concept['status'] : null)
+                'currentStatus' => (null !== $concept ? $concept['status'] : null),
+                'enableStatusesSystem' => $enableStatusesSystem,
             ]);
 		}
 	

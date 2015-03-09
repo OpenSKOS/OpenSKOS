@@ -56,7 +56,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		$this->_helper->_layout->setLayout('editor_central_content');
 		
 		$concept = $this->_getConcept();
-		
+        
 		if (null === $concept) {
 			$this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
 		} else {
@@ -90,8 +90,6 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				$formData['baseUri'] = $this->getRequest()->getPost('baseUri');
 			}
 		}
-		
-		
 		
 		$form->reset();
 		$form->populate($formData);
@@ -165,8 +163,6 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				
 				$user = OpenSKOS_Db_Table_Users::fromIdentity();
 				
-                
-                
 				$extraData = array_merge($extraData, array(
 						'tenant' => $user->tenant,
 						'modified_by' => (int)$user->id,
@@ -174,12 +170,6 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 						'toBeChecked' => (isset($extraData['toBeChecked']) ? (bool)$extraData['toBeChecked'] : false))
 				);
                 
-                
-                
-                
-                
-                
-				
 				if ( ! isset($extraData['uuid']) || empty($extraData['uuid'])) {					
 					$extraData['uuid'] = $concept['uuid'];
 					$extraData['created_by'] = $extraData['modified_by'];
@@ -437,7 +427,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 	}
 	
 	/**
-	 * @return Api_Models_Concept
+	 * @return Editor_Models_Concept
 	 */
 	protected function _getConcept()
 	{
