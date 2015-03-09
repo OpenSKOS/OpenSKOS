@@ -208,19 +208,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 					}
 				}
 				
-				if ($extraData['status'] === 'approved' && $oldData['status'] !== 'approved') {
+				if ($extraData['status'] === OpenSKOS_Concept_Status::APPROVED
+                        && $oldData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
 					$extraData['approved_timestamp'] = $extraData['modified_timestamp'];
 					$extraData['approved_by'] = $extraData['modified_by'];
 				}
 				
-				if ($extraData['status'] !== 'approved') {
+				if ($extraData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
 					$formData['approved_by'] = '';
 					$formData['approved_timestamp'] = '';
 					$extraData['approved_by'] = '';
 					$extraData['approved_timestamp'] = '';
 				}
 				
-				if ($extraData['status'] !== 'expired') {
+				if ($extraData['status'] !== OpenSKOS_Concept_Status::_EXPIRED) {
 					$formData['deleted_by'] = '';
 					$formData['deleted_timestamp'] = '';
 					$extraData['deleted_by'] = '';
@@ -418,7 +419,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				$updateExtraData['modified_by'] = $user->id;
 				$updateExtraData['modified_timestamp'] = date("Y-m-d\TH:i:s\Z");
 				
-				if ($oldData['status'] != 'approved' && $status == 'approved') {
+				if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED
+                        && $status == OpenSKOS_Concept_Status::APPROVED) {
 					$updateExtraData['approved_by'] = $user->id;
 					$updateExtraData['approved_timestamp'] = date("Y-m-d\TH:i:s\Z");
 				}
@@ -446,7 +448,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		
 		$response  = Api_Models_Concepts::factory()->getConcepts('uuid:'.$uuid);
 		if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {			
-			throw new Zend_Exception('The requested concept was not found');
+			throw new Zend_Exception('The requested concept was deleted or not found');
 		} else {
 			return new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
 		}

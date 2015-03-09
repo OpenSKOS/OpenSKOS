@@ -385,14 +385,14 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$extraData = array_merge($extraData, $updateExtraData);
 
 		if (isset($extraData['status'])) {
-			if ($extraData['status'] !== 'approved') {
+			if ($extraData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
 				$data['approved_by'] = '';
 				$data['approved_timestamp'] = '';
 				$extraData['approved_by'] = '';
 				$extraData['approved_timestamp'] = '';
 			}
 
-			if ($extraData['status'] !== 'expired') {
+			if ($extraData['status'] !== OpenSKOS_Concept_Status::_EXPIRED) {
 				$data['deleted_by'] = '';
 				$data['deleted_timestamp'] = '';
 				$extraData['deleted_by'] = '';

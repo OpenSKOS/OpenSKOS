@@ -34,6 +34,11 @@ class OpenSKOS_Concept_Status
     /**#@-*/
     
     /**
+     * Fallback for status expired
+     */
+    const _EXPIRED = 'expired';
+    
+    /**
      * List of possible statuses
      * @var array
      */
@@ -123,7 +128,9 @@ class OpenSKOS_Concept_Status
     public static function getAvailableStatuses($currentStatus)
     {
         if (empty($currentStatus)) {
-            return self::getStatuses();
+            $statuses = self::getStatuses();
+            $statuses = array_diff($statuses, [self::DELETED]);
+            return $statuses;
         } elseif (isset(self::$transitionsMap[$currentStatus])) {            
             return self::$transitionsMap[$currentStatus];
         } else {

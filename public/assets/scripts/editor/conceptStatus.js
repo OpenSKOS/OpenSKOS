@@ -30,7 +30,8 @@ var EditorConceptStatus = new Class({
     oldSelectedStatus: null,
     
     statusesWithSecondConcept: ['redirected', 'obsolete'],
-    statusesWithNoReturn: ['rejected', 'deleted'],
+    statusesWithNoReturn: ['rejected'],
+    deleteStatus: 'deleted',
     
 	initialize: function () {
 		
@@ -46,11 +47,11 @@ var EditorConceptStatus = new Class({
         this.oldSelectedStatus = this.selectedStatus;
         this.selectedStatus = e.target.get('value');
         
-        if (this.statusesWithNoReturn.indexOf(this.selectedStatus) !== -1) {
+        if (this.selectedStatus == this.deleteStatus) {
+            Editor.View.showDeleteBox($('uuid').get('value'));
+        } else if (this.statusesWithNoReturn.indexOf(this.selectedStatus) !== -1) {
             this.showConfirmationModal();
-        }
-        
-        if (this.statusesWithSecondConcept.indexOf(this.selectedStatus) !== -1) {
+        } else if (this.statusesWithSecondConcept.indexOf(this.selectedStatus) !== -1) {
             this.showChooseModal();
         } else {
             $('Editconcept').getElement('#statusOtherConcept').set('value', '');
