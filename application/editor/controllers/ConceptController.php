@@ -165,12 +165,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				
 				$user = OpenSKOS_Db_Table_Users::fromIdentity();
 				
+                
+                
 				$extraData = array_merge($extraData, array(
 						'tenant' => $user->tenant,
 						'modified_by' => (int)$user->id,
 						'modified_timestamp' =>  date("Y-m-d\TH:i:s\Z"),
 						'toBeChecked' => (isset($extraData['toBeChecked']) ? (bool)$extraData['toBeChecked'] : false))
 				);
+                
+                
+                
+                
+                
+                
 				
 				if ( ! isset($extraData['uuid']) || empty($extraData['uuid'])) {					
 					$extraData['uuid'] = $concept['uuid'];
@@ -228,7 +236,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 						}
 					}
 				}
-				
+                
+                $this->_handleStatusAutomatedActions($concept, $formData, $extraData);
+                
 				$concept->setConceptData($formData, $extraData);
 
 				if ($concept->save($extraData)) {
@@ -517,4 +527,57 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		}
 		return $data;
 	}
+    
+    /**
+     * Handles tsome automated actions for when status is changed.
+     * @param Editor_Models_Concept $concept
+     * @param array $formData
+     * @param array $extraData
+     */
+    protected function _handleStatusAutomatedActions(Editor_Models_Concept $concept, &$formData, $extraData)
+    {
+        if (isset($extraData['statusOtherConcept']) && !empty($extraData['statusOtherConcept'])) {
+            $otherConcept = null;
+            $otherConceptResponse = Api_Models_Concepts::factory()->getConcepts('uuid:' . $extraData['statusOtherConcept']);
+            if (isset($otherConceptResponse['response']['docs']) || (1 === count($otherConceptResponse['response']['docs']))) {
+                $otherConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($otherConceptResponse['response']['docs'])));
+            }
+
+            if ($otherConcept !== null) {
+                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED
+                        || $extraData['status'] == OpenSKOS_Concept_Status::OBSOLETE) {
+                    
+                    foreach ($concept->getConceptLanguages() as $lang) {
+                        $existingChangeNotes = [];
+                        if (isset($formData['changeNote@' . $lang])) {
+                            $existingChangeNotes = $formData['changeNote@' . $lang];
+                        }
+
+                        $newChangeNotes = [_('Forward') . ': ' . $otherConcept['uri']];
+
+                        $formData['changeNote@' . $lang] = array_unique(array_merge($existingChangeNotes, $newChangeNotes));
+                    }
+                }
+                
+                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED) {
+                    $otherConceptUpdateData = [];
+                    foreach ($concept->getConceptLanguages() as $lang) {
+                        $existingAltLabels = $otherConcept['altLabel@' . $lang];
+                        if (empty($existingAltLabels)) {
+                            $existingAltLabels = [];
+                        }
+                        
+                        $newAltLabels = [];
+                        if (isset($formData['prefLabel@' . $lang])) {
+                            $newAltLabels = $formData['prefLabel@' . $lang];
+                        }
+                        
+                        $otherConceptUpdateData['altLabel@' . $lang] = array_unique(array_merge($existingAltLabels, $newAltLabels));
+                    }
+                    
+                    $otherConcept->update($otherConceptUpdateData);
+                }
+            }
+        }
+    }
 }

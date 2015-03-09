@@ -69,15 +69,4 @@
 <span id="doc-properties-not-saved-confirmation" class="do-not-show"><?php echo $this->translate('A document property is not saved. Do you want to continue?')?></span>
 <span id="concept-deleted-successfully" class="do-not-show"><?php echo $this->translate('The concept was successfully deleted.')?></span>
 
-<div id="status-other-concept" class="do-not-show">
-    <div class="choose-message redirected"><?= $this->translate('Choose the concept to which this one is redirected.')?></div>
-    <div class="choose-message obsolete"><?= $this->translate('Choose the concept which replaces this one.')?></div>
-    <div class="hint"><?= $this->translate('Click on a concept in the left search or in right history/selection tabs to choose it.')?></div>
-    
-    <div class="chosen-concept do-not-show">
-        <?= $this->translate('Chosen concept')?>: <span class="chosen-concept-label"></span>
-    </div>
-    
-    <button class="choose-cancel" type="button"><?= $this->translate('Cancel')?></button>
-    <button class="choose-ok" type="button"><?= $this->translate('Ok')?></button>
-</div>
+<?= $this->render('concept/partials/status-interaction.phtml') ?>

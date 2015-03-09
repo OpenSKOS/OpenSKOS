@@ -1,0 +1,41 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<div id="status-confirmation" class="do-not-show">
+    <div class="confirmation-message"><?= $this->translate('Are you sure you want to set that status. It can not be returned.')?></div>
+    
+    <button class="confirmation-cancel" type="button"><?= $this->translate('Cancel')?></button>
+    <button class="confirmation-ok" type="button"><?= $this->translate('Ok')?></button>
+</div>
+
+<div id="status-other-concept" class="choose-other-concept do-not-show">
+    <div class="choose-message redirected"><?= $this->translate('Choose the concept to which this one is redirected.')?></div>
+    <div class="choose-message obsolete"><?= $this->translate('Choose the concept which replaces this one.')?></div>
+    <div class="choose-hint"><?= $this->translate('Click on a concept in the left search or in right history/selection tabs.')?></div>
+    
+    <div class="chosen-concept do-not-show">
+        <?= $this->translate('Chosen concept')?>: <span class="chosen-concept-label"></span>
+    </div>
+    
+    <button class="choose-cancel" type="button"><?= $this->translate('Cancel')?></button>
+    <button class="choose-ok" type="button"><?= $this->translate('Ok')?></button>
+</div>

@@ -27,29 +27,67 @@ var EditorConceptStatus = new Class({
     
     sboxDefaultStyles: null,
     selectedStatus: null,
+    oldSelectedStatus: null,
     
     statusesWithSecondConcept: ['redirected', 'obsolete'],
+    statusesWithNoReturn: ['rejected', 'deleted'],
     
 	initialize: function () {
 		
 	},
     
     listenForStatusChange: function () {
-        $('Editconcept').getElement('#status').addEvent('change', this.onStatusChange);
+        var statusEl = $('Editconcept').getElement('#status');        
+        statusEl.addEvent('change', this.onStatusChange);        
+        this.selectedStatus = statusEl.get('value');
     },
 	
 	onStatusChange: function (e) {
+        this.oldSelectedStatus = this.selectedStatus;
         this.selectedStatus = e.target.get('value');
+        
+        if (this.statusesWithNoReturn.indexOf(this.selectedStatus) !== -1) {
+            this.showConfirmationModal();
+        }
         
         if (this.statusesWithSecondConcept.indexOf(this.selectedStatus) !== -1) {
             this.showChooseModal();
+        } else {
+            $('Editconcept').getElement('#statusOtherConcept').set('value', '');
+            if ($('Editconcept').getElement('.concept-edit-status-other-concept') !== null) {
+                $('Editconcept').getElement('.concept-edit-status-other-concept').dispose();
+            }
         }
 	},
+    
+    showConfirmationModal: function () {
+        this.conceptConfirmation = $('status-confirmation').clone();
+        
+        Editor.View.showActionModal(this.conceptConfirmation, {size: {x: 300, y: 90}});
+        
+        var self = this;
+        var closeConfirmation = function () {
+            SqueezeBox.close();
+        };
+        var isOk = false;
+        this.conceptConfirmation.getElement('.confirmation-cancel').addEvent('click', closeConfirmation);
+        this.conceptConfirmation.getElement('.confirmation-ok').addEvent('click', function () {
+            isOk = true;
+            closeConfirmation();
+        });
+        
+        SqueezeBox.addEvent('close', function() {
+            if (!isOk) {
+                $('Editconcept').getElement('#status').set('value', self.oldSelectedStatus);
+                self.selectedStatus = self.oldSelectedStatus;
+            }
+        });
+    },
     
     showChooseModal: function () {
         this.conceptChoose = $('status-other-concept').clone();
         
-        Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 180}});
+        Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 140}});
         
         this.conceptChoose.getElement('.choose-cancel').addEvent('click', this.closeChooseModal);
         this.conceptChoose.getElement('.choose-ok').addEvent('click', this.chooseConceptOk);
@@ -76,7 +114,7 @@ var EditorConceptStatus = new Class({
     },
     
     closeChooseModal: function () {
-        this.deactivateConceptChoose;
+        this.deactivateConceptChoose();
         this.conceptChoose = null;
         SqueezeBox.close();
     },
@@ -105,7 +143,10 @@ var EditorConceptStatus = new Class({
         $('Editconcept').getElement('#statusOtherConcept').set('value', uuid);
         
         var chosenConcept = this.conceptChoose.getElement('.chosen-concept').get('html');
-        (new Element('span', {'html': chosenConcept})).inject(
+        if ($('Editconcept').getElement('.concept-edit-status-other-concept') !== null) {
+            $('Editconcept').getElement('.concept-edit-status-other-concept').dispose();
+        }
+        (new Element('span', {'html': chosenConcept, 'class': 'concept-edit-status-other-concept'})).inject(
             $('Editconcept').getElement('#concept-edit-status'),
             'after'
         );

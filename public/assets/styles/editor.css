@@ -55,11 +55,11 @@ body, header, footer {
   font-size: 12px;
   margin: 0;
   padding: 0;
-  color: black;
+  color: #000;
 }
 
 a {
-  color: #6b1750;
+  color: #6B1750;
 }
 
 select {
@@ -96,7 +96,7 @@ div.loading {
 }
 
 div#footer {
-  background: none repeat scroll 0 0 #6b1750;
+  background: none repeat scroll 0 0 #6B1750;
   bottom: 0;
   height: 30px;
   left: 0;
@@ -169,7 +169,7 @@ div#header ul.navigation li {
   padding: 0;
 }
 div#header ul.navigation li a {
-  color: #6b1750;
+  color: #6B1750;
   font-weight: bold;
   text-decoration: none;
   background: url("../images/menu-separator.png") no-repeat right top;
@@ -193,7 +193,7 @@ div#header h1 {
   position: absolute;
 }
 div#header h1 span {
-  color: #6b1750;
+  color: #6B1750;
   font-size: 0.8em;
   padding-left: 30px;
 }
@@ -258,7 +258,7 @@ div#content {
 #left-top-panel #searchText-element input {
   width: 222px;
   height: 22px;
-  background: url("../images/search.png") white no-repeat 233px center;
+  background: url("../images/search.png") #fff no-repeat 233px center;
   padding-left: 8px;
   padding-right: 24px;
   margin-bottom: 9px;
@@ -441,7 +441,7 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
 #concept-edit-form h2,
 #concept-scheme-edit-form h2 {
   padding-left: 6px;
-  color: #6b1750;
+  color: #6B1750;
 }
 #concept-view ul,
 #concept-edit-form ul,
@@ -823,7 +823,7 @@ div#search-results ul.concepts-list > li > ul span.concept-link-content a {
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul li > span, div#search-results ul.concepts-list > li > ul a {
-  background-color: #ebeaea;
+  background-color: #EBEAEA;
 }
 div#search-results ul.concepts-list > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul a.hide-narrower-relations,
@@ -839,7 +839,7 @@ div#search-results ul.concepts-list > li > ul > li > ul span.concept-link-conten
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul a {
-  background-color: #dbdbdb;
+  background-color: #DBDBDB;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -855,7 +855,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul span.concept-l
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul a {
-  background-color: #cbcbcb;
+  background-color: #CBCBCB;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -871,7 +871,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul span
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -887,7 +887,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -935,7 +935,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #c3c3c3;
+  background-color: #C3C3C3;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -951,7 +951,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -967,7 +967,7 @@ div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, div#search-results ul.concepts-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 
 ul#selection-list .concept-link {
@@ -1069,7 +1069,7 @@ ul#selection-list > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#selection-list > li > ul li > span, ul#selection-list > li > ul a {
-  background-color: #ebeaea;
+  background-color: #EBEAEA;
 }
 ul#selection-list > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul a.hide-narrower-relations,
@@ -1085,7 +1085,7 @@ ul#selection-list > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul a {
-  background-color: #dbdbdb;
+  background-color: #DBDBDB;
 }
 ul#selection-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1101,7 +1101,7 @@ ul#selection-list > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul a {
-  background-color: #cbcbcb;
+  background-color: #CBCBCB;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1117,7 +1117,7 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul span.concept-link-cont
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1133,7 +1133,7 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1181,7 +1181,7 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #c3c3c3;
+  background-color: #C3C3C3;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1197,7 +1197,7 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1213,7 +1213,7 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
   width: 98%;
 }
 ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 
 ul#history-list .concept-link {
@@ -1315,7 +1315,7 @@ ul#history-list > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#history-list > li > ul li > span, ul#history-list > li > ul a {
-  background-color: #ebeaea;
+  background-color: #EBEAEA;
 }
 ul#history-list > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul a.hide-narrower-relations,
@@ -1331,7 +1331,7 @@ ul#history-list > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#history-list > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul a {
-  background-color: #dbdbdb;
+  background-color: #DBDBDB;
 }
 ul#history-list > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1347,7 +1347,7 @@ ul#history-list > li > ul > li > ul > li > ul span.concept-link-content a {
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul a {
-  background-color: #cbcbcb;
+  background-color: #CBCBCB;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1363,7 +1363,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul span.concept-link-conten
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1379,7 +1379,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul span.concept-l
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1427,7 +1427,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #c3c3c3;
+  background-color: #C3C3C3;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1443,7 +1443,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #b9b9b9;
+  background-color: #B9B9B9;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.show-narrower-relations,
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a.hide-narrower-relations,
@@ -1459,7 +1459,7 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
   width: 98%;
 }
 ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul li > span, ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul a {
-  background-color: #aaaaaa;
+  background-color: #AAAAAA;
 }
 
 #concept-edit-form,
@@ -1837,7 +1837,7 @@ input[type=button],
 input[type=submit] {
   height: 22px;
   cursor: pointer;
-  color: #6b1750;
+  color: #6B1750;
   font-size: 11px;
   border-radius: 3px;
   border-top: 1px solid #d5d5d5;
@@ -1845,7 +1845,7 @@ input[type=submit] {
   border-right: 1px solid #b4b4b4;
   border-left: 1px solid #b4b4b4;
   -moz-border-radius: 3px;
-  background: url("../images/button-background.png") white repeat-x left bottom;
+  background: url("../images/button-background.png") #fff repeat-x left bottom;
   padding-left: 18px;
   padding-right: 18px;
   padding-bottom: 1px;
@@ -1859,40 +1859,47 @@ button.selection,
 input[type=button].selection,
 input[type=submit].selection {
   padding-left: 20px;
-  background: url("../images/button-background-selection.png") white no-repeat left bottom;
+  background: url("../images/button-background-selection.png") #fff no-repeat left bottom;
 }
 button.switch,
 input[type=button].switch,
 input[type=submit].switch {
-  background: url("../images/button-background-switch.png") white no-repeat left bottom;
+  background: url("../images/button-background-switch.png") #fff no-repeat left bottom;
 }
 button.export,
 input[type=button].export,
 input[type=submit].export {
-  background: url("../images/button-background-export.png") white no-repeat left bottom;
+  background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.delete,
 input[type=button].delete,
 input[type=submit].delete {
-  background: url("../images/button-background-export.png") white no-repeat left bottom;
+  background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.relate,
 input[type=button].relate,
 input[type=submit].relate {
-  background: url("../images/button-background-relate.png") white no-repeat left bottom;
+  background: url("../images/button-background-relate.png") #fff no-repeat left bottom;
 }
 
 #concept-edit,
 #conceptSwitch {
-  background: url("../images/button-background-switch.png") white no-repeat left bottom;
+  background: url("../images/button-background-switch.png") #fff no-repeat left bottom;
 }
 
 #conceptExport {
-  background: url("../images/button-background-export.png") white no-repeat left bottom;
+  background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 
 #conceptDelete {
-  background: url("../images/button-background-clear.png") white no-repeat left bottom;
+  background: url("../images/button-background-clear.png") #fff no-repeat left bottom;
+}
+
+.choose-other-concept .choose-hint {
+  margin: 20px 0px;
+}
+.choose-other-concept .chosen-concept {
+  margin-bottom: 20px;
 }
 
 /* Export box */

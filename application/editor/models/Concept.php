@@ -340,7 +340,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 	 * @param bool $ignoreValidation, optional, Default: false If set to true the validation on save will not be performed.
 	 * @return bool True if the save is successfull. False otherwise. You can see errors by calling getErrors();
 	 */
-	public function update($updateData, $updateExtraData, $commit, $ignoreValidation = false)
+	public function update($updateData, $updateExtraData = [], $commit = true, $ignoreValidation = false)
 	{
 		$data = $this->getData();
 		$extraData = $this->getCurrentRequiredData();
@@ -512,6 +512,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$mapping['extraFields'] = array(
 				'uuid',
 				'status',
+                'statusOtherConcept',
 				'toBeChecked',
 				'uri'
 		);
