@@ -171,12 +171,17 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		} else {
 			$availableStatuses = OpenSKOS_Concept_Status::getAvailableStatuses($this->getCurrentStatus());
         }
+        
+        // Fallback for expired status for beg
+        if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
+            $availableStatuses[] = OpenSKOS_Concept_Status::_EXPIRED;
+        }
 		
 		$this->addElement('select', 'status', array(
-				'label' => 'Status:',
-				'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
-				'value' => 'candidate',
-				'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
+            'label' => 'Status:',
+            'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
+            'value' => 'candidate',
+            'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
 		));
 		
 		if ($this->_isProposalOnly) {

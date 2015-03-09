@@ -216,12 +216,15 @@ class OpenSKOS_Rdf_Parser implements Countable
 		if ($dateAcceptedNodes->length > 0) {
 			$autoExtraData['approved_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateAcceptedNodes->item(0)->nodeValue));
 		}
-		
+        
 		// Sets status. If we have info for date submited the status is candidate, if we have info for date accepted the status is approved.
-		if ($dateAcceptedNodes->length > 0) {
-			$autoExtraData['status'] = 'approved';
+        $openskosStatusNodes = $xpath->query('openskos:status', $Description);
+		if ($openskosStatusNodes->length > 0) {
+            $autoExtraData['status'] = $openskosStatusNodes->item(0)->nodeValue;
+        } else if ($dateAcceptedNodes->length > 0) {
+			$autoExtraData['status'] = OpenSKOS_Concept_Status::APPROVED;
 		} else if ($dateSubmittedNodes->length > 0) {
-			$autoExtraData['status'] = 'candidate';
+			$autoExtraData['status'] = OpenSKOS_Concept_Status::CANDIDATE;
 		} else if ( ! empty($fallbackStatus)) {
 			$autoExtraData['status'] = $fallbackStatus;
 		}
@@ -229,9 +232,21 @@ class OpenSKOS_Rdf_Parser implements Countable
 		// Merges the incoming extra data with the auto detected extra data.
 		$extradata = array_merge($autoExtraData, $extradata);
 		
+        // Validates status
+        if (!in_array($extradata['status'], OpenSKOS_Concept_Status::getStatuses())) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Status "' . $extradata['status'] . '" not recognized.'
+            );
+        }
+        
+        // Status deleted equals soft deletion.
+        if ($extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
+            $extradata['deleted'] = true;
+        }
+        
 		// Set deleted timestamp if status is expired and deleted timestamp is not already set.
-		if (! isset($extradata['deleted_timestamp']) 
-				&& ((isset($extradata['status']) && $extradata['status'] == 'expired')
+        if (! isset($extradata['deleted_timestamp']) 
+				&& ((isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::_EXPIRED)
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
 			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
 		}
