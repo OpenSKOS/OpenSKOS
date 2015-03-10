@@ -183,13 +183,17 @@ class OpenSKOS_Rdf_Parser implements Countable
 	 * @param array $extradata
 	 * @param DOMXPath $xpath
 	 * @param string $fallbackStatus The status which will be used if no other status is detected.
+     * @param bool $autoGenerateUri If the script should auto generate uri and notation
+     * @param OpenSKOS_Db_Table_Row_Collection $collection
 	 * @return OpenSKOS_Solr_Document
 	 */
 	public static function DomNode2SolrDocument(
 		DOMNode $Description, 
 		Array $extradata = array(), 
 		DOMXPath $xpath = null,
-		$fallbackStatus = '')
+		$fallbackStatus = '',
+        $autoGenerateUri = false,
+        $collection = null)
 	{
 		if ($Description->nodeName != 'rdf:Description') {
 			throw new OpenSKOS_Rdf_Parser_Exception('wrong nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
@@ -259,17 +263,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
 		}
 		
-		if (!isset($extradata['uri'])) {
-			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
-			if (!$uri) {
-				throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
-			}
-			$document->uri = $uri;
-		} else {
-			$uri = $extradata['uri'];
-		}
-		
-
 		if (!isset($extradata['uuid'])) {
 			$document->uuid = OpenSKOS_Utils::uuid();
 		}
@@ -286,7 +279,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    return;
 		}
 
-		
+        
 		$skosElements = $xpath->query('./skos:*', $Description);
 		foreach ($skosElements as $skosElement) {
 			$fieldname = str_replace('skos:', '', $skosElement->nodeName);
@@ -336,6 +329,22 @@ class OpenSKOS_Rdf_Parser implements Countable
 			);
 			$document->$fieldname = trim($element->nodeValue);
 		}
+        
+        // Checks or generate uri
+		if (!isset($extradata['uri'])) {
+			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+			if (!$uri) {
+                if ($autoGenerateUri) {
+                    $uri = self::autoGenerateUri($document, $Description, $collection);
+                } else {
+                    throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
+                }
+			}
+			$document->uri = $uri;
+		} else {
+			$document->uri = $extradata['uri'];
+		}
+        
 		$document->xml = $Description->ownerDocument->saveXML($Description);
 		
 		//store namespaces:
@@ -355,6 +364,29 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		return $document;
 	}
+    
+    protected static function autoGenerateUri(&$document, &$Description, $collection)
+    {
+        if ($collection === null) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Auto generate uri is set to true, but collection is not provided.'
+            );
+        }
+
+        $baseUri = $collection->getConceptsBaseUri();                    
+        if (empty($baseUri)) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Auto generate uri is set to true, but collection is not provided.'
+            );
+        }
+        if (!preg_match('/\/$/', $baseUri) && !preg_match('/=$/', $baseUri)) {
+            $baseUri .= '/';
+        }
+        
+        $document->registerOrGenerateNotation();
+
+        return $baseUri . $document['notation'][0];
+    }
 	
     /**
      * Processes an import file.
