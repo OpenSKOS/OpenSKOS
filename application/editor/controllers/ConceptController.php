@@ -44,7 +44,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				'notation' => array($notation)
 		)));
 		
-		$form = Editor_Forms_Concept::getInstance(null);
+		$form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
 		$formData = $concept->toForm();
 		$form->getElement('conceptSchemeSelect')-> setMultiOptions($formData['conceptSchemeSelect']);
 		$form->populate($formData);

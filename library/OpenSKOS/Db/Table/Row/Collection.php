@@ -85,7 +85,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                 'label' => 'Status for imported concepts',
             ];
             
-            if ($this['enableStatusesSystem']) {
+            if ($this->getTenant()['enableStatusesSystem']) {
                 $statusOptions['multiOptions'] = OpenSKOS_Concept_Status::statusesToOptions();
             } else {
                 $statusOptions['multiOptions'] = [OpenSKOS_Concept_Status::APPROVED];
@@ -202,10 +202,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->addElement('checkbox', 'allow_oai', array('label' => _('Allow OpenSKOS OAI Harvesting')))
 				->addElement('select', 'OAI_baseURL', array('label' => _('OAI baseURL'), 'style' => 'width: 450px;'))
 				->addElement('text', 'conceptsBaseUrl', array('label' => _('Concepts base url'), 'style' => 'width: 450px;'))
-                ->addElement('checkbox', 'enableStatusesSystem', array(
-                    'label' => _('Enable the statuses system for concepts. This allows having "candidate", "approved", "obsolete" and other concepts.'),
-                    'required' => false
-                ))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				->addElement('reset', 'reset', array('label'=>_('Reset')))
 				->addElement('submit', 'cancel', array('label'=>_('Cancel')))

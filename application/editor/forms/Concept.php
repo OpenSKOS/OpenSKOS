@@ -466,19 +466,20 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 
 	/**
      * @param Editor_Models_Concept Pass the edited concept for some checks.
+     * @param OpenSKOS_Db_Table_Row_Tenant Passes tenant. If not gets it from concept.
 	 * @return Editor_Forms_Concept
 	 */
-	public static function getInstance($concept = null)
+	public static function getInstance($concept = null, $tenant = null)
 	{
 		static $instance;
         
 		if (null === $instance) {
             $enableStatusesSystem = false;
-            if ($concept !== null) {
-                $collection = $concept->getCollection();
-                if ($collection !== null) {
-                    $enableStatusesSystem = (bool) $collection['enableStatusesSystem'];
-                }
+            if ($tenant === null && $concept !== null) {
+                $tenant = $concept->getInstitution();
+            }
+            if ($tenant !== null) {
+                $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
             }
             
 			$instance = new Editor_Forms_Concept([
