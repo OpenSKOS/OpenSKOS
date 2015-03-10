@@ -21,7 +21,7 @@
 ?>
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'?>
 <?php
-$namespaces = array('rdf');
+$namespaces = array('rdf', 'openskos');
 ob_start();
 foreach ($this->response['response']['docs'] as $doc) {
 	echo $doc['xml'];
@@ -39,7 +39,6 @@ $namespaces = array_unique($namespaces);
 		endif;
 	endforeach
 	?>
-	xmlns:openskos="http://openskos.org/xmlns#"
 	<?php foreach ($this->response['response'] as $key => $var): if ($key == 'docs') continue;?>
 	openskos:<?php echo $key?>="<?php echo $var?>"
 	<?php endforeach?>

@@ -712,7 +712,8 @@ legend {
 	.concept-link.status-candidate .concept-link-content a {
 		color: blue;
 	};
-	.concept-link.status-expired .concept-link-content a {
+	.concept-link.status-expired .concept-link-content a,
+	.concept-link.status-obsolete .concept-link-content a {
 		color: red;
 	};
 
@@ -1314,6 +1315,16 @@ input[type=submit] {
 	@include buttonDelete();
 }
 
+.choose-other-concept {
+    .choose-hint {
+        margin: 20px 0px;
+    }
+    .chosen-concept {
+        margin-bottom: 20px;
+    }
+}
+
+
 /* Export box */
 .export-box {
 	dt, dd {
@@ -1387,4 +1398,4 @@ form#uploadicon {
 	dd {
 		float: left;
 	};
-} 
+}

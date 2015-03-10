@@ -510,7 +510,7 @@ class Editor_Models_Export
 	{
 		$namespacesPrefixes = array();
 		foreach ($concepts as $concept) {
-			$namespacesPrefixes = array_unique(array_merge($namespacesPrefixes, $concept['xmlns']));
+			$namespacesPrefixes = array_unique(array_merge($namespacesPrefixes, $concept->getNamespacePrefixes()));
 		}
 		$model = new OpenSKOS_Db_Table_Namespaces();
 		return $model->fetchPairs($model->select()->where('prefix IN ("' . implode('","', $namespacesPrefixes) . '")'));
