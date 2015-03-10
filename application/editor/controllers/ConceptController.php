@@ -199,7 +199,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				}
 				
 				if ($extraData['status'] === OpenSKOS_Concept_Status::APPROVED
-                        && $oldData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
+                        && (!isset($oldData['status']) || $oldData['status'] !== OpenSKOS_Concept_Status::APPROVED)) {
 					$extraData['approved_timestamp'] = $extraData['modified_timestamp'];
 					$extraData['approved_by'] = $extraData['modified_by'];
 				}
@@ -211,7 +211,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 					$extraData['approved_timestamp'] = '';
 				}
 				
-				if ($extraData['status'] !== OpenSKOS_Concept_Status::_EXPIRED) {
+				if (OpenSKOS_Concept_Status::isStatusLikeDeleted($extraData['status'])) {
 					$formData['deleted_by'] = '';
 					$formData['deleted_timestamp'] = '';
 					$extraData['deleted_by'] = '';

@@ -202,8 +202,9 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             }
 
             // Fallback for expired status for beg
+            //!TODO Can be removed when conversion ready
             if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
-                $availableStatuses[] = OpenSKOS_Concept_Status::_EXPIRED;
+                $availableStatuses[] = OpenSKOS_Concept_Status::OBSOLETE;
             }
 
             $this->addElement('select', 'status', array(
@@ -215,6 +216,12 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 
             if ($this->_isProposalOnly) {
                 $this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
+            }
+            
+            // Fallback for expired status for beg
+            //!TODO Can be removed when conversion ready
+            if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
+                $this->getElement('status')->setValue(OpenSKOS_Concept_Status::OBSOLETE);
             }
         } else {
             $this->addElement('hidden', 'status', array(

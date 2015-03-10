@@ -712,7 +712,8 @@ legend {
 	.concept-link.status-candidate .concept-link-content a {
 		color: blue;
 	};
-	.concept-link.status-expired .concept-link-content a {
+	.concept-link.status-expired .concept-link-content a,
+	.concept-link.status-obsolete .concept-link-content a {
 		color: red;
 	};
 

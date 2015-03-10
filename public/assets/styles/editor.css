@@ -734,7 +734,8 @@ div#search-results ul.concepts-list .concept-link .uuid {
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-div#search-results ul.concepts-list .concept-link.status-expired .concept-link-content a {
+div#search-results ul.concepts-list .concept-link.status-expired .concept-link-content a,
+div#search-results ul.concepts-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
 div#search-results ul.concepts-list span.concept-link-header {
@@ -980,7 +981,8 @@ ul#selection-list .concept-link .uuid {
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-ul#selection-list .concept-link.status-expired .concept-link-content a {
+ul#selection-list .concept-link.status-expired .concept-link-content a,
+ul#selection-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
 ul#selection-list span.concept-link-header {
@@ -1226,7 +1228,8 @@ ul#history-list .concept-link .uuid {
 ul#history-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-ul#history-list .concept-link.status-expired .concept-link-content a {
+ul#history-list .concept-link.status-expired .concept-link-content a,
+ul#history-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
 ul#history-list span.concept-link-header {

@@ -27,7 +27,9 @@
 <?php foreach ($this->data as $doc):
     if (!isset($doc['deleted'])) $doc['deleted'] = false;
 
-	$isDeleted = (true === $doc['deleted'] || (isset($doc['status']) && $doc['status'] == 'expired'));
+	$isDeleted = (true === $doc['deleted'] 
+        || (isset($doc['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($doc['status']))
+    );
 ?>
 <record>
 	<?php echo $this->partial('index/partial.header.phtml', array('doc' => $doc, 'collections' => $this->collections, 'conceptSchemes' => $this->conceptSchemes))?>
