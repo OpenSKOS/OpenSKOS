@@ -720,7 +720,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		$this->data['notation'] = array(array_shift($this->data['notation']));
     	}
 
-    	$this->setDcTermsData($extraData);
+    	$this->setSpecialExtraData($extraData);
 
     	$document = $this->toRDF();
 
@@ -757,7 +757,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
      *
      * @param unknown_type $extraData
      */
-    protected function setDcTermsData($extraData)
+    protected function setSpecialExtraData($extraData)
     {
     	if (isset($extraData['created_timestamp'])) {
     		$this->data['dcterms_dateSubmitted'] = array($extraData['created_timestamp']);
@@ -774,6 +774,9 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		if (null !== $creator) {
     			$this->data['dcterms_creator'] = array($creator->name);
     		}
+    	}
+        if (isset($extraData['status'])) {
+    		$this->data['status'] = $extraData['status'];
     	}
     }
 
