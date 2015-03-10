@@ -472,13 +472,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	{
 		static $instance;
         
-        $enableStatusesSystem = false;
-        $collection = $concept->getCollection();
-        if ($collection !== null) {
-            $enableStatusesSystem = (bool) $collection['enableStatusesSystem'];
-        }
-	
 		if (null === $instance) {
+            $enableStatusesSystem = false;
+            if ($concept !== null) {
+                $collection = $concept->getCollection();
+                if ($collection !== null) {
+                    $enableStatusesSystem = (bool) $collection['enableStatusesSystem'];
+                }
+            }
+            
 			$instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
                 'currentStatus' => (null !== $concept ? $concept['status'] : null),
