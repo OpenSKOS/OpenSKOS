@@ -417,9 +417,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				
 				// The actual update...
 				$doCommit = ($key == (count($concepts) - 1)); // Commit only on the last concept.
-						
-				$concept = new Editor_Models_Concept($concept);				
-				$concept->update(array(), $updateExtraData, $doCommit);
+
+				$concept = new Editor_Models_Concept($concept);
+				$concept->update(array(), $updateExtraData, $doCommit, true);
 			}
 		}
 		
