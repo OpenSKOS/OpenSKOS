@@ -49,6 +49,10 @@ var EditorConceptStatus = new Class({
         
         if (this.selectedStatus == this.deleteStatus) {
             Editor.View.showDeleteBox($('uuid').get('value'));
+            var self = this;
+            SqueezeBox.addEvent('close', function() {
+                self.returnOldStatus();
+            });
         } else if (this.statusesWithNoReturn.indexOf(this.selectedStatus) !== -1) {
             this.showConfirmationModal();
         } else if (this.statusesWithSecondConcept.indexOf(this.selectedStatus) !== -1) {
@@ -79,10 +83,16 @@ var EditorConceptStatus = new Class({
         
         SqueezeBox.addEvent('close', function() {
             if (!isOk) {
-                $('Editconcept').getElement('#status').set('value', self.oldSelectedStatus);
-                self.selectedStatus = self.oldSelectedStatus;
+                self.returnOldStatus();
             }
         });
+    },
+    
+    returnOldStatus: function () {
+        if ($('Editconcept')) {
+            $('Editconcept').getElement('#status').set('value', this.oldSelectedStatus);
+            this.selectedStatus = this.oldSelectedStatus;
+        }
     },
     
     showChooseModal: function () {
