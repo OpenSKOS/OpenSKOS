@@ -3,3 +3,7 @@ REPLACE INTO `namespace`
 
 ALTER TABLE `tenant`
     ADD COLUMN `enableStatusesSystem` BOOLEAN;
+
+INSERT INTO collection_has_namespace
+    SELECT DISTINCT id, 'openskos'
+    FROM collection;
