@@ -151,4 +151,14 @@ class OpenSKOS_Concept_Status
     {
         return in_array($toStatus, self::getAvailableStatuses($fromStatus));
     }
+    
+    /**
+     * Checks if the $status is expired, obsolete or deleted.
+     * @param string $status
+     * @return bool
+     */
+    public static function isStatusLikeDeleted($status)
+    {
+        return in_array($status, [self::_EXPIRED, self::OBSOLETE, self::DELETED]);
+    }
 }

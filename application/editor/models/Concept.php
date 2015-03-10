@@ -392,7 +392,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 				$extraData['approved_timestamp'] = '';
 			}
 
-			if ($extraData['status'] !== OpenSKOS_Concept_Status::_EXPIRED) {
+			if ($extraData['status'] !== OpenSKOS_Concept_Status::isStatusLikeDeleted($extraData['status'])) {
 				$data['deleted_by'] = '';
 				$data['deleted_timestamp'] = '';
 				$extraData['deleted_by'] = '';

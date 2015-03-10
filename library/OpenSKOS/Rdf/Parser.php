@@ -233,7 +233,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		$extradata = array_merge($autoExtraData, $extradata);
 		
         // Validates status
-        if (!in_array($extradata['status'], OpenSKOS_Concept_Status::getStatuses())) {
+        if (!empty($extradata['status']) && !in_array($extradata['status'], OpenSKOS_Concept_Status::getStatuses())) {
             throw new OpenSKOS_Rdf_Parser_Exception(
                 'Status "' . $extradata['status'] . '" not recognized.'
             );
@@ -244,9 +244,9 @@ class OpenSKOS_Rdf_Parser implements Countable
             $extradata['deleted'] = true;
         }
         
-		// Set deleted timestamp if status is expired and deleted timestamp is not already set.
+		// Set deleted timestamp if status is OBSOLETE(expired) and deleted timestamp is not already set.
         if (! isset($extradata['deleted_timestamp']) 
-				&& ((isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::_EXPIRED)
+				&& ((isset($extradata['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($extradata['status']))
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
 			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
 		}
