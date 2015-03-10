@@ -143,21 +143,23 @@ class Editor_Forms_SearchOptions extends Zend_Form
 	 */
 	protected function buildStatuses()
 	{
-		$statuses = array();
-		if (isset($this->_searchOptions['statuses'])) {
-			$statuses = $this->_searchOptions['statuses'];
-		}
-		
-		$this->addElement('multiCheckbox', 'status', array(
-				'label' => _('Status'),
-				'multiOptions' => $statuses
-		));
-		
-		if ( ! empty($statuses)) {
-			$checkedOptions = array_keys($statuses);
-			$this->getElement('status')->setValue($checkedOptions);
-		}
-		
+        if ($this->_getCurrentTenant()['enableStatusesSystem']) {
+            $statuses = array();
+            if (isset($this->_searchOptions['statuses'])) {
+                $statuses = $this->_searchOptions['statuses'];
+            }
+
+            $this->addElement('multiCheckbox', 'status', array(
+                    'label' => _('Status'),
+                    'multiOptions' => $statuses
+            ));
+
+            if ( ! empty($statuses)) {
+                $checkedOptions = array_keys($statuses);
+                $this->getElement('status')->setValue($checkedOptions);
+            }
+        }
+        
 		$this->addElement('checkbox', 'toBeChecked', array(
 			'label' => _('To be checked'),
 		));
