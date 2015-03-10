@@ -240,7 +240,7 @@ class OpenSKOS_Rdf_Parser implements Countable
         }
         
         // Status deleted equals soft deletion.
-        if ($extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
+        if (isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
             $extradata['deleted'] = true;
         }
         
