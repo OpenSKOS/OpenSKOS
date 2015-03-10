@@ -801,6 +801,30 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		return $nodes;
 	}
+    
+    /**
+	 * Creates simple openskos xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 *
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createSimpleOpenskosField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+	
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('openskos:' . $fieldName);
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
 	
 	/**
 	 * Creates dcterm xml element for the field
