@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+OpenSKOS
+
+LICENSE
+
+This source file is subject to the GPLv3 license that is bundled
+with this package in the file LICENSE.txt.
+It is also available through the world-wide-web at this URL:
+http://www.gnu.org/licenses/gpl-3.0.txt
+If you did not receive a copy of the license and are unable to
+obtain it through the world-wide-web, please send an email
+to license@zend.com so we can send you a copy immediately.
+-->
+
+<xs:schema version="1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:attribute name="numFound" type="xs:integer"/>
+    <xs:attribute name="start" type="xs:integer"/>
+    <xs:attribute name="maxScore" type="xs:decimal"/>
+    <xs:element name="status" type="xs:string"/>
+</xs:schema>

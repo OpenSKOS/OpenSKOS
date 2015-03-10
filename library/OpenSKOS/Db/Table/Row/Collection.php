@@ -81,11 +81,18 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->setAttrib('enctype', 'multipart/form-data')
 				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())));
 			
-			$availableStatuses = array();
-			$availableStatuses[] = 'candidate';
-			$availableStatuses[] = 'approved';
-			$availableStatuses[] = 'expired';
-			$form->addElement('select', 'status', array('label' => 'Status for imported concepts', 'multiOptions' => array_combine($availableStatuses, $availableStatuses)));
+            $statusOptions = [
+                'label' => 'Status for imported concepts',
+            ];
+            
+            if ($this->getTenant()['enableStatusesSystem']) {
+                $statusOptions['multiOptions'] = OpenSKOS_Concept_Status::statusesToOptions();
+            } else {
+                $statusOptions['multiOptions'] = [OpenSKOS_Concept_Status::APPROVED];
+                $statusOptions['disabled'] = true;
+            }
+            
+			$form->addElement('select', 'status', $statusOptions);
 			$form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
 			
 			$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');			
@@ -98,6 +105,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			
 			$form->addElement('submit', 'submit', array('label'=>'Submit'));
 		}
+        
 		return $form;
 	}
 	

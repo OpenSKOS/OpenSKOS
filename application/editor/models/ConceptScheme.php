@@ -365,7 +365,7 @@ class Editor_Models_ConceptScheme extends Api_Models_Concept
 	 */
 	protected function getRdfMapping()
 	{
-		return array('resourceFields' => array('hasTopConcept'), 'dctermsDateFields' => array(), 'simpleSkosFields' => array());
+		return array('resourceFields' => array('hasTopConcept'), 'dctermsDateFields' => array(), 'simpleSkosFields' => array(), 'openskosFields' => array());
 	}
 	
 	/**

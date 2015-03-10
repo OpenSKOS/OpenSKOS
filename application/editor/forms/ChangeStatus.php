@@ -33,16 +33,10 @@ class Editor_Forms_ChangeStatus extends Zend_Form
 	
 	protected function buildStatus()
 	{
-		$availableStatuses = array();
-		$availableStatuses[] = '';
-		$availableStatuses[] = 'candidate';
-		$availableStatuses[] = 'approved';
-		$availableStatuses[] = 'expired';
-		
 		$this->addElement('select', 'status', array(
 				'label' => 'Status:',
 				'separator' => '',
-				'multiOptions' => array_combine($availableStatuses, $availableStatuses),
+				'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions(),
 				'decorators' => array('ViewHelper', 'Label')
 		));
 		return $this;

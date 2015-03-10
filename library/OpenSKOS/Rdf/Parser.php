@@ -35,20 +35,17 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'lang|l=s' => 'The default language to use if no "xml:lang" attribute is found',
 		'env|e=s' => 'The environment to use (defaults to "production")',
 		'commit' => 'Commit to Solr (default: print to STDOUT)',
-		'status=s' => 'The status to use for concepts (candidate|approved|expired)',
+		'status=s' => 'The status to use for concepts (candidate,approved,redirected,not_compliant,rejected,obsolete,deleted)',
 		'ignoreIncomingStatus' => 'To ignore or not the concept status which comes from the import file',
 		'toBeChecked' => 'Sets the toBeCheked status to TRUE',
 		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation.',
 	);
 	
-	//@TODO move this to a Concept Class
-	static $statuses = array('candidate', 'approved', 'expired');
-	
 	static $namespaces = array(
 		'rdf'      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
 		'rdfs'     => 'http://www.w3.org/2000/01/rdf-schema#',
 		'skos'     => 'http://www.w3.org/2004/02/skos/core#',
-		'openskos' => 'http://openskos.org/xmlns#',
+		'openskos' => 'http://openskos.org/xmlns/openskos.xsd',
 		'dc'       => 'http://purl.org/dc/elements/1.1/',
 		'dcterms'  => 'http://purl.org/dc/terms/',
 		'owl'      => 'http://www.w3.org/2002/07/owl#'
@@ -219,12 +216,15 @@ class OpenSKOS_Rdf_Parser implements Countable
 		if ($dateAcceptedNodes->length > 0) {
 			$autoExtraData['approved_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateAcceptedNodes->item(0)->nodeValue));
 		}
-		
+        
 		// Sets status. If we have info for date submited the status is candidate, if we have info for date accepted the status is approved.
-		if ($dateAcceptedNodes->length > 0) {
-			$autoExtraData['status'] = 'approved';
+        $openskosStatusNodes = $xpath->query('openskos:status', $Description);
+		if ($openskosStatusNodes->length > 0) {
+            $autoExtraData['status'] = $openskosStatusNodes->item(0)->nodeValue;
+        } else if ($dateAcceptedNodes->length > 0) {
+			$autoExtraData['status'] = OpenSKOS_Concept_Status::APPROVED;
 		} else if ($dateSubmittedNodes->length > 0) {
-			$autoExtraData['status'] = 'candidate';
+			$autoExtraData['status'] = OpenSKOS_Concept_Status::CANDIDATE;
 		} else if ( ! empty($fallbackStatus)) {
 			$autoExtraData['status'] = $fallbackStatus;
 		}
@@ -232,9 +232,21 @@ class OpenSKOS_Rdf_Parser implements Countable
 		// Merges the incoming extra data with the auto detected extra data.
 		$extradata = array_merge($autoExtraData, $extradata);
 		
-		// Set deleted timestamp if status is expired and deleted timestamp is not already set.
-		if (! isset($extradata['deleted_timestamp']) 
-				&& ((isset($extradata['status']) && $extradata['status'] == 'expired')
+        // Validates status
+        if (!empty($extradata['status']) && !in_array($extradata['status'], OpenSKOS_Concept_Status::getStatuses())) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Status "' . $extradata['status'] . '" not recognized.'
+            );
+        }
+        
+        // Status deleted equals soft deletion.
+        if (isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
+            $extradata['deleted'] = true;
+        }
+        
+		// Set deleted timestamp if status is OBSOLETE(expired) and deleted timestamp is not already set.
+        if (! isset($extradata['deleted_timestamp']) 
+				&& ((isset($extradata['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($extradata['status']))
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
 			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
 		}
@@ -588,8 +600,9 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		
 		if ($opts->status) {
-			if (!in_array($opts->status, self::$statuses)) {
-				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', self::$statuses).'`', 0);
+            $statuses = OpenSKOS_Concept_Status::getStatuses();
+			if (!in_array($opts->status, $statuses)) {
+				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', $statuses).'`', 0);
 			}
 		}
 		
@@ -783,6 +796,30 @@ class OpenSKOS_Rdf_Parser implements Countable
 	
 		foreach ($fieldValues as $fieldValue) {
 			$node = $doc->createElement('skos:' . $fieldName);
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+    
+    /**
+	 * Creates simple openskos xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 *
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createSimpleOpenskosField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+	
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+	
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('openskos:' . $fieldName);
 			$node->appendChild($doc->createTextNode($fieldValue));
 			$nodes[] = $node;
 		}

@@ -322,7 +322,15 @@ class Editor_Forms_Search extends Zend_Form
             $profileOptions['conceptScheme'] = $formOptions['allowedConceptScheme'];
             unset($formOptions['allowedConceptScheme']);
         }
+        
+        $options = array_merge($formOptions, $profileOptions);
+        
+        // Remove any status options if status system is disabled.
 
-        return array_merge($formOptions, $profileOptions);
+        if (!OpenSKOS_Db_Table_Tenants::fromIdentity()['enableStatusesSystem']) {
+            $options['status'] = [];
+        }
+        
+        return $options;
     }
 }

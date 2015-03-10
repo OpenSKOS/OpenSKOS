@@ -92,7 +92,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	);
 
 	protected static $_defaultConceptData = array(
-		'xmlns' => array('rdf', 'skos', 'dcterms'),
+		'xmlns' => array('rdf', 'skos', 'dcterms', 'openskos'),
 		'class' => 'Concept'
 	);
 
@@ -154,13 +154,18 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	public function getNamespaces()
 	{
 		$model = new OpenSKOS_Db_Table_Namespaces();
-		//@FIXME Talk to Mark. Clarify what namespaces need to be included.
-		$prefixes = array_merge($this['xmlns'], array('dc', 'dcterms', 'skos'));
+        
+		$prefixes = $this->getNamespacePrefixes();
 		foreach ($prefixes as &$prefix) {
 			$prefix = $model->getAdapter()->quote($prefix);
 		}
 		return $model->fetchPairs($model->select()->where('prefix IN ('.implode(',', $prefixes).')'));
 	}
+    
+    public function getNamespacePrefixes()
+    {
+        return array_merge($this['xmlns'], array('dc', 'dcterms', 'skos', 'openskos'));
+    }
 
 	/**
 	 *
@@ -695,6 +700,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     			'resourceFields' => $resourceFields,
     			'dctermsDateFields' => $dctermsDateFields,
     			'simpleSkosFields' => $simpleSkosFields,
+                'openskosFields' => ['status']
     	);
     }
 
@@ -714,7 +720,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		$this->data['notation'] = array(array_shift($this->data['notation']));
     	}
 
-    	$this->setDcTermsData($extraData);
+    	$this->setSpecialExtraData($extraData);
 
     	$document = $this->toRDF();
 
@@ -751,7 +757,7 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
      *
      * @param unknown_type $extraData
      */
-    protected function setDcTermsData($extraData)
+    protected function setSpecialExtraData($extraData)
     {
     	if (isset($extraData['created_timestamp'])) {
     		$this->data['dcterms_dateSubmitted'] = array($extraData['created_timestamp']);
@@ -768,6 +774,9 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
     		if (null !== $creator) {
     			$this->data['dcterms_creator'] = array($creator->name);
     		}
+    	}
+        if (isset($extraData['status'])) {
+    		$this->data['status'] = $extraData['status'];
     	}
     }
 
@@ -834,6 +843,8 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 
     		} else if (in_array($docField, $rdfMapping['simpleSkosFields'])) {
     			$rdfNodes = array_merge($rdfNodes, OpenSKOS_Rdf_Parser::createSimpleSkosField($docField, $docValue));
+    		} else if (in_array($docField, $rdfMapping['openskosFields'])) {
+    			$rdfNodes = array_merge($rdfNodes, OpenSKOS_Rdf_Parser::createSimpleOpenskosField($docField, $docValue));
     		}
     	}
     	return $rdfNodes;
