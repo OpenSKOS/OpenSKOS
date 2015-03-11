@@ -1,13 +1,13 @@
-<span class="multi-field-hidden <?php echo $this->inputClasses; ?>">
+<span class="multi-field-hidden <?= $this->inputClasses; ?>">
 <span class="concept-multi-hidden-template template">
 	<span class="concept-multi-hidden-label"></span>
-	<input class="concept-multi-hidden" type="hidden" name="<?php echo $this->inputName;?>[]" value="" />
+	<input class="concept-multi-hidden" type="hidden" name="<?= $this->inputName;?>[]" value="" />
 	<span class="concept-multi-hidden-remove"></span>
 </span>
 <?php foreach ($this->inputLabel as $label) :?>
 	<span class="concept-multi-hidden-template">
-		<span class="concept-multi-hidden-label"><?php echo $label; ?> 	</span>
-		<input class="concept-multi-hidden" type="hidden" name="<?php echo $this->inputName;?>[]" value="<?php echo $this->inputValues[$label][$label]; ?>" />
+		<span class="concept-multi-hidden-label"><?= $label; ?> 	</span>
+		<input class="concept-multi-hidden" type="hidden" name="<?= $this->inputName;?>[]" value="<?= $this->escape($this->inputValues[$label][$label]); ?>" />
 		<span class="concept-multi-hidden-remove"></span>
 	</span>
 <?php endforeach ?>
