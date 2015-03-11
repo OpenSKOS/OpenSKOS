@@ -180,13 +180,17 @@ class OpenSKOS_Rdf_Parser implements Countable
 	 * @param array $extradata
 	 * @param DOMXPath $xpath
 	 * @param string $fallbackStatus The status which will be used if no other status is detected.
+     * @param bool $autoGenerateUri If the script should auto generate uri and notation
+     * @param OpenSKOS_Db_Table_Row_Collection $collection
 	 * @return OpenSKOS_Solr_Document
 	 */
 	public static function DomNode2SolrDocument(
 		DOMNode $Description, 
 		Array $extradata = array(), 
 		DOMXPath $xpath = null,
-		$fallbackStatus = '')
+		$fallbackStatus = '',
+        $autoGenerateUri = false,
+        $collection = null)
 	{
 		if ($Description->nodeName != 'rdf:Description') {
 			throw new OpenSKOS_Rdf_Parser_Exception('wrong nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
@@ -271,17 +275,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
 		}
 		
-		if (!isset($extradata['uri'])) {
-			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
-			if (!$uri) {
-				throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
-			}
-			$document->uri = $uri;
-		} else {
-			$uri = $extradata['uri'];
-		}
-		
-
 		if (!isset($extradata['uuid'])) {
 			$document->uuid = OpenSKOS_Utils::uuid();
 		}
@@ -298,7 +291,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    return;
 		}
 
-		
+        
 		$skosElements = $xpath->query('./skos:*', $Description);
 		foreach ($skosElements as $skosElement) {
 			$fieldname = str_replace('skos:', '', $skosElement->nodeName);
@@ -348,8 +341,23 @@ class OpenSKOS_Rdf_Parser implements Countable
 			);
 			$document->$fieldname = trim($element->nodeValue);
 		}
-		$document->xml = $Description->ownerDocument->saveXML($Description);
-		
+        
+        $document->xml = $Description->ownerDocument->saveXML($Description);
+        
+        // Checks or generate uri
+		if (!$document->offsetExists('uri')) {
+			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+			if ($uri) {
+                $document->uri = $uri;
+            } else {
+                if ($autoGenerateUri) {
+                    $document->autoGenerateUri($collection);
+                } else {
+                    throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
+                }
+			}
+		}
+        
 		//store namespaces:
 		$availableNamespaces = array();
 		foreach ($Description->childNodes as $childNode) {
@@ -367,7 +375,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		return $document;
 	}
-	
+    
     /**
      * Processes an import file.
      * @param int $byUserId, optional If specified some actions inside the processing will be linked to that user
