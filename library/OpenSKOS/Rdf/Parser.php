@@ -330,23 +330,22 @@ class OpenSKOS_Rdf_Parser implements Countable
 			$document->$fieldname = trim($element->nodeValue);
 		}
         
+        $document->xml = $Description->ownerDocument->saveXML($Description);
+        
         // Checks or generate uri
-		if (!isset($extradata['uri'])) {
+		if (!$document->offsetExists('uri')) {
 			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
-			if (!$uri) {
+			if ($uri) {
+                $document->uri = $uri;
+            } else {
                 if ($autoGenerateUri) {
-                    $uri = self::autoGenerateUri($document, $Description, $collection);
+                    $document->autoGenerateUri($collection);
                 } else {
                     throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
                 }
 			}
-			$document->uri = $uri;
-		} else {
-			$document->uri = $extradata['uri'];
 		}
         
-		$document->xml = $Description->ownerDocument->saveXML($Description);
-		
 		//store namespaces:
 		$availableNamespaces = array();
 		foreach ($Description->childNodes as $childNode) {
@@ -365,29 +364,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 		return $document;
 	}
     
-    protected static function autoGenerateUri(&$document, &$Description, $collection)
-    {
-        if ($collection === null) {
-            throw new OpenSKOS_Rdf_Parser_Exception(
-                'Auto generate uri is set to true, but collection is not provided.'
-            );
-        }
-
-        $baseUri = $collection->getConceptsBaseUri();                    
-        if (empty($baseUri)) {
-            throw new OpenSKOS_Rdf_Parser_Exception(
-                'Auto generate uri is set to true, but collection is not provided.'
-            );
-        }
-        if (!preg_match('/\/$/', $baseUri) && !preg_match('/=$/', $baseUri)) {
-            $baseUri .= '/';
-        }
-        
-        $document->registerOrGenerateNotation();
-
-        return $baseUri . $document['notation'][0];
-    }
-	
     /**
      * Processes an import file.
      * @param int $byUserId, optional If specified some actions inside the processing will be linked to that user
