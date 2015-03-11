@@ -1,7 +1,7 @@
-<span class="multi-field <?php echo $this->inputClasses; ?>">
-	<label class="concept-multi-label"><?php echo $this->inputLabel; ?></label>
+<span class="multi-field <?= $this->inputClasses; ?>">
+	<label class="concept-multi-label"><?= $this->inputLabel; ?></label>
 	<span class="concept-multi-template template">
-	<input type="text" name="<?php echo $this->inputName; ?>[][]" value="" class="concept-multi-input"/>
+	<input type="text" name="<?= $this->inputName; ?>[][]" value="" class="concept-multi-input"/>
 		<span class="concept-multi-remove"></span>
 		<span class="concept-multi-add"></span>
 	</span>
@@ -10,21 +10,21 @@
 	<?php if (isset($value['languageCode'])):  ?>
 		<?php if (isset($value['value']) && is_array($value['value'])) :?>
 			<?php foreach ($value['value'] as $inputValue): ?>
-			<span class="concept-multi-template <?php echo $value['languageCode']; ?>">
-				<input type="text" name="<?php echo $this->inputName; ?>[<?php echo $value['languageCode']; ?>][]" value="<?php echo $inputValue; ?>" class="concept-multi-input"/>
+			<span class="concept-multi-template <?= $value['languageCode']; ?>">
+				<input type="text" name="<?= $this->inputName; ?>[<?= $value['languageCode']; ?>][]" value="<?= $this->escape($inputValue); ?>" class="concept-multi-input"/>
 				<span class="concept-multi-remove"></span>
 				<span class="concept-multi-add"></span>
 			</span>
 			<?php endforeach?>
 		<?php else : ?>
-		<input type="text" name="<?php echo $this->inputName; ?>[<?php echo $value['languageCode']; ?>][]" value="<?php echo $value['value']; ?>" class="concept-multi-input"/>
+		<input type="text" name="<?= $this->inputName; ?>[<?= $value['languageCode']; ?>][]" value="<?= $this->escape($value['value']); ?>" class="concept-multi-input"/>
 		<?php endif?>	
 	<?php else: ?>
-	<input type="text" name="<?php echo $this->inputName; ?>[]" value="<?php echo $value; ?>" class="concept-multi-input"/>
+	<input type="text" name="<?= $this->inputName; ?>[]" value="<?= $this->escape($value); ?>" class="concept-multi-input"/>
 	<?php endif?>
 <?php endforeach ?>
 <?php else:?>
-	<input type="text" name="<?php echo $this->inputName; ?>[]" value="" class="concept-multi-input"/>
+	<input type="text" name="<?= $this->inputName; ?>[]" value="" class="concept-multi-input"/>
 		<span class="concept-multi-remove"></span>
 	<span class="concept-multi-add"></span>
 <?php endif?>
