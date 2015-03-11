@@ -150,14 +150,12 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
 	    		$this->data['notation'] = array(OpenSKOS_Db_Table_Notations::getNext());
 	    		
                 // Adds the notation to the xml. At the end just before </rdf:Description>
-                if (isset($this->data['xml'])) {
-                    $closingTag = '</rdf:Description>';
-                    $notationTag = '<skos:notation>' . $this->data['notation'][0] . '</skos:notation>';
+                $closingTag = '</rdf:Description>';
+                $notationTag = '<skos:notation>' . $this->data['notation'][0] . '</skos:notation>';
                 
-                    $xml = $this->data['xml'];
-                    $xml = str_replace($closingTag, $notationTag . $closingTag, $xml);
-                    $this->data['xml'] = $xml;
-                }
+                $xml = $this->data['xml'];
+                $xml = str_replace($closingTag, $notationTag . $closingTag, $xml);
+                $this->data['xml'] = $xml;
 	    		
 	    	} else {
 	    		if ( ! OpenSKOS_Db_Table_Notations::isRegistered($currentNotation)) {
@@ -169,6 +167,56 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
     	
     	return $this;
     } 
+    
+    /**
+     * Generates uri if it can. Alters the document to put it in, also alters the xml to put rdf:about
+     * @param OpenSKOS_Db_Table_Row_Collection $collection From where to get the basic uri.
+     * @throws OpenSKOS_Rdf_Parser_Exception
+     */
+    public function autoGenerateUri(OpenSKOS_Db_Table_Row_Collection $collection)
+    {
+        if (!((isset($this->data['class']) && $this->data['class'] == 'Concept')
+    			|| (isset($this->data['class'][0]) && $this->data['class'][0] == 'Concept'))) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Auto generate uri is for concepts only. Not working for concept schemas.'
+            );
+        }
+        
+        if ($collection === null) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Auto generate uri is set to true, but collection is not provided.'
+            );
+        }
+
+        $baseUri = $collection->getConceptsBaseUri();                    
+        if (empty($baseUri)) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Auto generate uri is set to true, but collection is not provided.'
+            );
+        }
+        if (!preg_match('/\/$/', $baseUri) && !preg_match('/=$/', $baseUri)) {
+            $baseUri .= '/';
+        }
+        
+        $this->registerOrGenerateNotation();
+
+        $uri = $baseUri . $this->data['notation'][0];
+        
+        // Write in the xml.
+        if (strpos($this->data['xml'][0], 'rdf:about') !== false) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Can not auto generate uri if rdf about is set.'
+            );
+        }
+        
+        $this->data['xml'] = str_replace(
+            '<rdf:Description',
+            '<rdf:Description rdf:about="' . $uri . '"',
+            $this->data['xml']
+        );
+        
+        $this->uri = $uri;
+    }
         
     public function __toString()
     {
