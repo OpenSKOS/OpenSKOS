@@ -67,7 +67,14 @@ class Api_ConceptController extends Api_FindConceptsController {
 		);
 		
 		try {
-			$solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($Descriptions->item(0), $data);
+			$solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument(
+                $Descriptions->item(0),
+                $data,
+                null,
+                '',
+                $this->getRequest()->getParam('autoGenerateUri', false),
+                $collection
+            );
 		} catch (OpenSKOS_Rdf_Parser_Exception $e) {
 			throw new Zend_Controller_Action_Exception($e->getMessage(), 400);
 		}
