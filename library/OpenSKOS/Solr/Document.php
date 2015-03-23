@@ -217,6 +217,23 @@ class OpenSKOS_Solr_Document implements Countable, ArrayAccess, Iterator
         
         $this->uri = $uri;
     }
+    
+    /**
+     * 
+     * @throws OpenSKOS_Rdf_Parser_Exception
+     */
+    public function addStatusToGeneratedXml()
+    {
+        if (isset($this->data['status']) && isset($this->data['status'][0]) && strpos($this->data['xml'][0], 'openskos:status') === false) {
+            // Adds the status to the xml. At the end just before </rdf:Description>
+            $closingTag = '</rdf:Description>';
+            $statusTag = '<openskos:status>' . $this->data['status'][0] . '</openskos:status>';
+
+            $xml = $this->data['xml'];
+            $xml = str_replace($closingTag, $statusTag . $closingTag, $xml);
+            $this->data['xml'] = $xml;
+        }
+    }
         
     public function __toString()
     {
