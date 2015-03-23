@@ -358,6 +358,9 @@ class OpenSKOS_Rdf_Parser implements Countable
 			}
 		}
         
+        // Puts status in the Document
+        $document->addStatusToGeneratedXml();
+        
 		//store namespaces:
 		$availableNamespaces = array();
 		foreach ($Description->childNodes as $childNode) {
