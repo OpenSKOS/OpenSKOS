@@ -133,7 +133,8 @@ class Api_ConceptController extends Api_FindConceptsController {
 			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
 			->setHeader('Location', $location)
 			->setHttpResponseCode(201);
-		echo $doc->saveXml($Descriptions->item(0));
+        
+		echo $this->model->getConcept($solrDocument['uuid'][0])->toRDF()->saveXml();
 	}
 
 	public function putAction() {
