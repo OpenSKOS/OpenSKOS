@@ -225,13 +225,13 @@ class OpenSKOS_Rdf_Parser implements Countable
         $openskosStatusNodes = $xpath->query('openskos:status', $Description);
 		if ($openskosStatusNodes->length > 0) {
             $autoExtraData['status'] = $openskosStatusNodes->item(0)->nodeValue;
-        } else if ($dateAcceptedNodes->length > 0) {
-			$autoExtraData['status'] = OpenSKOS_Concept_Status::APPROVED;
-		} else if ($dateSubmittedNodes->length > 0) {
-			$autoExtraData['status'] = OpenSKOS_Concept_Status::CANDIDATE;
-		} else if ( ! empty($fallbackStatus)) {
+        } elseif (!empty($fallbackStatus)) {
 			$autoExtraData['status'] = $fallbackStatus;
-		}
+		} elseif ($collection !== null && !$collection->getTenant()['enableStatusesSystem']) {
+            $autoExtraData['status'] = OpenSKOS_Concept_Status::APPROVED;
+        } else {
+            $autoExtraData['status'] = OpenSKOS_Concept_Status::CANDIDATE;
+        }
 		
 		// Merges the incoming extra data with the auto detected extra data.
 		$extradata = array_merge($autoExtraData, $extradata);
@@ -498,7 +498,14 @@ class OpenSKOS_Rdf_Parser implements Countable
 				$data['status'] = (string)$this->getOpt('status');
 			}
 			
-			$document = self::DomNode2SolrDocument($Description, $data, $xpath, (string)$this->getOpt('status'));
+			$document = self::DomNode2SolrDocument(
+                $Description,
+                $data,
+                $xpath,
+                (string)$this->getOpt('status'),
+                false,
+                $this->_collection
+            );
 			
 			if ($document) {                
 				$class = $document->offsetGet('class');
