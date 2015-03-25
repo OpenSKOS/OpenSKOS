@@ -21,6 +21,7 @@
 ?>
 <?php
 $exampleWordAutocomplete = 'dood';
+$exampleConceptStatus = OpenSKOS_Concept_Status::APPROVED;
 $exampleWordFindConcepts = $exampleWordAutocomplete;
 $exampleWordFindConceptsAltLabel = 'kruisigingen';
 $exampleWordFindConceptsAltLabelTruncated = 'kr*';
@@ -141,6 +142,14 @@ You can do this by querying the find API with the selected label, for example if
 	<li>
 		<p>Advanced queries:</p>
 		<ul>
+            <li>
+				Search for concepts with specific status "<em><?php echo $exampleConceptStatus?></em>":
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>
+					</a>
+                <br />
+                All possible statuses are: <?= implode(', ', array_diff(OpenSKOS_Concept_Status::getStatuses(), [OpenSKOS_Concept_Status::DELETED]))?>
+			</li>
 			<li>
 				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
 					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
