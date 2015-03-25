@@ -104,7 +104,9 @@ class Api_ConceptController extends Api_FindConceptsController {
 				$solrDocument->offsetSet('toBeChecked', $concept['toBeChecked']);
 			}
 		}
-                
+        
+        $this->validatePrefLabel($solrDocument);
+        
 		if($this->getRequest()->getActionName() == 'put') {
 			if (!$concept) {
 				throw new Zend_Controller_Action_Exception('Concept `'.$solrDocument['uri'][0].'` does not exists, try POST-ing it to create it as a new concept.', 404);
@@ -128,7 +130,7 @@ class Api_ConceptController extends Api_FindConceptsController {
 			'id' => $solrDocument['uuid'][0]
 		), 'rest', true);
 		
-		
+        
 		$this->getResponse()
 			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
 			->setHeader('Location', $location)
@@ -223,5 +225,40 @@ class Api_ConceptController extends Api_FindConceptsController {
 		
 		return $user;
 	}
+    
+    /**
+     * Validates pref label for saving concept.
+     * @param OpenSKOS_Solr_Document $solrDocument
+     * @throws Zend_Controller_Action_Exception
+     */
+    protected function validatePrefLabel(OpenSKOS_Solr_Document $solrDocument)
+    {
+        $prefLabelValidator = Editor_Models_ConceptValidator_UniquePrefLabelInScheme::factory();
+        $isUniquePrefLabel = $prefLabelValidator->isValid($this->docToEditorConcept($solrDocument), []);
+        
+        if (!$isUniquePrefLabel) {
+            throw new Zend_Controller_Action_Exception($prefLabelValidator->getError()->getMessage(), 409);
+        }
+    }
+    
+    /**
+     * Transforms sold doc to the editor model concept.
+     * May be used to refactor all the code. But may miss some things.
+     * @param OpenSKOS_Solr_Document $solrDocument
+     * @return \Editor_Models_Concept\
+     */
+    protected function docToEditorConcept(OpenSKOS_Solr_Document $solrDocument)
+    {
+        $data = $solrDocument->toArray();
+        if (!empty($data['tenant']) && is_array($data['tenant'])) {
+            $data['tenant'] = $data['tenant'][0];
+        }
+        
+        if (!empty($data['uuid']) && is_array($data['uuid'])) {
+            $data['uuid'] = $data['uuid'][0];
+        }
+        
+        return new Editor_Models_Concept(new Api_Models_Concept($data));
+    }
 }
 
