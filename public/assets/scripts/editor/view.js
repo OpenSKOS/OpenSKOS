@@ -203,6 +203,10 @@ var EditorView = new Class({
 		});
 		deleteBox.getElement('form').addEvent('submit', function (e) {e.stop(); new Element(e.target).send()});
 		deleteBox.getElement('form').getElement('[name=uuid]').set('value', uuid);
+        deleteBox.getElement('[name=cancelButton]').addEvent('click', function () {
+            SqueezeBox.close();
+        });
+        
 		SqueezeBox.open(deleteBox, {size: {x: 400, y: 250}, handler: 'adopt'});
 	},
 	showChangeStatusBox: function() {

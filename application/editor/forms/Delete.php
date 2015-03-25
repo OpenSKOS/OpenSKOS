@@ -42,8 +42,13 @@ class Editor_Forms_Delete extends Zend_Form
 	
 	protected function buildButtons()
 	{
+        $this->addElement('button', 'cancelButton', array(
+				'label' => 'Cancel',
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-delete-action', 'openOnly' => true)))
+		));
 		$this->addElement('submit', 'deleteButton', array(
-				'label' => 'Delete'
+				'label' => 'Delete',
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
 		));
 		return $this;
 	}
