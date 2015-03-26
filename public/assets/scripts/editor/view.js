@@ -230,7 +230,7 @@ var EditorView = new Class({
 			changeStatusBox.getElement('form').hide();
 			changeStatusBox.getElement('.loading').show();
 		});
-		this.showActionModal(changeStatusBox, {size: {x: 300, y: 180}});
+		this.showActionModal(changeStatusBox, {size: {x: 400, y: 250}});
 	},
 	showCreateConfirmationBox: function(doExist) {
 		var confirmationBox = $('create-confirmation-box').clone();
