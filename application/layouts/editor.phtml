@@ -51,7 +51,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 			}
 		</script>
         
-		<?php $scriptsVersion = 6; // Change that if the scripts are changed.?>
+		<?php $scriptsVersion = 7; // Change that if the scripts are changed.?>
                 
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
@@ -87,7 +87,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 	    ?>
 	</head>
 	<body>
-		<div id="wrapper">
+		<div id="wrapper" class="<?= $controller?>">
 		    <div id="header">
 		        <?php echo $this->render('editor_breadcrumbs.phtml');?>
 		        <div id="login_data">

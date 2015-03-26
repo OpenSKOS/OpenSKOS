@@ -92,10 +92,12 @@
 </div>
 
 <?php if ($this->collection->id):?>
-<p>You can share this information via the OpenSKOS API:</p>
-<ul>
-	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.rdf">in RDF</a></li>
-	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.html">in HTML</a></li>
-	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.json">in JSON</a></li>
-</ul>
+<div class="share-collection">
+    <p>You can share this information via the OpenSKOS API:</p>
+    <ul>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.rdf">in RDF</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.html">in HTML</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.json">in JSON</a></li>
+    </ul>
+</div>
 <?php endif?>
