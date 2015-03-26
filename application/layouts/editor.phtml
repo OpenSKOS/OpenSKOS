@@ -87,7 +87,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 	    ?>
 	</head>
 	<body>
-		<div id="wrapper">
+		<div id="wrapper" class="<?= $controller?>">
 		    <div id="header">
 		        <?php echo $this->render('editor_breadcrumbs.phtml');?>
 		        <div id="login_data">

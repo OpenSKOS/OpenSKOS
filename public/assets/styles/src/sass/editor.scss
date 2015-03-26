@@ -94,6 +94,12 @@ div#footer {
 	};
 }
 
+div#wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
 div#header {
 	background: url('../images/header-background.png') repeat-x left top;
 	margin: 0px;
@@ -190,25 +196,60 @@ div#header {
 }
 
 div#content {
-	background: #FFF;
+    background: #FFF;
+    position: absolute;
+    top: 90px;
+    bottom: 30px;
+    left: 0px;
+    right: 0px;
+    overflow-y: scroll;
+}
+
+#wrapper.index {    
+    #central-panel {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        left: 300px;  
+        right: 300px;
+        overflow: auto;
+        min-width: 200px;
+    }
+}
+
+#left-panel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    width: 300px;  
+    border-right: 1px solid #bababa;
+    #left-panel-resizer {
+        position: absolute;
+        cursor: e-resize;
+        width: 9px;
+        top: 0px;
+        bottom: 0px;
+        right: -5px;
+        z-index: 2;
+    };
+}
+
+#right-panel {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 300px !important;
+    background: #FFF;
+    border-left: 1px solid #bababa;
+    overflow: auto;
 }
 
 #left-panel,
 #central-panel,
 #right-panel {
 	border-top: 1px solid $main-borders-color;
-}
-
-#left-panel {
-	float: left;
-	width: 300px;
-	height: 100%;
-	border-right: 1px solid $main-borders-color;
-	#left-panel-resizer {
-		position: absolute;
-		cursor: e-resize;
-		width: 9px;
-	};
 }
 
 #left-top-panel, #AdvancedSearchOptions {
@@ -229,6 +270,7 @@ div#content {
 		top: solid 1px #fff;
 		bottom: solid 1px #b8b8b8;
 	};
+    height: 232px;
 	.inner-panel {
 		padding: 13px 20px 20px 20px;
 	};
@@ -288,6 +330,11 @@ div#content {
 
 #left-bottom-panel {
 	overflow-y: scroll;
+    position: absolute;
+    top: 234px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
 	h2 {
 		margin: 0 0 7px 0;
 		font-size: 1em;
@@ -300,17 +347,13 @@ div#content {
 	};
 }
 
-#central-panel {
-	float: left;
-	overflow: auto;
-}
-
-#right-panel {
-	float: right;
-	width: 300px !important;
-	background: #FFF;
-	border-left: 1px solid $main-borders-color;
-	overflow: auto;
+#left-panel.no-profile {
+    #left-top-panel {
+        height: 200px;
+    }
+    #left-bottom-panel {
+        top: 202px;
+    }
 }
 
 .inner-panel {
