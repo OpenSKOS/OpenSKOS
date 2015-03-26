@@ -21,7 +21,10 @@
 ?>
 
 <div id="change-status-box" class="change-status-box">
-    <h2><?php  echo $this->translate('Change status'); ?> </h2>
+    <h2><?php  echo $this->translate('Change status for all concepts in selection'); ?> </h2>
 	<?php echo $this->changeStatusForm;?>
+    <div class="error">
+        <?php  echo $this->translate('Use with caution! This action may change statuses for which the tranisiton is not allowed. For example you can update "approved" concept to be "deleted".'); ?>
+    </div>
 	<div class="loading do-not-show"><?php  echo $this->translate('Loading...'); ?></div>
 </div>
