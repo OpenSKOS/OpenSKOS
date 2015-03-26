@@ -298,8 +298,10 @@ EditorSearch = new Class({
             if (searchDropdown) {
                 if (searchDropdown.getElements('option').length > 1) {
                         $('search-profile-selector').show();
+                        $('left-panel').removeClass('no-profile');
                 } else {
                         $('search-profile-selector').hide();
+                        $('left-panel').addClass('no-profile');
                 }
             }
         },

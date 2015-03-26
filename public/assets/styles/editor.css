@@ -111,6 +111,12 @@ div#footer div#copyright {
   margin-left: 10px;
 }
 
+div#wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 div#header {
   background: url("../images/header-background.png") repeat-x left top;
   margin: 0px;
@@ -200,24 +206,57 @@ div#header h1 span {
 
 div#content {
   background: #FFF;
+  position: absolute;
+  top: 90px;
+  bottom: 30px;
+  left: 0px;
+  right: 0px;
+  overflow-y: scroll;
 }
 
-#left-panel,
-#central-panel,
-#right-panel {
-  border-top: 1px solid #bababa;
+#wrapper.index #central-panel {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 300px;
+  right: 300px;
+  overflow: auto;
+  min-width: 200px;
 }
 
 #left-panel {
-  float: left;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
   width: 300px;
-  height: 100%;
   border-right: 1px solid #bababa;
 }
 #left-panel #left-panel-resizer {
   position: absolute;
   cursor: e-resize;
   width: 9px;
+  top: 0px;
+  bottom: 0px;
+  right: -5px;
+  z-index: 2;
+}
+
+#right-panel {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  width: 300px !important;
+  background: #FFF;
+  border-left: 1px solid #bababa;
+  overflow: auto;
+}
+
+#left-panel,
+#central-panel,
+#right-panel {
+  border-top: 1px solid #bababa;
 }
 
 #left-top-panel #conceptScheme-element,
@@ -235,6 +274,7 @@ div#content {
   background: url("../images/left-top-panel.png") #ebebeb no-repeat right bottom;
   border-top: solid 1px #fff;
   border-bottom: solid 1px #b8b8b8;
+  height: 232px;
 }
 #left-top-panel .inner-panel {
   padding: 13px 20px 20px 20px;
@@ -294,6 +334,11 @@ div#content {
 
 #left-bottom-panel {
   overflow-y: scroll;
+  position: absolute;
+  top: 234px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
 }
 #left-bottom-panel h2 {
   margin: 0 0 7px 0;
@@ -306,17 +351,11 @@ div#content {
   margin-top: 3px;
 }
 
-#central-panel {
-  float: left;
-  overflow: auto;
+#left-panel.no-profile #left-top-panel {
+  height: 200px;
 }
-
-#right-panel {
-  float: right;
-  width: 300px !important;
-  background: #FFF;
-  border-left: 1px solid #bababa;
-  overflow: auto;
+#left-panel.no-profile #left-bottom-panel {
+  top: 202px;
 }
 
 .template {
@@ -1975,5 +2014,9 @@ form#uploadicon dt#uploadButton-label {
   display: none;
 }
 form#uploadicon dd {
+  float: left;
+}
+
+.share-collection {
   float: left;
 }

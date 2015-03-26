@@ -18,72 +18,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 window.addEvent('domready', function() {
-	fitPanelHeights();
-	fitCentralPanelWidth();
 	if ($('left-panel')) {
 		makeLeftPanelResizable();
 	}
 });
-
-window.addEvent('resize', function() {
-	fitPanelHeights();
-	fitCentralPanelWidth();
-});
-
-function fitCentralPanelWidth() {
-	var totalWidth = $('content').getStyle('width').toInt();
-	
-	var leftPanelWidth = 0;
-	if ($('left-panel')) {
-		leftPanelWidth = $('left-panel').getStyle('width').toInt() + $('left-panel').getStyle('border-left').toInt() + $('left-panel').getStyle('border-right').toInt();
-	}
-	
-	var rightPanelWidth = 0;
-	if ($('right-panel')) {
-		$('right-panel').setStyle('overflow', 'hidden');
-		rightPanelWidth = $('right-panel').getStyle('width').toInt() + $('right-panel').getStyle('border-left').toInt() + $('right-panel').getStyle('border-right').toInt();
-		$('right-panel').setStyle('overflow', 'auto');
-	}
-	
-	if ($('central-panel')) {
-		$('central-panel').setStyles({width: totalWidth - leftPanelWidth - rightPanelWidth - 2}); // - 2 to take care of differences in rounding after zooming.
-	}
-}
-
-function fitPanelHeights() {
-	var totalHeight = window.getSize().y;
-	
-	var headerHeight = 0;
-	if ($('header')) {
-		headerHeight = $('header').getSize().y;
-	}
-	
-	var footerHeight = 0;
-	if ($('footer')) {
-		footerHeight = $('footer').getSize().y;
-	}
-	
-	var leftTopPanelHeight = 0;
-	if ($('left-top-panel')) {
-		leftTopPanelHeight = $('left-top-panel').getSize().y;
-	}
-	
-	if ($('left-bottom-panel')) {
-		$('left-bottom-panel').setStyles({height: totalHeight - headerHeight - footerHeight - leftTopPanelHeight});
-	}
-	
-	if ($('central-panel')) {
-		$('central-panel').setStyles({height: totalHeight - headerHeight - footerHeight});
-	}
-	
-	if ($('left-panel-resizer')) {
-		$('left-panel-resizer').setStyles({height: totalHeight - headerHeight - footerHeight});
-	}
-	
-	if ($('right-panel')) {
-		$('right-panel').setStyles({height: totalHeight - headerHeight - footerHeight});
-	}
-}
 
 /**
  * Hold some global variables for the panel resizing.
@@ -102,11 +40,14 @@ function makeLeftPanelResizable()
 {
 	currentLeftPanelWidth = $('left-panel').getStyle('width').toInt();
 	currentLeftPanelHeight = $('left-panel').getStyle('height').toInt();
-	
-	var leftPanelCursorOffset = Math.floor($('left-panel-resizer').getStyle('width').toInt() / 2);
-	$('left-panel-resizer').setStyle('left', currentLeftPanelWidth - leftPanelCursorOffset);
-	
-	$('left-panel').makeResizable({handle: $('left-panel-resizer'), limit: {x: [minLeftPanelWidth, maxLeftPanelWidth], y: [currentLeftPanelHeight, currentLeftPanelHeight]}});
+    
+	$('left-panel').makeResizable({
+        handle: $('left-panel-resizer'),
+        limit: {
+            x: [minLeftPanelWidth, maxLeftPanelWidth],
+            y: [currentLeftPanelHeight, currentLeftPanelHeight]
+        }
+    });
 	
 	// This is needed because of bug in IE8 and IE7
 	var subConceptsOffset = 10;
@@ -128,7 +69,8 @@ function makeLeftPanelResizable()
 	}
 	
 	$('left-panel').addEvent('resize', function (e) {
-		
+		$('left-panel').setStyles({height: 'auto'});
+        
 		var newWidth = $('left-panel').getStyle('width').toInt();
 		var additonalWitdh = newWidth - currentLeftPanelWidth;
 		
@@ -137,10 +79,7 @@ function makeLeftPanelResizable()
 			return false;
 		}
 		
-		$('left-panel-resizer').setStyle('left', newWidth - leftPanelCursorOffset);
-		
-		fitCentralPanelWidth();
-		fitPanelHeights();
+        $('central-panel').setStyle('left', newWidth);
 		
 		$('left-panel').getElements('.concept-link-content').each(function (el) {
 			el.setStyle('width', initialConceptLinkContentWidth + newWidth - initialLeftColumnWidth - (el.getParents('ul.narrower-relations').length * subConceptsOffset));
