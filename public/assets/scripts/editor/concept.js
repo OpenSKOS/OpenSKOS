@@ -544,7 +544,7 @@ var EditorConcept = new Class({
 			data: {uuid: conceptSchemeUuid},
 			onSuccess: function(result, text) {
 				var baseUriEl = $('concept-edit-form').getElement('#baseUri');
-				if (! baseUriEl.getElement('option[value="' + result.result + '"]')) {
+				if (baseUriEl && ! baseUriEl.getElement('option[value="' + result.result + '"]')) {
 					$('concept-edit-form').getElement('#baseUri').adopt(
 						new Element('option', {'value': result.result, 'text': result.result})
 					);
