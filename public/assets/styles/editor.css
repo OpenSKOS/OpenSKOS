@@ -2016,3 +2016,7 @@ form#uploadicon dt#uploadButton-label {
 form#uploadicon dd {
   float: left;
 }
+
+.share-collection {
+  float: left;
+}
