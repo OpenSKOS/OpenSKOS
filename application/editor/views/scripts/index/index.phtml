@@ -104,7 +104,7 @@
 					<button class="action-clear-selection delete" href="#"><?php echo $this->translate('Clear selection'); ?></button>
 					<button class="export-selection export" href="#"><?php echo $this->translate('Export'); ?></button>
 					<button class="add-relation selection relate" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></button>
-					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')
+					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'bulk-status-edit')
                             && OpenSKOS_Db_Table_Tenants::fromIdentity()['enableStatusesSystem']): ?>
 						<button class="change-status" href="#" title="<?php echo $this->escape($this->translate('Change status'))?>"><span><?php echo $this->translate('Change status')?></span></button>
 					<?php endif?>
@@ -122,7 +122,7 @@
 					<button class="action-clear-selection delete" href="#"><?php echo $this->translate('Clear selection'); ?></button>
 					<button class="export-selection export" href="#"><?php echo $this->translate('Export'); ?></button>
 					<button class="add-relation selection relate" href="#" title="<?php echo $this->escape($this->translate('Relate to current concept'))?>"><span><?php echo $this->translate('Relate')?></span></button>
-					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')
+					<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'bulk-status-edit')
                             && OpenSKOS_Db_Table_Tenants::fromIdentity()['enableStatusesSystem']): ?>
 						<button class="change-status" href="#" title="<?php echo $this->escape($this->translate('Change status'))?>"><span><?php echo $this->translate('Change status')?></span></button>
 					<?php endif?>
