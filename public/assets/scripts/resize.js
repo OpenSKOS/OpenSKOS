@@ -40,11 +40,14 @@ function makeLeftPanelResizable()
 {
 	currentLeftPanelWidth = $('left-panel').getStyle('width').toInt();
 	currentLeftPanelHeight = $('left-panel').getStyle('height').toInt();
-	
-	var leftPanelCursorOffset = Math.floor($('left-panel-resizer').getStyle('width').toInt() / 2);
-	$('left-panel-resizer').setStyle('left', currentLeftPanelWidth - leftPanelCursorOffset);
-	
-	$('left-panel').makeResizable({handle: $('left-panel-resizer'), limit: {x: [minLeftPanelWidth, maxLeftPanelWidth], y: [currentLeftPanelHeight, currentLeftPanelHeight]}});
+    
+	$('left-panel').makeResizable({
+        handle: $('left-panel-resizer'),
+        limit: {
+            x: [minLeftPanelWidth, maxLeftPanelWidth],
+            y: [currentLeftPanelHeight, currentLeftPanelHeight]
+        }
+    });
 	
 	// This is needed because of bug in IE8 and IE7
 	var subConceptsOffset = 10;
@@ -66,7 +69,8 @@ function makeLeftPanelResizable()
 	}
 	
 	$('left-panel').addEvent('resize', function (e) {
-		
+		$('left-panel').setStyles({height: 'auto'});
+        
 		var newWidth = $('left-panel').getStyle('width').toInt();
 		var additonalWitdh = newWidth - currentLeftPanelWidth;
 		
@@ -75,10 +79,7 @@ function makeLeftPanelResizable()
 			return false;
 		}
 		
-		$('left-panel-resizer').setStyle('left', newWidth - leftPanelCursorOffset);
-		
-		fitCentralPanelWidth();
-		fitPanelHeights();
+        $('central-panel').setStyle('left', newWidth);
 		
 		$('left-panel').getElements('.concept-link-content').each(function (el) {
 			el.setStyle('width', initialConceptLinkContentWidth + newWidth - initialLeftColumnWidth - (el.getParents('ul.narrower-relations').length * subConceptsOffset));
