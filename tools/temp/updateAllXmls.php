@@ -38,7 +38,7 @@ do {
     echo "Get {$rows} concepts starting from {$start}. \n";
     
     $apiModel->setQueryParam('start', $start);
-    $response  = $apiModel->getConcepts('*:*', true);
+    $response  = $apiModel->getConcepts('-xmlns:openskos AND class:Concept', true);
 
     if (isset($response['response']['docs'])) {
         foreach ($response['response']['docs'] as $doc) {
