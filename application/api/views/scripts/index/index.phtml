@@ -226,7 +226,7 @@ All actions except the Retrieve action require a valid API key.</p>
 	<li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
 	<li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
 	<li><strong>key</strong> A valid API key</li>
-	<li><strong>autoGenerateUri</strong> If set to true the concept uri (rdf:about) will be automatically generated. Else rdf:about is required.</li>
+	<li><strong>autoGenerateUri</strong> If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated. Else rdf:about is required.</li>
 </ul>
 
 <p>For your convenience, it is also possible to send the tenant, collection and key in the XML document, by setting the appropriate attributes in the openskos namespace.</p>
@@ -236,7 +236,7 @@ All actions except the Retrieve action require a valid API key.</p>
 	->captureStart()?>
 <rdf:RDF 
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-  xmlns:openskos="http://openskos.org/xmlns/openskos.xsd"
+  xmlns:openskos="http://openskos.org/xmlns#"
   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
   openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
   <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
