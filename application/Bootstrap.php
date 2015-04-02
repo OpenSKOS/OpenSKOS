@@ -38,6 +38,22 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 		);
 		$front->getRouter()->addRoute('rest', $restRoute);
 	}
+    
+    protected function _initXmlnsRoute()
+	{
+		$this->bootstrap('frontController');
+		$this->getResource('FrontController')->getRouter()->addRoute(
+            'xmlns',
+            new Zend_Controller_Router_Route(
+                'xmlns',
+                [
+                    'module' => 'api',
+                    'controller' => 'xmlns',
+                    'action' => 'index'
+                ]
+            )
+        );
+	}
 	
 	public function _initActionHelpers()
 	{
