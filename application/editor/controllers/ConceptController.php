@@ -567,7 +567,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                         $otherConceptUpdateData['altLabel@' . $lang] = array_unique(array_merge($existingAltLabels, $newAltLabels));
                     }
                     
-                    $otherConcept->update($otherConceptUpdateData);
+                    $otherConcept->update(
+                        $otherConceptUpdateData,
+                        [
+                            'modified_by' => $this->getCurrentUser()->id,
+                            'modified_timestamp' => date("Y-m-d\TH:i:s\Z")
+                        ],
+                        true,
+                        true
+                    );
                 }
             }
         }
