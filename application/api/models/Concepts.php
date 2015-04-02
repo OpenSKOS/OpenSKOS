@@ -107,7 +107,7 @@ class Api_Models_Concepts
 	protected function _getLabelReturnField()
 	{
 		$labelReturnField = 'LexicalLabels';
-		if (null !== ($labelField = $this->getQueryParam('returnLabel'))) {
+		if (null !== ($labelField = $this->getQueryParam('returnLabel', 'prefLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
 				$labelReturnField = $labelField;
 			}
@@ -121,24 +121,24 @@ class Api_Models_Concepts
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
-		$labelSearchField = 'LexicalLabelsText';
+		$labelSearchField = 'LexicalLabelsAutocomplete';
 		$labelReturnField = $this->_getLabelReturnField();
 		
-		if (null !== ($labelField = $this->getQueryParam('searchLabel'))) {
+		if (null !== ($labelField = $this->getQueryParam('searchLabel', 'prefLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
-				$labelSearchField = $labelField.'Text';
+				$labelSearchField = $labelField.'Autocomplete';
 			}
 		}
 		
 		$labelSearchField .= null===$lang?'':'@'.$lang;
 		
-		$q = "{$labelSearchField}:{$label}*";
+		$q = "{$labelSearchField}:{$label}";
 		
 		//only return non-deleted items:
 		if (false === $includeDeleted) {
 		    $q = "($q) AND deleted:false";
 		}
-				
+        
 		$params = array(
 			'facet' => 'true',
 			'facet.field' => $labelReturnField,
