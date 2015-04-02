@@ -65,6 +65,11 @@ class Api_ConceptController extends Api_FindConceptsController {
 			'tenant' => $tenant->code,
 			'collection' => $collection->id
 		);
+        
+        $autoGenerateUri = filter_var(
+            $this->getRequest()->getParam('autoGenerateUri', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
 		
 		try {
 			$solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument(
@@ -72,7 +77,7 @@ class Api_ConceptController extends Api_FindConceptsController {
                 $data,
                 null,
                 '',
-                $this->getRequest()->getParam('autoGenerateUri', false),
+                $autoGenerateUri,
                 $collection
             );
 		} catch (OpenSKOS_Rdf_Parser_Exception $e) {
