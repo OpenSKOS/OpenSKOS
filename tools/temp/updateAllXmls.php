@@ -30,14 +30,12 @@ $conceptsCounter = 0;
 
 $apiModel = Api_Models_Concepts::factory();
 
-$start = 0;
 $rows = 100;
 
 $apiModel->setQueryParam('rows', $rows);
 do {
-    echo "Get {$rows} concepts starting from {$start}. \n";
+    echo "Get {$rows} concepts. \n";
     
-    $apiModel->setQueryParam('start', $start);
     $response  = $apiModel->getConcepts('-xmlns:openskos AND class:Concept', true);
 
     if (isset($response['response']['docs'])) {
@@ -48,8 +46,6 @@ do {
             echo $concept['uuid'] . "\n";
         }
     }
-    
-    $start += $rows;
 } while (count($response['response']['docs']) > 0);
 
 echo $conceptsCounter . ' concepts were updated.' . "\n";
