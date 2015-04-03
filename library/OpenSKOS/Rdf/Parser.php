@@ -38,7 +38,8 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'status=s' => 'The status to use for concepts (candidate,approved,redirected,not_compliant,rejected,obsolete,deleted)',
 		'ignoreIncomingStatus' => 'To ignore or not the concept status which comes from the import file',
 		'toBeChecked' => 'Sets the toBeCheked status to TRUE',
-		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation.',
+		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).',
+		'useUriAsIdentifier' => 'Use uri as identifier if concept notation does not exist in the importing concept.',
 	);
 	
 	static $namespaces = array(
@@ -485,7 +486,15 @@ class OpenSKOS_Rdf_Parser implements Countable
             
 			// Check if document with same notation already exists.
 			$notationNodes = $xpath->query('skos:notation', $Description);
-			if (!$this->handleUniqueNotation($data, $notationNodes, $notationsCheck)) {
+            $notation = null;
+            if ($notationNodes->length > 0) {
+                $notation = $notationNodes->item(0)->nodeValue;
+            } elseif ($this->getOpt('useUriAsIdentifier')) {
+                $uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+                $this->handleUriAsIdentifier($data, $notation, $uri, $notationsCheck);
+            }
+                        
+			if (!$this->handleUniqueNotation($data, $notation, $notationsCheck)) {
                 continue;
             }
 			
@@ -961,39 +970,59 @@ class OpenSKOS_Rdf_Parser implements Countable
         
 		return $canInsertDocument;
 	}
-	
+    
     /**
 	 * Validate if the concept has unique notation.
      * If not - checks if it should be perged. If not adds it to the _notImportedNotations and return false.
 	 * 
-     * @param array $data
-     * @param DOMNodeList $notationNodes
+     * @param array &$data
+     * @param string $notation
      * @param array $notationsCheck
      * @return boolean If the document can be inserted
      */
-	protected function handleUniqueNotation(array &$data, DOMNodeList $notationNodes, array $notationsCheck)
+	protected function handleUniqueNotation(array &$data, $notation, array $notationsCheck)
 	{
         $canInsertDocument = true;
         
-		if ($notationNodes->length > 0) {
-            $notation = $notationNodes->item(0)->nodeValue;
-            if (isset($notationsCheck[$notation])) {
-                if ($this->getOpt('onlyNewConcepts')) {
-                    $this->_notImportedNotations[] = $notation;
-                    $canInsertDocument = false;
-                } else {
-                    $existingConcept = Api_Models_Concepts::factory()->getConcept(
-                        $notationsCheck[$notation]
-                    );
+        if (isset($notationsCheck[$notation])) {
+            if ($this->getOpt('onlyNewConcepts')) {
+                $this->_notImportedNotations[] = $notation;
+                $canInsertDocument = false;
+            } else {
+                $existingConcept = Api_Models_Concepts::factory()->getConcept(
+                    $notationsCheck[$notation]['uuid']
+                );
 
-                    $existingConcept->purge();
+                $existingConcept->purge();
 
-                    $data['uuid'] = $existingConcept['uuid'];
-                }
+                $data['uuid'] = $existingConcept['uuid'];
             }
         }
         
         return $canInsertDocument;
+	}
+	
+    /**
+	 * Uses concept uri as identifier
+     * 
+     * @param array &$data
+     * @param string &$notationOutput
+     * @param string $uri
+     * @param array $notationsCheck
+     * @return boolean If the document can be inserted
+     */
+	protected function handleUriAsIdentifier(array &$data, &$notationOutput, $uri, array $notationsCheck)
+	{
+        if (!empty($uri)) {
+            foreach ($notationsCheck as $notation => $existingConcept) {
+                if (strcasecmp($uri, $existingConcept['uri']) === 0) {
+                    $data['notation'] = $notation;
+                    $notationOutput = $notation;
+                    $data['uuid'] = $existingConcept['uuid'];
+                    break;
+                }
+            }
+        }
 	}
     
     /**
@@ -1009,9 +1038,15 @@ class OpenSKOS_Rdf_Parser implements Countable
             . 'AND collection:' . $this->getCollection()->id;
         
 		$notationsCount = $this->_solr()->limit(0)->search($notationsCheckQuery);
-		$existingNotations = $this->_solr()->limit($notationsCount['response']['numFound'])->search($notationsCheckQuery, array('fl' => 'notation, uuid'));
+		$existingNotations = $this->_solr()
+            ->limit($notationsCount['response']['numFound'])
+            ->search($notationsCheckQuery, array('fl' => 'notation, uuid, uri'));
+        
 		foreach ($existingNotations['response']['docs'] as $doc) {
-			$notationsCheck[$doc['notation'][0]] = $doc['uuid'];
+			$notationsCheck[$doc['notation'][0]] = [
+                'uuid' => $doc['uuid'],
+                'uri' => (isset($doc['uri']) ? $doc['uri'] : null)
+            ];
 		}
         
         return $notationsCheck;
