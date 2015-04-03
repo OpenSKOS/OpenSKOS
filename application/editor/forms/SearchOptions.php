@@ -526,10 +526,11 @@ class Editor_Forms_SearchOptions extends Zend_Form
 		$options['labels']['hiddenLabel'] = _('hidden');
 	
 		$options['statuses']['none'] = _('none');
+        $statuses = array_diff(OpenSKOS_Concept_Status::getStatuses(), [OpenSKOS_Concept_Status::DELETED]);
         foreach (OpenSKOS_Concept_Status::getStatuses() as $status) {
             $options['statuses'][$status] = _($status);
         }
-		
+        
 		$options['docproperties']['definition'] = _('definition');
 		$options['docproperties']['example'] = _('example');
 		$options['docproperties']['changeNote'] = _('change note');
