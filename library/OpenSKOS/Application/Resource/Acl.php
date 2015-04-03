@@ -47,14 +47,13 @@ class OpenSKOS_Application_Resource_Acl extends Zend_Application_Resource_Resour
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_USER, 'editor', 'view');
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_USER, 'editor.concepts', 'view');
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_EDITOR, 'editor.concepts', array('propose'));
-    	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.concepts',  array('full-create', 'edit', 'delete'));
+    	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.concepts',  array('full-create', 'edit', 'delete', 'bulk-status-edit'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.concept-schemes', array('index', 'create', 'edit', 'delete', 'manage-icons'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.institution',  null);
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.collections',  array('index', 'manage'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.users',  array('index', 'manage'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.jobs',  array('index', 'manage'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR, 'editor.manage-search-profiles', null);
-    	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ROOT, 'editor.concepts',  array('bulk-status-edit'));
     	$acl->allow(OpenSKOS_Db_Table_Users::USER_ROLE_ROOT, 'editor.delete-all-concepts-in-collection', null);
     	
 		Zend_Registry::set(self::REGISTRY_KEY, $acl);
