@@ -223,7 +223,10 @@ switch ($action) {
                         if ((bool)$job->getParam('onlyNewConcepts')) {
 							$arguments[] = '--onlyNewConcepts';
 						}
-							
+                        if ((bool)$job->getParam('useUriAsIdentifier')) {
+							$arguments[] = '--useUriAsIdentifier';
+						}
+                        
 						$arguments[] = '--commit';
                         
 						$duplicateConceptSchemes = array();

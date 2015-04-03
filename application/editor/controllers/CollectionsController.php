@@ -143,7 +143,8 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
  				'lang' => $formData['lang'],
  				'toBeChecked' => (int)$formData['toBeChecked'] == 1,
 	 			'purge' => (int)$formData['purge'] == 1,
-	 			'onlyNewConcepts' => (int)$formData['onlyNewConcepts'] == 1
+	 			'onlyNewConcepts' => (int)$formData['onlyNewConcepts'] == 1,
+	 			'useUriAsIdentifier' => (int)$formData['useUriAsIdentifier'] == 1
 	 		);
 	 		$job = $model->fetchNew()->setFromArray(array(
 	 			'collection' => $collection->id,
