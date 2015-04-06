@@ -148,7 +148,16 @@ You can do this by querying the find API with the selected label, for example if
 						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>
 					</a>
                 <br />
-                All possible statuses are: <?= implode(', ', array_diff(OpenSKOS_Concept_Status::getStatuses(), [OpenSKOS_Concept_Status::DELETED]))?>
+                All possible statuses are: 
+                <table>
+                    <tr><td>candidate</td><td>A newly added concept</td></tr>
+                    <tr><td>approved</td><td>Candidate that was inspected and approved</td></tr>
+                    <tr><td>redirected</td><td>Proposed concept was found to be better represented by another concept. The redirected concept will be maintained for convenience and will contain a forward note to the target concept.</td></tr>
+                    <tr><td>not_compliant</td><td>Concept is not compliant with the GTAA standard, but is maintained for convenience of the creator. It can become obsolete when no longer necessary.</td></tr>
+                    <tr><td>rejected</td><td>Substandard quality</td></tr>
+                    <tr><td>obsolete</td><td>This concept is no longer necessary, may be succeeded by another concept.</td></tr>
+                    <tr><td>deleted</td><td>All concept metadata is deleted.</td></tr>
+                </table>
 			</li>
 			<li>
 				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
