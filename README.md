@@ -5,7 +5,11 @@ your webserver. Make sure the "data/uploads" directory is writable for the webse
 For security reasons you can place this "data" directory outside your
 webserver's document root.
 
-1.1 Configuration
+1.1 Composer
+-------------------------------------------------------------------------------
+Run composer install to install some dependencies like zend framework 1.12
+
+1.2 Configuration
 -------------------------------------------------------------------------------
 To configure OpenSKOS you have to rename:
   APPROOT/application/configs/application.ini.dist
@@ -15,7 +19,7 @@ to
 Now you van edit the APPROOT/application/configs/application.ini
 You can have separate config settings for specific deployments. The 
 configuration section marked by the Environment Variable "APPLICATION_ENV" (see
-3.1 Setting Up Your VHOST). Most settings are self explanatory.
+2.1 Setting Up Your VHOST). Most settings are self explanatory.
 
 If you experience any problems you may want to modify settings in the config,
 to show you more verbose error messages:
@@ -24,7 +28,7 @@ resources.frontController.params.displayExceptions=1
 phpSettings.display_errors = 1
 
 
-1.1.1 OAI-PMH setup
+1.2.1 OAI-PMH setup
 -------------------------------------------------------------------------------
 OpenSKOS includes a OAI harvester. To configure OAI Service providers, use the
 "instances" part of the configuration. Two types of instances are supported:
@@ -48,21 +52,14 @@ instances.example1.set=SETSPEC
 You can define multiple instances by using a different key (in the above example
 the key "example1" is used").
 
-
-2. Zend Framework
-===============================================================================
-Download a 1.11 branch from http://framework.zend.com/ and make sure it is in 
-you php include path. You can do this by setting the "include_path" directive
-in your php.ini. 
-
-3. Webserver with PHP support
+2. Webserver with PHP support
 ===============================================================================
 You can install your favorite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
 adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html)
 
-3.1 Setting Up Your VHOST
+2.1 Setting Up Your VHOST
 -------------------------------------------------------------------------------
 
 The following is a sample VHOST you might want to consider for your project.
@@ -84,7 +81,7 @@ The following is a sample VHOST you might want to consider for your project.
 </VirtualHost>
 
 
-4. Database setup
+3. Database setup
 ===============================================================================
 Install your choice of Zend Framework supported Database engine (see
 http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
@@ -100,7 +97,7 @@ With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
 
 
-5. Apache Solr Setup
+4. Apache Solr Setup
 ===============================================================================
 You have to have a java VM installed prior to installing Solr!
 Download a 3.4 release of Apache Solr and extract it somewhere on your server:
@@ -114,7 +111,7 @@ You can now start Solr (in this example with 1.024Mb memory assigned):
 java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
 
 
-6. Data Ingest
+5. Data Ingest
 ===============================================================================
 Once you have the application running you can start adding data,
 managed in "collections".
@@ -123,7 +120,7 @@ You can create a collection in the dashboard.
 
 There are three ways to populate a collection:
 
-6.1 REST-interface
+5.1 REST-interface
 -------------------------------------------------------------------------------
 Send data via the REST-API, e.g. like this:
 
@@ -137,7 +134,7 @@ Also, you have to identify the tenant and provide the API key,
 which you assign to the user in the dashboard.
 
 
-6.2 Uploader
+5.2 Uploader
 -------------------------------------------------------------------------------
 Upload a dataset (a SKOS/RDF file) via a form in the dashboard:Manage collections.
 Here you can provide many concepts within one file (XPath: /rdf:RDF/rdf:Description)
@@ -149,7 +146,7 @@ The import job can be started with ./tools/jobs.php,
 a CLI script intended to be run with a Cron like task runner. 
 
 
-6.3 OAI ???
+5.3 OAI ???
 -------------------------------------------------------------------------------
 Third possiblity is to replicate an existing dataset via OAI-PMH, 
 either from other OpenSKOS-instances or from an external source providing SKOS-data.
