@@ -244,16 +244,18 @@ class OpenSKOS_Rdf_Parser implements Countable
             );
         }
         
-        // Status deleted equals soft deletion.
+        // Status deleted equals soft deletion and soft deleting equals status deleted.
         if (isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
             $extradata['deleted'] = true;
+        } elseif (isset($extradata['deleted']) && $extradata['deleted']) {
+            $extradata['status'] = OpenSKOS_Concept_Status::DELETED;
         }
         
 		// Set deleted timestamp if status is OBSOLETE(expired) and deleted timestamp is not already set.
         if (! isset($extradata['deleted_timestamp']) 
 				&& ((isset($extradata['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($extradata['status']))
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
-			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
+			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);
 		}
 		
 		// Fix empty values
@@ -291,7 +293,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 			throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:type');
 		    return;
 		}
-
         
 		$skosElements = $xpath->query('./skos:*', $Description);
 		foreach ($skosElements as $skosElement) {
@@ -324,7 +325,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 				}
 			}
 		}
-		
+        
 		foreach (array('dc', 'dcterms') as $ns) {
 			foreach ($xpath->query('./'.$ns.':*', $Description) as $element) {
 				$fieldname = str_replace($ns.':', 'dcterms_', $element->nodeName);
@@ -360,7 +361,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
         
         // Puts status in the Document
-        $document->addStatusToGeneratedXml();
+        $document->updateStatusInGeneratedXml();
         
 		//store namespaces:
 		$availableNamespaces = array();
