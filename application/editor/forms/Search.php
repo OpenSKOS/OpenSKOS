@@ -329,6 +329,12 @@ class Editor_Forms_Search extends Zend_Form
 
         if (!OpenSKOS_Db_Table_Tenants::fromIdentity()['enableStatusesSystem']) {
             $options['status'] = [];
+        } elseif (!empty($options['status'])) {
+            // We can not search for status deleted.
+            $options['status'] = array_diff(
+                $options['status'],
+                [OpenSKOS_Concept_Status::DELETED]
+            );
         }
         
         return $options;
