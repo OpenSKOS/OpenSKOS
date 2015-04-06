@@ -19,6 +19,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+include 'autoload.inc.php';
+
 require_once 'Zend/Console/Getopt.php';
 $opts = array(
 	'help|?' => 'Print this usage message',

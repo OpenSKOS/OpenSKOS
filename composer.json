@@ -1,5 +1,6 @@
 {
     "require": {
-        "league/oauth2-client": "0.9.*"
+        "league/oauth2-client": "0.9.*",
+        "zendframework/zendframework1": "1.*"
     }
 }
