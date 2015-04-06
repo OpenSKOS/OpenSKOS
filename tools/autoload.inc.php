@@ -14,22 +14,14 @@
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-include 'autoload.inc.php';
+// Define path to application directory
+defined('APPLICATION_PATH')
+    || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
 
-require_once dirname(__FILE__) . '/../library/OpenSKOS/Rdf/Parser.php';
-require_once 'Zend/Console/Getopt.php';
-
-$opts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
-
-try {
-	$parser = OpenSKOS_Rdf_Parser::factory($opts);
-	$parser->process();
-} catch (OpenSKOS_Rdf_Parser_Exception $e) {
-	fwrite(STDERR, $e->getMessage());
-	exit($e->getCode());
-}
+// Composer autoload
+require APPLICATION_PATH . '/../vendor/autoload.php';
