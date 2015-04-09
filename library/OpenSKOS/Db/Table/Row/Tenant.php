@@ -39,7 +39,7 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 				->addElement('text', 'postalCode', array('label' => _('Postal Code')))
 				->addElement('text', 'countryName', array('label' => _('Country Name')))
                 ->addElement('checkbox', 'enableStatusesSystem', array(
-                    'label' => _('Enable the statuses system for concepts. This allows having "candidate", "approved", "obsolete" and other concepts.'),
+                    'label' => _('Enable the statuses system for concepts. (check help below *)'),
                     'required' => false
                 ))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))

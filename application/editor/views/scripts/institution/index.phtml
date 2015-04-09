@@ -24,6 +24,22 @@
 <div>
 	<div id="collection-form">
 		<?php echo $this->tenant->getForm()?>
+        <div class="help">
+            <ul>
+                <li>
+                    <div class="field">Enable the statuses system for concepts:</div>
+                    <div class="help-text">
+                        <ul>
+                            <li>This allows having "candidate", "approved", "obsolete" and other concepts.</li>
+                            <li>Checking/unchecking the checkbox will not update any statuses of concepts.</li>
+                            <li>When <strong>unchecked</strong> all edited and created concepts get the status approved. All searches search for any status.</li>
+                            <li>When <strong>checked</strong> all options for statuses (in search and create/edit) will appear.</li>
+                            <li>Status "DELETED" and deleted concepts are not affected from this option.</li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
 	</div>
 	<div id="collection-stats" class="box">
 		<p><?php echo $this->translate('You can share this information via the OpenSKOS API')?>:</p>
