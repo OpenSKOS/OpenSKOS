@@ -755,7 +755,18 @@ legend {
 	.concept-link.status-candidate .concept-link-content a {
 		color: blue;
 	};
-	.concept-link.status-expired .concept-link-content a,
+    .concept-link.status-approved .concept-link-content a {
+		color: #6B1750;
+	};
+    .concept-link.status-redirected .concept-link-content a {
+		color: orange;
+	};
+    .concept-link.status-not_compliant .concept-link-content a {
+		color: gray;
+	};
+    .concept-link.status-rejected .concept-link-content a {
+		color: black;
+	};
 	.concept-link.status-obsolete .concept-link-content a {
 		color: red;
 	};
