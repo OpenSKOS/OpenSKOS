@@ -295,13 +295,23 @@ class Api_ConceptController extends Api_FindConceptsController {
             }
             $autoGenerateUri = true;
         } else {
-            if (!($uri && $notationNodes->length > 0)) {
+            // Is uri missing
+            if (!$uri) {
                 throw new Zend_Controller_Action_Exception(
-                    'Notation (skos:notation) and/or uri (rdf:about) are missing from the xml. You may consider using autoGenerateIdentifiers.',
+                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
                     400
                 );
             }
             
+            // Is notation missing
+            if ($notationNodes->length == 0) {
+                throw new Zend_Controller_Action_Exception(
+                    'Notation (skos:notation) is missing from the xml. You may consider using autoGenerateIdentifiers.',
+                    400
+                );
+            }
+            
+            // Is uri based on notation
             if (!OpenSKOS_Db_Table_Notations::isContainedInUri($uri, $notationNodes->item(0)->nodeValue)) {
                 throw new Zend_Controller_Action_Exception(
                     'The concept uri (rdf:about) must be based on notation (must contain the notation)',
