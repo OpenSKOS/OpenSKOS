@@ -235,7 +235,15 @@ All actions except the Retrieve action require a valid API key.</p>
 	<li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
 	<li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
 	<li><strong>key</strong> A valid API key</li>
-	<li><strong>autoGenerateUri</strong> If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated. Else rdf:about is required.</li>
+	<li>
+        <strong>autoGenerateIdentifiers</strong>
+        <br />
+        If set to <strong>true</strong> (any of "1", "true", "on" and "yes") the concept notation and uri (rdf:about) will be automatically generated.
+        <br />
+        If notation and/or uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+        <br />
+        If set to <strong>false</strong> - the xml must contain both notation and uri (rdf:about). The uri must be based on notation (must contain the notation).
+    </li>
 </ul>
 
 <p>For your convenience, it is also possible to send the tenant, collection and key in the XML document, by setting the appropriate attributes in the openskos namespace.</p>
@@ -278,7 +286,7 @@ $response = $client
     ->setParameterGet('tenant', 'beg')
     ->setParameterGet('collection', 'gtaa')
     ->setParameterGet('key', 'your-valid-api-key')
-    ->setParameterGet('autoGenerateUri', true)
+    ->setParameterGet('autoGenerateIdentifiers', true)
     ->request('POST');
 if ($response->isSuccessful()) {
     echo 'Concept created';
