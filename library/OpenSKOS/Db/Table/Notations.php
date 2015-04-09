@@ -66,4 +66,12 @@ class OpenSKOS_Db_Table_Notations extends Zend_Db_Table
 		$model = new self();
 		return $model->insert(array('notation' => $notation));
 	}
+    
+    public static function isContainedInUri($uri, $notation)
+    {
+        // Match the notation as "full word only" - to have any separator in front and back
+        $regex = '/(^|[^a-zA-Z\d]+)' . preg_quote($notation) . '($|[^a-zA-Z\d]+)/i';
+        
+        return preg_match($regex, $uri);
+    }
 }
