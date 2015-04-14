@@ -773,7 +773,18 @@ div#search-results ul.concepts-list .concept-link .uuid {
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-div#search-results ul.concepts-list .concept-link.status-expired .concept-link-content a,
+div#search-results ul.concepts-list .concept-link.status-approved .concept-link-content a {
+  color: #6B1750;
+}
+div#search-results ul.concepts-list .concept-link.status-redirected .concept-link-content a {
+  color: orange;
+}
+div#search-results ul.concepts-list .concept-link.status-not_compliant .concept-link-content a {
+  color: gray;
+}
+div#search-results ul.concepts-list .concept-link.status-rejected .concept-link-content a {
+  color: black;
+}
 div#search-results ul.concepts-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
@@ -1020,7 +1031,18 @@ ul#selection-list .concept-link .uuid {
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-ul#selection-list .concept-link.status-expired .concept-link-content a,
+ul#selection-list .concept-link.status-approved .concept-link-content a {
+  color: #6B1750;
+}
+ul#selection-list .concept-link.status-redirected .concept-link-content a {
+  color: orange;
+}
+ul#selection-list .concept-link.status-not_compliant .concept-link-content a {
+  color: gray;
+}
+ul#selection-list .concept-link.status-rejected .concept-link-content a {
+  color: black;
+}
 ul#selection-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
@@ -1267,7 +1289,18 @@ ul#history-list .concept-link .uuid {
 ul#history-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
-ul#history-list .concept-link.status-expired .concept-link-content a,
+ul#history-list .concept-link.status-approved .concept-link-content a {
+  color: #6B1750;
+}
+ul#history-list .concept-link.status-redirected .concept-link-content a {
+  color: orange;
+}
+ul#history-list .concept-link.status-not_compliant .concept-link-content a {
+  color: gray;
+}
+ul#history-list .concept-link.status-rejected .concept-link-content a {
+  color: black;
+}
 ul#history-list .concept-link.status-obsolete .concept-link-content a {
   color: red;
 }
