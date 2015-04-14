@@ -127,19 +127,23 @@ class Api_ConceptController extends Api_FindConceptsController {
 			throw new Zend_Controller_Action_Exception('Failed to save Concept `'.$solrDocument['uri'][0].'`: '.$e->getMessage(), 400);
 		}
 		
-		$location = $this->view->serverUrl() . $this->view->url(array(
-			'controller' => 'concept',
-			'action' => 'get',
-			'module' => 'api',
-			'id' => $solrDocument['uuid'][0]
-		), 'rest', true);
+		$this->getResponse()->setHeader('Content-Type', 'text/xml; charset="utf-8"', true);
+        
+        if ($this->getRequest()->getActionName() == 'post') {
+            $location = $this->view->serverUrl() . $this->view->url(array(
+                'controller' => 'concept',
+                'action' => 'get',
+                'module' => 'api',
+                'id' => $solrDocument['uuid'][0]
+            ), 'rest', true);
+            
+            $this->getResponse()
+                ->setHeader('Location', $location)
+                ->setHttpResponseCode(201);
+        } else {
+            $this->getResponse()->setHttpResponseCode(200);
+        }
 		
-        
-		$this->getResponse()
-			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
-			->setHeader('Location', $location)
-			->setHttpResponseCode(201);
-        
 		echo $this->model->getConcept($solrDocument['uuid'][0])->toRDF()->saveXml();
 	}
 
