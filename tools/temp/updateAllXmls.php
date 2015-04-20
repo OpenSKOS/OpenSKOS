@@ -61,8 +61,8 @@ do {
 
     if (isset($response['response']['docs'])) {
         foreach ($response['response']['docs'] as $doc) {
-            echo $concept['uuid'] . "\n";
             $concept = new Editor_Models_Concept(new Api_Models_Concept($doc));
+            echo $concept['uuid'] . "\n";
             $concept->update([], [], true, true);
             $conceptsCounter ++;
         }
