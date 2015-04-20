@@ -50,7 +50,7 @@ $mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
 // Concepts
 $conceptsCounter = 0;
 
-$response  = Api_Models_Concepts::factory()->getConcepts('status:' . OpenSKOS_Concept_Status::_EXPIRED);
+$response  = Api_Models_Concepts::factory()->getConcepts('status:' . OpenSKOS_Concept_Status::_EXPIRED, true);
 
 if (isset($response['response']['docs'])) {
     foreach ($response['response']['docs'] as $doc) {
