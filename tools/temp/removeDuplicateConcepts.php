@@ -75,7 +75,7 @@ do {
             echo 'Process: ' . $notation . ' with "' . $counts . '" duplicates' . "\n";
 
             $apiModel->setQueryParam('sort', 'modified_timestamp asc');
-            $response  = $apiModel->getConcepts('notation: ' . $notation);
+            $response = $apiModel->getConcepts('notation:"' . $notation . '"');
 
             $lastConcept = array_pop($response['response']['docs']);
             echo 'We keep: ' . $lastConcept['uuid'] . ' modified timestamp: "' . $lastConcept['modified_timestamp'] . '"' . "\n";
