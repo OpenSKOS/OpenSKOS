@@ -45,6 +45,7 @@ $autoloader = new OpenSKOS_Autoloader();
 $mainAutoloader = Zend_Loader_Autoloader::getInstance();
 $mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
 
+Zend_Session::start(true);
 
 // Concepts
 $deletedConceptsCounter = 0;
