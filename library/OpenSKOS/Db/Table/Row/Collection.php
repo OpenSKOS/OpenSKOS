@@ -318,7 +318,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	public function toRdf($withCreator = true)
 	{
 		$helper = new Zend_View_Helper_ServerUrl();
-		$about = $helper->serverUrl('/api/collection/'.$this->getId());
+		$about = $helper->serverUrl('/api/collections/'.$this->getId());
 		$data = array();
 		foreach ($this as $key => $val) {
 			$data[$key] = htmlspecialchars($val);
