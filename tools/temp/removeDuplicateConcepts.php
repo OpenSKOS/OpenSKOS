@@ -52,44 +52,63 @@ $deletedConceptsCounter = 0;
 $notationsCounter = 0;
 
 $apiModel = Api_Models_Concepts::factory();
-$solr = OpenSKOS_Solr::getInstance()->cleanCopy();
-$facetsCount = 0;
-do {
-    $facetsResponse = $solr
-        ->limit(0,0)
-        ->search(
-            'deleted:false',
-            [
-                'facet' => 'true',
-                'facet.field' => 'notation',
-                'facet.mincount' => 2
-            ]
-        );
+
+$solrTenant = OpenSKOS_Solr::getInstance()->cleanCopy();
+$facetsResponseTenant = $solrTenant
+    ->limit(0,0)
+    ->search(
+        '*:*',
+        [
+            'facet' => 'true',
+            'facet.field' => 'tenant',
+        ]
+    );
+
+
+$facetFieldsTenant = $facetsResponseTenant['facet_counts']['facet_fields'];
+
+foreach ($facetFieldsTenant['tenant'] as $tenant => $countsTenant) {
+
+    echo 'Processing tenant ' . $tenant . '.' . "\n";
     
-    $facetFields = $facetsResponse['facet_counts']['facet_fields'];
-    
-    if (!empty($facetFields['notation'])) {
-        foreach ($facetFields['notation'] as $notation => $counts) {
-            $notationsCounter ++;
-            
-            echo 'Process: ' . $notation . ' with "' . $counts . '" duplicates' . "\n";
+    $solrNotation = OpenSKOS_Solr::getInstance()->cleanCopy();
+    do {
+        $facetsResponseNotation = $solrNotation
+            ->limit(0,0)
+            ->search(
+                'deleted:false AND tenant:' . $tenant,
+                [
+                    'facet' => 'true',
+                    'facet.field' => 'notation',
+                    'facet.mincount' => 2
+                ]
+            );
 
-            $apiModel->setQueryParam('sort', 'modified_timestamp asc');
-            $response = $apiModel->getConcepts('notation:"' . $notation . '"');
+        $facetFieldsNotation = $facetsResponseNotation['facet_counts']['facet_fields'];
 
-            $lastConcept = array_pop($response['response']['docs']);
-            echo 'We keep: ' . $lastConcept['uuid'] . ' modified timestamp: "' . $lastConcept['modified_timestamp'] . '"' . "\n";
-            foreach ($response['response']['docs'] as $doc) {
-                $deleteConcept = new Editor_Models_Concept(new Api_Models_Concept($doc));
-                echo 'Mark as delete: ' . $deleteConcept['uuid'] . ' modified timestamp: "' . $deleteConcept['modified_timestamp'] . '"' . "\n";
+        if (!empty($facetFieldsNotation['notation'])) {
+            foreach ($facetFieldsNotation['notation'] as $notation => $countsNotation) {
+                $notationsCounter ++;
 
-                $deleteConcept->delete(true);
-                $deletedConceptsCounter ++;
+                echo 'Process: ' . $notation . ' with "' . $countsNotation . '" duplicates' . "\n";
+
+                $apiModel->setQueryParam('sort', 'modified_timestamp asc');
+                $response = $apiModel->getConcepts('notation:"' . $notation . '" AND tenant:"' . $tenant . '"');
+
+                $lastConcept = array_pop($response['response']['docs']);
+                echo 'We keep: ' . $lastConcept['uuid'] . ' modified timestamp: "' . $lastConcept['modified_timestamp'] . '"' . "\n";
+                foreach ($response['response']['docs'] as $doc) {
+                    $deleteConcept = new Editor_Models_Concept(new Api_Models_Concept($doc));
+                    echo 'Mark as delete: ' . $deleteConcept['uuid'] . ' modified timestamp: "' . $deleteConcept['modified_timestamp'] . '"' . "\n";
+
+                    $deleteConcept->delete(true);
+                    $deletedConceptsCounter ++;
+                }
             }
         }
-    }
-    
-} while (!empty($facetFields['notation']));
+
+    } while (!empty($facetFieldsNotation['notation']));
+}
 
 echo $notationsCounter . ' concepts with duplicates found.' . "\n";
 echo $deletedConceptsCounter . ' concepts were deleted.' . "\n";
