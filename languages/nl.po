@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: OpenSKOS Dutch translation\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-05-07 08:37+0100\n"
-"PO-Revision-Date: 2015-05-07 09:28+0100\n"
+"PO-Revision-Date: 2015-05-12 15:23+0100\n"
 "Last-Translator: David Thornley <d.thornley@picturae.nl>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "Language: nl_NL\n"
@@ -579,7 +579,7 @@ msgstr "kandidaat"
 
 #: ../languages/strings.php:5
 msgid "redirected"
-msgstr "doorgesturd"
+msgstr "doorgestuurd"
 
 #: ../languages/strings.php:6
 msgid "not_compliant"
