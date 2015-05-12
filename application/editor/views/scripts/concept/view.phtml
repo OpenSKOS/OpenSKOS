@@ -29,7 +29,7 @@
             <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']):?>
                 <div id="concept-status">
                     <span><?php echo $this->translate('Status:'); ?> </span>
-                    <?php echo (isset($this->currentConcept['status']) && ! empty($this->currentConcept['status']) ? $this->currentConcept['status'] : $this->translate('undefined')); ?>
+                    <?php echo (isset($this->currentConcept['status']) && ! empty($this->currentConcept['status']) ? $this->translate($this->currentConcept['status']) : $this->translate('undefined')); ?>
                 </div>
             <?php endif?>
 			<div id="concept-checked">
