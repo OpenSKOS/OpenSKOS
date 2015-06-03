@@ -159,6 +159,6 @@ class OpenSKOS_Concept_Status
      */
     public static function isStatusLikeDeleted($status)
     {
-        return in_array($status, [self::_EXPIRED, self::OBSOLETE, self::DELETED]);
+        return in_array($status, [self::_EXPIRED, self::DELETED]);
     }
 }
