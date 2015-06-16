@@ -166,11 +166,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 					'decorators' => array('ViewHelper')
 			));
 			
-			$this->addElement('button', 'conceptDelete', array(
-					'label' => _('Delete'),
-					'class' => 'delete-concept',
-					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
-			));
+            if (!$this->getEnableStatusesSystem()) {
+                $this->addElement('button', 'conceptDelete', array(
+                        'label' => _('Delete'),
+                        'class' => 'delete-concept',
+                        'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
+                ));
+            }
 		} else {
 			$this->addElement('submit', 'conceptSave', array(
 					'label' => _('Ok'),
