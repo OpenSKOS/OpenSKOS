@@ -117,7 +117,7 @@ class Api_Models_Concepts
 		return $labelReturnField;
 	}
 	
-	public function autocomplete($label, $includeDeleted = false)
+	public function autocomplete($label, $includeDeleted = false, $autoStatus = true)
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
@@ -138,6 +138,10 @@ class Api_Models_Concepts
 		if (false === $includeDeleted) {
 		    $q = "($q) AND deleted:false";
 		}
+        
+        if ($autoStatus) {
+            $q = Api_Models_Utils::addStatusToQuery($q);
+        }
         
 		$params = array(
 			'facet' => 'true',

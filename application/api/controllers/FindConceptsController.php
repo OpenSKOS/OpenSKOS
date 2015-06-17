@@ -48,7 +48,11 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 				->setHeader('X-Error-Msg', 'Missing required parameter `q`');
 			throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
 		}
+        
+        $q = Api_Models_Utils::addStatusToQuery($q);
+        
 		$concepts = $this->model->getConcepts($q, $this->shouldIncludeDeleted($q));
+        
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
 		if ($context === 'json' || $context === 'jsonp') {
 			foreach ($concepts as $key => $val) {
