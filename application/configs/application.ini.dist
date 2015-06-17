@@ -122,6 +122,9 @@ resources.view.options.doctype=XHTML1_STRICT
 oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
+; Api configuration
+api.showOnlyApproved = "@api-show-only-approved@"
+
 [staging : production]
 
 [testing : production]
