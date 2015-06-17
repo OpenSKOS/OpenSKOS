@@ -350,6 +350,9 @@ class Editor_Models_Concept extends Api_Models_Concept
 
 		//!TODO The fallowing should be added to required data or all the process of editing concept should be refactored so that old data is not lost.
 		// Data which will be lost on update if not remembered...
+        if (isset($data['deleted'])) {
+			$extraData['deleted'] = $data['deleted'];
+		}
 		if (isset($data['toBeChecked'])) {
 			$extraData['toBeChecked'] = $data['toBeChecked'];
 		}
