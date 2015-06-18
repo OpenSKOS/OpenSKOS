@@ -252,7 +252,7 @@ class OpenSKOS_Rdf_Parser implements Countable
         }
         
 		// Set deleted timestamp if status is OBSOLETE(expired) and deleted timestamp is not already set.
-        if (! isset($extradata['deleted_timestamp']) 
+        if (empty($extradata['deleted_timestamp']) 
 				&& ((isset($extradata['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($extradata['status']))
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
 			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);
