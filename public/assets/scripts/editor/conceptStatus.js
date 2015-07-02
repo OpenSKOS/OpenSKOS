@@ -100,8 +100,14 @@ var EditorConceptStatus = new Class({
         
         Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 140}});
         
+        var isOk = false;
+        var self = this;
         this.conceptChoose.getElement('.choose-cancel').addEvent('click', this.closeChooseModal);
-        this.conceptChoose.getElement('.choose-ok').addEvent('click', this.chooseConceptOk);
+        this.conceptChoose.getElement('.choose-ok').addEvent('click', function () {
+            isOk = true;
+            self.chooseConceptOk();
+        });
+        
         this.conceptChoose.getElement('.choose-ok').hide();
         
         this.conceptChoose.getElements('.choose-message').hide();
@@ -110,6 +116,10 @@ var EditorConceptStatus = new Class({
         var sboxOldStyles = $('sbox-overlay').getStyles('width', 'height', 'top', 'left', 'right', 'bottom');
         SqueezeBox.addEvent('close', function() {
             $('sbox-overlay').setStyles(sboxOldStyles);
+            
+            if (!isOk) {
+                self.returnOldStatus();
+            }
         });
         
         $('sbox-overlay').setStyles({
