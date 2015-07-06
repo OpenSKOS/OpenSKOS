@@ -143,8 +143,14 @@ class Api_ConceptController extends Api_FindConceptsController {
         } else {
             $this->getResponse()->setHttpResponseCode(200);
         }
+        
+        $savedConcept = $this->model->getConcept($solrDocument['uuid'][0]);
 		
-		echo $this->model->getConcept($solrDocument['uuid'][0])->toRDF()->saveXml();
+        // We validate the pref label after commit as well.
+        // To prevent duplicates when simultaneously commits happen.
+        $this->validatePrefLabel($savedConcept, true, $concept);
+        
+		echo $savedConcept->toRDF()->saveXml();
 	}
 
 	public function putAction() {
@@ -236,15 +242,31 @@ class Api_ConceptController extends Api_FindConceptsController {
     
     /**
      * Validates pref label for saving concept.
-     * @param OpenSKOS_Solr_Document $solrDocument
+     * @param OpenSKOS_Solr_Document|Api_Models_Concept $concept
+     * @param bool $isAfterCommit
+     * @param null|Api_Models_Concept $previousState
      * @throws Zend_Controller_Action_Exception
      */
-    protected function validatePrefLabel(OpenSKOS_Solr_Document $solrDocument)
+    protected function validatePrefLabel($concept, $isAfterCommit = false, $previousState = null)
     {
+        if ($concept instanceof Api_Models_Concept) {
+            $editorConcept = new Editor_Models_Concept($concept);
+        } elseif ($concept instanceof OpenSKOS_Solr_Document) {
+            $editorConcept = $this->docToEditorConcept($concept);
+        } else {
+            throw new \RuntimeException(
+                '$concept is not instace of Api_Models_Concept or OpenSKOS_Solr_Document.'
+            );
+        }
+         
         $prefLabelValidator = Editor_Models_ConceptValidator_UniquePrefLabelInScheme::factory();
-        $isUniquePrefLabel = $prefLabelValidator->isValid($this->docToEditorConcept($solrDocument), []);
+        $isUniquePrefLabel = $prefLabelValidator->isValid($editorConcept, []);
         
         if (!$isUniquePrefLabel) {
+            if ($isAfterCommit) {
+                $this->rollbackConcept($concept, $previousState);
+            }
+            
             throw new Zend_Controller_Action_Exception($prefLabelValidator->getError()->getMessage(), 409);
         }
     }
@@ -267,6 +289,21 @@ class Api_ConceptController extends Api_FindConceptsController {
         }
         
         return new Editor_Models_Concept(new Api_Models_Concept($data));
+    }
+    
+    /**
+     * Rollback a concept to a previous state. If no previous state - purge the concept.
+     * @param Api_Models_Concept $concept
+     * @param null|Api_Models_Concept $oldState
+     */
+    protected function rollbackConcept(Api_Models_Concept $concept, $previousState)
+    {
+        if ($previousState !== null) {
+            // Save the previous state with all its extra data.
+            (new Editor_Models_Concept($previousState))->update([], [], true, true);
+        } else {
+            $concept->purge(true);
+        }
     }
     
     /**
