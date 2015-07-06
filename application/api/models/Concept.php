@@ -637,10 +637,15 @@ class Api_Models_Concept implements Countable, ArrayAccess, Iterator
 	 *
 	 * @return Api_Models_Concept
 	 */
-	public function purge()
+	public function purge($commit = null)
 	{
 	    //delete this document from Solr:
 	    $solr = $this->solr()->delete('uuid:'.(is_array($this['uuid']) ? $this['uuid'][0] : $this['uuid']));
+        
+        if ($commit) {
+            $solr->commit();
+        }
+        
 	    return $this;
 	}
 
