@@ -43,7 +43,7 @@ class Editor_Models_ConceptValidator_UniquePrefLabelInScheme extends Editor_Mode
 					$prefLabels = array_merge($prefLabels, $concept['prefLabel@' . $lang]);
 				}
 			}
-			$query = 'prefLabel:("' . implode('" OR "', $prefLabels) . '")';
+			$query = 'prefLabelPhrase:("' . implode('" OR "', $prefLabels) . '")';
 			$query .= ' inScheme:("' . implode('" OR "', $concept['inScheme']) . '")';
 			if (isset($concept['tenant']) && ! empty($concept['tenant'])) {
 				$query .= ' tenant:' . $concept['tenant'];
