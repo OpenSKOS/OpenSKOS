@@ -274,7 +274,7 @@ class Editor_Models_ApiClient
 	{
 		$queryParams = array();
 		$queryParams['rows'] = 0;
-		$query = 'prefLabel:' . $prefLabel;
+		$query = 'prefLabelPhrase:' . $prefLabel;
 		$response = Api_Models_Concepts::factory()->setQueryParams($queryParams)->getConcepts($query);		
 		return intval($response['response']['numFound']);
 	}
