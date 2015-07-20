@@ -132,7 +132,11 @@ class Api_Models_Concepts
 		
 		$labelSearchField .= null===$lang?'':'@'.$lang;
 		
-		$q = "{$labelSearchField}:{$label}";
+        // Quotes or spaces not working if the search is not escaped.
+        // We do not escape * and ? because they sometimes are used for searching.
+        $labelEscaped = OpenSKOS_Solr_Queryparser_Editor_ParseSearchText::escapeSpecialChars($label);
+        
+		$q = "{$labelSearchField}:{$labelEscaped}";
 		
 		//only return non-deleted items:
 		if (false === $includeDeleted) {
