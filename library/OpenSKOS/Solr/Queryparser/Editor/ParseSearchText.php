@@ -83,7 +83,7 @@ class OpenSKOS_Solr_Queryparser_Editor_ParseSearchText
 				$searchText = '*';
 			}
 			
-			$searchTextForNonTokenized = $this->_escapeSpecialChars($searchText);
+			$searchTextForNonTokenized = self::escapeSpecialChars($searchText);
 			$simpleFieldsQuery = $this->_buildQueryForSearchTextInFields('(' . $searchTextForNonTokenized . ')', $nonTokenizedFields);
 			
 			$searchTextForTokenized = $this->_replaceTokenizeDelimiterChars($searchText);
@@ -114,7 +114,7 @@ class OpenSKOS_Solr_Queryparser_Editor_ParseSearchText
 	 * @param string $text
 	 * @return string
 	 */
-	protected function _escapeSpecialChars($text)
+	public static function escapeSpecialChars($text)
 	{
 		foreach (self::$_charsToEscape as $char) {
 			$text = str_ireplace($char, '\\' . $char, $text);
