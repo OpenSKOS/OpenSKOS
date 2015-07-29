@@ -195,6 +195,19 @@ You can do this by querying the find API with the selected label, for example if
 						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0
 					</a>
 			</li>
+            <li>
+				Sort results on particular field "<em>prefLabelSort asc</em>":
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0&sort=prefLabelSort asc">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0&amp;sort=prefLabelSort asc
+					</a>
+                <br />
+                All possible sort fields: 
+                <table>
+                    <tr><td>prefLabelSort</td></tr>
+                    <tr><td>prefLabelSort@{lang}</td></tr>
+                    <tr><td>notationSort</td></tr>
+                </table>
+			</li>
 		</ul>
 		<div class="note">
 			<p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>

@@ -51,7 +51,12 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         
         $q = Api_Models_Utils::addStatusToQuery($q);
         
-		$concepts = $this->model->getConcepts($q, $this->shouldIncludeDeleted($q));
+		$concepts = $this->model->getConcepts(
+            $q,
+            $this->shouldIncludeDeleted($q),
+            false,
+            $this->getRequest()->getParam('sort')
+        );
         
 		$context = $this->_helper->contextSwitch()->getCurrentContext();
 		if ($context === 'json' || $context === 'jsonp') {
