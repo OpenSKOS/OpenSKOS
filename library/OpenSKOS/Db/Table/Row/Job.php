@@ -116,7 +116,69 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 		if (null === $path) return;
 		return 0 === strpos($this->getMime($path), 'application/zip');
 	}
-	
+    
+    /**
+     * Fetches all files attached to the job (extracts archive and returns those files if the file is zip).
+     * !TODO Move to more appropriate place.
+     * @return type
+     */
+    public function getFilesList()
+    {
+        $filesList = [];
+        $file = $this->getFile();
+        if ($this->isZip($file)) {
+            $zip = new ZipArchive();
+            if ($zip->open($file) !== true) {
+                fwrite(STDERR, "Can not open <$file>\n");
+                $this->error("Can not open <$file> as zip.")->finish()->save();
+            }
+
+            // Makes dir in which to extract the files.
+            $extractDirPath = $this->getExtractDirPath();
+            mkdir($extractDirPath);
+
+            $zip->extractTo($extractDirPath);
+
+            for ($fileInd = 0; $fileInd < $zip->numFiles; $fileInd ++) {
+                $filePath = $extractDirPath . DIRECTORY_SEPARATOR . $zip->getNameIndex($fileInd);
+                if (is_file($filePath)) {
+                    $filesList[] = $filePath;
+                }
+            }
+        } else {
+            $filesList[] = $file;
+        }
+        
+        return $filesList;
+    }
+    
+    /**
+     * Cleans up any extracted files.
+     */
+    public function cleanFiles()
+    {
+        $file = $this->getFile();
+        if ($this->isZip($file)) {
+            $extractDirPath = $this->getExtractDirPath();
+            
+            // Delete everything in extract dir
+            $dirsIterator = new RecursiveDirectoryIterator($extractDirPath);
+            $filesIterator = new RecursiveIteratorIterator($dirsIterator, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach($filesIterator as $file) {
+                if ('.' === $file->getBasename() || '..' ===  $file->getBasename()) {
+                    continue;
+                }
+                
+                if ($file->isDir()) {
+                    rmdir($file->getPathname());
+                } else {
+                    unlink($file->getPathname());
+                }
+            }
+            rmdir($extractDirPath);
+        }
+    }
+    
 	public function getMime($path = null)
 	{
 		if (!class_exists('finfo')) {
@@ -172,4 +234,15 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 		$this->info = $msg;
 		return $this;
 	}
+    
+    /**
+     * Gets path to a folder where zip files to be extracrted.
+     * Does not create the folder.
+     * @return string
+     */
+    protected function getExtractDirPath()
+    {
+        return $this->getParam('destination') . '_' . substr($this->getParam('name'), 0, strrpos($this->getParam('name'), '.'));
+    }
+	
 }
