@@ -162,34 +162,8 @@ switch ($action) {
 					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:						
 						$job->start()->save();
 						
-						$importFiles = array();
-						$file = $job->getFile();
-						$fromZip = false;
-						if ($job->isZip($file)) {
-							$fromZip = true;
-							
-							$zip = new ZipArchive();
-							if ($zip->open($file) !== true) {
-								fwrite(STDERR, "Can not open <$file>\n");
-								$job->error("Can not open <$file> as zip.")->finish()->save();
-								break;
-							}
-							
-							// Makes dir in which to extract the files.
-							$extractDirPath = $job->getParam('destination') . '_' . substr($job->getParam('name'), 0, strrpos($job->getParam('name'), '.'));
-							mkdir($extractDirPath);
-							
-							$zip->extractTo($extractDirPath);
-							$extractedFiles = scandir($extractDirPath);
-							foreach ($extractedFiles as $file) {
-								if ($file != '.' && $file != '..') {
-									$importFiles[] = $extractDirPath . '/' . $file;
-								}
-							}
-						} else {
-							$importFiles[] = $file;
-						}
-						
+						$importFiles = $job->getFilesList();
+                        
 						// If delete before import option is set - remove all concepts in the collection.
 						if ((bool)$job->getParam('deletebeforeimport')) {
 							$solrClient = Zend_Registry::get('OpenSKOS_Solr');
@@ -252,12 +226,7 @@ switch ($action) {
 						}
 						
 						// Delete extracted files when done.
-						if ($fromZip) {
-							foreach ($importFiles as $filePath) {
-								unlink($filePath);
-							}
-							rmdir($extractDirPath);
-						}
+                        $job->cleanFiles();
 						
 						// Clears the schemes cache after import.
 						OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
