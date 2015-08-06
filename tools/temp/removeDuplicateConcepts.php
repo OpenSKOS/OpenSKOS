@@ -92,7 +92,7 @@ foreach ($facetFieldsTenant['tenant'] as $tenant => $countsTenant) {
 
                 echo 'Process: ' . $notation . ' with "' . $countsNotation . '" duplicates' . "\n";
 
-                $apiModel->setQueryParam('sort', 'modified_timestamp asc');
+                $apiModel->setQueryParam('sort', 'modified_timestamp asc, status desc');
                 $response = $apiModel->getConcepts('notation:"' . $notation . '" AND tenant:"' . $tenant . '"');
 
                 $lastConcept = array_pop($response['response']['docs']);
