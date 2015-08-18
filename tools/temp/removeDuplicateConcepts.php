@@ -92,14 +92,27 @@ foreach ($facetFieldsTenant['tenant'] as $tenant => $countsTenant) {
 
                 echo 'Process: ' . $notation . ' with "' . $countsNotation . '" duplicates' . "\n";
 
-                $apiModel->setQueryParam('sort', 'modified_timestamp asc, status desc');
+                $apiModel->setQueryParam('sort', 'modified_timestamp desc, status asc');
                 $response = $apiModel->getConcepts('notation:"' . $notation . '" AND tenant:"' . $tenant . '"');
 
-                $lastConcept = array_pop($response['response']['docs']);
-                echo 'We keep: ' . $lastConcept['uuid'] . ' modified timestamp: "' . $lastConcept['modified_timestamp'] . '"' . "\n";
+                // We pick the first concept with schema. If non of them has one - we pick the first concept.
+                $keepKey = 0;
+                foreach ($response['response']['docs'] as $docKey => $doc) {
+                    if (!empty($doc['inScheme'])) {
+                        $keepKey = $docKey;
+                        break;
+                    }
+                }
+                
+                $keepDoc = $response['response']['docs'][$keepKey];
+                unset($response['response']['docs'][$keepKey]);
+                
+                echo 'We keep: ' . $keepDoc['uuid'] . ' modified timestamp: "' . $keepDoc['modified_timestamp'] . '"' . "\n";
                 foreach ($response['response']['docs'] as $doc) {
                     $deleteConcept = new Editor_Models_Concept(new Api_Models_Concept($doc));
-                    echo 'Mark as delete: ' . $deleteConcept['uuid'] . ' modified timestamp: "' . $deleteConcept['modified_timestamp'] . '"' . "\n";
+                    echo 'Mark as delete: ' . $deleteConcept['uuid']
+                        . ' modified timestamp: "'
+                        . $deleteConcept['modified_timestamp'] . '"' . "\n";
 
                     $deleteConcept->delete(true);
                     $deletedConceptsCounter ++;
