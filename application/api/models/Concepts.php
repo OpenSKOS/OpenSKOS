@@ -125,22 +125,26 @@ class Api_Models_Concepts
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
-		$labelSearchField = 'LexicalLabelsAutocomplete';
+		$labelSearchField = 'LexicalLabels';
 		$labelReturnField = $this->_getLabelReturnField();
 		
 		if (null !== ($labelField = $this->getQueryParam('searchLabel', 'prefLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
-				$labelSearchField = $labelField.'Autocomplete';
+				$labelSearchField = $labelField;
 			}
 		}
 		
-		$labelSearchField .= null===$lang?'':'@'.$lang;
+		$labelSearchFieldAutocomplete = $labelSearchField . 'Autocomplete';
+        $labelSearchFieldAutocomplete .= null === $lang ? '' : '@' . $lang;
+        
+        $labelSearchFieldText = $labelSearchField . 'Text';
+        $labelSearchFieldText .= null === $lang ? '' : '@' . $lang;
 		
         // Quotes or spaces not working if the search is not escaped.
         // We do not escape * and ? because they sometimes are used for searching.
         $labelEscaped = OpenSKOS_Solr_Queryparser_Editor_ParseSearchText::escapeSpecialChars($label);
         
-		$q = "{$labelSearchField}:{$labelEscaped}";
+		$q = "({$labelSearchFieldAutocomplete}:{$labelEscaped} OR {$labelSearchFieldText}:{$labelEscaped}*)";
 		
 		//only return non-deleted items:
 		if (false === $includeDeleted) {
