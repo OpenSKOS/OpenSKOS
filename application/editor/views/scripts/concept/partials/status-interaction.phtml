@@ -33,7 +33,17 @@
     <div class="choose-hint"><?= $this->translate('Click on a concept in the left search or in right history/selection tabs.')?></div>
     
     <div class="chosen-concept do-not-show">
-        <?= $this->translate('Chosen concept')?>: <span class="chosen-concept-label"></span>
+        <div class="chosen-concept-text">
+            <?= $this->translate('Chosen concept')?>: <span class="chosen-concept-label"></span>
+        </div>
+        
+        <div class="choose-label-to-fill">
+            <?= $this->translate('Which label to fill in the chosen concept?')?>
+            <select name="labelToFill" >
+                <option value="altLabel"><?= $this->translate('Alternative label')?></option>
+                <option value="hiddenLabel"><?= $this->translate('Hidden label')?></option>
+            </select>
+        </div>
     </div>
     
     <button class="choose-cancel" type="button"><?= $this->translate('Cancel')?></button>

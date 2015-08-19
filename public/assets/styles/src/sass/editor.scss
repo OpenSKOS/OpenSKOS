@@ -1370,11 +1370,20 @@ input[type=submit] {
 }
 
 .choose-other-concept {
+    .chosen-concept-label {
+        font-weight: bold;
+    }    
     .choose-hint {
         margin: 20px 0px;
     }
     .chosen-concept {
         margin-bottom: 20px;
+    }    
+    .choose-label-to-fill {
+        margin: 10px 0;
+        label {
+            display: block;
+        }
     }
 }
 

@@ -235,6 +235,10 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         $this->addElement('hidden', 'statusOtherConcept', array(
             'decorators' => array('ViewHelper')
         ));
+        
+        $this->addElement('hidden', 'statusOtherConceptLabelToFill', array(
+            'decorators' => array('ViewHelper')
+        ));
     }
 	
 	/**
