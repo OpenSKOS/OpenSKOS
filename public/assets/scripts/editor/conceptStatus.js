@@ -98,7 +98,7 @@ var EditorConceptStatus = new Class({
     showChooseModal: function () {
         this.conceptChoose = $('status-other-concept').clone();
         
-        Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 140}});
+        Editor.View.showActionModal(this.conceptChoose, {size: {x: 300, y: 200}});
         
         var isOk = false;
         var self = this;
@@ -113,6 +113,12 @@ var EditorConceptStatus = new Class({
         this.conceptChoose.getElements('.choose-message').hide();
         this.conceptChoose.getElements('.choose-message.' + this.selectedStatus).show();
         
+        if (this.selectedStatus === 'redirected') {
+            this.conceptChoose.getElements('.choose-label-to-fill').show();
+        } else {
+            this.conceptChoose.getElements('.choose-label-to-fill').hide();
+        }
+        
         var sboxOldStyles = $('sbox-overlay').getStyles('width', 'height', 'top', 'left', 'right', 'bottom');
         SqueezeBox.addEvent('close', function() {
             $('sbox-overlay').setStyles(sboxOldStyles);
@@ -120,6 +126,9 @@ var EditorConceptStatus = new Class({
             if (!isOk) {
                 self.returnOldStatus();
             }
+            
+            self.deactivateConceptChoose();
+            self.conceptChoose = null;
         });
         
         $('sbox-overlay').setStyles({
@@ -156,14 +165,24 @@ var EditorConceptStatus = new Class({
     },
     
     chooseConceptOk: function () {
-        this.conceptForStatusChosen(this.chosenConceptUuid, this.selectedStatus);
+        this.conceptForStatusChosen(
+            this.chosenConceptUuid,
+            this.selectedStatus,
+            this.conceptChoose.getElement('[name=labelToFill]').get('value')
+        );
         this.closeChooseModal();
     },
     
-    conceptForStatusChosen: function (uuid, status) {
+    conceptForStatusChosen: function (uuid, status, labelToFill) {
         $('Editconcept').getElement('#statusOtherConcept').set('value', uuid);
         
-        var chosenConcept = this.conceptChoose.getElement('.chosen-concept').get('html');
+        if (status === 'redirected') {
+            $('Editconcept').getElement('#statusOtherConceptLabelToFill').set('value', labelToFill);
+        } else {
+            $('Editconcept').getElement('#statusOtherConceptLabelToFill').set('value', '');
+        }
+        
+        var chosenConcept = this.conceptChoose.getElement('.chosen-concept-text').get('html');
         if ($('Editconcept').getElement('.concept-edit-status-other-concept') !== null) {
             $('Editconcept').getElement('.concept-edit-status-other-concept').dispose();
         }

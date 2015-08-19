@@ -1970,11 +1970,20 @@ input[type=submit].relate {
   background: url("../images/button-background-clear.png") #fff no-repeat left bottom;
 }
 
+.choose-other-concept .chosen-concept-label {
+  font-weight: bold;
+}
 .choose-other-concept .choose-hint {
   margin: 20px 0px;
 }
 .choose-other-concept .chosen-concept {
   margin-bottom: 20px;
+}
+.choose-other-concept .choose-label-to-fill {
+  margin: 10px 0;
+}
+.choose-other-concept .choose-label-to-fill label {
+  display: block;
 }
 
 /* Export box */
