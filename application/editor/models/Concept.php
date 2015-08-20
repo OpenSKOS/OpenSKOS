@@ -516,6 +516,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 				'uuid',
 				'status',
                 'statusOtherConcept',
+                'statusOtherConceptLabelToFill',
 				'toBeChecked',
 				'uri'
 		);

@@ -202,7 +202,7 @@ div#content {
     bottom: 30px;
     left: 0px;
     right: 0px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #wrapper.index {    
@@ -1370,11 +1370,20 @@ input[type=submit] {
 }
 
 .choose-other-concept {
+    .chosen-concept-label {
+        font-weight: bold;
+    }    
     .choose-hint {
         margin: 20px 0px;
     }
     .chosen-concept {
         margin-bottom: 20px;
+    }    
+    .choose-label-to-fill {
+        margin: 10px 0;
+        label {
+            display: block;
+        }
     }
 }
 
