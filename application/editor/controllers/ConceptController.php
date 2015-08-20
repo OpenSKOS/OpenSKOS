@@ -554,17 +554,19 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED) {
                     $otherConceptUpdateData = [];
                     foreach ($concept->getConceptLanguages() as $lang) {
-                        $existingAltLabels = $otherConcept['altLabel@' . $lang];
-                        if (empty($existingAltLabels)) {
-                            $existingAltLabels = [];
+                        $labelToFill = $extraData['statusOtherConceptLabelToFill'];
+                        
+                        $existingLabels = $otherConcept[$labelToFill . '@' . $lang];
+                        if (empty($existingLabels)) {
+                            $existingLabels = [];
                         }
                         
-                        $newAltLabels = [];
+                        $newLabels = [];
                         if (isset($formData['prefLabel@' . $lang])) {
-                            $newAltLabels = $formData['prefLabel@' . $lang];
+                            $newLabels = $formData['prefLabel@' . $lang];
                         }
                         
-                        $otherConceptUpdateData['altLabel@' . $lang] = array_unique(array_merge($existingAltLabels, $newAltLabels));
+                        $otherConceptUpdateData[$labelToFill . '@' . $lang] = array_unique(array_merge($existingLabels, $newLabels));
                     }
                     
                     $otherConcept->update(
