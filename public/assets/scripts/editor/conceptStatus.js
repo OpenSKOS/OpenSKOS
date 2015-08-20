@@ -108,15 +108,14 @@ var EditorConceptStatus = new Class({
             self.chooseConceptOk();
         });
         
-        this.conceptChoose.getElement('.choose-ok').hide();
-        
         this.conceptChoose.getElements('.choose-message').hide();
-        this.conceptChoose.getElements('.choose-message.' + this.selectedStatus).show();
+        this.conceptChoose.getElements('.choose-message.' + this.selectedStatus).show();        
+        this.conceptChoose.getElement('.choose-label-to-fill').hide();
         
         if (this.selectedStatus === 'redirected') {
-            this.conceptChoose.getElements('.choose-label-to-fill').show();
+            this.conceptChoose.getElement('.choose-ok').hide();
         } else {
-            this.conceptChoose.getElements('.choose-label-to-fill').hide();
+            this.conceptChoose.getElement('.choose-ok').setStyle('display', 'inline-block');      
         }
         
         var sboxOldStyles = $('sbox-overlay').getStyles('width', 'height', 'top', 'left', 'right', 'bottom');
@@ -162,6 +161,10 @@ var EditorConceptStatus = new Class({
         this.conceptChoose.getElement('.chosen-concept').show();
         this.chosenConceptUuid = uuid;
         this.conceptChoose.getElement('.chosen-concept-label').set('html', $$('.' + uuid).pick().get('html'));
+        
+        if (this.selectedStatus === 'redirected') {
+            this.conceptChoose.getElement('.choose-label-to-fill').show();
+        }
     },
     
     chooseConceptOk: function () {
@@ -183,6 +186,11 @@ var EditorConceptStatus = new Class({
         }
         
         var chosenConcept = this.conceptChoose.getElement('.chosen-concept-text').get('html');
+
+        if (!uuid) {
+            chosenConcept = null;
+        }
+        
         if ($('Editconcept').getElement('.concept-edit-status-other-concept') !== null) {
             $('Editconcept').getElement('.concept-edit-status-other-concept').dispose();
         }
