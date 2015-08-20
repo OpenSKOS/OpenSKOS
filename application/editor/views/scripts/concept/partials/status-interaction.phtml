@@ -29,12 +29,12 @@
 
 <div id="status-other-concept" class="choose-other-concept do-not-show">
     <div class="choose-message redirected"><?= $this->translate('Choose the concept to which this one is redirected.')?></div>
-    <div class="choose-message obsolete"><?= $this->translate('Choose the concept which replaces this one.')?></div>
-    <div class="choose-hint"><?= $this->translate('Click on a concept in the left search or in right history/selection tabs.')?></div>
+    <div class="choose-message obsolete"><?= $this->translate('If the concept is replaced from other concept, you can choose the other one now.')?></div>
+    <div class="choose-hint"><?= $this->translate('To choose - click on a concept in the left search results or in right history/selection tabs.')?></div>
     
-    <div class="chosen-concept do-not-show">
+    <div class="chosen-concept">
         <div class="chosen-concept-text">
-            <?= $this->translate('Chosen concept')?>: <span class="chosen-concept-label"></span>
+            <?= $this->translate('Redirected to concept')?>: <span class="chosen-concept-label"><?= $this->translate('(none)')?></span>
         </div>
         
         <div class="choose-label-to-fill">
