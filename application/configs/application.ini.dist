@@ -83,6 +83,11 @@ resources.solr.context = solr
 ;resources.solr.writePort = 8983
 ;resources.solr.writeContext = solr
 
+; Apache Jena Fuseki configuration:
+resources.fuseki.host = localhost
+resources.fuseki.port = 3030
+resources.fuseki.dataset = openskos
+
 ; Database configuration:
 resources.db.adapter=pdo_mysql
 resources.db.params.host=localhost

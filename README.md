@@ -104,14 +104,14 @@ Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stabl
 Installing Fuseki 2 for development purposes:
 
 1. Download Fuseki 2 from here [download](https://jena.apache.org/download/)
-2. Install stand alone fuseki server. Instructions copied from [getting started](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
+2. Install stand alone fuseki server. The instructions are the same as on [getting started page](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
   1. Unpack the downloaded file with unzip or tar zxfv
   2. `chmod +x fuseki-server s-*`
-3. Symlink or copy the file 
-`data/fuseki/configuration/openskos.ttl` into `<fuseki server folder>/run/configuration/`
-4. Run the fuseki server with
+3. Symlink or copy the file
+`<openskos folder>/data/fuseki/configuration/openskos.ttl` to `<fuseki folder>/run/configuration/openskos.ttl`
+4. Go to <fuseki folder> and run the server with
 `./fuseki-server --update`
-5. Now you will have the fuseki server up and running on http://localhost:3030/ with "openskos" dataset defined
+5. Now you will have the fuseki server up and running on http://localhost:3030/ with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `resources.fuseki`
 
 5. Data Ingest
 ===============================================================================
