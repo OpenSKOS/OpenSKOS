@@ -97,18 +97,17 @@ With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
 
 
-4. Apache Solr Setup
+4. Apache Jena Fuseki setup
 ===============================================================================
-You have to have a java VM installed prior to installing Solr!
-Download a 3.4 release of Apache Solr and extract it somewhere on your server:
-http://www.apache.org/dyn/closer.cgi/lucene/solr/
+Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
 
-- go to the "example" directory and create a directory named "openskos"
-- copy the "data/solr/conf" directory of the OpenSKOS checkout to the 
-  SOLR-INSTALL_DIR/example/openskos directory
-
-You can now start Solr (in this example with 1.024Mb memory assigned):
-java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
+Installing Fuseki 2 for openskos development purposes:
+1. Download Fuseki 2 from here [download](https://jena.apache.org/download/)
+2. Install stand alone fuseki server. Instructions copied from [getting started](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
+  1. Unpack the downloaded file with unzip or tar zxfv
+  2. `chmod +x fuseki-server s-*`
+3. Symlink or copy the file `data/fuseki/configuration/openskos.ttl` into `<fuseki server folder>/run/configuration/`
+4. Run the fuseki server `./fuseki-server --update`
 
 
 5. Data Ingest
