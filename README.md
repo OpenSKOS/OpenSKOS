@@ -101,13 +101,16 @@ where you can manage all the other entities of the application.
 ===============================================================================
 Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
 
-Installing Fuseki 2 for openskos development purposes:
+Installing Fuseki 2 for development purposes:
+
 1. Download Fuseki 2 from here [download](https://jena.apache.org/download/)
 2. Install stand alone fuseki server. Instructions copied from [getting started](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
   1. Unpack the downloaded file with unzip or tar zxfv
   2. `chmod +x fuseki-server s-*`
-3. Symlink or copy the file `data/fuseki/configuration/openskos.ttl` into `<fuseki server folder>/run/configuration/`
-4. Run the fuseki server `./fuseki-server --update`
+3. Symlink or copy the file 
+`data/fuseki/configuration/openskos.ttl` into `<fuseki server folder>/run/configuration/`
+4. Run the fuseki server with
+`./fuseki-server --update`
 
 
 5. Data Ingest
