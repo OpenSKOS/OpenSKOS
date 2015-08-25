@@ -109,9 +109,9 @@ Installing Fuseki 2 for development purposes:
   2. `chmod +x fuseki-server s-*`
 3. Symlink or copy the file
 `<openskos folder>/data/fuseki/configuration/openskos.ttl` to `<fuseki folder>/run/configuration/openskos.ttl`
-4. Go to <fuseki folder> and run the server with
+4. Go to `<fuseki folder>` and run the server with
 `./fuseki-server --update`
-5. Now you will have the fuseki server up and running on http://localhost:3030/ with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `resources.fuseki`
+5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `resources.fuseki`
 
 5. Data Ingest
 ===============================================================================
