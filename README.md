@@ -111,7 +111,7 @@ Installing Fuseki 2 for development purposes:
 `data/fuseki/configuration/openskos.ttl` into `<fuseki server folder>/run/configuration/`
 4. Run the fuseki server with
 `./fuseki-server --update`
-
+5. Now you will have the fuseki server up and running on http://localhost:3030/ with "openskos" dataset defined
 
 5. Data Ingest
 ===============================================================================
