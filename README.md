@@ -105,8 +105,9 @@ Installing Fuseki 2 for development purposes:
 
 1. Download Fuseki 2 from here [download](https://jena.apache.org/download/)
 2. Install stand alone fuseki server. The instructions are the same as on [getting started page](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
-  1. Unpack the downloaded file with unzip or tar zxfv
-  2. `chmod +x fuseki-server s-*`
+  1. Unpack the downloaded file with `unzip` or `tar zxfv` to a `<fuseki folder>` of your choice
+  2. `chmod +x fuseki-server`
+  3. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go with Java 8 directly.
 3. Symlink or copy the file
 `<openskos folder>/data/fuseki/configuration/openskos.ttl` to `<fuseki folder>/run/configuration/openskos.ttl`
 4. Go to `<fuseki folder>` and run the server with
