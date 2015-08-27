@@ -10,7 +10,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
-use OpenSkos2\Rdf\Object;
+use OpenSkos2\Rdf\Uri;
 
 class RelatedToSelfTest extends \PHPUnit_Framework_TestCase
 {
@@ -23,11 +23,11 @@ class RelatedToSelfTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_NARROWER, new Object(Object::TYPE_URI, 'http://example.com#concept2'));
+        $concept->addProperty(Concept::PROPERTY_NARROWER, new Uri('http://example.com#concept2'));
         $this->assertTrue($validator->validate($concept));
 
 
-        $concept->addProperty(Concept::PROPERTY_NARROWER, new Object(Object::TYPE_URI, 'http://example.com#concept1'));
+        $concept->addProperty(Concept::PROPERTY_NARROWER, new Uri('http://example.com#concept1'));
         $this->assertFalse($validator->validate($concept));
     }
 }
