@@ -9,6 +9,7 @@
 namespace OpenSkos2\Rdf;
 
 
+use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 
@@ -41,7 +42,7 @@ class ResourceManager
      */
     public function insert(Resource $resource)
     {
-
+        $this->client->insert(EasyRdf::resourceToGraph($resource));
     }
 
     /**
@@ -68,5 +69,25 @@ class ResourceManager
     public function fetch($query = null)
     {
 
+    }
+
+    protected function resourceToEasyRdfGraph(Resource $resource){
+        $easyResource = new \EasyRdf_Resource($resource->getUri(), new \EasyRdf_Graph());
+        foreach ($resource->getProperties() as $propName => $property) {
+            foreach ($property as $value) {
+                /**
+                 * @var $value Object
+                 */
+                if ($value instanceof Literal) {
+                    $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
+                }else {
+                    $easyResource->addResource($propName, $value->getValue());
+                }
+            }
+        }
+
+        $graph = $easyResource->getGraph();
+
+        return $graph;
     }
 }

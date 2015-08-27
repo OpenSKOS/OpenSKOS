@@ -2,6 +2,7 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Uri;
 
 /**
  * Created by PhpStorm.
@@ -11,6 +12,8 @@ use OpenSkos2\Rdf\Resource;
  */
 class Concept extends Resource
 {
+    const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
+
     //ConceptSchemes
     const PROPERTY_CONCEPTSCHEME = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
     const PROPERTY_INSCHEME = 'http://www.w3.org/2004/02/skos/core#inScheme';
@@ -115,4 +118,16 @@ class Concept extends Resource
 //            self::PROPERTY_DCTERMS_CREATOR,
 //        ],
     );
+
+    /**
+     * Resource constructor.
+     * @param string $uri
+     */
+    public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+        $this->addProperty(self::PROPERTY_RDF_TYPE, new Uri(self::TYPE));
+    }
+
+
 }

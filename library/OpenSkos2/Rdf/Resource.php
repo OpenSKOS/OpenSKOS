@@ -12,12 +12,23 @@ use OpenSkos2\Rdf\Object as RdfObject; //alias is used to help IDE to distinguis
 
 class Resource
 {
+    const PROPERTY_RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+
     protected $properties = [];
 
     /**
      * @var string
      */
     private $uri;
+
+    /**
+     * Resource constructor.
+     * @param string $uri
+     */
+    public function __construct($uri = null)
+    {
+        $this->uri = $uri;
+    }
 
     /**
      * @return array of RdfObject[]
@@ -60,6 +71,14 @@ class Resource
     public function setUri($uri)
     {
         $this->uri = $uri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return current($this->getProperty(self::PROPERTY_RDF_TYPE));
     }
 
 }
