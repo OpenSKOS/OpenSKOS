@@ -112,7 +112,7 @@ Installing Fuseki 2 for development purposes:
 4. Go to `<fuseki folder>` and run the server with
 `./fuseki-server --update`
   1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
-5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `resources.fuseki`
+5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
 
 5. Data Ingest
 ===============================================================================
