@@ -11,6 +11,10 @@ namespace OpenSkos2\Rdf;
 
 class Object
 {
+    const TYPE_URI = 'uri';
+    const TYPE_LITERAL = 'literal';
+
+
     /**
      * @var string
      */
@@ -31,4 +35,22 @@ class Object
         $this->type = $type;
         $this->value = $value;
     }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+
 }
