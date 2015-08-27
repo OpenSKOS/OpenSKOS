@@ -2,7 +2,8 @@
     "require": {
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
-        "easyrdf/easyrdf": "^0.9.1"
+        "easyrdf/easyrdf": "^0.9.1",
+        "php-di/zf1-bridge": "^3.1"
     },
     "autoload": {
         "psr-4": {
