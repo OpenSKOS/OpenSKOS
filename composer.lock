@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f2cd56a2f7e2c671813c6e03cff2e57e",
+    "hash": "fe4a030b27e30b9b89e0b31d5015a03e",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -455,6 +455,44 @@
                 "reflection"
             ],
             "time": "2015-06-01 14:23:20"
+        },
+        {
+            "name": "php-di/zf1-bridge",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHP-DI/ZF1-Bridge.git",
+                "reference": "4ba3d8a692b031451d27c958f54f134fbd964764"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHP-DI/ZF1-Bridge/zipball/4ba3d8a692b031451d27c958f54f134fbd964764",
+                "reference": "4ba3d8a692b031451d27c958f54f134fbd964764",
+                "shasum": ""
+            },
+            "require": {
+                "php-di/php-di": "~5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^3.7"
+            },
+            "suggest": {
+                "zendframework/zendframework1": "The complete Zend Framework 1",
+                "zf1/zend-controller": "The Zend Controller package only"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "DI\\Bridge\\ZendFramework1\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Integrates PHP-DI to Zend Framework 1",
+            "homepage": "https://github.com/PHP-DI/ZF1-Bridge",
+            "time": "2015-06-11 08:38:59"
         },
         {
             "name": "psr/log",

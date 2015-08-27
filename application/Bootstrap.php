@@ -73,13 +73,14 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $builder = new \DI\ContainerBuilder();
         $builder->addDefinitions(APPLICATION_PATH . '/configs/di.config.php');
         
-        //!TODO Configure the caching
-//        $cache = new MemcachedCache();
-//        $memcached = new Memcached();
-//        $memcached->addServer('localhost', 11211);
-//        $cache->setMemcached($memcached);
-//        $cache->setNamespace('OpenSkos');
-//        $builder->setDefinitionCache($cache);
+        if (APPLICATION_ENV === 'production') {
+            $resources = OpenSKOS_Application_BootstrapAccess::getOption('resources');
+            $cacheFolder = $resources['cachemanager']['general']['backend']['options']['cache_dir'];
+            $cache = new \Doctrine\Common\Cache\FilesystemCache($cacheFolder);
+        } else {
+            $cache = new ArrayCache();
+        }
+        $builder->setDefinitionCache($cache);
         
         $container = $builder->build();
 
