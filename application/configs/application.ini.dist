@@ -83,11 +83,6 @@ resources.solr.context = solr
 ;resources.solr.writePort = 8983
 ;resources.solr.writeContext = solr
 
-; Apache Jena Fuseki configuration:
-resources.fuseki.host = localhost
-resources.fuseki.port = 3030
-resources.fuseki.dataset = openskos
-
 ; Database configuration:
 resources.db.adapter=pdo_mysql
 resources.db.params.host=localhost
@@ -114,7 +109,6 @@ resources.frontController.plugins.locale="OpenSKOS_Controller_Plugin_Locale"
 ;resources.frontController.plugins.apiclient="OpenSKOS_Controller_Plugin_ApiClient"
 resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
-
 ; @extra routes here@
 
 resources.frontController.params.displayExceptions = 0
@@ -122,6 +116,10 @@ resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
 resources.view.options.doctype=XHTML1_STRICT
+
+; Apache Jena Fuseki configuration:
+sparql.queryUri = http://localhost:3030/openskos/query
+sparql.updateUri = http://localhost:3030/openskos/update
 
 ; Client id and client secret configured in https://console.developers.google.com
 oAuth2.google.clientId = "@google-client-id@"
