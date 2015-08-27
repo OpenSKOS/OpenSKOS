@@ -2,11 +2,15 @@
     "require": {
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
-        "easyrdf/easyrdf": "^0.9.1"
+        "easyrdf/easyrdf": "^0.9.1",
+        "psr/log": "^1.0"
     },
     "autoload": {
         "psr-4": {
             "OpenSkos2\\": "library/OpenSkos2"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
     }
 }
