@@ -1,4 +1,5 @@
 <?php
+use Doctrine\Common\Cache\ArrayCache;
 
 /**
  * OpenSKOS
@@ -67,12 +68,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         //Zend_Controller_Front::getInstance()->registerPlugin(new Application_Plugin_Auth($acl));
     }
-    
+
     protected function _initContainer()
     {
         $builder = new \DI\ContainerBuilder();
         $builder->addDefinitions(APPLICATION_PATH . '/configs/di.config.php');
-        
+
         if (APPLICATION_ENV === 'production') {
             $resources = OpenSKOS_Application_BootstrapAccess::getOption('resources');
             $cacheFolder = $resources['cachemanager']['general']['backend']['options']['cache_dir'];
@@ -81,11 +82,14 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             $cache = new ArrayCache();
         }
         $builder->setDefinitionCache($cache);
-        
+
         $container = $builder->build();
 
         $dispatcher = new \DI\Bridge\ZendFramework1\Dispatcher();
         $dispatcher->setContainer($container);
+        $dispatcher->setControllerDirectory(Zend_Controller_Front::getInstance()->getDispatcher()->getControllerDirectory());
+        $dispatcher->setDefaultControllerName(Zend_Controller_Front::getInstance()->getDispatcher()->getDefaultControllerName());
+        $dispatcher->setDefaultModule(Zend_Controller_Front::getInstance()->getDispatcher()->getDefaultModule());
 
         Zend_Controller_Front::getInstance()->setDispatcher($dispatcher);
     }
