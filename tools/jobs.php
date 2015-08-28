@@ -8,14 +8,11 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
@@ -69,6 +66,16 @@ include 'bootstrap.inc.php';
 $autoloader = new OpenSKOS_Autoloader();
 $mainAutoloader = Zend_Loader_Autoloader::getInstance();
 $mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
+
+
+
+/* @var $diContainer DI\Container */
+$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+
+/**
+ * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
+ */
+$resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 
 switch ($action) {
 	case 'list':
@@ -157,13 +164,24 @@ switch ($action) {
 				exit(0);
 			}
 			foreach ($jobs as $job) {
+                /** @var OpenSKOS_Db_Table_Row_Job $job */
 				$collection = $job->getCollection();
 				switch ($job->task) {
-					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:						
+					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
+                        //init importer
+                        $importer = new \OpenSkos2\Import\Command($resourceManager);
+
+                        $jobLogger = $job->getLogger();
+                        $importer->setLogger($jobLogger);
+
+
+//                        var_dump($job); exit;
 						$job->start()->save();
 						
 						$importFiles = $job->getFilesList();
-                        
+
+
+                        /*
 						// If delete before import option is set - remove all concepts in the collection.
 						if ((bool)$job->getParam('deletebeforeimport')) {
 							$solrClient = Zend_Registry::get('OpenSKOS_Solr');
@@ -207,24 +225,30 @@ switch ($action) {
                         
 						$duplicateConceptSchemes = array();
 						$notImportedNotations = array();
+                        */
 						foreach ($importFiles as $filePath) {
-							$parserOpts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
-							$parserOpts->setArguments(array_merge($arguments, array($filePath))); // The last argument must be the file path.
+                            $message = new \OpenSkos2\Import\Message($filePath);
+
+
+//                            $parserOpts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
+//							$parserOpts->setArguments(array_merge($arguments, array($filePath))); // The last argument must be the file path.
 							try {
-								$parser = OpenSKOS_Rdf_Parser::factory($parserOpts);
-								$parser->process($job['user']);
-								$duplicateConceptSchemes = array_merge($duplicateConceptSchemes, $parser->getDuplicateConceptSchemes());
-								$notImportedNotations = array_merge($notImportedNotations, $parser->getNotImportedNotations());
+                                $importer->handle($message);
+//								$parser = OpenSKOS_Rdf_Parser::factory($parserOpts);
+//								$parser->process($job['user']);
+//								$duplicateConceptSchemes = array_merge($duplicateConceptSchemes, $parser->getDuplicateConceptSchemes());
+//								$notImportedNotations = array_merge($notImportedNotations, $parser->getNotImportedNotations());
 							} catch (Exception $e) {
-								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+//								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+//								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 								
-								fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
-								$job->error($e->getMessage())->finish()->save();
+//								fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
+								$job->error("Aborting job because: "  . $e->getMessage())->finish()->save();
 								exit($e->getCode());
 							}
 						}
-						
+
+                        /*
 						// Delete extracted files when done.
                         $job->cleanFiles();
 						
@@ -248,8 +272,10 @@ switch ($action) {
 						}
 						
 						$job->setInfo($info);
-						$job->finish()->save();
-						
+
+                        */
+                        $job->finish()->save();
+
 						break;
 					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
 						$job->start()->save();
@@ -314,7 +340,7 @@ switch ($action) {
 							$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 					
 							fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
-							$job->error($e->getMessage())->finish()->save();
+							$job->error("Aborting job because: " . $e->getMessage())->finish()->save();
 						}
 						break;
 					default:
