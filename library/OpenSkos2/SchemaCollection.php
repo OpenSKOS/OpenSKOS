@@ -1,7 +1,6 @@
 <?php
 namespace OpenSkos2;
 
-use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 
 /**
@@ -12,5 +11,9 @@ use OpenSkos2\Rdf\ResourceCollection;
  */
 class SchemaCollection extends ResourceCollection
 {
-
+    /**
+     * What is the basic resource for this collection.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = Schema::TYPE;
 }
