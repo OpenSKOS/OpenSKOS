@@ -88,7 +88,11 @@ class ResourceManager
             );
         }
         
-        // We can not have more than one resource with same uri.
+        if (count($resources) > 1) {
+            throw new \RuntimeException(
+                'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
+            );
+        }
         
         return $resources[0];
     }
