@@ -33,7 +33,8 @@ class Resource
     /**
      * @return array of RdfObject[]
      */
-    public function getProperties(){
+    public function getProperties()
+    {
         return $this->properties;
     }
 
@@ -41,7 +42,8 @@ class Resource
      * @param $predicate
      * @return RdfObject[]
      */
-    public function getProperty($predicate) {
+    public function getProperty($predicate)
+    {
         if (!isset($this->properties[$predicate])) {
             return [];
         } else {
@@ -61,7 +63,8 @@ class Resource
     /**
      * @return string
      */
-    public function getUri(){
+    public function getUri()
+    {
         return $this->uri;
     }
 
@@ -80,5 +83,14 @@ class Resource
     {
         return current($this->getProperty(self::PROPERTY_RDF_TYPE));
     }
-
+    
+    /**
+     * Copies the resource properties from other resource.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public static function fromResource(Resource $resource)
+    {
+        $bla = new static($resource->uri);
+        $bla->properties = $resource->properties;
+    }
 }
