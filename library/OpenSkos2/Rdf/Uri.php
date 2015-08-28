@@ -25,7 +25,6 @@ class Uri implements Object
         $this->value = $value;
     }
 
-
     /**
      * @return string
      */
@@ -34,6 +33,12 @@ class Uri implements Object
         return $this->value;
     }
 
-
-
+    /**
+     * Output the uri as string.
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->value;
+    }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php /**  * OpenSKOS  *  * LICENSE  *  * This source file is subject to the GPLv3 license that is bundled  * with this package in the file LICENSE.txt.  * It is also available through the world-wide-web at this URL:  * http://www.gnu.org/licenses/gpl-3.0.txt  *  * @category   OpenSKOS  * @package    OpenSKOS  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)  * @author     Picturae  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3  */
 /**
  * Created by PhpStorm.
  * User: jsmit
@@ -24,8 +24,15 @@ class ResourceManager
     /**
      * @var string
      */
-    private $graph;
-
+    protected $graph;
+    
+    /**
+     * What is the basic resource for this manager.
+     * Made to be extended and overwrited.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = null;
+    
     /**
      * ResourceManager constructor.
      * @param \EasyRdf_Sparql_Client $client
@@ -64,15 +71,18 @@ class ResourceManager
     }
 
     /**
+     * Fetch all resources matching the query.
      * @param string $query
      * @return ResourceCollection
      */
-    public function fetch($query = null)
+    public function fetch($query)
     {
-
+        $result = $this->client->query($query);
+        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
     
     /**
+     * Fetches a single resource matching the uri.
      * @param string $uri
      * @return Resource
      * @throws ResourceNotFoundException
@@ -81,7 +91,7 @@ class ResourceManager
     {
         // @TODO Add the graph here in the query.
         $result = $this->client->query('DESCRIBE <' . $uri . '>');
-        $resources = EasyRdf::graphToResourceCollection($result);
+        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
         
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(

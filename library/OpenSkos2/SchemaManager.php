@@ -11,5 +11,9 @@ use OpenSkos2\Rdf\ResourceManager;
  */
 class SchemaManager extends ResourceManager
 {
-
+    /**
+     * What is the basic resource for this manager.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = Schema::TYPE;
 }
