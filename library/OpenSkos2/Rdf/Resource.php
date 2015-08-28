@@ -8,7 +8,7 @@
 
 namespace OpenSkos2\Rdf;
 
-use OpenSkos2\Rdf\Object as RdfObject; //alias is used to help IDE to distinguish from \Object
+use OpenSkos2\Rdf\Object as RdfObject;
 
 class Resource
 {

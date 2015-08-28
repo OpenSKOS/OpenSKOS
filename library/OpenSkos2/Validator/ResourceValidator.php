@@ -11,18 +11,17 @@ namespace OpenSkos2\Validator;
 
 use OpenSkos2\Rdf\Resource;
 
-abstract class ResourceValidator
+interface ResourceValidator
 {
-    protected $errorMessage;
-
-    abstract public function validate(Resource $resource);
+    /**
+     * @param Resource $resource
+     * @return bool
+     */
+    public function validate(Resource $resource);
 
     /**
      * @return string
      */
-    public function getErrorMessage()
-    {
-        return $this->errorMessage;
-    }
+    public function getErrorMessage();
 
 }

@@ -11,5 +11,5 @@ use OpenSkos2\Rdf\Resource;
  */
 class Collection extends Resource
 {
-
+    const TYPE = 'http://www.w3.org/2004/02/skos/core#Collection';
 }
