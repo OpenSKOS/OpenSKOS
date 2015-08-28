@@ -21,7 +21,7 @@ namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
 
-class Resource
+class Resource implements ResourceIdentifier
 {
     const PROPERTY_RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 

@@ -20,7 +20,7 @@
 namespace OpenSkos2\Rdf;
 
 
-class Uri implements Object
+class Uri implements Object, ResourceIdentifier
 {
     /**
      * @var string
@@ -46,10 +46,16 @@ class Uri implements Object
 
     /**
      * Output the uri as string.
+     * @todo Should we use getUri instead?
      * @return string
      */
     public function __toString()
     {
         return $this->value;
+    }
+    
+    public function getUri()
+    {
+        return $this->getValue();
     }
 }
