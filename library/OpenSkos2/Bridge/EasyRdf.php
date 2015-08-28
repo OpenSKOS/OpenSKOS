@@ -7,7 +7,13 @@ use EasyRdf_Literal;
 use EasyRdf_Resource;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Concept;
+use OpenSkos2\Schema;
+use OpenSkos2\Collection;
 use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\ConceptCollection;
+use OpenSkos2\SchemaCollection;
+use OpenSkos2\CollectionCollection;
 use OpenSkos2\Rdf\Uri;
 
 /**
@@ -33,7 +39,7 @@ class EasyRdf
                 continue;
             }
 
-            $myResource = new Resource($resource->getUri());
+            $myResource = self::factory($type->getUri(), $resource->getUri());
 
             foreach ($resource->propertyUris() as $propertyUri) {
 
@@ -75,5 +81,25 @@ class EasyRdf
         $graph = $easyResource->getGraph();
 
         return $graph;
+    }
+    
+    /**
+     * 
+     * @param string $type
+     * @param string $uri
+     * @return \OpenSkos2\Bridge\Schema|\OpenSkos2\Bridge\Concept|\OpenSkos2\Bridge\Collection|Resource
+     */
+    public static function factory($type, $uri = null)
+    {
+        switch ($type) {
+            case Concept::TYPE:
+                return new Concept($uri);
+            case Schema::TYPE:
+                return new Schema($uri);
+            case Collection::TYPE:
+                return new Collection($uri);
+            default:
+                return new Resource($uri);
+        }
     }
 }
