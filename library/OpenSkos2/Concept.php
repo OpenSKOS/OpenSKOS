@@ -1,15 +1,26 @@
 <?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 
-/**
- * Created by PhpStorm.
- * User: jsmit
- * Date: 26/08/2015
- * Time: 15:54
- */
 class Concept extends Resource
 {
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
@@ -59,7 +70,7 @@ class Concept extends Resource
     const PROPERTY_NARROWMATCH = 'http://www.w3.org/2004/02/skos/core#narrowMatch';
     const PROPERTY_RELATEDMATCH = 'http://www.w3.org/2004/02/skos/core#relatedMatch';
 
-    //DctermsDateFields
+    //Dcterms
 //    const PROPERTY_DCTERMS_DATESUBMITTED = 'http://www.w3.org/2004/02/skos/core#dcterms_dateSubmitted';
 //    const PROPERTY_DCTERMS_DATEACCEPTED = 'http://www.w3.org/2004/02/skos/core#dcterms_dateAccepted';
 //    const PROPERTY_DCTERMS_MODIFIED = 'http://www.w3.org/2004/02/skos/core#dcterms_modified';
@@ -111,7 +122,7 @@ class Concept extends Resource
             self::PROPERTY_NARROWMATCH,
             self::PROPERTY_RELATEDMATCH,
         ],
-//        'DctermsDateFields' => [
+//        'Dcterms
 //            self::PROPERTY_DCTERMS_DATESUBMITTED,
 //            self::PROPERTY_DCTERMS_DATEACCEPTED,
 //            self::PROPERTY_DCTERMS_MODIFIED,
