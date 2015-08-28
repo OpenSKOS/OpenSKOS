@@ -53,18 +53,17 @@ $client = $diContainer->get('EasyRdf_Sparql_Client');
 $client->clear('default');
 
 
-$file = new \OpenSkos2\File($OPTS->file);
+
 
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
+$importer = new \OpenSkos2\Import\Command($resourceManager);
+$message = new \OpenSkos2\Import\Message($OPTS->file);
 
-$validator = new \OpenSkos2\Validator\Validator();
-$validator->validateCollection($file->getResources(), $logger);
+$importer->handle($message);
 
-foreach ($myResources as $resourceToInsert) {
-    $resourceManager->insert($resourceToInsert);
-}
+
 
 
 echo "done!";

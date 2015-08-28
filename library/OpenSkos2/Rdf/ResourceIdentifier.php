@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -20,34 +19,10 @@
 namespace OpenSkos2\Rdf;
 
 
-class Uri implements Object, ResourceIdentifier
+interface ResourceIdentifier
 {
-    /**
-     * @var string
-     */
-    protected $value;
-
-    /**
-     * Literal constructor.
-     * @param string $value
-     */
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
-
     /**
      * @return string
      */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    public function getUri()
-    {
-        return $this->getValue();
-    }
-
+    public function getUri();
 }
