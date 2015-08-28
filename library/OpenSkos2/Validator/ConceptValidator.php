@@ -12,7 +12,7 @@ namespace OpenSkos2\Validator;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Resource;
 
-abstract class ConceptValidator extends ResourceValidator
+abstract class ConceptValidator extends AbstractResourceValidator
 {
     /**
      * @param Resource $resource

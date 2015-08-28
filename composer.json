@@ -5,7 +5,8 @@
         "easyrdf/easyrdf": "^0.9.1",
         "psr/log": "^1.0",
         "php-di/zf1-bridge": "^3.1",
-        "doctrine/cache": "~1.0"
+        "doctrine/cache": "~1.0",
+        "monolog/monolog": "^1.16"
     },
     "autoload": {
         "psr-4": {

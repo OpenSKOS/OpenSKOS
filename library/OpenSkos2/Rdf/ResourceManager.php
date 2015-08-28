@@ -12,6 +12,7 @@ namespace OpenSkos2\Rdf;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
+use OpenSkos2\Validator\Validator;
 
 class ResourceManager
 {

@@ -5,16 +5,13 @@ namespace OpenSkos2\Bridge;
 use EasyRdf_Graph;
 use EasyRdf_Literal;
 use EasyRdf_Resource;
+use OpenSkos2\Collection;
+use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Concept;
-use OpenSkos2\Schema;
-use OpenSkos2\Collection;
 use OpenSkos2\Rdf\ResourceCollection;
-use OpenSkos2\ConceptCollection;
-use OpenSkos2\SchemaCollection;
-use OpenSkos2\CollectionCollection;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Schema;
 
 /**
  * Created by PhpStorm.
@@ -25,12 +22,13 @@ use OpenSkos2\Rdf\Uri;
 class EasyRdf
 {
     /**
-     * @param EasyRdf_Graph $graph
+     * @param EasyRdf_Graph $graph to $read
      * @return ResourceCollection
      */
     public static function graphToResourceCollection(EasyRdf_Graph $graph)
     {
-        $myResources = new ResourceCollection();
+        $collection = new ResourceCollection();
+
         foreach ($graph->resources() as $resource) {
             /** @var $resource EasyRdf_Resource */
             $type = $resource->get('rdf:type');
@@ -53,9 +51,9 @@ class EasyRdf
                 }
             }
 
-            $myResources [] = $myResource;
+            $collection [] = $myResource;
         }
-        return $myResources;
+        return $collection;
     }
 
     /**
@@ -87,7 +85,7 @@ class EasyRdf
      * 
      * @param string $type
      * @param string $uri
-     * @return \OpenSkos2\Bridge\Schema|\OpenSkos2\Bridge\Concept|\OpenSkos2\Bridge\Collection|Resource
+     * @return Resource
      */
     public static function factory($type, $uri = null)
     {
