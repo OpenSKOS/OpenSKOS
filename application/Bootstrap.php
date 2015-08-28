@@ -79,7 +79,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             $cacheFolder = $resources['cachemanager']['general']['backend']['options']['cache_dir'];
             $cache = new \Doctrine\Common\Cache\FilesystemCache($cacheFolder);
         } else {
-            $cache = new ArrayCache();
+            $cache = new \Doctrine\Common\Cache\ArrayCache();
         }
         $builder->setDefinitionCache($cache);
 

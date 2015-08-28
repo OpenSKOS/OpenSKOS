@@ -70,24 +70,30 @@ class ResourceManager
     {
 
     }
-
-    protected function resourceToEasyRdfGraph(Resource $resource){
-        $easyResource = new \EasyRdf_Resource($resource->getUri(), new \EasyRdf_Graph());
-        foreach ($resource->getProperties() as $propName => $property) {
-            foreach ($property as $value) {
-                /**
-                 * @var $value Object
-                 */
-                if ($value instanceof Literal) {
-                    $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
-                }else {
-                    $easyResource->addResource($propName, $value->getValue());
-                }
-            }
+    
+    /**
+     * @param string $uri
+     * @return Resource
+     * @throws ResourceNotFoundException
+     */
+    public function fetchByUri($uri)
+    {
+        // @TODO Add the graph here in the query.
+        $result = $this->client->query('DESCRIBE <' . $uri . '>');
+        $resources = EasyRdf::graphToResourceCollection($result);
+        
+        if (count($resources) == 0) {
+            throw new ResourceNotFoundException(
+                'The requested resource <' . $uri . '> was not found.'
+            );
         }
-
-        $graph = $easyResource->getGraph();
-
-        return $graph;
+        
+        if (count($resources) > 1) {
+            throw new \RuntimeException(
+                'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
+            );
+        }
+        
+        return $resources[0];
     }
 }
