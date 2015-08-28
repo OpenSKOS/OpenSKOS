@@ -35,7 +35,7 @@ class Editor_Models_ConceptValidator_ExpiredWithRelations extends Editor_Models_
 		
 		$isValid = true;
 		
-		if ($extraData['status'] == 'expired' && $concept->hasAnyRelations()) {
+		if ($extraData['status'] == OpenSKOS_Concept_Status::OBSOLETE && $concept->hasAnyRelations()) {
 			$isValid = false;
 			$this->_setErrorMessage(_('Can not change status to "expired" while there are still relations to other concepts.'));
 		} else {
@@ -45,7 +45,7 @@ class Editor_Models_ConceptValidator_ExpiredWithRelations extends Editor_Models_
 			foreach ($allRelations as $relations) {
 				if (! empty($relations)) {
 					foreach ($relations as $relatedConcept) {
-						if ($relatedConcept['status'] == 'expired') {
+						if ($relatedConcept['status'] == OpenSKOS_Concept_Status::OBSOLETE) {
 							$isValid = false;
 							$relatedConcept = new Editor_Models_Concept($relatedConcept);
 							$this->_addConflictedConcept($relatedConcept);
