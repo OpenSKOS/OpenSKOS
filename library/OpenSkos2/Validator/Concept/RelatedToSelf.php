@@ -36,7 +36,7 @@ class RelatedToSelf extends ConceptValidator
         $ownUri = $concept->getUri();
         foreach ($relationFields as $field) {
             foreach ($concept->getProperty($field) as $object) {
-                if ($object->getValue() == $ownUri) {
+                if ($object->getUri() == $ownUri) {
                     $this->errorMessage ='The concept can not be related to itself.';
                     return false;
                 }

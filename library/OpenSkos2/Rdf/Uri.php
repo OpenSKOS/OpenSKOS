@@ -25,7 +25,7 @@ class Uri implements Object, ResourceIdentifier
     /**
      * @var string
      */
-    protected $value;
+    protected $uri;
 
     /**
      * Literal constructor.
@@ -33,21 +33,15 @@ class Uri implements Object, ResourceIdentifier
      */
     public function __construct($value)
     {
-        $this->value = $value;
+        $this->uri = $value;
     }
 
 
     /**
      * @return string
      */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
     public function getUri()
     {
-        return $this->getValue();
+        return $this->uri;
     }
-
 }

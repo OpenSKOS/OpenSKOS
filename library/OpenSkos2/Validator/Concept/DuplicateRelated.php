@@ -35,11 +35,11 @@ class DuplicateRelated extends ConceptValidator
 
         $loopedConcepts = [];
         foreach ($relatedTerms as $relatedTerm) {
-            if (isset($loopedConcepts[$relatedTerm->getValue()])) {
-                $this->errorMessage = "Related term {$relatedTerm->getValue()} is defined more than once";
+            if (isset($loopedConcepts[$relatedTerm->getUri()])) {
+                $this->errorMessage = "Related term {$relatedTerm->getUri()} is defined more than once";
                 return false;
             }
-            $loopedConcepts[$relatedTerm->getValue()] = true;
+            $loopedConcepts[$relatedTerm->getUri()] = true;
         }
 
         return true;

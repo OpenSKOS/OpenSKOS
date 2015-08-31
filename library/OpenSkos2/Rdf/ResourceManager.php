@@ -92,7 +92,7 @@ class ResourceManager
         // @TODO Add the graph here in the query.
         $result = $this->client->query('DESCRIBE <' . $uri . '>');
         $resources = EasyRdf::graphToResourceCollection($result);
-        
+
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
                 'The requested resource <' . $uri . '> was not found.'

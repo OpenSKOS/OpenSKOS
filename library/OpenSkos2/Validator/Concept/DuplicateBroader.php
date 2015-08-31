@@ -35,11 +35,11 @@ class DuplicateBroader extends ConceptValidator
 
         $loopedConcepts = [];
         foreach ($broaderTerms as $broaderTerm) {
-            if (isset($loopedConcepts[$broaderTerm->getValue()])) {
-                $this->errorMessage = "Broader term {$broaderTerm->getValue()} is defined more than once";
+            if (isset($loopedConcepts[$broaderTerm->getUri()])) {
+                $this->errorMessage = "Broader term {$broaderTerm->getUri()} is defined more than once";
                 return false;
             }
-            $loopedConcepts[$broaderTerm->getValue()] = true;
+            $loopedConcepts[$broaderTerm->getUri()] = true;
         }
 
         return true;

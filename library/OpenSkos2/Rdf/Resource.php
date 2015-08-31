@@ -21,25 +21,11 @@ namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
 
-class Resource implements ResourceIdentifier
+class Resource extends Uri implements ResourceIdentifier
 {
     const PROPERTY_RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
     protected $properties = [];
-
-    /**
-     * @var string
-     */
-    private $uri;
-
-    /**
-     * Resource constructor.
-     * @param string $uri
-     */
-    public function __construct($uri = null)
-    {
-        $this->uri = $uri;
-    }
 
     /**
      * @return array of RdfObject[]
@@ -50,7 +36,7 @@ class Resource implements ResourceIdentifier
     }
 
     /**
-     * @param $predicate
+     * @param string $predicate
      * @return RdfObject[]
      */
     public function getProperty($predicate)
@@ -63,12 +49,29 @@ class Resource implements ResourceIdentifier
     }
 
     /**
-     * @param $propertyName
+     * @param string $propertyName
      * @param RdfObject $value
      */
     public function addProperty($propertyName, RdfObject $value)
     {
         $this->properties[$propertyName][] = $value;
+    }
+
+    /**
+     * @param string $propertyName
+     */
+    public function unsetProperty($propertyName)
+    {
+        unset ($this->properties[$propertyName]);
+    }
+
+    /**
+     * @param string $propertyName
+     * @return bool
+     */
+    public function hasProperty($propertyName)
+    {
+        return isset($this->properties[$propertyName]);
     }
 
     /**
