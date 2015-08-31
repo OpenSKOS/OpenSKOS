@@ -51,11 +51,8 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 $importer = new \OpenSkos2\Import\Command($resourceManager);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
-    $OPTS->file,
-    new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'),
-    true,
-    OpenSKOS_Concept_Status::CANDIDATE,
-    true
+    $OPTS->file, new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'), true, OpenSKOS_Concept_Status::CANDIDATE,
+    false, true, 'nl', true, false
 );
 
 $importer->handle($message);

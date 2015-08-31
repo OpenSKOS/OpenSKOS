@@ -102,8 +102,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
 			$form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));            
 			$form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));
-			$form->addElement('checkbox', 'useUriAsIdentifier', array('label' => _('Use uri as identifier if concept notation does not exist in the importing concept.')));
-			
+
 			$form->addElement('submit', 'submit', array('label'=>'Submit'));
 		}
         
