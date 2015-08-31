@@ -23,10 +23,5 @@ namespace OpenSkos2\Rdf;
 interface Object
 {
 
-    /**
-     * @return string
-     */
-    public function getValue();
-
 
 }

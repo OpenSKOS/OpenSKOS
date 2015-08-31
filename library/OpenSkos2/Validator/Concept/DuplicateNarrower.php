@@ -35,11 +35,11 @@ class DuplicateNarrower extends ConceptValidator
 
         $loopedConcepts = [];
         foreach ($narrowerTerms as $narrowerTerm) {
-            if (isset($loopedConcepts[$narrowerTerm->getValue()])) {
-                $this->errorMessage = "Narrower term {$narrowerTerm->getValue()} is defined more than once";
+            if (isset($loopedConcepts[$narrowerTerm->getUri()])) {
+                $this->errorMessage = "Narrower term {$narrowerTerm->getUri()} is defined more than once";
                 return false;
             }
-            $loopedConcepts[$narrowerTerm->getValue()] = true;
+            $loopedConcepts[$narrowerTerm->getUri()] = true;
         }
 
         return true;

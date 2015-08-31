@@ -45,21 +45,18 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 
-
-/**
- * @var $client EasyRdf_Sparql_Client
- */
-$client = $diContainer->get('EasyRdf_Sparql_Client');
-$client->clear('default');
-
-
-
-
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $importer = new \OpenSkos2\Import\Command($resourceManager);
-$message = new \OpenSkos2\Import\Message($OPTS->file);
+$importer->setLogger($logger);
+$message = new \OpenSkos2\Import\Message(
+    $OPTS->file,
+    new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'),
+    true,
+    OpenSKOS_Concept_Status::CANDIDATE,
+    true
+);
 
 $importer->handle($message);
 

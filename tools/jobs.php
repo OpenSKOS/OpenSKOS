@@ -174,8 +174,8 @@ switch ($action) {
                         $jobLogger = $job->getLogger();
                         $importer->setLogger($jobLogger);
 
+                        $collectionObject = new \OpenSkos2\Collection("http://example.com/collection#1");
 
-//                        var_dump($job); exit;
 						$job->start()->save();
 						
 						$importFiles = $job->getFilesList();
@@ -189,23 +189,7 @@ switch ($action) {
 							$solrClient->commit();
 							$solrClient->optimize();
 						}
-						
-						// Prepare import arguments and call the parser process for each file.
-						$arguments = array();
-						$arguments[] = '--env';
-						$arguments[] = $OPTS->env;
-						
-						// Collection args
-						$arguments[] = '--tenant';
-						$arguments[] = $collection->tenant;
-						$arguments[] = '--collection';
-						$arguments[] = $collection->id;
-						
-						$arguments[] = '--status';
-						$arguments[] = $job->getParam('status');
-						if ((bool)$job->getParam('ignoreIncomingStatus')) {
-							$arguments[] = '--ignoreIncomingStatus';
-						}
+
 						$arguments[] = '--lang';
 						$arguments[] = $job->getParam('lang');
 						if ((bool)$job->getParam('toBeChecked')) {
@@ -213,9 +197,6 @@ switch ($action) {
 						}
 						if ((bool)$job->getParam('purge')) {
 							$arguments[] = '--purge';
-						}
-                        if ((bool)$job->getParam('onlyNewConcepts')) {
-							$arguments[] = '--onlyNewConcepts';
 						}
                         if ((bool)$job->getParam('useUriAsIdentifier')) {
 							$arguments[] = '--useUriAsIdentifier';
@@ -227,7 +208,13 @@ switch ($action) {
 						$notImportedNotations = array();
                         */
 						foreach ($importFiles as $filePath) {
-                            $message = new \OpenSkos2\Import\Message($filePath);
+                            $message = new \OpenSkos2\Import\Message(
+                                $filePath,
+                                $collectionObject,
+                                (bool)$job->getParam('ignoreIncomingStatus'),
+                                $job->getParam('status'),
+                                $job->getParam('onlyNewConcepts')
+                            );
 
 
 //                            $parserOpts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);

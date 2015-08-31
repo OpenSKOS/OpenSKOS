@@ -70,11 +70,15 @@ class Concept extends Resource
     const PROPERTY_NARROWMATCH = 'http://www.w3.org/2004/02/skos/core#narrowMatch';
     const PROPERTY_RELATEDMATCH = 'http://www.w3.org/2004/02/skos/core#relatedMatch';
 
+    //OpenSKOS specific
+    const PROPERTY_OPENSKOS_STATUS = 'http://openskos.org/xmlns#status';
+    const PROPERTY_OPENSKOS_TOBECHECKED = 'http://openskos.org/xmlns#toBeChecked';
+
     //Dcterms
-//    const PROPERTY_DCTERMS_DATESUBMITTED = 'http://www.w3.org/2004/02/skos/core#dcterms_dateSubmitted';
-//    const PROPERTY_DCTERMS_DATEACCEPTED = 'http://www.w3.org/2004/02/skos/core#dcterms_dateAccepted';
-//    const PROPERTY_DCTERMS_MODIFIED = 'http://www.w3.org/2004/02/skos/core#dcterms_modified';
-//    const PROPERTY_DCTERMS_CREATOR = 'http://www.w3.org/2004/02/skos/core#dcterms_creator';
+    const PROPERTY_DCTERMS_DATESUBMITTED = 'http://purl.org/dc/terms/dateSubmitted';
+    const PROPERTY_DCTERMS_DATEACCEPTED = 'http://purl.org/dc/terms/dateAccepted';
+    const PROPERTY_DCTERMS_MODIFIED = '	http://purl.org/dc/terms/modified';
+    const PROPERTY_DCTERMS_CREATOR = 'http://purl.org/dc/elements/1.1/creator';
 
     public static $classes = array(
         'ConceptSchemes' => [
