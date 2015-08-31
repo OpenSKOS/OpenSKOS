@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,15 +15,12 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-namespace OpenSkos2;
 
-use OpenSkos2\Rdf\ResourceCollection;
+namespace OpenSkos2\Exception;
 
-class CollectionCollection extends ResourceCollection
+/**
+ * The required resource was concept for example, but the returned resource is schema or something else.
+ */
+class InvalidResourceTypeException extends OpenskosException
 {
-    /**
-     * What is the basic resource for this collection.
-     * @var string NULL means any resource.
-     */
-    protected $resourceType = Collection::TYPE;
 }

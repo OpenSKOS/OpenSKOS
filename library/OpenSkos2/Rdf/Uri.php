@@ -36,10 +36,15 @@ class Uri implements Object, ResourceIdentifier
         $this->uri = $value;
     }
 
-
     /**
+     * Output the uri as string.
      * @return string
      */
+    public function __toString()
+    {
+        return $this->uri;
+    }
+
     public function getUri()
     {
         return $this->uri;

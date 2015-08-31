@@ -34,8 +34,15 @@ class ResourceManager
     /**
      * @var string
      */
-    private $graph;
-
+    protected $graph;
+    
+    /**
+     * What is the basic resource for this manager.
+     * Made to be extended and overwrited.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = null;
+    
     /**
      * ResourceManager constructor.
      * @param \EasyRdf_Sparql_Client $client
@@ -74,15 +81,18 @@ class ResourceManager
     }
 
     /**
+     * Fetch all resources matching the query.
      * @param string $query
      * @return ResourceCollection
      */
-    public function fetch($query = null)
+    public function fetch($query)
     {
-
+        $result = $this->client->query($query);
+        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
     
     /**
+     * Fetches a single resource matching the uri.
      * @param string $uri
      * @return Resource
      * @throws ResourceNotFoundException
@@ -91,8 +101,8 @@ class ResourceManager
     {
         // @TODO Add the graph here in the query.
         $result = $this->client->query('DESCRIBE <' . $uri . '>');
-        $resources = EasyRdf::graphToResourceCollection($result);
-
+        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+        
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
                 'The requested resource <' . $uri . '> was not found.'
