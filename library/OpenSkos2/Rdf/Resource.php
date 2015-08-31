@@ -55,6 +55,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function addProperty($propertyName, RdfObject $value)
     {
         $this->properties[$propertyName][] = $value;
+        return $this;
     }
 
     /**
@@ -63,6 +64,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function unsetProperty($propertyName)
     {
         unset ($this->properties[$propertyName]);
+        return $this;
     }
 
     /**
@@ -73,6 +75,18 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return isset($this->properties[$propertyName]);
     }
+
+    /**
+     * @param string $propertyName
+     * @param RdfObject $value
+     * @return $this
+     */
+    public function setProperty($propertyName, RdfObject $value)
+    {
+        $this->properties[$propertyName] = [$value];
+        return $this;
+    }
+
 
     /**
      * @return string

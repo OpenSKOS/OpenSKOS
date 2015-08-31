@@ -67,10 +67,6 @@ class Message
      * @var bool
      */
     private $toBeChecked;
-    /**
-     * @var bool
-     */
-    private $uriAsScheme;
 
     /**
      * Message constructor.
@@ -83,7 +79,6 @@ class Message
      * @param string $fallbackLanguage
      * @param bool $clearCollection
      * @param bool $deleteSchemes
-     * @param bool $uriAsScheme
      */
     public function __construct(
         $file,
@@ -94,8 +89,7 @@ class Message
         $toBeChecked = false,
         $fallbackLanguage = null,
         $clearCollection = false,
-        $deleteSchemes = false,
-        $uriAsScheme = false
+        $deleteSchemes = false
     ) {
         $this->file = $file;
         $this->collection = $collection;
@@ -106,7 +100,6 @@ class Message
         $this->fallbackLanguage = $fallbackLanguage;
         $this->clearCollection = $clearCollection;
         $this->deleteSchemes = $deleteSchemes;
-        $this->uriAsScheme = $uriAsScheme;
     }
 
     /**
@@ -180,14 +173,5 @@ class Message
     {
         return $this->clearCollection;
     }
-
-    /**
-     * @return bool
-     */
-    public function getUriAsIdentifier()
-    {
-        return $this->uriAsIdentifier;
-    }
-
 
 }
