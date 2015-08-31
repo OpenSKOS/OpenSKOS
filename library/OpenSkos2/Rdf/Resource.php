@@ -97,14 +97,4 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return current($this->getProperty(self::PROPERTY_RDF_TYPE));
     }
-    
-    /**
-     * Copies the resource properties from other resource.
-     * @param \OpenSkos2\Rdf\Resource $resource
-     */
-    public static function fromResource(Resource $resource)
-    {
-        $bla = new static($resource->uri);
-        $bla->properties = $resource->properties;
-    }
 }

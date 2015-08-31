@@ -22,4 +22,9 @@ use OpenSkos2\Rdf\ResourceManager;
 
 class CollectionManager extends ResourceManager
 {
+    /**
+     * What is the basic resource for this manager.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = Collection::TYPE;
 }

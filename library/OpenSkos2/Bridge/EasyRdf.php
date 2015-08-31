@@ -29,16 +29,20 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Schema;
+use OpenSkos2\ConceptCollection;
+use OpenSkos2\SchemaCollection;
+use OpenSkos2\CollectionCollection;
 
 class EasyRdf
 {
     /**
      * @param EasyRdf_Graph $graph to $read
+     * @param string $expectedType If expected type is set, a collection of that type will be enforced.
      * @return ResourceCollection
      */
-    public static function graphToResourceCollection(EasyRdf_Graph $graph)
+    public static function graphToResourceCollection(EasyRdf_Graph $graph, $expectedType = null)
     {
-        $collection = new ResourceCollection();
+        $collection = self::createResourceCollection($expectedType);
 
         foreach ($graph->resources() as $resource) {
             /** @var $resource EasyRdf_Resource */
@@ -48,57 +52,62 @@ class EasyRdf
                 continue;
             }
 
-            $myResource = self::factory($type->getUri(), $resource->getUri());
+            $myResource = self::createResource($type->getUri(), $resource->getUri());
 
             foreach ($resource->propertyUris() as $propertyUri) {
 
                 foreach ($resource->all(new EasyRdf_Resource($propertyUri)) as $propertyValue) {
                     if ($propertyValue instanceof EasyRdf_Literal) {
-                        $myResource->addProperty($propertyUri,
-                            new Literal($propertyValue->getValue(), $propertyValue->getLang()));
+                        $myResource->addProperty(
+                            $propertyUri,
+                            new Literal($propertyValue->getValue(), $propertyValue->getLang())
+                        );
                     } elseif ($propertyValue instanceof EasyRdf_Resource) {
                         $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
             }
 
-            $collection [] = $myResource;
+            $collection[] = $myResource;
         }
         return $collection;
     }
-
+    
     /**
      * @param Resource $resource
      * @return EasyRdf_Graph
      */
     public static function resourceToGraph(Resource $resource)
     {
-        $easyResource = new \EasyRdf_Resource($resource->getUri(), new \EasyRdf_Graph());
-        foreach ($resource->getProperties() as $propName => $property) {
-            foreach ($property as $value) {
-                /**
-                 * @var $value Object
-                 */
-                if ($value instanceof Literal) {
-                    $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
-                } elseif ($value instanceof Uri) {
-                    $easyResource->addResource($propName, $value->getUri());
-                }
-            }
-        }
-
-        $graph = $easyResource->getGraph();
+        $graph = new \EasyRdf_Graph();
+        
+        self::addResourceToGraph($resource, $graph);
 
         return $graph;
     }
     
     /**
-     * 
+     * @param ResourceCollection $collection
+     * @return EasyRdf_Graph
+     */
+    public static function resourceCollectionToGraph(ResourceCollection $collection)
+    {
+        $graph = new \EasyRdf_Graph();
+        
+        foreach ($collection as $resource) {
+            self::addResourceToGraph($resource, $graph);
+        }
+
+        return $graph;
+    }
+    
+    /**
+     * Creates a resource matching the give type.
      * @param string $type
      * @param string $uri
      * @return Resource
      */
-    public static function factory($type, $uri = null)
+    protected static function createResource($type, $uri = null)
     {
         switch ($type) {
             case Concept::TYPE:
@@ -109,6 +118,48 @@ class EasyRdf
                 return new Collection($uri);
             default:
                 return new Resource($uri);
+        }
+    }
+    
+    /**
+     * Creates a resource collection for the desired type.
+     * @param string $type
+     * @param string $uri
+     * @return Resource
+     */
+    protected static function createResourceCollection($type)
+    {
+        switch ($type) {
+            case Concept::TYPE:
+                return new ConceptCollection();
+            case Schema::TYPE:
+                return new SchemaCollection();
+            case Collection::TYPE:
+                return new CollectionCollection();
+            default:
+                return new ResourceCollection();
+        }
+    }
+    
+    /**
+     * @param Resource $resource
+     * @param EasyRdf_Graph $graph
+     */
+    protected static function addResourceToGraph(Resource $resource, \EasyRdf_Graph $graph)
+    {
+        $easyResource = new \EasyRdf_Resource($resource->getUri(), $graph);
+        
+        foreach ($resource->getProperties() as $propName => $property) {
+            foreach ($property as $value) {
+                /**
+                 * @var $value Object
+                 */
+                if ($value instanceof Literal) {
+                    $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
+                } else {
+                    $easyResource->addResource($propName, $value->getValue());
+                }
+            }
         }
     }
 }

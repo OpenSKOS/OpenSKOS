@@ -19,4 +19,5 @@ to license@zend.com so we can send you a copy immediately.
     <xs:attribute name="start" type="xs:integer"/>
     <xs:attribute name="maxScore" type="xs:decimal"/>
     <xs:element name="status" type="xs:string"/>
+    <xs:element name="toBeChecked" type="xs:boolean"/>
 </xs:schema>

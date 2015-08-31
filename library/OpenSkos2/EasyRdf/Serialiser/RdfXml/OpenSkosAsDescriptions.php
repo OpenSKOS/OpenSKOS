@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,15 +15,17 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-namespace OpenSkos2;
 
-use OpenSkos2\Rdf\ResourceCollection;
+namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 
-class CollectionCollection extends ResourceCollection
+class OpenSkosAsDescriptions extends OpenSkos
 {
     /**
-     * What is the basic resource for this collection.
-     * @var string NULL means any resource.
+     * @param \EasyRdf_Resource $res
+     * @return string
      */
-    protected $resourceType = Collection::TYPE;
+    protected function determineResType(\EasyRdf_Resource $res)
+    {
+        return 'rdf:Description';
+    }
 }

@@ -16,11 +16,16 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 
 class ConceptManager extends ResourceManager
 {
-
+    /**
+     * What is the basic resource for this manager.
+     * @var string NULL means any resource.
+     */
+    protected $resourceType = Concept::TYPE;
 }
