@@ -157,7 +157,7 @@ class EasyRdf
                 if ($value instanceof Literal) {
                     $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
                 } else {
-                    $easyResource->addResource($propName, $value->getValue());
+                    $easyResource->addResource($propName, $value->getUri());
                 }
             }
         }
