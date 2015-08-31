@@ -79,6 +79,12 @@ class Literal implements Object
         return $this;
     }
 
-
-
+    /**
+     * Output the literal as string.
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getValue() . '@' . $this->getLanguage();
+    }
 }
