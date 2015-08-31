@@ -22,6 +22,10 @@ namespace OpenSkos2\Rdf;
 
 class Literal implements Object
 {
+    CONST TYPE_DATETIME = "http://www.w3.org/2001/XMLSchema#datetime";
+    const TYPE_BOOL = "http://www.w3.org/2001/XMLSchema#bool";
+
+
     /**
      * @var string
      */
@@ -33,14 +37,20 @@ class Literal implements Object
     protected $value;
 
     /**
+     * @var string
+     */
+    private $type;
+
+    /**
      * Literal constructor.
      * @param string $value
      * @param string $language
      */
-    public function __construct($value, $language = null)
+    public function __construct($value, $language = null, $type = null)
     {
         $this->value = $value;
         $this->language = $language;
+        $this->type = $type;
     }
 
     /**
@@ -77,6 +87,14 @@ class Literal implements Object
     {
         $this->language = $language;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
 

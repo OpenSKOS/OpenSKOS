@@ -77,7 +77,7 @@ class Concept extends Resource
     //Dcterms
     const PROPERTY_DCTERMS_DATESUBMITTED = 'http://purl.org/dc/terms/dateSubmitted';
     const PROPERTY_DCTERMS_DATEACCEPTED = 'http://purl.org/dc/terms/dateAccepted';
-    const PROPERTY_DCTERMS_MODIFIED = '	http://purl.org/dc/terms/modified';
+    const PROPERTY_DCTERMS_MODIFIED = 'http://purl.org/dc/terms/modified';
     const PROPERTY_DCTERMS_CREATOR = 'http://purl.org/dc/elements/1.1/creator';
 
     public static $classes = array(

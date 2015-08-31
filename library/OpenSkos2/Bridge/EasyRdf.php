@@ -23,15 +23,16 @@ use EasyRdf_Graph;
 use EasyRdf_Literal;
 use EasyRdf_Resource;
 use OpenSkos2\Collection;
+use OpenSkos2\CollectionCollection;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptCollection;
+use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Schema;
-use OpenSkos2\ConceptCollection;
 use OpenSkos2\SchemaCollection;
-use OpenSkos2\CollectionCollection;
 
 class EasyRdf
 {
@@ -60,7 +61,11 @@ class EasyRdf
                     if ($propertyValue instanceof EasyRdf_Literal) {
                         $myResource->addProperty(
                             $propertyUri,
-                            new Literal($propertyValue->getValue(), $propertyValue->getLang())
+                            new Literal(
+                                $propertyValue->getValue(),
+                                $propertyValue->getLang(),
+                                $propertyValue->getDatatypeUri()
+                            )
                         );
                     } elseif ($propertyValue instanceof EasyRdf_Resource) {
                         $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
@@ -140,10 +145,11 @@ class EasyRdf
                 return new ResourceCollection();
         }
     }
-    
+
     /**
-     * @param Resource $resource
+     * @param Resource|Resource $resource
      * @param EasyRdf_Graph $graph
+     * @throws InvalidArgumentException
      */
     protected static function addResourceToGraph(Resource $resource, \EasyRdf_Graph $graph)
     {
@@ -155,9 +161,14 @@ class EasyRdf
                  * @var $value Object
                  */
                 if ($value instanceof Literal) {
-                    $easyResource->addLiteral($propName, $value->getValue(), $value->getLanguage());
+                    $easyResource->addLiteral($propName,
+                        new EasyRdf_Literal($value->getValue(), $value->getLanguage(), $value->getType()));
+                } elseif ($value instanceof Uri) {
+                    $easyResource->addResource($propName, $value->getUri());
                 } else {
-                    $easyResource->addResource($propName, $value->getValue());
+                    throw new InvalidArgumentException(
+                        "Unexpected value found for property {$propName} " . var_export($value)
+                    );
                 }
             }
         }

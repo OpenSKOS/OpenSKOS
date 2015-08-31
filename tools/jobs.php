@@ -180,87 +180,28 @@ switch ($action) {
 						
 						$importFiles = $job->getFilesList();
 
-
-                        /*
-						// If delete before import option is set - remove all concepts in the collection.
-						if ((bool)$job->getParam('deletebeforeimport')) {
-							$solrClient = Zend_Registry::get('OpenSKOS_Solr');
-							$solrClient->delete('collection:' . $collection->id);
-							$solrClient->commit();
-							$solrClient->optimize();
-						}
-
-						$arguments[] = '--lang';
-						$arguments[] = $job->getParam('lang');
-						if ((bool)$job->getParam('toBeChecked')) {
-							$arguments[] = '--toBeChecked';
-						}
-						if ((bool)$job->getParam('purge')) {
-							$arguments[] = '--purge';
-						}
-                        if ((bool)$job->getParam('useUriAsIdentifier')) {
-							$arguments[] = '--useUriAsIdentifier';
-						}
-                        
-						$arguments[] = '--commit';
-                        
-						$duplicateConceptSchemes = array();
-						$notImportedNotations = array();
-                        */
 						foreach ($importFiles as $filePath) {
                             $message = new \OpenSkos2\Import\Message(
-                                $filePath,
-                                $collectionObject,
+                                $filePath, $collectionObject,
                                 (bool)$job->getParam('ignoreIncomingStatus'),
                                 $job->getParam('status'),
-                                $job->getParam('onlyNewConcepts')
+                                $job->getParam('onlyNewConcepts'),
+                                (bool)$job->getParam('toBeChecked'),
+                                $job->getParam('lang'),
+                                (bool)$job->getParam('deletebeforeimport'),
+                                (bool)$job->getParam('purge')
                             );
 
-
-//                            $parserOpts = new Zend_Console_Getopt(OpenSKOS_Rdf_Parser::$get_opts);
-//							$parserOpts->setArguments(array_merge($arguments, array($filePath))); // The last argument must be the file path.
 							try {
                                 $importer->handle($message);
-//								$parser = OpenSKOS_Rdf_Parser::factory($parserOpts);
 //								$parser->process($job['user']);
-//								$duplicateConceptSchemes = array_merge($duplicateConceptSchemes, $parser->getDuplicateConceptSchemes());
-//								$notImportedNotations = array_merge($notImportedNotations, $parser->getNotImportedNotations());
 							} catch (Exception $e) {
-//								$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-//								$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-								
-//								fwrite(STDERR, $job->id.': '.$e->getMessage()."\n");
+
 								$job->error("Aborting job because: "  . $e->getMessage())->finish()->save();
 								exit($e->getCode());
 							}
 						}
 
-                        /*
-						// Delete extracted files when done.
-                        $job->cleanFiles();
-						
-						// Clears the schemes cache after import.
-						OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
-						
-						$model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-						$job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-						
-						$info = '';
-						if ( ! empty($duplicateConceptSchemes)) {
-							$info .= '<span class="errors">' . _('Tried to import the fallowing already existing concept schemes:') .  '"' . implode('", "', $duplicateConceptSchemes) . '"</span><br /><br />';
-						}
-						if ( ! empty($notImportedNotations)) {
-							// If there are thousands of not imported notations - show only first 100
-							if (count($notImportedNotations) > 100) {
-								$notImportedNotations = array_slice($notImportedNotations, 0, 100);
-								$notImportedNotations[] = '...';
-							}
-							$info .= _('The documents with the fallowing notations were not imported because already exist:') .  '"' . implode('", "', $notImportedNotations) . '"';
-						}
-						
-						$job->setInfo($info);
-
-                        */
                         $job->finish()->save();
 
 						break;
