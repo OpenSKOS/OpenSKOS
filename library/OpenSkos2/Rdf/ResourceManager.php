@@ -73,11 +73,11 @@ class ResourceManager
     }
 
     /**
-     * @param Resource $resource
+     * @param Uri $resource
      */
-    public function delete(Resource $resource)
+    public function delete(Uri $resource)
     {
-
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
 
     /**
@@ -116,5 +116,52 @@ class ResourceManager
         }
         
         return $resources[0];
+    }
+
+    /**
+     * @param Object[] $spec
+     */
+    public function deleteBy($spec)
+    {
+        $query = "DELETE WHERE {\n ?subject ";
+        foreach ($spec as $property => $value) {
+            $query .= "<{$property}> " . $this->valueToTurtle($value) . ";\n";
+        }
+        $query .= "?predicate ?object\n}";
+
+        $this->client->update($query);
+    }
+
+    /**
+     * @param Object $object
+     * @return string
+     * @throws \EasyRdf_Exception
+     */
+    protected function valueToTurtle(Object $object)
+    {
+        $serializer = new \EasyRdf_Serialiser_Ntriples();
+        if ($object instanceof Literal) {
+            return $serializer->serialiseValue([
+                'type' => 'literal',
+                'value' => $object->getValue(),
+                'lang' => $object->getLanguage()
+            ]);
+        } elseif ($object instanceof Uri) {
+            return $serializer->serialiseValue(['type' => 'uri', 'value' => $object->getUri()]);
+        }
+    }
+
+    /**
+     * @param Object[] $spec
+     * @return ResourceCollection
+     */
+    public function fetchBy($spec)
+    {
+        $query = "DELETE WHERE {\n ?subject ";
+        foreach ($spec as $property => $value) {
+            $query .= "<{$property}> " . $this->valueToTurtle($value) . ";\n";
+        }
+        $query .= "?predicate ?object\n}";
+        return self::fetch($query);
     }
 }

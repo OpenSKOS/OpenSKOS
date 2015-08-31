@@ -45,7 +45,7 @@ class ResourceCollection extends \ArrayObject
             );
         }
         
-        if ($newval->getType() != $this->resourceType) {
+        if ($this->resourceType !== null && $newval->getType() != $this->resourceType) {
             throw new InvalidResourceTypeException(
                 'Can not insert resource of type <' . $newval->getType() . '>. '
                 . 'The collection requires type <' . $this->resourceType . '>'
