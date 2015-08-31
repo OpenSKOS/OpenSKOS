@@ -147,7 +147,7 @@ class EasyRdf
     }
 
     /**
-     * @param Resource|Resource $resource
+     * @param Resource $resource
      * @param EasyRdf_Graph $graph
      * @throws InvalidArgumentException
      */
