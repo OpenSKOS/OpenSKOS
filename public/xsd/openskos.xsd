@@ -18,6 +18,18 @@ to license@zend.com so we can send you a copy immediately.
     <xs:attribute name="numFound" type="xs:integer"/>
     <xs:attribute name="start" type="xs:integer"/>
     <xs:attribute name="maxScore" type="xs:decimal"/>
-    <xs:element name="status" type="xs:string"/>
+    <xs:element name="status">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="candidate"/>
+                <xs:enumeration value="approved"/>
+                <xs:enumeration value="redirected"/>
+                <xs:enumeration value="not_compliant"/>
+                <xs:enumeration value="rejected"/>
+                <xs:enumeration value="obsolete"/>
+                <xs:enumeration value="deleted"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
 </xs:schema>
