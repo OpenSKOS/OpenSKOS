@@ -45,8 +45,9 @@ class Command
     public function handle(Message $message)
     {
         $format = FormatFactory::create(
-            $format,
+            $message->getFormat(),
             $message->getPropertiesToExport(),
+            // @TODO May limit fetch namespaces to just the query, but describe <uri> will return a lot more in context.
             $this->resourceManager->fetchNamespaces(),
             $message->getMaxDepth()
         );
@@ -57,7 +58,7 @@ class Command
             $message->getQuery()
         );
         
-        if (empty($message->getOutputFilePath())) {
+        if ($message->getOutputFilePath()) {
             $serialiser->writeToFile($message->getOutputFilePath());
         } else {
             return $serialiser->writeToString();
