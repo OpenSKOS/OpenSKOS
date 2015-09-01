@@ -26,6 +26,20 @@ use OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions as EasyRdfOpenSko
 // @TODO This class ignores properties to export.
 class Xml extends FormatAbstract
 {
+    /**
+     * Gets array of namespaces which are used in the collection which will be serialised.
+     * @var array
+     */
+    public function getNamespaces()
+    {
+        if (empty($this->namespaces)) {
+            throw new RequiredNamespacesListException(
+                'Namespaces are not specified. Can not export to xml.'
+            );
+        }
+        return $this->namespaces;
+    }
+    
     public function __construct()
     {
         // @TODO - put it somewhere globally
