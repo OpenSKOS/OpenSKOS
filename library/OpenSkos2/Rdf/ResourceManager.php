@@ -92,10 +92,31 @@ class ResourceManager
     }
     
     /**
+     * Adds limit and/or offset to the query.
+     * @param string $query
+     * @param int $offset
+     * @param int $limit
+     * @return ResourceCollection
+     */
+    public function fetchWithLimit($query, $offset = null, $limit = null)
+    {
+        if ($limit !== null) {
+            $query .= PHP_EOL . 'LIMIT ' . $limit;
+        }
+        
+        if ($offset !== null) {
+            $query .= PHP_EOL . 'OFFSET ' . $offset;
+        }
+        
+        return $this->fetch($query);
+    }
+    
+    /**
      * Fetches a single resource matching the uri.
      * @param string $uri
      * @return Resource
      * @throws ResourceNotFoundException
+     * @throws RuntimeException
      */
     public function fetchByUri($uri)
     {
@@ -163,5 +184,36 @@ class ResourceManager
         }
         $query .= "?predicate ?object\n}";
         return self::fetch($query);
+    }
+    
+    /**
+     * Fetch list of namespaces which are used in the resources in the query.
+     * @param string $query
+     * @return ResourceCollection
+     * @throws RuntimeException
+     */
+    public function fetchNamespaces($query = 'DESCRIBE ?object')
+    {
+        $query .= PHP_EOL . ' LIMIT 0';
+        
+        // The EasyRdf_Sparql_Client does not support fetching the namespaces, fuseki does.
+        // @TODO DI
+        $httpClient = \EasyRdf_Http::getDefaultHttpClient();
+        $httpClient->resetParameters();
+        
+        // @TODO Post for big queries
+        $httpClient->setMethod('GET');
+        $uri = $this->client->getQueryUri() . '?query=' . urlencode($query) . '&format=json';
+        $httpClient->setUri($uri);
+        
+        $response = $httpClient->request();
+        
+        if (!$response->isSuccessful()) {
+            throw new \RuntimeException(
+                'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
+            );
+        }
+        
+        return json_decode($response->getBody(), true)['@context'];
     }
 }
