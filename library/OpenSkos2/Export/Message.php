@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Export;
 
-use OpenSkos2\Rdf\Uri;
 
 class Message
 {
@@ -84,12 +83,12 @@ class Message
         $this->query = $query;
     }
 
-    public function __construct($format, $maxDepth, $outputFilePath, $propertiesToExport, $query)
+    public function __construct($format, $query, $propertiesToExport, $maxDepth, $outputFilePath = null)
     {
         $this->format = $format;
+        $this->query = $query;
+        $this->propertiesToExport = $propertiesToExport;
         $this->maxDepth = $maxDepth;
         $this->outputFilePath = $outputFilePath;
-        $this->propertiesToExport = $propertiesToExport;
-        $this->query = $query;
     }
 }

@@ -21,14 +21,13 @@ namespace OpenSkos2\Export\Serialiser;
 
 class FormatFactory
 {
-    /**
-     * Holds the format types.
-     * 
-     * @var string
+    /**#@+
+     * All possible formats
      */
     const FORMAT_XML = 'xml';
     const FORMAT_CSV = 'csv';
     const FORMAT_RTF = 'rtf';
+    /**#@-*/
 
     /**
      * Gets supported formats.
@@ -52,7 +51,7 @@ class FormatFactory
      * @return \OpenSkos2\Export\Serialiser\Format\Xml
      * @throws \RuntimeException
      */
-    public static function create($format, $propertiesToSerialise, $namespaces, $maxDepth)
+    public static function create($format, $propertiesToSerialise = [], $namespaces = [], $maxDepth = 1)
     {
         // @TODO Allow all easyrdf formats.
         switch ($format) {

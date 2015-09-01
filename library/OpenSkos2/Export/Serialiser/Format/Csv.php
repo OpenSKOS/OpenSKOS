@@ -21,19 +21,31 @@ namespace OpenSkos2\Export\Serialiser\Format;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
+use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
 class Csv extends FormatAbstract
 {
+    /**
+     * Gets the array of properties to be serialised.
+     * @return array
+     * @throws RequiredPropertiesListException
+     */
+    public function getPropertiesToSerialise()
+    {
+        if (empty($this->propertiesToSerialise)) {
+            throw new RequiredPropertiesListException(
+                'Properties to serialise are not specified. Can not export to csv.'
+            );
+        }
+        return $this->propertiesToSerialise;
+    }
+    
     /**
      * Creates the header of the output.
      * @return string
      */
     public function printHeader()
     {
-//        if (empty($propertiesToExport)) {
-//            $propertiesToExport = self::getExportableConceptFields();
-//        }
-        
         // @TODO Beautify properties
         return $this->stringPutCsv($this->getPropertiesToSerialise());
     }
