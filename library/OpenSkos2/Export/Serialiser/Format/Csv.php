@@ -80,7 +80,9 @@ class Csv extends FormatAbstract
         $resourceData = array();
 
         foreach ($this->getPropertiesToSerialise() as $property) {
-            if ($resource->hasProperty($property)) {
+            if ($property == 'uri') { // @TODO Something more clean?
+                $resourceData[$property] = $resource->getUri();
+            } elseif ($resource->hasProperty($property)) {
                 $values = $resource->getProperty($property);
                 if (count($values) > 1) {
                     $resourceData[$property] = implode(';', $values);
