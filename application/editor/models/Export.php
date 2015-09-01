@@ -156,12 +156,12 @@ class Editor_Models_Export
         
         
         
+        
+        
         $message = $this->createExportMessage();
         $message->setOutputFilePath($filePath);
         
-        /* @var $diContainer DI\Container */
-        $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-        $command = $diContainer->make('OpenSkos2\Export\Command');
+        $command = $this->getDi()->make('OpenSkos2\Export\Command');
         $command->handle($message);
 
         return $exportDirName . '/' . $fileDetails['fileName'];
@@ -197,7 +197,8 @@ class Editor_Models_Export
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT,
                     'parameters' => serialize(
-                        $this->createExportMessage()
+//                        $this->createExportMessage()
+                        $this->getSettings()
                     ),
                     'created' => new Zend_Db_Expr('NOW()')
                 ))->save();
@@ -284,14 +285,16 @@ class Editor_Models_Export
 
         // Export is slow if export type is search and the search results are more than MAX_RECORDS_FOR_INSTANT_EXPORT
         if ($this->get('type') == 'search') {
-            $searchOptions = $this->get('searchOptions');
-            $searchOptions['start'] = 0;
-            $searchOptions['rows'] = 0;
-
-            // @TODO Query Jena
-            $searchResult = $this->_getApiClientInstance()->searchConcepts($searchOptions);
-
-            return $searchResult['numFound'] > Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT;
+            
+            // @TODO $searchOptions = $this->get('searchOptions'); to query
+            
+            $resourceManager = $this->getDi()->make('OpenSkos2\Rdf\ResourceManager');
+            
+            // @TODO Count
+            $resourceManager->fetch($this->buildQuery());
+            $count = 100;
+            
+            return $count > Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT;
         }
 
         return false;
@@ -342,35 +345,6 @@ class Editor_Models_Export
     
     
     
-    /**
-     * Holds an instance of the api client. Frequently used inside the export class.
-     *  
-     * @var Editor_Models_ApiClient
-     */
-    protected $_apiClient;
-
-    /**
-     * Gets an instance of the api client. Sets the api client tenant.
-     * 
-     * return Editor_Models_ApiClient
-     */
-    protected function _getApiClientInstance()
-    {
-        if (null === $this->_apiClient) {
-            $user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
-            $tenant = OpenSKOS_Db_Table_Tenants::fromCode($user->tenant);
-            $this->_apiClient = Editor_Models_ApiClient::factory();
-            $this->_apiClient->setTenant($tenant);
-        }
-
-        return $this->_apiClient;
-    }
-    
-    
-    
-    
-    
-    
     
     
     
@@ -410,7 +384,7 @@ class Editor_Models_Export
                 //$hasMore = false;
                 throw new \Exception('Not moved to triplestore yet.');
             case 'search':
-                // @TODO $searchOptions to query
+                // @TODO $searchOptions = $this->get('searchOptions'); to query
                 return 'DESCRIBE ?object WHERE {?object rdf:type skos:Concept}';
                 break;
         }
