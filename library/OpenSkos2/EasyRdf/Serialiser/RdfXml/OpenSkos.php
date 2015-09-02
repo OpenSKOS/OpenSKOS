@@ -20,9 +20,11 @@ namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 
 class OpenSkos extends \EasyRdf_Serialiser_RdfXml
 {
+    const OPTION_RENDER_ITEMS_ONLY = 'renderItemsOnly';
+    
     protected $objects = [];
     private $outputtedResources = array();
-
+        
     public function serialise($graph, $format, array $options = array())
     {
         parent::checkSerialiseParams($graph, $format);
@@ -72,8 +74,12 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
             }
         }
 
-        return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n".
-        "<rdf:RDF". $namespaceStr . ">\n" . implode("\n", $this->objects) . "\n</rdf:RDF>\n";
+        if (!$options[self::OPTION_RENDER_ITEMS_ONLY]) {
+            return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n".
+            "<rdf:RDF". $namespaceStr . ">\n" . implode("\n", $this->objects) . "\n</rdf:RDF>\n";
+        } else {
+            return implode(PHP_EOL, $this->objects);
+        }
     }
 
     public function getObjectCount()

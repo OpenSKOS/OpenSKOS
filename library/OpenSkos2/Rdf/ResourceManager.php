@@ -196,13 +196,13 @@ class ResourceManager
     {
         $query .= PHP_EOL . ' LIMIT 0';
         
-        // The EasyRdf_Sparql_Client does not support fetching the namespaces, fuseki does.
+        // The EasyRdf_Sparql_Client does not gets the namespaces which fuseki provides.
+        // Maybe it can be fixed/configured. Then this method can use the client directly.
         // @TODO DI
         $httpClient = \EasyRdf_Http::getDefaultHttpClient();
         $httpClient->resetParameters();
         
-        // @TODO Post for big queries
-        $httpClient->setMethod('GET');
+        $httpClient->setMethod('GET'); // @TODO Post for big queries
         $uri = $this->client->getQueryUri() . '?query=' . urlencode($query) . '&format=json';
         $httpClient->setUri($uri);
         
