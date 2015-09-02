@@ -35,12 +35,12 @@
 <?php endif?>
 
 <?php if ($this->renderBody):?>
-<?php foreach ($this->data as $conceptData):?>
+<?php foreach ($this->data as $resourceData):?>
 
-{\pard\b <?php echo $conceptData['previewLabel']['value']?> \par}
+{\pard\b <?php echo $resourceData['previewLabel']['value']?> \par}
 {\pard\li400\ri80\sb150\sa0
 <?php $isFirst = true;?>
-<?php foreach ($conceptData['fields'] as $field):?>
+<?php foreach ($resourceData['fields'] as $field):?>
 <?php if ( ! $isFirst):?>
 \line
 <?php endif?>
@@ -49,11 +49,11 @@
 <?php endforeach?>
 \par}
 
-<?php if (isset($conceptData['narrowers'])):?>
+<?php if (isset($resourceData['narrowers'])):?>
 {\pard\li400\ri80\sb0\sa0
 <?php echo $this->translate('NARROWERS')?>
 \par}
-<?php echo rtfWriteNarrowers($conceptData)?>
+<?php echo rtfWriteNarrowers($resourceData)?>
 <?php endif?>
 
 {\pard\sb0\sa350\par}
@@ -69,10 +69,10 @@
 
 <?php 
 	if ( ! function_exists('rtfWriteNarrowers')) {
-		function rtfWriteNarrowers($conceptData, $offset = 600) {
+		function rtfWriteNarrowers($resourceData, $offset = 600) {
 			$result = '';
-			if (isset($conceptData['narrowers'])) {
-				foreach ($conceptData['narrowers'] as $narrower) {
+			if (isset($resourceData['narrowers'])) {
+				foreach ($resourceData['narrowers'] as $narrower) {
 					$result .= "\n" . '{\pard\li' . $offset . '\ri80\sb0\sa0' . "\n";
 					$result .= $narrower['previewLabel']['value'];
 					$result .= "\n" . '\par}' . "\n";
