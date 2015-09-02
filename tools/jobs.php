@@ -169,6 +169,13 @@ switch ($action) {
 				switch ($job->task) {
 					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
                         //init importer
+                        $userModel = new OpenSKOS_Db_Table_Users();
+                        /**
+                         * @var $user OpenSKOS_Db_Table_Row_User
+                         */
+                        $user = $userModel->find($job['user'])[0];
+                        $foaf = $user->getFoafPerson();
+
                         $importer = new \OpenSkos2\Import\Command($resourceManager);
 
                         $jobLogger = $job->getLogger();
@@ -182,14 +189,10 @@ switch ($action) {
 
 						foreach ($importFiles as $filePath) {
                             $message = new \OpenSkos2\Import\Message(
-                                $filePath, $collectionObject,
-                                (bool)$job->getParam('ignoreIncomingStatus'),
-                                $job->getParam('status'),
-                                $job->getParam('onlyNewConcepts'),
-                                (bool)$job->getParam('toBeChecked'),
-                                $job->getParam('lang'),
-                                (bool)$job->getParam('deletebeforeimport'),
-                                (bool)$job->getParam('purge')
+                                $foaf, $filePath, $collectionObject, (bool)$job->getParam('ignoreIncomingStatus'),
+                                $job->getParam('status'), $job->getParam('onlyNewConcepts'),
+                                (bool)$job->getParam('toBeChecked'), $job->getParam('lang'),
+                                (bool)$job->getParam('deletebeforeimport'), (bool)$job->getParam('purge')
                             );
 
 							try {

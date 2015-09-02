@@ -73,12 +73,18 @@ class Concept extends Resource
     //OpenSKOS specific
     const PROPERTY_OPENSKOS_STATUS = 'http://openskos.org/xmlns#status';
     const PROPERTY_OPENSKOS_TOBECHECKED = 'http://openskos.org/xmlns#toBeChecked';
+    const PROPERTY_OPENSKOS_DATE_DELETED = 'http://openskos.org/xmlns#dateDeleted';
+    const PROPERTY_OPENSKOS_DELETEDBY = 'http://openskos.org/xmlns#deletedBy';
+    const PROPERTY_OPENSKOS_ACCEPTEDBY = 'http://openskos.org/xmlns#acceptedBy';
 
     //Dcterms
     const PROPERTY_DCTERMS_DATESUBMITTED = 'http://purl.org/dc/terms/dateSubmitted';
     const PROPERTY_DCTERMS_DATEACCEPTED = 'http://purl.org/dc/terms/dateAccepted';
     const PROPERTY_DCTERMS_MODIFIED = 'http://purl.org/dc/terms/modified';
-    const PROPERTY_DCTERMS_CREATOR = 'http://purl.org/dc/elements/1.1/creator';
+    const PROPERTY_DCTERMS_CREATOR = 'http://purl.org/dc/terms/creator';
+    const PROPERTY_DCTERMS_CONTRIBUTOR = 'http://purl.org/dc/terms/contributor';
+    const PROPERTY_DCTERMS_DATE_ACCEPTED = 'http://purl.org/dc/terms/dateAccepted';
+
 
     public static $classes = array(
         'ConceptSchemes' => [
@@ -142,6 +148,18 @@ class Concept extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(self::PROPERTY_RDF_TYPE, new Uri(self::TYPE));
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(self::PROPERTY_OPENSKOS_STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(self::PROPERTY_OPENSKOS_STATUS)[0]->getValue();
+        }
     }
 
 

@@ -247,10 +247,10 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 					
 					$concept->updateConceptSchemes($newSchemes, $oldSchemes);
 				} else {
-					return $this->_forward('edit', 'concept', 'editor', array('errors' => $concept->getErrors()));
+					return $this->forward('edit', 'concept', 'editor', array('errors' => $concept->getErrors()));
 				}
 			} catch (Zend_Exception $e) {
-				return $this->_forward('edit', 'concept', 'editor', array('errors' => array(new Editor_Models_ConceptValidator_Error('unknown', $e->getMessage()))));
+				return $this->forward('edit', 'concept', 'editor', array('errors' => array(new Editor_Models_ConceptValidator_Error('unknown', $e->getMessage()))));
 			}
 			$this->_helper->redirector('view',
 					'concept',
