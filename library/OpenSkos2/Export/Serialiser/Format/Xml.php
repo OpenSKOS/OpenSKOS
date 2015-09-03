@@ -43,7 +43,7 @@ class Xml extends FormatAbstract
     public function __construct()
     {
         // @TODO - put it somewhere globally
-        \EasyRdf_Format::registerSerialiser(
+        \EasyRdf\Format::registerSerialiser(
             'rdfxml_openskos',
             '\OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions'
         );
@@ -60,7 +60,7 @@ class Xml extends FormatAbstract
             $namespaces[] = 'xmlns:' . $key . '="' . $uri . '"';
             
             // @TODO - put it somewhere globally
-            \EasyRdf_Namespace::set($key, $uri);
+            \EasyRdf\RdfNamespace::set($key, $uri);
         }
         
         return '<?xml version="1.0" encoding="utf-8" ?>' . PHP_EOL

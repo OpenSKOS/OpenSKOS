@@ -18,7 +18,11 @@
 
 namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 
-class OpenSkos extends \EasyRdf_Serialiser_RdfXml
+use EasyRdf\Literal;
+use EasyRdf\Resource;
+use OpenSkos2\Exception\OpenskosException;
+
+class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 {
     const OPTION_RENDER_ITEMS_ONLY = 'renderItemsOnly';
     
@@ -30,7 +34,7 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
         parent::checkSerialiseParams($graph, $format);
 
         if ($format != 'rdfxml_openskos') {
-            throw new Exception(
+            throw new OpenskosException(
                 "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
             );
         }
@@ -61,7 +65,7 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
         $namespaceStr = '';
         foreach ($this->prefixes as $prefix => $count) {
 
-            $url = \EasyRdf_Namespace::get($prefix);
+            $url = \EasyRdf\RdfNamespace::get($prefix);
 
             if (strlen($namespaceStr)) {
                 $namespaceStr .= "\n        ";
@@ -124,13 +128,13 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
         }
         $xmlString .= ">\n";
 
-        if ($res instanceof \EasyRdf_Container) {
+        if ($res instanceof \EasyRdf\Container) {
             foreach ($res as $item) {
                 $xmlString .= $this->rdfxmlObject('rdf:li', $item, $depth+1);
             }
         } else {
             foreach ($properties as $property) {
-                $short = \EasyRdf_Namespace::shorten($property, true);
+                $short = \EasyRdf\RdfNamespace::shorten($property, true);
                 if ($short) {
                     $this->addPrefix($short);
                     $objects = $res->all("<$property>");
@@ -141,7 +145,7 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
                         $xmlString .= $this->rdfxmlObject($short, $object, $depth+1);
                     }
                 } else {
-                    throw new Exception(
+                    throw new OpenskosException(
                         "It is not possible to serialse the property ".
                         "'$property' to RDF/XML."
                     );
@@ -165,7 +169,7 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
             $property = substr($property, 1);
         }
 
-        if (is_object($obj) and $obj instanceof \EasyRdf_Resource) {
+        if (is_object($obj) and $obj instanceof Resource) {
 
 
 
@@ -197,7 +201,7 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
                 return $tag."/>\n";
             //}
 
-        } elseif (is_object($obj) and $obj instanceof \EasyRdf_Literal) {
+        } elseif (is_object($obj) and $obj instanceof Literal) {
 
 
             $atrributes = "";
@@ -222,17 +226,17 @@ class OpenSkos extends \EasyRdf_Serialiser_RdfXml
 
             return "{$indent}<{$property}{$atrributes}>{$value}</{$property}>\n";
         } else {
-            throw new Exception(
+            throw new OpenskosException(
                 "Unable to serialise object to xml: ".getType($obj)
             );
         }
     }
     
     /**
-     * @param \EasyRdf_Resource $res
+     * @param Resource $res
      * @return string
      */
-    protected function determineResType(\EasyRdf_Resource $res)
+    protected function determineResType(Resource $res)
     {
         return $res->type();
     }

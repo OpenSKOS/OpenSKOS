@@ -18,13 +18,15 @@
 
 namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 
+use EasyRdf\Resource;
+
 class OpenSkosAsDescriptions extends OpenSkos
 {
     /**
-     * @param \EasyRdf_Resource $res
+     * @param Resource $res
      * @return string
      */
-    protected function determineResType(\EasyRdf_Resource $res)
+    protected function determineResType(Resource $res)
     {
         return 'rdf:Description';
     }

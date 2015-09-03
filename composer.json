@@ -2,7 +2,7 @@
     "require": {
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
-        "easyrdf/easyrdf": "^0.9.1",
+        "easyrdf/easyrdf": "dev-master",
         "psr/log": "^1.0",
         "php-di/zf1-bridge": "^3.1",
         "doctrine/cache": "~1.0",
