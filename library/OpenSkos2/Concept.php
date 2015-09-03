@@ -162,6 +162,4 @@ class Concept extends Resource
             return $this->getProperty(self::PROPERTY_OPENSKOS_STATUS)[0]->getValue();
         }
     }
-
-
 }

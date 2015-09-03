@@ -20,6 +20,9 @@
 namespace OpenSkos2\Export\Serialiser\Format;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Concept;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
@@ -33,14 +36,14 @@ class Rtf extends FormatAbstract
     protected $rtfFieldsTitlesMap = array(
         'uuid' => 'UUID',
         'uri' => 'URI',
-        'broader' => 'BT',
-        'narrower' => 'NT',
-        'related' => 'RT',
-        'exampleNote' => 'Voorbeeld:',
-        'dcterms_dateSubmited' => 'DS',
-        'dcterms_dateAccepted' => 'DA',
-        'dcterms_modified' => 'DM',
-        'dcterms_creator' => 'C',
+        Concept::PROPERTY_BROADER => 'BT',
+        Concept::PROPERTY_NARROWER => 'NT',
+        Concept::PROPERTY_RELATED => 'RT',
+        Concept::PROPERTY_EXAMPLE => 'Voorbeeld:',
+        Concept::PROPERTY_DCTERMS_DATESUBMITTED => 'DS',
+        Concept::PROPERTY_DCTERMS_DATEACCEPTED => 'DA',
+        Concept::PROPERTY_DCTERMS_MODIFIED => 'DM',
+        Concept::PROPERTY_DCTERMS_CREATOR => 'C',
     );
     
     /**
@@ -132,115 +135,52 @@ class Rtf extends FormatAbstract
      */
     protected function prepareResourceDataForRtf(Resource $resource)
     {
-        $fieldsToExport = $this->getPropertiesToSerialise();
-        
         $resourceData = [];
-//        $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $concept->getPreviewLabel());
-        $resourceData['previewLabel']['value'] = 'test';
+        
+        // Adds title
+        $previewLabel = $resource->getUri();
+        if ($resource instanceof Concept) {
+            // @TODO Add language support.
+            $previewLabel = implode(',', $resource->getProperty(Concept::PROPERTY_PREFLABEL));
+        }
+        $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $previewLabel);
+        
+        // Adds rest of fields.
         $resourceData['fields'] = [];
+        foreach ($this->getPropertiesToSerialise() as $predicate) {
+            if ($predicate == 'uri') {
+                $resourceData['fields'][] = $this->constructRtfFieldData(
+                    $predicate,
+                    $resource->getUri()
+                );
+            } else {
+                foreach ($resource->getProperty($predicate) as $property) {
+                    if ($property instanceof Literal) {
+                        $resourceData['fields'][] = $this->constructRtfFieldData(
+                            $predicate,
+                            $property->getValue(),
+                            $property->getLanguage()
+                        );
+                    } elseif ($property instanceof Uri) {
+                        $resourceData['fields'][] = $this->constructRtfFieldData(
+                            $predicate,
+                            $this->resolveUri($property)
+                        );
+                    }
+                }
+            }
+        }
+        
+        // @TODO Resolve narrowers. Related to issue #22757
+//        // Get concept children (narrowers)
+//        if ($this->get('maxDepth') > 1) {
+//            $narrowers = $this->getRtfNarrowers(new Editor_Models_Concept($concept), 1);
+//            if (!empty($narrowers)) {
+//                $conceptData['narrowers'] = $narrowers;
+//            }
+//        }
 
         return $resourceData;
-        
-        // Prepares concept schemes titles map
-        $schemesUris = array();
-        $schemesFields = Api_Models_Concept::$classes['ConceptSchemes'];
-        foreach ($schemesFields as $schemeField) {
-            if (in_array($schemeField, $fieldsToExport) && !empty($concept[$schemeField])) {
-                $schemesUris = array_merge($schemesUris, $concept[$schemeField]);
-            }
-        }
-        $schemesUris = array_unique($schemesUris);
-        $schemesTitleMap = $this->_getApiClientInstance()->getConceptSchemeMap('uri', array('dcterms_title' => 0), $schemesUris);
-
-        // Prepares related concepts map
-        $relatedConceptsUris = array();
-        $relationFields = array_merge(Api_Models_Concept::$classes['SemanticRelations'], Api_Models_Concept::$classes['MappingProperties']);
-        foreach ($relationFields as $relationField) {
-            if (in_array($relationField, $fieldsToExport) && !empty($concept[$relationField])) {
-                $relatedConceptsUris = array_merge($relatedConceptsUris, $concept[$relationField]);
-            }
-        }
-        $relatedConceptsUris = array_unique($relatedConceptsUris);
-        $relatedConceptsMap = Api_Models_Concepts::factory()->getEnumeratedConceptsMapByUris($relatedConceptsUris);
-
-        // Prepare language dependant fields. Remove the orginal field from fields to export and adds each per language field (field@en for example).
-        $allConceptFields = $concept->getFields();
-        $fieldsToExportInLanguages = array();
-        foreach ($allConceptFields as $currentConceptField) {
-            if (preg_match('/^([^@]+)@([^@]+)$/i', $currentConceptField, $matches) && in_array($matches[1], $fieldsToExport)) {
-                if (!isset($fieldsToExportInLanguages[$matches[1]])) {
-                    $fieldsToExportInLanguages[$matches[1]] = array();
-                }
-                $fieldsToExportInLanguages[$matches[1]][] = $matches[2];
-            }
-        }
-
-        // Goes trought each export field
-        foreach ($fieldsToExport as $field) {
-
-            if (isset($concept[$field])) {
-
-                if (isset($fieldsToExportInLanguages[$field])) {
-
-                    foreach ($fieldsToExportInLanguages[$field] as $language) {
-                        foreach ($concept[$field . '@' . $language] as $value) {
-                            $conceptData['fields'][] = $this->constructRtfFieldData($field, $value, $language);
-                        }
-                    }
-                } else if (is_array($concept[$field])) {
-
-                    foreach ($concept[$field] as $value) {
-
-                        if (in_array($field, $schemesFields) && isset($schemesTitleMap[$value])) {
-                            $value = $schemesTitleMap[$value];
-                        } else if (in_array($field, $relationFields) && isset($relatedConceptsMap[$value])) {
-                            $value = $relatedConceptsMap[$value]->getPreviewLabel();
-                        }
-
-                        $conceptData['fields'][] = $this->constructRtfFieldData($field, $value);
-                    }
-                } else {
-                    $conceptData['fields'][] = $this->constructRtfFieldData($field, $concept[$field]);
-                }
-            }
-        }
-
-        // Get concept children (narrowers)
-        if ($this->get('maxDepth') > 1) {
-            $narrowers = $this->getRtfNarrowers(new Editor_Models_Concept($concept), 1);
-            if (!empty($narrowers)) {
-                $conceptData['narrowers'] = $narrowers;
-            }
-        }
-
-        return $conceptData;
-    }
-
-    /**
-     * Get the narrowers of the concept prepared for rtf.
-     * 
-     * @param Editor_Models_Concept $concept
-     */
-    protected function getRtfNarrowers($concept, $depthLevel)
-    {
-        $result = array();
-        $narrowers = $concept->getNarrowers();
-        foreach ($narrowers as $key => $narrowerConcept) {
-            $narrowerConceptData = array();
-            $narrowerConceptData['previewLabel'] = $this->constructRtfFieldData(
-                'previewLabel',
-                $narrowerConcept->getPreviewLabel()
-            );
-
-            if ($depthLevel < ($this->get('maxDepth') - 1)) {
-                $narrowerConceptNarrowers = $this->getRtfNarrowers($narrowerConcept, $depthLevel + 1);
-                if (!empty($narrowerConceptNarrowers)) {
-                    $narrowerConceptData['narrowers'] = $narrowerConceptNarrowers;
-                }
-            }
-            $result[] = $narrowerConceptData;
-        }
-        return $result;
     }
 
     /**
@@ -303,5 +243,68 @@ class Rtf extends FormatAbstract
     protected function fixUnicodeForRtf($matches)
     {
         return '\u' . hexdec(bin2hex(iconv('UTF-8', 'UTF-16BE', $matches[1]))) . '?';
+    }
+    
+    
+    
+
+    /**
+     * Get the narrowers of the concept prepared for rtf.
+     * @TODO refs #22757
+     * @param Editor_Models_Concept $concept
+     */
+    protected function getRtfNarrowers($concept, $depthLevel)
+    {
+//        $result = array();
+//        $narrowers = $concept->getNarrowers();
+//        foreach ($narrowers as $key => $narrowerConcept) {
+//            $narrowerConceptData = array();
+//            $narrowerConceptData['previewLabel'] = $this->constructRtfFieldData(
+//                'previewLabel',
+//                $narrowerConcept->getPreviewLabel()
+//            );
+//
+//            if ($depthLevel < ($this->get('maxDepth') - 1)) {
+//                $narrowerConceptNarrowers = $this->getRtfNarrowers($narrowerConcept, $depthLevel + 1);
+//                if (!empty($narrowerConceptNarrowers)) {
+//                    $narrowerConceptData['narrowers'] = $narrowerConceptNarrowers;
+//                }
+//            }
+//            $result[] = $narrowerConceptData;
+//        }
+//        return $result;
+    }
+    
+    
+    /**
+     * @TODO Make such method globally
+     * @param Uri $uri
+     */
+    protected function resolveUri(Uri $uri)
+    {
+        return $uri->getUri();
+        // @TODO Concept schemes and relations
+//        // Prepares concept schemes titles map
+//        $schemesUris = array();
+//        $schemesFields = Api_Models_Concept::$classes['ConceptSchemes'];
+//        foreach ($schemesFields as $schemeField) {
+//            if (in_array($schemeField, $fieldsToExport) && !empty($concept[$schemeField])) {
+//                $schemesUris = array_merge($schemesUris, $concept[$schemeField]);
+//            }
+//        }
+//        $schemesUris = array_unique($schemesUris);
+//        $schemesTitleMap = $this->_getApiClientInstance()->getConceptSchemeMap('uri', array('dcterms_title' => 0), $schemesUris);
+//
+//        
+//        // Prepares related concepts map
+//        $relatedConceptsUris = array();
+//        $relationFields = array_merge(Api_Models_Concept::$classes['SemanticRelations'], Api_Models_Concept::$classes['MappingProperties']);
+//        foreach ($relationFields as $relationField) {
+//            if (in_array($relationField, $fieldsToExport) && !empty($concept[$relationField])) {
+//                $relatedConceptsUris = array_merge($relatedConceptsUris, $concept[$relationField]);
+//            }
+//        }
+//        $relatedConceptsUris = array_unique($relatedConceptsUris);
+//        $relatedConceptsMap = Api_Models_Concepts::factory()->getEnumeratedConceptsMapByUris($relatedConceptsUris);
     }
 }

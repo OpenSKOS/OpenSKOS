@@ -120,6 +120,8 @@ class Serialiser
      */
     protected function fetchResources($start, $step, &$hasMore)
     {
+        // @TODO Sort
+        
         $collection = $this->resourceManager->fetchWithLimit($this->query, $start, $step);
         
         // It may make it look once more at the end. But this way we don't need to count first.
