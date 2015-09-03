@@ -1,0 +1,1 @@
+ALTER TABLE collection ADD COLUMN uri TEXT;

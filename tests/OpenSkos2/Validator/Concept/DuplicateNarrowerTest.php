@@ -10,6 +10,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 
 class DuplicateNarrowerTest extends \PHPUnit_Framework_TestCase
@@ -22,16 +23,16 @@ class DuplicateNarrowerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_NARROWER, new Uri('http://example.com#Narrower'));
+        $concept->addProperty(Skos::NARROWER, new Uri('http://example.com#Narrower'));
 
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_NARROWER, new Uri('http://example.com#Narrower2'));
+        $concept->addProperty(Skos::NARROWER, new Uri('http://example.com#Narrower2'));
 
         $this->assertTrue($validator->validate($concept));
 
 
-        $concept->addProperty(Concept::PROPERTY_NARROWER, new Uri('http://example.com#Narrower2'));
+        $concept->addProperty(Skos::NARROWER, new Uri('http://example.com#Narrower2'));
 
         $this->assertFalse($validator->validate($concept));
     }

@@ -32,4 +32,9 @@ to license@zend.com so we can send you a copy immediately.
         </xs:simpleType>
     </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
+
+    <xs:element name="uuid"/>
+    <xs:element name="dateDeleted" />
+    <xs:element name="deletedBy" />
+    <xs:element name="acceptedBy" />
 </xs:schema>

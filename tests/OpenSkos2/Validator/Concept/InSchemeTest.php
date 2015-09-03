@@ -10,6 +10,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 
 class InSchemeTest extends \PHPUnit_Framework_TestCase
@@ -24,12 +25,12 @@ class InSchemeTest extends \PHPUnit_Framework_TestCase
         //no scheme
         $this->assertFalse($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_INSCHEME, new Uri('http://example.com#scheme1'));
+        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme1'));
 
         //1 scheme
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_INSCHEME, new Uri('http://example.com#scheme2'));
+        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme2'));
 
         //2 schemes
         $this->assertTrue($validator->validate($concept));

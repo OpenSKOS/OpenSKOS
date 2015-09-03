@@ -352,4 +352,38 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 		}
 		return $doc;
 	}
+
+
+	public function getResource()
+	{
+		$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+		/**
+		 * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
+		 */
+		$resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+
+		if (!$this->uri) {
+			$this->uri = "http://openskos.org/collections/" . \Rhumsaa\Uuid\Uuid::uuid4();
+			$this->save();
+		}
+
+		try {
+			return $resourceManager->fetchByUri($this->uri);
+
+		} catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
+			$person = new \OpenSkos2\Collection($this->uri);
+			$person->addProperty(\OpenSkos2\Namespaces\DcTerms::TYPE, new \OpenSkos2\Rdf\Literal($this->dc_title));
+			if ($this->dc_description) {
+				$person->addProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION,
+					new \OpenSkos2\Rdf\Literal($this->dc_description));
+			}
+			if ($this->license_url) {
+				$person->addProperty(\OpenSkos2\Namespaces\DcTerms::RIGHTS, new \OpenSkos2\Rdf\Uri($this->license_url));
+			}
+			$resourceManager->insert($person);
+
+			return $person;
+
+		}
+	}
 }

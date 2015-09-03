@@ -23,8 +23,6 @@ use OpenSkos2\Rdf\Object as RdfObject;
 
 class Resource extends Uri implements ResourceIdentifier
 {
-    const PROPERTY_RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
-
     protected $properties = [];
 
     /**
@@ -109,6 +107,6 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function getType()
     {
-        return current($this->getProperty(self::PROPERTY_RDF_TYPE));
+        return current($this->getProperty(Rdf::TYPE));
     }
 }
