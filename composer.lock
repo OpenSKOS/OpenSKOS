@@ -397,16 +397,16 @@
         },
         {
             "name": "php-di/invoker",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-DI/Invoker.git",
-                "reference": "7ea703c62dbb29d64763fa85258826034ce3c97d"
+                "reference": "2eb8f3a9b44c1427865134ef585d986ca89bce36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/7ea703c62dbb29d64763fa85258826034ce3c97d",
-                "reference": "7ea703c62dbb29d64763fa85258826034ce3c97d",
+                "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/2eb8f3a9b44c1427865134ef585d986ca89bce36",
+                "reference": "2eb8f3a9b44c1427865134ef585d986ca89bce36",
                 "shasum": ""
             },
             "require": {
@@ -436,26 +436,26 @@
                 "invoke",
                 "invoker"
             ],
-            "time": "2015-04-24 10:18:34"
+            "time": "2015-09-02 16:01:10"
         },
         {
             "name": "php-di/php-di",
-            "version": "5.0.3",
+            "version": "5.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-DI/PHP-DI.git",
-                "reference": "c59af31dcf2ee6246e28464e775599321df40955"
+                "reference": "b8e9f51c41047dd463e0415167be2155f305c187"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-DI/PHP-DI/zipball/c59af31dcf2ee6246e28464e775599321df40955",
-                "reference": "c59af31dcf2ee6246e28464e775599321df40955",
+                "url": "https://api.github.com/repos/PHP-DI/PHP-DI/zipball/b8e9f51c41047dd463e0415167be2155f305c187",
+                "reference": "b8e9f51c41047dd463e0415167be2155f305c187",
                 "shasum": ""
             },
             "require": {
                 "container-interop/container-interop": "~1.0",
                 "php": ">=5.4.0",
-                "php-di/invoker": "~1.0",
+                "php-di/invoker": "^1.0.1",
                 "php-di/phpdoc-reader": "~2.0"
             },
             "replace": {
@@ -493,7 +493,7 @@
                 "dependency injection",
                 "di"
             ],
-            "time": "2015-08-12 13:46:41"
+            "time": "2015-09-02 16:50:29"
         },
         {
             "name": "php-di/phpdoc-reader",
