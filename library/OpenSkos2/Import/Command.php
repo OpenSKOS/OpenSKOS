@@ -75,10 +75,11 @@ class Command implements LoggerAwareInterface
             }
         }
 
+        $currentVersions = [];
         foreach ($resourceCollection as $resourceToInsert) {
             try {
                 $uri = $resourceToInsert->getUri();
-                $currentVersion[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri);
+                $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri);
 
                 if ($message->getNoUpdates()) {
                     $this->logger->warning("Skipping concept {$uri}, because it already exists");
@@ -90,6 +91,7 @@ class Command implements LoggerAwareInterface
 
             //special import logic
             if ($resourceToInsert instanceof Concept) {
+                $currentVersion = null;
                 if (isset($currentVersion[$resourceToInsert->getUri()])) {
                     /**
                      * @var Resource $currentVersion
@@ -133,14 +135,43 @@ class Command implements LoggerAwareInterface
 
                 $resourceToInsert->setProperty(Concept::PROPERTY_DCTERMS_MODIFIED,
                     new Literal(date('c'), null, Literal::TYPE_DATETIME));
+
+                $resourceToInsert->setProperty(Concept::PROPERTY_DCTERMS_CONTRIBUTOR,
+                    $message->getUser());
+
                 if (!$resourceToInsert->hasProperty(Concept::PROPERTY_DCTERMS_DATESUBMITTED)) {
                     $resourceToInsert->setProperty(Concept::PROPERTY_DCTERMS_DATESUBMITTED,
                         new Literal(date('c'), null, Literal::TYPE_DATETIME));
                 }
+
+                if (!$resourceToInsert->hasProperty(Concept::PROPERTY_DCTERMS_CREATOR)) {
+                    $resourceToInsert->setProperty(Concept::PROPERTY_DCTERMS_CREATOR,
+                        $message->getUser());
+                }
+
+
+                $oldStatus = $currentVersion? $currentVersion->getStatus(): null;
+                if ($oldStatus !== $resourceToInsert->getStatus()) {
+                    //status change
+                    $resourceToInsert->unsetProperty(Concept::PROPERTY_DCTERMS_DATE_ACCEPTED);
+                    $resourceToInsert->unsetProperty(Concept::PROPERTY_OPENSKOS_ACCEPTEDBY);
+                    $resourceToInsert->unsetProperty(Concept::PROPERTY_OPENSKOS_DATE_DELETED);
+                    $resourceToInsert->unsetProperty(Concept::PROPERTY_OPENSKOS_DELETEDBY);
+
+                    switch($resourceToInsert->getStatus()) {
+                        case \OpenSKOS_Concept_Status::APPROVED:
+                            $resourceToInsert->addProperty(Concept::PROPERTY_DCTERMS_DATE_ACCEPTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                            $resourceToInsert->addProperty(Concept::PROPERTY_OPENSKOS_ACCEPTEDBY, $message->getUser());
+                            break;
+                        case \OpenSKOS_Concept_Status::DELETED:
+                            $resourceToInsert->addProperty(Concept::PROPERTY_OPENSKOS_DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                            $resourceToInsert->addProperty(Concept::PROPERTY_OPENSKOS_DELETEDBY, $message->getUser());
+                    }
+                }
             }
 
-            if (isset($currentVersion[$resourceToInsert->getUri()])) {
-                $this->resourceManager->delete($currentVersion[$resourceToInsert->getUri()]);
+            if (isset($currentVersions[$resourceToInsert->getUri()])) {
+                $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
             }
             $this->resourceManager->insert($resourceToInsert);
         }

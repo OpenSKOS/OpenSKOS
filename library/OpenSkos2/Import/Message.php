@@ -19,7 +19,7 @@
 
 namespace OpenSkos2\Import;
 
-
+use OpenSkos2\Person;
 use OpenSkos2\Rdf\Uri;
 
 class Message
@@ -61,15 +61,16 @@ class Message
     /**
      * @var bool
      */
-    private $uriAsIdentifier;
-
-    /**
-     * @var bool
-     */
     private $toBeChecked;
 
     /**
+     * @var Person
+     */
+    private $user;
+
+    /**
      * Message constructor.
+     * @param $user
      * @param $file
      * @param Uri $collection
      * @param bool $ignoreIncomingStatus
@@ -81,6 +82,7 @@ class Message
      * @param bool $deleteSchemes
      */
     public function __construct(
+        $user,
         $file,
         Uri $collection,
         $ignoreIncomingStatus,
@@ -100,6 +102,7 @@ class Message
         $this->fallbackLanguage = $fallbackLanguage;
         $this->clearCollection = $clearCollection;
         $this->deleteSchemes = $deleteSchemes;
+        $this->user = $user;
     }
 
     /**
@@ -174,4 +177,11 @@ class Message
         return $this->clearCollection;
     }
 
+    /**
+     * @return Person
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
 }

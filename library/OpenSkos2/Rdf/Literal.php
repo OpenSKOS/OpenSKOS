@@ -19,6 +19,7 @@
 
 namespace OpenSkos2\Rdf;
 
+use OpenSkos2\Exception\InvalidResourceException;
 
 class Literal implements Object
 {
@@ -45,9 +46,14 @@ class Literal implements Object
      * Literal constructor.
      * @param string $value
      * @param string $language
+     * @param string $type
+     * @throws InvalidResourceException
      */
     public function __construct($value, $language = null, $type = null)
     {
+        if (is_array($value)) {
+            throw new InvalidResourceException("Value cannot be an array");
+        }
         $this->value = $value;
         $this->language = $language;
         $this->type = $type;

@@ -409,4 +409,33 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 return true;
             }
         }
+
+	/**
+	 * @return \OpenSkos2\Person
+	 */
+	public function getFoafPerson()
+	{
+		$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+		/**
+		 * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
+		 */
+		$resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+
+		if (!$this->uri) {
+			$this->uri = "http://openskos.org/users/" . \Rhumsaa\Uuid\Uuid::uuid4();
+			$this->save();
+		}
+
+		try {
+			return $resourceManager->fetchByUri($this->uri);
+
+		} catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
+			$person = new \OpenSkos2\Person($this->uri);
+			$person->addProperty(\OpenSkos2\Person::PROPERTY_FOAF_NAME, new \OpenSkos2\Rdf\Literal($this->name));
+			$resourceManager->insert($person);
+
+			return $person;
+
+		}
+	}
 }

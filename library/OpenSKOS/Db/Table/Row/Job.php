@@ -98,7 +98,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	public function getFile()
 	{
 		$path = realpath($this->getParam('destination').DIRECTORY_SEPARATOR.$this->getParam('name'));
-		
+
 		return $path ? $path : null;
 	}
 	
