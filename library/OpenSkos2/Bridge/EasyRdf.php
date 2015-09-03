@@ -19,9 +19,7 @@
 
 namespace OpenSkos2\Bridge;
 
-use EasyRdf_Graph;
-use EasyRdf_Literal;
-use EasyRdf_Resource;
+use EasyRdf\Graph;
 use OpenSkos2\Collection;
 use OpenSkos2\CollectionCollection;
 use OpenSkos2\Concept;
@@ -37,16 +35,16 @@ use OpenSkos2\SchemaCollection;
 class EasyRdf
 {
     /**
-     * @param EasyRdf_Graph $graph to $read
+     * @param \EasyRdf\Graph $graph to $read
      * @param string $expectedType If expected type is set, a collection of that type will be enforced.
      * @return ResourceCollection
      */
-    public static function graphToResourceCollection(EasyRdf_Graph $graph, $expectedType = null)
+    public static function graphToResourceCollection(Graph $graph, $expectedType = null)
     {
         $collection = self::createResourceCollection($expectedType);
 
         foreach ($graph->resources() as $resource) {
-            /** @var $resource EasyRdf_Resource */
+            /** @var $resource \EasyRdf\Resource */
             $type = $resource->get('rdf:type');
 
             if (!$type) {
@@ -57,8 +55,8 @@ class EasyRdf
 
             foreach ($resource->propertyUris() as $propertyUri) {
 
-                foreach ($resource->all(new EasyRdf_Resource($propertyUri)) as $propertyValue) {
-                    if ($propertyValue instanceof EasyRdf_Literal) {
+                foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
+                    if ($propertyValue instanceof \EasyRdf\Literal) {
                         $myResource->addProperty(
                             $propertyUri,
                             new Literal(
@@ -67,7 +65,7 @@ class EasyRdf
                                 $propertyValue->getDatatypeUri()
                             )
                         );
-                    } elseif ($propertyValue instanceof EasyRdf_Resource) {
+                    } elseif ($propertyValue instanceof \EasyRdf\Resource) {
                         $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
@@ -80,11 +78,11 @@ class EasyRdf
     
     /**
      * @param Resource $resource
-     * @return EasyRdf_Graph
+     * @return Graph
      */
     public static function resourceToGraph(Resource $resource)
     {
-        $graph = new \EasyRdf_Graph();
+        $graph = new Graph();
         
         self::addResourceToGraph($resource, $graph);
 
@@ -93,11 +91,11 @@ class EasyRdf
     
     /**
      * @param ResourceCollection $collection
-     * @return EasyRdf_Graph
+     * @return Graph
      */
     public static function resourceCollectionToGraph(ResourceCollection $collection)
     {
-        $graph = new \EasyRdf_Graph();
+        $graph = new Graph();
         
         foreach ($collection as $resource) {
             self::addResourceToGraph($resource, $graph);
@@ -148,12 +146,12 @@ class EasyRdf
 
     /**
      * @param Resource $resource
-     * @param EasyRdf_Graph $graph
+     * @param \EasyRdf\Graph $graph
      * @throws InvalidArgumentException
      */
-    protected static function addResourceToGraph(Resource $resource, \EasyRdf_Graph $graph)
+    protected static function addResourceToGraph(Resource $resource, \EasyRdf\Graph $graph)
     {
-        $easyResource = new \EasyRdf_Resource($resource->getUri(), $graph);
+        $easyResource = new \EasyRdf\Resource($resource->getUri(), $graph);
         
         foreach ($resource->getProperties() as $propName => $property) {
             foreach ($property as $value) {
@@ -162,7 +160,7 @@ class EasyRdf
                  */
                 if ($value instanceof Literal) {
                     $easyResource->addLiteral($propName,
-                        new EasyRdf_Literal($value->getValue(), $value->getLanguage(), $value->getType()));
+                        new \EasyRdf\Literal($value->getValue(), $value->getLanguage(), $value->getType()));
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, $value->getUri());
                 } else {

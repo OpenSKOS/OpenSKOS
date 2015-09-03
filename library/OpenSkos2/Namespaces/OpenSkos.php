@@ -16,18 +16,14 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
+namespace OpenSkos2\Namespaces;
 
-use EasyRdf\Resource;
-
-class OpenSkosAsDescriptions extends OpenSkos
+class OpenSkos
 {
-    /**
-     * @param Resource $res
-     * @return string
-     */
-    protected function determineResType(Resource $res)
-    {
-        return 'rdf:Description';
-    }
+    const STATUS = 'http://openskos.org/xmlns#status';
+    const TOBECHECKED = 'http://openskos.org/xmlns#toBeChecked';
+    const DATE_DELETED = 'http://openskos.org/xmlns#dateDeleted';
+    const DELETEDBY = 'http://openskos.org/xmlns#deletedBy';
+    const ACCEPTEDBY = 'http://openskos.org/xmlns#acceptedBy';
+    const UUID = 'http://openskos.org/xmlns#uuid';
 }

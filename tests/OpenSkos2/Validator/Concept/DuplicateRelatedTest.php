@@ -10,6 +10,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 
 class DuplicateRelatedTest extends \PHPUnit_Framework_TestCase
@@ -22,16 +23,16 @@ class DuplicateRelatedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_RELATED, new Uri('http://example.com#Related'));
+        $concept->addProperty(SKOS::RELATED, new Uri('http://example.com#Related'));
 
         $this->assertTrue($validator->validate($concept));
 
-        $concept->addProperty(Concept::PROPERTY_RELATED, new Uri('http://example.com#Related2'));
+        $concept->addProperty(SKOS::RELATED, new Uri('http://example.com#Related2'));
 
         $this->assertTrue($validator->validate($concept));
 
 
-        $concept->addProperty(Concept::PROPERTY_RELATED, new Uri('http://example.com#Related2'));
+        $concept->addProperty(SKOS::RELATED, new Uri('http://example.com#Related2'));
 
         $this->assertFalse($validator->validate($concept));
     }

@@ -21,6 +21,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\ConceptValidator;
 
 class DuplicateRelated extends ConceptValidator
@@ -31,7 +32,7 @@ class DuplicateRelated extends ConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $relatedTerms = $concept->getProperty(Concept::PROPERTY_RELATED);
+        $relatedTerms = $concept->getProperty(Skos::RELATED);
 
         $loopedConcepts = [];
         foreach ($relatedTerms as $relatedTerm) {

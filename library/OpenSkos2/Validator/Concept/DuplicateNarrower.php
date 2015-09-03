@@ -21,6 +21,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\ConceptValidator;
 
 class DuplicateNarrower extends ConceptValidator
@@ -31,7 +32,7 @@ class DuplicateNarrower extends ConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $narrowerTerms = $concept->getProperty(Concept::PROPERTY_NARROWER);
+        $narrowerTerms = $concept->getProperty(Skos::NARROWER);
 
         $loopedConcepts = [];
         foreach ($narrowerTerms as $narrowerTerm) {

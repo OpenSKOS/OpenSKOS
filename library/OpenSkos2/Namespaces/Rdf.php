@@ -16,18 +16,11 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
+namespace OpenSkos2\Namespaces;
 
-use EasyRdf\Resource;
 
-class OpenSkosAsDescriptions extends OpenSkos
+class Rdf
 {
-    /**
-     * @param Resource $res
-     * @return string
-     */
-    protected function determineResType(Resource $res)
-    {
-        return 'rdf:Description';
-    }
+    //todo ensure completeness
+    const TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 }

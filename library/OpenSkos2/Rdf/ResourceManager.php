@@ -20,6 +20,8 @@
 namespace OpenSkos2\Rdf;
 
 
+use EasyRdf\Http;
+use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
@@ -27,7 +29,7 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 class ResourceManager
 {
     /**
-     * @var \EasyRdf_Sparql_Client
+     * @var Client
      */
     protected $client;
 
@@ -45,10 +47,10 @@ class ResourceManager
     
     /**
      * ResourceManager constructor.
-     * @param \EasyRdf_Sparql_Client $client
+     * @param Client $client
      * @param string $graph
      */
-    public function __construct(\EasyRdf_Sparql_Client $client, $graph = null)
+    public function __construct(Client $client, $graph = null)
     {
         $this->client = $client;
         $this->graph = $graph;
@@ -116,7 +118,6 @@ class ResourceManager
      * @param string $uri
      * @return Resource
      * @throws ResourceNotFoundException
-     * @throws RuntimeException
      */
     public function fetchByUri($uri)
     {
@@ -156,11 +157,11 @@ class ResourceManager
     /**
      * @param Object $object
      * @return string
-     * @throws \EasyRdf_Exception
+     * @throws \EasyRdf\Exception
      */
     protected function valueToTurtle(Object $object)
     {
-        $serializer = new \EasyRdf_Serialiser_Ntriples();
+        $serializer = new \EasyRdf\Serialiser\Ntriples();
         if ($object instanceof Literal) {
             return $serializer->serialiseValue([
                 'type' => 'literal',
@@ -190,16 +191,15 @@ class ResourceManager
      * Fetch list of namespaces which are used in the resources in the query.
      * @param string $query
      * @return ResourceCollection
-     * @throws RuntimeException
      */
     public function fetchNamespaces($query = 'DESCRIBE ?object')
     {
         $query .= PHP_EOL . ' LIMIT 0';
         
-        // The EasyRdf_Sparql_Client does not gets the namespaces which fuseki provides.
+        // The EasyRdf\Sparql\Client does not gets the namespaces which fuseki provides.
         // Maybe it can be fixed/configured. Then this method can use the client directly.
         // @TODO DI
-        $httpClient = \EasyRdf_Http::getDefaultHttpClient();
+        $httpClient = Http::getDefaultHttpClient();
         $httpClient->resetParameters();
         
         $httpClient->setMethod('GET'); // @TODO Post for big queries

@@ -20,7 +20,7 @@
 namespace OpenSkos2;
 
 
-use EasyRdf_Graph;
+use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
 
 class File
@@ -45,7 +45,7 @@ class File
      */
     public function getResources()
     {
-        $graph = new EasyRdf_Graph();
+        $graph = new Graph();
         $graph->parseFile($this->fileName);
         return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph);
     }

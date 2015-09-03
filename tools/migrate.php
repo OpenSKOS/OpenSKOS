@@ -20,6 +20,12 @@
  */
 include dirname(__FILE__) . '/autoload.inc.php';
 
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+
+
+
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
@@ -69,6 +75,8 @@ $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClas
 
 $users = [];
 $userModel = new OpenSKOS_Db_Table_Users();
+$collectionModel = new OpenSKOS_Db_Table_Collections();
+$collections = [];
 $mappings = [
     'users' => [
         'callback' => function ($value) use ($userModel, &$users, $tenant) {
@@ -95,11 +103,36 @@ $mappings = [
             return $users [$value];
         },
         'fields' => [
-            'modified_by' => \OpenSkos2\Concept::PROPERTY_DCTERMS_CONTRIBUTOR,
-            'created_by' => \OpenSkos2\Concept::PROPERTY_DCTERMS_CREATOR,
-            'dcterms_creator' => \OpenSkos2\Concept::PROPERTY_DCTERMS_CREATOR,
-            'approved_by' => \OpenSkos2\Concept::PROPERTY_OPENSKOS_ACCEPTEDBY,
-            'deleted_by' => \OpenSkos2\Concept::PROPERTY_OPENSKOS_DELETEDBY,
+            'modified_by' => DcTerms::CONTRIBUTOR,
+            'created_by' => DcTerms::CREATOR,
+            'dcterms_creator' => DcTerms::CREATOR,
+            'approved_by' => OpenSkos::ACCEPTEDBY,
+            'deleted_by' => OpenSkos::DELETEDBY,
+        ],
+    ],
+    'collection' => [
+        'callback' => function ($value) use ($collectionModel, &$collections, $tenant) {
+            if (!$value) {
+                return null;
+            }
+
+            if (!isset($collections [$value])) {
+                /**
+                 * @var $collection OpenSKOS_Db_Table_Row_Collection
+                 */
+                $collection = $collectionModel->fetchRow('id = ' . $collectionModel->getAdapter()->quote($value));
+
+                if (!$collection) {
+                    echo "Could not find collection with id: {$value}\n";
+                    $collections [$value] = null;
+                } else {
+                    $collections [$value] = $collection->getResource();
+                }
+            }
+            return $collections [$value];
+        },
+        'fields' => [
+            'collection' => Skos::COLLECTION,
         ],
     ],
     'uris' => [
@@ -117,8 +150,9 @@ $mappings = [
             return new \OpenSkos2\Rdf\Literal($value);
         },
         'fields' => [
-            'status' => \OpenSkos2\Concept::PROPERTY_OPENSKOS_STATUS,
-            'notation' => \OpenSkos2\Concept::PROPERTY_NOTATION,
+            'status' => OpenSkos::STATUS,
+            'notation' => Skos::NOTATION,
+            'uuid' => OpenSkos::UUID,
         ]
     ],
     'dates' => [
@@ -126,13 +160,13 @@ $mappings = [
             return new \OpenSkos2\Rdf\Literal($value, null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         },
         'fields' => [
-            'approved_timestamp' => \OpenSkos2\Concept::PROPERTY_DCTERMS_DATE_ACCEPTED,
-            'created_timestamp' => \OpenSkos2\Concept::PROPERTY_DCTERMS_DATESUBMITTED,
-            'modified_timestamp' => \OpenSkos2\Concept::PROPERTY_DCTERMS_MODIFIED,
-            'dcterms_dateSubmitted' => \OpenSkos2\Concept::PROPERTY_DCTERMS_DATESUBMITTED,
-            'dcterms_modified'  => \OpenSkos2\Concept::PROPERTY_DCTERMS_MODIFIED,
-            'dcterms_dateAccepted'  => \OpenSkos2\Concept::PROPERTY_DCTERMS_DATE_ACCEPTED,
-            'deleted_timestamp'  => \OpenSkos2\Concept::PROPERTY_OPENSKOS_DATE_DELETED,
+            'approved_timestamp' => DcTerms::DATEACCEPTED,
+            'created_timestamp' => DcTerms::DATESUBMITTED,
+            'modified_timestamp' => DcTerms::MODIFIED,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'dcterms_modified'  => DcTerms::MODIFIED,
+            'dcterms_dateAccepted'  => DcTerms::DATEACCEPTED,
+            'deleted_timestamp'  => OpenSkos::DATE_DELETED,
         ]
     ],
     'bool' => [
@@ -142,7 +176,7 @@ $mappings = [
             }
         },
         'fields' => [
-            'toBeChecked' => \OpenSkos2\Concept::PROPERTY_OPENSKOS_TOBECHECKED
+            'toBeChecked' => OpenSkos::TOBECHECKED
         ]
     ],
     'ignore' => [
@@ -161,6 +195,9 @@ $mappings = [
             'LexicalLabels' => 'LexicalLabels',
             'DocumentationProperties' => 'DocumentationProperties',
             'SemanticRelations' => 'SemanticRelations',
+            'statusOtherConcept' => 'statusOtherConcept',
+            'deleted' => 'deleted',
+            'tenant' => 'tenant'
         ]
     ]
 ];
@@ -228,23 +265,8 @@ do {
                 continue;
             }
 
-            switch ($field) {
-
-
-                case 'tenant':
-                case 'collection':
-                case 'uuid':
-
-                case 'deleted':
-                case 'statusOtherConcept':
-
-                    //todo
-                    break;
-
-                default:
-                    var_dump($doc);
-                    throw new Exception("What to do with field {$field}");
-            }
+            var_dump($doc);
+            throw new Exception("What to do with field {$field}");
         }
 
         $resourceManager->insert($resource);

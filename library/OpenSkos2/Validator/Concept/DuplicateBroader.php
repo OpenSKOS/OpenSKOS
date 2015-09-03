@@ -21,6 +21,7 @@ namespace OpenSkos2\Validator\Concept;
 
 
 use OpenSkos2\Concept;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\ConceptValidator;
 
 class DuplicateBroader extends ConceptValidator
@@ -31,7 +32,7 @@ class DuplicateBroader extends ConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $broaderTerms = $concept->getProperty(Concept::PROPERTY_BROADER);
+        $broaderTerms = $concept->getProperty(SKOS::BROADER);
 
         $loopedConcepts = [];
         foreach ($broaderTerms as $broaderTerm) {

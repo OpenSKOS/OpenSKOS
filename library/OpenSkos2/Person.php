@@ -18,6 +18,7 @@
  */
 namespace OpenSkos2;
 
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 
@@ -34,6 +35,6 @@ class Person extends Resource
     public function __construct($uri = null)
     {
         parent::__construct($uri);
-        $this->addProperty(self::PROPERTY_RDF_TYPE, new Uri(self::TYPE));
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 }
