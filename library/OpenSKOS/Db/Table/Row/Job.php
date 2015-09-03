@@ -153,6 +153,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
         } else {
             $filesList[] = $file;
         }
+        
         return $filesList;
     }
     

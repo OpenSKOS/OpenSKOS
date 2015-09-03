@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Import;
 
-
 use OpenSkos2\Person;
 use OpenSkos2\Rdf\Uri;
 
@@ -185,6 +184,4 @@ class Message
     {
         return $this->user;
     }
-
-
 }

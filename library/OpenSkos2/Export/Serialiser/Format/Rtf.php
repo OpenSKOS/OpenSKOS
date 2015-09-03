@@ -19,11 +19,11 @@
 
 namespace OpenSkos2\Export\Serialiser\Format;
 
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
+use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
-// @TODO Refactor or change completely.
-// @TODO getConcepts
-// @TODO fieldsToExport
+// @TODO remove scripts and zend dependency.
 class Rtf extends FormatAbstract
 {
     /**
@@ -44,65 +44,103 @@ class Rtf extends FormatAbstract
     );
     
     /**
-     * Exports in rtf format. Wrtites the result to the stream.
-     *
-     * @param long $streamHandle
+     * @var Zend_View
      */
-    public function export($streamHandle)
+    protected $view;
+    
+    /**
+     * @var string
+     */
+    protected $template;
+    
+    public function __construct()
     {
-        $view = new Zend_View();
-        $view->setBasePath(APPLICATION_PATH . '/editor/views/');
-        $template = 'export/rtf.phtml';
-
-        // Writes the header of the rtf.
-        $view->assign('renderHeader', true)->assign('renderBody', false)->assign('renderFooter', false);
-        fwrite($streamHandle, $view->render($template));
-
-        // Writes the concepts data. The body of the rtf.
-        // Gets fields which will be exported.
-        $fieldsToExport = $this->get('fieldsToExport');
-        if (empty($fieldsToExport)) {
-            $fieldsToExport = self::getExportableConceptFields();
-        }
-
-        $step = self::CONCEPTS_EXPORT_STEP;
-        $start = 0;
-        $hasMore = false;
-        do {
-            $concepts = $this->_getConcepts($start, $step, $hasMore);
-
-            if (!empty($concepts)) {
-                $conceptsData = array();
-                foreach ($concepts as $concept) {
-                    $conceptsData[] = $this->prepareConceptDataForRtf($concept, $fieldsToExport);
-                }
-
-                $view->data = $conceptsData;
-                $view->assign('renderHeader', false)->assign('renderBody', true)->assign('renderFooter', false);
-                fwrite($streamHandle, $view->render($template));
-            }
-
-            $start += $step;
-        } while ($hasMore);
-
-        // Writes the footer of the rtf.
-        $view->assign('renderHeader', false)->assign('renderBody', false)->assign('renderFooter', true);
-        fwrite($streamHandle, $view->render($template));
+        // @TODO Di
+        // @TODO Do we want to be dependent on zend here.
+        $this->view = new \Zend_View();
+        $this->view->setBasePath(__DIR__);
+        
+        $this->template = 'rtf.phtml';
     }
-
+    
+    /**
+     * Gets the array of properties to be serialised.
+     * @return array
+     * @throws RequiredPropertiesListException
+     */
+    public function getPropertiesToSerialise()
+    {
+        if (empty($this->propertiesToSerialise)) {
+            throw new RequiredPropertiesListException(
+                'Properties to serialise are not specified. Can not export to csv.'
+            );
+        }
+        return $this->propertiesToSerialise;
+    }
+    
+    /**
+     * Creates the header of the output.
+     * @return string
+     */
+    public function printHeader()
+    {
+        $this->view
+            ->assign('renderHeader', true)
+            ->assign('renderBody', false)
+            ->assign('renderFooter', false);
+        
+        return $this->view->render($this->template);
+    }
+    
+    /**
+     * Serialises a single resource.
+     * @return string
+     */
+    public function printResource(Resource $resource)
+    {
+        $this->view->data = [
+            $this->prepareResourceDataForRtf($resource)
+        ];
+                
+        $this->view
+            ->assign('renderHeader', false)
+            ->assign('renderBody', true)
+            ->assign('renderFooter', false);
+        
+        return $this->view->render($this->template);
+    }
+    
+    /**
+     * Creates the footer of the output.
+     * @return string
+     */
+    public function printFooter()
+    {
+        $this->view
+            ->assign('renderHeader', false)
+            ->assign('renderBody', false)
+            ->assign('renderFooter', true);
+        
+        return $this->view->render($this->template);
+    }
+    
     /**
      * Prepares concept data for exporting in rtf format.
      * 
-     * @param Api_Models_Concept $concept
-     * @param array $fieldsToExport
-     * @return array The result concept data
+     * @param Resource $resource
+     * @return array The result resource data
      */
-    protected function prepareConceptDataForRtf(Api_Models_Concept $concept, $fieldsToExport)
+    protected function prepareResourceDataForRtf(Resource $resource)
     {
-        $conceptData = array();
-        $conceptData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $concept->getPreviewLabel());
-        $conceptData['fields'] = array();
+        $fieldsToExport = $this->getPropertiesToSerialise();
+        
+        $resourceData = [];
+//        $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $concept->getPreviewLabel());
+        $resourceData['previewLabel']['value'] = 'test';
+        $resourceData['fields'] = [];
 
+        return $resourceData;
+        
         // Prepares concept schemes titles map
         $schemesUris = array();
         $schemesFields = Api_Models_Concept::$classes['ConceptSchemes'];

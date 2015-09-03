@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Rdf;
 
-
 use OpenSkos2\Exception\InvalidResourceException;
 
 class Literal implements Object

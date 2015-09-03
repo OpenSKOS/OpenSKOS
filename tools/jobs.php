@@ -169,6 +169,7 @@ switch ($action) {
 				switch ($job->task) {
 					case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
                         //init importer
+
                         $userModel = new OpenSKOS_Db_Table_Users();
                         /**
                          * @var $user OpenSKOS_Db_Table_Row_User

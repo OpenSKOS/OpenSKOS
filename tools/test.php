@@ -46,3 +46,4 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 
 //$resourceManager->deleteBy([\OpenSkos2\Concept::PROPERTY_PREFLABEL => new \OpenSkos2\Rdf\Literal('(hond of kleiner)', 'nl')]);
+
