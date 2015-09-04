@@ -24,11 +24,10 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 
-
-
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
+    'tenant=s' => 'Tenant to migrate',
 );
 
 try {
@@ -54,7 +53,7 @@ $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$tenant = 'rce';
+$tenant = $OPTS->tenant;
 
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 $init = json_decode(file_get_contents($endPoint), true);
@@ -94,7 +93,7 @@ $mappings = [
                     $user = $userModel->fetchRow('name = ' . $userModel->getAdapter()->quote($value) . ' AND tenant = ' . $userModel->getAdapter()->quote($tenant));
                 }
                 if (!$user) {
-                    echo "Could not find user with id: {$value}\n";
+                    echo "Could not find user with id/name: {$value}\n";
                     $users [$value] = null;
                 } else {
                     $users [$value] = $user->getFoafPerson();
@@ -276,5 +275,3 @@ do {
 
 
 echo "done!";
-
-
