@@ -125,34 +125,45 @@ class Command implements LoggerAwareInterface
                 if ($message->getImportedConceptStatus() &&
                     (!$resourceToInsert->hasProperty(OpenSkos::STATUS))
                 ) {
-                    $resourceToInsert->addProperty(OpenSkos::STATUS,
-                        new Literal($message->getImportedConceptStatus()));
+                    $resourceToInsert->addProperty(
+                        OpenSkos::STATUS,
+                        new Literal($message->getImportedConceptStatus())
+                    );
                 }
 
                 if ($message->getFallbackLanguage()) {
                     foreach ($resourceToInsert->getProperties() as $properties) {
                         foreach ($properties as $property) {
-                            if ($property instanceof Literal && $property->getType() === null && $property->getLanguage() === null) {
+                            if ($property instanceof Literal
+                                    && $property->getType() === null && $property->getLanguage() === null) {
                                 $property->setLanguage($message->getFallbackLanguage());
                             }
                         }
                     }
                 }
 
-                $resourceToInsert->setProperty(DcTerms::MODIFIED,
-                    new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                $resourceToInsert->setProperty(
+                    DcTerms::MODIFIED,
+                    new Literal(date('c'), null, Literal::TYPE_DATETIME)
+                );
 
-                $resourceToInsert->setProperty(DcTerms::CONTRIBUTOR,
-                    $message->getUser());
+                $resourceToInsert->setProperty(
+                    DcTerms::CONTRIBUTOR,
+                    $message->getUser()
+                );
 
                 if (!$resourceToInsert->hasProperty(DcTerms::DATESUBMITTED)) {
-                    $resourceToInsert->setProperty(DcTerms::DATESUBMITTED,
-                        new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                    $resourceToInsert->setProperty(
+                        DcTerms::DATESUBMITTED,
+                        new Literal(date('c'), null, Literal::TYPE_DATETIME)
+                    );
                 }
 
                 if (!$resourceToInsert->hasProperty(DcTerms::CREATOR)) {
-                    $resourceToInsert->setProperty(DcTerms::CREATOR,
-                        $message->getUser());
+                    $resourceToInsert->setProperty(
+                        DcTerms::CREATOR,
+                        $message->getUser()
+                    );
                 }
 
 
@@ -166,11 +177,17 @@ class Command implements LoggerAwareInterface
 
                     switch($resourceToInsert->getStatus()) {
                         case \OpenSKOS_Concept_Status::APPROVED:
-                            $resourceToInsert->addProperty(DcTerms::DATEACCEPTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                            $resourceToInsert->addProperty(
+                                DcTerms::DATEACCEPTED,
+                                new Literal(date('c'), null, Literal::TYPE_DATETIME)
+                            );
                             $resourceToInsert->addProperty(OpenSkos::ACCEPTEDBY, $message->getUser());
                             break;
                         case \OpenSKOS_Concept_Status::DELETED:
-                            $resourceToInsert->addProperty(OpenSkos::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+                            $resourceToInsert->addProperty(
+                                OpenSkos::DATE_DELETED,
+                                new Literal(date('c'), null, Literal::TYPE_DATETIME)
+                            );
                             $resourceToInsert->addProperty(OpenSkos::DELETEDBY, $message->getUser());
                     }
                 }

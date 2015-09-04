@@ -35,5 +35,4 @@ abstract class AbstractResourceValidator implements ResourceValidator
     {
         return $this->errorMessage;
     }
-
 }

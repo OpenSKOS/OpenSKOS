@@ -34,5 +34,4 @@ interface ResourceValidator
      * @return string
      */
     public function getErrorMessage();
-
 }

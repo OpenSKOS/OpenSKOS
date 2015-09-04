@@ -17,29 +17,24 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator;
-
+namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Validator\ConceptValidator;
 
-abstract class ConceptValidator extends AbstractResourceValidator
+class UniqueNotation extends ConceptValidator
 {
-    /**
-     * @param Resource $resource
-     * @return bool
-     */
-    public function validate(Resource $resource)
-    {
-        if ($resource instanceof Concept) {
-            return $this->validateConcept($resource);
-        }
-        return true;
-    }
-
     /**
      * @param Concept $concept
      * @return bool
      */
-    abstract protected function validateConcept(Concept $concept);
+    protected function validateConcept(Concept $concept)
+    {
+//        if (!count($concept->getProperty(Skos::INSCHEME))) {
+//            $this->errorMessage = 'The concept must be included in at least one scheme.';
+//            return false;
+//        }
+        return true;
+    }
 }
