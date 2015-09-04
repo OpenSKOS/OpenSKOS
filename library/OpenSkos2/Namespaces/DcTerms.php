@@ -75,5 +75,4 @@ class DcTerms
     const TITLE = 'http://purl.org/dc/terms/title';
     const TYPE = 'http://purl.org/dc/terms/type';
     const VALID = 'http://purl.org/dc/terms/valid';
-
 }
