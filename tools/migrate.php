@@ -73,33 +73,45 @@ $getFieldsInClass = function ($class) {
 $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClass('DocumentationProperties'));
 
 $users = [];
+$notFoundUsers = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
 $collections = [];
 $mappings = [
     'users' => [
-        'callback' => function ($value) use ($userModel, &$users, $tenant) {
+        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant) {
             if (!$value) {
                 return null;
             }
-
-            if (!isset($users [$value])) {
+            
+            if (in_array($value, $notFoundUsers)) {
+                return null;
+            }
+            
+            if (!isset($users[$value])) {
                 /**
                  * @var $user OpenSKOS_Db_Table_Row_User
                  */
                 if (is_numeric($value)) {
-                    $user = $userModel->fetchRow('id = ' . $userModel->getAdapter()->quote($value) . ' AND tenant = ' . $userModel->getAdapter()->quote($tenant));
+                    $user = $userModel->fetchRow(
+                        'id = ' . $userModel->getAdapter()->quote($value) . ' '
+                        . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
+                    );
                 } else {
-                    $user = $userModel->fetchRow('name = ' . $userModel->getAdapter()->quote($value) . ' AND tenant = ' . $userModel->getAdapter()->quote($tenant));
+                    $user = $userModel->fetchRow(
+                        'name = ' . $userModel->getAdapter()->quote($value) . ' '
+                        . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
+                    );
                 }
                 if (!$user) {
                     echo "Could not find user with id/name: {$value}\n";
-                    $users [$value] = null;
+                    $notFoundUsers[] = $value;
+                    $users[$value] = null;
                 } else {
-                    $users [$value] = $user->getFoafPerson();
+                    $users[$value] = $user->getFoafPerson();
                 }
             }
-            return $users [$value];
+            return $users[$value];
         },
         'fields' => [
             'modified_by' => DcTerms::CONTRIBUTOR,
