@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-use \OpenSkos2\Export\Serialiser\FormatFactory;
+use OpenSkos2\Export\Serialiser\FormatFactory;
 
 class Editor_Forms_Export extends Zend_Form
 {
@@ -62,7 +62,10 @@ class Editor_Forms_Export extends Zend_Form
     protected function buildFieldsSelector()
     {
         $exportableFields = Editor_Models_Export::getExportableConceptFields();
-        $exportableFields = array_combine($exportableFields, $exportableFields);
+        $exportableFields = array_combine(
+            $exportableFields,
+            array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $exportableFields)
+        );
         $exportableFields = array_merge(array('' => _('Select one')), $exportableFields);
         $this->addElement('select', 'exportableFields', array(
             'label' => 'Fields to export',

@@ -167,9 +167,13 @@ var EditorView = new Class({
 		exportBox.getElement('.add-to-export').addEvent('click', function () {
 			
 			var field = exportBox.getElement('.exportable-fields').get('value');
+			var fieldTitle = exportBox
+                            .getElement('.exportable-fields')
+                            .getElement('option[value=' + field + ']')
+                            .get('html');
 			
 			if (field != '') {
-				var item = new Element('li').set('id', field).set('text', field);
+				var item = new Element('li').set('id', field).set('text', fieldTitle);
 				var removeItem = new Element('a').addClass('fields-to-export-remove');
 				removeItem.addEvent('click', function (e) {
 					e.stop();

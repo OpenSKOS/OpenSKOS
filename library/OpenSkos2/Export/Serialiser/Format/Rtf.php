@@ -25,6 +25,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Concept;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
+use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
 
@@ -143,7 +144,7 @@ class Rtf extends FormatAbstract
         $previewLabel = $resource->getUri();
         if ($resource instanceof Concept) {
             // @TODO Add language support.
-            $previewLabel = implode(',', $resource->getProperty(Concept::PROPERTY_PREFLABEL));
+            $previewLabel = $resource->getPreviewTitle();
         }
         $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $previewLabel);
         
@@ -200,7 +201,12 @@ class Rtf extends FormatAbstract
         if (isset($this->rtfFieldsTitlesMap[$field])) {
             $result['fieldTitle'] = $this->rtfFieldsTitlesMap[$field];
         } else {
-            $fieldTitleParts = preg_split('/(?=[A-Z])/', $field);
+            $shortenField = Namespaces::shortenProperty($field);
+            
+            $fieldTitleParts = preg_split(
+                '/(?=[A-Z])/',
+                substr($shortenField, strpos($shortenField, ':') + 1)
+            );
             $result['fieldTitle'] = '';
             foreach ($fieldTitleParts as $part) {
                 $result['fieldTitle'] .= strtoupper(substr($part, 0, 1));

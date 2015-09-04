@@ -97,4 +97,19 @@ class Concept extends Resource
             return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
         }
     }
+    
+    /**
+     * Gets preview title for the concept.
+     * @TODO Add language support.
+     * @param string $language
+     * @return string
+     * @throws \Exception
+     */
+    public function getPreviewTitle($language = null)
+    {
+        if ($language) {
+            throw new \Exception('Language not supported yet.');
+        }
+        return implode(', ', $this->getProperty(Skos::PREFLABEL));
+    }
 }

@@ -47,7 +47,9 @@ class Csv extends FormatAbstract
     public function printHeader()
     {
         // @TODO Beautify properties
-        return $this->stringPutCsv($this->getPropertiesToSerialise());
+        return $this->stringPutCsv(
+            array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $this->getPropertiesToSerialise())
+        );
     }
     
     /**

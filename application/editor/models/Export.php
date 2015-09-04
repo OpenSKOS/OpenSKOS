@@ -22,6 +22,8 @@
 
 use OpenSkos2\Export\Message;
 use OpenSkos2\Export\Serialiser\FormatFactory;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Concept;
 
 class Editor_Models_Export
@@ -108,7 +110,6 @@ class Editor_Models_Export
         return $this->settings;
     }
 
-    
     /**
      * Exports to file with the specified settings.
      * 
@@ -120,10 +121,6 @@ class Editor_Models_Export
         $command = $this->getDi()->make('OpenSkos2\Export\Command');
         return $command->handle($this->createExportMessage());
     }
-    
-    
-    
-    
     
     /**
      * Exports to file with the specified settings.
@@ -152,11 +149,6 @@ class Editor_Models_Export
 
         $fileDetails = $this->getExportFileDetails();
         $filePath = $dirPath . '/' . $fileDetails['fileName'];
-
-        
-        
-        
-        
         
         $message = $this->createExportMessage();
         $message->setOutputFilePath($filePath);
@@ -183,14 +175,11 @@ class Editor_Models_Export
             throw new Zend_Exception('Current tenant does not have any collections. At least one is required.', 404);
         }
 
-        // We use the first collection of the tenant for the export job, 
-        // because the collection is important for the jobs, but the export is not related to any specific collection. 
+        // We use the first collection of the tenant for the export job,
+        // because the collection is important for the jobs,
+        // but the export is not related to any specific collection.
         $firstTenantCollection = $tenantCollections->current();
 
-        
-        
-        
-        
         $model = new OpenSKOS_Db_Table_Jobs();
         $job = $model->fetchNew()->setFromArray(array(
                     'collection' => $firstTenantCollection->id,
@@ -206,15 +195,6 @@ class Editor_Models_Export
         return $job;
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-
     /**
      * Gets the path to the dir where the export files should be placed.
      *
@@ -309,11 +289,23 @@ class Editor_Models_Export
     {
         $result = array();
         $result[] = 'uri';
-
+        
+        // @TODO Fetch from the triple store or have a list in the concept.
+        $result[] = OpenSkos::UUID;
+        $result[] = OpenSkos::STATUS;
+        $result[] = OpenSkos::TOBECHECKED;
+        
         foreach (Concept::$classes as $fieldsInClass) {
             $result = array_merge($result, $fieldsInClass);
         }
-
+        
+        $result[] = DcTerms::CREATED;
+        $result[] = DcTerms::CREATOR;
+        $result[] = DcTerms::DATEACCEPTED;
+        $result[] = OpenSkos::ACCEPTEDBY;
+        $result[] = DcTerms::MODIFIED;
+        $result[] = DcTerms::MEDIATOR;
+        
         return $result;
     }
 
@@ -336,14 +328,6 @@ class Editor_Models_Export
                 throw new \RuntimeException('No file info for format "' . $this->get('format') . '"');
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
     
     /**
      * @return Message
