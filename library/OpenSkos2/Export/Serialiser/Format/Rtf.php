@@ -25,6 +25,8 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Concept;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\DcTerms;
 
 // @TODO remove scripts and zend dependency.
 class Rtf extends FormatAbstract
@@ -36,14 +38,14 @@ class Rtf extends FormatAbstract
     protected $rtfFieldsTitlesMap = array(
         'uuid' => 'UUID',
         'uri' => 'URI',
-        Concept::PROPERTY_BROADER => 'BT',
-        Concept::PROPERTY_NARROWER => 'NT',
-        Concept::PROPERTY_RELATED => 'RT',
-        Concept::PROPERTY_EXAMPLE => 'Voorbeeld:',
-        Concept::PROPERTY_DCTERMS_DATESUBMITTED => 'DS',
-        Concept::PROPERTY_DCTERMS_DATEACCEPTED => 'DA',
-        Concept::PROPERTY_DCTERMS_MODIFIED => 'DM',
-        Concept::PROPERTY_DCTERMS_CREATOR => 'C',
+        Skos::BROADER => 'BT',
+        Skos::NARROWER => 'NT',
+        Skos::RELATED => 'RT',
+        Skos::EXAMPLE => 'Voorbeeld:',
+        DcTerms::DATESUBMITTED => 'DS',
+        DcTerms::DATEACCEPTED => 'DA',
+        DcTerms::MODIFIED => 'DM',
+        DcTerms::CREATOR => 'C',
     );
     
     /**

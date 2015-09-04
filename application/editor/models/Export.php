@@ -314,9 +314,6 @@ class Editor_Models_Export
             $result = array_merge($result, $fieldsInClass);
         }
 
-        // The field conceptScheme is not usable in the editor.
-        unset($result[array_search(Concept::PROPERTY_CONCEPTSCHEME, $result)]);
-
         return $result;
     }
 
