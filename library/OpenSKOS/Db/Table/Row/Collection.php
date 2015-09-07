@@ -367,7 +367,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 
         if (!$this->uri) {
             // @TODO Get base url for use here.
-            $this->uri = "http://openskos.org/api/collections/" . $this->getTenant() . ':' . $this['code'];
+            $this->uri = "http://openskos.org/api/collections/" . $this->getTenant()['code'] . ':' . $this['code'];
             $this->save();
         }
 
