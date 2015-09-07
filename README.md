@@ -161,3 +161,11 @@ and let the source be harvested.
 The harvest job can be started with ./tools/harvest.php, 
 another CLI script meant to be run as a cron-task.
 ???
+
+5.4 Migrate from OpenSKOS v1
+-------------------------------------------------------------------------------
+It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 instance directly into a v2 instance
+
+`tools/migrate.php --endpoint http://<solr server>:8180/ciss/<core name>/select`
+
+Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
