@@ -19,13 +19,32 @@
 
 namespace OpenSkos2\Validator;
 
-
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\ResourceManager;
 
 abstract class AbstractResourceValidator implements ResourceValidator
 {
+    /**
+     * @var string
+     */
     protected $errorMessage;
 
+    /**
+     * @var ResourceManager
+     */
+    protected $resourceManager;
+    
+    /**
+     * @param ResourceManager $resourceManager
+     */
+    public function __construct(ResourceManager $resourceManager)
+    {
+        $this->resourceManager = $resourceManager;
+    }
+    
+    /**
+     * @param $resource Resource
+     */
     abstract public function validate(Resource $resource);
 
     /**

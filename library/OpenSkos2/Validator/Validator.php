@@ -22,6 +22,7 @@ namespace OpenSkos2\Validator;
 use OpenSkos2\Tenant;
 use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Validator\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
@@ -36,19 +37,9 @@ use Psr\Log\NullLogger;
 class Validator
 {
     /**
-     * @return ResourceValidator[]
+     * @var ResourceManager
      */
-    public function getDefaultValidators()
-    {
-        return [
-            new DuplicateBroader(),
-            new DuplicateNarrower(),
-            new DuplicateRelated(),
-            new InScheme(),
-            new RelatedToSelf(),
-            new UniqueNotation()
-        ];
-    }
+    protected $resourceManager;
     
     /**
      * @var Tenant
@@ -56,13 +47,31 @@ class Validator
     protected $tenant;
     
     /**
+     * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(Tenant $tenant = null)
+    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null)
     {
+        $this->resourceManager = $resourceManager;
         $this->tenant = $tenant;
     }
 
+    /**
+     * @return ResourceValidator[]
+     */
+    public function getDefaultValidators()
+    {
+        // @TODO Factory + only names list.
+        return [
+            new DuplicateBroader($this->resourceManager),
+            new DuplicateNarrower($this->resourceManager),
+            new DuplicateRelated($this->resourceManager),
+            new InScheme($this->resourceManager),
+            new RelatedToSelf($this->resourceManager),
+            new UniqueNotation($this->resourceManager)
+        ];
+    }
+    
     /**
      * @param ResourceCollection $resourceCollection
      * @param LoggerInterface $logger
@@ -129,8 +138,11 @@ class Validator
         $validators = $this->getDefaultValidators();
         
         if (!empty($this->tenant)) {
+            // @TODO Tenant dependent validators list and TenantDepenedentValidator interface.
             if ($this->tenant->getRequireUniqueNotation()) {
-                $validators[] = new UniqueNotationInTenant($this->tenant);
+                $validator = new UniqueNotationInTenant($this->resourceManager);
+                $validator->setTenant($this->tenant);
+                $validators[] = $validator;
             }
         }
         
