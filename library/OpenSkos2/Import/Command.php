@@ -87,6 +87,9 @@ class Command implements LoggerAwareInterface
 
         $currentVersions = [];
         foreach ($resourceCollection as $resourceToInsert) {
+            // Generate uri if none is given (_:genid<n>)
+            // @TODO
+            
             try {
                 $uri = $resourceToInsert->getUri();
                 $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri);
@@ -138,11 +141,15 @@ class Command implements LoggerAwareInterface
                     );
                 }
 
+                // @TODO Those properties has to have types, rather then ignoring them from a list
+                $nonLangProperties = [Skos::NOTATION, OpenSkos::STATUS];
                 if ($message->getFallbackLanguage()) {
-                    foreach ($resourceToInsert->getProperties() as $properties) {
+                    foreach ($resourceToInsert->getProperties() as $predicate => $properties) {
                         foreach ($properties as $property) {
-                            if ($property instanceof Literal
-                                    && $property->getType() === null && $property->getLanguage() === null) {
+                            if (!in_array($predicate, $nonLangProperties)
+                                    && $property instanceof Literal
+                                    && $property->getType() === null
+                                    && $property->getLanguage() === null) {
                                 $property->setLanguage($message->getFallbackLanguage());
                             }
                         }
@@ -199,7 +206,7 @@ class Command implements LoggerAwareInterface
                     }
                 }
             }
-
+            
             if (isset($currentVersions[$resourceToInsert->getUri()])) {
                 $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
             }
