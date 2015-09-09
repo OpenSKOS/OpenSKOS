@@ -159,8 +159,10 @@ class EasyRdf
                  * @var $value Object
                  */
                 if ($value instanceof Literal) {
-                    $easyResource->addLiteral($propName,
-                        new \EasyRdf\Literal($value->getValue(), $value->getLanguage(), $value->getType()));
+                    $easyResource->addLiteral(
+                        $propName,
+                        new \EasyRdf\Literal($value->getValue(), $value->getLanguage(), $value->getType())
+                    );
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, $value->getUri());
                 } else {
@@ -170,5 +172,7 @@ class EasyRdf
                 }
             }
         }
+        
+        var_dump($easyResource);
     }
 }
