@@ -22,7 +22,7 @@ namespace OpenSkos2\Validator;
 use OpenSkos2\Tenant;
 use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Validator\ResourceManager;
+use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
@@ -56,22 +56,6 @@ class Validator
         $this->tenant = $tenant;
     }
 
-    /**
-     * @return ResourceValidator[]
-     */
-    public function getDefaultValidators()
-    {
-        // @TODO Factory + only names list.
-        return [
-            new DuplicateBroader($this->resourceManager),
-            new DuplicateNarrower($this->resourceManager),
-            new DuplicateRelated($this->resourceManager),
-            new InScheme($this->resourceManager),
-            new RelatedToSelf($this->resourceManager),
-            new UniqueNotation($this->resourceManager)
-        ];
-    }
-    
     /**
      * @param ResourceCollection $resourceCollection
      * @param LoggerInterface $logger
@@ -137,15 +121,30 @@ class Validator
     {
         $validators = $this->getDefaultValidators();
         
-        if (!empty($this->tenant)) {
+        if (!empty($this->tenant) && $this->tenant->getRequireUniqueNotation()) {
             // @TODO Tenant dependent validators list and TenantDepenedentValidator interface.
-            if ($this->tenant->getRequireUniqueNotation()) {
-                $validator = new UniqueNotationInTenant($this->resourceManager);
-                $validator->setTenant($this->tenant);
-                $validators[] = $validator;
-            }
+            $validator = new UniqueNotationInTenant($this->resourceManager);
+            $validator->setTenant($this->tenant);
+            $validators[] = $validator;
+        } else {
+            $validators[] = new UniqueNotation($this->resourceManager);
         }
         
         return $validators;
+    }
+    
+    /**
+     * @return ResourceValidator[]
+     */
+    protected function getDefaultValidators()
+    {
+        // @TODO Factory + only names list.
+        return [
+            new DuplicateBroader($this->resourceManager),
+            new DuplicateNarrower($this->resourceManager),
+            new DuplicateRelated($this->resourceManager),
+            new InScheme($this->resourceManager),
+            new RelatedToSelf($this->resourceManager)
+        ];
     }
 }

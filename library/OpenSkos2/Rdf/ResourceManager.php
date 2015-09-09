@@ -216,4 +216,15 @@ class ResourceManager
         
         return json_decode($response->getBody(), true)['@context'];
     }
+    
+    /**
+     * Sends an ask query for if a match is found for the patterns and returns the boolean result.
+     * @param string $patterns String representation of the patterns.
+     * @return boolean
+     */
+    public function ask($patterns)
+    {
+        $query = 'ASK {' . $patterns . '}';
+        return $this->client->query($query)->getBoolean();
+    }
 }

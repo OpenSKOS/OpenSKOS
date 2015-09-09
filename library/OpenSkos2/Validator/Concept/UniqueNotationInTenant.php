@@ -22,9 +22,8 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Tenant;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
 
-class UniqueNotationInTenant extends ConceptValidator
+class UniqueNotationInTenant extends UniqueNotation
 {
     /**
      * @var Tenant
@@ -34,7 +33,7 @@ class UniqueNotationInTenant extends ConceptValidator
     /**
      * @param Tenant $tenant
      */
-    public function __construct(Tenant $tenant)
+    public function setTenant(Tenant $tenant)
     {
         $this->tenant = $tenant;
     }
@@ -45,10 +44,20 @@ class UniqueNotationInTenant extends ConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-//        if (!count($concept->getProperty(Skos::INSCHEME))) {
-//            $this->errorMessage = 'The concept must be included in at least one scheme.';
-//            return false;
-//        }
+        if ($concept->hasProperty(Skos::NOTATION)) {
+            $patterns = $this->notationsPattern($concept);
+            $patterns .= PHP_EOL;
+            $patterns .= $this->notSameConceptPattern($concept);
+            
+            $hasOther = $this->resourceManager->ask($patterns);
+
+            if ($hasOther) {
+                $this->errorMessage = 'The concept notation must be unique per tenant. '
+                    . 'There is other concept with same notation in the same tenant.';
+                return false;
+            }
+        }
+
         return true;
     }
 }

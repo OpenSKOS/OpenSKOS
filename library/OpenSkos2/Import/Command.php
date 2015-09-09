@@ -28,8 +28,8 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Validator;
+use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
@@ -41,14 +41,21 @@ class Command implements LoggerAwareInterface
      * @var ResourceManager
      */
     private $resourceManager;
+    
+    /**
+     * @var Tenant
+     */
+    protected $tenant;
 
     /**
      * Command constructor.
      * @param ResourceManager $resourceManager
+     * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager)
+    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null)
     {
         $this->resourceManager = $resourceManager;
+        $this->tenant = $tenant;
     }
 
 
@@ -57,7 +64,7 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
 
-        $validator = new Validator();
+        $validator = new Validator($this->resourceManager, $this->tenant);
         $validator->validateCollection($resourceCollection, $this->logger);
 
         if ($message->getClearCollection()) {
