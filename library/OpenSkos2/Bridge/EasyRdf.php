@@ -172,7 +172,5 @@ class EasyRdf
                 }
             }
         }
-        
-        var_dump($easyResource);
     }
 }
