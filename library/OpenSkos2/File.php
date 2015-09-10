@@ -19,7 +19,6 @@
 
 namespace OpenSkos2;
 
-
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
 

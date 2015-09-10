@@ -72,7 +72,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function unsetProperty($predicate)
     {
-        unset ($this->properties[$predicate]);
+        unset($this->properties[$predicate]);
         return $this;
     }
 
@@ -129,7 +129,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
-     * Gets the specified property values but filter only those in the specified language.     * 
+     * Gets the specified property values but filter only those in the specified language.     *
      * @param string $predicate
      * @param string $language
      * @return RdfObject[]
@@ -157,7 +157,6 @@ class Resource extends Uri implements ResourceIdentifier
                 if ($value instanceof Literal
                         && $value->getLanguage() !== null
                         && !isset($languages[$value->getLanguage()])) {
-                    
                     $languages[$value->getLanguage()] = true;
                 }
             }

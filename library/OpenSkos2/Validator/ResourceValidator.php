@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Validator;
 
-
 use OpenSkos2\Rdf\Resource;
 
 interface ResourceValidator

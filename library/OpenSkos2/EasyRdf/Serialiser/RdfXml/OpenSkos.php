@@ -64,7 +64,6 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         // iterate through namepsaces array prefix and output a string.
         $namespaceStr = '';
         foreach ($this->prefixes as $prefix => $count) {
-
             $url = \EasyRdf\RdfNamespace::get($prefix);
 
             if (strlen($namespaceStr)) {
@@ -170,9 +169,6 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         }
 
         if (is_object($obj) and $obj instanceof Resource) {
-
-
-
             $pcount = count($obj->propertyUris());
             $rpcount = $this->reversePropertyCount($obj);
             $alreadyOutput = isset($this->outputtedResources[$obj->getUri()]);
@@ -202,8 +198,6 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             //}
 
         } elseif (is_object($obj) and $obj instanceof Literal) {
-
-
             $atrributes = "";
             $datatype = $obj->getDatatypeUri();
             if ($datatype) {

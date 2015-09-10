@@ -33,14 +33,14 @@ class Serialiser
     
     /**
      * The resource manager to use for fetching the resources to serialise.
-     * @var ResourceManager 
+     * @var ResourceManager
      */
     protected $resourceManager;
     
     // @TODO Maybe collection with query or something.
     /**
      * The query to use to fetch resources from the resource manager.
-     * @var string 
+     * @var string
      */
     protected $query;
     
@@ -77,7 +77,7 @@ class Serialiser
     
     /**
      * Writes the serialised objects to file.
-     * 
+     *
      * @param string $filePath
      */
     public function writeToFile($filePath)

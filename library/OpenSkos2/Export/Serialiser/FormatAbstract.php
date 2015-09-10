@@ -39,7 +39,7 @@ abstract class FormatAbstract
     
     /**
      * Max depth to export. Used for rtf format.
-     * @var int 
+     * @var int
      */
     protected $maxDepth = 1;
     

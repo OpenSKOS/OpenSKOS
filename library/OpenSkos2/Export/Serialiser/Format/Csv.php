@@ -72,7 +72,7 @@ class Csv extends FormatAbstract
     
     /**
      * Prepare concept data for exporting in csv format.
-     * 
+     *
      * @param Api_Models_Concept $concept
      * @param array $propertiesToExport
      * @return array The result concept data

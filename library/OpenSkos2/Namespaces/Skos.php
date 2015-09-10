@@ -18,7 +18,6 @@
 
 namespace OpenSkos2\Namespaces;
 
-
 class Skos
 {
     const CONCEPTSCHEME = 'http://www.w3.org/2004/02/skos/core#conceptScheme';

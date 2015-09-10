@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Rdf;
 
-
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;

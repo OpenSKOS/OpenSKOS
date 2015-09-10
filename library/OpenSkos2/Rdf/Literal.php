@@ -23,7 +23,7 @@ use OpenSkos2\Exception\InvalidResourceException;
 
 class Literal implements Object
 {
-    CONST TYPE_DATETIME = "http://www.w3.org/2001/XMLSchema#datetime";
+    const TYPE_DATETIME = "http://www.w3.org/2001/XMLSchema#datetime";
     const TYPE_BOOL = "http://www.w3.org/2001/XMLSchema#bool";
 
 

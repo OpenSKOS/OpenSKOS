@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Import;
 
-
 use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\File;
@@ -125,7 +124,6 @@ class Command implements LoggerAwareInterface
                      */
                     $currentVersion = $currentVersion[$resourceToInsert->getUri()];
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
-                        
                     }
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                         $resourceToInsert->setProperty(
@@ -201,7 +199,7 @@ class Command implements LoggerAwareInterface
                     $resourceToInsert->unsetProperty(OpenSkos::DATE_DELETED);
                     $resourceToInsert->unsetProperty(OpenSkos::DELETEDBY);
 
-                    switch($resourceToInsert->getStatus()) {
+                    switch ($resourceToInsert->getStatus()) {
                         case \OpenSKOS_Concept_Status::APPROVED:
                             $resourceToInsert->addProperty(
                                 DcTerms::DATEACCEPTED,

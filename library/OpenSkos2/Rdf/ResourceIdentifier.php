@@ -18,7 +18,6 @@
 
 namespace OpenSkos2\Rdf;
 
-
 interface ResourceIdentifier
 {
     /**

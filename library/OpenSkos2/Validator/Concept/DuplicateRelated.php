@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Validator\Concept;
 
-
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\ConceptValidator;
@@ -45,5 +44,4 @@ class DuplicateRelated extends ConceptValidator
 
         return true;
     }
-
 }

@@ -31,7 +31,7 @@ class FormatFactory
 
     /**
      * Gets supported formats.
-     * 
+     *
      * @return array
      */
     public static function getFormats()

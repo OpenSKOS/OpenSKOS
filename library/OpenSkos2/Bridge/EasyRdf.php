@@ -54,7 +54,6 @@ class EasyRdf
             $myResource = self::createResource($type->getUri(), $resource->getUri());
 
             foreach ($resource->propertyUris() as $propertyUri) {
-
                 foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
                     if ($propertyValue instanceof \EasyRdf\Literal) {
                         $myResource->addProperty(

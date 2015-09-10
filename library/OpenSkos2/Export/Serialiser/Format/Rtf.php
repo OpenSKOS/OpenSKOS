@@ -132,7 +132,7 @@ class Rtf extends FormatAbstract
     
     /**
      * Prepares concept data for exporting in rtf format.
-     * 
+     *
      * @param Resource $resource
      * @return array The result resource data
      */
@@ -232,7 +232,7 @@ class Rtf extends FormatAbstract
 
     /**
      * Converts the unicode chars inside the given utf8 text to rtf replacements.
-     * 
+     *
      * @param string $utf8_text
      * @return string
      */
@@ -244,7 +244,7 @@ class Rtf extends FormatAbstract
 
     /**
      * Use for callback in utf82rtf's preg_replace_callback.
-     * 
+     *
      * @param array $matches
      * @return string
      */

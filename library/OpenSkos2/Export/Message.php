@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Export;
 
-
 class Message
 {
 //    protected $userId;

@@ -18,7 +18,6 @@
 
 namespace OpenSkos2\Namespaces;
 
-
 class Rdf
 {
     //todo ensure completeness
