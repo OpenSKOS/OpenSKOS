@@ -73,6 +73,15 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return isset($this->properties[$propertyName]);
     }
+    
+    /**
+     * @param string $propertyName
+     * @return bool
+     */
+    public function isPropertyEmpty($propertyName)
+    {
+        return empty($this->properties[$propertyName]);
+    }
 
     /**
      * @param string $propertyName
@@ -108,5 +117,15 @@ class Resource extends Uri implements ResourceIdentifier
     public function getType()
     {
         return current($this->getProperty(Rdf::TYPE));
+    }
+    
+    /**
+     * Is the current resource a blank node.
+     * It is if no uri given or generated uri starting with _:
+     * @return boolean
+     */
+    public function isBlankNode()
+    {
+        return empty($this->uri) || preg_match('/^_:/', $this->uri);
     }
 }

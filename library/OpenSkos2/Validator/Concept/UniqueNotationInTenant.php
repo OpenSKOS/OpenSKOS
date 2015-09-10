@@ -44,7 +44,7 @@ class UniqueNotationInTenant extends UniqueNotation
      */
     protected function validateConcept(Concept $concept)
     {
-        if ($concept->hasProperty(Skos::NOTATION)) {
+        if (!$concept->isPropertyEmpty(Skos::NOTATION)) {
             $patterns = $this->notationsPattern($concept);
             $patterns .= PHP_EOL;
             $patterns .= $this->notSameConceptPattern($concept);

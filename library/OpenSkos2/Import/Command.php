@@ -64,6 +64,23 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
 
+        // @TODO Most of the code below has to be applied for the api and for the api,
+        // so has to be moved to a shared place.
+        
+        
+        // Srtuff needed before validation.
+        foreach ($resourceCollection as $resourceToInsert) {
+            // Concept only logic
+            // Generate uri if none or blank (_:genid<n>) is given.
+            if ($resourceToInsert instanceof Concept) {
+                $resourceToInsert->addProperty(Skos::COLLECTION, $message->getCollection());
+                
+                if ($resourceToInsert->isBlankNode()) {
+                    $resourceToInsert->selfGenerateUri();
+                }
+            }
+        }
+        
         $validator = new Validator($this->resourceManager, $this->tenant);
         $validator->validateCollection($resourceCollection, $this->logger);
 
@@ -87,9 +104,6 @@ class Command implements LoggerAwareInterface
 
         $currentVersions = [];
         foreach ($resourceCollection as $resourceToInsert) {
-            // Generate uri if none is given (_:genid<n>)
-            // @TODO
-            
             try {
                 $uri = $resourceToInsert->getUri();
                 $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri);
@@ -120,9 +134,7 @@ class Command implements LoggerAwareInterface
                         );
                     }
                 }
-
-
-                $resourceToInsert->addProperty(Skos::COLLECTION, $message->getCollection());
+    
 
                 if ($message->getIgnoreIncomingStatus()) {
                     $resourceToInsert->unsetProperty(OpenSkos::STATUS);

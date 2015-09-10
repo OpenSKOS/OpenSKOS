@@ -39,6 +39,9 @@ abstract class AbstractResourceValidator implements ResourceValidator
      */
     public function __construct(ResourceManager $resourceManager)
     {
+        // @TODO Maybe we need to split validators which need the resource manager and such which don't
+        // @TODO Update the tests
+        
         $this->resourceManager = $resourceManager;
     }
     

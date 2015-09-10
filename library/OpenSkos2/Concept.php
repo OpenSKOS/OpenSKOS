@@ -112,4 +112,32 @@ class Concept extends Resource
         }
         return implode(', ', $this->getProperty(Skos::PREFLABEL));
     }
+    
+    /**
+     * Generates an uri for the concept.
+     */
+    public function selfGenerateUri()
+    {
+        if (!$this->isBlankNode()) {
+            throw new \Exception(
+                'The concept already has an uri. Can not generate new one.'
+            );
+        }
+        
+        if ($this->isPropertyEmpty(Skos::COLLECTION)) {
+            throw new \Exception(
+                'Collection uri is required to generate concept uri.'
+            );
+        }
+        
+        $base = $this->getProperty(Skos::COLLECTION)[0]->getUri();
+        $separator = '/';
+        if ($this->isPropertyEmpty(Skos::NOTATION)) {
+            $uri = $base . $separator . \Rhumsaa\Uuid\Uuid::uuid4();
+        } else {
+            $uri = $base . $separator . $this->getProperty(Skos::NOTATION)[0]->getValue();
+        }
+        
+        $this->setUri($uri);
+    }
 }
