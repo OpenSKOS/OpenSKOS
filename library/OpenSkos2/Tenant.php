@@ -31,7 +31,7 @@ class Tenant
     /**
      * @var bool
      */
-    protected $requireUniqueNotation;
+    protected $isNotationUniquePerTenant;
     
     /**
      * @return string
@@ -42,20 +42,21 @@ class Tenant
     }
 
     /**
+     * Is the notation required to be unique per tenant, not per scheme.
      * @return bool
      */
-    public function getRequireUniqueNotation()
+    public function isNotationUniquePerTenant()
     {
-        return $this->requireUniqueNotation;
+        return $this->isNotationUniquePerTenant;
     }
 
     /**
      * @param string $code
-     * @param bool $requireUniqueNotation
+     * @param bool $isNotationUniquePerTenant
      */
-    public function __construct($code, $requireUniqueNotation = false)
+    public function __construct($code, $isNotationUniquePerTenant = false)
     {
         $this->code = $code;
-        $this->requireUniqueNotation = $requireUniqueNotation;
+        $this->isNotationUniquePerTenant = $isNotationUniquePerTenant;
     }
 }

@@ -22,9 +22,16 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
+use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
+use OpenSkos2\Validator\DependencyAware\TenantAware;
+use OpenSkos2\Validator\DependencyAware\TenantAwareTrait;
 
-class UniqueNotation extends ConceptValidator
+class UniqueNotation extends ConceptValidator implements ResourceManagerAware, TenantAware
 {
+    use ResourceManagerAwareTrait;
+    use TenantAwareTrait;
+    
     /**
      * @param Concept $concept
      * @return bool
@@ -34,20 +41,38 @@ class UniqueNotation extends ConceptValidator
         if (!$concept->isPropertyEmpty(Skos::NOTATION)) {
             $patterns = $this->notationsPattern($concept);
             $patterns .= PHP_EOL;
-            $patterns .= $this->schemesPattern($concept);
-            $patterns .= PHP_EOL;
             $patterns .= $this->notSameConceptPattern($concept);
             
-            $hasOther = $this->resourceManager->ask($patterns);
+            if ($this->isUniquePerSchema()) {
+                $patterns .= PHP_EOL;
+                $patterns .= $this->schemesPattern($concept);
+            }
+            
+            $hasOther = $this->getResourceManager()->ask($patterns);
 
             if ($hasOther) {
-                $this->errorMessage = 'The concept notation must be unique per concept scheme. '
-                    . 'There is other concept with same notation in one of the concept schemes.';
+                if ($this->isUniquePerSchema()) {
+                    $this->errorMessage = 'The concept notation must be unique per concept scheme. '
+                        . 'There is other concept with same notation in one of the concept schemes.';
+                } else {
+                    $this->errorMessage = 'The concept notation must be unique per tenant. '
+                        . 'There is other concept with same notation in the same tenant.';
+                }
+                
                 return false;
             }
         }
 
         return true;
+    }
+    
+    /**
+     * By default validate per scheme unless the tenant requires it unique per tenant.
+     * @return bool
+     */
+    protected function isUniquePerSchema()
+    {
+        return !$this->getTenant()->isNotationUniquePerTenant();
     }
     
     /**

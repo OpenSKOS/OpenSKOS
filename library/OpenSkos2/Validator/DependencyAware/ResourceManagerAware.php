@@ -17,27 +17,20 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator;
+namespace OpenSkos2\Validator\DependencyAware;
 
-use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\ResourceManager;
 
-abstract class AbstractResourceValidator implements ResourceValidator
+interface ResourceManagerAware
 {
     /**
-     * @var string
+     * @param ResourceManager $resourceManager
+     * @return self
      */
-    protected $errorMessage;
+    public function setResourceManager(ResourceManager $resourceManager);
     
     /**
-     * @param $resource Resource
+     * @return ResourceManager
      */
-    abstract public function validate(Resource $resource);
-
-    /**
-     * @return string
-     */
-    public function getErrorMessage()
-    {
-        return $this->errorMessage;
-    }
+    public function getResourceManager();
 }
