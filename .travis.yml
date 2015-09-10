@@ -9,3 +9,7 @@ php:
 
 install:
   - composer install --dev --prefer-dist
+
+script:
+ - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
+ - phpunit
