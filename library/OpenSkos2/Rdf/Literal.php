@@ -109,10 +109,8 @@ class Literal implements Object
      */
     public function __toString()
     {
-        $string = $this->getValue();
-        if ($this->getLanguage() !== null) {
-            $string .= '@' . $this->getLanguage();
-        }
-        return $string;
+        // We don't show language or type in the to string.
+        // Not needed on the places where we use it.
+        return $this->getValue();
     }
 }

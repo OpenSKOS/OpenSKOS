@@ -101,17 +101,19 @@ class Concept extends Resource
     
     /**
      * Gets preview title for the concept.
-     * @TODO Add language support.
      * @param string $language
      * @return string
      * @throws \Exception
      */
     public function getPreviewTitle($language = null)
     {
-        if ($language) {
-            throw new \Exception('Language not supported yet.');
+        if (!empty($lanaguage)) {
+            $values = $this->retrievePropertyInLanguage(Skos::PREFLABEL, $language);
+        } else {
+            $values = $this->getProperty(Skos::PREFLABEL);
         }
-        return implode(', ', $this->getProperty(Skos::PREFLABEL));
+        
+        return implode(', ', $values);
     }
     
     /**
