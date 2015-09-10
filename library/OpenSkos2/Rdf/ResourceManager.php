@@ -22,6 +22,7 @@ namespace OpenSkos2\Rdf;
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
+use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 
@@ -88,6 +89,7 @@ class ResourceManager
      */
     public function fetch($query)
     {
+        // @TODO this is better to be protected - no direct queries
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
@@ -101,6 +103,7 @@ class ResourceManager
      */
     public function fetchWithLimit($query, $offset = null, $limit = null)
     {
+        // @TODO this is better to be protected - no direct queries
         if ($limit !== null) {
             $query .= PHP_EOL . 'LIMIT ' . $limit;
         }
@@ -154,25 +157,6 @@ class ResourceManager
     }
 
     /**
-     * @param Object $object
-     * @return string
-     * @throws \EasyRdf\Exception
-     */
-    protected function valueToTurtle(Object $object)
-    {
-        $serializer = new \EasyRdf\Serialiser\Ntriples();
-        if ($object instanceof Literal) {
-            return $serializer->serialiseValue([
-                'type' => 'literal',
-                'value' => $object->getValue(),
-                'lang' => $object->getLanguage()
-            ]);
-        } elseif ($object instanceof Uri) {
-            return $serializer->serialiseValue(['type' => 'uri', 'value' => $object->getUri()]);
-        }
-    }
-
-    /**
      * @param Object[] $spec
      * @return ResourceCollection
      */
@@ -217,13 +201,72 @@ class ResourceManager
     }
     
     /**
+     * Asks for if the properties map has a match.
+     * <code>
+     * $matchProperties = [
+     *     Skos::NOTATION => $concept->getProperty(Skos::NOTATION),
+     *     Skos::INSCHEME => $concept->getProperty(Skos::INSCHEME),
+     * ];
+     * </code>
+     * @param Object[] $matchProperties
+     * @param Resource|null $excludeResource
+     * @return type
+     */
+    public function askForMatch($matchProperties, $excludeResource = null)
+    {
+        $patterns = '';
+        
+        $ind = 0;
+        foreach ($matchProperties as $predicate => $objects) {
+            $patterns .= '?subject <' . $predicate . '> ?o' . $ind;
+            $patterns .= PHP_EOL;
+            
+            $turtleObjects = array_map(
+                [$this, 'valueToTurtle'],
+                $objects
+            );
+            
+            $patterns .= 'FILTER (?o' . $ind . ' IN (' . implode(', ', $turtleObjects) . '))';
+            $patterns .= PHP_EOL;
+            
+            $ind ++;
+        }
+        
+        if (!empty($excludeResource)) {
+            $patterns .= 'FILTER (?subject != <' . $excludeResource->getUri() . '>)';
+            $patterns .= PHP_EOL;
+        }
+        
+        return $this->ask($patterns);
+    }
+    
+    /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
      * @param string $patterns String representation of the patterns.
      * @return boolean
      */
-    public function ask($patterns)
+    protected function ask($patterns)
     {
         $query = 'ASK {' . $patterns . '}';
         return $this->client->query($query)->getBoolean();
+    }
+
+    /**
+     * @param Object $object
+     * @return string
+     * @throws \EasyRdf\Exception
+     */
+    protected function valueToTurtle(Object $object)
+    {
+        $serializer = new \EasyRdf\Serialiser\Ntriples();
+        if ($object instanceof Literal) {
+            return $serializer->serialiseValue([
+                'type' => 'literal',
+                'value' => $object->getValue(),
+                'lang' => $object->getLanguage()
+            ]);
+        } elseif ($object instanceof Uri) {
+            return $serializer->serialiseValue(['type' => 'uri', 'value' => $object->getUri()]);
+        }
     }
 }

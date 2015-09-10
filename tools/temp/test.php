@@ -46,23 +46,26 @@ $autoloader = new OpenSKOS_Autoloader();
 $mainAutoloader = Zend_Loader_Autoloader::getInstance();
 $mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
 
+class EchoLogger extends \Psr\Log\AbstractLogger
+{
+    public function log($level, $message, array $context = array())
+    {
+        echo $message . PHP_EOL;
+    }
+}
 
 // Test....
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
-var_dump($diContainer->get('OpenSkos2\Rdf\ResourceManager'));
+$file = new OpenSkos2\File('/home/www/temp/concept.xml');
 
-var_dump($diContainer->make('OpenSkos2\Rdf\ResourceManager'));
+$validator = new \OpenSkos2\Validator\Validator(
+    $diContainer->get('OpenSkos2\Rdf\ResourceManager'),
+    new \OpenSkos2\Tenant('pic', true)
+);
 
-var_dump($diContainer->get('OpenSkos2\Rdf\ResourceManager'));
+$validator->validateCollection($file->getResources(), new EchoLogger());
 
-
-// Inside the controllers use this
-//   /**
-//      * This dependency will be injected by PHP-DI
-//      * @Inject
-//      * @var Application_Service_GuestbookService
-//      */
-//    private $guestbookService;
+//

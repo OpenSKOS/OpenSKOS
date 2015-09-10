@@ -133,7 +133,7 @@ class Validator
             if ($validator instanceof ResourceManagerAware) {
                 $validator->setResourceManager($this->resourceManager);
             }
-            if ($validator instanceof TenantAware) {
+            if ($validator instanceof TenantAware && $this->tenant !== null) {
                 $validator->setTenant($this->tenant);
             }
         }

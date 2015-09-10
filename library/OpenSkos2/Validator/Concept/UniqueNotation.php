@@ -39,16 +39,18 @@ class UniqueNotation extends ConceptValidator implements ResourceManagerAware, T
     protected function validateConcept(Concept $concept)
     {
         if (!$concept->isPropertyEmpty(Skos::NOTATION)) {
-            $patterns = $this->notationsPattern($concept);
-            $patterns .= PHP_EOL;
-            $patterns .= $this->notSameConceptPattern($concept);
+            $matchProperties = [
+                Skos::NOTATION => $concept->getProperty(Skos::NOTATION)
+            ];
             
             if ($this->isUniquePerSchema()) {
-                $patterns .= PHP_EOL;
-                $patterns .= $this->schemesPattern($concept);
+                $matchProperties[Skos::INSCHEME] = $concept->getProperty(Skos::INSCHEME);
             }
             
-            $hasOther = $this->getResourceManager()->ask($patterns);
+            $hasOther = $this->getResourceManager()->askForMatch(
+                $matchProperties,
+                $concept
+            );
 
             if ($hasOther) {
                 if ($this->isUniquePerSchema()) {
@@ -73,48 +75,5 @@ class UniqueNotation extends ConceptValidator implements ResourceManagerAware, T
     protected function isUniquePerSchema()
     {
         return !$this->getTenant()->isNotationUniquePerTenant();
-    }
-    
-    /**
-     * Pattern to match any of the notations of the concept.
-     * @param Concept $concept
-     * @return string
-     */
-    protected function notationsPattern(Concept $concept)
-    {
-        $pattern = '?subject <' . Skos::NOTATION . '> ?notation';
-        $pattern .= PHP_EOL;
-        $pattern .= 'FILTER (?notation IN (\'' . implode('\', \'', $concept->getProperty(Skos::NOTATION)) . '\'))';
-        
-        return $pattern;
-    }
-    
-    /**
-     * Pattern to match any of the schemes of the concept.
-     * @param Concept $concept
-     * @return string
-     */
-    protected function schemesPattern(Concept $concept)
-    {
-        $pattern = '?subject <' . Skos::INSCHEME . '> ?scheme';
-        $pattern .= PHP_EOL;
-        $pattern .= 'FILTER (?scheme IN (<' . implode('>, <', $concept->getProperty(Skos::INSCHEME)) . '>))';
-        
-        return $pattern;
-    }
-    
-    /**
-     * Filter to not match the concept which we validate.
-     * @param Concept $concept
-     * @return type
-     */
-    protected function notSameConceptPattern(Concept $concept)
-    {
-        $pattern = '';
-        $uri = $concept->getUri();
-        if (!empty($uri)) {
-            $pattern = 'FILTER (?subject != <' . $uri . '>)';
-        }
-        return $pattern;
     }
 }
