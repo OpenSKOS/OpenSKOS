@@ -19,7 +19,7 @@
 
 namespace OpenSkos2\Exception;
 
-class ResourceAlreadyExistsException extends OpenskosException
+class ResourceAlreadyExistsException extends OpenSkosException
 {
 
 }

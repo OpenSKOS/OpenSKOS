@@ -20,7 +20,7 @@
 namespace OpenSkos2\Exception;
 
 
-class OpenskosException extends \Exception
+class OpenSkosException extends \Exception
 {
 
 }

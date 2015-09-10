@@ -21,6 +21,6 @@ namespace OpenSkos2\Exception;
 /**
  * The required resource was concept for example, but the returned resource is schema or something else.
  */
-class InvalidResourceTypeException extends OpenskosException
+class InvalidResourceTypeException extends OpenSkosException
 {
 }

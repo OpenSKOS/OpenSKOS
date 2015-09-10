@@ -20,7 +20,7 @@
 namespace OpenSkos2\Exception;
 
 
-class InvalidResourceException extends OpenskosException
+class InvalidResourceException extends OpenSkosException
 {
 
 }

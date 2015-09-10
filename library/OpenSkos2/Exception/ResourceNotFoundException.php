@@ -19,7 +19,7 @@
 
 namespace OpenSkos2\Exception;
 
-class ResourceNotFoundException extends OpenskosException
+class ResourceNotFoundException extends OpenSkosException
 {
 
 }

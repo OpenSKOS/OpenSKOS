@@ -23,6 +23,7 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Exception\OpenSkosException;
 
 class Concept extends Resource
 {
@@ -119,13 +120,13 @@ class Concept extends Resource
     public function selfGenerateUri()
     {
         if (!$this->isBlankNode()) {
-            throw new \Exception(
+            throw new OpenSkosException(
                 'The concept already has an uri. Can not generate new one.'
             );
         }
         
         if ($this->isPropertyEmpty(Skos::COLLECTION)) {
-            throw new \Exception(
+            throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'
             );
         }

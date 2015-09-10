@@ -20,7 +20,7 @@ namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 
 use EasyRdf\Literal;
 use EasyRdf\Resource;
-use OpenSkos2\Exception\OpenskosException;
+use OpenSkos2\Exception\OpenSkosException;
 
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 {
@@ -34,7 +34,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         parent::checkSerialiseParams($graph, $format);
 
         if ($format != 'rdfxml_openskos') {
-            throw new OpenskosException(
+            throw new OpenSkosException(
                 "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
             );
         }
@@ -145,7 +145,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                         $xmlString .= $this->rdfxmlObject($short, $object, $depth+1);
                     }
                 } else {
-                    throw new OpenskosException(
+                    throw new OpenSkosException(
                         "It is not possible to serialse the property ".
                         "'$property' to RDF/XML."
                     );
@@ -226,7 +226,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
             return "{$indent}<{$property}{$atrributes}>{$value}</{$property}>\n";
         } else {
-            throw new OpenskosException(
+            throw new OpenSkosException(
                 "Unable to serialise object to xml: ".getType($obj)
             );
         }

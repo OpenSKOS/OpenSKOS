@@ -19,7 +19,7 @@
 namespace OpenSkos2\Exception;
 
 
-class InvalidArgumentException extends OpenskosException
+class InvalidArgumentException extends OpenSkosException
 {
 
 }
