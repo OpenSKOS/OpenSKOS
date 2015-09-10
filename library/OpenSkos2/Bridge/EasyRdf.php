@@ -48,13 +48,15 @@ class EasyRdf
             /** @var $resource \EasyRdf\Resource */
             $type = $resource->get('rdf:type');
 
+            // Filter out resources which are not fully described.
             if (!$type) {
-                throw new OpenSkosException(
-                    'There is no rdf:type for that resource.'
-                );
+                continue;
             }
-
-            $myResource = self::createResource($type->getUri(), $resource->getUri());
+            
+            $myResource = self::createResource(
+                $resource->getUri(),
+                $type
+            );
 
             foreach ($resource->propertyUris() as $propertyUri) {
                 foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
@@ -108,21 +110,25 @@ class EasyRdf
     
     /**
      * Creates a resource matching the give type.
-     * @param string $type
      * @param string $uri
+     * @param \EasyRdf\Resource|null $type
      * @return Resource
      */
-    protected static function createResource($type, $uri = null)
+    protected static function createResource($uri, $type)
     {
-        switch ($type) {
-            case Concept::TYPE:
-                return new Concept($uri);
-            case Schema::TYPE:
-                return new Schema($uri);
-            case Collection::TYPE:
-                return new Collection($uri);
-            default:
-                return new Resource($uri);
+        if ($type) {
+            switch ($type->getUri()) {
+                case Concept::TYPE:
+                    return new Concept($uri);
+                case Schema::TYPE:
+                    return new Schema($uri);
+                case Collection::TYPE:
+                    return new Collection($uri);
+                default:
+                    return new Resource($uri);
+            }
+        } else {
+            return new Resource($uri);
         }
     }
     
