@@ -25,7 +25,6 @@ use OpenSkos2\CollectionCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\Exception\InvalidArgumentException;
-use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
