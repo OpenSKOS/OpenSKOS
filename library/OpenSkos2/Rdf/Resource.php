@@ -45,55 +45,54 @@ class Resource extends Uri implements ResourceIdentifier
             return $this->properties[$predicate];
         }
     }
-
-    /**
-     * @param string $propertyName
-     * @param RdfObject $value
-     */
-    public function addProperty($propertyName, RdfObject $value)
-    {
-        $this->properties[$propertyName][] = $value;
-        return $this;
-    }
-
-    /**
-     * @param string $propertyName
-     */
-    public function unsetProperty($propertyName)
-    {
-        unset ($this->properties[$propertyName]);
-        return $this;
-    }
-
-    /**
-     * @param string $propertyName
-     * @return bool
-     */
-    public function hasProperty($propertyName)
-    {
-        return isset($this->properties[$propertyName]);
-    }
     
     /**
-     * @param string $propertyName
-     * @return bool
+     * @param string $predicate
+     * @param RdfObject $value
      */
-    public function isPropertyEmpty($propertyName)
+    public function addProperty($predicate, RdfObject $value)
     {
-        return empty($this->properties[$propertyName]);
+        $this->properties[$predicate][] = $value;
+        return $this;
     }
 
     /**
-     * @param string $propertyName
+     * @param string $predicate
      * @param RdfObject $value
      * @return $this
      */
-    public function setProperty($propertyName, RdfObject $value)
+    public function setProperty($predicate, RdfObject $value)
     {
-        $this->properties[$propertyName] = [$value];
+        $this->properties[$predicate] = [$value];
         return $this;
     }
 
+    /**
+     * @param string $predicate
+     */
+    public function unsetProperty($predicate)
+    {
+        unset ($this->properties[$predicate]);
+        return $this;
+    }
+
+    /**
+     * @param string $predicate
+     * @return bool
+     */
+    public function hasProperty($predicate)
+    {
+        return isset($this->properties[$predicate]);
+    }
+    
+    /**
+     * @param string $predicate
+     * @return bool
+     */
+    public function isPropertyEmpty($predicate)
+    {
+        return empty($this->properties[$predicate]);
+    }
 
     /**
      * @return string
@@ -127,5 +126,43 @@ class Resource extends Uri implements ResourceIdentifier
     public function isBlankNode()
     {
         return empty($this->uri) || preg_match('/^_:/', $this->uri);
+    }
+    
+    /**
+     * Gets the specified property values but filter only those in the specified language.     * 
+     * @param string $predicate
+     * @param string $language
+     * @return RdfObject[]
+     */
+    public function retrievePropertyInLanguage($predicate, $language)
+    {
+        $values = [];
+        foreach ($this->getProperty($predicate) as $value) {
+            if ($value instanceof Literal && $value->getLanguage() == $language) {
+                $values[] = $value;
+            }
+        }
+        return $values;
+    }
+
+    /**
+     * Gets list of all languages that currently exist in the properties of the resource.
+     * @return string[]
+     */
+    public function retrieveLanguages()
+    {
+        $languages = [];
+        foreach ($this->getProperties() as $property) {
+            foreach ($property as $value) {
+                if ($value instanceof Literal
+                        && $value->getLanguage() !== null
+                        && !isset($languages[$value->getLanguage()])) {
+                    
+                    $languages[$value->getLanguage()] = true;
+                }
+            }
+        }
+        
+        return array_keys($languages);
     }
 }
