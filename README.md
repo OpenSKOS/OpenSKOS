@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
+
 1. Install the OpenSKOS code
 ===============================================================================
 Copy the code to a location of your choice. Make sure all files are readable by
