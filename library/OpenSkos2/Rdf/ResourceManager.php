@@ -244,7 +244,7 @@ class ResourceManager
             }
             
             $patterns .= '?subject <' . $predicate . '> ?o' . $ind;
-            $patterns .= PHP_EOL;                        
+            $patterns .= PHP_EOL;
             $patterns .= 'FILTER (?o' . $ind . ' IN (' .(new NTriple())->serializeArray($objects) . '))';
             $patterns .= PHP_EOL;
             
