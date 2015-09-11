@@ -206,7 +206,6 @@ $mappings = [
             'LexicalLabels' => 'LexicalLabels',
             'DocumentationProperties' => 'DocumentationProperties',
             'SemanticRelations' => 'SemanticRelations',
-            'statusOtherConcept' => 'statusOtherConcept',
             'deleted' => 'deleted',
             'tenant' => 'tenant',
             'statusOtherConcept' => 'statusOtherConcept',
