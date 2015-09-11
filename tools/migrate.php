@@ -208,7 +208,9 @@ $mappings = [
             'SemanticRelations' => 'SemanticRelations',
             'statusOtherConcept' => 'statusOtherConcept',
             'deleted' => 'deleted',
-            'tenant' => 'tenant'
+            'tenant' => 'tenant',
+            'statusOtherConcept' => 'statusOtherConcept',
+            'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
         ]
     ]
 ];
