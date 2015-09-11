@@ -47,7 +47,6 @@ class Command
         $format = FormatFactory::create(
             $message->getFormat(),
             $message->getPropertiesToExport(),
-            // @TODO May limit fetch namespaces to just the query, but describe <uri> will return a lot more in context.
             $this->resourceManager->fetchNamespaces(),
             $message->getMaxDepth()
         );
