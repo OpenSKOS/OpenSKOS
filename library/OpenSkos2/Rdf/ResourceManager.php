@@ -231,14 +231,8 @@ class ResourceManager
             }
             
             $patterns .= '?subject <' . $predicate . '> ?o' . $ind;
-            $patterns .= PHP_EOL;
-            
-            $turtleObjects = array_map(
-                [$this, 'valueToTurtle'],
-                $objects
-            );
-            
-            $patterns .= 'FILTER (?o' . $ind . ' IN (' . implode(', ', $turtleObjects) . '))';
+            $patterns .= PHP_EOL;                        
+            $patterns .= 'FILTER (?o' . $ind . ' IN (' .(new NTriple())->serializeArray($objects) . '))';
             $patterns .= PHP_EOL;
             
             $ind ++;
@@ -281,15 +275,7 @@ class ResourceManager
      */
     protected function valueToTurtle(Object $object)
     {
-        $serializer = new \EasyRdf\Serialiser\Ntriples();
-        if ($object instanceof Literal) {
-            return $serializer->serialiseValue([
-                'type' => 'literal',
-                'value' => $object->getValue(),
-                'lang' => $object->getLanguage()
-            ]);
-        } elseif ($object instanceof Uri) {
-            return $serializer->serialiseValue(['type' => 'uri', 'value' => $object->getUri()]);
-        }
+        $serializer = new NTriple();
+        return $serializer->serialize($object);
     }
 }
