@@ -133,14 +133,36 @@ class Concept extends Resource
             );
         }
         
-        $base = $this->getProperty(Skos::COLLECTION)[0]->getUri();
-        $separator = '/';
+        $collectionUri = $this->getProperty(Skos::COLLECTION)[0]->getUri();
+        
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = $base . $separator . \Rhumsaa\Uuid\Uuid::uuid4();
+            $uri = self::generateUri($collectionUri);
         } else {
-            $uri = $base . $separator . $this->getProperty(Skos::NOTATION)[0]->getValue();
+            $uri = self::generateUri(
+                $collectionUri,
+                $this->getProperty(Skos::NOTATION)[0]->getValue()
+            );
         }
         
         $this->setUri($uri);
+    }
+    
+    /**
+     * Generates concept uri from collection and notation
+     * @param string $collectionUri
+     * @param string $firstNotation, optional. New uuid will be used if empty
+     * @return string
+     */
+    public static function generateUri($collectionUri, $firstNotation = null)
+    {
+        $separator = '/';
+        
+        if (empty($firstNotation)) {
+            $uri = $collectionUri . $separator . \Rhumsaa\Uuid\Uuid::uuid4();
+        } else {
+            $uri = $collectionUri . $separator . $firstNotation;
+        }
+        
+        return $uri;
     }
 }
