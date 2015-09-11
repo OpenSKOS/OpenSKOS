@@ -54,7 +54,7 @@ class Command
         $serialiser = new Serialiser(
             $this->resourceManager,
             $format,
-            $message->getQuery()
+            $message->getSearchPatterns()
         );
         
         if ($message->getOutputFilePath()) {

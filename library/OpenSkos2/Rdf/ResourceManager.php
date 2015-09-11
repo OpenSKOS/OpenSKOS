@@ -25,6 +25,7 @@ use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
+use OpenSkos2\Rdf\Serializer\NTriple;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -86,12 +87,12 @@ class ResourceManager
     }
     
     /**
-     * @param Object[] $spec
+     * @param Object[] $simplePatterns
      */
-    public function deleteBy($spec)
+    public function deleteBy($simplePatterns)
     {
         $query = "DELETE WHERE {\n ?subject ";
-        foreach ($spec as $predicate => $value) {
+        foreach ($simplePatterns as $predicate => $value) {
             $query .= "<{$predicate}> " . $this->valueToTurtle($value) . ";\n";
         }
         $query .= "?predicate ?object\n}";
@@ -127,12 +128,14 @@ class ResourceManager
     }
 
     /**
-     * @param Object[] $spec Example: [Skos::NOTATION => new Literal('AM002'),]
+     * Fetches full resources.
+     * There is hardcoded order by uri.
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
      * @param int $offset
      * @param int $limit
      * @return ResourceCollection
      */
-    public function fetchBy($spec = [], $offset = null, $limit = null)
+    public function fetch($simplePatterns = [], $offset = null, $limit = null)
     {
         /*
         DESCRIBE ?subject {
@@ -149,16 +152,7 @@ class ResourceManager
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
         
         $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
-        $query .= 'WHERE { ' . PHP_EOL;
-        if (!empty($spec)) {
-            foreach ($spec as $predicate => $value) {
-                $query .= '?subject <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
-            }
-        } else {
-            // All subjects
-            $query .= '?subject ?predicate ?object' . PHP_EOL;
-        }
-        $query .= '}'; // end where
+        $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
         
         // We need some order
         // @TODO provide possibility to order on other predicates.
@@ -175,7 +169,7 @@ class ResourceManager
         
         $query .= '}'; // end sub select
         
-        $resources = $this->fetch($query);
+        $resources = $this->fetchQuery($query);
         
         // The order by part does not apply to the resources with describe.
         // So we need to order them again.
@@ -221,6 +215,22 @@ class ResourceManager
     }
     
     /**
+     * Counts distinct resources
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @return int
+     */
+    public function countResources($simplePatterns = [])
+    {
+        $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
+        $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
+        
+        /* @var $result EasyRdf\Sparql\Result */
+        $result = $this->client->query($query);
+        
+        return $result[0]->count->getValue();
+    }
+    
+    /**
      * Asks for if the properties map has a match.
      * Example for $matchProperties:
      * <code>
@@ -258,13 +268,34 @@ class ResourceManager
         
         return $this->ask($patterns);
     }
+    
+    /**
+     * Makes query (with full sparql patterns) from our search patterns.
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param string $subject
+     * @return string
+     */
+    protected function simplePatternsToQuery($simplePatterns, $subject)
+    {
+        $query = '';
+        if (!empty($simplePatterns)) {
+            foreach ($simplePatterns as $predicate => $value) {
+                $query .= $subject . ' <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
+            }
+        } else {
+            // All subjects
+            $query .= $subject . ' ?predicate ?object' . PHP_EOL;
+        }
+        
+        return $query;
+    }
 
     /**
      * Fetch all resources matching the query.
      * @param string $query
      * @return ResourceCollection
      */
-    protected function fetch($query)
+    protected function fetchQuery($query)
     {
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
