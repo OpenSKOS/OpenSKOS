@@ -134,6 +134,18 @@ class ResourceManager
      */
     public function fetchBy($spec = [], $offset = null, $limit = null)
     {
+        /*
+        DESCRIBE ?subject {
+            SELECT DISTINCT ?subject
+            WHERE { 
+                ?subject ?predicate ?object
+            }
+            ORDER BY ?subject
+            LIMIT 10
+            OFFSET 0
+        }
+        */
+        
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
         
         $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
@@ -165,9 +177,10 @@ class ResourceManager
         
         $resources = $this->fetch($query);
         
-        // Those resources are now the correct ones, but not ordered
+        // The order by part does not apply to the resources with describe.
+        // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
-        // @TODO Make general sort if a sort option is added to fetchBy
+        // @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
                 return strcmp($resource1->getUri(), $resource2->getUri());
