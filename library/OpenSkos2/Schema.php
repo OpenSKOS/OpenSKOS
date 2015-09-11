@@ -19,6 +19,8 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
 
 class Schema extends Resource
 {
@@ -31,6 +33,7 @@ class Schema extends Resource
     public function __construct($uri = null)
     {
         parent::__construct($uri);
+
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 }
