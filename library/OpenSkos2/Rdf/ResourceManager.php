@@ -26,6 +26,9 @@ use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 
+// @TODO A lot of things can be made without working with full documents, so that should not go through here
+// For example getting a list of pref labels and uris
+
 class ResourceManager
 {
     /**
@@ -81,38 +84,19 @@ class ResourceManager
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
-
-    /**
-     * Fetch all resources matching the query.
-     * @param string $query
-     * @return ResourceCollection
-     */
-    public function fetch($query)
-    {
-        // @TODO this is better to be protected - no direct queries
-        $result = $this->client->query($query);
-        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
-    }
     
     /**
-     * Adds limit and/or offset to the query.
-     * @param string $query
-     * @param int $offset
-     * @param int $limit
-     * @return ResourceCollection
+     * @param Object[] $spec
      */
-    public function fetchWithLimit($query, $offset = null, $limit = null)
+    public function deleteBy($spec)
     {
-        // @TODO this is better to be protected - no direct queries
-        if ($limit !== null) {
-            $query .= PHP_EOL . 'LIMIT ' . $limit;
+        $query = "DELETE WHERE {\n ?subject ";
+        foreach ($spec as $predicate => $value) {
+            $query .= "<{$predicate}> " . $this->valueToTurtle($value) . ";\n";
         }
-        
-        if ($offset !== null) {
-            $query .= PHP_EOL . 'OFFSET ' . $offset;
-        }
-        
-        return $this->fetch($query);
+        $query .= "?predicate ?object\n}";
+
+        $this->client->update($query);
     }
     
     /**
@@ -143,40 +127,63 @@ class ResourceManager
     }
 
     /**
-     * @param Object[] $spec
-     */
-    public function deleteBy($spec)
-    {
-        $query = "DELETE WHERE {\n ?subject ";
-        foreach ($spec as $property => $value) {
-            $query .= "<{$property}> " . $this->valueToTurtle($value) . ";\n";
-        }
-        $query .= "?predicate ?object\n}";
-
-        $this->client->update($query);
-    }
-
-    /**
-     * @param Object[] $spec
+     * @param Object[] $spec Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param int $offset
+     * @param int $limit
      * @return ResourceCollection
      */
-    public function fetchBy($spec)
+    public function fetchBy($spec = [], $offset = null, $limit = null)
     {
-        $query = "DELETE WHERE {\n ?subject ";
-        foreach ($spec as $property => $value) {
-            $query .= "<{$property}> " . $this->valueToTurtle($value) . ";\n";
+        $query = 'DESCRIBE ?subject {' . PHP_EOL;
+        
+        $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $query .= 'WHERE { ' . PHP_EOL;
+        if (!empty($spec)) {
+            foreach ($spec as $predicate => $value) {
+                $query .= '?subject <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
+            }
+        } else {
+            // All subjects
+            $query .= '?subject ?predicate ?object' . PHP_EOL;
         }
-        $query .= "?predicate ?object\n}";
-        return self::fetch($query);
+        $query .= '}'; // end where
+        
+        // We need some order
+        // @TODO provide possibility to order on other predicates.
+        // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
+        $query .= PHP_EOL . 'ORDER BY ?subject';
+        
+        if ($limit !== null) {
+            $query .= PHP_EOL . 'LIMIT ' . $limit;
+        }
+        
+        if ($offset !== null) {
+            $query .= PHP_EOL . 'OFFSET ' . $offset;
+        }
+        
+        $query .= '}'; // end sub select
+        
+        $resources = $this->fetch($query);
+        
+        // Those resources are now the correct ones, but not ordered
+        // @TODO Find other solution - sort in jena, not here.
+        // @TODO Make general sort if a sort option is added to fetchBy
+        $resources->uasort(
+            function (Resource $resource1, Resource $resource2) {
+                return strcmp($resource1->getUri(), $resource2->getUri());
+            }
+        );
+        
+        return $resources;
     }
     
     /**
      * Fetch list of namespaces which are used in the resources in the query.
-     * @param string $query
      * @return ResourceCollection
      */
-    public function fetchNamespaces($query = 'DESCRIBE ?object')
+    public function fetchNamespaces()
     {
+        $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
         
         // The EasyRdf\Sparql\Client does not gets the namespaces which fuseki provides.
@@ -202,6 +209,7 @@ class ResourceManager
     
     /**
      * Asks for if the properties map has a match.
+     * Example for $matchProperties:
      * <code>
      * $matchProperties = [
      *     Skos::NOTATION => $concept->getProperty(Skos::NOTATION),
@@ -209,15 +217,19 @@ class ResourceManager
      * ];
      * </code>
      * @param Object[] $matchProperties
-     * @param Resource|null $excludeResource
-     * @return type
+     * @param string $excludeUri Adds filter for the subject != $excludeUri
+     * @return boolean
      */
-    public function askForMatch($matchProperties, $excludeResource = null)
+    public function askForMatch($matchProperties, $excludeUri = null)
     {
         $patterns = '';
         
         $ind = 0;
         foreach ($matchProperties as $predicate => $objects) {
+            if (!is_array($objects)) {
+                $objects = [$objects];
+            }
+            
             $patterns .= '?subject <' . $predicate . '> ?o' . $ind;
             $patterns .= PHP_EOL;
             
@@ -232,12 +244,23 @@ class ResourceManager
             $ind ++;
         }
         
-        if (!empty($excludeResource)) {
-            $patterns .= 'FILTER (?subject != <' . $excludeResource->getUri() . '>)';
+        if (!empty($excludeUri)) {
+            $patterns .= 'FILTER (?subject != <' . $excludeUri . '>)';
             $patterns .= PHP_EOL;
         }
         
         return $this->ask($patterns);
+    }
+
+    /**
+     * Fetch all resources matching the query.
+     * @param string $query
+     * @return ResourceCollection
+     */
+    protected function fetch($query)
+    {
+        $result = $this->client->query($query);
+        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
     
     /**

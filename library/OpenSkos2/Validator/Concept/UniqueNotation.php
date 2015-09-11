@@ -49,7 +49,7 @@ class UniqueNotation extends ConceptValidator implements ResourceManagerAware, T
             
             $hasOther = $this->getResourceManager()->askForMatch(
                 $matchProperties,
-                $concept
+                $concept->getUri()
             );
 
             if ($hasOther) {
