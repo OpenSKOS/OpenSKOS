@@ -19,8 +19,21 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
 
 class Schema extends Resource
 {
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Schema';
+    
+    /**
+     * Resource constructor.
+     * @param string $uri
+     */
+    public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
 }
