@@ -37,12 +37,12 @@ class Serialiser
      */
     protected $resourceManager;
     
-    // @TODO Maybe collection with query or something.
+    // @TODO Maybe collection with searchPatterns or something.
     /**
-     * The query to use to fetch resources from the resource manager.
-     * @var string
+     * The searchPatterns to use to fetch resources from the resource manager.
+     * @var Object[]|string
      */
-    protected $query;
+    protected $searchPatterns;
     
     /**
      * @var FormatAbstract
@@ -52,13 +52,13 @@ class Serialiser
     /**
      * @param ResourceManager $resourceManager
      * @param FormatAbstract $format
-     * @param string $query
+     * @param Object[]|string $searchPatterns
      */
-    public function __construct(ResourceManager $resourceManager, FormatAbstract $format = null, $query = '')
+    public function __construct(ResourceManager $resourceManager, FormatAbstract $format = null, $searchPatterns = [])
     {
         $this->resourceManager = $resourceManager;
         $this->format = $format;
-        $this->query = $query;
+        $this->searchPatterns = $searchPatterns;
     }
     
     /**
@@ -122,10 +122,25 @@ class Serialiser
     {
         // @TODO Sort
         
-        $collection = $this->resourceManager->fetchWithLimit($this->query, $start, $step);
-        
-        // It may make it look once more at the end. But this way we don't need to count first.
-        $hasMore = !(count($collection) < $step);
+        if (is_string($this->searchPatterns)) {
+            // Search patterns is is uri.
+            $collection = new ResourceCollection(
+                [
+                    $this->resourceManager->fetchByUri($this->searchPatterns)
+                ]
+            );
+            
+            $hasMore = false;
+        } else {
+            $collection = $this->resourceManager->fetch(
+                $this->searchPatterns,
+                $start,
+                $step
+            );
+            
+            // It may make it look once more at the end. But this way we don't need to count first.
+            $hasMore = !(count($collection) < $step);
+        }
         
         return $collection;
     }

@@ -21,16 +21,12 @@ namespace OpenSkos2\Export;
 
 class Message
 {
-//    protected $userId;
-    
     protected $format;
     protected $maxDepth;
     protected $outputFilePath;
     protected $propertiesToExport;
     
-//    protected $type;
-    
-    protected $query;
+    protected $searchPatterns;
     
     public function getFormat()
     {
@@ -52,9 +48,9 @@ class Message
         return $this->propertiesToExport;
     }
 
-    public function getQuery()
+    public function getSearchPatterns()
     {
-        return $this->query;
+        return $this->searchPatterns;
     }
 
     public function setFormat($format)
@@ -77,15 +73,15 @@ class Message
         $this->propertiesToExport = $propertiesToExport;
     }
 
-    public function setQuery($query)
+    public function setSearchPatterns($searchPatterns)
     {
-        $this->query = $query;
+        $this->searchPatterns = $searchPatterns;
     }
 
-    public function __construct($format, $query, $propertiesToExport, $maxDepth, $outputFilePath = null)
+    public function __construct($format, $searchPatterns, $propertiesToExport, $maxDepth, $outputFilePath = null)
     {
         $this->format = $format;
-        $this->query = $query;
+        $this->searchPatterns = $searchPatterns;
         $this->propertiesToExport = $propertiesToExport;
         $this->maxDepth = $maxDepth;
         $this->outputFilePath = $outputFilePath;

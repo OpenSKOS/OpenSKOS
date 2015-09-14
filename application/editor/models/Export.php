@@ -22,8 +22,10 @@
 
 use OpenSkos2\Export\Message;
 use OpenSkos2\Export\Serialiser\FormatFactory;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Concept;
 
 class Editor_Models_Export
@@ -186,7 +188,7 @@ class Editor_Models_Export
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT,
                     'parameters' => serialize(
-//                        $this->createExportMessage()
+                        //$this->createExportMessage()
                         $this->getSettings()
                     ),
                     'created' => new Zend_Db_Expr('NOW()')
@@ -266,13 +268,14 @@ class Editor_Models_Export
         // Export is slow if export type is search and the search results are more than MAX_RECORDS_FOR_INSTANT_EXPORT
         if ($this->get('type') == 'search') {
             
-            // @TODO $searchOptions = $this->get('searchOptions'); to query
-            
-            $resourceManager = $this->getDi()->make('OpenSkos2\Rdf\ResourceManager');
-            
-            // @TODO Count
-            $resourceManager->fetch($this->buildQuery());
-            $count = 100;
+            $searchPatterns = $this->buildSearchPatterns();
+            if (is_string($searchPatterns)) {
+                // This is one uri
+                $count = 1;
+            } else {
+                $resourceManager = $this->getDi()->make('OpenSkos2\Rdf\ResourceManager');
+                $count = $resourceManager->countResources($searchPatterns);
+            }
             
             return $count > Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT;
         }
@@ -336,7 +339,7 @@ class Editor_Models_Export
     {
         return new Message(
             $this->get('format'),
-            $this->buildQuery(),
+            $this->buildSearchPatterns(),
             $this->get('fieldsToExport'),
             $this->get('maxDepth')
         );
@@ -347,13 +350,12 @@ class Editor_Models_Export
      * @return string
      * @throws \Exception
      */
-    protected function buildQuery()
+    protected function buildSearchPatterns()
     {
         switch ($this->get('type')) {
             case 'concept':
                 $concept = Api_Models_Concepts::factory()->getConcept($this->get('conceptUuid'));
-                // @TODO Allow exports of resource collections and use it here.
-                return 'DESCRIBE <' . $concept['uri'] . '>';
+                return $concept['uri'];
             case 'history':
                 //$user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
                 //$concepts = $user->getUserHistory();
@@ -366,8 +368,9 @@ class Editor_Models_Export
                 throw new \Exception('Not moved to triplestore yet.');
             case 'search':
                 // @TODO $searchOptions = $this->get('searchOptions'); to query
-                return 'DESCRIBE ?object WHERE {?object rdf:type skos:Concept}';
-                break;
+                
+                // All concepts
+                return [Rdf::TYPE => new Uri(Concept::TYPE)];
         }
     }
     
