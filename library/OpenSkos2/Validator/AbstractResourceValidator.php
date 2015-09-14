@@ -19,25 +19,26 @@
 
 namespace OpenSkos2\Validator;
 
-use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Resource as RdfResource;
 
-abstract class AbstractResourceValidator implements ResourceValidator
+abstract class AbstractResourceValidator implements ValidatorInterface
 {
     /**
-     * @var string
+     * @var array
      */
-    protected $errorMessage;
+    protected $errorMessages = [];
     
     /**
-     * @param $resource Resource
+     * @param $resource RdfResource
+     * @return boolean
      */
-    abstract public function validate(Resource $resource);
+    abstract public function validate(RdfResource $resource);
 
     /**
      * @return string
      */
-    public function getErrorMessage()
+    public function getErrorMessages()
     {
-        return $this->errorMessage;
+        return $this->errorMessages;
     }
 }

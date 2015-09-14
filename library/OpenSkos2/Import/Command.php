@@ -80,8 +80,10 @@ class Command implements LoggerAwareInterface
             }
         }
         
-        $validator = new Validator($this->resourceManager, $this->tenant);
-        $validator->validateCollection($resourceCollection, $this->logger);
+        $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
+        if (!$validator->validate($resourceCollection, $this->logger)) {
+            throw new \Exception('Failed validation');
+        }
 
         if ($message->getClearCollection()) {
             $this->resourceManager->deleteBy([Skos::COLLECTION => $message->getCollection()]);

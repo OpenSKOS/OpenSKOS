@@ -21,9 +21,9 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 
-class InScheme extends ConceptValidator
+class InScheme extends AbstractConceptValidator
 {
     /**
      * @param Concept $concept
@@ -32,7 +32,7 @@ class InScheme extends ConceptValidator
     protected function validateConcept(Concept $concept)
     {
         if (!count($concept->getProperty(Skos::INSCHEME))) {
-            $this->errorMessage = 'The concept must be included in at least one scheme.';
+            $this->errorMessages[] = 'The concept must be included in at least one scheme.';
             return false;
         }
         return true;

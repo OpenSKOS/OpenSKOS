@@ -20,9 +20,9 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 
-class RelatedToSelf extends ConceptValidator
+class RelatedToSelf extends AbstractConceptValidator
 {
     /**
      * @param Concept $concept
@@ -36,7 +36,7 @@ class RelatedToSelf extends ConceptValidator
         foreach ($relationFields as $field) {
             foreach ($concept->getProperty($field) as $object) {
                 if ($object->getUri() == $ownUri) {
-                    $this->errorMessage ='The concept can not be related to itself.';
+                    $this->errorMessages[] ='The concept can not be related to itself.';
                     return false;
                 }
             }

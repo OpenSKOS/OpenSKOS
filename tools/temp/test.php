@@ -59,13 +59,14 @@ class EchoLogger extends \Psr\Log\AbstractLogger
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
-$file = new OpenSkos2\File('/home/www/temp/concept.xml');
+$file = new OpenSkos2\File(__DIR__ . '/../../tests/data/concept.xml');
 
-$validator = new \OpenSkos2\Validator\Validator(
+$validator = new \OpenSkos2\Validator\Collection(
     $diContainer->get('OpenSkos2\Rdf\ResourceManager'),
-    new \OpenSkos2\Tenant('pic', true)
+    new \OpenSkos2\Tenant('pic', true),
+    new EchoLogger()
 );
 
-$validator->validateCollection($file->getResources(), new EchoLogger());
-
+$isValid = $validator->validate($file->getResources());
+var_dump($isValid, $validator->getErrorMessages());
 //

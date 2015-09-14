@@ -21,9 +21,9 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 
-class DuplicateNarrower extends ConceptValidator
+class DuplicateNarrower extends AbstractConceptValidator
 {
     /**
      * @param Concept $concept
@@ -36,7 +36,7 @@ class DuplicateNarrower extends ConceptValidator
         $loopedConcepts = [];
         foreach ($narrowerTerms as $narrowerTerm) {
             if (isset($loopedConcepts[$narrowerTerm->getUri()])) {
-                $this->errorMessage = "Narrower term {$narrowerTerm->getUri()} is defined more than once";
+                $this->errorMessages[] = "Narrower term {$narrowerTerm->getUri()} is defined more than once";
                 return false;
             }
             $loopedConcepts[$narrowerTerm->getUri()] = true;

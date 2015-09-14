@@ -21,13 +21,13 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use OpenSkos2\Validator\DependencyAware\TenantAwareTrait;
 
-class UniqueNotation extends ConceptValidator implements ResourceManagerAware, TenantAware
+class UniqueNotation extends AbstractConceptValidator implements ResourceManagerAware, TenantAware
 {
     use ResourceManagerAwareTrait;
     use TenantAwareTrait;
@@ -54,10 +54,10 @@ class UniqueNotation extends ConceptValidator implements ResourceManagerAware, T
 
             if ($hasOther) {
                 if ($this->isUniquePerSchema()) {
-                    $this->errorMessage = 'The concept notation must be unique per concept scheme. '
+                    $this->errorMessages[] = 'The concept notation must be unique per concept scheme. '
                         . 'There is another concept with same notation in one of the concept schemes.';
                 } else {
-                    $this->errorMessage = 'The concept notation must be unique per tenant. '
+                    $this->errorMessages[] = 'The concept notation must be unique per tenant. '
                         . 'There is another concept with same notation in the same tenant.';
                 }
                 

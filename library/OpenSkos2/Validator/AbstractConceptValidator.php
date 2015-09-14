@@ -19,18 +19,26 @@
 
 namespace OpenSkos2\Validator;
 
-use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource as RdfResource;
 
-interface ResourceValidator
+abstract class AbstractConceptValidator extends AbstractResourceValidator
 {
     /**
-     * @param Resource $resource
+     * @param RdfResource $resource
      * @return bool
      */
-    public function validate(Resource $resource);
+    public function validate(RdfResource $resource)
+    {
+        if ($resource instanceof Concept) {
+            return $this->validateConcept($resource);
+        }
+        return false;
+    }
 
     /**
-     * @return string
+     * @param Concept $concept
+     * @return bool
      */
-    public function getErrorMessage();
+    abstract protected function validateConcept(Concept $concept);
 }

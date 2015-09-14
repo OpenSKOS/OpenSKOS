@@ -21,9 +21,9 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 
-class DuplicateRelated extends ConceptValidator
+class DuplicateRelated extends AbstractConceptValidator
 {
     /**
      * @param Concept $concept
@@ -36,7 +36,7 @@ class DuplicateRelated extends ConceptValidator
         $loopedConcepts = [];
         foreach ($relatedTerms as $relatedTerm) {
             if (isset($loopedConcepts[$relatedTerm->getUri()])) {
-                $this->errorMessage = "Related term {$relatedTerm->getUri()} is defined more than once";
+                $this->errorMessages[] = "Related term {$relatedTerm->getUri()} is defined more than once";
                 return false;
             }
             $loopedConcepts[$relatedTerm->getUri()] = true;

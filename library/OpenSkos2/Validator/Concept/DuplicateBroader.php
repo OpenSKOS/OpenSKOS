@@ -21,9 +21,9 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\ConceptValidator;
+use OpenSkos2\Validator\AbstractConceptValidator;
 
-class DuplicateBroader extends ConceptValidator
+class DuplicateBroader extends AbstractConceptValidator
 {
     /**
      * @param Concept $concept
@@ -31,12 +31,12 @@ class DuplicateBroader extends ConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $broaderTerms = $concept->getProperty(SKOS::BROADER);
+        $broaderTerms = $concept->getProperty(Skos::BROADER);
 
         $loopedConcepts = [];
         foreach ($broaderTerms as $broaderTerm) {
             if (isset($loopedConcepts[$broaderTerm->getUri()])) {
-                $this->errorMessage = "Broader term {$broaderTerm->getUri()} is defined more than once";
+                $this->errorMessages[] = "Broader term {$broaderTerm->getUri()} is defined more than once";
                 return false;
             }
             $loopedConcepts[$broaderTerm->getUri()] = true;
