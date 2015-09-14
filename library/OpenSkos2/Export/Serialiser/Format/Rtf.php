@@ -300,13 +300,19 @@ class Rtf extends FormatAbstract
 //                $schemesUris = array_merge($schemesUris, $concept[$schemeField]);
 //            }
 //        }
-//        $schemesUris = array_unique($schemesUris);
-//        $schemesTitleMap = $this->_getApiClientInstance()->getConceptSchemeMap('uri', array('dcterms_title' => 0), $schemesUris);
+//  $schemesUris = array_unique($schemesUris);
+//  $schemesTitleMap = $this->_getApiClientInstance()->getConceptSchemeMap(
+//      'uri', 
+//      array('dcterms_title' => 0), 
+//      $schemesUris
+//  );
 //
 //        
 //        // Prepares related concepts map
 //        $relatedConceptsUris = array();
-//        $relationFields = array_merge(Api_Models_Concept::$classes['SemanticRelations'], Api_Models_Concept::$classes['MappingProperties']);
+//        $relationFields = array_merge(Api_Models_Concept::$classes['SemanticRelations'], 
+//              Api_Models_Concept::$classes['MappingProperties']
+//        );
 //        foreach ($relationFields as $relationField) {
 //            if (in_array($relationField, $fieldsToExport) && !empty($concept[$relationField])) {
 //                $relatedConceptsUris = array_merge($relatedConceptsUris, $concept[$relationField]);

@@ -20,7 +20,10 @@ namespace OpenSkos2\Namespaces;
 
 class DcTerms
 {
-    const DC_ABSTRACT = 'http://purl.org/dc/terms/abstract'; //exception to the rule because abstract is a reserved keyword
+    /**
+     * exception to the rule because abstract is a reserved keyword
+     */
+    const DC_ABSTRACT = 'http://purl.org/dc/terms/abstract';
     const ACCESSRIGHTS = 'http://purl.org/dc/terms/accessRights';
     const ACCRUALMETHOD = 'http://purl.org/dc/terms/accrualMethod';
     const ACCRUALPERIODICITY = 'http://purl.org/dc/terms/accrualPeriodicity';

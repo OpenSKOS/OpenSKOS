@@ -23,8 +23,8 @@ class NTriple
 {
         
     /**
-     * Serialize an array when retrieving data from 
-     * 
+     * Serialize an array when retrieving data from
+     *
      * @param array $property
      * @return string
      */
@@ -56,7 +56,6 @@ class NTriple
             ]);
             
         } elseif ($object instanceof \OpenSkos2\Rdf\Uri) {
-            
             return $serializer->serialiseValue([
                 'type' => 'uri',
                 'value' => $object->getUri()
