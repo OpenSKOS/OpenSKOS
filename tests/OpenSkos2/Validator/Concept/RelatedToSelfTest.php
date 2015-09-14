@@ -19,7 +19,7 @@ class RelatedToSelfTest extends \PHPUnit_Framework_TestCase
     public function testValidate()
     {
         $validator = new RelatedToSelf();
-        $concept = new Concept();
+        $concept = new Concept('http://example.com#1');
         $concept->setUri('http://example.com#concept1');
 
         $this->assertTrue($validator->validate($concept));

@@ -20,7 +20,7 @@ class InSchemeTest extends \PHPUnit_Framework_TestCase
     public function testValidate()
     {
         $validator = new InScheme();
-        $concept = new Concept();
+        $concept = new Concept('http://example.com#1');
 
         //no scheme
         $this->assertFalse($validator->validate($concept));

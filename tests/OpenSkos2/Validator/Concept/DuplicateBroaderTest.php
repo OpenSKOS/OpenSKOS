@@ -19,7 +19,7 @@ class DuplicateBroaderTest extends \PHPUnit_Framework_TestCase
     public function testValidate()
     {
         $validator = new DuplicateBroader();
-        $concept = new Concept();
+        $concept = new Concept('http://example.com#1');
 
         $this->assertTrue($validator->validate($concept));
 
