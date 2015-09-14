@@ -55,10 +55,10 @@ class UniqueNotation extends ConceptValidator implements ResourceManagerAware, T
             if ($hasOther) {
                 if ($this->isUniquePerSchema()) {
                     $this->errorMessage = 'The concept notation must be unique per concept scheme. '
-                        . 'There is other concept with same notation in one of the concept schemes.';
+                        . 'There is another concept with same notation in one of the concept schemes.';
                 } else {
                     $this->errorMessage = 'The concept notation must be unique per tenant. '
-                        . 'There is other concept with same notation in the same tenant.';
+                        . 'There is another concept with same notation in the same tenant.';
                 }
                 
                 return false;
