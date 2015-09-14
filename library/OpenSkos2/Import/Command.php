@@ -120,11 +120,11 @@ class Command implements LoggerAwareInterface
             //special import logic
             if ($resourceToInsert instanceof Concept) {
                 $currentVersion = null;
-                if (isset($currentVersion[$resourceToInsert->getUri()])) {
+                if (isset($currentVersions[$resourceToInsert->getUri()])) {
                     /**
                      * @var Resource $currentVersion
                      */
-                    $currentVersion = $currentVersion[$resourceToInsert->getUri()];
+                    $currentVersion = $currentVersions[$resourceToInsert->getUri()];
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                     }
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
