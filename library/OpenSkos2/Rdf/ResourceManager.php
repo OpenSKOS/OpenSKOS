@@ -329,13 +329,12 @@ class ResourceManager
 
     /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
-     * @param string $patterns String representation of the patterns.
+     * @param string $query String representation of the patterns.
      * @return boolean
      */
-    protected function ask($patterns)
+    public function ask($query)
     {
-        $query = 'ASK {' . PHP_EOL . $patterns . PHP_EOL . '}';
-
+        $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
         return $this->client->query($query)->getBoolean();
     }
 
