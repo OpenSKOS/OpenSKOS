@@ -34,7 +34,7 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
     
     /**
      * Ensure the preflabel does not already exists in the scheme
-     * 
+     *
      * @param Concept $concept
      * @return bool
      */
@@ -55,14 +55,14 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
     
     /**
      * Check if the preflabel already exists in scheme
-     * 
+     *
      * @param Concept $concept
      * @param string $label
      * @param string $scheme
      * @return boolean
      */
     private function labelExistsInScheme(Concept $concept, $label, $scheme)
-    {        
+    {
         return $this->resourceManager->askForMatch([
             [
                 'operator' => \OpenSkos2\Sparql\Operator::EQUAL,

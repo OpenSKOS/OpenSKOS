@@ -260,7 +260,6 @@ class ResourceManager
 
         $filters = [];
         foreach ($params as $i => $data) {
-
             $predicate = $data['predicate'];
             $operator = '=';
 
@@ -277,7 +276,6 @@ class ResourceManager
         $filter .= implode(' && ', $filters) . ' ';
 
         if ($excludeUri) {
-
             $uri = new Uri($excludeUri);
             $filter .= '&& ?subject != ' . (new NTriple())->serialize($uri);
 

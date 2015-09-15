@@ -19,7 +19,8 @@
 
 namespace OpenSkos2\Sparql;
 
-class Operator {
+class Operator
+{
     
     const EQUAL = '=';
     
