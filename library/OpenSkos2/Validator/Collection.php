@@ -21,17 +21,8 @@ namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
 use OpenSkos2\Exception\InvalidResourceException;
-use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
-use OpenSkos2\Validator\Concept\DuplicateBroader;
-use OpenSkos2\Validator\Concept\DuplicateNarrower;
-use OpenSkos2\Validator\Concept\DuplicateRelated;
-use OpenSkos2\Validator\Concept\InScheme;
-use OpenSkos2\Validator\Concept\RelatedToSelf;
-use OpenSkos2\Validator\Concept\UniqueNotation;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -72,7 +63,6 @@ class Collection
         }
         
         $this->logger = $logger;
-        
         $this->resourceManager = $resourceManager;
         $this->tenant = $tenant;
     }
@@ -86,7 +76,10 @@ class Collection
     {
         $errorsFound = false;
         foreach ($resourceCollection as $resource) {
-            $errorsFound = $errorsFound || (!$this->applyValidators($resource, $this->logger));
+            if (!$this->getResourceValidator()->validate($resource)) {
+                $errorsFound = true;
+            }
+            
         }
 
         if ($errorsFound) {
@@ -107,52 +100,12 @@ class Collection
     }
     
     /**
-     * Apply the validators to the resource.
-     * @param Resource $resource
-     * @param LoggerInterface $logger
-     * @return boolean True if validators are not failing
+     * Get resource validator
+     *
+     * @return \OpenSkos2\Validator\Resource
      */
-    protected function applyValidators(Resource $resource, LoggerInterface $logger)
+    private function getResourceValidator()
     {
-        $errorsFound = false;
-        foreach ($this->createValidators() as $validator) {
-            $valid = $validator->validate($resource);
-            if (!$valid) {
-                foreach ($validator->getErrorMessage() as $message) {
-                    $this->errorMessages[] = $message;
-                }
-                
-                $logger->error("Errors founds while validating resource " . $resource->getUri());
-                $logger->error($validator->getErrorMessage());
-                $errorsFound = true;
-            }
-        }
-        return !$errorsFound;
-    }
-    
-    /**
-     * @return ResourceValidator[]
-     */
-    protected function createValidators()
-    {
-        $validators = [
-            new DuplicateBroader(),
-            new DuplicateNarrower(),
-            new DuplicateRelated(),
-            new InScheme(),
-            new RelatedToSelf(),
-            new UniqueNotation()
-        ];
-        
-        foreach ($validators as $validator) {
-            if ($validator instanceof ResourceManagerAware) {
-                $validator->setResourceManager($this->resourceManager);
-            }
-            if ($validator instanceof TenantAware && $this->tenant !== null) {
-                $validator->setTenant($this->tenant);
-            }
-        }
-        
-        return $validators;
+        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->tenant, $this->logger);
     }
 }

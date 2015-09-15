@@ -267,10 +267,19 @@ class ResourceManager
                 $operator = $data['operator'];
             }
 
-            $value = $data['value'];
-
             $select .= '?subject <' . $predicate . '> ?' . $i . '. ' . PHP_EOL;
-            $filters[] = '?' . $i . ' ' . $operator . ' ' . (new NTriple())->serialize($value);
+
+            $value = $data['value'];
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+            
+            $newFilter = [];
+            foreach ($value as $val) {
+                $newFilter[] = '?' . $i . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
+            }
+            
+            $filters[] = '(' . implode(' || ', $newFilter) . ') ';
         }
 
         $filter .= implode(' && ', $filters) . ' ';

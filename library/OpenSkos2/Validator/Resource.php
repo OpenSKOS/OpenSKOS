@@ -20,17 +20,14 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
-use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
-use OpenSkos2\Validator\Concept\UniqueNotationInTenant;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
@@ -56,11 +53,22 @@ class Resource
     private $errorMessages = [];
 
     /**
+     * Logger
+     *
+     * @var LoggerInterface
+     */
+    private $logger;
+    
+    /**
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null)
+    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
     {
+        if ($logger === null) {
+            $logger = new NullLogger();
+        }
+        
         $this->resourceManager = $resourceManager;
         $this->tenant = $tenant;
     }
@@ -75,7 +83,7 @@ class Resource
     {
         return $this->applyValidators($resource);
     }
-    
+
     /**
      * Get error messages
      *
@@ -94,23 +102,45 @@ class Resource
     protected function applyValidators(RdfResource $resource)
     {
         $errorsFound = false;
-        foreach ($this->createValidators() as $validator) {
+        foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
-            if (!$valid) {
-                foreach ($validator->getErrorMessages() as $message) {
-                    $this->errorMessages[] = $message;
-                }
-
-                $errorsFound = true;
+            if ($valid) {
+                continue;
             }
+
+            foreach ($validator->getErrorMessages() as $message) {
+                $this->errorMessages[] = $message;
+            }
+            
+            $this->logger->error("Errors founds while validating resource " . $resource->getUri());
+            $this->logger->error($validator->getErrorMessage());
+            
+            $errorsFound = true;
         }
+
         return !$errorsFound;
     }
 
     /**
-     * @return ValidatorInterface[]
+     * Get validators based on the type of resource
+     *
+     * @param RdfResource $resource
+     * @return array
      */
-    private function createValidators()
+    private function getValidators(RdfResource $resource)
+    {
+        if ($resource instanceof \OpenSkos2\Concept) {
+            return $this->getConceptValidators();
+        }
+        return [];
+    }
+    
+    /**
+     * Return all validators for a concept
+     *
+     * @return ResourceValidator[]
+     */
+    private function getConceptValidators()
     {
         $validators = [
             new DuplicateBroader(),
@@ -120,7 +150,7 @@ class Resource
             new RelatedToSelf(),
             new UniqueNotation()
         ];
-
+        
         foreach ($validators as $validator) {
             if ($validator instanceof ResourceManagerAware) {
                 $validator->setResourceManager($this->resourceManager);
@@ -129,7 +159,7 @@ class Resource
                 $validator->setTenant($this->tenant);
             }
         }
-
+        
         return $validators;
     }
 }

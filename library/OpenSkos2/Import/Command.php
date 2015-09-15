@@ -27,7 +27,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Validator\Validator;
 use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
