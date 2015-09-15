@@ -41,14 +41,14 @@ class ResourceManager
      * @var string
      */
     protected $graph;
-    
+
     /**
      * What is the basic resource for this manager.
      * Made to be extended and overwrited.
      * @var string NULL means any resource.
      */
     protected $resourceType = null;
-    
+
     /**
      * ResourceManager constructor.
      * @param Client $client
@@ -85,7 +85,7 @@ class ResourceManager
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
-    
+
     /**
      * @param Object[] $simplePatterns
      */
@@ -99,7 +99,7 @@ class ResourceManager
 
         $this->client->update($query);
     }
-    
+
     /**
      * Fetches a single resource matching the uri.
      * @param string $uri
@@ -117,13 +117,13 @@ class ResourceManager
                 'The requested resource <' . $uri . '> was not found.'
             );
         }
-        
+
         if (count($resources) > 1) {
             throw new \RuntimeException(
                 'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
             );
         }
-        
+
         return $resources[0];
     }
 
@@ -140,7 +140,7 @@ class ResourceManager
         /*
         DESCRIBE ?subject {
             SELECT DISTINCT ?subject
-            WHERE { 
+            WHERE {
                 ?subject ?predicate ?object
             }
             ORDER BY ?subject
@@ -148,29 +148,29 @@ class ResourceManager
             OFFSET 0
         }
         */
-        
+
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
-        
+
         $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
         $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
-        
+
         // We need some order
         // @TODO provide possibility to order on other predicates.
         // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
         $query .= PHP_EOL . 'ORDER BY ?subject';
-        
+
         if ($limit !== null) {
             $query .= PHP_EOL . 'LIMIT ' . $limit;
         }
-        
+
         if ($offset !== null) {
             $query .= PHP_EOL . 'OFFSET ' . $offset;
         }
-        
+
         $query .= '}'; // end sub select
-        
+
         $resources = $this->fetchQuery($query);
-        
+
         // The order by part does not apply to the resources with describe.
         // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
@@ -180,10 +180,10 @@ class ResourceManager
                 return strcmp($resource1->getUri(), $resource2->getUri());
             }
         );
-        
+
         return $resources;
     }
-    
+
     /**
      * Fetch list of namespaces which are used in the resources in the query.
      * @return ResourceCollection
@@ -192,28 +192,28 @@ class ResourceManager
     {
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
-        
+
         // The EasyRdf\Sparql\Client does not gets the namespaces which fuseki provides.
         // Maybe it can be fixed/configured. Then this method can use the client directly.
         // @TODO DI
         $httpClient = Http::getDefaultHttpClient();
         $httpClient->resetParameters();
-        
+
         $httpClient->setMethod('GET'); // @TODO Post for big queries
         $uri = $this->client->getQueryUri() . '?query=' . urlencode($query) . '&format=json';
         $httpClient->setUri($uri);
-        
+
         $response = $httpClient->request();
-        
+
         if (!$response->isSuccessful()) {
             throw new \RuntimeException(
                 'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
-        
+
         return json_decode($response->getBody(), true)['@context'];
     }
-    
+
     /**
      * Counts distinct resources
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
@@ -223,52 +223,71 @@ class ResourceManager
     {
         $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
         $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
-        
+
         /* @var $result EasyRdf\Sparql\Result */
         $result = $this->client->query($query);
-        
+
         return $result[0]->count->getValue();
     }
-    
+
     /**
      * Asks for if the properties map has a match.
      * Example for $matchProperties:
+     *
      * <code>
      * $matchProperties = [
-     *     Skos::NOTATION => $concept->getProperty(Skos::NOTATION),
-     *     Skos::INSCHEME => $concept->getProperty(Skos::INSCHEME),
+     *     [
+     *       "predicate" => Skos::NOTATION
+     *       "value" => $concept->getProperty(Skos::NOTATION),
+     *       "operator" => "=" // optional defaults to equals
+     *     ],
+     *     [
+     *       "predicate" => Skos::INSCHEME
+     *       "value" => $concept->getProperty(Skos::INSCHEME),
+     *       "operator" => "!="
+     *     ]
      * ];
      * </code>
-     * @param Object[] $matchProperties
-     * @param string $excludeUri Adds filter for the subject != $excludeUri
+     *
+     * @param array $params
+     * @param string $excludeUri
      * @return boolean
      */
-    public function askForMatch($matchProperties, $excludeUri = null)
+    public function askForMatch(array $params, $excludeUri = null)
     {
-        $patterns = '';
-        
-        $ind = 0;
-        foreach ($matchProperties as $predicate => $objects) {
-            if (!is_array($objects)) {
-                $objects = [$objects];
+        $select = '';
+        $filter = 'FILTER(' . PHP_EOL;
+
+        $filters = [];
+        foreach ($params as $i => $data) {
+
+            $predicate = $data['predicate'];
+            $operator = '=';
+
+            if (isset($data['operator'])) {
+                $operator = $data['operator'];
             }
-            
-            $patterns .= '?subject <' . $predicate . '> ?o' . $ind;
-            $patterns .= PHP_EOL;
-            $patterns .= 'FILTER (?o' . $ind . ' IN (' .(new NTriple())->serializeArray($objects) . '))';
-            $patterns .= PHP_EOL;
-            
-            $ind ++;
+
+            $value = $data['value'];
+
+            $select .= '?subject <' . $predicate . '> ?' . $i . '. ' . PHP_EOL;
+            $filters[] = '?' . $i . ' ' . $operator . ' ' . (new NTriple())->serialize($value);
         }
-        
-        if (!empty($excludeUri)) {
-            $patterns .= 'FILTER (?subject != <' . $excludeUri . '>)';
-            $patterns .= PHP_EOL;
+
+        $filter .= implode(' && ', $filters) . ' ';
+
+        if ($excludeUri) {
+
+            $uri = new Uri($excludeUri);
+            $filter .= '&& ?subject != ' . (new NTriple())->serialize($uri);
+
         }
-        
-        return $this->ask($patterns);
+
+        $ask = $select . $filter . ')';
+
+        return $this->ask($ask);
     }
-    
+
     /**
      * Makes query (with full sparql patterns) from our search patterns.
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
@@ -286,7 +305,7 @@ class ResourceManager
             // All subjects
             $query .= $subject . ' ?predicate ?object' . PHP_EOL;
         }
-        
+
         return $query;
     }
 
@@ -300,7 +319,7 @@ class ResourceManager
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
-    
+
     /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
      * @param string $patterns String representation of the patterns.
@@ -308,7 +327,8 @@ class ResourceManager
      */
     protected function ask($patterns)
     {
-        $query = 'ASK {' . $patterns . '}';
+        $query = 'ASK {' . PHP_EOL . $patterns . PHP_EOL . '}';
+
         return $this->client->query($query)->getBoolean();
     }
 

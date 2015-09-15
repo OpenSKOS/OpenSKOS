@@ -31,43 +31,52 @@ class UniqueNotation extends AbstractConceptValidator implements ResourceManager
 {
     use ResourceManagerAwareTrait;
     use TenantAwareTrait;
-    
+
     /**
      * @param Concept $concept
      * @return bool
      */
     protected function validateConcept(Concept $concept)
     {
-        if (!$concept->isPropertyEmpty(Skos::NOTATION)) {
-            $matchProperties = [
-                Skos::NOTATION => $concept->getProperty(Skos::NOTATION)
-            ];
-            
-            if ($this->isUniquePerSchema()) {
-                $matchProperties[Skos::INSCHEME] = $concept->getProperty(Skos::INSCHEME);
-            }
-            
-            $hasOther = $this->getResourceManager()->askForMatch(
-                $matchProperties,
-                $concept->getUri()
-            );
-
-            if ($hasOther) {
-                if ($this->isUniquePerSchema()) {
-                    $this->errorMessages[] = 'The concept notation must be unique per concept scheme. '
-                        . 'There is another concept with same notation in one of the concept schemes.';
-                } else {
-                    $this->errorMessages[] = 'The concept notation must be unique per tenant. '
-                        . 'There is another concept with same notation in the same tenant.';
-                }
-                
-                return false;
-            }
+        if ($concept->isPropertyEmpty(Skos::NOTATION)) {
+            return true;
         }
 
-        return true;
+        $params = [];
+        $params[] = [
+            'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
+            'predicate' => Skos::NOTATION,
+            'value' => $concept->getProperties(Skos::NOTATION)
+        ];
+
+        if ($this->isUniquePerSchema()) {
+            $params[] = [
+                'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
+                'predicate' => Skos::INSCHEME,
+                'value' => $concept->getProperties(Skos::INSCHEME)
+            ];
+        }
+
+        $hasOther = $this->getResourceManager()->askForMatch(
+            $params,
+            $concept->getUri()
+        );
+
+        if (!$hasOther) {
+            return true;
+        }
+
+        if ($this->isUniquePerSchema()) {
+            $this->errorMessages[] = 'The concept notation must be unique per concept scheme. '
+                . 'There is another concept with same notation in one of the concept schemes.';
+        } else {
+            $this->errorMessages[] = 'The concept notation must be unique per tenant. '
+                . 'There is another concept with same notation in the same tenant.';
+        }
+
+        return false;
     }
-    
+
     /**
      * By default validate per scheme unless the tenant requires it unique per tenant.
      * @return bool
