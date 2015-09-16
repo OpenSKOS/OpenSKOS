@@ -34,7 +34,7 @@ class CycleInNarrower extends AbstractConceptValidator implements ResourceManage
     
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
-     * but was not supported in OpenSKOS this validator provides a way to restrict it in a similiar way
+     * but was not supported in OpenSKOS this validator provides a way to restrict it in a similar way
      *
      * @param Concept $concept
      * @return bool

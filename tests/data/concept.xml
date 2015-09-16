@@ -6,12 +6,14 @@
     xmlns:openskos="http://openskos.org/xmlns#">
     <skos:Concept rdf:about="http://example.com/collection#1/AM002">
         <skos:inScheme rdf:resource="http://AM/collection1/Dogs"/>
+        <skos:inScheme rdf:resource="http://AM/collection1/Animals"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime"
         >2015-09-10T09:26:10+00:00</dcterms:modified>
         <dcterms:creator rdf:resource="http://openskos.org/users/720990b5-f659-4507-b89a-0f02612da5b3"/>
         <dcterms:contributor rdf:resource="http://openskos.org/users/720990b5-f659-4507-b89a-0f02612da5b3"/>
         <skos:notation>AM002</skos:notation>
-        <skos:prefLabel xml:lang="nl">Relatively large dog</skos:prefLabel>
+        <skos:prefLabel xml:lang="nl">Grote hond</skos:prefLabel>
+        <skos:prefLabel xml:lang="en">Relatively large dog</skos:prefLabel>
         <openskos:status>candidate</openskos:status>
         <dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime"
         >2015-09-10T09:26:10+00:00</dcterms:dateSubmitted>

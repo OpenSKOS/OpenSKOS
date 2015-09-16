@@ -1,15 +1,15 @@
 <?php
 
-/*
+/* 
  * OpenSKOS
- *
+ * 
  * LICENSE
- *
+ * 
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- *
+ * 
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
@@ -21,16 +21,10 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class CycleInBroader extends AbstractConceptValidator implements ResourceManagerAware
+class CycleBroaderAndNarrower extends AbstractConceptValidator
 {
-
-    use ResourceManagerAwareTrait;
 
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
@@ -41,18 +35,38 @@ class CycleInBroader extends AbstractConceptValidator implements ResourceManager
      */
     protected function validateConcept(Concept $concept)
     {
-        $broaderTerms = $concept->getProperty(Skos::BROADER);
-
-        $uri = new Uri($concept->getUri());
-
-        $query = (new NTriple())->serialize($uri) . ' skos:broader+ ?broader' . PHP_EOL
-                . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
-        if ($this->resourceManager->ask($query)) {
-            $this->errorMessages[] = "Cyclic broader relation detected for concept: {$concept->getUri()}";
-            
-            return false;
+        $broaderTerms = $this->buildArray($concept->getProperty(Skos::BROADER));
+        $narrowerTerms = $this->buildArray($concept->getProperty(Skos::NARROWER));
+        
+        //var_dump($broaderTerms, $narrowerTerms); exit;
+        
+        $duplicate = array_intersect($broaderTerms, $narrowerTerms);
+        
+        if (empty($duplicate)) {
+            return true;
         }
-
-        return true;
+        
+        $this->errorMessages[] = 'Duplicate found in broader and narrower';
+        return false;
+    }
+    
+    /**
+     * Build array with strings
+     *
+     * @param array $values
+     * @return array
+     */
+    private function buildArray($values)
+    {
+        $new = [];
+        foreach ($values as $val) {
+            $new[] = (string)$val;
+        }
+        return $new;
+    }
+    
+    private function checkDuplicate($key1, $key2)
+    {
+        var_dump($key1, $key2);
     }
 }
