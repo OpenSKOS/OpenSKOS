@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -20,46 +20,45 @@
  */
 
 /**
- * Validates that the concept is at least in one scheme. 
- * 
+ * Validates that the concept is at least in one scheme.
+ *
  */
 class Editor_Models_ConceptValidator_StatusesTransition extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('status');
-		
-		$isValid = true;
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('status');
+        
+        $isValid = true;
         
         $oldConcept = null;
         $response  = Api_Models_Concepts::factory()->getConcepts('uuid:' . $concept['uuid']);
-		if (isset($response['response']['docs']) && (1 === count($response['response']['docs']))) {
-			$oldConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
-		}
-		
+        if (isset($response['response']['docs']) && (1 === count($response['response']['docs']))) {
+            $oldConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
+        }
+        
         if (null !== $oldConcept) {
             $isValid = OpenSKOS_Concept_Status::isTransitionAllowed($oldConcept['status'], $concept['status']);
         }
         
-		if ( ! $isValid) {
-			$this->_setErrorMessage(
+        if (! $isValid) {
+            $this->_setErrorMessage(
                 sprintf(
                     _('The status transition from "%s" to "%s" is not allowed.'),
                     $oldConcept['status'],
                     $concept['status']
                 )
             );
-		}
-		
-		return $isValid;
-	}
-		
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_StatusesTransition();
-	}
+        }
+        
+        return $isValid;
+    }
+        
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_StatusesTransition();
+    }
 }
-

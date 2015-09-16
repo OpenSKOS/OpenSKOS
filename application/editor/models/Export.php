@@ -45,14 +45,14 @@ class Editor_Models_Export
 
     /**
      * Holds all the settings used for export.
-     * 
+     *
      * @var array
      */
     public $settings = array();
 
     /**
      * Sets setting.
-     * 
+     *
      * @param string $setting
      * @param mixed $value
      * @return Editor_Models_Export
@@ -65,7 +65,7 @@ class Editor_Models_Export
 
     /**
      * Sets all settings.
-     * 
+     *
      * @param array $settings
      * @return Editor_Models_Export
      */
@@ -77,7 +77,7 @@ class Editor_Models_Export
 
     /**
      * Get a setting. Throws error if not found.
-     * 
+     *
      * @param string $setting
      * @return mixed
      * @throws Zend_Exception
@@ -104,7 +104,7 @@ class Editor_Models_Export
 
     /**
      * Get all settings.
-     * 
+     *
      * @return array
      */
     public function getSettings()
@@ -114,7 +114,7 @@ class Editor_Models_Export
 
     /**
      * Exports to file with the specified settings.
-     * 
+     *
      * @param array $editorOptions, optional
      * @return string The relative (up to main export dir) path to the exported file
      */
@@ -126,7 +126,7 @@ class Editor_Models_Export
     
     /**
      * Exports to file with the specified settings.
-     * 
+     *
      * @param array $editorOptions, optional
      * @return string The relative (up to main export dir) path to the exported file
      */
@@ -163,7 +163,7 @@ class Editor_Models_Export
 
     /**
      * Creates an openskos background job to export with the given settings to a file.
-     * 
+     *
      * @return int The job id
      */
     public function exportWithBackgroundJob()
@@ -219,7 +219,7 @@ class Editor_Models_Export
 
     /**
      * Remove any old export files.
-     * 
+     *
      * @param string $mainDir
      */
     protected function cleanUpOldExports($mainDir)
@@ -267,7 +267,6 @@ class Editor_Models_Export
 
         // Export is slow if export type is search and the search results are more than MAX_RECORDS_FOR_INSTANT_EXPORT
         if ($this->get('type') == 'search') {
-            
             $searchPatterns = $this->buildSearchPatterns();
             if (is_string($searchPatterns)) {
                 // This is one uri

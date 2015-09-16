@@ -87,7 +87,10 @@ class Editor_Forms_Export extends Zend_Form
         ));
 
         $this->addDisplayGroup(
-                array('exportableFields', 'addToExportFields', 'fieldsToExport'), 'fields-selector', array('disableDefaultDecorators' => true, 'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'class' => 'fields-selector')))));
+            array('exportableFields', 'addToExportFields', 'fieldsToExport'),
+            'fields-selector',
+            array('disableDefaultDecorators' => true, 'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'class' => 'fields-selector'))))
+        );
 
         return $this;
     }
@@ -106,7 +109,10 @@ class Editor_Forms_Export extends Zend_Form
         ));
 
         $this->addDisplayGroup(
-                array('maxDepth'), 'depth-selector', array('disableDefaultDecorators' => true, 'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'class' => 'depth-selector')))));
+            array('maxDepth'),
+            'depth-selector',
+            array('disableDefaultDecorators' => true, 'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'class' => 'depth-selector'))))
+        );
 
 
         return $this;
@@ -154,5 +160,4 @@ class Editor_Forms_Export extends Zend_Form
 
         return $instance;
     }
-
 }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -25,33 +25,33 @@
  */
 class Editor_Models_ConceptValidator_DuplicateRelated extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('related');
-		
-		$isValid = true;
-		if (isset($concept['related'])) {
-			$model = Api_Models_Concepts::factory();
-			foreach ($concept['related'] as $i => $related) {
-				if (count(array_keys($concept['related'], $related)) > 1) {
-					$isValid = false;
-					$this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($related, true)));
-				}
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('Some concepts are defined more than once as related'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_DuplicateRelated();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('related');
+        
+        $isValid = true;
+        if (isset($concept['related'])) {
+            $model = Api_Models_Concepts::factory();
+            foreach ($concept['related'] as $i => $related) {
+                if (count(array_keys($concept['related'], $related)) > 1) {
+                    $isValid = false;
+                    $this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($related, true)));
+                }
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('Some concepts are defined more than once as related'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_DuplicateRelated();
+    }
 }

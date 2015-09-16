@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -25,33 +25,33 @@
  */
 class Editor_Models_ConceptValidator_DuplicateBroaders extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('broader');
-		
-		$isValid = true;
-		if (isset($concept['broader'])) {
-			$model = Api_Models_Concepts::factory();
-			foreach ($concept['broader'] as $i => $broader) {
-				if (count(array_keys($concept['broader'], $broader)) > 1) {
-					$isValid = false;
-					$this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($broader, true)));
-				}
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('Some concepts are defined more than once as broader'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_DuplicateBroaders();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('broader');
+        
+        $isValid = true;
+        if (isset($concept['broader'])) {
+            $model = Api_Models_Concepts::factory();
+            foreach ($concept['broader'] as $i => $broader) {
+                if (count(array_keys($concept['broader'], $broader)) > 1) {
+                    $isValid = false;
+                    $this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($broader, true)));
+                }
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('Some concepts are defined more than once as broader'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_DuplicateBroaders();
+    }
 }

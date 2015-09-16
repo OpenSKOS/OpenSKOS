@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,85 +21,85 @@
 
 /**
  * Provides basic abstract class for concept validators
- * 
+ *
  */
 abstract class Editor_Models_ConceptValidator
 {
-	/**
-	 * Holds the field for which the validator is.
-	 *
-	 * @var string
-	 */
-	protected $_field = '';
-	
-	/**
-	 * Holds the message of the error if not valid.
-	 *
-	 * @var string
-	 */
-	protected $_errorMessage = '';
-	
-	/**
-	 * Holds an array of concepts which has conflicts wtht the current concept.
-	 *
-	 * @var array Array of Editor_Models_Concept objects
-	 */
-	protected $_errorConflictedConcepts = array();
-	
-	/**
-	 * Validates the validated concept
-	 * 
-	 * @param Editor_Models_Concept $concept
-	 * @param array Any extra data which will be used on saving.
-	 * @return bool True if the concept is valid. False otherwise
-	 */
-	public abstract function isValid(Editor_Models_Concept $concept, $extraData);
-	
-	/**
-	 * Gets the error of the validator.
-	 * 
-	 * @return Editor_Models_ConceptValidator_Error
-	 */
-	public function getError()
-	{
-		return new Editor_Models_ConceptValidator_Error($this->_field, $this->_errorMessage, $this->_errorConflictedConcepts);
-	}
-	
-	/**
-	 * Sets the field for which the validator is.
-	 *
-	 * @param string $field
-	 */
-	protected function _setField($field)
-	{
-		$this->_field = $field;
-	}
-	
-	/**
-	 * Sets the error message for the error of the validator.
-	 *
-	 * @param string $errorMessage
-	 */
-	protected function _setErrorMessage($errorMessage)
-	{
-		$this->_errorMessage = $errorMessage;
-	}
-	
-	/**
-	 * Adds a concept to the conflicted concepts which will be part of the error of the validator.
-	 *
-	 * @param Editor_Models_Concept $conflictedConcept
-	 */
-	protected function _addConflictedConcept($conflictedConcept)
-	{
-		$this->_errorConflictedConcepts[] = $conflictedConcept;
-	}
-	
+    /**
+     * Holds the field for which the validator is.
+     *
+     * @var string
+     */
+    protected $_field = '';
+    
+    /**
+     * Holds the message of the error if not valid.
+     *
+     * @var string
+     */
+    protected $_errorMessage = '';
+    
+    /**
+     * Holds an array of concepts which has conflicts wtht the current concept.
+     *
+     * @var array Array of Editor_Models_Concept objects
+     */
+    protected $_errorConflictedConcepts = array();
+    
+    /**
+     * Validates the validated concept
+     *
+     * @param Editor_Models_Concept $concept
+     * @param array Any extra data which will be used on saving.
+     * @return bool True if the concept is valid. False otherwise
+     */
+    abstract public function isValid(Editor_Models_Concept $concept, $extraData);
+    
+    /**
+     * Gets the error of the validator.
+     *
+     * @return Editor_Models_ConceptValidator_Error
+     */
+    public function getError()
+    {
+        return new Editor_Models_ConceptValidator_Error($this->_field, $this->_errorMessage, $this->_errorConflictedConcepts);
+    }
+    
+    /**
+     * Sets the field for which the validator is.
+     *
+     * @param string $field
+     */
+    protected function _setField($field)
+    {
+        $this->_field = $field;
+    }
+    
+    /**
+     * Sets the error message for the error of the validator.
+     *
+     * @param string $errorMessage
+     */
+    protected function _setErrorMessage($errorMessage)
+    {
+        $this->_errorMessage = $errorMessage;
+    }
+    
+    /**
+     * Adds a concept to the conflicted concepts which will be part of the error of the validator.
+     *
+     * @param Editor_Models_Concept $conflictedConcept
+     */
+    protected function _addConflictedConcept($conflictedConcept)
+    {
+        $this->_errorConflictedConcepts[] = $conflictedConcept;
+    }
+    
     /**
      * Creates validator instance.
      * @return Editor_Models_ConceptValidator
      */
-	public static function factory()
+    public static function factory()
     {
         return new self();
     }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,11 +21,11 @@
 
 /**
  * Validates that there is no direct narrower relation between concepts which has also the same relation via intermidate concept(s).
- * 
+ *
  * E.g. The following is ok.
  * - Birds NT Song Birds
  * - Song Birds NT Canaries
- * 
+ *
  * The following is not ok.
  * - Birds NT Song Birds
  * - Birds NT Canaries
@@ -34,32 +34,32 @@
  */
 class Editor_Models_ConceptValidator_UnneededDirectNarrowers extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('broader');
-		
-		$isValid = true;
-		$allNarrowers = $concept->getRelationsByField('narrower', null, array($concept, 'getAllRelations'));		
-		foreach ($allNarrowers as $narrower) {
-			$narrower = new Editor_Models_Concept($narrower);
-			if ($concept->hasRelationInDepth('narrower', $narrower, false)) {
-				$isValid = false;
-				$this->_addConflictedConcept($narrower);
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('One or more of narrower relations have also a relation via an intermediate concepts'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_UnneededDirectNarrowers();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('broader');
+        
+        $isValid = true;
+        $allNarrowers = $concept->getRelationsByField('narrower', null, array($concept, 'getAllRelations'));
+        foreach ($allNarrowers as $narrower) {
+            $narrower = new Editor_Models_Concept($narrower);
+            if ($concept->hasRelationInDepth('narrower', $narrower, false)) {
+                $isValid = false;
+                $this->_addConflictedConcept($narrower);
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('One or more of narrower relations have also a relation via an intermediate concepts'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_UnneededDirectNarrowers();
+    }
 }

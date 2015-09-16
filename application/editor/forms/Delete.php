@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,49 +21,49 @@
 
 class Editor_Forms_Delete extends Zend_Form
 {
-	public function init() 
-	{
-		$this->setName('deleteform')
-		->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller'=>'concept', 'action' => 'delete')))
-		->setMethod('post');
+    public function init()
+    {
+        $this->setName('deleteform')
+        ->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller'=>'concept', 'action' => 'delete')))
+        ->setMethod('post');
 
-		$this->buildHiddenInputs()
-		->buildButtons();
-	}
-		
-	protected function buildHiddenInputs()
-	{
-		$this->addElement('hidden', 'uuid', array(
-				'filters' => array('StringTrim'),
-				'label' => '',
-		));
-		return $this;
-	}
-	
-	protected function buildButtons()
-	{
+        $this->buildHiddenInputs()
+        ->buildButtons();
+    }
+        
+    protected function buildHiddenInputs()
+    {
+        $this->addElement('hidden', 'uuid', array(
+                'filters' => array('StringTrim'),
+                'label' => '',
+        ));
+        return $this;
+    }
+    
+    protected function buildButtons()
+    {
         $this->addElement('button', 'cancelButton', array(
-				'label' => 'Cancel',
+                'label' => 'Cancel',
                 'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-delete-action', 'openOnly' => true)))
-		));
-		$this->addElement('submit', 'deleteButton', array(
-				'label' => 'Delete',
+        ));
+        $this->addElement('submit', 'deleteButton', array(
+                'label' => 'Delete',
                 'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
-		));
-		return $this;
-	}
-	
-	/**
-	 * @return Editor_Forms_Export
-	 */
-	public static function getInstance()
-	{
-		static $instance;
-		
-		if (null === $instance) {
-			$instance = new Editor_Forms_Delete();
-		}
-		
-		return $instance;
-	}
+        ));
+        return $this;
+    }
+    
+    /**
+     * @return Editor_Forms_Export
+     */
+    public static function getInstance()
+    {
+        static $instance;
+        
+        if (null === $instance) {
+            $instance = new Editor_Forms_Delete();
+        }
+        
+        return $instance;
+    }
 }

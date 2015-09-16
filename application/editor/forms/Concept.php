@@ -20,122 +20,123 @@
  */
 
 class Editor_Forms_Concept extends OpenSKOS_Form
-{	
-	/**
-	 * A flag indicating that the form is for create.
-	 * 
-	 * @var bool
-	 */
-	protected $_isCreate = false;
+{
+   
+    /**
+     * A flag indicating that the form is for create.
+     *
+     * @var bool
+     */
+    protected $_isCreate = false;
     
     /**
-	 * What is the current status of the concept if any.
-	 * 
-	 * @var string
-	 */
-	protected $_currentStatus = null;
+     * What is the current status of the concept if any.
+     *
+     * @var string
+     */
+    protected $_currentStatus = null;
     
     /**
-	 * Is the statuses system enabled.
-	 * 
-	 * @var bool
-	 */
-	protected $_enableStatusesSystem = false;
-	
-	/**
-	 * A flag indicating that the form is for proposal only.
-	 * 
-	 * @var bool
-	 */
-	protected $_isProposalOnly = false;
-	
-	public function init() 
-	{
-		$this->setName("Edit concept");
-		$this->setMethod('Post');
-		
-		$this->_isProposalOnly = ( ! (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'full-create') || OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')));
-		
-		$this->buildHeader()
-		->buildTabsControl()
-		->buildLanguageTabs()
-		->buildSchemeTabs();
-	}
-	
-	/**
-	 * Sets the flag isCreate. If true - the form is in create mode.
-	 * 
-	 * @param bool $isCreate
-	 */
-	public function setIsCreate($isCreate)
-	{
-		$this->_isCreate = $isCreate;
-	}
-	
-	/**
-	 * Gets the flag isCreate.
-	 *
-	 * @return bool $isCreate
-	 */
-	public function getIsCreate()
-	{
-		return $this->_isCreate;
-        
-	}
-    
-	/**
-	 * Sets the current status of the concept. Before save or anything.
-	 * 
-	 * @param string $currentStatus
-	 */
-	public function setCurrentStatus($currentStatus)
-	{
-		$this->_currentStatus = $currentStatus;
-	}
-	
-	/**
-	 * Gets is the statuses system enabled.
-	 *
-	 * @return bool $currentStatus
-	 */
-	public function getEnableStatusesSystem()
-	{
-		return $this->_enableStatusesSystem;
-        
-	}
+     * Is the statuses system enabled.
+     *
+     * @var bool
+     */
+    protected $_enableStatusesSystem = false;
     
     /**
-	 * Sets is the statuses system enabled.
-	 * 
-	 * @param bool $enableStatusesSystem
-	 */
-	public function setEnableStatusesSystem($enableStatusesSystem)
-	{
-		$this->_enableStatusesSystem = $enableStatusesSystem;
-	}
-	
-	/**
-	 * Gets the current status of the concept. Before save or anything.
-	 *
-	 * @return string $currentStatus
-	 */
-	public function getCurrentStatus()
-	{
-		return $this->_currentStatus;
+     * A flag indicating that the form is for proposal only.
+     *
+     * @var bool
+     */
+    protected $_isProposalOnly = false;
+    
+    public function init()
+    {
+        $this->setName("Edit concept");
+        $this->setMethod('Post');
         
-	}
-	
-	/**
-	 * This builds the form header.
-	 * Holds the status, to be checked and action buttons for the concept form.
-	 * 
-	 * @return Editor_Forms_Concept
-	 */
-	protected function buildHeader()
-	{
-		$this->addElement('hidden', 'uuid', array(
-			'decorators' => array()
-		));
+        $this->_isProposalOnly = ( ! (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'full-create') || OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')));
+        
+        $this->buildHeader()
+        ->buildTabsControl()
+        ->buildLanguageTabs()
+        ->buildSchemeTabs();
+    }
+    
+    /**
+     * Sets the flag isCreate. If true - the form is in create mode.
+     *
+     * @param bool $isCreate
+     */
+    public function setIsCreate($isCreate)
+    {
+        $this->_isCreate = $isCreate;
+    }
+    
+    /**
+     * Gets the flag isCreate.
+     *
+     * @return bool $isCreate
+     */
+    public function getIsCreate()
+    {
+        return $this->_isCreate;
+        
+    }
+    
+    /**
+     * Sets the current status of the concept. Before save or anything.
+     *
+     * @param string $currentStatus
+     */
+    public function setCurrentStatus($currentStatus)
+    {
+        $this->_currentStatus = $currentStatus;
+    }
+    
+    /**
+     * Gets is the statuses system enabled.
+     *
+     * @return bool $currentStatus
+     */
+    public function getEnableStatusesSystem()
+    {
+        return $this->_enableStatusesSystem;
+        
+    }
+    
+    /**
+     * Sets is the statuses system enabled.
+     *
+     * @param bool $enableStatusesSystem
+     */
+    public function setEnableStatusesSystem($enableStatusesSystem)
+    {
+        $this->_enableStatusesSystem = $enableStatusesSystem;
+    }
+    
+    /**
+     * Gets the current status of the concept. Before save or anything.
+     *
+     * @return string $currentStatus
+     */
+    public function getCurrentStatus()
+    {
+        return $this->_currentStatus;
+        
+    }
+    
+    /**
+     * This builds the form header.
+     * Holds the status, to be checked and action buttons for the concept form.
+     *
+     * @return Editor_Forms_Concept
+     */
+    protected function buildHeader()
+    {
+        $this->addElement('hidden', 'uuid', array(
+            'decorators' => array()
+        ));
         
         $this->buildStatuses();
         
@@ -145,27 +146,26 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
             ));
         }
-		
-		if ( ! $this->_isCreate) {
-			
-			$this->addElement('submit', 'conceptSave', array(
-					'label' => _('Ok'),
-					'class' => 'concept-edit-submit',
-					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-action', 'openOnly' => true)))
-			));
-			
-			$this->addElement('submit', 'conceptSwitch', array(
-					'label' => _('Switch to view mode'),
-					'class' => 'concept-edit-view',
-					'decorators' => array('ViewHelper')
-			));
-			
-			$this->addElement('button', 'conceptExport', array(
-					'label' => _('Export'),
-					'class' => 'export-concept',
-					'decorators' => array('ViewHelper')
-			));
-			
+        
+        if (! $this->_isCreate) {
+            $this->addElement('submit', 'conceptSave', array(
+                    'label' => _('Ok'),
+                    'class' => 'concept-edit-submit',
+                    'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-action', 'openOnly' => true)))
+            ));
+            
+            $this->addElement('submit', 'conceptSwitch', array(
+                    'label' => _('Switch to view mode'),
+                    'class' => 'concept-edit-view',
+                    'decorators' => array('ViewHelper')
+            ));
+            
+            $this->addElement('button', 'conceptExport', array(
+                    'label' => _('Export'),
+                    'class' => 'export-concept',
+                    'decorators' => array('ViewHelper')
+            ));
+            
             if (!$this->getEnableStatusesSystem()) {
                 $this->addElement('button', 'conceptDelete', array(
                         'label' => _('Delete'),
@@ -173,23 +173,24 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                         'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
                 ));
             }
-		} else {
-			$this->addElement('submit', 'conceptSave', array(
-					'label' => _('Ok'),
-					'class' => 'concept-edit-submit',
-					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-action')))
-			));
-		}
-		
-		$this->addDisplayGroup(
-				array('status', 'statusOtherConceptCancel', 'statusOtherConceptOk', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 
-				'concept-header', 
-				array(
-					'legend' => 'header',
-					'disableDefaultDecorators'=> true,
-					'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header')))));
-		return $this;
-	}
+        } else {
+            $this->addElement('submit', 'conceptSave', array(
+                    'label' => _('Ok'),
+                    'class' => 'concept-edit-submit',
+                    'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-action')))
+            ));
+        }
+        
+        $this->addDisplayGroup(
+            array('status', 'statusOtherConceptCancel', 'statusOtherConceptOk', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'),
+            'concept-header',
+            array(
+                    'legend' => 'header',
+                    'disableDefaultDecorators'=> true,
+                    'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header'))))
+        );
+        return $this;
+    }
     
     /**
      * Build the statuses dropdown.
@@ -240,253 +241,255 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'decorators' => array('ViewHelper')
         ));
     }
-	
-	/**
-	 * This builds the tabs control and the modals content for adding a language layer or a concept scheme layer.
-	 * 
-	 * @return Editor_Forms_Concept
-	 */	
-	protected function buildTabsControl()
-	{
-		$languageTabs = new OpenSKOS_Form_Element_Multihidden('conceptLanguages');
-		$languageTabs->setCssClasses(array('concept-form-left'));
-		$this->addElement($languageTabs);
+    
+    /**
+     * This builds the tabs control and the modals content for adding a language layer or a concept scheme layer.
+     *
+     * @return Editor_Forms_Concept
+     */
+    protected function buildTabsControl()
+    {
+        $languageTabs = new OpenSKOS_Form_Element_Multihidden('conceptLanguages');
+        $languageTabs->setCssClasses(array('concept-form-left'));
+        $this->addElement($languageTabs);
 
-		$schemeTabs = new OpenSKOS_Form_Element_Multihidden('inScheme');
-		$schemeTabs->setCssClasses(array('concept-form-right'));
-		$this->addElement($schemeTabs);
-		
-		$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-		$languages = $editorOptions['languages'];
-		
-		$this->addElement('select', 'conceptLanguageSelect', array(
-				'label' => 'Select a language',
-				'multiOptions' => $languages,
-				'decorators' => array('ViewHelper', 'Label'),
-				'validators' => array()
-				));
-		
-		$this->addElement('submit', 'conceptLanguageOk', array(
-				'label' => 'Add',
-				'decorators' => array('ViewHelper')));
-		
-		$this->addElement('select', 'conceptSchemeSelect', array(
-				'label' => 'Select a concept scheme',
-				'decorators' => array('ViewHelper'),
-				'registerInArrayValidator' => false
-			));
-		
-		$this->addElement('submit', 'conceptSchemeOk', array(
-				'label' => 'Add',
-				'decorators' => array('ViewHelper')));
-		
-		
-		$this->addDisplayGroup(
-				array('conceptLanguageSelect', 'conceptLanguageOk'),
-				'concept-language-overlay',
-				array(
-						'legend' => 'header',
-						'disableDefaultDecorators'=> true,
-						'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-language-settings', 'class' => 'do-not-show')))));
+        $schemeTabs = new OpenSKOS_Form_Element_Multihidden('inScheme');
+        $schemeTabs->setCssClasses(array('concept-form-right'));
+        $this->addElement($schemeTabs);
+        
+        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $languages = $editorOptions['languages'];
+        
+        $this->addElement('select', 'conceptLanguageSelect', array(
+                'label' => 'Select a language',
+                'multiOptions' => $languages,
+                'decorators' => array('ViewHelper', 'Label'),
+                'validators' => array()
+                ));
+        
+        $this->addElement('submit', 'conceptLanguageOk', array(
+                'label' => 'Add',
+                'decorators' => array('ViewHelper')));
+        
+        $this->addElement('select', 'conceptSchemeSelect', array(
+                'label' => 'Select a concept scheme',
+                'decorators' => array('ViewHelper'),
+                'registerInArrayValidator' => false
+            ));
+        
+        $this->addElement('submit', 'conceptSchemeOk', array(
+                'label' => 'Add',
+                'decorators' => array('ViewHelper')));
+        
+        
+        $this->addDisplayGroup(
+            array('conceptLanguageSelect', 'conceptLanguageOk'),
+            'concept-language-overlay',
+            array(
+                        'legend' => 'header',
+                        'disableDefaultDecorators'=> true,
+                        'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-language-settings', 'class' => 'do-not-show'))))
+        );
 
-		$this->addDisplayGroup(
-				array('conceptSchemeSelect', 'conceptSchemeOk'),
-				'concept-scheme-overlay',
-				array(
-						'legend' => 'header',
-						'disableDefaultDecorators'=> true,
-						'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-scheme-settings', 'class' => 'do-not-show')))));
-		
-		$this->addDisplayGroup(
-				array('conceptLanguages', 'inScheme'),
-				'concept-tabs',
-				array(
-						'legend' => 'header',
-						'disableDefaultDecorators'=> true,
-						'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-tabs')))));
-		return $this;
-	}
-	
-	/**
-	 * This builds the content that will be hidden/shown depending on language.
-	 * Tabbing in the form is different than tabbing elsewhere because of the Zend_Form grouping limitations.
-	 * 
-	 * @return Editor_Forms_Concept
-	 */
-	protected function buildLanguageTabs()
-	{
-		$this->addElement('hidden', 'wrapLeftTop', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-left', 'openOnly'  => true)))
-				));
-		
-		
-		$labels = array();
-		$labels['prefLabel'] = 'Preferred label';
-		
-		$documentProperties = array();
-		$documentProperties['scopeNote'] = 'Scope note';
-		$documentProperties['note'] = 'Note';
-		$documentProperties['example'] = 'Example';
-		
-		if ( ! $this->_isProposalOnly) {
-			
-			$labels['altLabel'] = 'Alternative label';
-			$labels['hiddenLabel'] = 'Hidden label';
-			
-			$documentProperties['definition'] = 'Definition';
-			$documentProperties['changeNote'] = 'Change note';			
-			$documentProperties['editorialNote'] = 'Editorial note';
-			$documentProperties['historyNote'] = 'History note';
-		}
-		
-		$this->buildMultiElements($labels, 'OpenSKOS_Form_Element_Multitext' ,array(), null, 'concept-edit-language-labels');
-		$this->buildMultiElements($documentProperties, 'OpenSKOS_Form_Element_Multitextarea', array(), null,'concept-edit-language-properties');
-		
-		$this->addElement('select', 'conceptPropertySelect', array(
-				'label' => '', 
-				'multiOptions' => array_merge(array('' => ''), $documentProperties),
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-selector')))));
-		
-		$this->addElement('textarea', 'conceptPropertyContent', array(
-				'label' => '', 
-				'rows' => 2,
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-content')))));
-		
-		$this->addElement('submit', 'conceptPropertyAdd', array(
-				'label' => _('Add documentation property'),
-				'class' => 'concept-edit-property-action',
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
-		));
-		
-		$this->addElement('hidden', 'wrapLeftBottom', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly'  => true)))
-				));
+        $this->addDisplayGroup(
+            array('conceptSchemeSelect', 'conceptSchemeOk'),
+            'concept-scheme-overlay',
+            array(
+                        'legend' => 'header',
+                        'disableDefaultDecorators'=> true,
+                        'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-scheme-settings', 'class' => 'do-not-show'))))
+        );
+        
+        $this->addDisplayGroup(
+            array('conceptLanguages', 'inScheme'),
+            'concept-tabs',
+            array(
+                        'legend' => 'header',
+                        'disableDefaultDecorators'=> true,
+                        'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-tabs'))))
+        );
+        return $this;
+    }
+    
+    /**
+     * This builds the content that will be hidden/shown depending on language.
+     * Tabbing in the form is different than tabbing elsewhere because of the Zend_Form grouping limitations.
+     *
+     * @return Editor_Forms_Concept
+     */
+    protected function buildLanguageTabs()
+    {
+        $this->addElement('hidden', 'wrapLeftTop', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-left', 'openOnly'  => true)))
+                ));
+        
+        
+        $labels = array();
+        $labels['prefLabel'] = 'Preferred label';
+        
+        $documentProperties = array();
+        $documentProperties['scopeNote'] = 'Scope note';
+        $documentProperties['note'] = 'Note';
+        $documentProperties['example'] = 'Example';
+        
+        if (! $this->_isProposalOnly) {
+            $labels['altLabel'] = 'Alternative label';
+            $labels['hiddenLabel'] = 'Hidden label';
+            
+            $documentProperties['definition'] = 'Definition';
+            $documentProperties['changeNote'] = 'Change note';
+            $documentProperties['editorialNote'] = 'Editorial note';
+            $documentProperties['historyNote'] = 'History note';
+        }
+        
+        $this->buildMultiElements($labels, 'OpenSKOS_Form_Element_Multitext', array(), null, 'concept-edit-language-labels');
+        $this->buildMultiElements($documentProperties, 'OpenSKOS_Form_Element_Multitextarea', array(), null, 'concept-edit-language-properties');
+        
+        $this->addElement('select', 'conceptPropertySelect', array(
+                'label' => '',
+                'multiOptions' => array_merge(array('' => ''), $documentProperties),
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-selector')))));
+        
+        $this->addElement('textarea', 'conceptPropertyContent', array(
+                'label' => '',
+                'rows' => 2,
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-content')))));
+        
+        $this->addElement('submit', 'conceptPropertyAdd', array(
+                'label' => _('Add documentation property'),
+                'class' => 'concept-edit-property-action',
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
+        ));
+        
+        $this->addElement('hidden', 'wrapLeftBottom', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly'  => true)))
+                ));
 
-		return $this;
-	}
-	
-	/**
-	 * @return Editor_Forms_Concept
-	 */	
-	protected function buildSchemeTabs()
-	{
-		$this->addElement('hidden', 'wrapRightTop', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-right', 'openOnly'  => true)))
-		));
-		
-		if ( ! $this->_isProposalOnly) {
-			$this->buildMultiElements(array(
-					'broader' => _('Has broader'),
-					'narrower' => _('Has narrower'),
-					'related' => _('Has related')
-			),'OpenSKOS_Form_Element_Multilink' ,array(), null, 'concept-edit-scheme-relations');
-		}
-		
-		$this->buildMappingProperties();
-		
-		if ($this->_isCreate) {
-			$this->addElement('select', 'baseUri', array(
-					'label' => 'Base URI:',
-					'decorators' => array('ViewHelper', 'Label')
-			));
-			$this->getElement('baseUri')->setRegisterInArrayValidator(false);
-			
-			$this->addElement('hidden', 'hiddenBr1', array(
-					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
-			));
-		}
-		
-		$this->addElement('text', 'uri', array(
-				'label' => 'URI:',
-				'readonly' => true,
-				'decorators' => array('ViewHelper', 'Label')
-		));
-		
-		$this->addElement('hidden', 'hiddenBr2', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
-		));
-		
-		$this->addElement('text', 'notation', array(
-				'label' => 'Notation:',
-				'readonly' => true,
-				'decorators' => array('ViewHelper', 'Label')
-		));
-		
-		
-		$this->addElement('hidden', 'hiddenBr3', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
-		));
-		
-		$this->addElement('multiCheckbox', 'topConceptOf', array(
-				'label' => 'Is top concept:',
-				'decorators' => array('ViewHelper', 'Label'),
-				'registerInArrayValidator' => false
-		));
-		
-		$this->addDisplayGroup(
-				array('conceptUri', 'conceptNotation', 'topConceptOf'),
-				'concept-edit-scheme',
-				array(
-						'legend' => 'header',
-						'disableDefaultDecorators'=> true,
-						'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-scheme-properties')))));
-		
-		
-		$this->addElement('hidden', 'wrapRightBottom', array(
-				'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly'  => true)))
-		));
-		
-		return $this;
-	}
-	
-	/**
-	 * Straight forward - mapping properties section.
-	 * @return Editor_Forms_Concept
-	 */
-	protected function buildMappingProperties()
-	{
-		if ( ! $this->_isProposalOnly) {	
-					
-			$mappingNames = array(
-					'broadMatch' => _('Has broader match'),
-					'narrowMatch' => _('Has narrower match'),
-					'relatedMatch' => _('Has related match'),
-					'mappingRelation' => _('Has mapping relation'),
-					'closeMatch' => _('Has close match'),
-					'exactMatch' => _('Has exact match')
-			);
-			
-			$this->buildMultiElements($mappingNames, 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-mapping-properties');
-		}
-		
-		return $this;
-	}
-	
-	public static function getHelperFields ()
-	{
-		return array(
-				'conceptLanguages',
-				'conceptSchemes',
-				'conceptLanguageSelect',
-				'conceptSchemeSelect',
-				'wrapLeftTop',
-				'conceptPropertySelect',
-				'conceptPropertyContent',
-				'wrapLeftBottom',
-				'wrapRightTop',
-				'wrapRightBottom');
-	}
+        return $this;
+    }
+    
+    /**
+     * @return Editor_Forms_Concept
+     */
+    protected function buildSchemeTabs()
+    {
+        $this->addElement('hidden', 'wrapRightTop', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-right', 'openOnly'  => true)))
+        ));
+        
+        if (! $this->_isProposalOnly) {
+            $this->buildMultiElements(array(
+                    'broader' => _('Has broader'),
+                    'narrower' => _('Has narrower'),
+                    'related' => _('Has related')
+            ), 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-scheme-relations');
+        }
+        
+        $this->buildMappingProperties();
+        
+        if ($this->_isCreate) {
+            $this->addElement('select', 'baseUri', array(
+                    'label' => 'Base URI:',
+                    'decorators' => array('ViewHelper', 'Label')
+            ));
+            $this->getElement('baseUri')->setRegisterInArrayValidator(false);
+            
+            $this->addElement('hidden', 'hiddenBr1', array(
+                    'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
+            ));
+        }
+        
+        $this->addElement('text', 'uri', array(
+                'label' => 'URI:',
+                'readonly' => true,
+                'decorators' => array('ViewHelper', 'Label')
+        ));
+        
+        $this->addElement('hidden', 'hiddenBr2', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
+        ));
+        
+        $this->addElement('text', 'notation', array(
+                'label' => 'Notation:',
+                'readonly' => true,
+                'decorators' => array('ViewHelper', 'Label')
+        ));
+        
+        
+        $this->addElement('hidden', 'hiddenBr3', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly'  => true)))
+        ));
+        
+        $this->addElement('multiCheckbox', 'topConceptOf', array(
+                'label' => 'Is top concept:',
+                'decorators' => array('ViewHelper', 'Label'),
+                'registerInArrayValidator' => false
+        ));
+        
+        $this->addDisplayGroup(
+            array('conceptUri', 'conceptNotation', 'topConceptOf'),
+            'concept-edit-scheme',
+            array(
+                        'legend' => 'header',
+                        'disableDefaultDecorators'=> true,
+                        'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-scheme-properties'))))
+        );
+        
+        
+        $this->addElement('hidden', 'wrapRightBottom', array(
+                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly'  => true)))
+        ));
+        
+        return $this;
+    }
+    
+    /**
+     * Straight forward - mapping properties section.
+     * @return Editor_Forms_Concept
+     */
+    protected function buildMappingProperties()
+    {
+        if (! $this->_isProposalOnly) {
+            $mappingNames = array(
+                    'broadMatch' => _('Has broader match'),
+                    'narrowMatch' => _('Has narrower match'),
+                    'relatedMatch' => _('Has related match'),
+                    'mappingRelation' => _('Has mapping relation'),
+                    'closeMatch' => _('Has close match'),
+                    'exactMatch' => _('Has exact match')
+            );
+            
+            $this->buildMultiElements($mappingNames, 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-mapping-properties');
+        }
+        
+        return $this;
+    }
+    
+    public static function getHelperFields()
+    {
+        return array(
+                'conceptLanguages',
+                'conceptSchemes',
+                'conceptLanguageSelect',
+                'conceptSchemeSelect',
+                'wrapLeftTop',
+                'conceptPropertySelect',
+                'conceptPropertyContent',
+                'wrapLeftBottom',
+                'wrapRightTop',
+                'wrapRightBottom');
+    }
 
-	/**
+    /**
      * @param Editor_Models_Concept Pass the edited concept for some checks.
      * @param OpenSKOS_Db_Table_Row_Tenant Passes tenant. If not gets it from concept.
-	 * @return Editor_Forms_Concept
-	 */
-	public static function getInstance($concept = null, $tenant = null)
-	{
-		static $instance;
+     * @return Editor_Forms_Concept
+     */
+    public static function getInstance($concept = null, $tenant = null)
+    {
+        static $instance;
         
-		if (null === $instance) {
+        if (null === $instance) {
             $enableStatusesSystem = false;
             if ($tenant === null && $concept !== null) {
                 $tenant = $concept->getInstitution();
@@ -495,13 +498,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
             }
             
-			$instance = new Editor_Forms_Concept([
+            $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
                 'currentStatus' => (null !== $concept ? $concept['status'] : null),
                 'enableStatusesSystem' => $enableStatusesSystem,
             ]);
-		}
-	
-		return $instance;
-	}
+        }
+    
+        return $instance;
+    }
 }

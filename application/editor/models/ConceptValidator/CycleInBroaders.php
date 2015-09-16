@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,7 +21,7 @@
 
 /**
  * Validates that there is no cycle in the broader relations.
- * 
+ *
  * This is not valid:
  * a BT b
  * b BT c
@@ -29,32 +29,32 @@
  */
 class Editor_Models_ConceptValidator_CycleInBroaders extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('broader');
-		
-		$isValid = true;		
-		$allBroaders = $concept->getRelationsByField('broader', null, array($concept, 'getAllRelations'));
-		foreach ($allBroaders as $broader) {
-			$broader = new Editor_Models_Concept($broader);
-			if ($broader->hasRelationInDepth('broader', $concept)) {
-				$isValid = false;
-				$this->_addConflictedConcept($broader);
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('One or more of the broader relations create a cycle'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_CycleInBroaders();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('broader');
+        
+        $isValid = true;
+        $allBroaders = $concept->getRelationsByField('broader', null, array($concept, 'getAllRelations'));
+        foreach ($allBroaders as $broader) {
+            $broader = new Editor_Models_Concept($broader);
+            if ($broader->hasRelationInDepth('broader', $concept)) {
+                $isValid = false;
+                $this->_addConflictedConcept($broader);
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('One or more of the broader relations create a cycle'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_CycleInBroaders();
+    }
 }

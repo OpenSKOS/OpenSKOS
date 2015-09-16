@@ -22,19 +22,19 @@
 class Editor_SearchController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
-    {	
+    {
         $this->view->searchForm = Editor_Forms_Search::getInstance();
 
         $request = $this->getRequest();
-        if ( ! $this->getRequest()->isPost()) {
+        if (! $this->getRequest()->isPost()) {
             return;
         }
 
-        if ( ! $this->view->searchForm->isValid($this->getRequest()->getPost())) {
+        if (! $this->view->searchForm->isValid($this->getRequest()->getPost())) {
             return;
         }
 
-        $userForSearch = $this->view->searchForm->getUserForSearch();		
+        $userForSearch = $this->view->searchForm->getUserForSearch();
         $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
 
         $this->view->disableSearchProfileChanging = $loggedUser->disableSearchProfileChanging;
@@ -47,20 +47,18 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
         if ($loggedUser['id'] == $userForSearch['id']) {
             $profileId = $this->getRequest()->getParam('searchProfileId', '');
             
-            if ($detailedSearchOptions['searchProfileId'] != $profileId 
+            if ($detailedSearchOptions['searchProfileId'] != $profileId
                 || ! isset($detailedSearchOptions['searchProfileId'])) {
-                
-               $this->_switchUserToSearchProfile($loggedUser, $profileId);
-               $detailedSearchOptions = $loggedUser->getSearchOptions();
+                $this->_switchUserToSearchProfile($loggedUser, $profileId);
+                $detailedSearchOptions = $loggedUser->getSearchOptions();
                
                // Reset allowedConceptScheme
-               if ($loggedUser->disableSearchProfileChanging) {
-                   $searchOptions['allowedConceptScheme'] = array();
-               }
+                if ($loggedUser->disableSearchProfileChanging) {
+                    $searchOptions['allowedConceptScheme'] = array();
+                }
 
-            } elseif ((!isset($searchOptions['conceptScheme']) || !isset($detailedSearchOptions['conceptScheme'])) 
+            } elseif ((!isset($searchOptions['conceptScheme']) || !isset($detailedSearchOptions['conceptScheme']))
                 || $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
-
                 if ($loggedUser->isAllowedToUseSearchProfile('custom')) {
                     // Change concept schemes selection
                     $detailedSearchOptions['searchProfileId'] = 'custom';
@@ -82,7 +80,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
                 Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions)
             );
         } catch (Exception $ex) {
-            $this->getHelper('json')->sendJson(array('status' => 'error', 'message' => 'Bad query syntax.'));			
+            $this->getHelper('json')->sendJson(array('status' => 'error', 'message' => 'Bad query syntax.'));
         }
 
         $concepts = array();
@@ -120,7 +118,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
         if ((bool)$this->getRequest()->getParam('resetDefaults', false) || (bool)$this->getRequest()->getParam('switchProfile', false)) {
             // If param searchProfileId is set - loads the form for that profile.
             $profileId = $this->getRequest()->getParam('searchProfileId', '');
-            if ( ! empty($profileId)) {
+            if (! empty($profileId)) {
                 $profile = $profilesModel->find($profileId);
                 if ($profile->count() > 0) {
                     $profileSearchOptions = $profile->current()->getSearchOptions();
@@ -132,7 +130,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
             }
         } else {
             // If the form is opened (not submited with errors) populate it with the data from the user session.
-            if ( ! $this->getRequest()->isPost()) {
+            if (! $this->getRequest()->isPost()) {
                 $options = $user->getSearchOptions();
                 if (empty($options)) {
                         $options = Editor_Forms_SearchOptions::getDefaultSearchOptions();
@@ -147,9 +145,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
         // Check is editing and deleting of the selected profile allowed for the current user.
         $profile = $profilesModel->find($this->view->form->getElement('searchProfileId')->getValue());
         if ($profile->count() > 0) {
-            if ( ! ($user->isAllowed('editor.manage-search-profiles', null) 
+            if (! ($user->isAllowed('editor.manage-search-profiles', null)
                     || $user->id == $profile->current()->creatorUserId)) {
-
                 $this->view->form->getElement('save')->setAttrib('class', 'do-not-show');
                 $this->view->form->getElement('delete')->setAttrib('class', 'do-not-show');
             }
@@ -178,11 +175,11 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
         $form = Editor_Forms_SearchOptions::getInstance();
 
         $request = $this->getRequest();
-        if ( ! $this->getRequest()->isPost()) {
+        if (! $this->getRequest()->isPost()) {
             return;
         }
 
-        if ( ! $form->isValid($this->getRequest()->getPost())) {
+        if (! $form->isValid($this->getRequest()->getPost())) {
             return $this->_forward('show-form');
         }
 
@@ -225,12 +222,12 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor
         $profileId = intval($this->getRequest()->getParam('searchProfileId', ''));
         $profile = $profilesModel->find($profileId)->current();
         if (((bool)$this->getRequest()->getParam('save', false) || (bool)$this->getRequest()->getParam('delete', false)) &&  ! empty($profileId)) {
-            if ( ! ($user->isAllowed('editor.manage-search-profiles', null) || $user->id == $profile->creatorUserId)) {
+            if (! ($user->isAllowed('editor.manage-search-profiles', null) || $user->id == $profile->creatorUserId)) {
                 $form->addError(_('You are not allowed to edit that search profile.'));
                 return $this->_forward('show-form');
             }
 
-            if ((bool)$this->getRequest()->getParam('save', false)) {				
+            if ((bool)$this->getRequest()->getParam('save', false)) {
                 $profileName = $this->getRequest()->getParam('searchProfileName', '');
                 if (empty($profileName)) {
                         $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));

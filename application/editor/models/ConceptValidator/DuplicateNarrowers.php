@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -25,33 +25,33 @@
  */
 class Editor_Models_ConceptValidator_DuplicateNarrowers extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('narrower');
-		
-		$isValid = true;
-		if (isset($concept['narrower'])) {
-			$model = Api_Models_Concepts::factory();
-			foreach ($concept['narrower'] as $i => $narrower) {
-				if (count(array_keys($concept['narrower'], $narrower)) > 1) {
-					$isValid = false;
-					$this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($narrower, true)));
-				}
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('Some concepts are defined more than once as narrower'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_DuplicateNarrowers();
-	}	
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('narrower');
+        
+        $isValid = true;
+        if (isset($concept['narrower'])) {
+            $model = Api_Models_Concepts::factory();
+            foreach ($concept['narrower'] as $i => $narrower) {
+                if (count(array_keys($concept['narrower'], $narrower)) > 1) {
+                    $isValid = false;
+                    $this->_addConflictedConcept(new Editor_Models_Concept($model->getConceptByUri($narrower, true)));
+                }
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('Some concepts are defined more than once as narrower'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_DuplicateNarrowers();
+    }
 }

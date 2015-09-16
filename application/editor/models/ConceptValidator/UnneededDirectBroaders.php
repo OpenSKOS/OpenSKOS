@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,44 +21,44 @@
 
 /**
  * Validates that there is no direct broader relation between concepts which has also the same relation via intermidate concept(s).
- * 
+ *
  * E.g. The following is ok.
  * - Song Birds BT Birds
- * - Canaries BT Song Birds 
+ * - Canaries BT Song Birds
  * The following is not ok.
  * - Song Birds BT Birds
- * - Canaries BT Birds 
+ * - Canaries BT Birds
  * - Canaries BT Song Birds
  *
  */
 class Editor_Models_ConceptValidator_UnneededDirectBroaders extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('broader');
-		
-		$isValid = true;		
-		$allBroaders = $concept->getRelationsByField('broader', null, array($concept, 'getAllRelations'));
-		foreach ($allBroaders as $broader) {
-			$broader = new Editor_Models_Concept($broader);
-			if ($concept->hasRelationInDepth('broader', $broader, false)) {
-				$isValid = false;
-				$this->_addConflictedConcept($broader);
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('One or more of broader relations have also a relation via an intermediate concepts'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_UnneededDirectBroaders();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('broader');
+        
+        $isValid = true;
+        $allBroaders = $concept->getRelationsByField('broader', null, array($concept, 'getAllRelations'));
+        foreach ($allBroaders as $broader) {
+            $broader = new Editor_Models_Concept($broader);
+            if ($concept->hasRelationInDepth('broader', $broader, false)) {
+                $isValid = false;
+                $this->_addConflictedConcept($broader);
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('One or more of broader relations have also a relation via an intermediate concepts'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_UnneededDirectBroaders();
+    }
 }

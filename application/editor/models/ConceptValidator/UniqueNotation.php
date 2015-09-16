@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -20,41 +20,39 @@
  */
 
 /**
- * Validates that the concept has unique notation. 
- * 
+ * Validates that the concept has unique notation.
+ *
  */
 class Editor_Models_ConceptValidator_UniqueNotation extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('notation');		
-		$isValid = true;
-		
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('notation');
+        $isValid = true;
+        
         if (!isset($concept['notation']) || empty($concept['notation'])) {
             $this->_setErrorMessage(_('Notation not specified.'));
             $isValid = false;
         } else {
-            
             $query = 'notation:"' . $concept['notation'] . '"';
             $query .= ' tenant:"' . OpenSKOS_Db_Table_Tenants::fromIdentity()->code . '"';
-			$query .= ' -uuid:"' . $concept['uuid'] . '"';
+            $query .= ' -uuid:"' . $concept['uuid'] . '"';
 
-			$response = Api_Models_Concepts::factory()->setQueryParams(array('rows' => 0))->getConcepts($query);
-			if ($response['response']['numFound'] > 0) {
+            $response = Api_Models_Concepts::factory()->setQueryParams(array('rows' => 0))->getConcepts($query);
+            if ($response['response']['numFound'] > 0) {
                 $this->_setErrorMessage(_('System error. The notation of this concept is already used.'));
-				$isValid = false;
-			}
+                $isValid = false;
+            }
         }
         
-		return $isValid;
-	}
-		
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_UniqueNotation();
-	}
+        return $isValid;
+    }
+        
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_UniqueNotation();
+    }
 }
-

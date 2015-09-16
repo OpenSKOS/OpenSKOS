@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,49 +21,50 @@
 
 class Editor_Forms_OpenIdLogin extends Zend_Form
 {
-	public function init()
-	{
-		$this->setName('openidlogin')
-		->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller' => 'login', 'action' => 'openid-login')))
-		->setMethod('get');
 
-		$this->buildOpenIdIdentity()
-		->buildRememberMe()
-		->buildButtons();
-	}
-	
-	protected function buildOpenIdIdentity()
-	{
-		$this->addElement('text', 'openIdIdentity', array('label' => 'OpenID Identity', 'required' => true));
-		return $this;
-	}
-	
-	protected function buildRememberMe()
-	{
-		$this->addElement('checkbox', 'rememberme', array('label' => _('Remember me')));
-		return $this;
-	}
-	
-	protected function buildButtons()
-	{
-		$this->addElement('submit', 'openIdLoginButton', array(
-				'label' => 'Log in with OpenID',
-				'decorators' => array(),
-		));
-		return $this;
-	}
-	
-	/**
-	 * @return Editor_Forms_OpenIdLogin
-	 */
-	public static function getInstance()
-	{
-		static $instance;
-	
-		if (null === $instance) {
-			$instance = new Editor_Forms_OpenIdLogin();
-		}
-	
-		return $instance;
-	}
+    public function init()
+    {
+        $this->setName('openidlogin')
+        ->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller' => 'login', 'action' => 'openid-login')))
+        ->setMethod('get');
+
+        $this->buildOpenIdIdentity()
+        ->buildRememberMe()
+        ->buildButtons();
+    }
+    
+    protected function buildOpenIdIdentity()
+    {
+        $this->addElement('text', 'openIdIdentity', array('label' => 'OpenID Identity', 'required' => true));
+        return $this;
+    }
+    
+    protected function buildRememberMe()
+    {
+        $this->addElement('checkbox', 'rememberme', array('label' => _('Remember me')));
+        return $this;
+    }
+    
+    protected function buildButtons()
+    {
+        $this->addElement('submit', 'openIdLoginButton', array(
+                'label' => 'Log in with OpenID',
+                'decorators' => array(),
+        ));
+        return $this;
+    }
+    
+    /**
+     * @return Editor_Forms_OpenIdLogin
+     */
+    public static function getInstance()
+    {
+        static $instance;
+    
+        if (null === $instance) {
+            $instance = new Editor_Forms_OpenIdLogin();
+        }
+    
+        return $instance;
+    }
 }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -20,33 +20,32 @@
  */
 
 /**
- * Validates that the concept is at least in one scheme. 
- * 
+ * Validates that the concept is at least in one scheme.
+ *
  */
 class Editor_Models_ConceptValidator_IsAtLeastInOneScheme extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('inScheme');
-		
-		$isValid = true;
-		if ( ! isset($concept['inScheme']) || empty($concept['inScheme'])) {
-			$isValid = false;
-		}
-				
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('The concept must be included in at least one scheme.'));
-		}
-		
-		return $isValid;
-	}
-		
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_IsAtLeastInOneScheme();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('inScheme');
+        
+        $isValid = true;
+        if (! isset($concept['inScheme']) || empty($concept['inScheme'])) {
+            $isValid = false;
+        }
+                
+        if (! $isValid) {
+            $this->_setErrorMessage(_('The concept must be included in at least one scheme.'));
+        }
+        
+        return $isValid;
+    }
+        
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_IsAtLeastInOneScheme();
+    }
 }
-

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,61 +21,61 @@
 
 class Editor_Models_ConceptValidator_Error
 {
-	/**
-	 * Holds the field for which is the validator.
-	 *
-	 * @var string
-	 */
-	private $_field;
-	
-	/**
-	 * Holds the error message of the validator.
-	 *
-	 * @var string
-	 */
-	private $_message;
-	
-	/**
-	 * Holds an array of concepts which has conflicts wtht the current concept.
-	 *
-	 * @var array Array of Editor_Models_Concept objects
-	 */
-	private $_conflictedConcepts = array();
-	
-	public function __construct($field, $message, $conflictedConcepts = array())
-	{
-		$this->_field = $field;
-		$this->_message = $message;
-		$this->_conflictedConcepts = $conflictedConcepts;
-	}
-	
-	/**
-	 * Gets the field for which the validator is.
-	 *
-	 * @return string
-	 */
-	public function getField()
-	{
-		return $this->_message;
-	}
-	
-	/**
-	 * Gets the error message of the validator.
-	 *
-	 * @return string
-	 */
-	public function getMessage()
-	{
-		return $this->_message;
-	}
-	
-	/**
-	 * Gets the concepts which has conflicts with the validated concept.
-	 *
-	 * @return array Array of Editor_Models_Concept objects
-	 */
-	public function getConflictedConcepts()
-	{
-		return $this->_conflictedConcepts;
-	}
+    /**
+     * Holds the field for which is the validator.
+     *
+     * @var string
+     */
+    private $_field;
+    
+    /**
+     * Holds the error message of the validator.
+     *
+     * @var string
+     */
+    private $_message;
+    
+    /**
+     * Holds an array of concepts which has conflicts wtht the current concept.
+     *
+     * @var array Array of Editor_Models_Concept objects
+     */
+    private $_conflictedConcepts = array();
+    
+    public function __construct($field, $message, $conflictedConcepts = array())
+    {
+        $this->_field = $field;
+        $this->_message = $message;
+        $this->_conflictedConcepts = $conflictedConcepts;
+    }
+    
+    /**
+     * Gets the field for which the validator is.
+     *
+     * @return string
+     */
+    public function getField()
+    {
+        return $this->_message;
+    }
+    
+    /**
+     * Gets the error message of the validator.
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_message;
+    }
+    
+    /**
+     * Gets the concepts which has conflicts with the validated concept.
+     *
+     * @return array Array of Editor_Models_Concept objects
+     */
+    public function getConflictedConcepts()
+    {
+        return $this->_conflictedConcepts;
+    }
 }

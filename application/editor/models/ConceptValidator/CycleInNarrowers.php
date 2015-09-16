@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,7 +21,7 @@
 
 /**
  * Validates that there is no cycle in the narrower relations.
- * 
+ *
  * This is not valid:
  * a NT b
  * b NT c
@@ -29,32 +29,32 @@
  */
 class Editor_Models_ConceptValidator_CycleInNarrowers extends Editor_Models_ConceptValidator
 {
-	/**
-	 * @see Editor_Models_ConceptValidator::validate($concept)
-	 */
-	public function isValid(Editor_Models_Concept $concept, $extraData)
-	{
-		$this->_setField('narrower');
-		
-		$isValid = true;		
-		$allNarrowers = $concept->getRelationsByField('narrower', null, array($concept, 'getAllRelations'));		
-		foreach ($allNarrowers as $narrower) {
-			$narrower = new Editor_Models_Concept($narrower);
-			if ($narrower->hasRelationInDepth('narrower', $concept)) {
-				$isValid = false;
-				$this->_addConflictedConcept($narrower);
-			}
-		}
-		
-		if ( ! $isValid) {
-			$this->_setErrorMessage(_('One or more of the narrower relations create a cycle'));
-		}
-		
-		return $isValid;
-	}
-	
-	public static function factory()
-	{
-		return new Editor_Models_ConceptValidator_CycleInNarrowers();
-	}
+    /**
+     * @see Editor_Models_ConceptValidator::validate($concept)
+     */
+    public function isValid(Editor_Models_Concept $concept, $extraData)
+    {
+        $this->_setField('narrower');
+        
+        $isValid = true;
+        $allNarrowers = $concept->getRelationsByField('narrower', null, array($concept, 'getAllRelations'));
+        foreach ($allNarrowers as $narrower) {
+            $narrower = new Editor_Models_Concept($narrower);
+            if ($narrower->hasRelationInDepth('narrower', $concept)) {
+                $isValid = false;
+                $this->_addConflictedConcept($narrower);
+            }
+        }
+        
+        if (! $isValid) {
+            $this->_setErrorMessage(_('One or more of the narrower relations create a cycle'));
+        }
+        
+        return $isValid;
+    }
+    
+    public static function factory()
+    {
+        return new Editor_Models_ConceptValidator_CycleInNarrowers();
+    }
 }
