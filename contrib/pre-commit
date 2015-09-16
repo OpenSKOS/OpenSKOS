@@ -44,8 +44,8 @@ $phpunit_output = [];
 exec("./vendor/bin/phpunit", $phpunit_output, $return_phpunit);
 
 if ($return_phpunit !== 0) {
-	echo implode("\n", $phpunit_output), "\n";
-	$exit_status = 1;
+    echo implode("\n", $phpunit_output), "\n";
+    $exit_status = 1;
 }
 
 exit($exit_status);
