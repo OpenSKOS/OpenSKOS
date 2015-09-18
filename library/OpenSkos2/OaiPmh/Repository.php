@@ -77,8 +77,7 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
         $baseUrl,
         array $adminEmails,
         $description = null
-    )
-    {
+    ) {
         $this->resourceManager = $resourceManager;
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
@@ -185,8 +184,13 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      * @param string $set
      * @return string
      */
-    private function getResumptionToken($offset =0, \DateTime $from = null, \DateTime $till = null, $metadataPrefix = null, $set = null)
-    {
+    private function getResumptionToken(
+        $offset = 0,
+        \DateTime $from = null,
+        \DateTime $till = null,
+        $metadataPrefix = null,
+        $set = null
+    ) {
         $params = [];
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;

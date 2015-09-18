@@ -318,7 +318,7 @@ class ResourceManager
 
     /**
      * Execute raw query
-     * 
+     *
      * @param string $query
      */
     public function query($query)
