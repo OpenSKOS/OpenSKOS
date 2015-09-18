@@ -19,7 +19,7 @@
 namespace OpenSkos2\Exception;
 
 /**
- * The required resource was concept for example, but the returned resource is schema or something else.
+ * The required resource was concept for example, but the returned resource is conceptScheme or something else.
  */
 class InvalidResourceTypeException extends OpenSkosException
 {

@@ -25,27 +25,50 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
     {
         $this->getHelper('layout')->disableLayout();
         $this->getResponse()->setHeader('Content-Type', 'text/xml; charset=utf8');
-        
+
     }
-    
-    public function indexAction()
+
+    public function testAction()
     {
+        $this->_helper->viewRenderer->setNoRender(true);
+        
+
+        $db = $this->getInvokeArg('bootstrap')->getResource('db');
+        $repository = new OpenSkos2\OaiPmh\Repository(
+            $this->getResourceManager(),
+            'OpenSKOS - OAI-PMH Service provider',
+            $this->getBaseUrl(),
+            ['oai-pmh@openskos.org'],
+            null
+        );
+
+        $provider = new Picturae\OaiPmh\Provider($repository);
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $provider->setRequest($request);        
+        $response = $provider->execute();
+        
+        (new Zend\Diactoros\Response\SapiEmitter())->emit($response);
+    }
+
+    public function indexAction()
+    {      
+        error_reporting(0);
         require_once APPLICATION_PATH . '/' . $this->getRequest()->getModuleName() .'/models/OaiPmh.php';
         $this->view->responseDate = date(OaiPmh::XS_DATETIME_FORMAT);
-            
+
         $oai = new OaiPmh($this->getRequest()->getParams(), $this->view);
         $oai->setBaseUrl('http:'.($_SERVER['SERVER_PORT']==443?'s':'') . '//'
             .$_SERVER['HTTP_HOST']
             . $this->getFrontController()->getRouter()->assemble(array()));
         $this->view->oai = $oai;
-        
+
     }
-    
+
     public function getAction()
     {
         $this->_501('GET');
     }
-    
+
     public function postAction()
     {
         $this->_501('POST');
@@ -59,5 +82,14 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
     public function deleteAction()
     {
         $this->_501('DELETE');
+    }
+
+    /**
+     * Get base url
+     * @return string
+     */
+    private function getBaseUrl()
+    {
+        return $this->view->serverUrl() . $this->view->url();
     }
 }

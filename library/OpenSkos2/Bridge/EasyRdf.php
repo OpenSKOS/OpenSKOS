@@ -24,18 +24,17 @@ use OpenSkos2\Collection;
 use OpenSkos2\CollectionCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Schema;
-use OpenSkos2\SchemaCollection;
 
 class EasyRdf
 {
     /**
-     * @param \EasyRdf\Graph $graph to $read
+     * @param Graph $graph to $read
      * @param string $expectedType If expected type is set, a collection of that type will be enforced.
      * @return ResourceCollection
      */
@@ -58,8 +57,8 @@ class EasyRdf
             );
 
             foreach ($resource->propertyUris() as $propertyUri) {
-                foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
-                    if ($propertyValue instanceof \EasyRdf\Literal) {
+                foreach ($resource->all(new Literal($propertyUri)) as $propertyValue) {
+                    if ($propertyValue instanceof Literal) {
                         $myResource->addProperty(
                             $propertyUri,
                             new Literal(
@@ -68,7 +67,7 @@ class EasyRdf
                                 $propertyValue->getDatatypeUri()
                             )
                         );
-                    } elseif ($propertyValue instanceof \EasyRdf\Resource) {
+                    } elseif ($propertyValue instanceof Literal) {
                         $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
@@ -110,7 +109,7 @@ class EasyRdf
     /**
      * Creates a resource matching the give type.
      * @param string $uri
-     * @param \EasyRdf\Resource|null $type
+     * @param Resource|null $type
      * @return Resource
      */
     protected static function createResource($uri, $type)
@@ -119,8 +118,8 @@ class EasyRdf
             switch ($type->getUri()) {
                 case Concept::TYPE:
                     return new Concept($uri);
-                case Schema::TYPE:
-                    return new Schema($uri);
+                case ConceptScheme::TYPE:
+                    return new ConceptScheme($uri);
                 case Collection::TYPE:
                     return new Collection($uri);
                 default:
@@ -142,8 +141,8 @@ class EasyRdf
         switch ($type) {
             case Concept::TYPE:
                 return new ConceptCollection();
-            case Schema::TYPE:
-                return new SchemaCollection();
+            case ConceptScheme::TYPE:
+                return new ConceptScheme();
             case Collection::TYPE:
                 return new CollectionCollection();
             default:
@@ -153,12 +152,12 @@ class EasyRdf
 
     /**
      * @param Resource $resource
-     * @param \EasyRdf\Graph $graph
+     * @param Graph $graph
      * @throws InvalidArgumentException
      */
-    protected static function addResourceToGraph(Resource $resource, \EasyRdf\Graph $graph)
+    protected static function addResourceToGraph(Resource $resource, Graph $graph)
     {
-        $easyResource = new \EasyRdf\Resource($resource->getUri(), $graph);
+        $easyResource = new Literal($resource->getUri(), $graph);
         
         foreach ($resource->getProperties() as $propName => $property) {
             foreach ($property as $value) {
@@ -166,11 +165,15 @@ class EasyRdf
                  * @var $value Object
                  */
                 if ($value instanceof Literal) {
+                    var_dump('Something is fucked :( ', $value);
+                    return;
                     $easyResource->addLiteral(
                         $propName,
-                        new \EasyRdf\Literal($value->getValue(), $value->getLanguage(), $value->getType())
+                        new Literal($value->getValue(), $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Uri) {
+                    var_dump('Something is uri :( ', $value);
+                    return;
                     $easyResource->addResource($propName, $value->getUri());
                 } else {
                     throw new InvalidArgumentException(

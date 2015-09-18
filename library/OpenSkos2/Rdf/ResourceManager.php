@@ -317,6 +317,16 @@ class ResourceManager
     }
 
     /**
+     * Execute raw query
+     * 
+     * @param string $query
+     */
+    public function query($query)
+    {
+        return $this->client->query($query);
+    }
+
+    /**
      * Fetch all resources matching the query.
      * @param string $query
      * @return ResourceCollection
@@ -326,7 +336,7 @@ class ResourceManager
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
-
+    
     /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
      * @param string $query String representation of the patterns.
