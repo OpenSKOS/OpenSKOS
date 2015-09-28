@@ -38,6 +38,13 @@ use Zend_Db_Adapter_Abstract;
 
 class Repository implements InterfaceRepository
 {
+    
+    /**
+     * Amount of records to be displayed
+     *
+     * @var int
+     */
+    private $limit = 100;
 
     /**
      * OAI-PMH Repository name
@@ -208,15 +215,12 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        $token = $this->encodeResumptionToken();
-        
-        $concepts = $this->conceptManager->getConcepts();
-        $items = [];
+        $concepts = $this->conceptManager->getConcepts($this->limit, 0);
         foreach ($concepts as $concept) {
             $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
         }
         
-        $token = 'something';
+        $token = $this->encodeResumptionToken($this->limit);
         return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
     }
 
@@ -226,7 +230,18 @@ class Repository implements InterfaceRepository
      */
     public function listRecordsByToken($token)
     {
-
+        $params = $this->decodeResumptionToken($token);
+       
+        $offset = (int)$params['offset'];
+        $concepts = $this->conceptManager->getConcepts($this->limit, $offset);
+        foreach ($concepts as $concept) {
+            $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
+        }
+        
+        $params['offset'] = (int)$params['offset'] + $this->limit;
+        $token = $this->encodeResumptionToken($params);
+        
+        return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
     }
 
     /**
@@ -303,7 +318,7 @@ class Repository implements InterfaceRepository
      */
     private function decodeResumptionToken($token)
     {
-        return (array) base64_decode(json_decode($params));
+        return (array) json_decode(base64_decode($token));
     }
 
     /**
