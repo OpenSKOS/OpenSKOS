@@ -45,7 +45,7 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
     /**
      * Get dependency injection container
      * 
-     * @return $diContainer DI\Container
+     * @return \DI\Container
      */
     public function getDI()
     {

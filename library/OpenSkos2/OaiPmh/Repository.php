@@ -71,18 +71,35 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      */
     private $offset = 0;
 
+    /**
+     * Database adapter
+     *
+     * @var \Zend_Db_Adapter_Abstract $db,
+     */
+    private $db;
+    
+    /**
+     *
+     * @var \OpenSkos2\ConceptSchemeManager
+     */
+    private $schemeManager;
+
     public function __construct(
         \OpenSkos2\Rdf\ResourceManager $resourceManager,
+        \OpenSkos2\ConceptSchemeManager $schemeManager,
         $repositoryName,
         $baseUrl,
         array $adminEmails,
+        \Zend_Db_Adapter_Abstract $db,
         $description = null
     ) {
         $this->resourceManager = $resourceManager;
+        $this->schemeManager = $schemeManager;
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
         $this->description = $description;
+        $this->db = $db;
         $this->getEarliestDateStamp();
     }
 
@@ -108,9 +125,37 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      */
     public function listSets()
     {
-        $this->resourceManager->fetch($simplePatterns, $offset);
+        $collections = $this->getCollections();
+        
+        $items = [];
+        
+        $tenantAdded = [];
+        
+        foreach ($collections as $row) {
+            // Tenant spec
+            $tenantCode = $row['tenant_code'];
+            if (!isset($tenantAdded[$tenantCode])) {
+                $items[] = new \Picturae\OaiPmh\Implementation\Set($tenantCode, $row['tenant_title']);
+                $tenantAdded[$tenantCode] = $tenantCode;
+            }
+            
+            // Collection spec
+            $spec = $row['tenant_code'] . ':' . $row['collection_code'];
+            $items[] = new \Picturae\OaiPmh\Implementation\Set($spec, $row['collection_title']);
+                        
+            // Concept scheme spec
+            $schemes = $this->schemeManager->getSchemeByCollectionUri($row['collection_uri']);
+            foreach ($schemes as $scheme) {
+                $uri = $scheme->getUri();
+                $pUri = parse_url($uri);
+                $schemeSpec = $spec . ':' . $pUri['host'] . $pUri['path'];
+                $title = $scheme->getProperty(\OpenSkos2\Namespaces\DcTerms::TITLE);
+                $name = $title[0]->getValue();
+                $items[] = new \Picturae\OaiPmh\Implementation\Set($schemeSpec, $name);
+            }
+        }
 
-        return new \Picturae\OaiPmh\SetList($items, $resumptionToken);
+        return new \Picturae\OaiPmh\Implementation\SetList($items);
     }
 
     /**
@@ -207,6 +252,33 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
         return base64_encode(json_encode($params));
     }
 
+    /**
+     * Get all collections
+     *
+     * @return \OpenSKOS_Db_Table_Row_Collection[]
+     */
+    private function getCollections()
+    {
+        $sql = $this->db->select()
+                ->from(['col' => 'collection'], [
+                    'collection_code' => 'col.code',
+                    'collection_title' => 'col.dc_title',
+                    'collection_description' => 'col.dc_description',
+                    'collection_uri' => 'col.uri',
+                ])
+                ->join(
+                    ['ten' => 'tenant'],
+                    'col.tenant = ten.code',
+                    [
+                        'tenant_title' => 'ten.name',
+                        'tenant_code' => 'ten.code',
+                    ]
+                )
+                ->order('col.tenant ASC');
+        
+        return $this->db->fetchAll($sql);
+    }
+    
     /**
      * Decode resumption token
      * possible properties are:
