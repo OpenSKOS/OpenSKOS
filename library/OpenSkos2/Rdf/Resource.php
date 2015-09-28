@@ -115,7 +115,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function getType()
     {
-        return current($this->getProperty(Rdf::TYPE));
+        return current($this->getProperty(\OpenSkos2\Namespaces\Rdf::TYPE));
     }
     
     /**

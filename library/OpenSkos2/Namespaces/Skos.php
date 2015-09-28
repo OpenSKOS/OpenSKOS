@@ -20,6 +20,8 @@ namespace OpenSkos2\Namespaces;
 
 class Skos
 {
+    const NAME_SPACE  = 'http://www.w3.org/2004/02/skos/core#';
+    
     const CONCEPTSCHEME = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
     const INSCHEME = 'http://www.w3.org/2004/02/skos/core#inScheme';
     const HASTOPCONCEPT = 'http://www.w3.org/2004/02/skos/core#hasTopConcept';

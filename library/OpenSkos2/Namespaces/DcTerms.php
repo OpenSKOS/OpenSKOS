@@ -20,6 +20,8 @@ namespace OpenSkos2\Namespaces;
 
 class DcTerms
 {
+    const NAME_SPACE = 'http://purl.org/dc/terms/';
+    
     /**
      * exception to the rule because abstract is a reserved keyword
      */

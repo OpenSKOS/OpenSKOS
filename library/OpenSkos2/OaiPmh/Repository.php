@@ -23,8 +23,7 @@ use DateTime;
 use DOMDocument;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Rdf\ResourceManager;
-use Picturae\OaiPmh\Implementation\MetadataFormatType as MetadataFormatType2;
+use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\Repository\Identity as ImplementationIdentity;
 use Picturae\OaiPmh\Implementation\Set;
 use Picturae\OaiPmh\Implementation\SetList;
@@ -39,6 +38,7 @@ use Zend_Db_Adapter_Abstract;
 
 class Repository implements InterfaceRepository
 {
+
     /**
      * OAI-PMH Repository name
      * @var string
@@ -78,9 +78,9 @@ class Repository implements InterfaceRepository
     /**
      * RDF Resource manager
      *
-     * @var ResourceManager
+     * @var \OpenSkos2\ConceptManager
      */
-    private $resourceManager;
+    private $conceptManager;
 
     /**
      * Current offset retrieved from token
@@ -103,7 +103,7 @@ class Repository implements InterfaceRepository
     private $schemeManager;
 
     public function __construct(
-        ResourceManager $resourceManager,
+        \OpenSkos2\ConceptManager $conceptManager,
         ConceptSchemeManager $schemeManager,
         $repositoryName,
         $baseUrl,
@@ -111,7 +111,7 @@ class Repository implements InterfaceRepository
         Zend_Db_Adapter_Abstract $db,
         $description = null
     ) {
-        $this->resourceManager = $resourceManager;
+        $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
@@ -164,14 +164,13 @@ class Repository implements InterfaceRepository
             // Concept scheme spec
             $schemes = $this->schemeManager->getSchemeByCollectionUri($row['collection_uri']);
             foreach ($schemes as $scheme) {
-                
                 $uuidProp = $scheme->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
-                $uuid = $uuidProp[0]->getValue();                
+                $uuid = $uuidProp[0]->getValue();
                 $schemeSpec = $spec . ':' . $uuid;
-                
+
                 $title = $scheme->getProperty(DcTerms::TITLE);
                 $name = $title[0]->getValue();
-                
+
                 $items[] = new Set($schemeSpec, $name);
             }
         }
@@ -209,7 +208,16 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        //$this->resourceManager->
+        $token = $this->encodeResumptionToken();
+        
+        $concepts = $this->conceptManager->getConcepts();
+        $items = [];
+        foreach ($concepts as $concept) {
+            $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
+        }
+        
+        $token = 'something';
+        return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
     }
 
     /**
@@ -228,18 +236,18 @@ class Repository implements InterfaceRepository
     public function listMetadataFormats($identifier = null)
     {
         $formats = [];
-        $formats[]= new MetadataFormatType2(
+        $formats[] = new ImplementationMetadataFormatType(
             'oai_dc',
             'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
             'http://www.openarchives.org/OAI/2.0/oai_dc/'
         );
 
-        $formats[]= new MetadataFormatType2(
+        $formats[] = new ImplementationMetadataFormatType(
             'oai_rdf',
             'http://www.openarchives.org/OAI/2.0/rdf.xsd',
             'http://www.w3.org/2004/02/skos/core#'
         );
-        
+
         return $formats;
     }
 
@@ -251,39 +259,6 @@ class Repository implements InterfaceRepository
     {
         $doc = new DOMDocument();
         return $doc;
-    }
-
-    /**
-     * Get resumption token
-     *
-     * @param int $offset
-     * @param DateTime $from
-     * @param DateTime $till
-     * @param string $metadataPrefix
-     * @param string $set
-     * @return string
-     */
-    private function getResumptionToken(
-        $offset = 0,
-        DateTime $from = null,
-        DateTime $till = null,
-        $metadataPrefix = null,
-        $set = null
-    ) {
-        $params = [];
-        $params['offset'] = $offset;
-        $params['metadataPrefix'] = $metadataPrefix;
-        $params['set'] = $set;
-
-        if ($from) {
-            $params['from'] = $from->getTimestamp();
-        }
-
-        if ($till) {
-            $params['till'] = $till->getTimestamp();
-        }
-
-        return base64_encode(json_encode($params));
     }
 
     /**
@@ -304,9 +279,9 @@ class Repository implements InterfaceRepository
                     ['ten' => 'tenant'],
                     'col.tenant = ten.code',
                     [
-                        'tenant_title' => 'ten.name',
-                        'tenant_code' => 'ten.code',
-                    ]
+                    'tenant_title' => 'ten.name',
+                    'tenant_code' => 'ten.code',
+                        ]
                 )
                 ->order('col.tenant ASC');
 
@@ -328,9 +303,42 @@ class Repository implements InterfaceRepository
      */
     private function decodeResumptionToken($token)
     {
-        return (array)base64_decode(json_decode($params));
+        return (array) base64_decode(json_decode($params));
     }
 
+    /**
+     * Get resumption token
+     *
+     * @param int $offset
+     * @param DateTime $from
+     * @param DateTime $till
+     * @param string $metadataPrefix
+     * @param string $set
+     * @return string
+     */
+    private function encodeResumptionToken(
+        $offset = 0,
+        DateTime $from = null,
+        DateTime $till = null,
+        $metadataPrefix = null,
+        $set = null
+    ) {
+        $params = [];
+        $params['offset'] = $offset;
+        $params['metadataPrefix'] = $metadataPrefix;
+        $params['set'] = $set;
+
+        if ($from) {
+            $params['from'] = $from->getTimestamp();
+        }
+
+        if ($till) {
+            $params['till'] = $till->getTimestamp();
+        }
+
+        return base64_encode(json_encode($params));
+    }
+    
     /**
      * Get earliest modified timestamp
      *
@@ -351,7 +359,7 @@ class Repository implements InterfaceRepository
                 LIMIT 1
             ';
 
-        $graph = $this->resourceManager->query($query);
+        $graph = $this->conceptManager->query($query);
         return new DateTime($graph[0]->date->getValue());
     }
 }

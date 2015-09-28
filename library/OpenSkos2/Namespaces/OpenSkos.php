@@ -20,6 +20,8 @@ namespace OpenSkos2\Namespaces;
 
 class OpenSkos
 {
+    const NAME_SPACE = 'http://openskos.org/xmlns#';
+    
     const STATUS = 'http://openskos.org/xmlns#status';
     
     const TOBECHECKED = 'http://openskos.org/xmlns#toBeChecked';
