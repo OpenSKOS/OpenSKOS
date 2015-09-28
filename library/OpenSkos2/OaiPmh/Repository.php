@@ -19,7 +19,25 @@
 
 namespace OpenSkos2\OaiPmh;
 
-class Repository implements \Picturae\OaiPmh\Interfaces\Repository
+use DateTime;
+use DOMDocument;
+use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Rdf\ResourceManager;
+use Picturae\OaiPmh\Implementation\MetadataFormatType as MetadataFormatType2;
+use Picturae\OaiPmh\Implementation\Repository\Identity as ImplementationIdentity;
+use Picturae\OaiPmh\Implementation\Set;
+use Picturae\OaiPmh\Implementation\SetList;
+use Picturae\OaiPmh\Interfaces\MetadataFormatType;
+use Picturae\OaiPmh\Interfaces\Record;
+use Picturae\OaiPmh\Interfaces\RecordList;
+use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
+use Picturae\OaiPmh\Interfaces\Repository\Identity;
+use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
+use stdClass;
+use Zend_Db_Adapter_Abstract;
+
+class Repository implements InterfaceRepository
 {
     /**
      * OAI-PMH Repository name
@@ -53,14 +71,14 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      * by the content of the earliestDatestamp element. earliestDatestamp must be expressed at the finest granularity
      * supported by the repository.
      *
-     * @return \DateTime
+     * @return DateTime
      */
     private $earliestDateStamp;
 
     /**
      * RDF Resource manager
      *
-     * @var \OpenSkos2\Rdf\ResourceManager
+     * @var ResourceManager
      */
     private $resourceManager;
 
@@ -74,23 +92,23 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
     /**
      * Database adapter
      *
-     * @var \Zend_Db_Adapter_Abstract $db,
+     * @var Zend_Db_Adapter_Abstract $db,
      */
     private $db;
-    
+
     /**
      *
-     * @var \OpenSkos2\ConceptSchemeManager
+     * @var ConceptSchemeManager
      */
     private $schemeManager;
 
     public function __construct(
-        \OpenSkos2\Rdf\ResourceManager $resourceManager,
-        \OpenSkos2\ConceptSchemeManager $schemeManager,
+        ResourceManager $resourceManager,
+        ConceptSchemeManager $schemeManager,
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        \Zend_Db_Adapter_Abstract $db,
+        Zend_Db_Adapter_Abstract $db,
         $description = null
     ) {
         $this->resourceManager = $resourceManager;
@@ -108,59 +126,62 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      */
     public function identify()
     {
-        return new \Picturae\OaiPmh\Implementation\Repository\Identity(
+        return new ImplementationIdentity(
             $this->repositoryName,
             $this->baseUrl,
             $this->getEarliestDateStamp(),
-            \Picturae\OaiPmh\Interfaces\Repository\Identity::DELETED_RECORD_NO,
+            Identity::DELETED_RECORD_NO,
             $this->adminEmails,
-            \Picturae\OaiPmh\Implementation\Repository\Identity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ,
+            ImplementationIdentity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ,
             null,
             null
         );
     }
 
     /**
-     * @return SetList
+     * @return InterfaceSetList
      */
     public function listSets()
     {
         $collections = $this->getCollections();
-        
+
         $items = [];
-        
+
         $tenantAdded = [];
-        
+
         foreach ($collections as $row) {
             // Tenant spec
             $tenantCode = $row['tenant_code'];
             if (!isset($tenantAdded[$tenantCode])) {
-                $items[] = new \Picturae\OaiPmh\Implementation\Set($tenantCode, $row['tenant_title']);
+                $items[] = new Set($tenantCode, $row['tenant_title']);
                 $tenantAdded[$tenantCode] = $tenantCode;
             }
-            
+
             // Collection spec
             $spec = $row['tenant_code'] . ':' . $row['collection_code'];
-            $items[] = new \Picturae\OaiPmh\Implementation\Set($spec, $row['collection_title']);
-                        
+            $items[] = new Set($spec, $row['collection_title']);
+
             // Concept scheme spec
             $schemes = $this->schemeManager->getSchemeByCollectionUri($row['collection_uri']);
             foreach ($schemes as $scheme) {
-                $uri = $scheme->getUri();
-                $pUri = parse_url($uri);
-                $schemeSpec = $spec . ':' . $pUri['host'] . $pUri['path'];
-                $title = $scheme->getProperty(\OpenSkos2\Namespaces\DcTerms::TITLE);
+                
+                $uuidProp = $scheme->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+                $uuid = $uuidProp[0]->getValue();                
+                $schemeSpec = $spec . ':' . $uuid;
+                
+                $title = $scheme->getProperty(DcTerms::TITLE);
                 $name = $title[0]->getValue();
-                $items[] = new \Picturae\OaiPmh\Implementation\Set($schemeSpec, $name);
+                
+                $items[] = new Set($schemeSpec, $name);
             }
         }
 
-        return new \Picturae\OaiPmh\Implementation\SetList($items);
+        return new SetList($items);
     }
 
     /**
      * @param string $token
-     * @return SetList
+     * @return InterfaceSetList
      */
     public function listSetsByToken($token)
     {
@@ -181,14 +202,14 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
     /**
      * @param string $metadataFormat metadata format of the records to be fetch or null if only headers are fetched
      * (listIdentifiers)
-     * @param \DateTime $from
-     * @param \DateTime $until
+     * @param DateTime $from
+     * @param DateTime $until
      * @param string $set name of the set containing this record
      * @return RecordList
      */
-    public function listRecords($metadataFormat = null, \DateTime $from = null, \DateTime $until = null, $set = null)
+    public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-
+        //$this->resourceManager->
     }
 
     /**
@@ -206,7 +227,20 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      */
     public function listMetadataFormats($identifier = null)
     {
+        $formats = [];
+        $formats[]= new MetadataFormatType2(
+            'oai_dc',
+            'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
+            'http://www.openarchives.org/OAI/2.0/oai_dc/'
+        );
 
+        $formats[]= new MetadataFormatType2(
+            'oai_rdf',
+            'http://www.openarchives.org/OAI/2.0/rdf.xsd',
+            'http://www.w3.org/2004/02/skos/core#'
+        );
+        
+        return $formats;
     }
 
     /**
@@ -215,7 +249,7 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      */
     private function getDescription()
     {
-        $doc = new \DOMDocument();
+        $doc = new DOMDocument();
         return $doc;
     }
 
@@ -223,16 +257,16 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      * Get resumption token
      *
      * @param int $offset
-     * @param \DateTime $from
-     * @param \DateTime $till
+     * @param DateTime $from
+     * @param DateTime $till
      * @param string $metadataPrefix
      * @param string $set
      * @return string
      */
     private function getResumptionToken(
         $offset = 0,
-        \DateTime $from = null,
-        \DateTime $till = null,
+        DateTime $from = null,
+        DateTime $till = null,
         $metadataPrefix = null,
         $set = null
     ) {
@@ -275,10 +309,10 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
                     ]
                 )
                 ->order('col.tenant ASC');
-        
+
         return $this->db->fetchAll($sql);
     }
-    
+
     /**
      * Decode resumption token
      * possible properties are:
@@ -290,7 +324,7 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
      * ->till
      *
      * @param string $token
-     * @return \stdClass
+     * @return stdClass
      */
     private function decodeResumptionToken($token)
     {
@@ -318,6 +352,6 @@ class Repository implements \Picturae\OaiPmh\Interfaces\Repository
             ';
 
         $graph = $this->resourceManager->query($query);
-        return new \DateTime($graph[0]->date->getValue());
+        return new DateTime($graph[0]->date->getValue());
     }
 }

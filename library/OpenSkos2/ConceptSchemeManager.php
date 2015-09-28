@@ -49,11 +49,12 @@ class ConceptSchemeManager extends ResourceManager
             PREFIX openskos: <http://openskos.org/xmlns#>
             PREFIX dc: <http://purl.org/dc/terms/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                SELECT ?subject ?title
+                SELECT ?subject ?title ?uuid
                 WHERE {
                     ?subject rdf:type skos:conceptScheme;
                     skos:Collection ' . $escaped . ';
                     dc:title ?title;
+                    openskos:uuid ?uuid;
             }
         ';
         
@@ -71,6 +72,11 @@ class ConceptSchemeManager extends ResourceManager
             if (!empty($row->title)) {
                 $scheme->addProperty(DcTerms::TITLE, new Literal($row->title->getValue()));
             }
+            
+            if (!empty($row->uuid)) {
+                $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($row->uuid->getValue()));
+            }
+            
             $scheme->addProperty(Skos::COLLECTION, new Uri($collectionUri));
             
             $collection[] = $scheme;
