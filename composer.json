@@ -1,4 +1,10 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Mech7/asparagus.git"
+        }
+    ],
     "require": {
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
@@ -9,7 +15,8 @@
         "monolog/monolog": "^1.16",
         "ramsey/uuid": "^2.8",
         "picturae/oai-pmh": "^0.5.0",
-        "zendframework/zend-diactoros": "^1.1"
+        "zendframework/zend-diactoros": "^1.1",
+        "benestar/asparagus": "dev-master"
     },
     "autoload": {
         "psr-4": {

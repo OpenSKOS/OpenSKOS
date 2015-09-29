@@ -125,7 +125,6 @@ class Repository implements InterfaceRepository
         $this->adminEmails = $adminEmails;
         $this->description = $description;
         $this->db = $db;
-        $this->getEarliestDateStamp();
     }
 
     /**
@@ -215,7 +214,8 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        $concepts = $this->conceptManager->getConcepts($this->limit, 0);
+        $concepts = $this->conceptManager->getConcepts($this->limit, 0, $from, $until);
+        $items = [];
         foreach ($concepts as $concept) {
             $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
         }
@@ -357,7 +357,7 @@ class Repository implements InterfaceRepository
     /**
      * Get earliest modified timestamp
      *
-     * @return string returns date/time like 2015-01-28T10:05:07.438Z
+     * @return DateTime
      */
     private function getEarliestDateStamp()
     {
@@ -375,6 +375,6 @@ class Repository implements InterfaceRepository
             ';
 
         $graph = $this->conceptManager->query($query);
-        return new DateTime($graph[0]->date->getValue());
+        return $graph[0]->date->getValue();
     }
 }

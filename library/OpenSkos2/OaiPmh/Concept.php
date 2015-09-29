@@ -54,7 +54,7 @@ class Concept implements Record
     public function getHeader()
     {
         $concept = $this->concept;
-        $datestamp = new DateTime($concept->getProperty(\OpenSkos2\Namespaces\DcTerms::MODIFIED)[0]->getValue());
+        $datestamp = $concept->getProperty(\OpenSkos2\Namespaces\DcTerms::MODIFIED)[0]->getValue();
         $setSpecs = [];
         $schemes = $concept->getProperty(Skos::INSCHEME);
         foreach ($schemes as $scheme) {
@@ -109,8 +109,21 @@ class Concept implements Record
                 foreach ($properties as $property) {
                     if ($property instanceof Uri) {
                         $element = $metadata->createElementNS($mainNamespace, $tag, $property->getUri());
+                        
+                    } elseif ($property->getValue() instanceof DateTime) {
+                        $date = $property->getValue();
+                        $element = $metadata->createElementNS($mainNamespace, $tag, $date->format(DATE_W3C));
+                        $language = $property->getLanguage();
+                        if (!empty($language)) {
+                            $element->setAttribute('language', $language);
+                        }
                     } else {
-                        $element = $metadata->createElementNS($mainNamespace, $tag, $property->getValue());
+                        $element = $metadata->createElementNS(
+                            $mainNamespace,
+                            $tag,
+                            htmlspecialchars($property->getValue(), ENT_XML1)
+                        );
+                        
                         $language = $property->getLanguage();
                         if (!empty($language)) {
                             $element->setAttribute('language', $language);

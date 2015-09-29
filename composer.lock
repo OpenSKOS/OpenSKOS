@@ -4,8 +4,58 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c77c304f609b258488b787cda9bb3c2b",
+    "hash": "fc72498e5343905a359c869ddc624d31",
+    "content-hash": "64242951e8ad9f47b570f6062985468b",
     "packages": [
+        {
+            "name": "benestar/asparagus",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Mech7/asparagus.git",
+                "reference": "11c79cd457d842e0b97bc5765257b446f800652b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Mech7/asparagus/zipball/11c79cd457d842e0b97bc5765257b446f800652b",
+                "reference": "11c79cd457d842e0b97bc5765257b446f800652b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Asparagus\\": "src/"
+                }
+            },
+            "license": [
+                "GNU GPL v2+"
+            ],
+            "authors": [
+                {
+                    "name": "Bene*",
+                    "email": "benestar.wikimedia@gmail.com"
+                }
+            ],
+            "description": "SPARQL abstraction layer for PHP",
+            "homepage": "https://github.com/benestar/Asparagus",
+            "keywords": [
+                "SPARQL",
+                "abstraction layer",
+                "asparagus"
+            ],
+            "support": {
+                "source": "https://github.com/Mech7/asparagus/tree/master"
+            },
+            "time": "2015-09-07 14:54:51"
+        },
         {
             "name": "container-interop/container-interop",
             "version": "1.1.0",
@@ -635,16 +685,16 @@
         },
         {
             "name": "picturae/oai-pmh",
-            "version": "0.5.0",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picturae/OaiPmh.git",
-                "reference": "d15ac8b2ab2ffd8802f9cb4ec5eb2c3f437533fb"
+                "reference": "fdda62ab4fa539fb4fe7c352ad70424d0f2e2038"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/d15ac8b2ab2ffd8802f9cb4ec5eb2c3f437533fb",
-                "reference": "d15ac8b2ab2ffd8802f9cb4ec5eb2c3f437533fb",
+                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/fdda62ab4fa539fb4fe7c352ad70424d0f2e2038",
+                "reference": "fdda62ab4fa539fb4fe7c352ad70424d0f2e2038",
                 "shasum": ""
             },
             "require": {
@@ -675,7 +725,7 @@
                 }
             ],
             "description": "Picturae OAI-PMH package. Can be used to create a OAI endpoint",
-            "time": "2015-09-17 10:41:21"
+            "time": "2015-09-28 09:19:17"
         },
         {
             "name": "psr/http-message",
@@ -832,16 +882,16 @@
         },
         {
             "name": "symfony/event-dispatcher",
-            "version": "v2.7.4",
+            "version": "v2.7.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/EventDispatcher.git",
-                "reference": "b58c916f1db03a611b72dd702564f30ad8fe83fa"
+                "url": "https://github.com/symfony/event-dispatcher.git",
+                "reference": "ae4dcc2a8d3de98bd794167a3ccda1311597c5d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/b58c916f1db03a611b72dd702564f30ad8fe83fa",
-                "reference": "b58c916f1db03a611b72dd702564f30ad8fe83fa",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/ae4dcc2a8d3de98bd794167a3ccda1311597c5d9",
+                "reference": "ae4dcc2a8d3de98bd794167a3ccda1311597c5d9",
                 "shasum": ""
             },
             "require": {
@@ -886,7 +936,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2015-08-24 07:13:45"
+            "time": "2015-09-22 13:49:29"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1392,16 +1442,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.8.7",
+            "version": "4.8.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa"
+                "reference": "73fad41adb5b7bc3a494bb930d90648df1d5e74b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa",
-                "reference": "dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/73fad41adb5b7bc3a494bb930d90648df1d5e74b",
+                "reference": "73fad41adb5b7bc3a494bb930d90648df1d5e74b",
                 "shasum": ""
             },
             "require": {
@@ -1460,7 +1510,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2015-09-14 06:57:22"
+            "time": "2015-09-20 12:56:44"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1965,16 +2015,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.7.4",
+            "version": "v2.7.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/Yaml.git",
-                "reference": "2dc7b06c065df96cc686c66da2705e5e18aef661"
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "31cb2ad0155c95b88ee55fe12bc7ff92232c1770"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/2dc7b06c065df96cc686c66da2705e5e18aef661",
-                "reference": "2dc7b06c065df96cc686c66da2705e5e18aef661",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/31cb2ad0155c95b88ee55fe12bc7ff92232c1770",
+                "reference": "31cb2ad0155c95b88ee55fe12bc7ff92232c1770",
                 "shasum": ""
             },
             "require": {
@@ -2010,13 +2060,14 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2015-08-24 07:13:45"
+            "time": "2015-09-14 14:14:09"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "easyrdf/easyrdf": 20
+        "easyrdf/easyrdf": 20,
+        "benestar/asparagus": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
