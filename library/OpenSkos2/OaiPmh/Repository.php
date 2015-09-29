@@ -348,7 +348,7 @@ class Repository implements InterfaceRepository
      * ->until (timestamp)
      *
      * @param string $token
-     * @return stdClass
+     * @return array
      */
     private function decodeResumptionToken($token)
     {

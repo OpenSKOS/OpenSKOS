@@ -285,7 +285,10 @@ do {
             var_dump($doc);
             throw new Exception("What to do with field {$field}");
         }
-
+        
+        // Add tenant in graph
+        $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+        
         $resourceManager->insert($resource);
 
     }

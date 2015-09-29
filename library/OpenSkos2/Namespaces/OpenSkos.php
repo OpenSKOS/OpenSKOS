@@ -22,6 +22,8 @@ class OpenSkos
 {
     const NAME_SPACE = 'http://openskos.org/xmlns#';
     
+    const TENANT = 'http://openskos.org/xmlns#tenant';
+    
     const STATUS = 'http://openskos.org/xmlns#status';
     
     const TOBECHECKED = 'http://openskos.org/xmlns#toBeChecked';
