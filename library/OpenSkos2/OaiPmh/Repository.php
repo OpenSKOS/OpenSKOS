@@ -38,7 +38,7 @@ use Zend_Db_Adapter_Abstract;
 
 class Repository implements InterfaceRepository
 {
-    
+
     /**
      * Amount of records to be displayed
      *
@@ -214,13 +214,23 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        $concepts = $this->conceptManager->getConcepts($this->limit, 0, $from, $until);
+        $concepts = $this->conceptManager->getConcepts($this->limit + 1, 0, $from, $until);
         $items = [];
-        foreach ($concepts as $concept) {
+        
+        $showToken = false;
+        foreach ($concepts as $i => $concept) {
+            if ($i === $this->limit) {
+                $showToken = true;
+                continue;
+            }
             $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
         }
         
-        $token = $this->encodeResumptionToken($this->limit);
+        $token = null;
+        if ($showToken) {
+            $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
+        }
+        
         return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
     }
 
@@ -231,16 +241,40 @@ class Repository implements InterfaceRepository
     public function listRecordsByToken($token)
     {
         $params = $this->decodeResumptionToken($token);
-       
-        $offset = (int)$params['offset'];
-        $concepts = $this->conceptManager->getConcepts($this->limit, $offset);
-        foreach ($concepts as $concept) {
+
+        $concepts = $this->conceptManager->getConcepts(
+            $this->limit + 1,
+            $params['offset'],
+            $params['from'],
+            $params['until']
+        );
+        
+        $items = [];
+        
+        $showToken = false;
+        foreach ($concepts as $i => $concept) {
+            if ($i === $this->limit) {
+                $showToken = true;
+                continue;
+            }
+            
             $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
         }
-        
+
         $params['offset'] = (int)$params['offset'] + $this->limit;
-        $token = $this->encodeResumptionToken($params);
         
+        $token = null;
+        
+        if ($showToken) {
+            $token = $this->encodeResumptionToken(
+                $params['offset'],
+                $params['from'],
+                $params['until'],
+                $params['metadataPrefix'],
+                $params['set']
+            );
+        }
+
         return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
     }
 
@@ -310,15 +344,25 @@ class Repository implements InterfaceRepository
      * ->offset
      * ->metadataPrefix
      * ->set
-     * ->from
-     * ->till
+     * ->from (timestamp)
+     * ->until (timestamp)
      *
      * @param string $token
      * @return stdClass
      */
     private function decodeResumptionToken($token)
     {
-        return (array) json_decode(base64_decode($token));
+        $params = (array) json_decode(base64_decode($token));
+
+        if (!empty($params['from'])) {
+            $params['from'] = new \DateTime('@' . $params['from']);
+        }
+
+        if (!empty($params['until'])) {
+            $params['until'] = new \DateTime('@' . $params['until']);
+        }
+
+        return $params;
     }
 
     /**
@@ -326,7 +370,7 @@ class Repository implements InterfaceRepository
      *
      * @param int $offset
      * @param DateTime $from
-     * @param DateTime $till
+     * @param DateTime $util
      * @param string $metadataPrefix
      * @param string $set
      * @return string
@@ -334,7 +378,7 @@ class Repository implements InterfaceRepository
     private function encodeResumptionToken(
         $offset = 0,
         DateTime $from = null,
-        DateTime $till = null,
+        DateTime $util = null,
         $metadataPrefix = null,
         $set = null
     ) {
@@ -342,18 +386,20 @@ class Repository implements InterfaceRepository
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;
         $params['set'] = $set;
+        $params['from'] = null;
+        $params['until'] = null;
 
         if ($from) {
             $params['from'] = $from->getTimestamp();
         }
 
-        if ($till) {
-            $params['till'] = $till->getTimestamp();
+        if ($util) {
+            $params['until'] = $util->getTimestamp();
         }
 
         return base64_encode(json_encode($params));
     }
-    
+
     /**
      * Get earliest modified timestamp
      *
