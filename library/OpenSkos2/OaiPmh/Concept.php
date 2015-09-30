@@ -86,6 +86,7 @@ class Concept implements Record
             Skos::NAME_SPACE => [
                 Skos::NOTATION => 'skos:notation',
                 Skos::PREFLABEL => 'skos:prefLabel',
+                Skos::ALTLABEL => 'skos:altLabel',
                 Skos::HIDDENLABEL => 'skos:hiddenLabel',
                 Skos::SCOPENOTE => 'skos:scopeNote',
                 Skos::INSCHEME => 'skos:inScheme',
