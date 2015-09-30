@@ -328,11 +328,16 @@ class ResourceManager
 
     /**
      * Fetch all resources matching the query.
-     * @param string $query
+     *
+     * @param \Asparagus\QueryBuilder|string $query
      * @return ResourceCollection
      */
-    protected function fetchQuery($query)
+    public function fetchQuery($query)
     {
+        if ($query instanceof \Asparagus\QueryBuilder) {
+            $query = $query->getSPARQL();
+        }
+        
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }

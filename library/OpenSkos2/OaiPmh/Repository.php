@@ -19,11 +19,25 @@
 
 namespace OpenSkos2\OaiPmh;
 
+use Asparagus\QueryBuilder;
 use DateTime;
 use DOMDocument;
+use OpenSkos2\OaiPmh\Concept as OaiConcept;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Xsd;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Rdf\Uri;
+use OpenSKOS_Db_Table_Row_Collection;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
+use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
 use Picturae\OaiPmh\Implementation\Repository\Identity as ImplementationIdentity;
 use Picturae\OaiPmh\Implementation\Set;
 use Picturae\OaiPmh\Implementation\SetList;
@@ -33,7 +47,6 @@ use Picturae\OaiPmh\Interfaces\RecordList;
 use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
-use stdClass;
 use Zend_Db_Adapter_Abstract;
 
 class Repository implements InterfaceRepository
@@ -85,7 +98,7 @@ class Repository implements InterfaceRepository
     /**
      * RDF Resource manager
      *
-     * @var \OpenSkos2\ConceptManager
+     * @var ConceptManager
      */
     private $conceptManager;
 
@@ -110,7 +123,7 @@ class Repository implements InterfaceRepository
     private $schemeManager;
 
     public function __construct(
-        \OpenSkos2\ConceptManager $conceptManager,
+        ConceptManager $conceptManager,
         ConceptSchemeManager $schemeManager,
         $repositoryName,
         $baseUrl,
@@ -170,7 +183,7 @@ class Repository implements InterfaceRepository
             // Concept scheme spec
             $schemes = $this->schemeManager->getSchemeByCollectionUri($row['collection_uri']);
             foreach ($schemes as $scheme) {
-                $uuidProp = $scheme->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+                $uuidProp = $scheme->getProperty(OpenSkos::UUID);
                 $uuid = $uuidProp[0]->getValue();
                 $schemeSpec = $spec . ':' . $uuid;
 
@@ -214,7 +227,19 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        $concepts = $this->conceptManager->getConcepts($this->limit + 1, 0, $from, $until);
+        
+        $pSet = $this->parseSet($set);
+        
+        $concepts = $this->getConcepts(
+            $this->limit + 1,
+            0,
+            $from,
+            $until,
+            $pSet['tenant'],
+            $pSet['collection'],
+            $pSet['conceptScheme']
+        );
+        
         $items = [];
         
         $showToken = false;
@@ -223,7 +248,7 @@ class Repository implements InterfaceRepository
                 $showToken = true;
                 continue;
             }
-            $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
+            $items[] = new OaiConcept($concept);
         }
         
         $token = null;
@@ -231,7 +256,7 @@ class Repository implements InterfaceRepository
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
         
-        return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
+        return new OaiRecordList($items, $token);
     }
 
     /**
@@ -242,7 +267,7 @@ class Repository implements InterfaceRepository
     {
         $params = $this->decodeResumptionToken($token);
 
-        $concepts = $this->conceptManager->getConcepts(
+        $concepts = $this->getConcepts(
             $this->limit + 1,
             $params['offset'],
             $params['from'],
@@ -258,7 +283,7 @@ class Repository implements InterfaceRepository
                 continue;
             }
             
-            $items[] = new \OpenSkos2\OaiPmh\Concept($concept);
+            $items[] = new OaiConcept($concept);
         }
 
         $params['offset'] = (int)$params['offset'] + $this->limit;
@@ -275,7 +300,7 @@ class Repository implements InterfaceRepository
             );
         }
 
-        return new \Picturae\OaiPmh\Implementation\RecordList($items, $token);
+        return new OaiRecordList($items, $token);
     }
 
     /**
@@ -299,6 +324,40 @@ class Repository implements InterfaceRepository
 
         return $formats;
     }
+    
+    /**
+     * Parse set string
+     *
+     *           (optional)       (optional)
+     * <tenant>:<collection>:<concept-scheme-uuid>
+     *
+     * Returns an array with the following keys
+     *
+     * [
+     *   'tenant',
+     *   'collection',
+     *   'conceptScheme',
+     * ]
+     *
+     * @param string $set
+     * @return array
+     */
+    private function parseSet($set)
+    {
+        $arrSet = explode(':', $set);
+        
+        $return = [];
+        $return['tenant'] = isset($arrSet[0]) ? new Literal($arrSet[0]) : null;
+        
+        $collection = null;
+        if (isset($arrSet[2])) {
+            $collection = new Uri(OpenSkos::COLLECTION_BASE. $arrSet[0] . ':'. $arrSet[1]);
+        }
+        $return['collection'] = $collection;
+        
+        $return['conceptScheme'] = isset($arrSet[2]) ? new Literal($arrSet[2]) : null;
+        return $return;
+    }
 
     /**
      * @todo Figure out what kind of dom document this needs to be
@@ -313,7 +372,7 @@ class Repository implements InterfaceRepository
     /**
      * Get all collections
      *
-     * @return \OpenSKOS_Db_Table_Row_Collection[]
+     * @return OpenSKOS_Db_Table_Row_Collection[]
      */
     private function getCollections()
     {
@@ -422,5 +481,68 @@ class Repository implements InterfaceRepository
 
         $graph = $this->conceptManager->query($query);
         return $graph[0]->date->getValue();
+    }
+    
+    /**
+     * Fetch all concepts based on parameters in the token
+     *
+     * @param int $limit
+     * @param int $offset
+     * @param \DateTime $from
+     * @param \DateTime $till
+     * @return Concept[]
+     */
+    private function getConcepts(
+        $limit = 10,
+        $offset = 0,
+        \DateTime $from = null,
+        \DateTime $till = null,
+        $tenant = null,
+        $collection = null,
+        $scheme = null
+    ) {
+        $prefixes = [
+            'rdf' => Rdf::NAME_SPACE,
+            'skos' => Skos::NAME_SPACE,
+            'dc' => Dc::NAME_SPACE,
+            'dct' => DcTerms::NAME_SPACE,
+            'openskos' => OpenSkos::NAME_SPACE,
+            'xsd' => Xsd::NAME_SPACE
+        ];
+
+        $qb = new QueryBuilder($prefixes);
+        $select = $qb->describe('?subject')
+                ->where('?subject', 'rdf:type', 'skos:Concept')
+                ->also('dct:modified', '?modified')
+                ->limit($limit)
+                ->offset($offset);
+
+        if (!empty($tenant)) {
+            $tenantN = NTriple::getInstance()->serialize($tenant);
+            $select->also('openskos:tenant', $tenantN);
+        }
+
+        if (!empty($collection)) {
+            $collectionN = NTriple::getInstance()->serialize($collection);
+            $select->also('skos:Collection', $collectionN);
+        }
+
+        if (!empty($scheme)) {
+            $schemeN = NTriple::getInstance()->serialize($scheme);
+            $select->also('skos:inScheme', '?scheme')
+                    ->also('?scheme', 'openskos:uuid', $schemeN);
+        }
+
+        if (!empty($from)) {
+            $tFrom = $from->format(DATE_W3C);
+            $select->filter('?modified >= "' . $tFrom . '"^^xsd:dateTime');
+        }
+
+        if (!empty($till)) {
+            $tTill = $till->format(DATE_W3C);
+            $select->filter('?modified >= "' . $tTill . '"^^xsd:dateTime');
+        }
+
+        return $this->conceptManager->fetchQuery($select);
     }
 }
