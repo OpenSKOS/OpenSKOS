@@ -89,16 +89,18 @@ class Concept implements Record
                 Skos::ALTLABEL => 'skos:altLabel',
                 Skos::HIDDENLABEL => 'skos:hiddenLabel',
                 Skos::SCOPENOTE => 'skos:scopeNote',
+                Skos::NOTE => 'skos:note',
+                Skos::HISTORYNOTE => 'skos:historyNote',
                 Skos::INSCHEME => 'skos:inScheme',
             ],
             OpenSkos::NAME_SPACE => [
                 OpenSkos::STATUS => 'openskos:status',
                 OpenSkos::UUID => 'openskos:uuid',
             ],
-            \OpenSkos2\Namespaces\DcTerms::NAME_SPACE => [
-                \OpenSkos2\Namespaces\DcTerms::DATEACCEPTED => 'dcterms:dateAccepted',
-                \OpenSkos2\Namespaces\DcTerms::DATESUBMITTED => 'dcterms:dateSubmitted',
-                \OpenSkos2\Namespaces\DcTerms::MODIFIED => 'dcterms:modified',
+            DcTerms::NAME_SPACE => [
+                DcTerms::DATEACCEPTED => 'dcterms:dateAccepted',
+                DcTerms::DATESUBMITTED => 'dcterms:dateSubmitted',
+                DcTerms::MODIFIED => 'dcterms:modified',
             ]
         ];
         
