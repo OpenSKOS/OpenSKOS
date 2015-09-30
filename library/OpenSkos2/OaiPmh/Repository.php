@@ -214,7 +214,8 @@ class Repository implements InterfaceRepository
      */
     public function getRecord($metadataFormat, $identifier)
     {
-
+        var_dump($metadataFormat, $identifier);
+        exit;
     }
 
     /**
@@ -347,15 +348,24 @@ class Repository implements InterfaceRepository
         $arrSet = explode(':', $set);
         
         $return = [];
-        $return['tenant'] = isset($arrSet[0]) ? new Literal($arrSet[0]) : null;
+        
+        $tenant = null;
+        if (!empty($arrSet[0])) {
+            $tenant = new Literal($arrSet[0]);
+        }
+        $return['tenant'] = $tenant;
         
         $collection = null;
-        if (isset($arrSet[2])) {
+        if (!empty($arrSet[2])) {
             $collection = new Uri(OpenSkos::COLLECTION_BASE. $arrSet[0] . ':'. $arrSet[1]);
         }
         $return['collection'] = $collection;
         
-        $return['conceptScheme'] = isset($arrSet[2]) ? new Literal($arrSet[2]) : null;
+        $conceptScheme = null;
+        if (!empty($arrSet[2])) {
+            $conceptScheme = new Literal($arrSet[2]);
+        }
+        $return['conceptScheme'] = $conceptScheme;
         return $return;
     }
 
@@ -516,7 +526,7 @@ class Repository implements InterfaceRepository
                 ->also('dct:modified', '?modified')
                 ->limit($limit)
                 ->offset($offset);
-
+        
         if (!empty($tenant)) {
             $tenantN = NTriple::getInstance()->serialize($tenant);
             $select->also('openskos:tenant', $tenantN);
@@ -542,7 +552,7 @@ class Repository implements InterfaceRepository
             $tTill = $till->format(DATE_W3C);
             $select->filter('?modified >= "' . $tTill . '"^^xsd:dateTime');
         }
-
+        
         return $this->conceptManager->fetchQuery($select);
     }
 }

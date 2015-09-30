@@ -108,8 +108,8 @@ class ResourceManager
      */
     public function fetchByUri($uri)
     {
-        // @TODO Add the graph here in the query.
-        $result = $this->client->query('DESCRIBE <' . $uri . '>');
+        $resource = new Uri($uri);
+        $result = $this->client->query('DESCRIBE '. (new NTriple)->serialize($resource));
         $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
 
         if (count($resources) == 0) {
