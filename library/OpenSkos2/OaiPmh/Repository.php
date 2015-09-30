@@ -22,20 +22,22 @@ namespace OpenSkos2\OaiPmh;
 use Asparagus\QueryBuilder;
 use DateTime;
 use DOMDocument;
-use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Xsd;
+use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSKOS_Db_Table_Row_Collection;
+use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
 use Picturae\OaiPmh\Implementation\Repository\Identity as ImplementationIdentity;
@@ -214,8 +216,13 @@ class Repository implements InterfaceRepository
      */
     public function getRecord($metadataFormat, $identifier)
     {
-        var_dump($metadataFormat, $identifier);
-        exit;
+        try {
+            $concept = $this->conceptManager->fetchByUri($identifier);
+        } catch (ResourceNotFoundException $exc) {
+            throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
+        }
+        
+        return new OaiConcept($concept);
     }
 
     /**
@@ -371,7 +378,7 @@ class Repository implements InterfaceRepository
 
     /**
      * @todo Figure out what kind of dom document this needs to be
-     * @return \OpenSkos2\OaiPmh\DOMDocument
+     * @return DOMDocument
      */
     private function getDescription()
     {
