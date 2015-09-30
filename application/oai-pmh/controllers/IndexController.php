@@ -28,7 +28,7 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
 
     }
 
-    public function testAction()
+    public function indexAction()
     {
         $this->_helper->viewRenderer->setNoRender(true);
         
@@ -53,20 +53,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
         $response = $provider->execute();
         
         (new Zend\Diactoros\Response\SapiEmitter())->emit($response);
-    }
-
-    public function indexAction()
-    {      
-        error_reporting(0);
-        require_once APPLICATION_PATH . '/' . $this->getRequest()->getModuleName() .'/models/OaiPmh.php';
-        $this->view->responseDate = date(OaiPmh::XS_DATETIME_FORMAT);
-
-        $oai = new OaiPmh($this->getRequest()->getParams(), $this->view);
-        $oai->setBaseUrl('http:'.($_SERVER['SERVER_PORT']==443?'s':'') . '//'
-            .$_SERVER['HTTP_HOST']
-            . $this->getFrontController()->getRouter()->assemble(array()));
-        $this->view->oai = $oai;
-
     }
 
     public function getAction()
