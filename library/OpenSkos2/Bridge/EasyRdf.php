@@ -29,8 +29,6 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Schema;
-use OpenSkos2\SchemaCollection;
 
 class EasyRdf
 {
@@ -119,8 +117,8 @@ class EasyRdf
             switch ($type->getUri()) {
                 case Concept::TYPE:
                     return new Concept($uri);
-                case Schema::TYPE:
-                    return new Schema($uri);
+                case \OpenSkos2\ConceptScheme::TYPE:
+                    return new \OpenSkos2\ConceptScheme($uri);
                 case Collection::TYPE:
                     return new Collection($uri);
                 default:
@@ -142,8 +140,8 @@ class EasyRdf
         switch ($type) {
             case Concept::TYPE:
                 return new ConceptCollection();
-            case Schema::TYPE:
-                return new SchemaCollection();
+            case \OpenSkos2\ConceptScheme::TYPE:
+                return new \OpenSkos2\ConceptSchemeCollection();
             case Collection::TYPE:
                 return new CollectionCollection();
             default:

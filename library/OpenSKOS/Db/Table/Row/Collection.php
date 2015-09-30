@@ -363,7 +363,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         /**
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
-        $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+        $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
 
         if (!$this->uri) {
             // @TODO Get base url for use here.

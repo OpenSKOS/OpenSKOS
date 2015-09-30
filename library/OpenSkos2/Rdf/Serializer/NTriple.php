@@ -65,4 +65,13 @@ class NTriple
             throw new Exception\InvalidArgumentException('Invalid object: ' . get_class($object));
         }
     }
+    
+    /**
+     *
+     * @return \OpenSkos2\Rdf\Serializer\NTriple
+     */
+    public static function getInstance()
+    {
+        return new self();
+    }
 }

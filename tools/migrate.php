@@ -18,7 +18,12 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-include dirname(__FILE__) . '/autoload.inc.php';
+
+/**
+ * Script to migrate the data from SOLR to Jena run as following: 
+ * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
+ */
+require dirname(__FILE__) . '/autoload.inc.php';
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -38,7 +43,7 @@ try {
     exit(1);
 }
 
-include dirname(__FILE__) . '/bootstrap.inc.php';
+require dirname(__FILE__) . '/bootstrap.inc.php';
 
 // Test....
 
@@ -48,7 +53,7 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 /**
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
-$resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+$resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
 
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
@@ -223,7 +228,7 @@ do {
 
         switch ($doc['class']) {
             case 'ConceptScheme':
-                $resource = new \OpenSkos2\Schema($doc['uri']);
+                $resource = new \OpenSkos2\ConceptScheme($doc['uri']);
                 break;
             case 'Concept':
                 $resource = new \OpenSkos2\Concept($doc['uri']);
@@ -280,7 +285,10 @@ do {
             var_dump($doc);
             throw new Exception("What to do with field {$field}");
         }
-
+        
+        // Add tenant in graph
+        $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+        
         $resourceManager->insert($resource);
 
     }

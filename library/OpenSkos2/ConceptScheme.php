@@ -1,14 +1,15 @@
 <?php
-/**
+
+/* 
  * OpenSKOS
- *
+ * 
  * LICENSE
- *
+ * 
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- *
+ * 
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
@@ -16,11 +17,23 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Exception;
+namespace OpenSkos2;
 
-/**
- * The required resource was concept for example, but the returned resource is conceptScheme or something else.
- */
-class InvalidResourceTypeException extends OpenSkosException
+use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
+
+class ConceptScheme extends Resource
 {
+    const TYPE = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
+    
+    /**
+     * Resource constructor.
+     * @param string $uri
+     */
+    public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
 }

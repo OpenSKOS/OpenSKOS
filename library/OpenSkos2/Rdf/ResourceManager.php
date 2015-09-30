@@ -108,8 +108,8 @@ class ResourceManager
      */
     public function fetchByUri($uri)
     {
-        // @TODO Add the graph here in the query.
-        $result = $this->client->query('DESCRIBE <' . $uri . '>');
+        $resource = new Uri($uri);
+        $result = $this->client->query('DESCRIBE '. (new NTriple)->serialize($resource));
         $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
 
         if (count($resources) == 0) {
@@ -317,16 +317,31 @@ class ResourceManager
     }
 
     /**
-     * Fetch all resources matching the query.
+     * Execute raw query
+     *
      * @param string $query
+     */
+    public function query($query)
+    {
+        return $this->client->query($query);
+    }
+
+    /**
+     * Fetch all resources matching the query.
+     *
+     * @param \Asparagus\QueryBuilder|string $query
      * @return ResourceCollection
      */
-    protected function fetchQuery($query)
+    public function fetchQuery($query)
     {
+        if ($query instanceof \Asparagus\QueryBuilder) {
+            $query = $query->getSPARQL();
+        }
+        
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
-
+    
     /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
      * @param string $query String representation of the patterns.

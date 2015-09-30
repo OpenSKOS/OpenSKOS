@@ -13,7 +13,7 @@ obtain it through the world-wide-web, please send an email
 to license@zend.com so we can send you a copy immediately.
 -->
 
-<xs:schema version="1.0"
+<xs:schema version="1.1"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:attribute name="numFound" type="xs:integer"/>
     <xs:attribute name="start" type="xs:integer"/>
@@ -32,7 +32,7 @@ to license@zend.com so we can send you a copy immediately.
         </xs:simpleType>
     </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
-
+        
     <xs:element name="uuid"/>
     <xs:element name="dateDeleted" />
     <xs:element name="deletedBy" />

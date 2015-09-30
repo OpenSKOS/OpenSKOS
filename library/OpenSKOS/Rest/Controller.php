@@ -42,6 +42,26 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         'application/jsonp' => 'jsonp',
     );
 
+    /**
+     * Get dependency injection container
+     * 
+     * @return \DI\Container
+     */
+    public function getDI()
+    {
+       return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();    
+    }
+    
+    /**
+     * Get resource manager
+     * 
+     * @return \OpenSkos2\Rdf\ResourceManager
+     */
+    public function getResourceManager()
+    {
+        return $this->getDI()->get('OpenSkos2\Rdf\ResourceManager');
+    }    
+    
     protected function _501($method)
     {
         $this->getResponse()

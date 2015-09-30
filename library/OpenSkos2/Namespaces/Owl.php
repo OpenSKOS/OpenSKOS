@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * OpenSKOS
  *
  * LICENSE
@@ -16,24 +16,10 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-namespace OpenSkos2;
 
-use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Rdf\Uri;
+namespace OpenSkos2\Namespaces;
 
-class Schema extends Resource
+class Owl
 {
-    const TYPE = 'http://www.w3.org/2004/02/skos/core#Schema';
-    
-    /**
-     * Resource constructor.
-     * @param string $uri
-     */
-    public function __construct($uri = null)
-    {
-        parent::__construct($uri);
-
-        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
-    }
+    const NAME_SPACE = 'http://www.w3.org/2002/07/owl#';
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,15 +15,13 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-namespace OpenSkos2;
 
-use OpenSkos2\Rdf\ResourceCollection;
+namespace OpenSkos2\Namespaces;
 
-class SchemaCollection extends ResourceCollection
+class Dc
 {
     /**
-     * What is the basic resource for this collection.
-     * @var string NULL means any resource.
+     * Namespace
      */
-    protected $resourceType = Schema::TYPE;
+    const NAME_SPACE = 'http://purl.org/dc/elements/1.1/';
 }

@@ -89,14 +89,14 @@ class Command implements LoggerAwareInterface
         }
 
         if ($message->getDeleteSchemes()) {
-            $foundSchemas = [];
+            $conceptSchemes = [];
             foreach ($resourceCollection as $resourceToInsert) {
                 foreach ($resourceToInsert->getProperty(Skos::INSCHEME) as $scheme) {
                     /** @var $scheme Uri */
-                    $foundSchemas[$scheme->getUri()] = $scheme;
+                    $conceptSchemes[$scheme->getUri()] = $scheme;
                 }
             }
-            foreach ($foundSchemas as $scheme) {
+            foreach ($conceptSchemes as $scheme) {
                 $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
                 $this->resourceManager->delete($scheme);
             }
