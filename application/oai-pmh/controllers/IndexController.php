@@ -25,18 +25,17 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
     {
         $this->getHelper('layout')->disableLayout();
         $this->getResponse()->setHeader('Content-Type', 'text/xml; charset=utf8');
-
     }
 
     public function indexAction()
     {
         $this->_helper->viewRenderer->setNoRender(true);
-        
+
         $schemeManager = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager');
         $conceptManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
-        
+
         $db = $this->getInvokeArg('bootstrap')->getResource('db');
-        
+
         $repository = new OpenSkos2\OaiPmh\Repository(
             $conceptManager,
             $schemeManager,
@@ -47,11 +46,9 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
             null
         );
 
-        $provider = new Picturae\OaiPmh\Provider($repository);
         $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-        $provider->setRequest($request);        
-        $response = $provider->execute();
-        
+        $provider = new Picturae\OaiPmh\Provider($repository, $request);
+        $response = $provider->getResponse();
         (new Zend\Diactoros\Response\SapiEmitter())->emit($response);
     }
 

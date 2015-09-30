@@ -377,16 +377,6 @@ class Repository implements InterfaceRepository
     }
 
     /**
-     * @todo Figure out what kind of dom document this needs to be
-     * @return DOMDocument
-     */
-    private function getDescription()
-    {
-        $doc = new DOMDocument();
-        return $doc;
-    }
-
-    /**
      * Get all collections
      *
      * @return OpenSKOS_Db_Table_Row_Collection[]
