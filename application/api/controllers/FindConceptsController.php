@@ -42,6 +42,22 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         }
     }
 
+    /**
+     * Handle the following API Requests
+     *
+     * /api/find-concepts?q=Kim%20Holland
+     * /api/find-concepts?q=K&start=10
+     * /api/find-concepts?q=K&format=json
+     * /api/find-concepts?q=K&format=jsonp&callback=MyCallBack
+     * /api/find-concepts?&fl=prefLabel,scopeNote&format=json&q=inScheme%3A%22http%3A%2F%2Fdata.beeldengeluid.nl%2Fgtaa%2FGeografischeNamen%22+AND+LexicalLabelsText%3As%2A
+     * /api/find-concepts?format=json&fl=uuid,uri,prefLabel,class,dc_title&id=http://data.beeldengeluid.nl/gtaa/27140
+     * /api/find-concepts?id=http://data.beeldengeluid.nl/gtaa/215866
+     * /api/find-concepts?q=status:approved possible status (candidate|approved|redirected|not_compliant|rejected|obsolete|deleted)
+     * /api/find-concepts?q=altLabel:kruisigingen 
+     * /api/find-concepts?q=prefLabelText@nl:doodstraf
+     * /api/find-concepts?q=altLabelText:kr* 
+     * /api/find-concepts?q=notation:[* TO *]
+     */
     public function indexAction()
     {
         if (null === ($q = $this->getRequest()->getParam('q'))) {
@@ -49,12 +65,30 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
                     ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
+        
+        $this->getHelper('layout')->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true);
+        $manager =  $this->getDI()->get('OpenSkos2\ConceptManager');
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $concept = new \OpenSkos2\Api\Concept($manager, $request);
+        $concepts = $concept->findConcepts();
 
+        $context = $this->_helper->contextSwitch()->getCurrentContext();
+        if ($context === 'json') {
+            $response = (new \OpenSkos2\Api\Response\JsonResponse($concepts))->getResponse();
+            (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
+            exit;
+        }
+        
+        return;
+        
+        
         $q = Api_Models_Utils::addStatusToQuery($q);
 
         $concepts = $this->model->getConcepts(
                 $q, $this->shouldIncludeDeleted($q), false, $this->getRequest()->getParam('sort')
         );
+        
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         if ($context === 'json' || $context === 'jsonp') {
@@ -76,10 +110,17 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             $this->view->response = $concepts;
         }
     }
-
+    
+    /**
+     * Return an concept by the following requests
+     * 
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
+     */
     public function getAction()
     {
-
+        
         $concept = $this->_fetchConcept();
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         if ($context == 'json' || $context == 'jsonp') {
@@ -130,7 +171,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         /*
          * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
          * with this we can create a route in the config ini like this:
-         * 
+         *
          * resources.router.routes.route_id.type = "Zend_Controller_Router_Route_Regex"
          * resources.router.routes.route_id.route = "gtaa\/(\d+)"
          * resources.router.routes.route_id.defaults.module = "api"
