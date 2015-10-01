@@ -68,47 +68,15 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
+        
         $manager =  $this->getDI()->get('OpenSkos2\ConceptManager');
         $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
         $concept = new \OpenSkos2\Api\Concept($manager, $request);
-        $concepts = $concept->findConcepts();
-
+        
         $context = $this->_helper->contextSwitch()->getCurrentContext();
-        if ($context === 'json') {
-            $response = (new \OpenSkos2\Api\Response\JsonResponse($concepts))->getResponse();
-            (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
-            exit;
-        }
-        
-        return;
-        
-        
-        $q = Api_Models_Utils::addStatusToQuery($q);
-
-        $concepts = $this->model->getConcepts(
-                $q, $this->shouldIncludeDeleted($q), false, $this->getRequest()->getParam('sort')
-        );
-        
-
-        $context = $this->_helper->contextSwitch()->getCurrentContext();
-        if ($context === 'json' || $context === 'jsonp') {
-            foreach ($concepts as $key => $val) {
-                foreach ($val['docs'] as &$doc) {
-                    unset($doc['xml']);
-                }
-                $this->view->$key = $val;
-            }
-        } elseif ($context === 'xml') {
-            $xpath = new DOMXPath($concepts);
-            foreach ($xpath->query('/response/result/doc/str[@name="xml"]') as $node) {
-                $node->parentNode->removeChild($node);
-            }
-            $this->view->response = $concepts;
-        } else {
-            $model = new OpenSKOS_Db_Table_Namespaces();
-            $this->view->namespaces = $model->fetchPairs();
-            $this->view->response = $concepts;
-        }
+        $response = $concept->findConcepts($context);
+        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
+        exit; // find better way to prevent output from zf1
     }
     
     /**

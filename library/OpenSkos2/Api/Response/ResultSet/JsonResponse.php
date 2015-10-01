@@ -17,7 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Api\Response;
+namespace OpenSkos2\Api\Response\ResultSet;
 
 /**
  * Provide the json output for find-concepts api

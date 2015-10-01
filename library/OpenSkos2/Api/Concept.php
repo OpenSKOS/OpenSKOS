@@ -65,28 +65,42 @@ class Concept
      * /api/find-concepts?format=json&fl=uuid,uri,prefLabel,class,dc_title&id=http://data.beeldengeluid.nl/gtaa/27140
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.rdf
      *
+     * @param string $context
      * @return ConceptResultSet
      */
-    public function findConcepts()
+    public function findConcepts($context)
     {
         $count = $this->getConceptFinderQuery(self::QUERY_COUNT);
         $query = $this->getConceptFinderQuery(self::QUERY_DESCRIBE);
 
         $concepts = $this->manager->fetchQuery($query);
-        
+
         $countResult = $this->manager->query($count);
         $total = $countResult[0]->count->getValue();
-        
+
         $params = $this->request->getQueryParams();
-        
+
         $start = 0;
         if (!empty($params['start'])) {
             $start = (int)$params['start'];
         }
+
+        $result = new ConceptResultSet($concepts, $total, $start);
         
-        return new ConceptResultSet($concepts, $total, $start);
+        switch ($context) {
+            case 'json':
+                $response = (new \OpenSkos2\Api\Response\ResultSet\JsonResponse($result))->getResponse();
+                break;
+            case 'rdf':
+                $response = (new \OpenSkos2\Api\Response\ResultSet\RdfResponse($result))->getResponse();
+                break;
+            default:
+                throw new Exception\InvalidArgumentException('Invalid context: ' . $context);
+        }
+
+        return $response;
     }
-    
+
     /**
      * Get describe or count query
      *
@@ -102,23 +116,23 @@ class Concept
             'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
             'xsd' => \OpenSkos2\Namespaces\Xsd::NAME_SPACE
         ];
-                
+
         $query = new \Asparagus\QueryBuilder($prefixes);
-        
+
         if ($type === self::QUERY_COUNT) {
             $query->select('(COUNT(*) AS ?count)');
         }
-        
+
         if ($type === self::QUERY_DESCRIBE) {
             $query->describe('?subject');
         }
 
         $query->where('?subject', 'rdf:type', 'skos:Concept')
             ->limit($this->limit);
-        
+
         return $query;
     }
-    
+
     /**
      * Add search term parameters
      *
