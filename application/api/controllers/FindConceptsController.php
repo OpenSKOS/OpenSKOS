@@ -81,7 +81,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $this->_helper->viewRenderer->setNoRender(true);
 
         $id = $this->getId();
-
+        
         /* @var $manager \OpenSkos2\ConceptManager */
         $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
 
@@ -89,7 +89,6 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $concept = new \OpenSkos2\Api\Concept($manager, $request);
         $context = $this->_helper->contextSwitch()->getCurrentContext();
 
-        //var_dump($context); exit;
         $response = $concept->getConcept($id, $context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit;
@@ -143,5 +142,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
             $id = $id_prefix . $id;
         }
+        
+        return $id;
     }
 }
