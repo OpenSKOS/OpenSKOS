@@ -25,6 +25,8 @@ use \Interop\Container\ContainerInterface;
 return [
     'EasyRdf\Sparql\Client' => function (ContainerInterface $c) {
         
+        EasyRdf\RdfNamespace::set('openskos', OpenSkos2\Namespaces\OpenSkos::NAME_SPACE);
+        
         // @TODO Why is that OpenSKOS_Application_BootstrapAccess needed?
         $sparqlOptions = OpenSKOS_Application_BootstrapAccess::getOption('sparql');
         

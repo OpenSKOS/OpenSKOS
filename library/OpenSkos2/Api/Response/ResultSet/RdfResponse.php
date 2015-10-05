@@ -51,10 +51,10 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)
             ->withHeader('Content-Type', 'text/xml; charset=UTF-8');
-        
+
         return $response;
     }
-    
+
     /**
      * Build RDF Document
      *
@@ -74,18 +74,70 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
         $root->setAttribute('openskos:numFound', $this->result->getTotal());
         $root->setAttribute('openskos:start', $this->result->getStart());
         $doc->appendChild($root);
-        
+
         foreach ($this->result->getConcepts() as $concept) {
             /* @var $concept \OpenSkos2\Concept */
-            $desc = $doc->createElement('rdf:Description');
+            $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
+            $conceptXML =  new \DOMDocument();
+            $conceptXML->loadXML($xml);
+            
+            // Add rdf:type
+            $rdfType = $conceptXML->createElement('rdf:type');
+            $rdfType->setAttribute('rdf:resource', \OpenSkos2\Concept::TYPE);
+            $conceptXML->documentElement->appendChild($rdfType);
+                        
+            // Rename rdf:RDF to rdf:Description
+            $desc = $conceptXML->createElement('rdf:Description');
             $desc->setAttribute('rdf:about', $concept->getUri());
-            $this->addConcept($desc, $doc, $concept);
-            $root->appendChild($desc);
+            $this->renameElement($conceptXML->documentElement, $desc);
+            
+            $this->moveNodesFromConcept($conceptXML->documentElement);
+            
+            $root->appendChild(
+                $doc->importNode($conceptXML->documentElement, true)
+            );
         }
-        
+
         return $doc;
     }
     
+    /**
+     * Move nodes from node skos:Concept to node root rdf:Description
+     * to stay backwards compatible with the old API
+     * and remove the original skos:Concept element
+     */
+    private function moveNodesFromConcept(\DOMElement $concept)
+    {
+        //var_dump($concept->childNodes->item(1)->nodeName); exit;
+        $skosConcept = $concept->childNodes->item(1);
+        foreach ($skosConcept->childNodes as $child) {
+            //var_dump($kosConcept->parentNode->nodeName); exit;
+            $skosConcept->parentNode->appendChild($child->cloneNode(true));
+        }
+        $concept->removeChild($skosConcept);
+    }
+    
+    /**
+    * Renames a node in a DOM Document, both elements must come from the same document.
+    *
+    * @param \DOMElement $node
+    * @param \DOMELement $renamed
+    * @return DOMNode
+    */
+    private function renameElement(\DOMElement $node, \DOMELement $renamed)
+    {
+
+        foreach ($node->attributes as $attribute) {
+            $renamed->setAttribute($attribute->nodeName, $attribute->nodeValue);
+        }
+
+        while ($node->firstChild) {
+            $renamed->appendChild($node->firstChild);
+        }
+
+        return $node->parentNode->replaceChild($renamed, $node);
+    }
+
     /**
      * Add all concept elements as child to the element given
      *
@@ -98,7 +150,7 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
         $type = $doc->createElement('rdf:type');
         $type->setAttribute('rdf:resource', \OpenSkos2\Concept::TYPE);
         $element->appendChild($type);
-        
+
         $map = [
             'openskos:status' => \OpenSkos2\Namespaces\OpenSkos::STATUS,
             'skos:notation' => \OpenSkos2\Namespaces\Skos::NOTATION,
@@ -113,7 +165,7 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
             'dcterms:creator' => \OpenSkos2\Namespaces\DcTerms::CREATOR,
             'dcterms:dateSubmitted' => \OpenSkos2\Namespaces\DcTerms::DATESUBMITTED,
         ];
-        
+
         foreach ($map as $tag => $ns) {
             $properties = $concept->getProperty($ns);
             foreach ($properties as $prop) {
@@ -124,26 +176,26 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
                     $element->appendChild($el);
                     continue;
                 }
-                               
+
                 $val = $prop->getValue();
-                                                
+
                 if (empty($val)) {
                     continue;
                 }
-                
+
                 if ($val instanceof \DateTime) {
                     $val = $val->format(DATE_W3C);
                     $el = $doc->createElement($tag, $val);
                     $element->appendChild($el);
                     continue;
                 }
-                
+
                 $el = $doc->createElement($tag, $val);
                 $lang = $prop->getLanguage();
                 if (!empty($lang)) {
                     $el->setAttribute('xml:lang', $lang);
                 }
-                
+
                 $element->appendChild($el);
             }
         }

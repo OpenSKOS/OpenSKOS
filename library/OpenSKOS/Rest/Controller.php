@@ -97,6 +97,15 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
                 )
             )
             ->addContext(
+                'jsonld',
+                array(
+                    'suffix' => 'jsonld',
+                    'headers' => array(
+                        'Content-Type' => 'application-json; charset=UTF-8'
+                    )
+                )
+            )
+            ->addContext(
                 'html',
                 array(
                     'suffix' => '',

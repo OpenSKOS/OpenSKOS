@@ -48,9 +48,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/find-concepts?q=Kim%20Holland
      * /api/find-concepts?q=K&start=10
      * /api/find-concepts?q=K&format=json
-     * /api/find-concepts?q=K&format=jsonp&callback=MyCallBack
-     * /api/find-concepts?&fl=prefLabel,scopeNote&format=json&q=inScheme%3A%22http%3A%2F%2Fdata.beeldengeluid.nl%2Fgtaa%2FGeografischeNamen%22+AND+LexicalLabelsText%3As%2A
-     * /api/find-concepts?format=json&fl=uuid,uri,prefLabel,class,dc_title&id=http://data.beeldengeluid.nl/gtaa/27140
+     * /api/find-concepts?format=json&q=inScheme:"http://data.beeldengeluid.nl/gtaa/GeografischeNamen" AND LexicalLabelsText:s*
+     * /api/find-concepts?format=json&id=http://data.beeldengeluid.nl/gtaa/27140
      * /api/find-concepts?id=http://data.beeldengeluid.nl/gtaa/215866
      * /api/find-concepts?q=status:approved possible status (candidate|approved|redirected|not_compliant|rejected|obsolete|deleted)
      * /api/find-concepts?q=altLabel:kruisigingen 
@@ -88,27 +87,25 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      */
     public function getAction()
     {
+        $this->getHelper('layout')->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true);
         
-        $concept = $this->_fetchConcept();
-        $context = $this->_helper->contextSwitch()->getCurrentContext();
-        if ($context == 'json' || $context == 'jsonp') {
-            if (null !== $concept) {
-                foreach ($concept as $key => $var) {
-                    if ($key == 'xml') {
-                        continue;
-                    }
-                    $this->view->$key = $var;
-                }
-            }
-        } elseif ($this->_helper->contextSwitch()->getCurrentContext() === 'xml') {
-            $xpath = new DOMXPath($concept);
-            foreach ($xpath->query('/doc/str[@name="xml"]') as $node) {
-                $node->parentNode->removeChild($node);
-            }
-            $this->view->concept = $concept;
-        } else {
-            $this->view->concept = $concept;
+        $id = $this->getRequest()->getParam('id');
+        if (null === $id) {
+            throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
         }
+        
+        /* @var $manager \OpenSkos2\ConceptManager */
+        $manager =  $this->getDI()->get('OpenSkos2\ConceptManager');
+
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $concept = new \OpenSkos2\Api\Concept($manager, $request);        
+        $context = $this->_helper->contextSwitch()->getCurrentContext();
+        
+        //var_dump($context); exit;
+        $response = $concept->getConcept($id, $context);
+        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
+        exit;        
     }
 
     public function postAction()

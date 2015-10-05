@@ -294,7 +294,7 @@ class ResourceManager
 
         return $this->ask($ask);
     }
-
+    
     /**
      * Makes query (with full sparql patterns) from our search patterns.
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
@@ -320,6 +320,7 @@ class ResourceManager
      * Execute raw query
      *
      * @param string $query
+     * @return \EasyRdf\Graph
      */
     public function query($query)
     {

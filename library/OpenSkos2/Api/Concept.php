@@ -70,23 +70,25 @@ class Concept
      */
     public function findConcepts($context)
     {
-        $count = $this->getConceptFinderQuery(self::QUERY_COUNT);
-        $query = $this->getConceptFinderQuery(self::QUERY_DESCRIBE);
+        
+        $solr2sparql = new Query\Solr2Sparql($this->request);
+                
+        $params = $this->request->getQueryParams();
+        $start = 0;
+        if (!empty($params['start'])) {
+            $start = (int)$params['start'];
+        }
+        
+        $count = $solr2sparql->getCount();
+        $query = $solr2sparql->getSelect($this->limit, $start);
 
         $concepts = $this->manager->fetchQuery($query);
 
         $countResult = $this->manager->query($count);
         $total = $countResult[0]->count->getValue();
 
-        $params = $this->request->getQueryParams();
-
-        $start = 0;
-        if (!empty($params['start'])) {
-            $start = (int)$params['start'];
-        }
-
         $result = new ConceptResultSet($concepts, $total, $start);
-        
+
         switch ($context) {
             case 'json':
                 $response = (new \OpenSkos2\Api\Response\ResultSet\JsonResponse($result))->getResponse();
@@ -102,54 +104,39 @@ class Concept
     }
 
     /**
-     * Get describe or count query
+     * Get PSR-7 response for concept
      *
-     * @param string $type
+     * @param string $context
+     * @throws Exception\NotFoundException
+     * @throws Exception\InvalidArgumentException
      */
-    private function getConceptFinderQuery($type)
+    public function getConcept($uuid, $context)
     {
         $prefixes = [
-            'rdf' => \OpenSkos2\Namespaces\Rdf::NAME_SPACE,
-            'skos' => \OpenSkos2\Namespaces\Skos::NAME_SPACE,
-            'dc' => \OpenSkos2\Namespaces\Dc::NAME_SPACE,
-            'dct' => \OpenSkos2\Namespaces\DcTerms::NAME_SPACE,
             'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
-            'xsd' => \OpenSkos2\Namespaces\Xsd::NAME_SPACE
         ];
 
-        $query = new \Asparagus\QueryBuilder($prefixes);
+        $lit = new \OpenSkos2\Rdf\Literal($uuid);
+        $qb = new \Asparagus\QueryBuilder($prefixes);
+        $query = $qb->describe('?subject')
+            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
+        $data = $this->manager->fetchQuery($query);
 
-        if ($type === self::QUERY_COUNT) {
-            $query->select('(COUNT(*) AS ?count)');
+        if (!count($data)) {
+            throw new Exception\NotFoundException('Concept not found by id: ' . $uuid, 404);
+        }
+        
+        switch ($context) {
+            case 'json':
+                $response = (new \OpenSkos2\Api\Response\Detail\JsonResponse($data[0]))->getResponse();
+                break;
+            case 'rdf':
+                $response = (new \OpenSkos2\Api\Response\Detail\RdfResponse($data[0]))->getResponse();
+                break;
+            default:
+                throw new Exception\InvalidArgumentException('Invalid context: ' . $context);
         }
 
-        if ($type === self::QUERY_DESCRIBE) {
-            $query->describe('?subject');
-        }
-
-        $query->where('?subject', 'rdf:type', 'skos:Concept')
-            ->limit($this->limit);
-
-        return $query;
-    }
-
-    /**
-     * Add search term parameters
-     *
-     * @param \Asparagus\QueryBuilder $query
-     * @return \Asparagus\QueryBuilder
-     */
-    private function buildSearchQuery(\Asparagus\QueryBuilder $query)
-    {
-        $params = $this->request->getQueryParams();
-        if (isset($params['q'])) {
-            $literalKey = new \OpenSkos2\Rdf\Literal('^' . $params['q']);
-            $term = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($literalKey);
-
-            $query->also('skos:prefLabel', '?pref')
-                    ->also('skos:altLabel', '?alt')
-                    ->filter('regex(str(?pref), ' . $term . ') || regex(str(?alt), ' . $term . ')');
-        }
-        return $query;
+        return $response;
     }
 }

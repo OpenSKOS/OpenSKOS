@@ -164,9 +164,16 @@ class EasyRdf
                  * @var $value Object
                  */
                 if ($value instanceof Literal) {
+                    $val = $value->getValue();
+                    
+                    // Convert timestamp to string
+                    if ($val instanceof \DateTime) {
+                        $val = $val->format(\DATE_W3C);
+                    }
+                    
                     $easyResource->addLiteral(
                         $propName,
-                        new \EasyRdf\Literal($value->getValue(), $value->getLanguage(), $value->getType())
+                        new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, $value->getUri());
