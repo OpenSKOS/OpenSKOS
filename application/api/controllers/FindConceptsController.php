@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * OpenSKOS
  *
  * LICENSE
@@ -9,30 +9,20 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
-    /**
-     *
-     * @var Api_Models_Concepts
-     */
-    protected $model;
+class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
     public function init()
     {
         parent::init();
-        $this->model = Api_Models_Concepts::factory()->setQueryParams(
-                $this->getRequest()->getParams()
-        );
+        
         $this->_helper->contextSwitch()
                 ->initContext($this->getRequestedFormat());
 
@@ -64,20 +54,20 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
                     ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
-        
+
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
-        
-        $manager =  $this->getDI()->get('OpenSkos2\ConceptManager');
+
+        $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
         $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
         $concept = new \OpenSkos2\Api\Concept($manager, $request);
-        
+
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $response = $concept->findConcepts($context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit; // find better way to prevent output from zf1
     }
-    
+
     /**
      * Return an concept by the following requests
      * 
@@ -89,23 +79,20 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     {
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
-        
-        $id = $this->getRequest()->getParam('id');
-        if (null === $id) {
-            throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
-        }
-        
+
+        $id = $this->getId();
+
         /* @var $manager \OpenSkos2\ConceptManager */
-        $manager =  $this->getDI()->get('OpenSkos2\ConceptManager');
+        $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
 
         $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-        $concept = new \OpenSkos2\Api\Concept($manager, $request);        
+        $concept = new \OpenSkos2\Api\Concept($manager, $request);
         $context = $this->_helper->contextSwitch()->getCurrentContext();
-        
+
         //var_dump($context); exit;
         $response = $concept->getConcept($id, $context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
-        exit;        
+        exit;
     }
 
     public function postAction()
@@ -124,9 +111,12 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     }
 
     /**
-     * @return Api_Models_Concept
+     * Get concept id
+     * 
+     * @throws Zend_Controller_Exception
+     * @return string
      */
-    protected function _fetchConcept()
+    private function getId()
     {
         $id = $this->getRequest()->getParam('id');
         if (null === $id) {
@@ -148,34 +138,10 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
          * resources.router.routes.route_id.reverse = "gtaa/%d"
          */
 
-
         $id_prefix = $this->getRequest()->getParam('id_prefix');
         if (null !== $id_prefix && !OpenSKOS_Solr::isValidUuid($id)) {
             $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
             $id = $id_prefix . $id;
         }
-
-        // Tries to find any not deleted concept.
-        $concept = $this->model->getConcept($id);
-
-        // If not deleted concept was not found - tries to find deleted one.
-        if (null === $concept) {
-            $concept = $this->model->getConcept($id, array(), true);
-        }
-
-        if (null === $concept) {
-            throw new Zend_Controller_Exception('Concept `' . $id . '` not found', 404);
-        }
-        if ($concept->isDeleted()) {
-            throw new Zend_Controller_Exception('Concept `' . $id . '` is deleted since ' . $concept['timestamp'], 410);
-        }
-        return $concept;
     }
-
-    protected function shouldIncludeDeleted($q)
-    {
-        // Ultimate reliability
-        return (strripos($q, 'status:deleted') !== false) && (!strripos($q, '-status:deleted') !== false);
-    }
-
 }

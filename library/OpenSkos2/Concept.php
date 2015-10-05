@@ -29,6 +29,17 @@ class Concept extends Resource
 {
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
+    /**
+     * All possible statuses
+     */
+    const STATUS_CANDIDATE = 'candidate';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REDIRECTED = 'redirected';
+    const STATUS_NOT_COMPLIANT = 'not_compliant';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_OBSOLETE = 'obsolete';
+    const STATUS_DELETED = 'deleted';
+    
     public static $classes = array(
         'ConceptSchemes' => [
             Skos::CONCEPTSCHEME,
@@ -99,6 +110,19 @@ class Concept extends Resource
         }
     }
     
+    /**
+     * Check if the concept is deleted
+     *
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Gets preview title for the concept.
      * @param string $language

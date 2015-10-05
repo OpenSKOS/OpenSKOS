@@ -126,12 +126,18 @@ class Concept
             throw new Exception\NotFoundException('Concept not found by id: ' . $uuid, 404);
         }
         
+        /* @var $concept \OpenSkos2\Concept */
+        $concept = $data[0];
+        if ($concept->isDeleted()) {
+            throw new Exception\DeletedException('Concept ' . $uuid . ' is deleted', 410);
+        }
+        
         switch ($context) {
             case 'json':
-                $response = (new \OpenSkos2\Api\Response\Detail\JsonResponse($data[0]))->getResponse();
+                $response = (new \OpenSkos2\Api\Response\Detail\JsonResponse($concept))->getResponse();
                 break;
             case 'rdf':
-                $response = (new \OpenSkos2\Api\Response\Detail\RdfResponse($data[0]))->getResponse();
+                $response = (new \OpenSkos2\Api\Response\Detail\RdfResponse($concept))->getResponse();
                 break;
             default:
                 throw new Exception\InvalidArgumentException('Invalid context: ' . $context);
