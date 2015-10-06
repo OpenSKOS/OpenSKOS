@@ -106,12 +106,12 @@ class Solr2Sparql
             $query->describe('?subject');
         }
         
-        if ($type !== self::QUERY_COUNT) {
-            $query->where('?subject', 'rdf:type', 'skos:Concept')
-                ->limit($this->limit)
-                ->offset($this->offset);
-        }
-
+        $query->where('?subject', 'rdf:type', 'skos:Concept')
+            ->limit($this->limit)
+            ->offset($this->offset);
+        
+        $this->buildSearchQuery($query);
+        
         return $query;
     }
 

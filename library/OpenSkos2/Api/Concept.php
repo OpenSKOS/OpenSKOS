@@ -74,8 +74,8 @@ class Concept
             $start = (int)$params['start'];
         }
         
-        $count = $solr2sparql->getCount();
         $query = $solr2sparql->getSelect($this->limit, $start);
+        $count = $solr2sparql->getCount();
 
         $concepts = $this->manager->fetchQuery($query);
 
