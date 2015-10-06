@@ -63,6 +63,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $concept = new \OpenSkos2\Api\Concept($manager);
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
         $response = $concept->findConcepts($request, $context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit; // find better way to prevent output from zf1
