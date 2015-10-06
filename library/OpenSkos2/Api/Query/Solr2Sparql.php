@@ -122,9 +122,9 @@ class Solr2Sparql
         $query->where('?subject', 'rdf:type', 'skos:Concept')
                 ->limit($this->limit)
                 ->offset($this->offset);
-
+        
         $this->buildSearchQuery($query);
-
+        
         return $query;
     }
 
@@ -150,8 +150,8 @@ class Solr2Sparql
             $this->addGenericSearch($query, $tQuery['term']);
         }
         
-        foreach ($tQuery['fields'] as $data) {
-            $this->addFieldSearch($query, $data);
+        foreach ($tQuery['fields'] as $i => $data) {
+            $this->addFieldSearch($query, $data, '?param'.$i);
         }
 
         return $query;
@@ -162,20 +162,28 @@ class Solr2Sparql
      *
      * @param \Asparagus\QueryBuilder $query
      * @param array $data
+     * @param string $param
      */
-    private function addFieldSearch(\Asparagus\QueryBuilder $query, $data)
+    private function addFieldSearch(\Asparagus\QueryBuilder $query, $data, $param)
     {
         if ($data['wildcard']) {
-            return $query->filter('regex(str(?pref), ' . $data['value'] . ', "i")');
+            $value = new \OpenSkos2\Rdf\Literal('^' . $data['value']);
+            $eValue = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($value);
+            
+            $query->also('skos:prefLabel', '?pref');
+            return $query->filter('regex(str(?pref), ' . $eValue . ', "i")');
         }
-        
-        $uri = new \OpenSkos2\Rdf\Uri($data['field']);
-        $eField = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($uri);
         
         $value = new \OpenSkos2\Rdf\Literal($data['value']);
         $eValue = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($value);
         
-        $query->also($eField, $eValue);
+        $uri = new \OpenSkos2\Rdf\Uri($data['field']);
+        $eField = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($uri);
+        
+        $query->also($eField, $param);
+
+        $query->filter('str('.$param.') = '.$eValue);
+
     }
 
     /**
@@ -244,7 +252,7 @@ class Solr2Sparql
         return [
             'field' => $this->getField($queryPart),
             'value' => $val,
-            'wildcard' => $this->isWildcard($val),
+            'wildcard' => $this->isWildcard($queryPart),
             'language' => $this->getLanguage($val),
         ];
     }
@@ -271,8 +279,9 @@ class Solr2Sparql
      */
     private function isWildcard($queryValue)
     {
+        $parts = explode(':', $queryValue);
         // Check if the query part is wildcard
-        if (substr($queryValue, -1) === '*') {
+        if (substr($parts[1], -1) === '*') {
             return true;
         }
         return false;
@@ -319,6 +328,7 @@ class Solr2Sparql
     private function getFieldValue($queryPart)
     {
         $parts = explode(':', $queryPart);
-        return trim($parts[1]);
+        $value = trim($parts[1], ' *');
+        return $value;
     }
 }
