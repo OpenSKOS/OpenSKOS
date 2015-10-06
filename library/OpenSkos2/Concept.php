@@ -27,6 +27,7 @@ use OpenSkos2\Exception\OpenSkosException;
 
 class Concept extends Resource
 {
+
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
     /**
@@ -140,6 +141,43 @@ class Concept extends Resource
         return implode(', ', $values);
     }
     
+    /**
+     * Get openskos:uuid if it exists
+     *
+     * @return string
+     */
+    public function getUuid()
+    {
+        $uuids = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+        if (isset($uuids[0])) {
+            return $uuids[0]->getValue();
+        }
+    }
+
+    /**
+     * Get tenant
+     *
+     * @return \OpenSkos2\Rdf\Literal
+     */
+    public function getTenant()
+    {
+        $values = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
+        if (isset($values[0])) {
+            return $values[0];
+        }
+    }
+    
+    /**
+     * Get institution row
+     *
+     * @return \OpenSKOS_Db_Table_Row_Tenant
+     */
+    public function getInstitution()
+    {
+        $model = new \OpenSKOS_Db_Table_Tenants();
+        return $model->find($this->getTenant())->current();
+    }
+
     /**
      * Generates an uri for the concept.
      */

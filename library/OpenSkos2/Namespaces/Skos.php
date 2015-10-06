@@ -65,4 +65,6 @@ class Skos
     const MAPPINGRELATION = 'http://www.w3.org/2004/02/skos/core#mappingRelation';
     const NARROWMATCH = 'http://www.w3.org/2004/02/skos/core#narrowMatch';
     const RELATEDMATCH = 'http://www.w3.org/2004/02/skos/core#relatedMatch';
+        
+    const HTML_REFERENCE ='http://www.w3.org/2009/08/skos-reference/skos.html';
 }

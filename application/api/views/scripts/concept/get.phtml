@@ -1,5 +1,6 @@
 <?php
-/**
+
+/*
  * OpenSKOS
  *
  * LICENSE
@@ -8,124 +9,100 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-?>
-<?php
-/**
- * 
- * @var Api_Models_Concept
- */
-$concept = &$this->concept;
 
-$title = $concept['prefLabel'][0];
-if (null !== ($lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang'))) {
-	$fieldname = "prefLabel@{$lang}";	
-	if (isset($concept[$fieldname])) {
-		$title = $concept[$fieldname][0];
-	}
-}
-if (!$title) $title = $concept['uri'];
+/* @var $concept \OpenSkos2\Concept */
+$concept = $this->concept;
+
+$lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
+$title = $concept->getPreviewTitle($lang);
 $this->headTitle($title);
-$collection = $concept->getCollection();
-
 ?>
-<h2><?php echo $this->escape($title)?></h2>
+<h2><?=$this->escape($title)?></h2>
 <dl>
-	<dt><?php echo $this->translate('Institution')?>:</dt>
-	<dd><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'institutions', 'id' => $concept['tenant']), 'rest')?>.html"><?php echo $concept->getInstitution()->name?></a></dd>
-	<dt><?php echo $this->translate('Collection')?>:</dt>
-	<dd><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'collections', 'id' => $collection->getId()), 'rest')?>.html"><?php echo $collection->dc_title?></a></dd>
-	<dt>URI:</dt>
-	<dd><a rel="external" href="<?php echo $concept['uri']?>"><?php echo $concept['uri']?></a></dd>
-	<dt>SKOS Class:</dt>
-	<dd><a rel="external" href="<?php echo $concept->getClassUri()?>"><?php echo $concept->getClass()?></a></dd>
+    <dt><?=$this->translate('Institution')?>:</dt>
+    <dd><a href="<?=$this->url([
+                'module' => 'api',
+                'controller' => 'institutions',
+                'id' => (string)$concept->getTenant()
+            ],
+            'rest'
+        )?>.html"><?=$this->escape($concept->getInstitution()->name)?></a></dd>
+    <?php /* @todo Fix skos:Collection to openskos:Collection first before add this
+    <dt><?=$this->translate('Collection')?>:</dt>
+    <dd>
+        <a href="<?=$this->url(array(
+                                    'module' => 'api',
+                                    'controller' => 'collections',
+                                    'id' => $collection->getId()
+                                ), 'rest'
+                )?>.html"><?=$collection->dc_title?></a>
+    </dd>
+     */
+    ?>
+    <dt>URI:</dt>
+    <dd>
+        <a rel="external" href="<?=$this->escape($concept->getUri())?>"><?=$this->escape($concept->getUri())?></a>
+    </dd>
+    <dt>SKOS Class:</dt>
+    <dd><a rel="external" href="<?=$concept::TYPE?>"><?=$concept::TYPE?></a></dd>
 </dl>
 
-<?php if ($inScheme = $concept['inScheme']):?>
-<h3><?php echo $this->translate('inScheme')?></h3>
-<ul>
-<?php foreach ($inScheme as $uri):?>
-	<li><a href="<?php echo $this->url(array('module' => 'api', 'controller' => 'redirect', 'action' => 'index', 'id' => null), 'default')?>?id=<?php echo $uri?>&format=html"><?php echo $uri?></a></li>
-<?php endforeach?>
-</ul>
+<?php if ($inScheme = $concept->getProperty(\OpenSkos2\Namespaces\Skos::INSCHEME)):?>
+    <h3><?=$this->translate('inScheme')?></h3>
+    <ul>
+        <?php foreach ($inScheme as $uri):?>
+            <li><a href="<?php echo $this->url([
+                        'module' => 'api',
+                        'controller' => 'redirect',
+                        'action' => 'index',
+                        'id' => null
+                    ], 'default'
+                    )?>?id=<?=$this->escape($uri)?>&format=html"><?=$this->escape($uri)?></a></li>
+        <?php endforeach?>
+    </ul>
 <?php endif?>
 
+<?php foreach (\OpenSkos2\Concept::$classes as $className => $fieldsInClass):?>
+    <h3><?=$this->translate($className)?></h3>
+    <?php foreach ($fieldsInClass as $subClass):?>
 
-<?php foreach (Api_Models_Concept::$classes as $className => $subClasses):?>
-	<?php if ($concept->hasClass($className)): ?>
-<h3><?php echo $this->concept->translate($className)?></h3>
-		<?php foreach ($subClasses as $subClass):?>
-			<?php if (!Api_Models_Concept::isLanguageSensitiveClass($className)):?>
-				<?php if (null !== ($values = $concept->getValues($subClass, $lang))):?>
-	<h4><?php echo $this->translate('skos:'.$subClass)?></h4>
-		<ul class="<?php echo $subClass?>">
-					<?php foreach ($values as $value):?>
-                <?= $value ?>
-			<li><a class="resolvable-concept" href="<?php echo $this->url(array('module' => 'api', 'controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $value?>&format=html"><?php echo $this->escape($value)?></a></li>
-					<?php endforeach?>
-		</ul>
+        <?php
+        $values = $concept->getProperty($subClass);
+        if (!count($values)) {
+            continue;
+        }
+        ?>
 
-				<?php endif?>
-			<?php else:?>
-			<?php if (null !== ($langValues = $concept->getLangValues($subClass, $lang))):?>
-	<h4><?php echo $this->concept->translate('skos:'.$subClass)?></h4>
-	<ul class="<?php echo $subClass?>">
-		<?php foreach ($langValues as $lang => $values):?>
-			<?php foreach ($values as $value):?>
-		<li>
-			<span class="label" xml:lang="<?php echo $lang?>"><?php echo $this->escape($value)?></span>
-			<span class="lang <?php echo $lang?>"><span>(<?php echo $lang?>)</span></span>
-		</li>
-			<?php endforeach?>
-		<?php endforeach?>
-	</ul>
-				<?php endif?>
-			<?php endif?>
-		<?php endforeach?>
-	<?php endif?>
-<?php endforeach?>
+        <h4><?=$this->translate('skos:'.$subClass)?></h4>
 
-<?php if ($topConcepts = $concept->getTopConcepts()):?>
-<h3><?php echo $this->translate('hasTopConcept')?> (<?php echo number_format($topConcepts->getTotalItemCount())?> <?php echo $this->translate('items')?>)</h3>
-<ol start="<?php echo $topConcepts->getAbsoluteItemNumber(1)?>">
-	<?php foreach ($topConcepts as $topConcept):?>
-			<li><a class="resolvable-concept" href="<?php echo $this->url(array('controller' => 'concept', 'id' => null), 'rest')?>?id=<?php echo $topConcept?>"><?php echo $this->escape($topConcept)?></a></li>
-	<?php endforeach?>
-</ol>
-<?php echo $this->paginationControl($topConcepts, 'Sliding', 'pagination.phtml')?>
-<?php endif?>
+        <ul class="<?php echo $subClass?>">
+            <?php foreach ($values as $value):?>
+                <li>
+                    <a class="resolvable-concept"
+                       href="<?=$this->url(['module' => 'api', 'controller' => 'concept', 'id' => null], 'rest')?>?id=<?=$value?>&format=html">
+                        <?php if (method_exists($value, 'getLanguage') && $value->getLanguage()): ?>
+                            <span class="label" xml:lang="<?=$value->getLanguage()?>"><?=$this->escape($value)?></span>
+                            <span class="lang <?=$lang?>">(<?=$lang?>)</span>
+                        <?php else:?>
+                            <?=$this->escape($value)?>
+                        <?php endif?>
+                    </a>
+                </li>
+            <?php endforeach?>
+        </ul>
+    <?php endforeach; ?>
+<?php endforeach; ?>
 
-<?php if (null !== ($relations = $concept->getImplicitRelations())):?>
-<h3><?php echo $this->translate('Implicit Semantic Relations')?></h3>
-<?php foreach ($relations as $relationName => $relatedConcepts):?>
-<h4><?php echo $this->translate('skos:'.$relationName)?></h4>
+<h3><?=$this->translate('Alternative formats')?></h3>
 <ul>
-	<?php foreach ($relatedConcepts as $relatedConcept):?>
-	<li><a href="<?php echo $this->url(array('id' => $relatedConcept['uuid']), 'rest')?>.html"><?php echo isset($relatedConcept['prefLabel'])
-		?$this->escape($relatedConcept['prefLabel'][0])
-		:(isset($relatedConcept['dc_title']) ? $this->escape($relatedConcept['dc_title']['0']): $relatedConcept['uri'])?></a></li>
-	<?php endforeach?>
+    <li><a class="rdf" href="<?=$this->url(['id' => $concept->getUuid()])?>.rdf">RDF</a></li>
+    <li><a class="json" href="<?=$this->url(['id' => $concept->getUuid()])?>.json">JSON</a></li>
+    <li><a class="jsonp" href="<?=$this->url(['id' => $concept->getUuid()])?>.jsonp?callback=callback">JSONP</a></li>
 </ul>
-<?php endforeach?>
-<?php endif?>
-
-<h3><?php echo $this->translate('Alternative formats')?></h3>
-<ul>
-    <!-- 
-	<li><a class="xml" href="<?php echo $this->url(array('id' => $concept['uuid']))?>?format=xml">XML</a></li>
-	 -->
-	<li><a class="rdf" href="<?php echo $this->url(array('id' => $concept['uuid']))?>.rdf">RDF</a></li>
-    <li><a class="json" href="<?php echo $this->url(array('id' => $concept['uuid']))?>.json">JSON</a></li>
-    <li><a class="jsonp" href="<?php echo $this->url(array('id' => $concept['uuid']))?>.jsonp?callback=myCallback_1234">JSONP</a></li>
-</ul>
-</p>
-

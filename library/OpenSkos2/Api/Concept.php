@@ -36,11 +36,6 @@ class Concept
     private $manager;
 
     /**
-     * @var \Psr\Http\Message\ServerRequestInterface
-     */
-    private $request;
-
-    /**
      * Amount of concepts to return
      *
      * @var int
@@ -51,9 +46,8 @@ class Concept
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      */
-    public function __construct(\OpenSkos2\ConceptManager $manager, \Psr\Http\Message\ServerRequestInterface $request)
+    public function __construct(\OpenSkos2\ConceptManager $manager)
     {
-        $this->request = $request;
         $this->manager = $manager;
     }
 
@@ -65,15 +59,16 @@ class Concept
      * /api/find-concepts?format=json&fl=uuid,uri,prefLabel,class,dc_title&id=http://data.beeldengeluid.nl/gtaa/27140
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.rdf
      *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param string $context
-     * @return ConceptResultSet
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function findConcepts($context)
+    public function findConcepts(\Psr\Http\Message\ServerRequestInterface $request, $context)
     {
         
-        $solr2sparql = new Query\Solr2Sparql($this->request);
+        $solr2sparql = new Query\Solr2Sparql($request);
                 
-        $params = $this->request->getQueryParams();
+        $params = $request->getQueryParams();
         $start = 0;
         if (!empty($params['start'])) {
             $start = (int)$params['start'];
@@ -106,35 +101,26 @@ class Concept
     /**
      * Get PSR-7 response for concept
      *
+     * @param $request \Psr\Http\Message\ServerRequestInterface
      * @param string $context
      * @throws Exception\NotFoundException
      * @throws Exception\InvalidArgumentException
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function getConcept($uuid, $context)
+    public function getConceptResponse(\Psr\Http\Message\ServerRequestInterface $request, $uuid, $context)
     {
-        $prefixes = [
-            'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
-        ];
-
-        $lit = new \OpenSkos2\Rdf\Literal($uuid);
-        $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe('?subject')
-            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
-        $data = $this->manager->fetchQuery($query);
-
-        if (!count($data)) {
-            throw new Exception\NotFoundException('Concept not found by id: ' . $uuid, 404);
-        }
-        
-        /* @var $concept \OpenSkos2\Concept */
-        $concept = $data[0];
-        if ($concept->isDeleted()) {
-            throw new Exception\DeletedException('Concept ' . $uuid . ' is deleted', 410);
-        }
+        $concept = $this->getConcept($uuid);
         
         switch ($context) {
             case 'json':
                 $response = (new \OpenSkos2\Api\Response\Detail\JsonResponse($concept))->getResponse();
+                break;
+            case 'jsonp':
+                $params = $request->getQueryParams();
+                $response = (new \OpenSkos2\Api\Response\Detail\JsonpResponse(
+                    $concept,
+                    $params['callback']
+                ))->getResponse();
                 break;
             case 'rdf':
                 $response = (new \OpenSkos2\Api\Response\Detail\RdfResponse($concept))->getResponse();
@@ -144,5 +130,29 @@ class Concept
         }
 
         return $response;
+    }
+    
+    /**
+     * Get openskos concept
+     *
+     * @param string $uuid
+     * @throws Exception\NotFoundException
+     * @throws Exception\DeletedException
+     * @return \OpenSkos2\Concept
+     */
+    public function getConcept($uuid)
+    {
+        /* @var $concept \OpenSkos2\Concept */
+        $concept = $this->manager->fetchByUuid($uuid);
+        
+        if (!$concept) {
+            throw new Exception\NotFoundException('Concept not found by id: ' . $uuid, 404);
+        }
+        
+        if ($concept->isDeleted()) {
+            throw new Exception\DeletedException('Concept ' . $uuid . ' is deleted', 410);
+        }
+        
+        return $concept;
     }
 }

@@ -22,7 +22,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     public function init()
     {
         parent::init();
-        
+
         $this->_helper->contextSwitch()
                 ->initContext($this->getRequestedFormat());
 
@@ -42,9 +42,9 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/find-concepts?format=json&id=http://data.beeldengeluid.nl/gtaa/27140
      * /api/find-concepts?id=http://data.beeldengeluid.nl/gtaa/215866
      * /api/find-concepts?q=status:approved possible status (candidate|approved|redirected|not_compliant|rejected|obsolete|deleted)
-     * /api/find-concepts?q=altLabel:kruisigingen 
+     * /api/find-concepts?q=altLabel:kruisigingen
      * /api/find-concepts?q=prefLabelText@nl:doodstraf
-     * /api/find-concepts?q=altLabelText:kr* 
+     * /api/find-concepts?q=altLabelText:kr*
      * /api/find-concepts?q=notation:[* TO *]
      */
     public function indexAction()
@@ -59,37 +59,42 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $this->_helper->viewRenderer->setNoRender(true);
 
         $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
-        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-        $concept = new \OpenSkos2\Api\Concept($manager, $request);
+
+        $concept = new \OpenSkos2\Api\Concept($manager);
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
-        $response = $concept->findConcepts($context);
+        $response = $concept->findConcepts($request, $context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit; // find better way to prevent output from zf1
     }
 
     /**
      * Return an concept by the following requests
-     * 
+     *
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
      */
     public function getAction()
     {
-        $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
 
         $id = $this->getId();
-        
+
         /* @var $manager \OpenSkos2\ConceptManager */
         $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
 
-        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
-        $concept = new \OpenSkos2\Api\Concept($manager, $request);
+        $apiConcept = new \OpenSkos2\Api\Concept($manager);
         $context = $this->_helper->contextSwitch()->getCurrentContext();
 
-        $response = $concept->getConcept($id, $context);
+        // Exception for html use ZF 1 easier with linking in the view
+        if ('html' === $context) {
+            $this->view->concept = $apiConcept->getConcept($id);
+            return $this->renderScript('concept/get.phtml');
+        }
+
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $response = $apiConcept->getConceptResponse($request, $id, $context);
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit;
     }
@@ -111,7 +116,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
     /**
      * Get concept id
-     * 
+     *
      * @throws Zend_Controller_Exception
      * @return string
      */
@@ -142,7 +147,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
             $id = $id_prefix . $id;
         }
-        
+
         return $id;
     }
 }

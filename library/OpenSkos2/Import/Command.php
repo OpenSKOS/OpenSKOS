@@ -201,14 +201,14 @@ class Command implements LoggerAwareInterface
                     $resourceToInsert->unsetProperty(OpenSkos::DELETEDBY);
 
                     switch ($resourceToInsert->getStatus()) {
-                        case \OpenSKOS_Concept_Status::APPROVED:
+                        case \OpenSkos2\Concept::STATUS_APPROVED:
                             $resourceToInsert->addProperty(
                                 DcTerms::DATEACCEPTED,
                                 new Literal(date('c'), null, Literal::TYPE_DATETIME)
                             );
                             $resourceToInsert->addProperty(OpenSkos::ACCEPTEDBY, $message->getUser());
                             break;
-                        case \OpenSKOS_Concept_Status::DELETED:
+                        case \OpenSkos2\Concept::STATUS_DELETED:
                             $resourceToInsert->addProperty(
                                 OpenSkos::DATE_DELETED,
                                 new Literal(date('c'), null, Literal::TYPE_DATETIME)

@@ -99,6 +99,30 @@ class ResourceManager
 
         $this->client->update($query);
     }
+    
+    /**
+     * Fetch resource by uuid
+     *
+     * @param string $uuid
+     * @return OpenSkos2\Rdf\Resource
+     */
+    public function fetchByUuid($uuid)
+    {
+        $prefixes = [
+            'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
+        ];
+
+        $lit = new \OpenSkos2\Rdf\Literal($uuid);
+        $qb = new \Asparagus\QueryBuilder($prefixes);
+        $query = $qb->describe('?subject')
+            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
+        $data = $this->fetchQuery($query);
+        
+        if (!isset($data[0])) {
+            return;
+        }
+        return $data[0];
+    }
 
     /**
      * Fetches a single resource matching the uri.
