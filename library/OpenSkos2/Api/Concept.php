@@ -69,12 +69,20 @@ class Concept
         $solr2sparql = new Query\Solr2Sparql($request);
                 
         $params = $request->getQueryParams();
+        
+        // offset
         $start = 0;
         if (!empty($params['start'])) {
             $start = (int)$params['start'];
         }
         
-        $query = $solr2sparql->getSelect($this->limit, $start);
+        // limit
+        $limit = $this->limit;
+        if (isset($params['rows']) && $params['rows'] < 1001) {
+            $limit = (int)$params['rows'];
+        }
+        
+        $query = $solr2sparql->getSelect($limit, $start);
         $count = $solr2sparql->getCount();
 
         $concepts = $this->manager->fetchQuery($query);
