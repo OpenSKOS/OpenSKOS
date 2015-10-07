@@ -33,19 +33,15 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     }
 
     /**
-     * Handle the following API Requests
+     * The following requests are possible
      *
-     * /api/find-concepts?q=Kim%20Holland
-     * /api/find-concepts?q=K&start=10
-     * /api/find-concepts?q=K&format=json
-     * /api/find-concepts?format=json&q=inScheme:"http://data.beeldengeluid.nl/gtaa/GeografischeNamen" AND LexicalLabelsText:s*
-     * /api/find-concepts?format=json&id=http://data.beeldengeluid.nl/gtaa/27140
-     * /api/find-concepts?id=http://data.beeldengeluid.nl/gtaa/215866
-     * /api/find-concepts?q=status:approved possible status (candidate|approved|redirected|not_compliant|rejected|obsolete|deleted)
-     * /api/find-concepts?q=altLabel:kruisigingen
-     * /api/find-concepts?q=prefLabelText@nl:doodstraf
-     * /api/find-concepts?q=altLabelText:kr*
-     * /api/find-concepts?q=notation:[* TO *]
+     * /api/find-concepts?q=doood
+     * /api/find-concepts?q=do*
+     * /api/find-concepts?q=prefLabel:dood
+     * /api/find-concepts?q=do* status:approved
+     * /api/find-concepts?q=prefLabel:do*&rows=0&format=json
+     * /api/find-concepts?q=prefLabel@nl:doo
+     * /api/find-concepts?q=prefLabel@nl:do*
      */
     public function indexAction()
     {
@@ -75,6 +71,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
+     * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test
      */
     public function getAction()
     {
