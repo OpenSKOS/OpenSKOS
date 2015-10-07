@@ -73,9 +73,11 @@ class Solr2Sparql
     /**
      * Return the sparql to execute
      *
+     * @param integer $limit
+     * @param integer $offset
      * @return \Asparagus\QueryBuilder
      */
-    public function getSelect($limit, $offset)
+    public function getSelect($limit = 50, $offset = 0)
     {
         $this->limit = $limit;
         $this->offset = $offset;
@@ -167,19 +169,18 @@ class Solr2Sparql
      */
     private function addFieldSearch(\Asparagus\QueryBuilder $query, $data, $param)
     {
+        $uri = new \OpenSkos2\Rdf\Uri($data['field']);
+        $eField = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($uri);
+
         if ($data['wildcard']) {
-            $value = new \OpenSkos2\Rdf\Literal('^' . $data['value']);
-            $eValue = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($value);
-            
-            $query->also('skos:prefLabel', '?pref');
-            return $query->filter('regex(str(?pref), ' . $eValue . ', "i")');
+            $regex = new \OpenSkos2\Rdf\Literal('^' . $data['value']);
+            $eRegex = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($regex);
+            $query->also($eField, $param);
+            return $query->filter('regex(str('.$param.'), ' . $eRegex . ', "i")');
         }
         
         $value = new \OpenSkos2\Rdf\Literal($data['value']);
         $eValue = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($value);
-        
-        $uri = new \OpenSkos2\Rdf\Uri($data['field']);
-        $eField = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($uri);
         
         $query->also($eField, $param);
 
@@ -254,22 +255,23 @@ class Solr2Sparql
             'field' => $this->getField($queryPart),
             'value' => $val,
             'wildcard' => $this->isWildcard($queryPart),
-            'language' => $this->getLanguage($val),
+            'language' => $this->getLanguage($queryPart),
         ];
     }
 
     /**
      * Get language
      *
+     * @param string $queryPart
      * @return string|null
      */
-    private function getLanguage($value)
+    private function getLanguage($queryPart)
     {
-        $arr = explode('@', $value);
-        if (count($arr) < 2) {
-            return;
+        $parts = explode(':', $queryPart);
+        $field = explode('@', $parts[0]);
+        if (isset($field[1])) {
+            return $field[1];
         }
-        return $arr[1];
     }
 
     /**
