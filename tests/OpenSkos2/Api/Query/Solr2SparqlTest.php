@@ -59,7 +59,7 @@ LIMIT 10 OFFSET 0
             ->withQueryParams(['q' => 'prefLabel:test']);
         $s2s = new Solr2Sparql($request);
         $sparql = $s2s->getSelect(10, 0)->format();
-        
+
         $expected = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -73,14 +73,14 @@ LIMIT 10 OFFSET 0
 ';
         $this->assertEquals($expected, $sparql);
     }
-    
+
     public function testSearchFieldWildCard()
     {
         $request = (new \Zend\Diactoros\ServerRequest())
             ->withQueryParams(['q' => 'prefLabel:test*']);
         $s2s = new Solr2Sparql($request);
         $sparql = $s2s->getSelect(10, 0)->format();
-        
+
         $expected = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -88,10 +88,54 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX openskos: <http://openskos.org/xmlns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> DESCRIBE ?subject WHERE {
 	?subject rdf:type skos:Concept ; <http://www.w3.org/2004/02/skos/core#prefLabel> ?param0 .
-	FILTER (regex (str (?param0), "^test", "i"))
+	FILTER (regex (str (?param0), "test", "i"))
 }
 LIMIT 10 OFFSET 0
 ';
+
+        $this->assertEquals($expected, $sparql);
+    }
+
+    public function testSearchFieldLanguage()
+    {
+        $request = (new \Zend\Diactoros\ServerRequest())
+            ->withQueryParams(['q' => 'prefLabel@nl:test']);
+        $s2s = new Solr2Sparql($request);
+        $sparql = $s2s->getSelect(10, 0)->format();
+
+        $expected = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX openskos: <http://openskos.org/xmlns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> DESCRIBE ?subject WHERE {
+	?subject rdf:type skos:Concept ; <http://www.w3.org/2004/02/skos/core#prefLabel> ?param0 .
+	FILTER (str (?param0) = "test" && lang (?param0) = "nl")
+}
+LIMIT 10 OFFSET 0
+';
+        $this->assertEquals($expected, $sparql);
+    }
+
+    public function testSearchFieldLanguageWildcard()
+    {
+        $request = (new \Zend\Diactoros\ServerRequest())
+            ->withQueryParams(['q' => 'prefLabel@nl:test*']);
+        $s2s = new Solr2Sparql($request);
+        $sparql = $s2s->getSelect(10, 0)->format();
+
+        $expected = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX openskos: <http://openskos.org/xmlns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> DESCRIBE ?subject WHERE {
+	?subject rdf:type skos:Concept ; <http://www.w3.org/2004/02/skos/core#prefLabel> ?param0 .
+	FILTER (regex (str (?param0), "test", "i") && lang (?param0) = "nl")
+}
+LIMIT 10 OFFSET 0
+';
+
         $this->assertEquals($expected, $sparql);
     }
 }

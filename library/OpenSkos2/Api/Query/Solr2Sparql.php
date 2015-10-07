@@ -169,14 +169,18 @@ class Solr2Sparql
      */
     private function addFieldSearch(\Asparagus\QueryBuilder $query, $data, $param)
     {
-        $uri = new \OpenSkos2\Rdf\Uri($data['field']);
-        $eField = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($uri);
-
+        $eField = \OpenSkos2\Sparql\Escape::escapeUri($data['field']);
+        
+        $langFilter = '';
+        if (!empty($data['language'])) {
+            $langFilter = ' && lang(' . $param . ') = ' . \OpenSkos2\Sparql\Escape::escapeLiteral($data['language']);
+        }
+        
         if ($data['wildcard']) {
-            $regex = new \OpenSkos2\Rdf\Literal('^' . $data['value']);
-            $eRegex = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($regex);
+            $eRegex = \OpenSkos2\Sparql\Escape::escapeLiteral($data['value']);
             $query->also($eField, $param);
-            return $query->filter('regex(str('.$param.'), ' . $eRegex . ', "i")');
+            $filter = 'regex(str('. $param .'), ' . $eRegex . ', "i")' . $langFilter;
+            return $query->filter($filter);
         }
         
         $value = new \OpenSkos2\Rdf\Literal($data['value']);
@@ -184,7 +188,7 @@ class Solr2Sparql
         
         $query->also($eField, $param);
 
-        $query->filter('str('.$param.') = '.$eValue);
+        $query->filter('str('.$param.') = '.$eValue . $langFilter);
 
     }
 
