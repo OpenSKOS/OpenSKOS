@@ -44,7 +44,7 @@ class DuplicateBroaderTest extends \PHPUnit_Framework_TestCase
         $triple = new \OpenSkos2\Rdf\Serializer\NTriple();
         $serialized = $triple->serialize($uri);
         $this->assertEquals('<http://example.com/omg>', $serialized);
-    }    
+    }
     
     public function testEscapeURI()
     {
@@ -64,5 +64,4 @@ class DuplicateBroaderTest extends \PHPUnit_Framework_TestCase
         $serialize = $triple->serializeArray($literal);
         $this->assertEquals('"123", "134"', $serialize);
     }
-
 }

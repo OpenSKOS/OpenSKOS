@@ -180,6 +180,9 @@ class Concept extends Resource
 
     /**
      * Generates an uri for the concept.
+     * Requires a URI from to an openskos collection
+     *
+     * @return string
      */
     public function selfGenerateUri()
     {
@@ -189,13 +192,13 @@ class Concept extends Resource
             );
         }
         
-        if ($this->isPropertyEmpty(Skos::COLLECTION)) {
+        if ($this->isPropertyEmpty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION)) {
             throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'
             );
         }
         
-        $collectionUri = $this->getProperty(Skos::COLLECTION)[0]->getUri();
+        $collectionUri = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION)[0]->getUri();
         
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::generateUri($collectionUri);
@@ -207,6 +210,7 @@ class Concept extends Resource
         }
         
         $this->setUri($uri);
+        return $uri;
     }
     
     /**
