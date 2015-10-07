@@ -1,5 +1,6 @@
 <?php
-/**
+
+/*
  * OpenSKOS
  *
  * LICENSE
@@ -8,14 +9,11 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
@@ -39,6 +37,21 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
         $this->view->setEncoding('UTF-8');
     }
     
+    /**
+     * Returns a json response of pref / alt labels
+     * 
+     * Must have a q query parameter in the request example:
+     * /api/autocomplete?q=something
+     * 
+     * Returns
+     * 
+     * [
+     *  'something'
+     *  'somethingelse'
+     * ]
+     * 
+     * @throws Zend_Controller_Exception
+     */
     public function indexAction()
     {
         if (null === ($q = $this->getRequest()->getParam('q'))) {
@@ -47,19 +60,38 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
         
-        $q = Api_Models_Utils::addStatusToQuery($q);
+        $result = $this->getConceptManager()->autoComplete($q);
         
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
-            json_encode($this->model->getConcepts($q, null, true))
+            json_encode($result)
         );
     }
 
+    /**
+     * Returns a json response of pref / alt labels
+     * 
+     * Must have a term in the path from the request:
+     * /api/autocomplete/something
+     * 
+     * Returns
+     * 
+     * [
+     *  'something'
+     *  'somethingelse'
+     * ]
+     * 
+     * @throws Zend_Controller_Exception
+     */
     public function getAction()
     {
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        
+        $q = $this->getRequest()->getParam('id');
+        $result = $this->getConceptManager()->autoComplete($q);
+        
         $this->getResponse()->setBody(
-            json_encode($this->model->autocomplete($this->getRequest()->getParam('id')))
+            json_encode($result)
         );
     }
 

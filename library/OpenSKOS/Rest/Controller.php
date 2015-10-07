@@ -58,8 +58,18 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
     public function getResourceManager()
     {
         return $this->getDI()->get('OpenSkos2\Rdf\ResourceManager');
-    }    
+    }   
     
+    /**
+     * Get concept mananger
+     * 
+     * @return \OpenSkos2\ConceptManager
+     */
+    public function getConceptManager()
+    {
+        return $this->getDI()->get('OpenSkos2\ConceptManager');
+    }
+
     protected function _501($method)
     {
         $this->getResponse()
