@@ -116,15 +116,16 @@ class Solr2Sparql
         }
 
         if ($type === self::QUERY_DESCRIBE) {
-            $query->describe('?subject');
-        }
-
-        $query->where('?subject', 'rdf:type', 'skos:Concept')
+            $query->describe('?subject')
                 ->limit($this->limit)
                 ->offset($this->offset);
+        }
+        
+        $query->where('?subject', 'rdf:type', 'skos:Concept');
+        
         
         $this->buildSearchQuery($query);
-        
+
         return $query;
     }
 
@@ -153,7 +154,7 @@ class Solr2Sparql
         foreach ($tQuery['fields'] as $i => $data) {
             $this->addFieldSearch($query, $data, '?param'.$i);
         }
-
+        
         return $query;
     }
     
@@ -299,9 +300,13 @@ class Solr2Sparql
         if (count($parts) < 2) {
             return false;
         }
+        
+        $field = explode('@', $parts[0])[0];
 
         // Check if the field is supported
-        array_key_exists($parts[0], $this->fieldMapping);
+        if (!array_key_exists($field, $this->fieldMapping)) {
+            return false;
+        }
 
         return true;
     }
@@ -316,7 +321,12 @@ class Solr2Sparql
     {
         $parts = explode(':', $queryPart);
         $parts[0];
-        return $this->fieldMapping[$parts[0]];
+        
+        $field = explode('@', $parts[0])[0];
+
+        if (array_key_exists($field, $this->fieldMapping)) {
+            return $this->fieldMapping[$field];
+        }
     }
 
     /**
