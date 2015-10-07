@@ -77,7 +77,7 @@ class ConceptSchemeManager extends ResourceManager
                 $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($row->uuid->getValue()));
             }
             
-            $scheme->addProperty(Skos::COLLECTION, new Uri($collectionUri));
+            $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION, new Uri($collectionUri));
             
             $collection[] = $scheme;
         }

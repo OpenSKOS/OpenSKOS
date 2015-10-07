@@ -131,8 +131,8 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-
-            if (!isset($collections [$value])) {
+                        
+            if (!isset($collections[$value])) {
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
                  */
@@ -145,10 +145,10 @@ $mappings = [
                     $collections [$value] = $collection->getResource();
                 }
             }
-            return $collections [$value];
+            return $collections[$value];
         },
         'fields' => [
-            'collection' => Skos::COLLECTION,
+            'collection' => OpenSkos2\Namespaces\OpenSkos::COLLECTION,
         ],
     ],
     'uris' => [

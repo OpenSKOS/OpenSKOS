@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-OpenSKOS
-
-LICENSE
-
-This source file is subject to the GPLv3 license that is bundled
-with this package in the file LICENSE.txt.
-It is also available through the world-wide-web at this URL:
-http://www.gnu.org/licenses/gpl-3.0.txt
-If you did not receive a copy of the license and are unable to
-obtain it through the world-wide-web, please send an email
-to license@zend.com so we can send you a copy immediately.
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
 -->
 
 <xs:schema version="1.1"
@@ -33,6 +38,7 @@ to license@zend.com so we can send you a copy immediately.
     </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
         
+    <xs:element name="collection"/>
     <xs:element name="uuid"/>
     <xs:element name="dateDeleted" />
     <xs:element name="deletedBy" />
