@@ -19,7 +19,12 @@
 
 namespace OpenSkos2;
 
+use Asparagus\QueryBuilder;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Serializer\NTriple;
 
 class ConceptManager extends ResourceManager
 {
@@ -38,23 +43,23 @@ class ConceptManager extends ResourceManager
     public function autoComplete($term)
     {
         $prefixes = [
-            'skos' => \OpenSkos2\Namespaces\Skos::NAME_SPACE,
-            'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE
+            'skos' => Skos::NAME_SPACE,
+            'openskos' => OpenSkos::NAME_SPACE
         ];
 
-        $literalKey = new \OpenSkos2\Rdf\Literal('^' . $term);
-        $eTerm = (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($literalKey);
+        $literalKey = new Literal('^' . $term);
+        $eTerm = (new NTriple())->serialize($literalKey);
 
-        $q = new \Asparagus\QueryBuilder($prefixes);
+        $q = new QueryBuilder($prefixes);
 
         // Do a distinct query on pref and alt labels where string starts with $term
         $query = $q->selectDistinct('?label')
             ->union(
                 $q->newSubgraph()
-                    ->where('?subject', 'openskos:status', '"'. \OpenSkos2\Concept::STATUS_APPROVED.'"')
+                    ->where('?subject', 'openskos:status', '"'. Concept::STATUS_APPROVED.'"')
                     ->also('skos:prefLabel', '?label'),
                 $q->newSubgraph()
-                    ->where('?subject', 'openskos:status', '"'. \OpenSkos2\Concept::STATUS_APPROVED.'"')
+                    ->where('?subject', 'openskos:status', '"'. Concept::STATUS_APPROVED.'"')
                     ->also('skos:altLabel', '?label')
             )
             ->filter('regex(str(?label), ' . $eTerm . ', "i")')
