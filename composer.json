@@ -15,7 +15,10 @@
     },
     "autoload": {
         "psr-4": {
-            "OpenSkos2\\": "library/OpenSkos2"
+            "OpenSkos2\\": "library/OpenSkos2"            
+        },
+        "psr-0": {
+            "OpenSKOS_": "library/"
         }
     },
     "require-dev": {
