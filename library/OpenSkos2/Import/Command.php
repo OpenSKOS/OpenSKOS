@@ -21,7 +21,7 @@ namespace OpenSkos2\Import;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceNotFoundException;
-use OpenSkos2\File;
+use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;

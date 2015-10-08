@@ -17,27 +17,28 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2;
+namespace OpenSkos2\Converter;
 
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
 
-class File
+/**
+ * Convert xml string to ResourceCollection
+ */
+class Text
 {
     /**
      * @var string
      */
-    protected $fileName;
+    protected $string;
 
     /**
-     * File constructor.
-     * @param string $fileName
+     * @param string $string
      */
-    public function __construct($fileName)
+    public function __construct($string)
     {
-        $this->fileName = $fileName;
+        $this->string = $string;
     }
-
 
     /**
      * @return ResourceCollection
@@ -45,7 +46,7 @@ class File
     public function getResources()
     {
         $graph = new Graph();
-        $graph->parseFile($this->fileName);
+        $graph->parse($this->string);
         return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph);
     }
 }

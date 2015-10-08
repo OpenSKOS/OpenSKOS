@@ -18,12 +18,16 @@
  */
 namespace OpenSkos2;
 
+use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Exception\OpenSkosException;
+use OpenSKOS_Db_Table_Row_Tenant;
+use OpenSKOS_Db_Table_Tenants;
+use Rhumsaa\Uuid\Uuid;
 
 class Concept extends Resource
 {
@@ -148,7 +152,7 @@ class Concept extends Resource
      */
     public function getUuid()
     {
-        $uuids = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+        $uuids = $this->getProperty(OpenSkos::UUID);
         if (isset($uuids[0])) {
             return $uuids[0]->getValue();
         }
@@ -157,11 +161,11 @@ class Concept extends Resource
     /**
      * Get tenant
      *
-     * @return \OpenSkos2\Rdf\Literal
+     * @return Literal
      */
     public function getTenant()
     {
-        $values = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
+        $values = $this->getProperty(OpenSkos::TENANT);
         if (isset($values[0])) {
             return $values[0];
         }
@@ -170,11 +174,11 @@ class Concept extends Resource
     /**
      * Get institution row
      *
-     * @return \OpenSKOS_Db_Table_Row_Tenant
+     * @return OpenSKOS_Db_Table_Row_Tenant
      */
     public function getInstitution()
     {
-        $model = new \OpenSKOS_Db_Table_Tenants();
+        $model = new OpenSKOS_Db_Table_Tenants();
         return $model->find($this->getTenant())->current();
     }
 
@@ -192,13 +196,13 @@ class Concept extends Resource
             );
         }
         
-        if ($this->isPropertyEmpty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION)) {
+        if ($this->isPropertyEmpty(OpenSkos::COLLECTION)) {
             throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'
             );
         }
         
-        $collectionUri = $this->getProperty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION)[0]->getUri();
+        $collectionUri = $this->getProperty(OpenSkos::COLLECTION)[0]->getUri();
         
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::generateUri($collectionUri);
@@ -224,7 +228,7 @@ class Concept extends Resource
         $separator = '/';
         
         if (empty($firstNotation)) {
-            $uri = $collectionUri . $separator . \Rhumsaa\Uuid\Uuid::uuid4();
+            $uri = $collectionUri . $separator . Uuid::uuid4();
         } else {
             $uri = $collectionUri . $separator . $firstNotation;
         }

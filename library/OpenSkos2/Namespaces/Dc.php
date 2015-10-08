@@ -24,4 +24,6 @@ class Dc
      * Namespace
      */
     const NAME_SPACE = 'http://purl.org/dc/elements/1.1/';
+    
+    const DATE_SUBMITTED = 'http://dublincore.org/documents/dcmi-terms/#terms-dateSubmitted';
 }

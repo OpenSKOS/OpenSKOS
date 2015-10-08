@@ -19,7 +19,7 @@
 
 namespace OpenSkos2\Api\Exception;
 
-class InvalidArgumentException extends \InvalidArgumentException
+class InvalidArgumentException extends ApiException
 {
-    
+
 }

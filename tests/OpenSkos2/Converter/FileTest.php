@@ -23,15 +23,15 @@ class FileTest extends \PHPUnit_Framework_TestCase
 {
     public function testResources()
     {
-        $xml = __DIR__ . '/../data/concepts.xml';
-        $file = new \OpenSkos2\File($xml);
+        $xml = __DIR__ . '/../../data/concepts.xml';
+        $file = new \OpenSkos2\Converter\File($xml);
         $this->assertInstanceOf('\OpenSkos2\Rdf\ResourceCollection', $file->getResources());
     }
     
     public function testConcept()
     {
-        $xml = __DIR__ . '/../data/concept.xml';
-        $file = new \OpenSkos2\File($xml);
+        $xml = __DIR__ . '/../../data/concept.xml';
+        $file = new \OpenSkos2\Converter\File($xml);
         $this->assertInstanceOf('\OpenSkos2\Concept', $file->getResources()[0]);
     }
 }

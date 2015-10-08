@@ -19,6 +19,6 @@
 
 namespace OpenSkos2\Api\Exception;
 
-class NotFoundException extends ApiException
+class ApiException extends \Exception
 {
 }

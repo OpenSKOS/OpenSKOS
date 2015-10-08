@@ -19,6 +19,6 @@
 
 namespace OpenSkos2\Api\Exception;
 
-class DeletedException extends \Exception
+class DeletedException extends ApiException
 {
 }
