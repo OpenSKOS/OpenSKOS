@@ -171,3 +171,14 @@ It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 inst
 `tools/migrate.php --endpoint http://<solr server>:8180/ciss/<core name>/select`
 
 Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
+
+5.5
+-------------------------------------------------------------------------------
+
+Generate API Documentation
+
+```
+npm install
+npm run doc
+```
+Visit: http://domain/apidoc/
