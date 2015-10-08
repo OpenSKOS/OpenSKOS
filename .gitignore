@@ -8,3 +8,5 @@ public/data/export/*
 /public/data/icons/
 /vendor/
 /nbproject/
+/node_modules/
+/public/apidoc/
