@@ -176,6 +176,16 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
             }
         }
     }
+    
+    /**
+     * Get the collection uri for openskos:collection
+     * 
+     * @return \OpenSkos2\Rdf\Uri
+     */
+    public function getUri()
+    {
+        return new \OpenSkos2\Rdf\Uri($this->getConceptsBaseUri());
+    }
 
     public function addNamespace(OpenSKOS_Db_Table_Row_Namespace $namespace)
     {
