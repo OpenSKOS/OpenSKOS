@@ -19,8 +19,7 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
-{
+class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
 
     public function setNamespaces($namespaces)
     {
@@ -378,14 +377,12 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             $collection->addProperty(\OpenSkos2\Namespaces\DcTerms::TYPE, new \OpenSkos2\Rdf\Literal($this->dc_title));
             if ($this->dc_description) {
                 $collection->addProperty(
-                    \OpenSkos2\Namespaces\DcTerms::DESCRIPTION,
-                    new \OpenSkos2\Rdf\Literal($this->dc_description)
+                        \OpenSkos2\Namespaces\DcTerms::DESCRIPTION, new \OpenSkos2\Rdf\Literal($this->dc_description)
                 );
             }
             if ($this->license_url) {
                 $collection->addProperty(
-                    \OpenSkos2\Namespaces\DcTerms::RIGHTS,
-                    new \OpenSkos2\Rdf\Uri($this->license_url)
+                        \OpenSkos2\Namespaces\DcTerms::RIGHTS, new \OpenSkos2\Rdf\Uri($this->license_url)
                 );
             }
             $resourceManager->insert($collection);
@@ -393,4 +390,5 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             return $collection;
         }
     }
+
 }
