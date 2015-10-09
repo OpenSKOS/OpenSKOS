@@ -26,6 +26,7 @@ use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkosNamespace as OpenSkosNamespace;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -68,14 +69,29 @@ class ResourceManager
     {
         $this->client->insert(EasyRdf::resourceToGraph($resource));
     }
-
+    
     /**
-     * @param Resource $resource
-     * @throws ResourceNotFoundException
+     * Soft delete resource , sets the openskos:status to deleted
+     * and add a delete date
+     *
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Uri $user
      */
-    public function update(Resource $resource)
+    public function deleteSoft(Resource $resource, Uri $user = null)
     {
-
+        $resource->unsetProperty(OpenSkosNamespace::STATUS);
+        $status = new Literal(\OpenSkos2\Concept::STATUS_DELETED);
+        $resource->addProperty(OpenSkosNamespace::STATUS, $status);
+        
+        $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
+        $resource->addProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+        
+        if ($user) {
+            $resource->unsetProperty(OpenSkosNamespace::DELETEDBY, $user);
+        }
+        
+        $this->delete($resource);
+        $this->insert($resource);
     }
 
     /**
@@ -109,7 +125,7 @@ class ResourceManager
     public function fetchByUuid($uuid)
     {
         $prefixes = [
-            'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
+            'openskos' => OpenSkosNamespace::NAME_SPACE,
         ];
 
         $lit = new \OpenSkos2\Rdf\Literal($uuid);

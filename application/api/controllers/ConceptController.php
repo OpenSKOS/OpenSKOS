@@ -21,6 +21,13 @@ require_once 'FindConceptsController.php';
 
 class Api_ConceptController extends Api_FindConceptsController
 {
+    
+    public function init()
+    {
+        $this->getHelper('layout')->disableLayout();
+        $this->getHelper('viewRenderer')->setNoRender(true);
+        parent::init();
+    }
 
     /**
     *
@@ -111,15 +118,73 @@ class Api_ConceptController extends Api_FindConceptsController
     */
     public function postAction()
     {
-        $this->getHelper('layout')->disableLayout();
-        $this->getHelper('viewRenderer')->setNoRender(true);
-
-        $request = \Zend\Diactoros\ServerRequestFactory::fromGlobals();
-        $xml = $this->getRequest()->getRawBody();
+        $request = $this->getPsrRequest();        
         $api = new OpenSkos2\Api\Concept($this->getConceptManager());
-        $response = $api->create($request, $xml);
-        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
-        exit; // find better way to prevent output from zf1
+        $response = $api->create($request);
+        $this->emitResponse($response);        
+    }
+    
+    public function putAction()
+    {
+        
+    }
+    
+    /**
+    *
+    * @apiVersion 1.0.0
+    * @apiDescription Delete a SKOS Concept
+    * @api {delete} /api/concept Delete SKOS concept
+    * @apiName DeleteConcept
+    * @apiGroup Concept
+    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
+    * @apiParam {String} collection The collection code for the collection the concept must be put in
+    * @apiParam {String} key A valid API key
+    * @apiParam {String} id The uri of the concept
+    * @apiSuccess (202) {String} Concept uri
+    * @apiSuccessExample {String} Success-Response
+    *   HTTP/1.1 202 Accepted
+    *   <?xml version="1.0"?>
+    *   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+    *      xmlns:dcterms="http://purl.org/dc/terms/"
+    *      xmlns:openskos="http://openskos.org/xmlns#"
+    *      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    *      xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+    *   <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/285863243243224">
+    *           <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    *           <skos:prefLabel xml:lang="nl">doodstraff</skos:prefLabel>
+    *           <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+    *           <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+    *           <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+    *           <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+    *           <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+    *           <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+    *           <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+    *           <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+    *           <skos:notation>285863243243224</skos:notation>
+    *         <openskos:status>candidate</openskos:status>
+    *   </rdf:Description>
+    *   </rdf:RDF>
+    * @apiSuccessExample {String} Success-Response
+    *   HTTP/1.1 202 Deleted
+    * @apiError MissingKey {String} No key specified
+    * @apiErrorExample MissingKey:
+    *   HTTP/1.1 412 Precondition Failed
+    *   No key specified
+    * @apiError MissingTenant {String} No tenant specified
+    * @apiErrorExample MissingTenant:
+    *   HTTP/1.1 412 Precondition Failed
+    *   No tenant specified
+    * @apiError MissingCollection {String} No collection specified
+    * @apiErrorExample MissingCollection:
+    *   HTTP/1.1 412 Precondition Failed
+    *   No collection specified
+    */
+    public function deleteAction()
+    {
+        $request = $this->getPsrRequest();        
+        $api = new OpenSkos2\Api\Concept($this->getConceptManager());
+        $response = $api->delete($request);
+        $this->emitResponse($response);        
     }
 
     /**
@@ -256,12 +321,12 @@ class Api_ConceptController extends Api_FindConceptsController
         echo $savedConcept->toRDF()->saveXml();
     }
 
-    public function putAction()
+    public function putTestAction()
     {
         $this->postAction();
     }
 
-    public function deleteAction()
+    public function deleteTestAction()
     {
         $this->view->errorOnly = true;
         $this->getHelper('layout')->disableLayout();

@@ -60,7 +60,7 @@ class Concept
 
     /**
      *
-     * @param ServerRequestInterface $request
+     * @param \OpenSkos2\ConceptManager $manager
      */
     public function __construct(\OpenSkos2\ConceptManager $manager)
     {
@@ -194,6 +194,51 @@ class Concept
         }
         return $response;
     }
+    
+    /**
+     * Perform a soft delete on a concept
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundException
+     */
+    public function delete(ServerRequestInterface $request)
+    {
+        try {
+            $params = $request->getQueryParams();
+            if (empty($params['id'])) {
+                throw new InvalidArgumentException('Missing id parameter');
+            }
+            
+            $id = $params['id'];
+            /* @var $concept \OpenSkos2\Concept */
+            $concept = $this->manager->fetchByUri($id);
+            if (!$concept) {
+                throw new NotFoundException('Concept not found by id :' . $id, 404);
+            }
+            
+            $user = $this->getUser($params);
+            $tenant = $this->getTenant($params);
+            
+            if ($user->tenant !== $tenant->code) {
+                throw new NotFoundException('User does not match tenant code', 400);
+            }
+            
+            // Check if the concept matches the tenant
+            $conceptTenants =$concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
+            if ((string)$conceptTenants[0] !== $tenant->code) {
+                throw new ApiException('Tenant does not match concept tenants code', 401);
+            }
+            
+            $this->manager->deleteSoft($concept);
+        } catch (ApiException $ex) {
+            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        }
+        
+        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
+        return $this->getSuccessResponse($xml, 202);
+    }
 
     /**
      * Handle the action of creating the concept
@@ -272,7 +317,7 @@ class Concept
         }
         
         $this->manager->insert($concept);
-        return $this->getSuccessResponse($doc->saveXML());
+        return $this->getSuccessResponse($doc->saveXML(), 201);
     }
 
     /**
@@ -307,11 +352,11 @@ class Concept
         if (empty($params['collection'])) {
             throw new InvalidArgumentException('No collection specified', 412);
         }
-
+        $code = $params['collection'];
         $model = new \OpenSKOS_Db_Table_Collections();
-        $collection = $model->findByCode($params['collection'], $tenant);
+        $collection = $model->findByCode($code, $tenant);
         if (null === $collection) {
-            throw new InvalidArgumentException('No such collection: `'.$collectionCode.'`', 404);
+            throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
         }
         return $collection;
     }
@@ -328,7 +373,7 @@ class Concept
 
         $user = \OpenSKOS_Db_Table_Users::fetchByApiKey($params['key']);
         if (null === $user) {
-            throw new InvalidArgumentException('No such API-key: `'.$apikey.'`', 401);
+            throw new InvalidArgumentException('No such API-key: `' . $params['key'] . '`', 401);
         }
 
         if (!$user->isApiAllowed()) {
@@ -361,13 +406,14 @@ class Concept
      * Get success response
      *
      * @param string $message
+     * @param int    $status
      * @return ResponseInterface
      */
-    private function getSuccessResponse($message)
+    private function getSuccessResponse($message, $status = 200)
     {
         $stream = new Stream('php://memory', 'wb+');
         $stream->write($message);
-        $response = (new Response($stream))
+        $response = (new Response($stream, $status))
             ->withHeader('Content-Type', 'text/xml; charset="utf-8"');
         return $response;
     }

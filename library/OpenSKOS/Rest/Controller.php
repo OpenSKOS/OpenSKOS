@@ -181,4 +181,25 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         
         return $acceptedFormats;
     }
+        
+    /**
+     * Get PSR7 request
+     * 
+     * @return Psr\Http\Message\ServerRequestInterface
+     */
+    public function getPsrRequest()
+    {
+        return \Zend\Diactoros\ServerRequestFactory::fromGlobals();
+    }
+    
+    /**
+     * Emit PSR7 Response
+     * 
+     * @param \Psr\Http\Message\ResponseInterface $response
+     */
+    public function emitResponse(\Psr\Http\Message\ResponseInterface $response)
+    {
+        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
+        exit; // find better way to prevent output from zf1
+    }    
 }

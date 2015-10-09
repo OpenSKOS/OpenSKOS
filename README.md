@@ -181,4 +181,4 @@ Generate API Documentation
 npm install
 npm run doc
 ```
-Visit: http://domain/apidoc/
+Visit: http://example.com/apidoc/

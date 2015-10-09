@@ -59,10 +59,9 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $concept = new \OpenSkos2\Api\Concept($manager);
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
-        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $request = $this->getPsrRequest();
         $response = $concept->findConcepts($request, $context);
-        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
-        exit; // find better way to prevent output from zf1
+        $this->emitResponse($response);        
     }
 
     /**
@@ -91,10 +90,9 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             return $this->renderScript('concept/get.phtml');
         }
 
-        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $request = $this->getPsrRequest();
         $response = $apiConcept->getConceptResponse($request, $id, $context);
-        (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
-        exit;
+        $this->emitResponse($response);
     }
 
     public function postAction()
