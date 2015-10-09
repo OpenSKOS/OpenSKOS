@@ -55,6 +55,28 @@ class Resource extends Uri implements ResourceIdentifier
         $this->properties[$predicate][] = $value;
         return $this;
     }
+    
+    /**
+     * Make sure the property is only added once
+     *
+     * @param string $predicate
+     * @param RdfObject $value
+     * @return \OpenSkos2\Rdf\Resource
+     */
+    public function addUniqueProperty($predicate, RdfObject $value)
+    {
+        if (!isset($this->properties[$predicate])) {
+            $this->properties[$predicate][] = $value;
+            return $this;
+        }
+        foreach ($this->properties[$predicate] as $obj) {
+            if ($obj->getValue() === $value->getValue() && $obj->getLanguage() === $value->getLanguage()) {
+                return $this;
+            }
+        }
+        $this->properties[$predicate][] = $value;
+        return $this;
+    }
 
     /**
      * @param string $predicate
@@ -65,6 +87,17 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $this->properties[$predicate] = [$value];
         return $this;
+    }
+    
+    /**
+     * Set multiple values at once, override existing values
+     *
+     * @param string $predicate
+     * @param RdfObject[] $values
+     */
+    public function setProperties($predicate, array $values)
+    {
+        $this->properties[$predicate] = $values;
     }
 
     /**
