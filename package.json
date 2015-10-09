@@ -23,5 +23,11 @@
   "homepage": "https://github.com/picturae/OpenSKOS#readme",
   "devDependencies": {
     "apidoc": "^0.13.1"
+  },
+  "apidoc": {
+    "title": "OpenSKOS Editor",
+    "url" : "https://github.com/picturae/OpenSKOS",
+    "version": "1.0.0",
+    "description": "OpenSKOS provides an API and editor for SKOS concepts: http://www.w3.org/2004/02/skos/"
   }
 }
