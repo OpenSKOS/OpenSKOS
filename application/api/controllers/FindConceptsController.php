@@ -33,6 +33,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     }
 
     /**
+     * @apiVersion 1.0.0
+     * @apiDescription Find a SKOS Concept
      * The following requests are possible
      *
      * /api/find-concepts?q=doood
@@ -42,6 +44,42 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/find-concepts?q=prefLabel:do*&rows=0&format=json
      * /api/find-concepts?q=prefLabel@nl:doo
      * /api/find-concepts?q=prefLabel@nl:do*
+     * @api {find} /api/find-concepts Find a concept
+     * @apiName FindConcepts
+     * @apiGroup Concept
+     * @apiParam {String} q search term
+     * @apiSuccess (200) {String} XML
+     * @apiSuccessExample {String} Success-Response
+     *   HTTP/1.1 200 Ok
+     *   <?xml version="1.0"?>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+     *          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *          xmlns:dc="http://purl.org/dc/elements/1.1/"
+     *          xmlns:dcterms="http://purl.org/dc/terms/"
+     *          xmlns:openskos="http://openskos.org/xmlns#"
+     *          xmlns:owl="http://www.w3.org/2002/07/owl#"
+     *          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     *          openskos:numFound="15"
+     *          openskos:start="0">
+     *  <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *      xmlns:dc="http://purl.org/dc/terms/"
+     *      rdf:about="http://data.cultureelerfgoed.nl/semnet/efc584d7-9880-43fb-9a0b-76f3036aa315">
+     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+     *         <skos:prefLabel xml:lang="nl">doodshemden</skos:prefLabel>
+     *         <skos:altLabel xml:lang="nl">doodshemd</skos:altLabel>
+     *         <openskos:tenant>rce</openskos:tenant>
+     *         <skos:notation>1183132</skos:notation>
+     *         <skos:inScheme rdf:resource="http://data.cultureelerfgoed.nl/semnet/erfgoedthesaurus"/>
+     *         <skos:inScheme rdf:resource="http://data.cultureelerfgoed.nl/semnet/objecten"/>
+     *         <openskos:uuid>945bb5a9-0277-9df4-d206-a129bc144da4</openskos:uuid>
+     *         <skos:related rdf:resource="http://data.cultureelerfgoed.nl/semnet/77f6ff1b-b603-4a76-a264-10b3f25eb7df"/>
+     *         <dc:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-07-03T09:30:05+00:00</dc:modified>
+     *         <skos:definition xml:lang="nl">Albevormig hemd waarin een dode wordt gekleed.</skos:definition>
+     *         <skos:broader rdf:resource="http://data.cultureelerfgoed.nl/semnet/7deba87b-1ac5-450f-bff7-78865d3b4742"/>
+     *         <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-07-03T09:27:56+00:00</dc:dateSubmitted>
+     *         <openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-10-09T09:33:06+00:00</openskos:dateDeleted>
+     *         <openskos:status>deleted</openskos:status>
+     *         <openskos:collection rdf:resource="http://openskos.org/api/collections/rce:EGT"/>
      */
     public function indexAction()
     {
@@ -61,16 +99,60 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $request = $this->getPsrRequest();
         $response = $concept->findConcepts($request, $context);
-        $this->emitResponse($response);        
+        $this->emitResponse($response);
     }
 
     /**
+     * @apiVersion 1.0.0
+     * @apiDescription Get a SKOS Concept
      * Return an concept by the following requests
      *
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test
+     * 
+     * @api {find} /api/concept/{id}.rdf Find a concept
+     * @apiName GetConcept
+     * @apiGroup Concept
+     * @apiSuccess (200) {String} XML
+     * @apiSuccessExample {String} Success-Response
+     *   HTTP/1.1 200 Ok
+     *  <?xml version="1.0" encoding="utf-8" ?>
+     *  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *           xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *           xmlns:dc="http://purl.org/dc/terms/"
+     *           xmlns:openskos="http://openskos.org/xmlns#">
+     *
+     *    <skos:Concept rdf:about="http://data.beeldengeluid.nl/gtaa/218059">
+     *      <skos:historyNote xml:lang="nl">Recordnummer: 11665
+     *  Datum invoer: 13-12-1998
+     *  Gebruiker invoer: SEBASTIAAN
+     *  Datum gewijzigd: 12-10-2004
+     *  Gebruiker gewijzigd: Beng</skos:historyNote>
+     *      <skos:historyNote xml:lang="nl">Goedgekeurd door: Alma Wolthuis</skos:historyNote>
+     *      <skos:historyNote xml:lang="nl">Gewijzigd door: Alma Wolthuis</skos:historyNote>
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/217190"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/215665"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/216387"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/217572"/>
+     *      <dc:creator rdf:resource="http://openskos.org/users/9f598c22-1fd4-4113-9447-7c71d0c7146f"/>
+     *      <skos:broadMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+     *      <openskos:collection rdf:resource="http://openskos.org/api/collections/beg:gtaa"/>
+     *      <openskos:status>approved</openskos:status>
+     *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+     *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+     *      <openskos:tenant>beg</openskos:tenant>
+     *      <dc:contributor>RVD, SFW, NFM, GWA, TVA</dc:contributor>
+     *      <skos:notation>218059</skos:notation>
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
+     *      <dc:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T17:30:51+00:00</dc:modified>
+     *      <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateSubmitted>
+     *      <dc:dateAccepted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateAccepted>
+     *      <openskos:uuid>03ae64e0-94ba-55d8-c01a-6f4259e95177</openskos:uuid>
+     *    </skos:Concept>
+     *  </rdf:RDF>
+     *
      */
     public function getAction()
     {

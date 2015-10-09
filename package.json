@@ -1,7 +1,7 @@
 {
   "name": "openskos",
   "version": "1.0.0",
-  "description": "[![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)",
+  "description": "Openskos editor",
   "main": "index.js",
   "directories": {
     "doc": "docs",

@@ -26,7 +26,7 @@ use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkosNamespace as OpenSkosNamespace;
+use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
