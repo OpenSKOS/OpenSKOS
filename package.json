@@ -15,8 +15,8 @@
     "type": "git",
     "url": "git+https://github.com/picturae/OpenSKOS.git"
   },
-  "author": "",
-  "license": "GPL",
+  "author": "Picturae",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/picturae/OpenSKOS/issues"
   },
