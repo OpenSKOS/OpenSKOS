@@ -184,6 +184,7 @@ class Concept
      * Create the concept
      *
      * @param ServerRequestInterface $request
+     * @return ResponseInterface
      */
     public function create(ServerRequestInterface $request)
     {
@@ -195,6 +196,44 @@ class Concept
         return $response;
     }
     
+    /**
+     * Update a concept
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function update(ServerRequestInterface $request)
+    {
+        try {
+            $concept = $this->getConceptFromRequest($request);
+            $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
+            
+            $params = $request->getQueryParams();
+            $tenant = $this->getTenant($params);
+            $collection = $this->getCollection($params, $tenant);
+            $user = $this->getUser($params);
+
+            // Update properties
+            $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperties(Dc::DATE_SUBMITTED));
+            $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperties(DcTerms::CREATOR));
+            $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
+            $concept->addProperty(OpenSkos::COLLECTION, $$collection->getUri());
+            $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+            $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+            
+            $this->manager->delete($existingConcept);
+            $this->manager->insert($concept);
+            
+        } catch (ApiException $ex) {
+            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
+            return $this->getErrorResponse(404, 'Concept not found try insert');
+        }
+        
+        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
+        return $this->getSuccessResponse($xml);
+    }
+
     /**
      * Perform a soft delete on a concept
      *
@@ -247,6 +286,38 @@ class Concept
      */
     private function handleCreate(ServerRequestInterface $request)
     {
+        $concept = $this->getConceptFromRequest($request);
+        
+        $params = $request->getQueryParams();
+        $tenant = $this->getTenant($params);
+        $collection = $this->getCollection($params, $tenant);
+        $user = $this->getUser($params);
+        
+        $concept->addProperty(Dc::DATE_SUBMITTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+        $concept->addProperty(DcTerms::CREATOR, $user->getFoafPerson());
+        $concept->addProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
+        $concept->addProperty(OpenSkos::COLLECTION, $collection->getUri());
+
+        if (!$this->uniquePrefLabel($concept)) {
+            throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
+        }
+        
+        $this->manager->insert($concept);
+        
+        $rdf = (new Transform\DataRdf($concept))->transform();
+        return $this->getSuccessResponse($rdf, 201);
+    }
+    
+    /**
+     * Get the skos concept from the request to insert or update
+     * does some validation to see if the xml is valid
+     *
+     * @param ServerRequestInterface $request
+     * @return \OpenSkos2\Concept
+     * @throws InvalidArgumentException
+     */
+    private function getConceptFromRequest(ServerRequestInterface $request)
+    {
         $xml = $request->getBody();
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 412);
@@ -283,16 +354,7 @@ class Concept
             }
         }
 
-        $tenant = $this->getTenant($params);
-        $collection = $this->getCollection($params, $tenant);
-        $user = $this->getUser($params);
-
         $conceptXml = $descriptions->item(0);
-
-        $data = array(
-            'tenant' => $tenant->code,
-            'collection' => $collection->id
-        );
 
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $conceptXml, $doc);
 
@@ -307,17 +369,7 @@ class Concept
         if ($autoGenerateUri) {
             $concept->selfGenerateUri();
         }
-
-        $concept->addProperty(Dc::DATE_SUBMITTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
-        $concept->addProperty(DcTerms::CREATOR, $user->getFoafPerson());
-        $concept->addProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-
-        if (!$this->uniquePrefLabel($concept)) {
-            throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
-        }
-        
-        $this->manager->insert($concept);
-        return $this->getSuccessResponse($doc->saveXML(), 201);
+        return $concept;
     }
 
     /**

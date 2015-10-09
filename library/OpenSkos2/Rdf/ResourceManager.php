@@ -72,7 +72,10 @@ class ResourceManager
     
     /**
      * Soft delete resource , sets the openskos:status to deleted
-     * and add a delete date
+     * and add a delete date.
+     *
+     * Be careful you need to add the full resource as it will be deleted and added again
+     * do not only give a uri or part of the graph
      *
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param Uri $user
