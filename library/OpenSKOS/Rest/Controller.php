@@ -189,7 +189,13 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
      */
     public function getPsrRequest()
     {
-        return \Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        // Add ZF 1 body to for requests other then POST 
+        // for < PHP 5.6 support see: http://php.net/manual/en/wrappers.php.php#wrappers.php.input        
+        $stream = new \Zend\Diactoros\Stream('php://memory', 'r+');
+        $stream->write($this->getRequest()->getRawBody());
+
+        return \Zend\Diactoros\ServerRequestFactory::fromGlobals()
+                ->withBody($stream);
     }
     
     /**
