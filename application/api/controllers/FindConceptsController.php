@@ -46,7 +46,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/find-concepts?q=prefLabel@nl:do*
      * @api {find} /api/find-concepts Find a concept
      * @apiName FindConcepts
-     * @apiGroup Concept
+     * @apiGroup FindConcept
      * @apiParam {String} q search term
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
@@ -112,9 +112,9 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test
      * 
-     * @api {find} /api/concept/{id}.rdf Find a concept
+     * @api {find} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
-     * @apiGroup Concept
+     * @apiGroup FindConcept
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
