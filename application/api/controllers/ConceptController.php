@@ -212,7 +212,7 @@ class Api_ConceptController extends Api_FindConceptsController
     {
         $request = $this->getPsrRequest();
         $api = new OpenSkos2\Api\Concept($this->getConceptManager());
-        $response = $api->create($request);
+        $response = $api->update($request);
         $this->emitResponse($response);
     }
 
