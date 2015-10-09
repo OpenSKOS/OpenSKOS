@@ -38,16 +38,24 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * The following requests are possible
      *
      * /api/find-concepts?q=doood
+     * 
      * /api/find-concepts?q=do*
+     * 
      * /api/find-concepts?q=prefLabel:dood
+     * 
      * /api/find-concepts?q=do* status:approved
-     * /api/find-concepts?q=prefLabel:do*&rows=0&format=json
+     * 
+     * /api/find-concepts?q=prefLabel:do*&rows=0
+     * 
      * /api/find-concepts?q=prefLabel@nl:doo
+     * 
      * /api/find-concepts?q=prefLabel@nl:do*
+     * 
      * @api {find} /api/find-concepts Find a concept
      * @apiName FindConcepts
      * @apiGroup FindConcept
      * @apiParam {String} q search term
+     * @apiParam {String} rows Amount of rows to return
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
@@ -104,13 +112,16 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
     /**
      * @apiVersion 1.0.0
-     * @apiDescription Get a SKOS Concept
-     * Return an concept by the following requests
+     * @apiDescription 
+     * Return an concept the following requests are valid
      *
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json
-     * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf (rdf format)
+     * 
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html (html format)
+     * 
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json (json format)
+     * 
+     * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)
      * 
      * @api {find} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
