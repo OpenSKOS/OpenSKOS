@@ -208,7 +208,7 @@ class Concept
             $concept = $this->getConceptFromRequest($request);
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
             
-            $params = $request->getQueryParams();
+            $params = $this->getParams($request);
             $tenant = $this->getTenant($params);
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUser($params);
@@ -288,7 +288,8 @@ class Concept
     {
         $concept = $this->getConceptFromRequest($request);
         
-        $params = $request->getQueryParams();
+        $params = $this->getParams($request);
+        
         $tenant = $this->getTenant($params);
         $collection = $this->getCollection($params, $tenant);
         $user = $this->getUser($params);
@@ -309,6 +310,26 @@ class Concept
     }
     
     /**
+     * Get request params, including parameters send in XML body
+     *
+     * @param ServerRequestInterface $request
+     * @return array
+     */
+    private function getParams(ServerRequestInterface $request)
+    {
+        $params = $request->getQueryParams();
+        $doc = $this->getDomDocumentFromRequest($request);
+        // is a tenant, collection or api key set in the XML?
+        foreach (array('tenant', 'collection', 'key') as $attributeName) {
+            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
+            if (!empty($value)) {
+                $params[$attributeName] = $value;
+            }
+        }
+        return $params;
+    }
+    
+    /**
      * Get the skos concept from the request to insert or update
      * does some validation to see if the xml is valid
      *
@@ -318,21 +339,7 @@ class Concept
      */
     private function getConceptFromRequest(ServerRequestInterface $request)
     {
-        $xml = $request->getBody();
-        if (!$xml) {
-            throw new InvalidArgumentException('No RDF-XML recieved', 412);
-        }
-
-        $doc = new \DOMDocument();
-        if (!@$doc->loadXML($xml)) {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
-        }
-
-        //do some basic tests
-        if ($doc->documentElement->nodeName != 'rdf:RDF') {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid: '
-                    . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>', 412);
-        }
+        $doc = $this->getDomDocumentFromRequest($request);
 
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
@@ -340,14 +347,9 @@ class Concept
                     . '/rdf:RDF/rdf:Description, got '.$descriptions->length, 412);
         }
 
-        $params = $request->getQueryParams();
-
         // is a tenant, collection or api key set in the XML?
         foreach (array('tenant', 'collection', 'key') as $attributeName) {
             $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            if (!empty($value)) {
-                $params[$attributeName] = $value;
-            }
             // remove the api key
             if (!empty($value) && $attributeName === 'key') {
                 $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
@@ -370,6 +372,34 @@ class Concept
             $concept->selfGenerateUri();
         }
         return $concept;
+    }
+    
+    /**
+     * Get dom document from request
+     *
+     * @param ServerRequestInterface $request
+     * @return \DOMDocument
+     * @throws InvalidArgumentException
+     */
+    private function getDomDocumentFromRequest(ServerRequestInterface $request)
+    {
+        $xml = $request->getBody();
+        if (!$xml) {
+            throw new InvalidArgumentException('No RDF-XML recieved', 412);
+        }
+        
+        $doc = new \DOMDocument();
+        if (!@$doc->loadXML($xml)) {
+            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
+        }
+
+        //do some basic tests
+        if ($doc->documentElement->nodeName != 'rdf:RDF') {
+            throw new InvalidArgumentException('Recieved RDF-XML is not valid: '
+                    . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>', 412);
+        }
+        
+        return $doc;
     }
 
     /**
