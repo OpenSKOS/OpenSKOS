@@ -148,7 +148,7 @@ $mappings = [
             return $collections[$value];
         },
         'fields' => [
-            'collection' => OpenSkos2\Namespaces\OpenSkos::COLLECTION,
+            'collection' => OpenSkos2\Namespaces\OpenSkos::SET,
         ],
     ],
     'uris' => [

@@ -364,7 +364,7 @@ class Repository implements InterfaceRepository
         
         $collection = null;
         if (!empty($arrSet[2])) {
-            $collection = new Uri(OpenSkos::COLLECTION_BASE. $arrSet[0] . ':'. $arrSet[1]);
+            $collection = new Uri(OpenSkos::SET_BASE. $arrSet[0] . ':'. $arrSet[1]);
         }
         $return['collection'] = $collection;
         

@@ -67,7 +67,7 @@ class DataArray
                 'repeatable' => false
             ],
             'collection' => [
-                'uri' => \OpenSkos2\Namespaces\OpenSkos::COLLECTION,
+                'uri' => \OpenSkos2\Namespaces\OpenSkos::SET,
                 'repeatable' => false
             ],
             'uuid' => [

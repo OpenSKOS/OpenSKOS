@@ -25,7 +25,7 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
     {
         $concept = new \OpenSkos2\Concept('');
         $collectionUri = new \OpenSkos2\Rdf\Uri('http://example.com/collection');
-        $concept->addProperty(\OpenSkos2\Namespaces\OpenSkos::COLLECTION, $collectionUri);
+        $concept->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $collectionUri);
         $uri = $concept->selfGenerateUri();
         $regex = '/^http:\/\/example.com\/collection\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/';
         $this->assertRegExp($regex, $uri);

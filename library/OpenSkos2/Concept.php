@@ -196,13 +196,13 @@ class Concept extends Resource
             );
         }
         
-        if ($this->isPropertyEmpty(OpenSkos::COLLECTION)) {
+        if ($this->isPropertyEmpty(OpenSkos::SET)) {
             throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'
             );
         }
         
-        $collectionUri = $this->getProperty(OpenSkos::COLLECTION)[0]->getUri();
+        $collectionUri = $this->getProperty(OpenSkos::SET)[0]->getUri();
         
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::generateUri($collectionUri);

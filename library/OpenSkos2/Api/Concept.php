@@ -217,7 +217,7 @@ class Concept
             $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperty(Dc::DATE_SUBMITTED));
             $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperty(DcTerms::CREATOR));
             $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-            $concept->addProperty(OpenSkos::COLLECTION, $collection->getUri());
+            $concept->addProperty(OpenSkos::SET, $collection->getUri());
             $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
             
             $this->manager->delete($existingConcept);
@@ -296,7 +296,7 @@ class Concept
         $concept->addProperty(Dc::DATE_SUBMITTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
         $concept->addProperty(DcTerms::CREATOR, $user->getFoafPerson());
         $concept->addProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-        $concept->addProperty(OpenSkos::COLLECTION, $collection->getUri());
+        $concept->addProperty(OpenSkos::SET, $collection->getUri());
 
         if (!$this->uniquePrefLabel($concept)) {
             throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
