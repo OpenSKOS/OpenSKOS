@@ -214,11 +214,10 @@ class Concept
             $user = $this->getUser($params);
 
             // Update properties
-            $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperties(Dc::DATE_SUBMITTED));
-            $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperties(DcTerms::CREATOR));
+            $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperty(Dc::DATE_SUBMITTED));
+            $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperty(DcTerms::CREATOR));
             $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-            $concept->addProperty(OpenSkos::COLLECTION, $$collection->getUri());
-            $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+            $concept->addProperty(OpenSkos::COLLECTION, $collection->getUri());
             $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
             
             $this->manager->delete($existingConcept);
