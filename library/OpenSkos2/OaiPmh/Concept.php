@@ -86,16 +86,41 @@ class Concept implements Record
             Skos::NAME_SPACE => [
                 Skos::NOTATION => 'skos:notation',
                 Skos::PREFLABEL => 'skos:prefLabel',
+                Skos::CONCEPTSCHEME => 'skos:conceptScheme',
+                Skos::INSCHEME => 'skos:inScheme',
+                Skos::HASTOPCONCEPT => 'skos:hasTopConcept',
+                Skos::TOPCONCEPTOF => 'skos:topConceptOf',
                 Skos::ALTLABEL => 'skos:altLabel',
                 Skos::HIDDENLABEL => 'skos:hiddenLabel',
-                Skos::SCOPENOTE => 'skos:scopeNote',
-                Skos::NOTE => 'skos:note',
+                Skos::CHANGENOTE => 'skos:changeNote',
+                Skos::DEFINITION => 'skos:definition',
+                Skos::EDITORIALNOTE => 'skos:editorialNote',
+                Skos::EXAMPLE => 'skos:example',
                 Skos::HISTORYNOTE => 'skos:historyNote',
+                Skos::NOTE => 'skos:note',
+                Skos::SCOPENOTE => 'skos:scopeNote',
                 Skos::INSCHEME => 'skos:inScheme',
+                Skos::NARROWER => 'skos:narrower',
+                Skos::NARROWERTRANSITIVE => 'skos:narrowerTransitive',
+                Skos::RELATED => 'skos:related',                
+                Skos::SEMANTICRELATION => 'skos:semanticRelation',                
+                Skos::BROADER => 'skos:broader',
+                Skos::BROADERTRANSITIVE => 'skos:broaderTransitive',
+                Skos::COLLECTION => 'skos:Collection',
+                Skos::ORDEREDCOLLECTION => 'skos:OrderedCollection',
+                Skos::MEMBER => 'skos:member',
+                Skos::MEMBERLIST => 'skos:memberList',
+                Skos::BROADMATCH => 'skos:broadMatch',
+                Skos::CLOSEMATCH => 'skos:closeMatch',
+                Skos::EXACTMATCH => 'skos:exactMatch',
+                Skos::MAPPINGRELATION => 'skos:mappingRelation',
+                Skos::NARROWMATCH => 'skos:narrowMatch',
+                Skos::RELATEDMATCH => 'skos:relatedMatch',
             ],
             OpenSkos::NAME_SPACE => [
                 OpenSkos::STATUS => 'openskos:status',
                 OpenSkos::UUID => 'openskos:uuid',
+                OpenSkos::SET => 'openskos:set',
             ],
             DcTerms::NAME_SPACE => [
                 DcTerms::DATEACCEPTED => 'dcterms:dateAccepted',
@@ -146,5 +171,10 @@ class Concept implements Record
      */
     public function getAbout()
     {
+    }
+    
+    public function getSpecId()
+    {
+        
     }
 }
