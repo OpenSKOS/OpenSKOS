@@ -56,9 +56,18 @@ class Concept implements Record
         $concept = $this->concept;
         $datestamp = $concept->getProperty(\OpenSkos2\Namespaces\DcTerms::MODIFIED)[0]->getValue();
         $setSpecs = [];
-        $schemes = $concept->getProperty(Skos::INSCHEME);
-        foreach ($schemes as $scheme) {
-            $setSpecs[] = $scheme->getUri();
+        
+        $tenants = $concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
+        $sets = $concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::SET);
+        
+        foreach ($tenants as $tenant) {
+            $setSpecs[] = (string)$tenant;
+        }
+        
+        foreach ($sets as $set) {
+            $arrSet = explode('/', (string)$set);
+            $cleanSet = end($arrSet);
+            $setSpecs[] = $cleanSet;
         }
 
         return new Header($concept->geturi(), $datestamp, $setSpecs);
@@ -171,10 +180,5 @@ class Concept implements Record
      */
     public function getAbout()
     {
-    }
-    
-    public function getSpecId()
-    {
-        
     }
 }

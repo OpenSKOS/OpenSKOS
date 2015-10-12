@@ -21,7 +21,6 @@ namespace OpenSkos2\OaiPmh;
 
 use Asparagus\QueryBuilder;
 use DateTime;
-use DOMDocument;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
@@ -205,7 +204,6 @@ class Repository implements InterfaceRepository
      */
     public function listSetsByToken($token)
     {
-        $params = $this->decodeResumptionToken($token);
         return $this->listSets();
     }
 
@@ -221,7 +219,7 @@ class Repository implements InterfaceRepository
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
-        
+
         return new OaiConcept($concept);
     }
 
@@ -235,9 +233,9 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        
+
         $pSet = $this->parseSet($set);
-        
+
         $concepts = $this->getConcepts(
             $this->limit + 1,
             0,
@@ -247,9 +245,9 @@ class Repository implements InterfaceRepository
             $pSet['collection'],
             $pSet['conceptScheme']
         );
-        
+
         $items = [];
-        
+
         $showToken = false;
         foreach ($concepts as $i => $concept) {
             if ($i === $this->limit) {
@@ -258,12 +256,12 @@ class Repository implements InterfaceRepository
             }
             $items[] = new OaiConcept($concept);
         }
-        
+
         $token = null;
         if ($showToken) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
-        
+
         return new OaiRecordList($items, $token);
     }
 
@@ -281,23 +279,23 @@ class Repository implements InterfaceRepository
             $params['from'],
             $params['until']
         );
-        
+
         $items = [];
-        
+
         $showToken = false;
         foreach ($concepts as $i => $concept) {
             if ($i === $this->limit) {
                 $showToken = true;
                 continue;
             }
-            
+
             $items[] = new OaiConcept($concept);
         }
 
         $params['offset'] = (int)$params['offset'] + $this->limit;
-        
+
         $token = null;
-        
+
         if ($showToken) {
             $token = $this->encodeResumptionToken(
                 $params['offset'],
@@ -332,7 +330,7 @@ class Repository implements InterfaceRepository
 
         return $formats;
     }
-    
+
     /**
      * Parse set string
      *
@@ -353,25 +351,32 @@ class Repository implements InterfaceRepository
     private function parseSet($set)
     {
         $arrSet = explode(':', $set);
-        
+
         $return = [];
-        
+
         $tenant = null;
         if (!empty($arrSet[0])) {
             $tenant = new Literal($arrSet[0]);
         }
+
         $return['tenant'] = $tenant;
-        
+
         $collection = null;
-        if (!empty($arrSet[2])) {
-            $collection = new Uri(OpenSkos::SET_BASE. $arrSet[0] . ':'. $arrSet[1]);
+        if (!empty($arrSet[1])) {
+            $collections = new \OpenSKOS_Db_Table_Collections();
+            $collectionRow = $collections->findByCode($arrSet[1], $tenant);
+            if ($collectionRow) {
+                $collection = $collectionRow->uri;
+            }
         }
+
         $return['collection'] = $collection;
-        
+
         $conceptScheme = null;
         if (!empty($arrSet[2])) {
             $conceptScheme = new Literal($arrSet[2]);
         }
+
         $return['conceptScheme'] = $conceptScheme;
         return $return;
     }
@@ -489,7 +494,7 @@ class Repository implements InterfaceRepository
         $graph = $this->conceptManager->query($query);
         return $graph[0]->date->getValue();
     }
-    
+
     /**
      * Fetch all concepts based on parameters in the token
      *
@@ -523,15 +528,15 @@ class Repository implements InterfaceRepository
                 ->also('dct:modified', '?modified')
                 ->limit($limit)
                 ->offset($offset);
-        
+
         if (!empty($tenant)) {
             $tenantN = NTriple::getInstance()->serialize($tenant);
             $select->also('openskos:tenant', $tenantN);
         }
 
         if (!empty($collection)) {
-            $collectionN = NTriple::getInstance()->serialize($collection);
-            $select->also('skos:Collection', $collectionN);
+            $collectionN = \OpenSkos2\Sparql\Escape::escapeUri($collection);
+            $select->also('openskos:set', $collectionN);
         }
 
         if (!empty($scheme)) {
