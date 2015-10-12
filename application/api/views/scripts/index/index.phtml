@@ -452,9 +452,6 @@ if ($response->isSuccessful()) {
                         <li>
 				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&amp;callback=myCallback_1234</a>
 			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=html"><?php echo $this->url(array('controller' => 'collections'))?>?format=html</a>
-			</li>
 		</ul>
 	 </li>
 	<li>Fetch a single Institute from this repository
@@ -467,9 +464,6 @@ if ($response->isSuccessful()) {
 			</li>
                         <li>
 				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234</a>
-			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html</a>
 			</li>
 		</ul>
 	 </li>
