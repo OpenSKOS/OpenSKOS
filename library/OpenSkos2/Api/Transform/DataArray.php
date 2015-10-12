@@ -141,46 +141,36 @@ class DataArray
      * @param array $settings
      * #param string $field field name to map
      * @param array $concept
-     * @return int|string|array
+     * @return array
      */
     private function getPropertyValue(array $prop, $field, $settings, $concept)
     {
-        if (isset($prop[0]) && $settings['repeatable'] === false) {
-            $lang = $prop[0]->getLanguage();
+        foreach ($prop as $val) {
+            // Some values only have a URI but not getValue or getLanguage
+            if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
+                $concept[$field] = $val->getUri();
+                continue;
+            }
+
+            $value = $val->getValue();
+
+            if ($value instanceof \DateTime) {
+                $value = $value->format(DATE_W3C);
+            }
+
+            if (empty($value)) {
+                continue;
+            }
+            $lang = $val->getLanguage();
+            $langField = $field;
             if (!empty($lang)) {
-                $field = $field . '@' . $lang;
+                $langField .= '@' . $lang;
             }
             
-            $val = $prop[0]->getValue();
-            $concept[$field] = $val;
-            
-            if ($val instanceof \DateTime) {
-                $concept[$field] = $val->format(\DATE_W3C);
-            }
-        }
-        
-        if ($settings['repeatable'] === true) {
-            foreach ($prop as $val) {
-                if ($val instanceof \OpenSkos2\Rdf\Uri) {
-                    $concept[$field] = $val->getUri();
-                    continue;
-                }
-                
-                $value = $val->getValue();
-                
-                if ($value instanceof \DateTime) {
-                    $value = $value->format(DATE_W3C);
-                }
-                
-                if (empty($value)) {
-                    continue;
-                }
-                $lang = $val->getLanguage();
-                $langField = $field;
-                if (!empty($lang)) {
-                    $langField .= '@' . $lang;
-                }
+            if ($settings['repeatable'] === true) {
                 $concept[$langField][] = $value;
+            } else {
+                $concept[$langField] = $value;
             }
         }
         
