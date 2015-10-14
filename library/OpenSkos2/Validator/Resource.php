@@ -58,15 +58,18 @@ class Resource
      * @var LoggerInterface
      */
     private $logger;
-    
+
     /**
-     * @param ResourceManager $resourceManager
-     * @param Tenant $tenant optional If specified - tenant specific validation can be made.
+     * @param ResourceManager          $resourceManager
+     * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
+     * @param \Psr\Log\LoggerInterface $logger
      */
     public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
     {
         if ($logger === null) {
-            $logger = new NullLogger();
+            $this->logger = new NullLogger();
+        } else {
+            $this->logger = $logger;
         }
         
         $this->resourceManager = $resourceManager;
@@ -102,6 +105,7 @@ class Resource
     protected function applyValidators(RdfResource $resource)
     {
         $errorsFound = false;
+        /** @var \OpenSkos2\Validator\ValidatorInterface $validator */
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
             if ($valid) {
@@ -112,8 +116,8 @@ class Resource
                 $this->errorMessages[] = $message;
             }
             
-            $this->logger->error("Errors founds while validating resource " . $resource->getUri());
-            $this->logger->error($validator->getErrorMessage());
+            $this->logger->error('Errors founds while validating resource ' . $resource->getUri());
+            $this->logger->error($validator->getErrorMessages());
             
             $errorsFound = true;
         }
