@@ -28,11 +28,28 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 
 class ConceptManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
+
+    /**
+     * Supported relation types to add or remove
+     * @var array
+     */
+    private $relationTypes = [
+        Skos::BROADER,
+        Skos::NARROWER,
+        Skos::BROADERTRANSITIVE,
+        Skos::NARROWERTRANSITIVE,
+        Skos::BROADMATCH,
+        Skos::NARROWMATCH,
+        Skos::RELATED,
+        Skos::TOPCONCEPTOF,
+        Skos::HASTOPCONCEPT,
+    ];
 
     /**
      * Perform basic autocomplete search on pref and alt labels
@@ -54,17 +71,17 @@ class ConceptManager extends ResourceManager
 
         // Do a distinct query on pref and alt labels where string starts with $term
         $query = $q->selectDistinct('?label')
-            ->union(
-                $q->newSubgraph()
-                    ->where('?subject', 'openskos:status', '"'. Concept::STATUS_APPROVED.'"')
-                    ->also('skos:prefLabel', '?label'),
-                $q->newSubgraph()
-                    ->where('?subject', 'openskos:status', '"'. Concept::STATUS_APPROVED.'"')
-                    ->also('skos:altLabel', '?label')
-            )
-            ->filter('regex(str(?label), ' . $eTerm . ', "i")')
-            ->limit(50);
-        
+                ->union(
+                    $q->newSubgraph()
+                        ->where('?subject', 'openskos:status', '"' . Concept::STATUS_APPROVED . '"')
+                        ->also('skos:prefLabel', '?label'),
+                    $q->newSubgraph()
+                        ->where('?subject', 'openskos:status', '"' . Concept::STATUS_APPROVED . '"')
+                        ->also('skos:altLabel', '?label')
+                )
+                ->filter('regex(str(?label), ' . $eTerm . ', "i")')
+                ->limit(50);
+
         $result = $this->query($query);
 
         $items = [];
@@ -72,5 +89,95 @@ class ConceptManager extends ResourceManager
             $items[] = $literal->label->getValue();
         }
         return $items;
+    }
+
+    /**
+     * Add relations to a skos concept
+     *
+     * @param string $uri
+     * @param string $relationType
+     * @param array $uris
+     * @throws Exception\InvalidArgumentException
+     */
+    public function addRelation($uri, $relationType, $uris)
+    {
+        if (!in_array($relationType, $this->relationTypes, true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+
+        $graph = new \EasyRdf\Graph();
+        foreach ($uris as $related) {
+            $graph->add($uri, $relationType, $related);
+        }
+
+        $this->client->insert($graph);
+    }
+
+    /**
+     * Add relations to both sides of the concepts for example.
+     * http://example.com/1 skos::narrower [http://example.com/2]
+     *
+     * Will add http://example.com/2 as narrower for http://example.com/1
+     * and add http://example.com/1 as broader for http://example.com/1
+     *
+     * This will not update transitive relations
+     *
+     * @param string $uri
+     * @param string $relationType
+     * @param array $uris
+     */
+    public function addRelationBothsides($uri, $relationType, $uris)
+    {
+        $this->addRelation($uri, $relationType, $uris);
+        
+        $inverse = $this->getInverseRelation($relationType);
+        foreach ($uris as $relation) {
+            $graph = new \EasyRdf\Graph();
+            $graph->add($relation, $inverse, $uri);
+            $this->client->insert($graph);
+        }
+    }
+
+    /**
+     * Get inverse of skos relation
+     *
+     * @param string $relation
+     * @param string
+     * @throws Exception\InvalidArgumentException
+     */
+    private function getInverseRelation($relation)
+    {
+        switch ($relation) {
+            case Skos::BROADER:
+                return Skos::NARROWER;
+                break;
+            case Skos::NARROWER:
+                return Skos::BROADER;
+                break;
+            case Skos::RELATED:
+                return Skos::RELATED;
+                break;
+            case Skos::BROADMATCH:
+                return Skos::NARROWMATCH;
+                break;
+            case Skos::NARROWMATCH:
+                return Skos::BROADMATCH;
+                break;
+            case Skos::BROADERTRANSITIVE:
+                return Skos::NARROWERTRANSITIVE;
+                break;
+            case Skos::NARROWERTRANSITIVE:
+                return Skos::BROADERTRANSITIVE;
+                break;
+            case Skos::TOPCONCEPTOF:
+                return Skos::HASTOPCONCEPT;
+                break;
+            case Skos::HASTOPCONCEPT:
+                return Skos::TOPCONCEPTOF;
+                break;
+            default:
+                throw new Exception\InvalidArgumentException('Relation not supported');
+                break;
+        }
     }
 }

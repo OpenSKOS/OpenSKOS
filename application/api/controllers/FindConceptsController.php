@@ -123,6 +123,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * 
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)
      * 
+     * /api/concept/?id=http://example.com/1 (rdf format)
+     * 
      * @api {get} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
      * @apiGroup FindConcept
@@ -207,7 +209,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * Get concept id
      *
      * @throws Zend_Controller_Exception
-     * @return string
+     * @return string|\OpenSkos2\Rdf\Uri
      */
     private function getId()
     {
@@ -215,7 +217,11 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         if (null === $id) {
             throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
         }
-
+        
+        if (strpos($id, 'http://') !== false || strpos($id, 'https://') !== false) {
+            return new OpenSkos2\Rdf\Uri($id);
+        }
+        
         /*
          * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
          * with this we can create a route in the config ini like this:

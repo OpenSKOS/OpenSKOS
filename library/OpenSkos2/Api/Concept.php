@@ -40,7 +40,8 @@ use Zend\Diactoros\Stream;
  */
 class Concept
 {
-
+    use \OpenSkos2\Api\Response\ApiResponseTrait;
+    
     const QUERY_DESCRIBE = 'describe';
     const QUERY_COUNT = 'count';
 
@@ -159,22 +160,26 @@ class Concept
     /**
      * Get openskos concept
      *
-     * @param string $uuid
+     * @param string|\OpenSkos2\Rdf\Uri $id
      * @throws NotFoundException
      * @throws Exception\DeletedException
      * @return \OpenSkos2\Concept
      */
-    public function getConcept($uuid)
+    public function getConcept($id)
     {
         /* @var $concept \OpenSkos2\Concept */
-        $concept = $this->manager->fetchByUuid($uuid);
-
+        if ($id instanceof \OpenSkos2\Rdf\Uri) {
+            $concept = $this->manager->fetchByUri($id);
+        } else {
+            $concept = $this->manager->fetchByUuid($id);
+        }
+        
         if (!$concept) {
-            throw new NotFoundException('Concept not found by id: ' . $uuid, 404);
+            throw new NotFoundException('Concept not found by id: ' . $id, 404);
         }
 
         if ($concept->isDeleted()) {
-            throw new Exception\DeletedException('Concept ' . $uuid . ' is deleted', 410);
+            throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
 
         return $concept;
@@ -209,10 +214,14 @@ class Concept
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
             
             $params = $this->getParams($request);
-            $tenant = $this->getTenant($params);
+                        
+            $tenant = $this->getTenantFromParams($params);
+            
             $collection = $this->getCollection($params, $tenant);
-            $user = $this->getUser($params);
-
+            $user = $this->getUserFromParams($params);
+            
+            $this->conceptEditAllowed($concept, $tenant, $user);
+            
             // Update properties
             $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperty(Dc::DATE_SUBMITTED));
             $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperty(DcTerms::CREATOR));
@@ -256,18 +265,10 @@ class Concept
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
             
-            $user = $this->getUser($params);
-            $tenant = $this->getTenant($params);
+            $user = $this->getUserFromParams($params);
+            $tenant = $this->getTenantFromParams($params);
             
-            if ($user->tenant !== $tenant->code) {
-                throw new NotFoundException('User does not match tenant code', 400);
-            }
-            
-            // Check if the concept matches the tenant
-            $conceptTenants =$concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
-            if ((string)$conceptTenants[0] !== $tenant->code) {
-                throw new ApiException('Tenant does not match concept tenants code', 401);
-            }
+            $this->conceptEditAllowed($concept, $tenant, $user);
             
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
@@ -289,9 +290,9 @@ class Concept
         
         $params = $this->getParams($request);
         
-        $tenant = $this->getTenant($params);
+        $tenant = $this->getTenantFromParams($params);
         $collection = $this->getCollection($params, $tenant);
-        $user = $this->getUser($params);
+        $user = $this->getUserFromParams($params);
         
         $concept->addProperty(Dc::DATE_SUBMITTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
         $concept->addProperty(DcTerms::CREATOR, $user->getFoafPerson());
@@ -402,28 +403,6 @@ class Concept
     }
 
     /**
-     * Get tenant
-     *
-     * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_Tenant
-     */
-    private function getTenant($params)
-    {
-        if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 412);
-        }
-
-        $tenantCode = $params['tenant'];
-        $model = new \OpenSKOS_Db_Table_Tenants();
-        $tenant = $model->find($tenantCode)->current();
-        if (null === $tenant) {
-            throw new InvalidArgumentException('No such tenant: `'.$tenantCode.'`', 404);
-        }
-
-        return $tenant;
-    }
-
-    /**
      * @params array $queryParams
      * @params \OpenSKOS_Db_Table_Row_Tenant $tenant
      * @return OpenSKOS_Db_Table_Row_Collection
@@ -440,32 +419,6 @@ class Concept
             throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
         }
         return $collection;
-    }
-
-    /**
-     * @params array $queryParams
-     * @return \OpenSKOS_Db_Table_Row_User
-     */
-    private function getUser($params)
-    {
-        if (empty($params['key'])) {
-            throw new InvalidArgumentException('No key specified', 412);
-        }
-
-        $user = \OpenSKOS_Db_Table_Users::fetchByApiKey($params['key']);
-        if (null === $user) {
-            throw new InvalidArgumentException('No such API-key: `' . $params['key'] . '`', 401);
-        }
-
-        if (!$user->isApiAllowed()) {
-            throw new InvalidArgumentException('Your user account is not allowed to use the API', 401);
-        }
-
-        if (strtolower($user->active) !== 'y') {
-            throw new InvalidArgumentException('Your user account is blocked', 401);
-        }
-
-        return $user;
     }
 
     /**
@@ -577,5 +530,33 @@ class Concept
         $validator = new UniquePreflabelInScheme();
         $validator->setResourceManager($this->manager);
         return $validator->validate($concept);
+    }
+    
+    /**
+     * @param array $params
+     * @return \OpenSKOS_Db_Table_Row_Tenant
+     * @throws InvalidArgumentException
+     */
+    private function getTenantFromParams($params)
+    {
+        if (empty($params['tenant'])) {
+            throw new InvalidArgumentException('No tenant specified', 412);
+        }
+            
+        return $this->getTenant($params['tenant']);
+    }
+    
+    /**
+     *
+     * @param array $params
+     * @return \OpenSKOS_Db_Table_Row_User
+     * @throws InvalidArgumentException
+     */
+    private function getUserFromParams($params)
+    {
+        if (empty($params['key'])) {
+            throw new InvalidArgumentException('No key specified', 412);
+        }
+        return $this->getUserByKey($params['key']);
     }
 }

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- this is a shared config for all cores on db005-* -->
+<!-- beware that this gets replicated to al slaves! -->
+<config>
+  <luceneMatchVersion>4.4</luceneMatchVersion>
+
+  <!-- set this via the core's properties file -->
+  <dataDir>/var/local/solr/openskos/data</dataDir>
+
+  <indexConfig>
+    <useCompoundFile>false</useCompoundFile>
+    <mergeFactor>100</mergeFactor>
+    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
+    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <maxMergeDocs>2147483647</maxMergeDocs>
+    <maxFieldLength>10000</maxFieldLength>
+    <writeLockTimeout>1000</writeLockTimeout>
+    <commitLockTimeout>10000</commitLockTimeout>
+    <lockType>simple</lockType>
+    <unlockOnStartup>true</unlockOnStartup>
+  </indexConfig>
+
+  <updateHandler class="solr.DirectUpdateHandler2">
+    <!--
+    <autoCommit>
+      <maxDocs>${autocommit.maxdocs:10000}</maxDocs>
+      <maxTime>${autocommit.maxtime:300000}</maxTime>
+    </autoCommit>
+    -->
+    <updateLog>
+        <str name="dir">${solr.core0.data.dir:}</str>
+    </updateLog>
+  </updateHandler>
+
+    <!-- Search Components
+        Search components are registered to SolrCore and used by
+        instances of SearchHandler (which can access them by name)
+
+        By default, the following components are available:
+
+        <searchComponent name="query"     class="solr.QueryComponent" />
+        <searchComponent name="facet"     class="solr.FacetComponent" />
+        <searchComponent name="mlt"       class="solr.MoreLikeThisComponent" />
+        <searchComponent name="highlight" class="solr.HighlightComponent" />
+        <searchComponent name="stats"     class="solr.StatsComponent" />
+        <searchComponent name="debug"     class="solr.DebugComponent" />
+
+        Default configuration in a requestHandler would look like:
+
+        <arr name="components">
+          <str>query</str>
+          <str>facet</str>
+          <str>mlt</str>
+          <str>highlight</str>
+          <str>stats</str>
+          <str>debug</str>
+        </arr>
+
+        If you register a searchComponent to one of the standard names,
+        that will be used instead of the default.
+
+        To insert components before or after the 'standard' components, use:
+
+        <arr name="first-components">
+          <str>myFirstComponentName</str>
+        </arr>
+
+        <arr name="last-components">
+          <str>myLastComponentName</str>
+        </arr>
+
+        NOTE: The component registered with the name "debug" will
+        always be executed after the "last-components"
+      -->
+
+    <searchComponent class="solr.SpellCheckComponent" name="suggest">
+        <lst name="spellchecker">
+            <str name="name">suggest</str>
+            <str name="storeDir">suggest</str>
+            <str name="classname">org.apache.solr.spelling.suggest.Suggester</str>
+            <str name="lookupImpl">org.apache.solr.spelling.suggest.tst.TSTLookup</str>
+            <!-- Alternatives to lookupImpl:
+                 org.apache.solr.spelling.suggest.fst.FSTLookup   [finite state automaton]
+                 org.apache.solr.spelling.suggest.fst.WFSTLookupFactory [weighted finite state automaton]
+                 org.apache.solr.spelling.suggest.jaspell.JaspellLookup [default, jaspell-based]
+                 org.apache.solr.spelling.suggest.tst.TSTLookup   [ternary trees]
+              -->
+            <str name="field">suggestions</str>  <!-- the indexed field to derive suggestions from -->
+            <str name="buildOnOptimize">true</str>
+        </lst>
+    </searchComponent>
+
+    <requestHandler class="org.apache.solr.handler.component.SearchHandler" name="/suggest">
+        <lst name="defaults">
+            <str name="spellcheck">true</str>
+            <str name="spellcheck.dictionary">suggest</str>
+            <str name="spellcheck.onlyMorePopular">false</str>
+            <str name="spellcheck.count">50</str>
+            <str name="spellcheck.collate">true</str>
+        </lst>
+        <arr name="components">
+            <str>suggest</str>
+        </arr>
+    </requestHandler>
+
+  <query>
+        <maxBooleanClauses>1024</maxBooleanClauses>
+        <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+        <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+        <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+        <enableLazyFieldLoading>true</enableLazyFieldLoading>
+        <queryResultWindowSize>10</queryResultWindowSize>
+        <useColdSearcher>false</useColdSearcher>
+        <maxWarmingSearchers>4</maxWarmingSearchers>
+  </query>
+
+  <requestDispatcher handleSelect="false" >
+    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+  </requestDispatcher>
+
+    <!-- SearchHandler
+         http://wiki.apache.org/solr/SearchHandler
+
+         For processing Search Queries, the primary Request Handler
+         provided with Solr is "SearchHandler" It delegates to a sequent
+         of SearchComponents (see below) and supports distributed
+         queries across multiple shards
+      -->
+    <requestHandler name="/select" class="solr.SearchHandler">
+        <!-- default values for query parameters can be specified, these
+             will be overridden by parameters in the request
+          -->
+        <lst name="defaults">
+            <str name="echoParams">explicit</str>
+            <int name="rows">100</int>
+            <str name="df">searchfield</str>
+            <str name="wt">json</str>
+            <str name="indent">false</str>
+            <str name="defType">edismax</str>
+        </lst>
+    </requestHandler>
+
+    <requestHandler name="/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+
+    <requestHandler name="standard" class="solr.StandardRequestHandler">
+       <lst name="defaults">
+         <str name="echoParams">explicit</str>
+       </lst>
+    </requestHandler>
+
+    <requestHandler name="/replication" class="solr.ReplicationHandler">
+      <lst name="master">
+        <str name="enable">${replication.enablemaster:false}</str>
+        <str name="replicateAfter">startup</str>
+        <str name="replicateAfter">${replication.replicateafter:optimize}</str>
+        <str name="confFiles">solrconfig.xml,schema.xml,solrcore.properties:solrcore.properties.master,solrcore.properties.slave:solrcore.properties</str>
+      </lst>
+      <lst name="slave">
+        <str name="enable">${replication.enableslave:false}</str>
+        <str name="masterUrl">http://db005-b.pictura-hosting.nl:8180/ciss4/${solr.core.name}/replication</str>
+        <str name="pollInterval">00:00:60</str>
+      </lst>
+    </requestHandler>
+
+    <requestHandler name="/update" class="solr.UpdateRequestHandler" />
+    <requestHandler name="/update/json" class="solr.JsonUpdateRequestHandler"/>
+
+    <!-- ter vervanging van alle losse /admin/* handlers -->
+    <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
+
+    <requestHandler name="/admin/ping" class="PingRequestHandler">
+        <lst name="defaults">
+            <str name="qt">standard</str>
+            <str name="q">solrpingquery</str>
+            <str name="echoParams">all</str>
+        </lst>
+    </requestHandler>
+
+    <queryResponseWriter name="standard" class="org.apache.solr.response.XMLResponseWriter"/>
+    <queryResponseWriter name="json" class="org.apache.solr.response.JSONResponseWriter"/>
+    <queryResponseWriter name="php" class="org.apache.solr.response.PHPResponseWriter"/>
+    <queryResponseWriter name="phps" class="org.apache.solr.response.PHPSerializedResponseWriter"/>
+    <queryResponseWriter name="xslt" class="org.apache.solr.response.XSLTResponseWriter">
+        <int name="xsltCacheLifetimeSeconds">5</int>
+    </queryResponseWriter>
+
+    <admin>
+        <defaultQuery>solr</defaultQuery>
+        <!-- <healthcheck type="file">server-enabled</healthcheck> -->
+    </admin>
+</config>
