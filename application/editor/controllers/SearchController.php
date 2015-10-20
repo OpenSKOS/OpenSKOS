@@ -31,25 +31,6 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         if (!$this->view->searchForm->isValid($this->getRequest()->getPost())) {
             return;
         }
-        
-        // Search labels first
-        new OpenSkos2\Editor\Search();
-        var_dump('xx'); exit;
-    }
-
-
-    public function indexTestAction()
-    {
-        $this->view->searchForm = Editor_Forms_Search::getInstance();
-
-        $request = $this->getRequest();
-        if (!$request->isPost()) {
-            return;
-        }
-
-        if (!$this->view->searchForm->isValid($this->getRequest()->getPost())) {
-            return;
-        }
 
         $userForSearch = $this->view->searchForm->getUserForSearch();
         $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
