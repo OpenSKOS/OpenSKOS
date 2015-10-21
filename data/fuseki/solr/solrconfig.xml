@@ -73,36 +73,6 @@
         always be executed after the "last-components"
       -->
 
-    <searchComponent class="solr.SpellCheckComponent" name="suggest">
-        <lst name="spellchecker">
-            <str name="name">suggest</str>
-            <str name="storeDir">suggest</str>
-            <str name="classname">org.apache.solr.spelling.suggest.Suggester</str>
-            <str name="lookupImpl">org.apache.solr.spelling.suggest.tst.TSTLookup</str>
-            <!-- Alternatives to lookupImpl:
-                 org.apache.solr.spelling.suggest.fst.FSTLookup   [finite state automaton]
-                 org.apache.solr.spelling.suggest.fst.WFSTLookupFactory [weighted finite state automaton]
-                 org.apache.solr.spelling.suggest.jaspell.JaspellLookup [default, jaspell-based]
-                 org.apache.solr.spelling.suggest.tst.TSTLookup   [ternary trees]
-              -->
-            <str name="field">suggestions</str>  <!-- the indexed field to derive suggestions from -->
-            <str name="buildOnOptimize">true</str>
-        </lst>
-    </searchComponent>
-
-    <requestHandler class="org.apache.solr.handler.component.SearchHandler" name="/suggest">
-        <lst name="defaults">
-            <str name="spellcheck">true</str>
-            <str name="spellcheck.dictionary">suggest</str>
-            <str name="spellcheck.onlyMorePopular">false</str>
-            <str name="spellcheck.count">50</str>
-            <str name="spellcheck.collate">true</str>
-        </lst>
-        <arr name="components">
-            <str>suggest</str>
-        </arr>
-    </requestHandler>
-
   <query>
         <maxBooleanClauses>1024</maxBooleanClauses>
         <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
