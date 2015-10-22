@@ -75,7 +75,7 @@ class ResourceManager
     {
         $this->client->insert(EasyRdf::resourceToGraph($resource));
 
-        // Post  something to solr...
+        // Add resource to solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
@@ -96,6 +96,7 @@ class ResourceManager
      */
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
+        $uri = $resource->getUri();
         $resource->unsetProperty(OpenSkosNamespace::STATUS);
         $status = new Literal(\OpenSkos2\Concept::STATUS_DELETED);
         $resource->addProperty(OpenSkosNamespace::STATUS, $status);
@@ -109,6 +110,14 @@ class ResourceManager
 
         $this->delete($resource);
         $this->insert($resource);
+        
+        // Update solr
+        $update = $this->solr->createUpdate();
+        $doc = $update->createDocument();
+        $doc->setKey('id', $uri);
+        $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
+        $doc->setFieldModifier('s_status', 'set');
+        $update->addDocument($doc)->addCommit(true);
     }
 
     /**
@@ -116,10 +125,18 @@ class ResourceManager
      */
     public function delete(Uri $resource)
     {
+        $uri = $resource->getUri();
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+        
+        // delete resource in solr
+        $update = $this->solr->createUpdate();
+        $update->addDeleteById($uri);
+        $this->solr->update($update);
     }
 
     /**
+     *
+     * @todo Keep SOLR in sync
      * @param Object[] $simplePatterns
      */
     public function deleteBy($simplePatterns)
