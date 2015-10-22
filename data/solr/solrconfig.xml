@@ -25,22 +25,8 @@
     <updateLog>
         <str name="dir">${solr.core0.data.dir:}</str>
     </updateLog>
-    
-    <!-- SoftAutoCommit
-
-         Perform a 'soft' commit automatically under certain conditions.
-         This commit avoids ensuring that data is synched to disk.
-
-         maxDocs - Maximum number of documents to add since the last
-                   soft commit before automaticly triggering a new soft commit.
-
-         maxTime - Maximum amount of time in ms that is allowed to pass
-                   since a document was added before automaticly
-                   triggering a new soft commit.
-      -->
-      
-       <!-- Limit the number of deletions Solr will buffer during doc updating.
-
+          
+    <!-- Limit the number of deletions Solr will buffer during doc updating.
         Setting this lower can help bound memory use during indexing.
     -->
     <maxPendingDeletes>100000</maxPendingDeletes>
