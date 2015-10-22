@@ -35,4 +35,18 @@ return [
             $sparqlOptions['updateUri']
         );
     },
+    'Solarium\Client' => function (ContainerInterface $c) {
+        
+        $solr = OpenSKOS_Application_BootstrapAccess::getOption('resources')['solr'];
+
+        return new Solarium\Client([
+            'endpoint' => [
+                'localhost' => [
+                    'host' => $solr['host'],
+                    'port' => $solr['port'],
+                    'path' => $solr['context'],
+                ]
+            ]
+        ]);
+    }
 ];

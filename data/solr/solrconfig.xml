@@ -21,15 +21,53 @@
   </indexConfig>
 
   <updateHandler class="solr.DirectUpdateHandler2">
-    <!--
-    <autoCommit>
-      <maxDocs>${autocommit.maxdocs:10000}</maxDocs>
-      <maxTime>${autocommit.maxtime:300000}</maxTime>
-    </autoCommit>
-    -->
+
     <updateLog>
         <str name="dir">${solr.core0.data.dir:}</str>
     </updateLog>
+    
+    <!-- SoftAutoCommit
+
+         Perform a 'soft' commit automatically under certain conditions.
+         This commit avoids ensuring that data is synched to disk.
+
+         maxDocs - Maximum number of documents to add since the last
+                   soft commit before automaticly triggering a new soft commit.
+
+         maxTime - Maximum amount of time in ms that is allowed to pass
+                   since a document was added before automaticly
+                   triggering a new soft commit.
+      -->
+      
+       <!-- Limit the number of deletions Solr will buffer during doc updating.
+
+        Setting this lower can help bound memory use during indexing.
+    -->
+    <maxPendingDeletes>100000</maxPendingDeletes>
+
+    <!-- autocommit pending docs if certain criteria are met.  Future versions may expand the available
+     criteria -->
+    <autoCommit>
+      <maxDocs>10000</maxDocs> <!-- maximum uncommited docs before autocommit triggered -->
+      <maxTime>15000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
+      <openSearcher>false</openSearcher> <!-- SOLR 4.0.  Optionally don't open a searcher on hard commit.  This is useful to minimize the size of transaction logs that keep track of uncommitted updates. -->
+    </autoCommit> 
+      
+    <!-- SoftAutoCommit
+
+         Perform a 'soft' commit automatically under certain conditions.
+         This commit avoids ensuring that data is synched to disk.
+
+         maxDocs - Maximum number of documents to add since the last
+                   soft commit before automaticly triggering a new soft commit.
+
+         maxTime - Maximum amount of time in ms that is allowed to pass
+                   since a document was added before automaticly
+                   triggering a new soft commit.
+      -->
+    <autoSoftCommit>
+        <maxTime>1000</maxTime>
+    </autoSoftCommit>         
   </updateHandler>
 
     <!-- Search Components
@@ -73,36 +111,6 @@
         always be executed after the "last-components"
       -->
 
-    <searchComponent class="solr.SpellCheckComponent" name="suggest">
-        <lst name="spellchecker">
-            <str name="name">suggest</str>
-            <str name="storeDir">suggest</str>
-            <str name="classname">org.apache.solr.spelling.suggest.Suggester</str>
-            <str name="lookupImpl">org.apache.solr.spelling.suggest.tst.TSTLookup</str>
-            <!-- Alternatives to lookupImpl:
-                 org.apache.solr.spelling.suggest.fst.FSTLookup   [finite state automaton]
-                 org.apache.solr.spelling.suggest.fst.WFSTLookupFactory [weighted finite state automaton]
-                 org.apache.solr.spelling.suggest.jaspell.JaspellLookup [default, jaspell-based]
-                 org.apache.solr.spelling.suggest.tst.TSTLookup   [ternary trees]
-              -->
-            <str name="field">suggestions</str>  <!-- the indexed field to derive suggestions from -->
-            <str name="buildOnOptimize">true</str>
-        </lst>
-    </searchComponent>
-
-    <requestHandler class="org.apache.solr.handler.component.SearchHandler" name="/suggest">
-        <lst name="defaults">
-            <str name="spellcheck">true</str>
-            <str name="spellcheck.dictionary">suggest</str>
-            <str name="spellcheck.onlyMorePopular">false</str>
-            <str name="spellcheck.count">50</str>
-            <str name="spellcheck.collate">true</str>
-        </lst>
-        <arr name="components">
-            <str>suggest</str>
-        </arr>
-    </requestHandler>
-
   <query>
         <maxBooleanClauses>1024</maxBooleanClauses>
         <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
@@ -121,19 +129,19 @@
     <!-- SearchHandler
          http://wiki.apache.org/solr/SearchHandler
 
-         For processing Search Queries, the primary Request Handler
-         provided with Solr is "SearchHandler" It delegates to a sequent
-         of SearchComponents (see below) and supports distributed
-         queries across multiple shards
-      -->
+       For processing Search Queries, the primary Request Handler
+       provided with Solr is "SearchHandler" It delegates to a sequent
+       of SearchComponents (see below) and supports distributed
+       queries across multiple shards
+    -->
     <requestHandler name="/select" class="solr.SearchHandler">
         <!-- default values for query parameters can be specified, these
-             will be overridden by parameters in the request
-          -->
+           will be overridden by parameters in the request
+        -->
         <lst name="defaults">
             <str name="echoParams">explicit</str>
             <int name="rows">100</int>
-            <str name="df">searchfield</str>
+            <str name="df">search</str>
             <str name="wt">json</str>
             <str name="indent">false</str>
             <str name="defType">edismax</str>
@@ -143,23 +151,9 @@
     <requestHandler name="/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
 
     <requestHandler name="standard" class="solr.StandardRequestHandler">
-       <lst name="defaults">
-         <str name="echoParams">explicit</str>
-       </lst>
-    </requestHandler>
-
-    <requestHandler name="/replication" class="solr.ReplicationHandler">
-      <lst name="master">
-        <str name="enable">${replication.enablemaster:false}</str>
-        <str name="replicateAfter">startup</str>
-        <str name="replicateAfter">${replication.replicateafter:optimize}</str>
-        <str name="confFiles">solrconfig.xml,schema.xml,solrcore.properties:solrcore.properties.master,solrcore.properties.slave:solrcore.properties</str>
-      </lst>
-      <lst name="slave">
-        <str name="enable">${replication.enableslave:false}</str>
-        <str name="masterUrl">http://db005-b.pictura-hosting.nl:8180/ciss4/${solr.core.name}/replication</str>
-        <str name="pollInterval">00:00:60</str>
-      </lst>
+        <lst name="defaults">
+            <str name="echoParams">explicit</str>
+        </lst>
     </requestHandler>
 
     <requestHandler name="/update" class="solr.UpdateRequestHandler" />
