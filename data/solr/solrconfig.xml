@@ -5,7 +5,7 @@
   <luceneMatchVersion>4.4</luceneMatchVersion>
 
   <!-- set this via the core's properties file -->
-  <dataDir>/var/local/solr/openskos/data</dataDir>
+  <dataDir>${solr.core.data.dir:}</dataDir>
 
   <indexConfig>
     <useCompoundFile>false</useCompoundFile>

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -18,7 +18,7 @@
  */
 
 class Editor_SearchController extends OpenSKOS_Controller_Editor {
-    
+
     public function indexAction()
     {
         $this->view->searchForm = Editor_Forms_Search::getInstance();
