@@ -142,7 +142,7 @@ class ConceptManager extends ResourceManager
      * Perform a full text query
      * lucene / solr queries are possible
      * for the available fields see schema.xml
-     * 
+     *
      * @param string $query
      * @param int $rows
      * @param int $start
@@ -166,7 +166,8 @@ class ConceptManager extends ResourceManager
             $return['concepts'][] = $document->getFields();
         }
         
-        var_dump($return); exit;
+        var_dump($return);
+        exit;
     }
 
     /**

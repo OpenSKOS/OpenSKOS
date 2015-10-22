@@ -19,7 +19,8 @@
 
 namespace OpenSkos2\Search;
 
-class Fulltext {
+class Fulltext
+{
 
     /**
      * @var \OpenSkos2\ConceptManager
@@ -55,7 +56,7 @@ class Fulltext {
         }
         $solrQuery .= ')';
         
-        // search status   
+        // search status
         $solrQuery .= '(';
         foreach ($options['status'] as $status) {
             $solrQuery .= 's_status:"'.$status.'" OR ';
