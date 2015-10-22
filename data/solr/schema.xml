@@ -4,10 +4,11 @@
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
-        <field name="s_*" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-        <field name="t_*" type="text" indexed="true" stored="true" required="true" multiValued="false" />
-
-        <field name="search" type="text" indexed="true" stored="true" required="true" multiValued="false" />
+        <dynamicField name="d_*" type="date" indexed="true" stored="true" required="false" multiValued="true" />
+        <dynamicField name="s_*" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+        <dynamicField name="t_*" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+                        
+        <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
 
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
 
@@ -19,10 +20,14 @@
     <uniqueKey>uri</uniqueKey>
 
     <types>
+        <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+        
         <fieldType name="long" class="solr.TrieLongField" omitNorms="true"/>
         
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
-
+        
+        <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
+        
         <fieldtype name="text" class="solr.TextField" positionIncrementGap="100">
             <analyzer>
                 <tokenizer class="solr.StandardTokenizerFactory"/>

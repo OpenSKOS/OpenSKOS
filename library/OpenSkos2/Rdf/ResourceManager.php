@@ -51,14 +51,20 @@ class ResourceManager
     protected $resourceType = null;
 
     /**
+     * @var \Solarium\Client
+     */
+    private $solr;
+
+    /**
      * ResourceManager constructor.
      * @param Client $client
      * @param string $graph
      */
-    public function __construct(Client $client, $graph = null)
+    public function __construct(Client $client, \Solarium\Client $solr, $graph = null)
     {
         $this->client = $client;
         $this->graph = $graph;
+        $this->solr = $solr;
     }
 
     /**
@@ -68,8 +74,16 @@ class ResourceManager
     public function insert(Resource $resource)
     {
         $this->client->insert(EasyRdf::resourceToGraph($resource));
+
+        // Post  something to solr...
+        $update = $this->solr->createUpdate();
+        $doc = $update->createDocument();
+        $convert = new \OpenSkos2\Solr\Document($resource, $doc);
+        $resourceDoc = $convert->getDocument();
+        $update->addDocument($resourceDoc)->addCommit(true);
+        $result = $this->solr->update($update);
     }
-    
+
     /**
      * Soft delete resource , sets the openskos:status to deleted
      * and add a delete date.
@@ -85,14 +99,14 @@ class ResourceManager
         $resource->unsetProperty(OpenSkosNamespace::STATUS);
         $status = new Literal(\OpenSkos2\Concept::STATUS_DELETED);
         $resource->addProperty(OpenSkosNamespace::STATUS, $status);
-        
+
         $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
         $resource->addProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
-        
+
         if ($user) {
             $resource->unsetProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
-        
+
         $this->delete($resource);
         $this->insert($resource);
     }
@@ -118,7 +132,7 @@ class ResourceManager
 
         $this->client->update($query);
     }
-    
+
     /**
      * Fetch resource by uuid
      *
@@ -136,7 +150,7 @@ class ResourceManager
         $query = $qb->describe('?subject')
             ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
         $data = $this->fetchQuery($query);
-        
+
         if (!isset($data[0])) {
             return;
         }
@@ -316,12 +330,12 @@ class ResourceManager
             if (!is_array($value)) {
                 $value = [$value];
             }
-            
+
             $newFilter = [];
             foreach ($value as $val) {
                 $newFilter[] = '?' . $i . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
             }
-            
+
             $filters[] = '(' . implode(' || ', $newFilter) . ') ';
         }
 
@@ -337,7 +351,7 @@ class ResourceManager
 
         return $this->ask($ask);
     }
-    
+
     /**
      * Makes query (with full sparql patterns) from our search patterns.
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
@@ -381,11 +395,11 @@ class ResourceManager
         if ($query instanceof \Asparagus\QueryBuilder) {
             $query = $query->getSPARQL();
         }
-        
+
         $result = $this->client->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
-    
+
     /**
      * Sends an ask query for if a match is found for the patterns and returns the boolean result.
      * @param string $query String representation of the patterns.
