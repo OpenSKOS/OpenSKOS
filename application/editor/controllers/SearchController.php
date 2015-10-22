@@ -68,30 +68,11 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             }
         }
 
-        // Select the concepts
-        $apiClient = new Editor_Models_ApiClient();
-        try {
-            $conceptsRaw = $apiClient->searchConcepts(
-                    Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions)
-            );
-        } catch (Exception $ex) {
-            $this->getHelper('json')->sendJson(array('status' => 'error', 'message' => 'Bad query syntax.'));
-        }
-
-        $concepts = array();
-        foreach ($conceptsRaw['data'] as $concept) {
-            $concepts[] = $concept->toArray(array('uuid', 'uri', 'status', 'schemes', 'previewLabel', 'previewScopeNote'));
-        }
-
-        $this->getHelper('json')->sendJson(
-                array(
-                    'status' => 'ok',
-                    'numFound' => $conceptsRaw['numFound'],
-                    'concepts' => $concepts,
-                    'conceptSchemeOptions' => $this->_getConceptSchemeOptions($searchOptions),
-                    'profileOptions' => $this->_getProfilesSelectOptions()
-                )
-        );
+        $options = Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+        
+        /* @var $search \OpenSkos2\Search\Fulltext */
+        $search = $this->getDI()->get('\OpenSkos2\Search\Fulltext');
+        return $search->search($options);
     }
 
     public function showFormAction()

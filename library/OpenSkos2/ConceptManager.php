@@ -137,6 +137,37 @@ class ConceptManager extends ResourceManager
             $this->client->insert($graph);
         }
     }
+    
+    /**
+     * Perform a full text query
+     * lucene / solr queries are possible
+     * for the available fields see schema.xml
+     * 
+     * @param string $query
+     * @param int $rows
+     * @param int $start
+     */
+    public function search($query, $rows = 20, $start = 0)
+    {
+        $select = $this->solr->createSelect();
+        $select->setStart($start)
+                ->setRows($rows)
+                ->setFields(['uri'])
+                ->setQuery($query);
+        
+        $result = $this->solr->select($select);
+
+        $return = [
+            'total' => $result->getNumFound(),
+            'concepts' => [],
+        ];
+        
+        foreach ($result as $document) {
+            $return['concepts'][] = $document->getFields();
+        }
+        
+        var_dump($return); exit;
+    }
 
     /**
      * Get inverse of skos relation

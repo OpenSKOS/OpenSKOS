@@ -236,5 +236,14 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
             }
         }
     }
-
+    
+    /**
+     * Get dependency injection container
+     * 
+     * @return \DI\Container
+     */
+    public function getDI()
+    {
+       return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();    
+    }
 }
