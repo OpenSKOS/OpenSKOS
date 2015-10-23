@@ -34,7 +34,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         
         $doc = $skosSolr->getDocument();
         
-        $label = $doc->{'s_prefLabel@nl'};
+        $label = $doc->{'s_prefLabel_nl'};
         $firstLabel = current($label);
         $this->assertEquals('bla', $firstLabel);
         $this->assertEquals($uri, $doc->uri);

@@ -4,9 +4,18 @@
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
+        <!-- date -->
         <dynamicField name="d_*" type="date" indexed="true" stored="true" required="false" multiValued="true" />
+        <!-- string -->
         <dynamicField name="s_*" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+        <!-- search -->
         <dynamicField name="t_*" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- autocomplete -->
+        <dynamicField name="a_*" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- int -->
+        <dynamicField name="i_*" type="integer" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- boolean -->
+        <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
                         
         <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
 
@@ -28,6 +37,20 @@
         
         <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
         
+        <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
+        
+        <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+                <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30" side="front"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+            </analyzer>
+         </fieldType>
+        
         <fieldtype name="text" class="solr.TextField" positionIncrementGap="100">
             <analyzer>
                 <tokenizer class="solr.StandardTokenizerFactory"/>
@@ -43,5 +66,6 @@
             </analyzer>
         </fieldtype>
     </types>
-
+    
+    <solrQueryParser defaultOperator="AND"/>
 </schema>

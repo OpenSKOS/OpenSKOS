@@ -18,7 +18,9 @@
  */
 
 class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
-
+    
+    use \OpenSkos2\Zf1\Psr7Trait;
+    
     /**
      * Holds constants for defining reposnse type.
      * @var string

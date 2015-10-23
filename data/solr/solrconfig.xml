@@ -97,21 +97,27 @@
         always be executed after the "last-components"
       -->
 
-  <query>
-        <maxBooleanClauses>1024</maxBooleanClauses>
-        <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
-        <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
-        <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
-        <enableLazyFieldLoading>true</enableLazyFieldLoading>
-        <queryResultWindowSize>10</queryResultWindowSize>
-        <useColdSearcher>false</useColdSearcher>
-        <maxWarmingSearchers>4</maxWarmingSearchers>
-  </query>
+    <query>
+          <maxBooleanClauses>1024</maxBooleanClauses>
+          <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+          <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+          <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+          <enableLazyFieldLoading>true</enableLazyFieldLoading>
+          <queryResultWindowSize>10</queryResultWindowSize>
+          <useColdSearcher>false</useColdSearcher>
+          <maxWarmingSearchers>4</maxWarmingSearchers>
+    </query>
 
-  <requestDispatcher handleSelect="false" >
-    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
-  </requestDispatcher>
-
+    <requestDispatcher handleSelect="false" >
+      <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+    </requestDispatcher>
+    
+    <!-- query existing fields -->
+    <requestHandler name="/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+    
+    <!-- perform query analysis -->
+    <requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" />
+    
     <!-- SearchHandler
          http://wiki.apache.org/solr/SearchHandler
 
@@ -120,10 +126,10 @@
        of SearchComponents (see below) and supports distributed
        queries across multiple shards
     -->
-    <requestHandler name="/select" class="solr.SearchHandler">
+   <requestHandler name="/select" class="solr.SearchHandler">
         <!-- default values for query parameters can be specified, these
-           will be overridden by parameters in the request
-        -->
+             will be overridden by parameters in the request
+          -->
         <lst name="defaults">
             <str name="echoParams">explicit</str>
             <int name="rows">100</int>
@@ -133,7 +139,7 @@
             <str name="defType">edismax</str>
         </lst>
     </requestHandler>
-
+       
     <requestHandler name="/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
 
     <requestHandler name="standard" class="solr.StandardRequestHandler">

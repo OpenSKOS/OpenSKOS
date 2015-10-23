@@ -2,14 +2,14 @@
 
 /*
  * OpenSKOS
- * 
+ *
  * LICENSE
- * 
+ *
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * 
+ *
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
@@ -19,60 +19,30 @@
 
 class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
+    /**
+     * Return json search results for search in the editor with a search profile
+     */
     public function indexAction()
     {
-        $this->view->searchForm = Editor_Forms_Search::getInstance();
+        $searchForm = Editor_Forms_Search::getInstance();
 
         $request = $this->getRequest();
         if (!$request->isPost()) {
             return;
         }
 
-        if (!$this->view->searchForm->isValid($this->getRequest()->getPost())) {
+        if (!$searchForm->isValid($this->getRequest()->getPost())) {
             return;
         }
 
-        $userForSearch = $this->view->searchForm->getUserForSearch();
-        $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
+        $options = $this->getSearchOptions($searchForm);
 
-        $this->view->disableSearchProfileChanging = $loggedUser->disableSearchProfileChanging;
-
-        $searchOptions = $this->view->searchForm->getValues();
-        $detailedSearchOptions = $userForSearch->getSearchOptions(true);
-
-        // Change search profile if needed and allowed. Change concept schemes if needed.
-        //!TODO Refactor. That code evolved little ugly.
-        if ($loggedUser['id'] == $userForSearch['id']) {
-            $profileId = $this->getRequest()->getParam('searchProfileId', '');
-
-            if ($detailedSearchOptions['searchProfileId'] != $profileId || !isset($detailedSearchOptions['searchProfileId'])) {
-                $this->_switchUserToSearchProfile($loggedUser, $profileId);
-                $detailedSearchOptions = $loggedUser->getSearchOptions();
-
-                // Reset allowedConceptScheme
-                if ($loggedUser->disableSearchProfileChanging) {
-                    $searchOptions['allowedConceptScheme'] = array();
-                }
-            } elseif ((!isset($searchOptions['conceptScheme']) || !isset($detailedSearchOptions['conceptScheme'])) || $searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
-                if ($loggedUser->isAllowedToUseSearchProfile('custom')) {
-                    // Change concept schemes selection
-                    $detailedSearchOptions['searchProfileId'] = 'custom';
-                    if (isset($searchOptions['conceptScheme'])) {
-                        $detailedSearchOptions['conceptScheme'] = $searchOptions['conceptScheme'];
-                    } else {
-                        $detailedSearchOptions['conceptScheme'] = array();
-                    }
-
-                    $loggedUser->setSearchOptions($detailedSearchOptions);
-                }
-            }
-        }
-
-        $options = Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
-        
-        /* @var $search \OpenSkos2\Search\Fulltext */
-        $search = $this->getDI()->get('\OpenSkos2\Search\Fulltext');
-        return $search->search($options);
+        /* @var $search \OpenSkos2\Search\Autocomplete */
+        $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
+        $items =  $search->search($options);
+        $items['status'] = 'ok';
+        $response = new Zend\Diactoros\Response\JsonResponse($items);
+        $this->emitResponse($response);
     }
 
     public function showFormAction()
@@ -313,4 +283,51 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         return $profilesOptions;
     }
 
+    /**
+     *
+     * @todo Refactor search options
+     * @param \Editor_Forms_Search $searchForm
+     * @return array
+     */
+    private function getSearchOptions(\Editor_Forms_Search $searchForm)
+    {
+        $userForSearch = $searchForm->getUserForSearch();
+        $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
+
+        $searchOptions = $searchForm->getValues();
+        $detailedSearchOptions = $userForSearch->getSearchOptions(true);
+
+        if ($loggedUser['id'] !== $userForSearch['id']) {
+            return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+        }
+
+        // Change search profile if needed and allowed. Change concept schemes if needed.
+        $profileId = $this->getRequest()->getParam('searchProfileId', '');
+
+        if ($detailedSearchOptions['searchProfileId'] != $profileId || !isset($detailedSearchOptions['searchProfileId'])) {
+            $this->_switchUserToSearchProfile($loggedUser, $profileId);
+            $detailedSearchOptions = $loggedUser->getSearchOptions();
+
+            // Reset allowedConceptScheme
+            if ($loggedUser->disableSearchProfileChanging) {
+                $searchOptions['allowedConceptScheme'] = array();
+            }
+        }
+
+        if (!$loggedUser->isAllowedToUseSearchProfile('custom')) {
+            return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+        }
+
+        if (!isset($searchOptions['conceptScheme'])) {
+            $detailedSearchOptions['conceptScheme'] = [];
+        }
+
+        if ($searchOptions['conceptScheme'] != $detailedSearchOptions['conceptScheme']) {
+            $detailedSearchOptions['conceptScheme'] = $searchOptions['conceptScheme'];
+        }
+
+        $loggedUser->setSearchOptions($detailedSearchOptions);
+
+        return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+    }
 }

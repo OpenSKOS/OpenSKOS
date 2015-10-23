@@ -36,4 +36,55 @@ class ConceptScheme extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
+    
+    /**
+     *
+     * Builds the path to the concept scheme icon.
+     * Returns empty string if the file does not exist.
+     *
+     * @todo Moved from Editor_Models_ConceptScheme for backwards compatibility,
+     * refactor later to not depend on the zend application
+     * @param srtring $uuid
+     * @param OpenSKOS_Db_Table_Row_Tenant $tenant optional, Default null.
+     * If not set the currently logged one will be used.
+     * @return string
+     */
+    public static function buildIconPath($uuid, $tenant = null)
+    {
+        $editorOptions = \OpenSKOS_Application_BootstrapAccess::getBootstrap()->getOption('editor');
+        
+        if (null === $tenant) {
+            $tenant = \OpenSKOS_Db_Table_Tenants::fromIdentity();
+        }
+        
+        $ap = APPLICATION_PATH;
+        // We always need tenant for getting icon path.
+        if (null !== $tenant) {
+            if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
+                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->code;
+            } else {
+                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->code;
+            }
+            
+            if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignHttpPath'])) {
+                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->code;
+            } else {
+                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->code;
+            }
+            
+            if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['extension'])) {
+                $iconsExtension = $editorOptions['schemeIcons']['extension'];
+            } else {
+                $iconsExtension = 'png';
+            }
+            
+            if (is_file($iconsAssignPath . '/' . $uuid . '.' . $iconsExtension)) {
+                return $iconsAssignHttpPath . '/' . $uuid . '.' . $iconsExtension . '?nocache=' . time();
+            } else {
+                return '';
+            }
+        } else {
+            return '';
+        }
+    }
 }
