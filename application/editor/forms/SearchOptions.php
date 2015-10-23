@@ -9,30 +9,42 @@ class Editor_Forms_SearchOptions extends Zend_Form
      * @var array
      */
     protected $_editorOptions;
-    
+
     /**
      * Holds the available search options.
      *
      * @var array
      */
     protected $_searchOptions;
-    
+
     /**
      * Holds the currently logged user's tenant.
      *
      * @var OpenSKOS_Db_Table_Row_Tenant
      */
     protected $_currentTenant;
-    
+
+    /**
+     * @var \OpenSkos2\ConceptSchemeManager
+     */
+    private $manager;
+
+    public function __construct(\OpenSkos2\ConceptSchemeManager $schemeManager, $options = null)
+    {
+        $this->manager = $schemeManager;
+        parent::__construct($options);
+    }
+
+
     public function init()
     {
         $this->setName('Advanced Search Options');
-        
+
         $this->setMethod('Post');
-        
+
         $this->_editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
         $this->_searchOptions = self::getAvailableSearchOptions();
-        
+
         $this->buildSearchProfiles()
             ->buildLanguage()
             ->buildLexicalLabel()
@@ -42,14 +54,14 @@ class Editor_Forms_SearchOptions extends Zend_Form
             ->buildUserInteraction()
             ->buildCollections()
             ->buildConceptSchemes();
-            
+
         if (! $this->_currentTenant->disableSearchInOtherTenants) {
             $this->buildTenants();
         }
-            
+
         $this->buildButtons()
             ->buildSaveAsProfile();
-        
+
         // If the user is disabled to change search profile - disable all fields.
         if (OpenSKOS_Db_Table_Users::requireFromIdentity()->disableSearchProfileChanging) {
             foreach ($this->getElements() as $element) {
@@ -57,17 +69,17 @@ class Editor_Forms_SearchOptions extends Zend_Form
             }
         }
     }
-    
+
     public function isValid($data)
     {
         // If the user is disabled to change search profile he can not change any search settings.
         if (OpenSKOS_Db_Table_Users::requireFromIdentity()->disableSearchProfileChanging) {
             $this->addError(_('You are not allowed to change your detailed search options.'));
         }
-        
+
         return parent::isValid($data);
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -81,19 +93,19 @@ class Editor_Forms_SearchOptions extends Zend_Form
             $profilesOptions[$profile->id] = $profile->name;
         }
         $profilesOptions['custom'] = _('Custom');
-        
+
         $this->addElement('select', 'searchProfileId', array(
             'label' => _('Search Profile'),
             'multiOptions' => $profilesOptions
         ));
-        
+
         $this->addElement('text', 'searchProfileName', array(
             'filters' => array('StringTrim'),
             'label' => _('Search Profile Name'),
         ));
-        
+
         $this->addElement('hidden', 'switchProfile', array('value' => 0, 'decorators' => array('ViewHelper')));
-        
+
         return $this;
     }
 
@@ -107,7 +119,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
             return $this;
         }
         $languages = $this->_editorOptions['languages'];
-        
+
         $this->addElement('multiCheckbox', 'languages', array(
                 'label' => _('Language'),
                 'multiOptions' => $languages
@@ -115,7 +127,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         $this->getElement('languages')->setValue(array_keys($languages));
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -125,19 +137,19 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (isset($this->_searchOptions['labels'])) {
             $labels = $this->_searchOptions['labels'];
         }
-        
+
         $this->addElement('multiCheckbox', 'label', array(
                 'label' => _('Lexical label'),
                 'multiOptions' => $labels
         ));
-        
+
         if (! empty($labels)) {
             $this->getElement('label')->setValue(array_keys($labels));
         }
-        
+
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -159,11 +171,11 @@ class Editor_Forms_SearchOptions extends Zend_Form
                 $this->getElement('status')->setValue($checkedOptions);
             }
         }
-        
+
         $this->addElement('checkbox', 'toBeChecked', array(
             'label' => _('To be checked'),
         ));
-        
+
         return $this;
     }
 
@@ -176,19 +188,19 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (isset($this->_searchOptions['docproperties'])) {
             $docProperties = $this->_searchOptions['docproperties'];
         }
-                
+
         $this->addElement('multiCheckbox', 'properties', array(
                 'label' => _('Document properties'),
                 'multiOptions' => $docProperties
         ));
-        
+
         if (! empty($docProperties)) {
             $this->getElement('properties')->setValue(array_keys($docProperties));
         }
-        
+
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -208,7 +220,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         ));
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -222,22 +234,22 @@ class Editor_Forms_SearchOptions extends Zend_Form
         foreach ($users as $user) {
             $userData[$user->id] = $user->name;
         }
-        
+
         $userInteractionTypes = array();
         if (isset($this->_searchOptions['interactiontypes'])) {
             $userInteractionTypes = $this->_searchOptions['interactiontypes'];
         }
-        
+
         $this->addElement('hidden', 'userInteractionTypeLabel', array(
                 'label' => _('Created, modified or approved'),
                 'disabled' => true
         ));
-        
+
         $this->addElement('multiCheckbox', 'userInteractionType', array(
                 'label' => '',
                 'multiOptions' => $userInteractionTypes
         ));
-        
+
         $this->addElement('multiselect', 'interactionByRoles', array(
                 'label' => _('Roles'),
                 'multiOptions' => $rolesOptions
@@ -247,7 +259,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
                 'multiOptions' => $userData
         ));
         $this->buildDateInput('interaction');
-        
+
         $this->addDisplayGroup(
             array('userInteractionType', 'interactionByRoles', 'interactionByUsers', 'interactionDateFrom', 'interactionDateTo'),
             'interaction',
@@ -256,10 +268,10 @@ class Editor_Forms_SearchOptions extends Zend_Form
                         'disableDefaultDecorators'=> true,
                         'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'interaction'))))
         );
-        
+
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -273,9 +285,9 @@ class Editor_Forms_SearchOptions extends Zend_Form
                 'class' => 'datepicker'
 
         ));
-            
+
         $this->getElement($relatedElement.'DateFrom')->addValidator(new OpenSKOS_Validate_DateCompare($relatedElement.'DateTo', false));
-        
+
         $this->addElement('text', $relatedElement.'DateTo', array(
                 'label' => _('To'),
                 'size' => 10,
@@ -286,7 +298,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
 
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -298,7 +310,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         foreach ($tenants as $tenant) {
             $tenantsOptions[$tenant->code] = $tenant->name;
         }
-        
+
         $this->addElement('multiselect', 'tenants', array(
                 'label' => _('Tenants'),
                 'multiOptions' => $tenantsOptions
@@ -306,7 +318,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         $this->getElement('tenants')->setValue(array($this->_getCurrentTenant()->code));
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -318,27 +330,25 @@ class Editor_Forms_SearchOptions extends Zend_Form
         foreach ($collections as $collection) {
             $collectionsOptions[$collection->id] = $collection->dc_title;
         }
-        
+
         $this->addElement('multiselect', 'collections', array(
                 'label' => _('Collections'),
                 'multiOptions' => $collectionsOptions
         ));
-        
+
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
     protected function buildConceptSchemes()
     {
-        $apiClient = new Editor_Models_ApiClient();
-        $conceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap();
-    
-        $this->addElement('multiCheckbox', 'conceptScheme', array(
+        $map = $this->manager->getMap();
+        $this->addElement('multiCheckbox', 'f', [
             'label' => _('Concept schemes'),
-            'multiOptions' => $conceptSchemes
-        ));
+            'multiOptions' => $map
+        ]);
         return $this;
     }
 
@@ -350,22 +360,22 @@ class Editor_Forms_SearchOptions extends Zend_Form
         $this->addElement('submit', 'ok', array(
                 'label' => _('Ok')
         ));
-        
+
         $this->addElement('submit', 'resetDefaults', array(
                 'label' => _('Reset Defaults')
         ));
-        
+
         $this->addElement('submit', 'save', array(
                 'label' => _('Save Profile')
         ));
-        
+
         $this->addElement('submit', 'delete', array(
                 'label' => _('Delete Profile')
         ));
-        
+
         return $this;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -375,23 +385,23 @@ class Editor_Forms_SearchOptions extends Zend_Form
                 'label' => _('Save Profile As'),
                 'decorators' => array('ViewHelper')
         ));
-        
+
         $this->addElement('text', 'searchProfileNameSaveAs', array(
                 'filters' => array('StringTrim'),
                 'label' => 'Name',
                 'decorators' => array('ViewHelper')
         ));
-        
+
         $this->addDisplayGroup(
             array('saveAs', 'searchProfileNameSaveAs'),
             'save-as',
             array('disableDefaultDecorators'=> true,
                       'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'dd'))))
         );
-    
+
         return $this;
     }
-    
+
     /**
      * Gets the currently logged user's tenant.
      *
@@ -405,10 +415,10 @@ class Editor_Forms_SearchOptions extends Zend_Form
                 throw new Zend_Exception('Tenant not found. Needed for request to the api.');
             }
         }
-    
+
         return $this->_currentTenant;
     }
-    
+
     /**
      * @return Editor_Forms_SearchOptions
      */
@@ -422,7 +432,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
 
         return $instance;
     }
-    
+
     /**
      * Gets an array of the default search options.
      *
@@ -432,7 +442,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         $dummyForm = new Editor_Forms_SearchOptions();
         return self::formValues2Options($dummyForm->getValues(true));
     }
-    
+
     /**
      * Transforms form values to options.
      * Init options which are not set.
@@ -447,7 +457,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (empty($values['searchProfileId'])) {
             $values['searchProfileId'] = '';
         }
-        
+
         // All options which are not set must be empty arrays.
         if (! isset($values['languages'])) {
             $values['languages'] = array();
@@ -461,7 +471,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (! isset($values['properties'])) {
             $values['properties'] = array();
         }
-        
+
         // We do not need to remember searchProfileName in options.
         if (isset($values['searchProfileName'])) {
             unset($values['searchProfileName']);
@@ -472,7 +482,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (isset($values['switchProfile'])) {
             unset($values['switchProfile']);
         }
-        
+
         // We do not need buttons.
         if (isset($values['ok'])) {
             unset($values['ok']);
@@ -492,7 +502,7 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (isset($values['switchProfile'])) {
             unset($values['switchProfile']);
         }
-        
+
         // Some options needs to be empty arrays or strings.
         if (empty($values['userInteractionType'])) {
             $values['userInteractionType'] = array();
@@ -509,13 +519,13 @@ class Editor_Forms_SearchOptions extends Zend_Form
         if (empty($values['interactionDateTo'])) {
             $values['interactionDateTo'] = '';
         }
-        
+
         // Unset any disabled input fields.
         unset($values['userInteractionTypeLabel']);
-        
+
         return $values;
     }
-    
+
     /**
      * Gets an array of the available search options.
      *
@@ -526,30 +536,30 @@ class Editor_Forms_SearchOptions extends Zend_Form
         $options['labels']['prefLabel'] = _('preferred');
         $options['labels']['altLabel'] = _('alternative');
         $options['labels']['hiddenLabel'] = _('hidden');
-    
+
         $options['statuses']['none'] = _('none');
-        
+
         // We can not filter by status deleted. Those concepts are not shown.
         $statuses = array_diff(
             OpenSKOS_Concept_Status::getStatuses(),
             [OpenSKOS_Concept_Status::DELETED]
         );
-        
+
         foreach ($statuses as $status) {
             $options['statuses'][$status] = _($status);
         }
-        
+
         $options['docproperties']['definition'] = _('definition');
         $options['docproperties']['example'] = _('example');
         $options['docproperties']['changeNote'] = _('change note');
         $options['docproperties']['editorialNote'] = _('editorial note');
         $options['docproperties']['historyNote'] = _('history note');
         $options['docproperties']['scopeNote'] = _('scope note');
-    
+
         $options['interactiontypes']['created'] = _('created');
         $options['interactiontypes']['modified'] = _('modified');
         $options['interactiontypes']['approved'] = _('approved');
-    
+
         return $options;
     }
 }

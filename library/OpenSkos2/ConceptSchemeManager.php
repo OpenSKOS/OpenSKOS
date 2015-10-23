@@ -34,7 +34,32 @@ class ConceptSchemeManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
-    
+
+    /**
+     * Get all concept schema's as an array uri => title
+     */
+    public function getMap()
+    {
+        $prefixes = [
+            'skos' => Skos::NAME_SPACE,
+            'dc' => DcTerms::NAME_SPACE,
+            'rdf' => Namespaces\Rdf::NAME_SPACE,
+        ];
+        $qb = new \Asparagus\QueryBuilder($prefixes);
+        $qb->select('?subject', '?title')
+                ->where('?subject', 'rdf:type', 'skos:conceptScheme')
+                ->also('dc:title', '?title');
+
+        $result = $this->query($qb);
+        $map = [];
+
+        foreach ($result as $row) {
+            $map[(string)$row->subject] = (string)$row->title;
+        }
+
+        return $map;
+    }
+
     /**
      * Get all scheme's by collection URI
      *
@@ -57,31 +82,31 @@ class ConceptSchemeManager extends ResourceManager
                     openskos:uuid ?uuid;
             }
         ';
-        
+
         $result = $this->query($query);
-                
+
         $collection = new ResourceCollection();
         foreach ($result as $row) {
             $uri = $row->subject->getUri();
-            
+
             if (empty($uri)) {
                 continue;
             }
-            
+
             $scheme = new ConceptScheme($uri);
             if (!empty($row->title)) {
                 $scheme->addProperty(DcTerms::TITLE, new Literal($row->title->getValue()));
             }
-            
+
             if (!empty($row->uuid)) {
                 $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($row->uuid->getValue()));
             }
-            
+
             $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new Uri($collectionUri));
-            
+
             $collection[] = $scheme;
         }
-        
+
         return $collection;
     }
 }

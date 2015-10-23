@@ -50,12 +50,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $this->_helper->_layout->setLayout('editor_modal_box');
 
         $user = OpenSKOS_Db_Table_Users::requireFromIdentity();
-
-        if ((bool) $this->getRequest()->getParam('reInitForm', false)) {
-            $this->view->form = new Editor_Forms_SearchOptions();
-        } else {
-            $this->view->form = Editor_Forms_SearchOptions::getInstance();
-        }
+        $this->view->form = $this->getSearchOptionsForm();
 
         $this->view->form->setAction($this->getFrontController()->getRouter()->assemble(array('controller' => 'search', 'action' => 'set-options')));
 
@@ -117,7 +112,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
     public function setOptionsAction()
     {
-        $form = Editor_Forms_SearchOptions::getInstance();
+        $form = $this->getSearchOptionsForm();
 
         $request = $this->getRequest();
         if (!$this->getRequest()->isPost()) {
@@ -329,5 +324,13 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $loggedUser->setSearchOptions($detailedSearchOptions);
 
         return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+    }
+    
+    /**
+     * @return \Editor_Forms_SearchOptions
+     */
+    private function getSearchOptionsForm()
+    {
+        return $this->getDI()->get('Editor_Forms_SearchOptions');
     }
 }
