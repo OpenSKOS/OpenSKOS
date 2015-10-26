@@ -111,8 +111,7 @@ resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
 ; @extra routes here@
 
-; @TODO Return displayExceptions = 0
-resources.frontController.params.displayExceptions = 1
+resources.frontController.params.displayExceptions = 0
 resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
