@@ -23,6 +23,21 @@ class Escape
 {
     
     /**
+     * Escape array of literals
+     *
+     * @param array $literals
+     * @return string
+     */
+    public static function escapeLiterals(array $literals)
+    {
+        $lit = [];
+        foreach ($literals as $item) {
+            $lit[] = new \OpenSkos2\Rdf\Literal($item);
+        }
+        return (new \OpenSkos2\Rdf\Serializer\NTriple())->serializeArray($lit);
+    }
+
+    /**
      * Escape literal to use in sparql
      *
      * @param string $literal
@@ -43,5 +58,20 @@ class Escape
     {
         $ouri = new \OpenSkos2\Rdf\Uri($uri);
         return (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($ouri);
+    }
+    
+    /**
+     * Escape uri to use in sparql
+     *
+     * @param array $uris
+     * @return string
+     */
+    public static function escapeUris($uris)
+    {
+        $resources = [];
+        foreach ($uris as $uri) {
+            $resources[] = new \OpenSkos2\Rdf\Uri($uri);
+        }
+        return (new \OpenSkos2\Rdf\Serializer\NTriple())->serializeArray($resources);
     }
 }

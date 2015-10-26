@@ -53,7 +53,7 @@ class ResourceManager
     /**
      * @var \Solarium\Client
      */
-    private $solr;
+    protected $solr;
 
     /**
      * ResourceManager constructor.

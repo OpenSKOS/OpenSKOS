@@ -26,7 +26,7 @@ use OpenSkos2\Rdf\Resource;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
 /**
- * Get a solr document from a resource
+ * Get a solr document from a skos concept resource
  */
 class Document
 {
@@ -44,26 +44,27 @@ class Document
      * These namespaces will be indexed to solr, if the value contains a language
      * it will be added to the fieldname as.
      *
-     * s_prefLabel@nl
-     * s_prefLabel@en
+     * s_notation (never has an language)
+     * s_prefLabel_nl
+     * s_prefLabel_en
      *
      * @var array
      */
     private $mapping = [
-        Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel'],
-        Skos::ALTLABEL => ['s_altLabel', 't_altLabel'],
-        Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel'],
-        Skos::DEFINITION => ['t_definition'],
-        Skos::EXAMPLE => ['t_example'],
-        Skos::CHANGENOTE => ['t_changeNote'],
-        Skos::EDITORIALNOTE => ['t_editorialNote'],
-        Skos::HISTORYNOTE => ['t_historyNote'],
-        Skos::SCOPENOTE => ['t_scopeNote'],
-        Skos::NOTATION => ['t_notaton'],
+        Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel'],
+        Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel'],
+        Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel'],
+        Skos::DEFINITION => ['t_definition', 'a_definition'],
+        Skos::EXAMPLE => ['t_example', 'a_example'],
+        Skos::CHANGENOTE => ['t_changeNote', 'a_changeNote'],
+        Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote'],
+        Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote'],
+        Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote'],
+        Skos::NOTATION =>   ['s_notaton', 't_notaton', 'a_notaton'],
         Openskos::STATUS => ['s_status'],
         Openskos::TENANT => ['s_tenant'],
-        DcTerms::CREATOR => ['s_creator', 't_creator'],
-        DcTerms::CONTRIBUTOR => ['s_contributor', 't_contributor'],
+        DcTerms::CREATOR => ['s_creator', 't_creator', 'a_creator'],
+        DcTerms::CONTRIBUTOR => ['s_contributor', 't_contributor', 'a_contributor'],
         DcTerms::CREATED => ['d_created'],
         DcTerms::MODIFIED => ['d_modified'],
     ];
@@ -99,8 +100,40 @@ class Document
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
-
+        
+        $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
+        $this->document->b_isOrphan = $this->isOrphan();
+        
         return $this->document;
+    }
+    
+    /**
+     * Check if the concept is an orphan
+     *
+     * @return boolean
+     */
+    private function isOrphan()
+    {
+        if ($this->resource->isPropertyEmpty(Skos::BROADER)) {
+            return false;
+        }
+        if ($this->resource->isPropertyEmpty(Skos::NARROWER)) {
+            return false;
+        }
+        if ($this->resource->isPropertyEmpty(Skos::BROADERTRANSITIVE)) {
+            return false;
+        }
+        if ($this->resource->isPropertyEmpty(Skos::NARROWERTRANSITIVE)) {
+            return false;
+        }
+        if ($this->resource->isPropertyEmpty(Skos::NARROWMATCH)) {
+            return false;
+        }
+        if ($this->resource->isPropertyEmpty(Skos::BROADMATCH)) {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -122,7 +155,7 @@ class Document
             }
 
             if ($language) {
-                $newField .= '@' . $language;
+                $newField .= '_' . $language;
             }
 
             if (!isset($data[$newField])) {

@@ -36,6 +36,28 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
 
     /**
+     * String to combine / explode for concat values from sparql
+     *
+     * @var string
+     */
+    private $concatSeperator = '^';
+
+    /**
+     * String to combine and explode group_concat values from sparql
+     *
+     * @var string
+     */
+    private $groupConcatSeperator = '|';
+
+    /**
+     * Field seperator, used to add field names in concatted groups e.g
+     * title@@this is my title
+     *
+     * @var string
+     */
+    private $concatFieldSeperator = '@@';
+    
+    /**
      * Supported relation types to add or remove
      * @var array
      */
@@ -137,6 +159,106 @@ class ConceptManager extends ResourceManager
             $this->client->insert($graph);
         }
     }
+    
+    /**
+     * Perform a full text query
+     * lucene / solr queries are possible
+     * for the available fields see schema.xml
+     *
+     * @param string $query
+     * @param int $rows
+     * @param int $start
+     */
+    public function search($query, $rows = 20, $start = 0)
+    {
+        $select = $this->solr->createSelect();
+        $select->setStart($start)
+                ->setRows($rows)
+                ->setFields(['uri'])
+                ->setQuery($query);
+        
+        $solrResult = $this->solr->select($select);
+        
+        $conceptUri = [];
+        
+        foreach ($solrResult as $doc) {
+            $conceptUri[] = $doc->uri;
+        }
+        
+        $conceptUris = \OpenSkos2\Sparql\Escape::escapeUris($conceptUri);
+
+        // Add asparagus BIND support see: https://github.com/Benestar/asparagus/issues/26
+        $query = '
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX openskos: <http://openskos.org/xmlns#>
+            PREFIX dcterms: <http://purl.org/dc/terms/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+            SELECT ?prefLabel ?uuid ?uri ?status
+                (group_concat (
+                    distinct concat ("uri",
+                        "'.$this->concatFieldSeperator.'",
+                        str(?scheme),
+                        "'.$this->concatSeperator.'",
+                        "dcterms_title",
+                        "'.$this->concatFieldSeperator.'",
+                        ?schemeTitleb,
+                        "'.$this->concatSeperator.'",
+                        "uuid",
+                        "'.$this->concatFieldSeperator.'",
+                        ?schemeUuidb);separator = "'.$this->groupConcatSeperator.'") AS ?schemes)
+            WHERE {
+                    ?uri rdf:type skos:Concept ;
+                            skos:prefLabel ?prefLabel ;
+                            openskos:uuid ?uuid ;
+                            openskos:status ?status ;
+                            skos:inScheme ?scheme .
+                    OPTIONAL {
+                        ?uri skos:inScheme ?scheme .
+                            ?scheme dcterms:title ?schemeTitle ;
+                            openskos:uuid ?schemeUuid .
+                    }
+                    FILTER (?uri IN ('.$conceptUris.'))
+              BIND ( IF (BOUND (?schemeUuid), ?schemeUuid, \'\')  as ?schemeUuidb)
+              BIND ( IF (BOUND (?schemeTitle), ?schemeTitle, \'\')  as ?schemeTitleb)
+            }
+            GROUP BY ?prefLabel ?uuid ?uri ?status
+            LIMIT 20';
+        
+        $searchResult = $this->query($query);
+        $items = [];
+        foreach ($searchResult as $literal) {
+            $arrLit = (array)$literal;
+            if (empty($arrLit)) {
+                continue;
+            }
+
+            $concept = [
+                'uri' => (string)$literal->uri,
+                'uuid' => (string)$literal->uuid,
+                'previewLabel' => (string)$literal->prefLabel,
+                'status' => (string)$literal->status
+            ];
+
+            if (isset($literal->schemes)) {
+                $schemes = $this->decodeConcat((string)$literal->schemes);
+                $concept['schemes'] = $this->addIconToScheme($schemes);
+            }
+
+            if (isset($literal->scopeNotes)) {
+                $concept['scopeNotes'] = explode('|', (string)$literal->scopeNotes);
+            }
+
+            $items[] = $concept;
+        }
+        
+        $return = [
+            'numFound' => $solrResult->getNumFound(),
+            'concepts' => $items
+        ];
+        
+        return $return;
+    }
 
     /**
      * Get inverse of skos relation
@@ -179,5 +301,46 @@ class ConceptManager extends ResourceManager
                 throw new Exception\InvalidArgumentException('Relation not supported');
                 break;
         }
+    }
+    
+    /**
+     * Add icon path to schemes
+     *
+     * @param array $schemes
+     * @return array
+     */
+    private function addIconToScheme($schemes)
+    {
+        foreach ($schemes as $i => $scheme) {
+            $scheme['iconPath'] = ConceptScheme::buildIconPath($scheme['uuid']);
+            $schemes[$i] = $scheme;
+        }
+        return $schemes;
+    }
+
+    /**
+     * Decode a string that has concat and group_concat values
+     *
+     * @param string $value
+     * @return array
+     */
+    private function decodeConcat($value)
+    {
+        $decoded = [];
+        $groups = explode($this->groupConcatSeperator, $value);
+        foreach ($groups as $group) {
+            $values = explode($this->concatSeperator, $group);
+            $obj = [];
+            foreach ($values as $groupValue) {
+                if (empty($groupValue)) {
+                    continue;
+                }
+                $fieldAndValue = explode($this->concatFieldSeperator, $groupValue);
+                $fieldName = $fieldAndValue[0];
+                $obj[$fieldName] = $fieldAndValue[1];
+            }
+            $decoded[] = $obj;
+        }
+        return $decoded;
     }
 }
