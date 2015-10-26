@@ -60,7 +60,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   <?xml version="1.0"?>
-            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
      *          xmlns:dc="http://purl.org/dc/elements/1.1/"
      *          xmlns:dcterms="http://purl.org/dc/terms/"
@@ -69,8 +69,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      *          openskos:numFound="15"
      *          openskos:start="0">
-     *  <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     *      xmlns:dc="http://purl.org/dc/terms/"
+     *  <rdf:Description xmlns:dc="http://purl.org/dc/terms/"
      *      rdf:about="http://data.cultureelerfgoed.nl/semnet/efc584d7-9880-43fb-9a0b-76f3036aa315">
      *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
      *         <skos:prefLabel xml:lang="nl">doodshemden</skos:prefLabel>
@@ -137,7 +136,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *           xmlns:dc="http://purl.org/dc/terms/"
      *           xmlns:openskos="http://openskos.org/xmlns#">
      *
-     *    <skos:Concept rdf:about="http://data.beeldengeluid.nl/gtaa/218059">
+     *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/218059">
+     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
      *      <skos:historyNote xml:lang="nl">Recordnummer: 11665
      *  Datum invoer: 13-12-1998
      *  Gebruiker invoer: SEBASTIAAN
@@ -163,7 +163,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *      <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateSubmitted>
      *      <dc:dateAccepted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateAccepted>
      *      <openskos:uuid>03ae64e0-94ba-55d8-c01a-6f4259e95177</openskos:uuid>
-     *    </skos:Concept>
+     *    </rdf:Description>
      *  </rdf:RDF>
      *
      */

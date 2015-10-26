@@ -77,7 +77,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             }
         }
 
-        if (!$options[self::OPTION_RENDER_ITEMS_ONLY]) {
+        if (empty($options[self::OPTION_RENDER_ITEMS_ONLY])) {
             return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n".
             "<rdf:RDF". $namespaceStr . ">\n" . implode("\n", $this->objects) . "\n</rdf:RDF>\n";
         } else {

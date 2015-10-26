@@ -76,15 +76,13 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
         $doc->appendChild($root);
 
         foreach ($this->result->getConcepts() as $concept) {
+            // @TODO This can be replaced with something like the OpenSkos2\Export\Serialiser\Format\Xml().
+            // or both of them with something shared.
+            
             /* @var $concept \OpenSkos2\Concept */
             $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
             $conceptXML =  new \DOMDocument();
             $conceptXML->loadXML($xml);
-            
-            // Add rdf:type
-            $rdfType = $conceptXML->createElement('rdf:type');
-            $rdfType->setAttribute('rdf:resource', \OpenSkos2\Concept::TYPE);
-            $conceptXML->documentElement->appendChild($rdfType);
                         
             // Rename rdf:RDF to rdf:Description
             $desc = $conceptXML->createElement('rdf:Description');

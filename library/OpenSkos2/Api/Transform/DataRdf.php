@@ -19,6 +19,8 @@
 
 namespace OpenSkos2\Api\Transform;
 
+use OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions as EasyRdfOpenSkos;
+
 /**
  * Transform \OpenSkos2\Concept to a RDF string.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
@@ -32,11 +34,23 @@ class DataRdf
     private $concept;
     
     /**
+     * @var bool
+     */
+    private $includeRdfHeader = true;
+    
+    /**
      * @param \OpenSkos2\Concept $concept
      */
-    public function __construct(\OpenSkos2\Concept $concept)
+    public function __construct(\OpenSkos2\Concept $concept, $includeRdfHeader = true)
     {
         $this->concept = $concept;
+        $this->includeRdfHeader = $includeRdfHeader;
+        
+        // @TODO - put it somewhere globally
+        \EasyRdf\Format::registerSerialiser(
+            'rdfxml_openskos',
+            '\OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions'
+        );
     }
     
     /**
@@ -47,6 +61,9 @@ class DataRdf
     public function transform()
     {
         $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($this->concept);
-        return $concept->serialise('rdf');
+        return $concept->serialise(
+            'rdfxml_openskos',
+            [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
+        );
     }
 }
