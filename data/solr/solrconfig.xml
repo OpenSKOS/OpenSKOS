@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- this is a shared config for all cores on db005-* -->
-<!-- beware that this gets replicated to al slaves! -->
 <config>
   <luceneMatchVersion>4.4</luceneMatchVersion>
 
