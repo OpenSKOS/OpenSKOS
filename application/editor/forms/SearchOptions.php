@@ -430,30 +430,6 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     }
 
     /**
-     * @return Editor_Forms_SearchOptions
-     */
-    public static function getInstance()
-    {
-        static $instance;
-
-        if (null === $instance) {
-            $instance = new Editor_Forms_SearchOptions();
-        }
-
-        return $instance;
-    }
-
-    /**
-     * Gets an array of the default search options.
-     *
-     */
-    public static function getDefaultSearchOptions()
-    {
-        $dummyForm = new Editor_Forms_SearchOptions();
-        return self::formValues2Options($dummyForm->getValues(true));
-    }
-
-    /**
      * Transforms form values to options.
      * Init options which are not set.
      * Remove unneeded values.
@@ -571,5 +547,5 @@ class Editor_Forms_SearchOptions extends Zend_Form {
 
         return $options;
     }
-
+    
 }

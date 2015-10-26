@@ -23,7 +23,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
      * Return json search results for search in the editor with a search profile
      */
     public function indexAction()
-    {
+    {        
         $searchForm = Editor_Forms_Search::getInstance();
 
         $request = $this->getRequest();
@@ -67,14 +67,14 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                     $this->view->form->populate($profileSearchOptions);
                 }
             } else {
-                $this->view->form->populate(Editor_Forms_SearchOptions::getDefaultSearchOptions());
+                $this->view->form->populate($this->getSearchOptionsForm()->getValues(true));
             }
         } else {
             // If the form is opened (not submited with errors) populate it with the data from the user session.
             if (!$this->getRequest()->isPost()) {
                 $options = $user->getSearchOptions();
                 if (empty($options)) {
-                    $options = Editor_Forms_SearchOptions::getDefaultSearchOptions();
+                    $options = $this->getSearchOptionsForm()->getValues(true);
                 }
                 $this->view->form->populate($options);
             }
@@ -193,10 +193,10 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                 $originalOptions = Editor_Forms_SearchOptions::formValues2Options($originalOptions); // Make sure that there are no any old or unneeded options in the profile.
                 $originalOptions['searchProfileId'] = $profile->id;
             } else {
-                $originalOptions = Editor_Forms_SearchOptions::getDefaultSearchOptions();
+                $originalOptions = $this->getSearchOptionsForm()->getValues(true);
             }
 
-            $checkOptions = array_merge(Editor_Forms_SearchOptions::getDefaultSearchOptions(), $options);
+            $checkOptions = array_merge($this->getSearchOptionsForm()->getValues(true), $options);
 
             if ($checkOptions != $originalOptions) {
                 $options['searchProfileId'] = 'custom';
@@ -225,7 +225,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             if (null !== $profile) {
                 $detailedSearchOptions = $profile->getSearchOptions();
             } else {
-                $detailedSearchOptions = Editor_Forms_SearchOptions::getDefaultSearchOptions();
+                $detailedSearchOptions = $this->getSearchOptionsForm()->getValues(true);
             }
             $detailedSearchOptions['searchProfileId'] = $profileId;
             $user->setSearchOptions($detailedSearchOptions);

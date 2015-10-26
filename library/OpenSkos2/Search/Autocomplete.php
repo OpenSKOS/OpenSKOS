@@ -121,7 +121,6 @@ class Autocomplete
             }
             $solrQuery .= ')';
         }
-
         return $this->manager->search($solrQuery, $options['rows'], $options['start']);
     }
 }
