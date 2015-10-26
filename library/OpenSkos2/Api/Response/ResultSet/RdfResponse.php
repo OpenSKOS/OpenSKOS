@@ -63,7 +63,7 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
     private function getXML()
     {
         $doc = new \DOMDocument;
-        $root = $doc->createElementNS(\OpenSkos2\Namespaces\Rdf::TYPE, 'rdf:RDF');
+        $root = $doc->createElementNS(\OpenSkos2\Namespaces\Rdf::NAME_SPACE, 'rdf:RDF');
         $ns = 'http://www.w3.org/2000/xmlns/';
         $root->setAttributeNS($ns, 'xmlns:skos', \OpenSkos2\Namespaces\Skos::NAME_SPACE);
         $root->setAttributeNS($ns, 'xmlns:dc', \OpenSkos2\Namespaces\Dc::NAME_SPACE);
