@@ -22,7 +22,6 @@ namespace OpenSkos2\Rdf;
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
-use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
@@ -199,6 +198,16 @@ class ResourceManager
         }
 
         return $resources[0];
+    }
+    
+    /**
+     * Asks if a resource with the given uri exists.
+     * @param string $uri
+     * @return bool
+     */
+    public function askForUri($uri)
+    {
+        return $this->ask('<' . $uri . '> ?predicate ?object');
     }
 
     /**
