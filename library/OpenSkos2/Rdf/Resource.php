@@ -126,6 +126,20 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return empty($this->properties[$predicate]);
     }
+    
+    /**
+     * @param string $predicate
+     * @return bool
+     */
+    public function isPropertyTrue($predicate)
+    {
+        if (!$this->isPropertyEmpty($predicate)) {
+            $values = $this->getProperty($predicate);
+            // @TODO is that enough?
+            return (bool) $values[0]->getValue();
+        }
+        return empty($this->properties[$predicate]);
+    }
 
     /**
      * @return string
@@ -162,6 +176,23 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
+     * Go through the propery values and check if there is one in the specified language.
+     * @param string $predicate
+     * @param string $language
+     * @return bool
+     */
+    public function hasPropertyInLanguage($predicate, $language)
+    {
+        $values = [];
+        foreach ($this->getProperty($predicate) as $value) {
+            if ($value instanceof Literal && $value->getLanguage() == $language) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Gets the specified property values but filter only those in the specified language.     *
      * @param string $predicate
      * @param string $language
@@ -177,7 +208,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return $values;
     }
-
+    
     /**
      * Gets list of all languages that currently exist in the properties of the resource.
      * @return string[]
@@ -196,5 +227,22 @@ class Resource extends Uri implements ResourceIdentifier
         }
         
         return array_keys($languages);
+    }
+    
+    /**
+     * Gets proprty value and implodes it if multiple values are found.
+     * @param string $property
+     * @param string $language
+     * @return string
+     */
+    public function getPropertyFlatValue($property, $language = null)
+    {
+        if (!empty($language)) {
+            $values = $this->retrievePropertyInLanguage($property, $language);
+        } else {
+            $values = $this->getProperty($property);
+        }
+        
+        return implode(', ', $values);
     }
 }

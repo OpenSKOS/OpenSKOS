@@ -202,7 +202,7 @@ var EditorRelations = new Class({
 			e.stop();			
 			// If in edit mode and access allowed - opens add relation box.
 			if (ARE_RELATIONS_ALLOWED && Editor.Concept.isInEditMode()) {
-				self.showAddMultipleRelationBox(Editor.Search.getVisibleResultsUuids());
+				self.showAddMultipleRelationBox(Editor.Search.getVisibleResultsUris());
 			}
 		});
 		

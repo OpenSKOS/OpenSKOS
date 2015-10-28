@@ -19,6 +19,12 @@
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Rdf\Uri;
+
 class Editor_ConceptController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
@@ -261,23 +267,19 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $this->_helper->_layout->setLayout('editor_central_content');
             $user = OpenSKOS_Db_Table_Users::fromIdentity();
 
-            $apiClient = new Editor_Models_ApiClient();
             $concept = $this->_getConcept();
-            $conceptSchemes = $apiClient->getConceptSchemeUriMap(null, $concept['tenant']);
-            $currentConceptSchemes = $concept->getConceptSchemes();
-
-            if (null !== $user)
-                $user->updateUserHistory($concept['uuid']);
+            
+            if (!empty($user)) {
+                $user->updateUserHistory($concept->getUri());
+            }
 
             $this->view->assign('currentConcept', $concept);
-            $this->view->assign('conceptLanguages', $concept->getConceptLanguages());
-            $this->view->assign('conceptSchemes', $conceptSchemes);
+            $this->view->assign(
+                'conceptSchemes',
+                $this->getDI()->get('\OpenSkos2\ConceptSchemeManager')->fetch([], 0, 200)
+            );
 
             $this->view->assign('footerData', $this->_generateFooter($concept));
-
-            if (isset($currentConceptSchemes['inScheme'])) {
-                $this->view->assign('schemeUris', $currentConceptSchemes['inScheme']);
-            }
         } catch (Zend_Exception $e) {
             $this->view->assign('errorMessage', $e->getMessage());
         }
@@ -422,20 +424,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     }
 
     /**
-     * @return Editor_Models_Concept
+     * @return OpenSkos2\Concept
      */
     protected function _getConcept()
     {
-        $uuid = $this->getRequest()->getParam('uuid');
-        if (null === $uuid || empty($uuid)) {
-            return null;
-        }
-
-        $response = Api_Models_Concepts::factory()->getConcepts('uuid:' . $uuid);
-        if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {
-            throw new Zend_Exception('The requested concept was deleted or not found');
+        $uri = $this->getRequest()->getParam('uri');
+        if (!empty($uri)) {
+            return $this->getDI()->get('\OpenSkos2\ConceptManager')->fetchByUri($uri);
         } else {
-            return new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
+            return null;
         }
     }
 
@@ -443,43 +440,59 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      * @FIXME There is too much logic data in the view, it should be moved to helpers and loaded before rendering.
      * A lot of the data should be loaded into the view from the controller.
      */
-    protected function _generateFooter(Api_Models_Concept &$concept)
+    protected function _generateFooter(OpenSkos2\Concept &$concept)
     {
-        $footerData = array();
-        $footerFields = array('created', 'modified', 'approved');
-        foreach ($footerFields as $field) {
-            if (isset($concept[$field . '_by'])) {
-                $user = $this->_getUser($concept[$field . '_by']);
+        $footerData = [];
+        $footerFields = [
+            'created' => [
+                'user' => DcTerms::CREATOR,
+                'date' => DcTerms::DATESUBMITTED,
+            ],
+            'modified' => [
+                'user' => DcTerms::CONTRIBUTOR,
+                'date' => DcTerms::MODIFIED,
+            ],
+            'approved' => [
+                'user' => OpenSkos::ACCEPTEDBY,
+                'date' => DcTerms::DATEACCEPTED,
+            ],
+        ];
+        
+        $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
+        
+        foreach ($footerFields as $field => $properties) {
+            $userName = null;
+            $date = null;
+            
+            if (!$concept->isPropertyEmpty($properties['user'])) {
+                $users = $concept->getProperty($properties['user']);
+                
+                // @TODO We only pick the first user now
+                $user = $users[0];
+                if ($user instanceof Uri && $personManager->askForUri($user)) {
+                    $userName = $personManager->fetchByUri($user)->getName();
+                } else {
+                    $userName = $user->getValue();
+                }
             }
-            if (isset($concept[$field . '_timestamp'])) {
-                $serverTimeZone = new DateTimeZone(ini_get('date.timezone'));
-                $date = new DateTime($concept[$field . '_timestamp']);
-                $date->setTimezone($serverTimeZone);
-                $date = $date->format('d-m-Y H:i:s');
-            } else {
-                $date = '';
+            
+            if (!$concept->isPropertyEmpty($properties['date'])) {
+                $dates = $concept->getProperty($properties['date']);
+                
+                // @TODO We only pick the first date now
+                $date = $dates[0]->getValue()
+                    // @TODO there is a timezone already. Check that
+                    ->setTimezone(new DateTimeZone(ini_get('date.timezone')))
+                    ->format('d-m-Y H:i:s');
             }
-
-            if ($field == 'created') {
-                $footerData[$field]['user'] = isset($user) && (null !== $user) ? $user->name : (isset($concept['dcterms_creator']) && !empty($concept['dcterms_creator']) ? $concept['dcterms_creator'][0] : 'N/A');
-            } else {
-                $footerData[$field]['user'] = isset($user) && (null !== $user) ? $user->name : 'N/A';
-            }
+            
+            $footerData[$field]['user'] = !empty($userName) ? $userName : 'N/A';
             $footerData[$field]['date'] = !empty($date) ? $date : 'N/A';
         }
+        
         return $footerData;
     }
-
-    /**
-     * @return OpenSKOS_Db_Table_Row_User
-     */
-    protected function _getUser($id)
-    {
-        $model = new OpenSKOS_Db_Table_Users();
-        $user = $model->find((int) $id)->current();
-        return $user;
-    }
-
+    
     /**
      * Check if the user's tenant and the concept's tenant are the same. 
      * If not - do not allow edit and return to view with error.

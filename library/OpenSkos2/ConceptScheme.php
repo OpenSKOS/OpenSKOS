@@ -22,6 +22,7 @@ namespace OpenSkos2;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Namespaces\DcTerms;
 
 class ConceptScheme extends Resource
 {
@@ -35,6 +36,17 @@ class ConceptScheme extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
+
+    /**
+     * Gets preview title for the concept.
+     * @param string $language
+     * @return string
+     * @throws \Exception
+     */
+    public function getPreviewTitle($language = null)
+    {
+        return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
     }
     
     /**

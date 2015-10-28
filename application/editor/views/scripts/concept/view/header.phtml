@@ -1,0 +1,51 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\Namespaces\OpenSkos;
+?>
+
+<div id="concept-header">
+    <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']): ?>
+        <div id="concept-status">
+            <span><?php echo $this->translate('Status:'); ?> </span>
+            <?php echo ($this->currentConcept->isPropertyEmpty(OpenSkos::STATUS) ? $this->translate('undefined') : $this->translate($this->currentConcept->getPropertyFlatValue(OpenSkos::STATUS))); ?>
+        </div>
+    <?php endif ?>
+    <div id="concept-checked">
+        <span><?php echo $this->translate('To be checked:'); ?> </span>
+        <?php echo $this->currentConcept->isPropertyTrue(OpenSkos::TOBECHECKED) ? $this->translate('Yes') : $this->translate('No'); ?>
+    </div>
+    <div id="concept-action">
+        <input id="uri" type="hidden" value="<?php echo $this->currentConcept->getUri(); ?>" />
+        <?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')): ?>
+            <?php if ($this->currentConcept->getTenant() == OpenSKOS_Db_Table_Users::fromIdentity()->tenant): ?>
+                <button id="concept-edit">
+                    <?php echo $this->translate('Switch to edit mode'); ?>
+                </button>
+            <?php else: ?>
+                <?php echo $this->translate('Tenant:') . ' "' . $this->currentConcept->getTenant() . '"' ?>
+            <?php endif ?>
+        <?php endif ?>
+        <button class="export-concept export">
+            <?php echo $this->translate('Export'); ?>
+        </button>
+    </div>
+    <p>&nbsp;</p>
+</div>

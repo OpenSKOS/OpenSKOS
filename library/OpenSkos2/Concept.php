@@ -136,13 +136,7 @@ class Concept extends Resource
      */
     public function getPreviewTitle($language = null)
     {
-        if (!empty($lanaguage)) {
-            $values = $this->retrievePropertyInLanguage(Skos::PREFLABEL, $language);
-        } else {
-            $values = $this->getProperty(Skos::PREFLABEL);
-        }
-        
-        return implode(', ', $values);
+        return $this->getPropertyFlatValue(Skos::PREFLABEL, $language);
     }
     
     /**
@@ -180,6 +174,20 @@ class Concept extends Resource
     {
         $model = new OpenSKOS_Db_Table_Tenants();
         return $model->find($this->getTenant())->current();
+    }
+    
+    /**
+     * Checks if the concept is top concept for the specified scheme.
+     * @param string $conceptSchemeUri
+     * @return bool
+     */
+    public function isTopConceptOf($conceptSchemeUri)
+    {
+        if (!$this->isPropertyEmpty(Skos::TOPCONCEPTOF)) {
+            return in_array($conceptSchemeUri, $this->getProperty(Skos::TOPCONCEPTOF));
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
+use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -231,6 +232,10 @@ class ResourceManager
             OFFSET 0
         }
         */
+        
+        if (!empty($this->resourceType)) {
+            $simplePatterns[RdfNamespace::TYPE] = new Uri($this->resourceType);
+        }
 
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
 

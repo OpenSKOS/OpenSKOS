@@ -767,7 +767,7 @@ div#search-results ul.concepts-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-div#search-results ul.concepts-list .concept-link .uuid {
+div#search-results ul.concepts-list .concept-link .uri {
   display: none;
 }
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
@@ -1025,7 +1025,7 @@ ul#selection-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-ul#selection-list .concept-link .uuid {
+ul#selection-list .concept-link .uri {
   display: none;
 }
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
@@ -1283,7 +1283,7 @@ ul#history-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-ul#history-list .concept-link .uuid {
+ul#history-list .concept-link .uri {
   display: none;
 }
 ul#history-list .concept-link.status-candidate .concept-link-content a {
@@ -1560,10 +1560,6 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-edit-form #concept-edit-header,
 #concept-scheme-edit-form #concept-edit-header {
   height: 62px;
-}
-#concept-edit-form #uuid-label,
-#concept-scheme-edit-form #uuid-label {
-  display: none;
 }
 #concept-edit-form #status-label,
 #concept-edit-form #concept-edit-checked > label,

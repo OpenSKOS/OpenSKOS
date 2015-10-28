@@ -48,14 +48,14 @@ var EditorView = new Class({
         });
 
         var contentEl = liEl.getElement('.concept-link-content');
-        contentEl.adopt(new Element('a', {'class': conceptData.uuid, href: '#', html: conceptData.previewLabel, title: conceptData.previewLabel + (conceptData.previewScopeNote ? ' {' + conceptData.previewScopeNote + '}' : '')}));
+        contentEl.adopt(new Element('a', {href: '#', html: conceptData.previewLabel, title: conceptData.previewLabel + (conceptData.previewScopeNote ? ' {' + conceptData.previewScopeNote + '}' : '')}));
 
         if (conceptData.status) {
             liEl.addClass('status-' + conceptData.status);
         }
 
-        if (liEl.getElement('.uuid')) {
-            liEl.getElement('.uuid').set('text', conceptData.uuid);
+        if (liEl.getElement('.uri')) {
+            liEl.getElement('.uri').set('text', conceptData.uri);
         }
 
         return liEl;

@@ -10,6 +10,7 @@
 	<span class="concept-link-header"></span>
 	<span class="concept-link-content"><a href="#"></a></span>
 	<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="" /></span>
+        <span class="uri"></span>
 </li>
 <?php if (is_array($scheme['concepts'])):?>
 <?php foreach ($scheme['concepts'] as $conceptLink) :?>
@@ -26,7 +27,9 @@
 		<?php endforeach?>
 	<?php endif?>
 	</span>
-	<span class="concept-link-content"><a href="#" class="<?php echo $conceptLink['concept']['uuid']; ?>"><?php echo $conceptLink['concept']['previewLabel']; ?> </a></span>
+	<span class="concept-link-content">
+            <a href="#"><?php echo $conceptLink['concept']['previewLabel']; ?> </a></span>            
+            <span class="uri"></span>
 	<?php if ($conceptLink['concept']['remove']) :?>
 		<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="<?php echo $conceptLink['concept']['uri']; ?>" /></span>
 	<?php endif?>
@@ -44,7 +47,8 @@
 	<li class="concept-link template">
 		<span class="concept-link-header"></span>
 		<span class="concept-link-content"><a href="#"></a></span>
-		<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="" /></span>
+		<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="" /></span>                
+                <span class="uri"></span>
 	</li>
 </ul>
 <?php endif?>

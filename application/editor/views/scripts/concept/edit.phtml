@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -19,54 +19,39 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php $this->headTitle ($this->translate('Edit concept'))?>
+<?php $this->headTitle($this->translate('Edit concept')) ?>
 <div id="concept-edit-form">
-	<h2><?php echo $this->translate('Edit concept')?></h2>
+    <h2><?php echo $this->translate('Edit concept') ?></h2>
 
-	<?php if ( ! empty($this->errors)) :?>
-		<div class="errors">
-			<?php foreach ($this->errors as $error) : ?>
-				<div>
-					<?php echo $error->getMessage();?><br />
-					<?php if (count($error->getConflictedConcepts()) > 0) :?>
-						<ul>
-							<?php foreach ($error->getConflictedConcepts() as $concept) : ?>
-								<li class="concept-link">
-									<span class="concept-link-content">
-										<a class="<?php echo $concept['uuid'];?>" href="#"><?php echo $concept->getMlField('prefLabel', Zend_Registry::get('Zend_Locale')->getLanguage());?></a>
-									</span>	
-								</li>
-							<?php endforeach ?>
-						</ul>
-					<?php endif ?>
-				</div>
-			<?php endforeach ?>
-		</div>
-	<?php endif ?>
+    <?php if (!empty($this->errors)) : ?>
+        <div class="errors">
+            <?php foreach ($this->errors as $error) : ?>
+                <div>
+                    <?php echo $error->getMessage(); ?><br />
+                    <?php if (count($error->getConflictedConcepts()) > 0) : ?>
+                        <ul>
+                            <?php foreach ($error->getConflictedConcepts() as $concept) : ?>
+                                <li class="concept-link">
+                                    <span class="concept-link-content">
+                                        <a href="#"><?php echo $concept->getMlField('prefLabel', Zend_Registry::get('Zend_Locale')->getLanguage()); ?></a>
+                                    </span>
+                                    <span class="uri"><?php echo $concept['uri']; ?></span>
+                                </li>
+                            <?php endforeach ?>
+                        </ul>
+                    <?php endif ?>
+                </div>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
 
-	<?php echo $this->form;?>
+    <?php echo $this->form; ?>
 
-	<div class="clear">&nbsp;</div>
-	<div id="concept-footer">
-		<div id="created" class="section">
-			<?php echo $this->translate('Created')?><br />
-			<?php echo $this->footerData['created']['date']?><br />
-			<?php echo $this->footerData['created']['user']?>
-		</div>
-		<div id="modified" class="section">
-			<?php echo $this->translate('Modified')?><br />
-			<?php echo $this->footerData['modified']['date']?><br />
-			<?php echo $this->footerData['modified']['user']?>
-		</div>
-		<div id="approved" class="section">
-			<?php echo $this->translate('Approved')?><br />
-			<?php echo $this->footerData['approved']['date']?><br />
-			<?php echo $this->footerData['approved']['user']?>
-		</div>
-	</div>
+    <div class="clear">&nbsp;</div>
+    <?= $this->render('concept/view/footer.phtml') ?>
 </div>
-<span id="switch-to-view-confirmation" class="do-not-show"><?php echo $this->translate('Any changes you made will not be saved. Are you sure you want to go back to view mode?')?></span>
-<span id="doc-properties-not-saved-confirmation" class="do-not-show"><?php echo $this->translate('A document property is not saved. Do you want to continue?')?></span>
-<span id="concept-deleted-successfully" class="do-not-show"><?php echo $this->translate('The concept was successfully deleted.')?></span>
+<span id="switch-to-view-confirmation" class="do-not-show"><?php echo $this->translate('Any changes you made will not be saved. Are you sure you want to go back to view mode?') ?></span>
+<span id="doc-properties-not-saved-confirmation" class="do-not-show"><?php echo $this->translate('A document property is not saved. Do you want to continue?') ?></span>
+<span id="concept-deleted-successfully" class="do-not-show"><?php echo $this->translate('The concept was successfully deleted.') ?></span>
 
 <?= $this->render('concept/partials/status-interaction.phtml') ?>

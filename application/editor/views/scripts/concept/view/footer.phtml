@@ -1,0 +1,39 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?>
+
+<div id="concept-footer">
+    <div id="created" class="section">
+        <?php echo $this->translate('Created') ?><br />
+        <?php echo $this->footerData['created']['date'] ?><br />
+        <?php echo $this->footerData['created']['user'] ?>
+    </div>
+    <div id="modified" class="section">
+        <?php echo $this->translate('Modified') ?><br />
+        <?php echo $this->footerData['modified']['date'] ?><br />
+        <?php echo $this->footerData['modified']['user'] ?>
+    </div>
+    <div id="approved" class="section">
+        <?php echo $this->translate('Approved') ?><br />
+        <?php echo $this->footerData['approved']['date'] ?><br />
+        <?php echo $this->footerData['approved']['user'] ?>
+    </div>
+</div>

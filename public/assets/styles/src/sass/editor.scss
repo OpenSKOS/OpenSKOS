@@ -749,7 +749,7 @@ legend {
 		float: left;
 	};
 
-	.concept-link .uuid {
+	.concept-link .uri {
 		display:none;
 	};
 	.concept-link.status-candidate .concept-link-content a {
@@ -969,9 +969,6 @@ ul#history-list {
 	#concept-edit-header {
 		height: 62px;
 	};
-	#uuid-label {
-		display: none;
-	};	
 	#status-label,
 	#concept-edit-checked > label {
 		font-weight: bold;

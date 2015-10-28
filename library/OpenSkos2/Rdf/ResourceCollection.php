@@ -54,4 +54,19 @@ class ResourceCollection extends \ArrayObject
         
         parent::offsetSet($index, $newval);
     }
+    
+    /**
+     * Finds resource by the specified uri.
+     * @param string $uri
+     * @return OpenSkos2\Rdf\Resource
+     */
+    public function findByUri($uri)
+    {
+        foreach ($this as $resource) {
+            if ($resource->getUri() == $uri) {
+                return $resource;
+            }
+        }
+        return null;
+    }
 }

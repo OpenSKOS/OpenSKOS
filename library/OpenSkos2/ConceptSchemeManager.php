@@ -33,7 +33,7 @@ class ConceptSchemeManager extends ResourceManager
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
-    protected $resourceType = Concept::TYPE;
+    protected $resourceType = ConceptScheme::TYPE;
 
     /**
      * Get all concept schema's as an array uri => title

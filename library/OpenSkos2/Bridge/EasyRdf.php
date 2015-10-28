@@ -24,6 +24,7 @@ use OpenSkos2\Collection;
 use OpenSkos2\CollectionCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
+use OpenSkos2\Person;
 use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
@@ -121,6 +122,8 @@ class EasyRdf
                     return new \OpenSkos2\ConceptScheme($uri);
                 case Collection::TYPE:
                     return new Collection($uri);
+                case Person::TYPE:
+                    return new Person($uri);
                 default:
                     return new Resource($uri);
             }

@@ -19,15 +19,14 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 
 class Person extends Resource
 {
     const TYPE = 'http://xmlns.com/foaf/0.1/Person';
-
-    const PROPERTY_FOAF_NAME = 'http://xmlns.com/foaf/0.1/name';
-
+    
     /**
      * Resource constructor.
      * @param string $uri
@@ -36,5 +35,16 @@ class Person extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
+    
+    /**
+     * Gets name of person
+     * @param string $language
+     * @return string
+     * @throws \Exception
+     */
+    public function getName($language = null)
+    {
+        return $this->getPropertyFlatValue(Foaf::NAME, $language);
     }
 }

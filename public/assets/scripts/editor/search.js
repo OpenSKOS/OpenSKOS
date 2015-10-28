@@ -148,7 +148,7 @@ EditorSearch = new Class({
                     }
                     this.toggleMoreResultsLink(data.numFound);
                     if (this.resultsFound == 1 && !Editor.Concept.isInEditMode()) {
-                        Editor.Control.loadConcept(data.concepts[0].uuid);
+                        Editor.Control.loadConcept(data.concepts[0].uri);
                     }
                 } else {
                     if (!this.appendResults) {
@@ -226,7 +226,6 @@ EditorSearch = new Class({
     },
     addResultItem: function (data) {
         var item = Editor.View.renderConceptLink(data, this.searchResults.getElement('.concepts-list'));
-        item.getElement('.uuid').setProperty('text', data.uuid);
         item.inject(this.searchResults.getElement('.concepts-list'));
     },
     initAdvancedOptionsBox: function () {
@@ -250,21 +249,21 @@ EditorSearch = new Class({
         }
     },
     addAllSearchResultsToSelection: function () {
-        var uuids = this.getVisibleResultsUuids();
+        var uris = this.getVisibleResultsUris();
         if (Editor.ConceptsSelection) {
-            Editor.ConceptsSelection.addMultiple(uuids);
+            Editor.ConceptsSelection.addMultiple(uris);
         }
     },
     getSearchResultsCount: function () {
         return this.resultsFound;
     },
-    getVisibleResultsUuids: function () {
+    getVisibleResultsUris: function () {
         var resultItems = this.searchResults.getElements('.concept-link:not(.template)');
-        var uuids = new Array();
+        var uris = new Array();
         for (i = 0; i < resultItems.length; i++) {
-            uuids.push(resultItems[i].getElement('.uuid').get('text'));
+            uris.push(resultItems[i].getElement('.uri').get('text'));
         }
-        return uuids;
+        return uris;
     },
     setConceptSchemeOptions: function (conceptSchemeOptions) {
         var elementPrefix = 'conceptScheme';
