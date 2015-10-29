@@ -265,21 +265,22 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         try {
             $this->_helper->_layout->setLayout('editor_central_content');
-            $user = OpenSKOS_Db_Table_Users::fromIdentity();
-
+            
             $concept = $this->_getConcept();
             
+            $user = OpenSKOS_Db_Table_Users::fromIdentity();
             if (!empty($user)) {
                 $user->updateUserHistory($concept->getUri());
             }
 
             $this->view->assign('currentConcept', $concept);
+            $this->view->assign('conceptManager', $this->getDI()->get('\OpenSkos2\ConceptManager'));
             $this->view->assign(
                 'conceptSchemes',
                 $this->getDI()->get('\OpenSkos2\ConceptSchemeManager')->fetch([], 0, 200)
             );
-
             $this->view->assign('footerData', $this->_generateFooter($concept));
+            
         } catch (Zend_Exception $e) {
             $this->view->assign('errorMessage', $e->getMessage());
         }

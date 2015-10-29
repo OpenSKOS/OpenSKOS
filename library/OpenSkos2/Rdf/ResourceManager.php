@@ -385,7 +385,8 @@ class ResourceManager
 
     /**
      * Makes query (with full sparql patterns) from our search patterns.
-     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),] 
+     * or [0 => ['?subject', Skos::NOTATION, new Literal('AM002'),]
      * @param string $subject
      * @return string
      */
@@ -394,7 +395,16 @@ class ResourceManager
         $query = '';
         if (!empty($simplePatterns)) {
             foreach ($simplePatterns as $predicate => $value) {
-                $query .= $subject . ' <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
+                if (!is_integer($predicate)) {
+                    $query .= $subject . ' <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
+                } else {
+                    // Build a pattern like
+                    // $value[0] <$value[1]> $value[2]
+                    $query .= $value[0] instanceof Object ? $this->valueToTurtle($value[0]) : $value[0];
+                    $query .= ' <' . $value[1] . '> ';
+                    $query .= $value[2] instanceof Object ? $this->valueToTurtle($value[2]) : $value[2];
+                    $query .= ' .';
+                }
             }
         } else {
             // All subjects

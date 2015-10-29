@@ -63,16 +63,7 @@ use OpenSkos2\Namespaces\DcTerms;
                     <span><?php echo $this->translate('Is top concept:'); ?> </span>
                     <?php echo $this->currentConcept->isTopConceptOf($schemeUri) ? $this->translate('Yes') : $this->translate('No'); ?>
                 </div>
-
-
                 
-                
-    <?php exit?>
-                
-                
-                
-                
-
                 <div class="concept-scheme-relations">
                     <?php
                     $relationNames = array(
@@ -81,43 +72,22 @@ use OpenSkos2\Namespaces\DcTerms;
                         Skos::RELATED => _('Has related')
                     );
                     ?>
-                    <?php
-                    foreach ($relationNames as $relation => $relationTitle):
-                        $relations = $this->currentConcept->getRelationsByField($relation, $conceptScheme, array($this->currentConcept, 'getAllRelations'));
+                    <?php foreach ($relationNames as $relationKey => $relationTitle):
+                        $relations = $this->conceptManager->fetchRelations(
+                            $this->currentConcept->getUri(),
+                            $relationKey,
+                            $conceptScheme
+                        );
                         ?>
-                        <?php if (!empty($relations)) : ?>
-                            <div class="concept-scheme-relation-grid <?php echo $relation ?>">
-                                <div class="concept-item-subtitle">
-                                    <?php echo $relationTitle; ?>
-                                    <span class="relations-count">( <?php echo count($relations); ?> )</span>
-                                </div>
-                                <ul class="concept-relation-list">
-                                    <?php foreach ($relations as $key => $concept): ?>
-                                        <li class="concept-link">
-                                            <span class="concept-link-header"> 
-                                                <?php if (isset($concept['inScheme'])) : ?>
-                                                    <?php foreach ($concept['inScheme'] as $rSchemeUri) : ?> 
-                                                        <?php $imgTitle = isset($this->conceptSchemes[$rSchemeUri]['dcterms_title'][0]) ? $this->conceptSchemes[$rSchemeUri]['dcterms_title'][0] : 'NA' ?>
-                                                        <?php if (!empty($this->conceptSchemes[$rSchemeUri]['iconPath'])): ?>
-                                                            <img alt="<?php echo $imgTitle ?>" title="<?php echo $imgTitle ?>" src="<?php echo $this->conceptSchemes[$rSchemeUri]['iconPath'] ?>" />
-                                                        <?php else: ?>
-                                                            <span>(<?php echo substr($imgTitle, 0, 2) ?>)</span>
-                                                        <?php endif ?>
-                                                    <?php endforeach ?>
-                                                <?php endif ?>
-                                            </span>
-                                            <span class="concept-link-content">
-                                                <?php $scopeNote = $concept->getMlField('scopeNote', Zend_Registry::get('Zend_Locale')->getLanguage()); ?>
-                                                <a href="#" title="<?php echo $concept->getPreviewLabel(); ?><?php echo (empty($scopeNote) ? '' : ' {' . $scopeNote . '}') ?>"> <?php echo $concept->getPreviewLabel(); ?>
-                                                    <?php if (!$this->currentConcept->isInternalRelation($concept['uri'], $relation)) : ?>
-                                                        <?php echo '*'; ?> <?php endif ?>
-                                                </a>
-                                            </span>
-                                            <span class="uri"><?php echo $concept['uri']; ?></span>
-                                        </li>
-                                    <?php endforeach ?>
-                                </ul>
-                            </div>
+                        <?php if ($relations->count()) : ?>
+                            <?= $this->partial(
+                                'concept/view/relations.phtml',
+                                [
+                                    'key' => $relationKey,
+                                    'title' => $relationTitle,
+                                    'relations' => $relations,
+                                ]
+                            );?>
                         <?php endif ?>
                     <?php endforeach ?>
                 </div>
@@ -125,8 +95,6 @@ use OpenSkos2\Namespaces\DcTerms;
         <?php endforeach ?>
     <?php endif ?>
 </div>
-
-
 
 <div class="concept-scheme-mappings">
     <?php
@@ -139,43 +107,21 @@ use OpenSkos2\Namespaces\DcTerms;
         Skos::EXACTMATCH => _('Has exact match')
     );
     ?>
-    <?php
-    foreach ($mappingNames as $mapping => $mappingTitle):
-        $mappings = $this->currentConcept->getRelationsByField($mapping, null, array($this->currentConcept, 'getAllMappings'));
+    <?php foreach ($mappingNames as $mappingKey => $mappingTitle):
+        $mappings = $this->conceptManager->fetchRelations(
+            $this->currentConcept->getUri(),
+            $mappingKey
+        );
         ?>
-        <?php if (!empty($mappings)) : ?>
-            <div class="concept-scheme-relation-grid <?php echo $mapping ?>">
-                <div class="concept-item-subtitle">
-                    <?php echo $mappingTitle; ?>
-                    <span class="relations-count">( <?php echo count($mappings); ?> )</span>
-                </div>
-                <ul class="concept-relation-list">
-                    <?php foreach ($mappings as $key => $concept): ?>
-                        <li class="concept-link" id="<?php echo $concept['uuid']; ?>">
-                            <span class="concept-link-header"> 
-                                <?php if (isset($concept['inScheme'])) : ?>
-                                    <?php foreach ($concept['inScheme'] as $rSchemeUri) : ?> 
-                                        <?php $imgTitle = isset($this->conceptSchemes[$rSchemeUri]['dcterms_title'][0]) ? $this->conceptSchemes[$rSchemeUri]['dcterms_title'][0] : 'NA' ?>
-                                        <?php if (!empty($this->conceptSchemes[$rSchemeUri]['iconPath'])): ?>
-                                            <img alt="<?php echo $imgTitle ?>" title="<?php echo $imgTitle ?>" src="<?php echo $this->conceptSchemes[$rSchemeUri]['iconPath'] ?>" />
-                                        <?php else: ?>
-                                            <span>(<?php echo substr($imgTitle, 0, 2) ?>)</span>
-                                        <?php endif ?>
-                                    <?php endforeach ?>
-                                <?php endif ?>
-                            </span>
-                            <span class="concept-link-content"> 
-                                <?php $scopeNote = $concept->getMlField('scopeNote', Zend_Registry::get('Zend_Locale')->getLanguage()); ?>
-                                <a href="#" title="<?php echo $concept->getPreviewLabel(); ?><?php echo (empty($scopeNote) ? '' : ' {' . $scopeNote . '}') ?>"> <?php echo $concept->getPreviewLabel(); ?>
-                                    <?php if (!$this->currentConcept->isInternalRelation($concept['uri'], $mapping)) : ?>
-                                        <?php echo '*'; ?> <?php endif ?>
-                                </a>
-                            </span>
-                            <span class="uri"><?php echo $concept['uri']; ?></span>
-                        </li>
-                    <?php endforeach ?>
-                </ul>
-            </div>
+        <?php if ($mappings->count()) : ?>
+            <?= $this->partial(
+                'concept/view/relations.phtml',
+                [
+                    'key' => $mappingKey,
+                    'title' => $mappingTitle,
+                    'relations' => $mappings,
+                ]
+            );?>
         <?php endif ?>
     <?php endforeach ?>
 </div>

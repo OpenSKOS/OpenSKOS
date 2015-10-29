@@ -23,6 +23,7 @@ use Asparagus\QueryBuilder;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
 
@@ -161,6 +162,41 @@ class ConceptManager extends ResourceManager
     }
     
     /**
+     * Fetches all relations (can be a large number) for the given relation type.
+     * @param string $uri
+     * @param string $relationType Skos::BROADER for example.
+     * @param string $conceptScheme , optional Specify if you want relations from single concept scheme only.
+     * @return ConceptCollection
+     */
+    public function fetchRelations($uri, $relationType, $conceptScheme = null)
+    {
+        // @TODO May need to optimize. Check with large numbers.
+        // @TODO It is possible that there are relations to uris, for which there is no a resource.
+        
+        $allRelations = new ConceptCollection([]);
+        
+        $patterns = [
+            [new Uri($uri), $relationType, '?subject'],
+        ];
+        
+        if (!empty($conceptScheme)) {
+            $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+        }
+        
+        $start = 0;
+        $step = 100;
+        do {
+            $relations = $this->fetch($patterns, $start, $step);
+            foreach ($relations as $relation) {
+                $allRelations->append($relation);
+            }
+            $start += $step;
+        } while (!(count($relations) < $step));
+        
+        return $allRelations;
+    }
+    
+    /**
      * Perform a full text query
      * lucene / solr queries are possible
      * for the available fields see schema.xml
@@ -259,7 +295,7 @@ class ConceptManager extends ResourceManager
         
         return $return;
     }
-
+    
     /**
      * Get inverse of skos relation
      *
