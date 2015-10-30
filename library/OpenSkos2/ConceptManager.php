@@ -29,7 +29,6 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 
 class ConceptManager extends ResourceManager
 {
-
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
@@ -170,7 +169,6 @@ class ConceptManager extends ResourceManager
      */
     public function fetchRelations($uri, $relationType, $conceptScheme = null)
     {
-        // @TODO May need to optimize. Check with large numbers.
         // @TODO It is possible that there are relations to uris, for which there is no a resource.
         
         $allRelations = new ConceptCollection([]);

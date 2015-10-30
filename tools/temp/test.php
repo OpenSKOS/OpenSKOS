@@ -618,6 +618,7 @@ $xml = '<rdf:RDF
 <skos:narrowMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/89955"/>
 <skos:narrowMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/89991"/>
 <skos:narrowMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/89994"/>
+<skos:narrowMatch rdf:resource="http://blabla/1"/>
     </rdf:Description>
 </rdf:RDF>';
 
