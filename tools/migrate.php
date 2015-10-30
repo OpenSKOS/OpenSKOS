@@ -158,7 +158,10 @@ $mappings = [
         'fields' => array_merge(
             $getFieldsInClass('SemanticRelations'),
             $getFieldsInClass('MappingProperties'),
-            $getFieldsInClass('ConceptSchemes')
+            $getFieldsInClass('ConceptSchemes'),
+            [
+                'member' => Skos::MEMBER, // for collections ?!?
+            ]
         ),
     ],
     'literals' => [
@@ -215,6 +218,7 @@ $mappings = [
             'tenant' => 'tenant',
             'statusOtherConcept' => 'statusOtherConcept',
             'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
+            'ConceptCollections' => 'ConceptCollections',
         ]
     ]
 ];
@@ -232,6 +236,9 @@ do {
                 break;
             case 'Concept':
                 $resource = new \OpenSkos2\Concept($doc['uri']);
+                break;
+            case 'Collection':
+                $resource = new \OpenSkos2\Collection($doc['uri']);
                 break;
             default:
                 throw new Exception("Didn't expect class: " . $doc['class']);
