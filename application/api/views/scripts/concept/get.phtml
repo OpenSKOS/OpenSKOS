@@ -21,7 +21,7 @@
 $concept = $this->concept;
 
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
-$title = $concept->getPreviewTitle($lang);
+$title = $concept->getCaption($lang);
 $this->headTitle($title);
 ?>
 <h2><?=$this->escape($title)?></h2>

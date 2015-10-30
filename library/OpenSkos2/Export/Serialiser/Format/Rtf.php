@@ -144,7 +144,7 @@ class Rtf extends FormatAbstract
         $previewLabel = $resource->getUri();
         if ($resource instanceof Concept) {
             // @TODO Add language support.
-            $previewLabel = $resource->getPreviewTitle();
+            $previewLabel = $resource->getCaption();
         }
         $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $previewLabel);
         

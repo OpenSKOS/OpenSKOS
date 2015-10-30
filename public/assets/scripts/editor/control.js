@@ -270,7 +270,7 @@ var EditorControl = new Class({
 
             new Request.JSON({
                 url: BASE_URL + "/editor/concept/get-narrower-relations/",
-                data: {uuid: conceptLi.getElement('.uuid').get('text')},
+                data: {uri: conceptLi.getElement('.uri').get('text')},
                 onSuccess: function (result, text) {
                     if (result.status === self._statusSuccess) {
 

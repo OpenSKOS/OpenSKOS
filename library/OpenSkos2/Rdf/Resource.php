@@ -20,6 +20,7 @@
 namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
+use OpenSkos2\Namespaces as Namespaces;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -166,6 +167,14 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
+     * @return string
+     */
+    public function getCaption($language = null)
+    {
+        return $this->uri;
+    }
+    
+    /**
      * Is the current resource a blank node.
      * It is if no uri given or generated uri starting with _:
      * @return boolean
@@ -244,5 +253,32 @@ class Resource extends Uri implements ResourceIdentifier
         }
         
         return implode(', ', $values);
+    }
+    
+    /**
+     * Gets the resource in simple flat array with all (or filtered) properties.
+     * @param array $filter , optional
+     * @param string $language , optional
+     * @return array
+     */
+    public function toFlatArray($filter = [], $language = null)
+    {
+        $result = [];
+        
+        foreach (array_keys($this->getProperties()) as $property) {
+            if (empty($filter) || in_array($property, $filter)) {
+                $result[Namespaces::shortenProperty($property)] = $this->getPropertyFlatValue($property, $language);
+            }
+        }
+        
+        // @TODO uri and caption are out of scope here, but really handful.
+        if (empty($filter) || in_array('uri', $filter)) {
+            $result['uri'] = $this->getUri();
+        }
+        if (empty($filter) || in_array('caption', $filter)) {
+            $result['caption'] = $this->getCaption($language);
+        }
+        
+        return $result;
     }
 }

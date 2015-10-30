@@ -39,19 +39,19 @@ var EditorView = new Class({
 
         Object.each(conceptData.schemes, function (scheme) {
             if (scheme.iconPath != '') {
-                var schemeHolder = new Element('img', {title: scheme.dcterms_title[0], alt: scheme.dcterms_title[0].substring(0, 2), src: scheme.iconPath});
+                var schemeHolder = new Element('img', {title: scheme.caption, alt: scheme.caption.substring(0, 2), src: scheme.iconPath});
             } else {
-                var schemeHolder = new Element('span', {text: '(' + scheme.dcterms_title[0].substring(0, 2) + ')'});
+                var schemeHolder = new Element('span', {text: '(' + scheme.caption.substring(0, 2) + ')'});
             }
-            schemeHolder.addClass(scheme.uuid);
+            schemeHolder.addClass(scheme.uri);
             headerEl.adopt(schemeHolder);
         });
 
         var contentEl = liEl.getElement('.concept-link-content');
-        contentEl.adopt(new Element('a', {href: '#', html: conceptData.previewLabel, title: conceptData.previewLabel + (conceptData.previewScopeNote ? ' {' + conceptData.previewScopeNote + '}' : '')}));
+        contentEl.adopt(new Element('a', {href: '#', html: conceptData.caption, title: conceptData.caption + (conceptData['skos:skopeNote'] ? ' {' + conceptData['skos:skopeNote'] + '}' : '')}));
 
         if (conceptData.status) {
-            liEl.addClass('status-' + conceptData.status);
+            liEl.addClass('status-' + conceptData['openskos:status']);
         }
 
         if (liEl.getElement('.uri')) {
@@ -106,7 +106,6 @@ var EditorView = new Class({
 
         for (var i = 0; i < concepts.length; i++) {
             var item = Editor.View.renderConceptLink(concepts[i], templateContainer);
-            item.getElement('.uuid').set('text', concepts[i].uuid);
 
             // Fix item's content width if right column is resized.
             var itemContentWidth = container.getParent('.concept-link').getElement('.concept-link-content').getStyle('width').toInt() - subConceptsOffset;

@@ -20,10 +20,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
+use Zend\Diactoros\Response\JsonResponse;
 
 class Editor_ConceptController extends OpenSKOS_Controller_Editor
 {
@@ -303,17 +305,33 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     public function getNarrowerRelationsAction()
     {
         $data = array();
-        $conceptRaw = Api_Models_Concepts::factory()->getConcept($this->getRequest()->getParam('uuid'));
-        if (null !== $conceptRaw) {
-            $concept = new Editor_Models_Concept($conceptRaw);
-            $relations = $concept->getNarrowers();
-            foreach ($relations as $relation) {
-                $data[] = $relation->toArray(array('uuid', 'uri', 'status', 'schemes', 'previewLabel', 'previewScopeNote'));
-            }
+        
+        $narrowers = $this->getDI()->get('\OpenSkos2\ConceptManager')->fetchRelations(
+            $this->_getConcept()->getUri(),
+            Skos::NARROWER
+        );
+        
+        foreach ($narrowers as $concept) {
+            $conceptData = $concept->toFlatArray([
+                'uri',
+                'caption',
+                OpenSkos::STATUS,
+                Skos::SCOPENOTE
+            ]);
+            
+            $conceptData['schemes'] = $this->conceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
+            
+            $data[] = $conceptData;
         }
-        $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $data));
+        
+        $this->emitResponse(
+            new JsonResponse([
+                'status' => 'ok',
+                'result' => $data
+            ])
+        );
     }
-
+    
     public function exportAction()
     {
         if (!$this->getRequest()->isPost()) {
@@ -471,7 +489,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 // @TODO We only pick the first user now
                 $user = $users[0];
                 if ($user instanceof Uri && $personManager->askForUri($user)) {
-                    $userName = $personManager->fetchByUri($user)->getName();
+                    $userName = $personManager->fetchByUri($user)->getCaption();
                 } else {
                     $userName = $user->getValue();
                 }
@@ -588,4 +606,25 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         }
     }
 
+    protected $conceptSchemesCache;
+    protected function conceptSchemesMeta($shemesUris)
+    {
+        // @TODO Move, share, refactor all places with similar stuff. Have fun
+        if (empty($this->conceptSchemesCache)) {
+            $this->conceptSchemesCache = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager')->fetch([], 0, 200);
+        }
+        
+        $result = [];
+        foreach ($shemesUris as $uri) {
+            $scheme = $this->conceptSchemesCache->findByUri($uri);
+            $schemeMeta = $scheme->toFlatArray([
+                'uri',
+                'caption',
+                DcTerms::TITLE
+            ]);
+            $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
+            $result[] = $schemeMeta;
+        }
+        return $result;
+    }
 }

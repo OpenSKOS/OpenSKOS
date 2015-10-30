@@ -36,7 +36,7 @@ use OpenSkos2\Namespaces\Skos;
                             <?php
                                 $scheme = $this->conceptSchemes->findByUri($schemeUri);
                                 if (!empty($scheme)) {
-                                    $imgTitle = $scheme->getPreviewTitle();
+                                    $imgTitle = $scheme->getCaption();
                                     $iconPath = OpenSkos2\ConceptScheme::buildIconPath($scheme->getUri());
                                 }
                             ?>
@@ -56,9 +56,9 @@ use OpenSkos2\Namespaces\Skos;
                             Zend_Registry::get('Zend_Locale')->getLanguage()
                         );
                     ?>
-                    <a href="#" title="<?= $concept->getPreviewTitle(); ?>
+                    <a href="#" title="<?= $concept->getCaption(); ?>
                         <?= (empty($scopeNote) ? '' : ' {' . $scopeNote . '}') ?>">
-                        <?= $concept->getPreviewTitle(); ?>
+                        <?= $concept->getCaption(); ?>
                         <?php // if (!$this->currentConcept->isInternalRelation($concept['uri'], $relation)) : ?>
                             <!--*-->
                         <?php // endif ?>

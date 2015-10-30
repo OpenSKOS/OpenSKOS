@@ -111,6 +111,10 @@ class Literal implements Object
     {
         // We don't show language or type in the to string.
         // Not needed on the places where we use it.
-        return $this->getValue();
+        if ($this->getValue() instanceof \DateTime) {
+            return $this->getValue()->format('c');
+        } else {
+            return (string)$this->getValue();
+        }
     }
 }

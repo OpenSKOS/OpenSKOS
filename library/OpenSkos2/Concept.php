@@ -134,7 +134,7 @@ class Concept extends Resource
      * @return string
      * @throws \Exception
      */
-    public function getPreviewTitle($language = null)
+    public function getCaption($language = null)
     {
         return $this->getPropertyFlatValue(Skos::PREFLABEL, $language);
     }

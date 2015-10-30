@@ -234,7 +234,7 @@ class ConceptManager extends ResourceManager
                         "'.$this->concatFieldSeperator.'",
                         str(?scheme),
                         "'.$this->concatSeperator.'",
-                        "dcterms_title",
+                        "caption",
                         "'.$this->concatFieldSeperator.'",
                         ?schemeTitleb,
                         "'.$this->concatSeperator.'",
@@ -269,9 +269,9 @@ class ConceptManager extends ResourceManager
 
             $concept = [
                 'uri' => (string)$literal->uri,
-                'uuid' => (string)$literal->uuid,
-                'previewLabel' => (string)$literal->prefLabel,
-                'status' => (string)$literal->status
+                'openskos:uuid' => (string)$literal->uuid, // @TODO Should not be needed anymore. Can be removed
+                'caption' => (string)$literal->prefLabel,
+                'openskos:status' => (string)$literal->status
             ];
 
             if (isset($literal->schemes)) {
@@ -280,7 +280,7 @@ class ConceptManager extends ResourceManager
             }
 
             if (isset($literal->scopeNotes)) {
-                $concept['scopeNotes'] = explode('|', (string)$literal->scopeNotes);
+                $concept['skos:scopeNote'] = explode('|', (string)$literal->scopeNotes);
             }
 
             $items[] = $concept;

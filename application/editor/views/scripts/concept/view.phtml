@@ -25,7 +25,7 @@
 <?php if (isset($this->currentConcept)): ?>
     <div id="concept-view">
         <h2>
-            <?php echo $this->currentConcept->getPreviewTitle(); ?>
+            <?php echo $this->currentConcept->getCaption(); ?>
         </h2>
         <?= $this->render('concept/view/header.phtml') ?>
         <div class="wrapper">

@@ -43,7 +43,7 @@ class Person extends Resource
      * @return string
      * @throws \Exception
      */
-    public function getName($language = null)
+    public function getCaption($language = null)
     {
         return $this->getPropertyFlatValue(Foaf::NAME, $language);
     }

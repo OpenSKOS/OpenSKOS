@@ -44,7 +44,7 @@ class ConceptScheme extends Resource
      * @return string
      * @throws \Exception
      */
-    public function getPreviewTitle($language = null)
+    public function getCaption($language = null)
     {
         return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
     }
