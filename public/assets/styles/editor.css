@@ -728,6 +728,10 @@ legend {
   background: url("../images/narrower-arrow.png") no-repeat;
 }
 
+.concept-link .uri {
+  display: none;
+}
+
 span.concept-link-header {
   display: inline-block;
 }
@@ -766,9 +770,6 @@ ul.concepts-list li.active > span, ul.concepts-list li.active a {
 div#search-results ul.concepts-list .concept-link {
   white-space: nowrap;
   float: left;
-}
-div#search-results ul.concepts-list .concept-link .uri {
-  display: none;
 }
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
@@ -1025,9 +1026,6 @@ ul#selection-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-ul#selection-list .concept-link .uri {
-  display: none;
-}
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
@@ -1282,9 +1280,6 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
 ul#history-list .concept-link {
   white-space: nowrap;
   float: left;
-}
-ul#history-list .concept-link .uri {
-  display: none;
 }
 ul#history-list .concept-link.status-candidate .concept-link-content a {
   color: blue;

@@ -19,6 +19,7 @@
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+use OpenSkos2\Namespaces\Skos;
 ?>
 
 <div class="concept-scheme-relation-grid <?= $this->key ?>">
@@ -30,22 +31,19 @@
         <?php foreach ($this->relations as $key => $concept): ?>
             <li class="concept-link">
                 <span class="concept-link-header"> 
-                    <?php if (!$this->currentConcept->isPropertyEmpty(Skos::INSCHEME)): ?>
-                        <?php foreach ($this->currentConcept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
+                    <?php if (!$concept->isPropertyEmpty(Skos::INSCHEME)): ?>
+                        <?php foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
                             <?php
                                 $scheme = $this->conceptSchemes->findByUri($schemeUri);
                                 if (!empty($scheme)) {
                                     $imgTitle = $scheme->getPreviewTitle();
-                                } else {
-                                    $imgTitle = 'N/A';
+                                    $iconPath = OpenSkos2\ConceptScheme::buildIconPath($scheme->getUri());
                                 }
-                                
-                                $iconPath = OpenSkos2\ConceptScheme::buildIconPath($scheme->getUri());
                             ?>
                             <?php if (!empty($iconPath)): ?>
                                 <img alt="<?= $imgTitle ?>" title="<?= $imgTitle ?>" src="<?= $iconPath ?>" />
                             <?php else: ?>
-                                <span>(<?= substr($imgTitle, 0, 2) ?>)</span>
+                                <span>(<?= empty($imgTitle) ? 'N/A' : substr($imgTitle, 0, 2) ?>)</span>
                             <?php endif ?>
                         <?php endforeach ?>
                     <?php endif ?>

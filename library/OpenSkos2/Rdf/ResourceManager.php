@@ -256,7 +256,7 @@ class ResourceManager
         }
 
         $query .= '}'; // end sub select
-
+        
         $resources = $this->fetchQuery($query);
 
         // The order by part does not apply to the resources with describe.
@@ -396,7 +396,7 @@ class ResourceManager
         if (!empty($simplePatterns)) {
             foreach ($simplePatterns as $predicate => $value) {
                 if (!is_integer($predicate)) {
-                    $query .= $subject . ' <' . $predicate . '> ' . $this->valueToTurtle($value) . '.' . PHP_EOL;
+                    $query .= $subject . ' <' . $predicate . '> ' . $this->valueToTurtle($value) . ' .' . PHP_EOL;
                 } else {
                     // Build a pattern like
                     // $value[0] <$value[1]> $value[2]
@@ -405,6 +405,7 @@ class ResourceManager
                     $query .= $value[2] instanceof Object ? $this->valueToTurtle($value[2]) : $value[2];
                     $query .= ' .';
                 }
+                $query .= PHP_EOL;
             }
         } else {
             // All subjects

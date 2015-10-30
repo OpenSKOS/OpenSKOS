@@ -76,7 +76,7 @@ use OpenSkos2\Namespaces\DcTerms;
                         $relations = $this->conceptManager->fetchRelations(
                             $this->currentConcept->getUri(),
                             $relationKey,
-                            $conceptScheme
+                            $schemeUri
                         );
                         ?>
                         <?php if ($relations->count()) : ?>
@@ -86,6 +86,7 @@ use OpenSkos2\Namespaces\DcTerms;
                                     'key' => $relationKey,
                                     'title' => $relationTitle,
                                     'relations' => $relations,
+                                    'conceptSchemes' => $this->conceptSchemes,
                                 ]
                             );?>
                         <?php endif ?>
@@ -120,6 +121,7 @@ use OpenSkos2\Namespaces\DcTerms;
                     'key' => $mappingKey,
                     'title' => $mappingTitle,
                     'relations' => $mappings,
+                    'conceptSchemes' => $this->conceptSchemes,
                 ]
             );?>
         <?php endif ?>
