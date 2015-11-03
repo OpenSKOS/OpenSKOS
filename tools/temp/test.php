@@ -54,28 +54,18 @@ class EchoLogger extends \Psr\Log\AbstractLogger
     }
 }
 
-// Test....
+// Test...
 
 $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:dc="http://purl.org/dc/terms/"
          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
          xmlns:openskos="http://openskos.org/xmlns#">
-
-  <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/141299">
+<rdf:Description rdf:about="http://testing/2">
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-    <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2007-11-24T09:36:10+00:00</dc:dateSubmitted>
-    <skos:prefLabel xml:lang="nl">Pershing, F. Warren</skos:prefLabel>
-    <openskos:status>approved</openskos:status>
+    <skos:prefLabel xml:lang="nl">Testing2</skos:prefLabel>
+    <skos:notation>2</skos:notation>
     <openskos:tenant>beng</openskos:tenant>
-    <skos:hiddenLabel xml:lang="nl">F. Warren Pershing</skos:hiddenLabel>
-    <skos:scopeNote xml:lang="nl">zoon generaal John J. Pershing</skos:scopeNote>
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
-    <skos:notation>141299</skos:notation>
-    <dc:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-01-11T14:56:58+00:00</dc:modified>
-    <dc:dateAccepted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2007-11-24T09:36:10+00:00</dc:dateAccepted>
-    <skos:historyNote xml:lang="nl">Goedgekeurd door: NAA</skos:historyNote>
-    <openskos:uuid>83168d87-b96a-5be4-4a3e-4efc65fe69bc</openskos:uuid>
-    <skos:narrower rdf:resource="http://data.beeldengeluid.nl/gtaa/89409"/>
+    <skos:narrower rdf:resource="http://testing/3"/>
   </rdf:Description>
   </rdf:RDF>
 ';
@@ -84,16 +74,22 @@ $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 $client = new Zend_Http_Client('http://openskos/api/concept', array(
 'maxredirects' => 0,
 'timeout'      => 30));
+
 $response = $client
-->setEncType('text/xml')
-->setRawData($xml)
-->setParameterGet('tenant', 'beng')
-->setParameterGet('collection', 'mycol')
-->setParameterGet('key', 'alexandar')
-->setParameterGet('autoGenerateIdentifiers', false)
-->request('PUT');
+    ->setEncType('text/xml')
+    ->setRawData($xml)
+    ->setParameterGet('tenant', 'beng')
+    ->setParameterGet('collection', 'mycol')
+    ->setParameterGet('key', 'alexandar')
+    ->setParameterGet('autoGenerateIdentifiers', false)
+    ->request('PUT');
+
 if ($response->isSuccessful()) {
-echo 'Concept created';
+    echo 'Concept created';
 } else {
-echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
+    echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
 }
+
+
+//$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+//$diContainer->get('OpenSkos2\Rdf\ResourceManager')->delete(new OpenSkos2\Rdf\Uri('http://testing/1'));

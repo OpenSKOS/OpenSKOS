@@ -89,7 +89,7 @@ class Relation
         }
 
         try {
-            $this->manager->addRelationBothsides($body['concept'], $body['type'], $body['related']);
+            $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
         } catch (\Exception $exc) {
             throw new Exception\ApiException($exc->getMessage(), 500);
         }

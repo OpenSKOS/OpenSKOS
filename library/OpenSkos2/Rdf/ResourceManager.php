@@ -186,6 +186,8 @@ class ResourceManager
         $result = $this->client->query('DESCRIBE '. (new NTriple)->serialize($resource));
         $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
 
+        // @TODO Add resourceType check.
+        
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
                 'The requested resource <' . $uri . '> was not found.'
@@ -208,7 +210,14 @@ class ResourceManager
      */
     public function askForUri($uri)
     {
-        return $this->ask('<' . $uri . '> ?predicate ?object');
+        $query = '<' . $uri . '> ?predicate ?object';
+        
+        if (!empty($this->resourceType)) {
+            $query .= ' . ';
+            $query .= '<' . $uri . '> <' . RdfNamespace::TYPE . '> <' . $this->resourceType . '>';
+        }
+        
+        return $this->ask($query);
     }
 
     /**
@@ -346,6 +355,13 @@ class ResourceManager
         $select = '';
         $filter = 'FILTER(' . PHP_EOL;
 
+        if (!empty($this->resourceType)) {
+            $params[] = [
+                'predicate' => RdfNamespace::TYPE,
+                'value' => new Uri($this->resourceType),
+            ];
+        }
+        
         $filters = [];
         foreach ($params as $i => $data) {
             $predicate = $data['predicate'];
@@ -379,7 +395,7 @@ class ResourceManager
         }
 
         $ask = $select . $filter . ')';
-
+        
         return $this->ask($ask);
     }
 

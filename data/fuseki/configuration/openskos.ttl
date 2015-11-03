@@ -8,14 +8,34 @@
 :service_tdb_all
         a                                   fuseki:Service ;
         rdfs:label                          "TDB openskos" ;
-        fuseki:dataset                      :tdb_dataset_readwrite ;
+        fuseki:dataset                      <#openskos> ;
         fuseki:name                         "openskos" ;
         fuseki:serviceQuery                 "query" , "sparql" ;
         fuseki:serviceReadGraphStore        "get" ;
         fuseki:serviceReadWriteGraphStore   "data" ;
         fuseki:serviceUpdate                "update" ;
-        fuseki:serviceUpload                "upload" .
+        fuseki:serviceUpload                "upload"
+.
 
-:tdb_dataset_readwrite
+<#openskos> 
+        a       ja:RDFDataset ;    
+        ja:defaultGraph <#modelDft> ;
+.
+
+<#modelDft>
+        a       ja:InfModel ;
+        ja:baseModel <#tdbGraph> ;
+	ja:reasoner [
+		ja:rulesFrom <file:rules/skos>
+	]
+.
+
+<#tdbDataset>
         a             tdb:DatasetTDB ;
-        tdb:location  "run/databases/openskos" .
+        tdb:location  "run/databases/openskos" 
+.
+
+<#tdbGraph> 
+        a tdb:GraphTDB ;
+        tdb:dataset <#tdbDataset>
+.

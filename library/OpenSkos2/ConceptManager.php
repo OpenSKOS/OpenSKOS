@@ -134,31 +134,6 @@ class ConceptManager extends ResourceManager
 
         $this->client->insert($graph);
     }
-
-    /**
-     * Add relations to both sides of the concepts for example.
-     * http://example.com/1 skos::narrower [http://example.com/2]
-     *
-     * Will add http://example.com/2 as narrower for http://example.com/1
-     * and add http://example.com/1 as broader for http://example.com/1
-     *
-     * This will not update transitive relations
-     *
-     * @param string $uri
-     * @param string $relationType
-     * @param array $uris
-     */
-    public function addRelationBothsides($uri, $relationType, $uris)
-    {
-        $this->addRelation($uri, $relationType, $uris);
-        
-        $inverse = $this->getInverseRelation($relationType);
-        foreach ($uris as $relation) {
-            $graph = new \EasyRdf\Graph();
-            $graph->add($relation, $inverse, $uri);
-            $this->client->insert($graph);
-        }
-    }
     
     /**
      * Fetches all relations (can be a large number) for the given relation type.
@@ -292,49 +267,6 @@ class ConceptManager extends ResourceManager
         ];
         
         return $return;
-    }
-    
-    /**
-     * Get inverse of skos relation
-     *
-     * @param string $relation
-     * @param string
-     * @throws Exception\InvalidArgumentException
-     */
-    private function getInverseRelation($relation)
-    {
-        switch ($relation) {
-            case Skos::BROADER:
-                return Skos::NARROWER;
-                break;
-            case Skos::NARROWER:
-                return Skos::BROADER;
-                break;
-            case Skos::RELATED:
-                return Skos::RELATED;
-                break;
-            case Skos::BROADMATCH:
-                return Skos::NARROWMATCH;
-                break;
-            case Skos::NARROWMATCH:
-                return Skos::BROADMATCH;
-                break;
-            case Skos::BROADERTRANSITIVE:
-                return Skos::NARROWERTRANSITIVE;
-                break;
-            case Skos::NARROWERTRANSITIVE:
-                return Skos::BROADERTRANSITIVE;
-                break;
-            case Skos::TOPCONCEPTOF:
-                return Skos::HASTOPCONCEPT;
-                break;
-            case Skos::HASTOPCONCEPT:
-                return Skos::TOPCONCEPTOF;
-                break;
-            default:
-                throw new Exception\InvalidArgumentException('Relation not supported');
-                break;
-        }
     }
     
     /**
