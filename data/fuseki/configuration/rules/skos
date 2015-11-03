@@ -1,4 +1,6 @@
-# TODO Use that schema instead if possible: http://www.w3.org/2009/08/skos-reference/skos.rdf
+# TODO Use that schema if possible http://www.w3.org/2009/08/skos-reference/skos.rdf
+# Maybe have to do it with custom java class loaded in the config.
+
 # TODO Fill the rules with more if missing. For collection maybe.
 
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
