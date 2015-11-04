@@ -306,7 +306,7 @@ EditorSearch = new Class({
     hideProfilesSelectIfNoOptions: function () {
         var searchDropdown = this.searchForm.getElement('select[name=searchProfileId]');
         if (searchDropdown) {
-            if (searchDropdown.getElements('option').length > 1) {
+            if (searchDropdown.getElements('option:not([value="custom"])').length > 1) {
                 $('search-profile-selector').show();
                 $('left-panel').removeClass('no-profile');
             } else {

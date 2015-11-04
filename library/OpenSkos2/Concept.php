@@ -204,6 +204,8 @@ class Concept extends Resource
             );
         }
         
+        
+        // @TODO What is up with collection?
         if ($this->isPropertyEmpty(OpenSkos::SET)) {
             throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'

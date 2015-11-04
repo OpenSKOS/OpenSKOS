@@ -296,9 +296,10 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     
     public function getConceptsBaseUrlAction()
     {
-        $conceptScheme = $this->_getConceptScheme();
+//        $conceptScheme = $this->_getConceptScheme();
         
-        $conceptsBaseUrl = $conceptScheme->getCollection()->getConceptsBaseUri();
+//        $conceptsBaseUrl = $conceptScheme->getCollection()->getConceptsBaseUri();
+        $conceptsBaseUrl = 'http://todo';
     
         $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $conceptsBaseUrl));
     }

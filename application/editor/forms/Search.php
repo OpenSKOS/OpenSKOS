@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_Forms_Search extends Zend_Form
+class Editor_Forms_Search extends OpenSKOS_Form
 {
     /**
      * @var int
@@ -113,8 +113,8 @@ class Editor_Forms_Search extends Zend_Form
             $inCollections = $userOptions['collections'];
         }
 
-        $apiClient = new Editor_Models_ApiClient();
-        $conceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+        $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
+            ->fetchUrisCaptionsMap(null, $inCollections);
 
         $selectedConceptSchemes = array();
         if (isset($userOptions['conceptScheme'])) {
@@ -143,14 +143,13 @@ class Editor_Forms_Search extends Zend_Form
             if (null !== $profile) {
                 $profileOptions = $profile->getSearchOptions();
 
-                $apiClient = new Editor_Models_ApiClient();
-
                 $inCollections = array();
                 if (isset($profileOptions['collections'])) {
                     $inCollections = $profileOptions['collections'];
                 }
 
-                $conceptSchemesInCollections = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+                $conceptSchemesInCollections = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
+                    ->fetchUrisCaptionsMap(null, $inCollections);
 
                 if (!empty($profileOptions['conceptScheme'])) {
                     foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {

@@ -23,7 +23,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
      * Return json search results for search in the editor with a search profile
      */
     public function indexAction()
-    {        
+    {
         $searchForm = Editor_Forms_Search::getInstance();
 
         $request = $this->getRequest();
@@ -39,8 +39,10 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
-        $items =  $search->search($options);
+        $items = $search->search($options);
         $items['status'] = 'ok';
+        $items['conceptSchemeOptions'] = $this->_getConceptSchemeOptions();
+        $items['profileOptions'] = $this->_getProfilesSelectOptions();
         $response = new Zend\Diactoros\Response\JsonResponse($items);
         $this->emitResponse($response);
     }

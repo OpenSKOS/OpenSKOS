@@ -20,11 +20,13 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Concept;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use Zend\Diactoros\Response\JsonResponse;
 
 class Editor_ConceptController extends OpenSKOS_Controller_Editor
@@ -39,24 +41,40 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         $this->_helper->_layout->setLayout('editor_central_content');
 
-        $notation = OpenSKOS_Db_Table_Notations::getNext();
-
-        $initialLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();
-        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-        if (!empty($editorOptions['languages']) && !in_array($initialLanguage, $editorOptions['languages'])) { // If the browser language is supported
-            $initialLanguage = key($editorOptions['languages']);
-        }
-
-        $concept = new Editor_Models_Concept(new Api_Models_Concept(array(
-            'prefLabel@' . $initialLanguage => array($this->getRequest()->getParam('label')),
-            'notation' => array($notation)
-        )));
-
         $form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
-        $formData = $concept->toForm();
-        $form->getElement('conceptSchemeSelect')->setMultiOptions($formData['conceptSchemeSelect']);
-        $form->populate($formData);
-        $this->view->form = $form->setAction($this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save')));
+        
+        $languageCode = $this->getInitialLanguage();
+        $form->populate([
+            'conceptLanguages' => [
+                strtoupper($languageCode) => [
+                    strtoupper($languageCode) => $languageCode
+                ]
+            ],
+            'prefLabel' => [
+                [
+                    'languageCode' => $languageCode,
+                    'value' => [
+                        $this->getRequest()->getParam('label')
+                    ],
+                ],
+            ],
+            'hiddenLabel' => [
+                [
+                    'languageCode' => $languageCode,
+                    'value' => [''],
+                ],
+            ],
+            'altLabel' => [
+                [
+                    'languageCode' => $languageCode,
+                    'value' => [''],
+                ],
+            ],
+        ]);
+        
+        $this->view->form = $form->setAction(
+            $this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save'))
+        );
     }
 
     public function editAction()
@@ -604,6 +622,21 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 }
             }
         }
+    }
+    
+    /**
+     * Checks if the browser language is supported and returns it. If not supported - gets the first one.
+     * @return string
+     */
+    protected function getInitialLanguage()
+    {
+        $initialLanguage = Zend_Registry::get('Zend_Locale')->getLanguage();
+        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        if (!empty($editorOptions['languages']) && !in_array($initialLanguage, $editorOptions['languages'])) {
+            // If the browser language is supported
+            $initialLanguage = key($editorOptions['languages']);
+        }
+        return $initialLanguage;
     }
 
     protected $conceptSchemesCache;
