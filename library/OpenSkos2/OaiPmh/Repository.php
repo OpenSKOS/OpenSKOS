@@ -370,8 +370,10 @@ class Repository implements InterfaceRepository
         if (!empty($arrSet[1])) {
             $collections = new \OpenSKOS_Db_Table_Collections();
             $collectionRow = $collections->findByCode($arrSet[1], $tenant);
-            if ($collectionRow) {
+            if ($collectionRow && !empty($collectionRow->uri)) {
                 $collection = $collectionRow->uri;
+            } else {
+                $collection = new Literal($arrSet[1]);
             }
         }
 
