@@ -273,11 +273,16 @@ class Repository implements InterfaceRepository
     {
         $params = $this->decodeResumptionToken($token);
 
+        $pSet = $this->parseSet($params['set']);
+
         $concepts = $this->getConcepts(
             $this->limit + 1,
             $params['offset'],
             $params['from'],
-            $params['until']
+            $params['until'],
+            $pSet['tenant'],
+            $pSet['collection'],
+            $pSet['conceptScheme']
         );
 
         $items = [];
