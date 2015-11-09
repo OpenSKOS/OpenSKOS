@@ -368,7 +368,7 @@ class Repository implements InterfaceRepository
             if ($collectionRow) {
                 $collection = $collectionRow->uri;
             } else {
-                $collection = $arrSet[1];
+                $collection = new Literal($arrSet[1]);
             }
         }
 
