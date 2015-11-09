@@ -367,6 +367,8 @@ class Repository implements InterfaceRepository
             $collectionRow = $collections->findByCode($arrSet[1], $tenant);
             if ($collectionRow) {
                 $collection = $collectionRow->uri;
+            } else {
+                $collection = $arrSet[1];
             }
         }
 
