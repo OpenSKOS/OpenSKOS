@@ -48,4 +48,23 @@ class Namespaces
             return $shortName;
         }
     }
+    
+    /**
+     * Makes http://openskos.org/xmlns#status to be status
+     * @param string $property
+     * @return string
+     */
+    public static function shortenPropertyNameOnly($property)
+    {
+        foreach (self::$additionalNamespaces as $prefix => $uri) {
+            \EasyRdf\RdfNamespace::set($prefix, $uri);
+        }
+        
+        $uriParts = RdfNamespace::splitUri($property);
+        if (empty($uriParts[1])) {
+            return $property;
+        } else {
+            return $uriParts[1];
+        }
+    }
 }

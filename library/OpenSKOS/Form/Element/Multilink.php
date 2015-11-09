@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,14 +19,13 @@
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+class OpenSKOS_Form_Element_Multilink extends OpenSKOS_Form_Element_Multi
+{
+    const MULTILINK_PARTIAL_VIEW = 'partials/multilink.phtml';
 
-class OpenSKOS_Form_Element_Multilink extends OpenSKOS_Form_Element_Multi {
-
-	const MULTILINK_PARTIAL_VIEW  = 'partials/multilink.phtml';
-	
-	public function __construct($groupName, $groupLabel, $partialView = self::MULTILINK_PARTIAL_VIEW)
-	{
-		parent::__construct($groupName, $groupLabel);
-		$this->setPartialView($partialView);
-	}
+    public function __construct($groupName, $groupLabel, $partialView = self::MULTILINK_PARTIAL_VIEW)
+    {
+        parent::__construct($groupName, $groupLabel);
+        $this->setPartialView($partialView);
+    }
 }

@@ -46,7 +46,11 @@ class ConceptScheme extends Resource
      */
     public function getCaption($language = null)
     {
-        return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
+        if ($this->hasPropertyInLanguage(DcTerms::TITLE, $language)) {
+            return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
+        } else {
+            return $this->getPropertyFlatValue(DcTerms::TITLE);
+        }
     }
     
     /**

@@ -60,15 +60,36 @@ $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:dc="http://purl.org/dc/terms/"
          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
          xmlns:openskos="http://openskos.org/xmlns#">
-<rdf:Description rdf:about="http://testing/2">
+<rdf:Description rdf:about="http://testing/6">
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-    <skos:prefLabel xml:lang="nl">Testing2</skos:prefLabel>
-    <skos:notation>2</skos:notation>
+    <skos:prefLabel xml:lang="nl">Testing6</skos:prefLabel>
+    <skos:notation>6</skos:notation>
     <openskos:tenant>beng</openskos:tenant>
+    <openskos:toBeChecked>1</openskos:toBeChecked>
+    
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
+    <skos:topConceptOf rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
     <skos:narrower rdf:resource="http://testing/3"/>
+    <skos:narrower rdf:resource="http://testing/1"/>
   </rdf:Description>
   </rdf:RDF>
 ';
+
+
+//$xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+//         xmlns:dc="http://purl.org/dc/terms/"
+//         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+//         xmlns:openskos="http://openskos.org/xmlns#">
+//<rdf:Description rdf:about="http://testing/1">
+//    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+//    <skos:prefLabel xml:lang="nl">Testing1</skos:prefLabel>
+//    <skos:notation>1</skos:notation>
+//    <openskos:tenant>beng</openskos:tenant>
+//    
+//    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
+//  </rdf:Description>
+//  </rdf:RDF>
+//';
 
 
 $client = new Zend_Http_Client('http://openskos/api/concept', array(
@@ -82,7 +103,7 @@ $response = $client
     ->setParameterGet('collection', 'mycol')
     ->setParameterGet('key', 'alexandar')
     ->setParameterGet('autoGenerateIdentifiers', false)
-    ->request('PUT');
+    ->request('POST');
 
 if ($response->isSuccessful()) {
     echo 'Concept created';

@@ -19,6 +19,9 @@
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+
 class Editor_Forms_Concept extends OpenSKOS_Form
 {
     /**
@@ -372,7 +375,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 'broader' => _('Has broader'),
                 'narrower' => _('Has narrower'),
                 'related' => _('Has related')
-                    ), 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-scheme-relations');
+            ), 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-scheme-relations');
         }
 
         $this->buildMappingProperties();
@@ -409,9 +412,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         $this->addElement('hidden', 'hiddenBr3', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly' => true)))
         ));
-
+        
+        $topConceptOfOptions = [];
+        foreach ($this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll() as $scheme) {
+            $topConceptOfOptions[$scheme->getUri()] = '';
+        }
+        
         $this->addElement('multiCheckbox', 'topConceptOf', array(
             'label' => 'Is top concept:',
+            'multiOptions' => $topConceptOfOptions,
             'decorators' => array('ViewHelper', 'Label'),
             'registerInArrayValidator' => false
         ));
@@ -444,7 +453,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 'relatedMatch' => _('Has related match'),
                 'mappingRelation' => _('Has mapping relation'),
                 'closeMatch' => _('Has close match'),
-                'exactMatch' => _('Has exact match')
+                'exactMatch' => _('Has exact match'),
             );
 
             $this->buildMultiElements($mappingNames, 'OpenSKOS_Form_Element_Multilink', array(), null, 'concept-edit-mapping-properties');
@@ -469,7 +478,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     }
 
     /**
-     * @param Editor_Models_Concept Pass the edited concept for some checks.
+     * @param OpenSkos2\Concept Pass the edited concept for some checks.
      * @param OpenSKOS_Db_Table_Row_Tenant Passes tenant. If not gets it from concept.
      * @return Editor_Forms_Concept
      */
@@ -488,7 +497,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 
             $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
-                'currentStatus' => (null !== $concept ? $concept['status'] : null),
+                'currentStatus' => (null !== $concept ? $concept->getPropertyFlatValue(OpenSkos::STATUS) : null),
                 'enableStatusesSystem' => $enableStatusesSystem,
             ]);
         }

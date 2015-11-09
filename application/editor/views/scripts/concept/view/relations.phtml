@@ -31,34 +31,23 @@ use OpenSkos2\Namespaces\Skos;
         <?php foreach ($this->relations as $key => $concept): ?>
             <li class="concept-link">
                 <span class="concept-link-header"> 
-                    <?php if (!$concept->isPropertyEmpty(Skos::INSCHEME)): ?>
-                        <?php foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
-                            <?php
-                                $scheme = $this->conceptSchemes->findByUri($schemeUri);
-                                if (!empty($scheme)) {
-                                    $imgTitle = $scheme->getCaption();
-                                    $iconPath = OpenSkos2\ConceptScheme::buildIconPath($scheme->getUri());
-                                }
-                            ?>
-                            <?php if (!empty($iconPath)): ?>
-                                <img alt="<?= $imgTitle ?>" title="<?= $imgTitle ?>" src="<?= $iconPath ?>" />
-                            <?php else: ?>
-                                <span>(<?= empty($imgTitle) ? 'N/A' : substr($imgTitle, 0, 2) ?>)</span>
-                            <?php endif ?>
-                        <?php endforeach ?>
-                    <?php endif ?>
+                    <?= $this->partial(
+                        'concept/view/schemes.phtml',
+                        [
+                            'concept' => $concept,
+                            'conceptSchemes' => $this->conceptSchemes,
+                        ]
+                    );?>
                 </span>
                 
                 <span class="concept-link-content">
                     <?php
-                        $scopeNote = $concept->retrievePropertyInLanguage(
-                            Skos::SCOPENOTE,
-                            Zend_Registry::get('Zend_Locale')->getLanguage()
-                        );
+                        $language = Zend_Registry::get('Zend_Locale')->getLanguage();
+                        $scopeNote = $concept->retrievePropertyInLanguage(Skos::SCOPENOTE, $language);
                     ?>
-                    <a href="#" title="<?= $concept->getCaption(); ?>
+                    <a href="#" title="<?= $concept->getCaption($language); ?>
                         <?= (empty($scopeNote) ? '' : ' {' . $scopeNote . '}') ?>">
-                        <?= $concept->getCaption(); ?>
+                        <?= $concept->getCaption($language); ?>
                         <?php // if (!$this->currentConcept->isInternalRelation($concept['uri'], $relation)) : ?>
                             <!--*-->
                         <?php // endif ?>

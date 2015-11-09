@@ -51,7 +51,7 @@ var EditorControl = new Class({
             Editor.Control.clickConcept(this.getParent('.concept-link').getElement('.uri').get('text'));
         });
         $(document.body).addEvent('click:relay(#concept-edit)', function (e) {
-            Editor.Control.editConcept(this.get('class').split(' ')[0]);
+            Editor.Control.editConcept($('uri').get('value'));
         });
 
         $(document.body).addEvent('click:relay(#concept-add)', function (e) {
@@ -63,7 +63,7 @@ var EditorControl = new Class({
         // Bind Export actions
         $(document.body).addEvent("click:relay(.export-concept)", function (e) {
             e.stop();
-            Editor.View.showExportBox('concept', $('uuid').get('value'));
+            Editor.View.showExportBox('concept', $('uri').get('value'));
         });
         $(document.body).addEvent("click:relay(.export-history)", function (e) {
             e.stop();
@@ -120,18 +120,18 @@ var EditorControl = new Class({
             }
         }).get();
     },
-    editConcept: function (uuid) {
+    editConcept: function (uri) {
         var self = this;
         self.showLoading();
         new Request.HTML({
-            url: BASE_URL + '/editor/concept/edit/uri/' + uuid,
+            url: BASE_URL + '/editor/concept/edit/uri/' + encodeURIComponent(uri),
             onSuccess: function (responseTree, responseElements, responseHTML, responseJavaScript) {
                 self.stopLoading();
 
                 $('central-content').empty();
                 $('central-content').set('html', responseHTML);
                 Editor.Concept.initConceptForm();
-                Editor.View.markConceptActive(uuid);
+                Editor.View.markConceptActive(uri);
             }
         }).get();
     },
@@ -164,7 +164,7 @@ var EditorControl = new Class({
                 if (null !== $('Editconcept')) {
                     Editor.Concept.initConceptForm();
                 } else {
-                    Editor.Control.loadHistory($('history-list'), $('concept-view').getElement('#uuid').get('value'));
+                    Editor.Control.loadHistory($('history-list'), $('concept-view').getElement('#uri').get('value'));
                     new TabPane('concept-language-tab-container', {}, false);
                     new TabPane('concept-scheme-tab-container', {}, false);
                     Editor.Relations.disableRelationLinks();
@@ -236,7 +236,7 @@ var EditorControl = new Class({
             }
         }).send();
     },
-    loadHistory: function (element, forUuid) {
+    loadHistory: function (element, forUri) {
         var self = this;
         new Request.JSON({
             url: BASE_URL + "/editor/history",
@@ -246,8 +246,8 @@ var EditorControl = new Class({
                     Editor.View.emptyContainer(element, '.concept-link');
                     Editor.View.showHistory(result.result, element);
 
-                    if (forUuid) {
-                        Editor.View.markConceptActive(forUuid);
+                    if (forUri) {
+                        Editor.View.markConceptActive(forUri);
                     }
                 }
             }

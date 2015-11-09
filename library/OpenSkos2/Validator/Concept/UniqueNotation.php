@@ -49,7 +49,7 @@ class UniqueNotation extends AbstractConceptValidator implements ResourceManager
             'value' => $concept->getProperty(Skos::NOTATION)
         ];
 
-        if ($this->isUniquePerScheme()) {
+        if ($this->isUniquePerScheme() && !$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $params[] = [
                 'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
                 'predicate' => Skos::INSCHEME,

@@ -136,7 +136,11 @@ class Concept extends Resource
      */
     public function getCaption($language = null)
     {
-        return $this->getPropertyFlatValue(Skos::PREFLABEL, $language);
+        if ($this->hasPropertyInLanguage(Skos::PREFLABEL, $language)) {
+            return $this->getPropertyFlatValue(Skos::PREFLABEL, $language);
+        } else {
+            return $this->getPropertyFlatValue(Skos::PREFLABEL);
+        }
     }
     
     /**

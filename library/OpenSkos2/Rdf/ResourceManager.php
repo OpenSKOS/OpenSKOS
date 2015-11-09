@@ -83,6 +83,17 @@ class ResourceManager
         $update->addDocument($resourceDoc)->addCommit(true);
         $result = $this->solr->update($update);
     }
+    
+    /**
+     * Deletes and then inserts the resourse.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function replace(Resource $resource)
+    {
+        // @TODO Danger if insert fails. Need transaction or something.
+        $this->delete($resource);
+        $this->insert($resource);
+    }
 
     /**
      * Soft delete resource , sets the openskos:status to deleted

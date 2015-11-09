@@ -1,55 +1,57 @@
-<span class="multi-field-complex" id="<?php echo $this->inputName; ?>">
-<?php if (is_array($this->inputValues) && !empty($this->inputValues)):?>
-<?php foreach ($this->inputValues as $scheme): ?>
-<div class="concept-complex-title <?php echo $this->inputName; ?>">
-	<?php echo $this->inputLabel; ?> 
-	<span class="relations-count">( <?php echo count($scheme['concepts']); ?> )</span>
-</div>
-<ul class="multi-field-list <?php echo $scheme['uuid']?>">
-<li class="concept-link template">
-	<span class="concept-link-header"></span>
-	<span class="concept-link-content"><a href="#"></a></span>
-	<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="" /></span>
-        <span class="uri"></span>
-</li>
-<?php if (is_array($scheme['concepts'])):?>
-<?php foreach ($scheme['concepts'] as $conceptLink) :?>
-<li class="concept-link">
-	<span class="concept-link-header"> 
-	<?php if (is_array($conceptLink['schemes'])) :?>
-		<?php foreach ($conceptLink['schemes'] as $schemeLink):?>
-			<?php $imgTitle = (isset($schemeLink['dcterms_title'][0]) ? $schemeLink['dcterms_title'][0] : 'NA')?>
-			<?php if ( ! empty($schemeLink['iconPath'])):?>
-				<img alt="<?php echo $imgTitle?>" title="<?php echo $imgTitle?>" src="<?php echo $schemeLink['iconPath']?>" />
-			<?php else:?>
-				<span>(<?php echo substr($imgTitle, 0, 2)?>)</span>
-			<?php endif?>
-		<?php endforeach?>
-	<?php endif?>
-	</span>
-	<span class="concept-link-content">
-            <a href="#"><?php echo $conceptLink['concept']['previewLabel']; ?> </a></span>            
-            <span class="uri"></span>
-	<?php if ($conceptLink['concept']['remove']) :?>
-		<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="<?php echo $conceptLink['concept']['uri']; ?>" /></span>
-	<?php endif?>
-</li>
-<?php endforeach?>
-<?php endif?>
-</ul>
-<?php endforeach?>
-<?php else: ?>
-<div class="concept-complex-title <?php echo $this->inputName; ?>">
-	<?php echo $this->inputLabel; ?> 
-	<span class="relations-count">( 0 )</span>
-</div>
-<ul class="multi-field-list template">
-	<li class="concept-link template">
-		<span class="concept-link-header"></span>
-		<span class="concept-link-content"><a href="#"></a></span>
-		<span class="concept-link-remove-action"><input type="hidden" name="<?php echo $this->inputName; ?>[]" value="" /></span>                
+<span class="multi-field-complex" id="<?= $this->inputName; ?>">
+    <?php if (is_array($this->inputValues) && !empty($this->inputValues)): ?>
+        <?php foreach ($this->inputValues as $schemeUri => $concepts): ?>
+            <div class="concept-complex-title <?= $this->inputName; ?>">
+                <?= $this->inputLabel; ?> 
+                <span class="relations-count">( <?= count($concepts); ?> )</span>
+            </div>
+            <ul class="multi-field-list <?= $schemeUri ?>">
+                <li class="concept-link template">
+                    <span class="concept-link-header"></span>
+                    <span class="concept-link-content"><a href="#"></a></span>
+                    <span class="concept-link-remove-action"><input type="hidden" name="<?= $this->inputName; ?>[]" value="" /></span>
+                    <span class="uri"></span>
+                </li>
+                <?php foreach ($concepts as $concept) : ?>
+                    <li class="concept-link">
+                        <span class="concept-link-header"> 
+                            <?= $this->partial(
+                                'concept/view/schemes.phtml',
+                                [
+                                    'concept' => $concept,
+                                    'conceptSchemes' => $this->conceptSchemes,
+                                ]
+                            );?>
+                        </span>
+                        
+                        <span class="concept-link-content">
+                            <?php
+                                $language = Zend_Registry::get('Zend_Locale')->getLanguage();
+                            ?>
+                            <a href="#"><?= $concept->getCaption($language); ?> </a>
+                        </span>
+                        
+                        <span class="concept-link-remove-action">
+                            <input type="hidden" name="<?= $this->inputName; ?>[]" value="<?= $concept->getUri(); ?>" />
+                        </span>
+                        
+                        <span class="uri"><?= $concept->getUri(); ?></span>
+                    </li>
+                <?php endforeach ?>
+            </ul>
+        <?php endforeach ?>
+    <?php else: ?>
+        <div class="concept-complex-title <?= $this->inputName; ?>">
+            <?= $this->inputLabel; ?> 
+            <span class="relations-count">( 0 )</span>
+        </div>
+        <ul class="multi-field-list template">
+            <li class="concept-link template">
+                <span class="concept-link-header"></span>
+                <span class="concept-link-content"><a href="#"></a></span>
+                <span class="concept-link-remove-action"><input type="hidden" name="<?= $this->inputName; ?>[]" value="" /></span>                
                 <span class="uri"></span>
-	</li>
-</ul>
-<?php endif?>
+            </li>
+        </ul>
+    <?php endif ?>
 </span>

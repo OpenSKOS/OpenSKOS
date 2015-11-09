@@ -212,7 +212,7 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         
         return $this;
     }
-    
+        
     /**
      * Build inputs to handle adding a concept to the scheme or making a concept top concept in the scheme.
      *

@@ -136,10 +136,9 @@ class Resource extends Uri implements ResourceIdentifier
     {
         if (!$this->isPropertyEmpty($predicate)) {
             $values = $this->getProperty($predicate);
-            // @TODO is that enough?
             return (bool) $values[0]->getValue();
         }
-        return empty($this->properties[$predicate]);
+        return false;
     }
 
     /**
@@ -192,7 +191,6 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function hasPropertyInLanguage($predicate, $language)
     {
-        $values = [];
         foreach ($this->getProperty($predicate) as $value) {
             if ($value instanceof Literal && $value->getLanguage() == $language) {
                 return true;

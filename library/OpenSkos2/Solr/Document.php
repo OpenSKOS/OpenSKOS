@@ -22,6 +22,8 @@ namespace OpenSkos2\Solr;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Openskos;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
@@ -65,7 +67,7 @@ class Document
         Openskos::TENANT => ['s_tenant'],
         DcTerms::CREATOR => ['s_creator', 't_creator', 'a_creator'],
         DcTerms::CONTRIBUTOR => ['s_contributor', 't_contributor', 'a_contributor'],
-        DcTerms::CREATED => ['d_created'],
+        DcTerms::DATEACCEPTED => ['d_created'],
         DcTerms::MODIFIED => ['d_modified'],
     ];
 
@@ -149,28 +151,41 @@ class Document
         foreach ($values as $value) {
             $newField = $field;
 
-            $language = null;
-            if (method_exists($value, 'getLanguage')) {
-                $language = $value->getLanguage();
-            }
-
-            if ($language) {
-                $newField .= '_' . $language;
+            if (method_exists($value, 'getLanguage') && $value->getLanguage()) {
+                $newField .= '_' . $value->getLanguage();
             }
 
             if (!isset($data[$newField])) {
                 $data[$newField] = [];
             }
 
-            if (!method_exists($value, 'getLanguage')) {
+            if ($value instanceof Uri) {
                 $data[$newField][] = $value->getUri();
             } else {
-                $data[$newField][] = $value->getValue();
+                $data[$newField][] = $this->valueToSolr($value);
             }
         }
 
         foreach ($data as $field => $val) {
             $document->{$field} = $val;
+        }
+    }
+    
+    protected function valueToSolr($value)
+    {
+        switch ($value->getType()) {
+            case Literal::TYPE_DATETIME:
+                if ($value->getValue() instanceof \DateTime) {
+                    return $value->getValue()->format('Y-m-d\TH:i:s.z\Z');
+                } else {
+                    return gmdate('Y-m-d\TH:i:s.z\Z', strtotime($value->getValue()));
+                }
+                break;
+            case Literal::TYPE_BOOL:
+                return boolval($value->getValue());
+                break;
+            default:
+                return $value->getValue();
         }
     }
 }

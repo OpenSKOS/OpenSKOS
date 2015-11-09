@@ -26,7 +26,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Validator\Resource as ResourceValidator;
 use Zend\Diactoros\Response\JsonResponse;
 
 class Editor_ConceptController extends OpenSKOS_Controller_Editor
@@ -76,210 +76,104 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save'))
         );
     }
-
+    
     public function editAction()
     {
         $this->_helper->_layout->setLayout('editor_central_content');
 
         $concept = $this->_getConcept();
+        
+        $form = Editor_Forms_Concept::getInstance($concept);
 
-        if (null === $concept) {
+        if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         } else {
             $this->_requireAccess('editor.concepts', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
         }
-
-        $this->_checkConceptTenantForEdit($concept);
-
-        $form = Editor_Forms_Concept::getInstance($concept);
-
-        if (!$this->getRequest()->isPost()) {
-            $formData = $concept->toForm();
-        } else {
+        
+        $this->checkConceptTenantForEdit($concept);
+        
+        if ($this->getRequest()->isPost()) {
             // If we are here after post - there are errors in the form.
             $this->view->errors = $this->_getParam('errors', array());
 
-            $formData = $this->getRequest()->getPost();
-
             if ($form->getIsCreate()) {
-                $concept = new Editor_Models_Concept(new Api_Models_Concept());
+                $concept = new Concept();
             }
-
-            $extraData = $concept->transformFormData($formData);
-            $concept->setConceptData($formData);
-            $formData = $concept->toForm();
-            $formData = array_merge($formData, $extraData);
-
-            $formData['notation'] = $this->getRequest()->getPost('notation');
-            $formData['uri'] = $this->getRequest()->getPost('uri');
-            if ($form->getIsCreate()) {
-                $formData['baseUri'] = $this->getRequest()->getPost('baseUri');
-            }
+            
+            // Populate the concept with posted data.
+            Editor_Forms_Concept_FormToConcept::toConcept(
+                $concept,
+                $this->getRequest()->getPost(),
+                OpenSKOS_Db_Table_Users::fromIdentity()
+            );
         }
-
+        
         $form->reset();
-        $form->populate($formData);
-
-        if (isset($formData['topConceptOf'])) {
-
-            //extract checked
-            $values = array();
-            foreach ($formData['topConceptOf'] as $uuid => $checked) {
-                if ($checked) {
-                    $values[] = $uuid;
-                    $formData['topConceptOf'][$uuid] = false;
-                }
-            }
-
-            //set all options
-            $form->getElement('topConceptOf')->setMultiOptions($formData['topConceptOf']);
-
-            //set checked options
-            $form->getElement('topConceptOf')->setValue($values);
-        }
-        $form->getElement('conceptSchemeSelect')->setMultiOptions($formData['conceptSchemeSelect']);
-        unset($formData['topConceptOf']);
-
-        $form->setAction($this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save')));
+        $form->populate(
+            Editor_Forms_Concept_ConceptToForm::toFormData($concept)
+        );
+        
+        $form->setAction(
+            $this->getFrontController()->getRouter()->assemble(['controller' => 'concept', 'action' => 'save'])
+        );
         $this->view->form = $form;
-
+        
         $this->view->assign('footerData', $this->_generateFooter($concept));
     }
-
+    
     public function saveAction()
     {
         $concept = $this->_getConcept();
-
+        
         $form = Editor_Forms_Concept::getInstance($concept);
-
-        $formData = $this->getRequest()->getParams();
-
-        if (!$this->getRequest()->isPost()) {
-            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
-            $this->_helper->redirector('edit');
-        }
-
-        $this->_checkConceptTenantForEdit($concept);
-
-        if (!$form->isValid($formData)) {
-            return $this->_forward('edit');
+        
+        if ($form->getIsCreate()) {
+            $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         } else {
-
-            //@FIXME should upgrade multi hidden fields to allow easy submission (change name to template something)
-            array_shift($formData['inScheme']);
-
-            $form->populate($formData);
-
-            if (null === $concept) {
-                $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
-                $concept = new Editor_Models_Concept(new Api_Models_Concept());
-            } else {
-                $this->_requireAccess('editor.concepts', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
-            }
-
-            $formData = $form->getValues();
-
-            $oldData = $concept->getData();
-
-            //by reference.
-            $extraData = $concept->transformFormData($formData);
-            $concept->setConceptData($formData, $extraData);
-
-            try {
-
-                $user = OpenSKOS_Db_Table_Users::fromIdentity();
-
-                $extraData = array_merge($extraData, array(
-                    'tenant' => $user->tenant,
-                    'modified_by' => (int) $user->id,
-                    'modified_timestamp' => date("Y-m-d\TH:i:s\Z"),
-                    'toBeChecked' => (isset($extraData['toBeChecked']) ? (bool) $extraData['toBeChecked'] : false))
-                );
-
-                if (!isset($extraData['uuid']) || empty($extraData['uuid'])) {
-                    $extraData['uuid'] = $concept['uuid'];
-                    $extraData['created_by'] = $extraData['modified_by'];
-                    $extraData['created_timestamp'] = $extraData['modified_timestamp'];
-                } else {
-                    if (isset($oldData['created_by'])) {
-                        $extraData['created_by'] = $oldData['created_by'];
-                    }
-                    if (isset($oldData['created_timestamp'])) {
-                        $extraData['created_timestamp'] = $oldData['created_timestamp'];
-                    }
-                    if (isset($oldData['collection'])) {
-                        $extraData['collection'] = $oldData['collection'];
-                    }
-                    if (isset($oldData['approved_by'])) {
-                        $extraData['approved_by'] = $oldData['approved_by'];
-                    }
-                    if (isset($oldData['approved_timestamp'])) {
-                        $extraData['approved_timestamp'] = $oldData['approved_timestamp'];
-                    }
-                    if (isset($oldData['deleted_by'])) {
-                        $extraData['deleted_by'] = $oldData['deleted_by'];
-                    }
-                    if (isset($oldData['deleted_timestamp'])) {
-                        $extraData['deleted_timestamp'] = $oldData['deleted_timestamp'];
-                    }
-                }
-
-                if ($extraData['status'] === OpenSKOS_Concept_Status::APPROVED && (!isset($oldData['status']) || $oldData['status'] !== OpenSKOS_Concept_Status::APPROVED)) {
-                    $extraData['approved_timestamp'] = $extraData['modified_timestamp'];
-                    $extraData['approved_by'] = $extraData['modified_by'];
-                }
-
-                if ($extraData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
-                    $formData['approved_by'] = '';
-                    $formData['approved_timestamp'] = '';
-                    $extraData['approved_by'] = '';
-                    $extraData['approved_timestamp'] = '';
-                }
-
-                if (OpenSKOS_Concept_Status::isStatusLikeDeleted($extraData['status'])) {
-                    $formData['deleted_by'] = '';
-                    $formData['deleted_timestamp'] = '';
-                    $extraData['deleted_by'] = '';
-                    $extraData['deleted_timestamp'] = '';
-                }
-
-                if (!isset($extraData['collection'])) {
-                    if (isset($concept['inScheme']) && isset($concept['inScheme'][0])) {
-                        $firstConceptScheme = Editor_Models_ApiClient::factory()->getConceptSchemes($concept['inScheme'][0]);
-                        $firstConceptScheme = array_shift($firstConceptScheme);
-                        if (!empty($firstConceptScheme) && isset($firstConceptScheme['collection'])) {
-                            $extraData['collection'] = $firstConceptScheme['collection'];
-                        }
-                    }
-                }
-
-                $this->_handleStatusAutomatedActions($concept, $formData, $extraData);
-
-                $concept->setConceptData($formData, $extraData);
-
-                if ($concept->save($extraData)) {
-                    if (!isset($concept['inScheme'])) {
-                        $newSchemes = array();
-                    } else {
-                        $newSchemes = $concept['inScheme'];
-                    }
-
-                    if (!isset($oldData['inScheme'])) {
-                        $oldSchemes = array();
-                    } else {
-                        $oldSchemes = $oldData['inScheme'];
-                    }
-
-                    $concept->updateConceptSchemes($newSchemes, $oldSchemes);
-                } else {
-                    return $this->_forward('edit', 'concept', 'editor', array('errors' => $concept->getErrors()));
-                }
-            } catch (Zend_Exception $e) {
-                return $this->_forward('edit', 'concept', 'editor', array('errors' => array(new Editor_Models_ConceptValidator_Error('unknown', $e->getMessage()))));
-            }
-            $this->_helper->redirector('view', 'concept', 'editor', array('uuid' => $extraData['uuid']));
+            $this->_requireAccess('editor.concepts', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
         }
+        
+        if ($form->getIsCreate()) {
+            $concept = new Concept();
+        }
+        
+        $this->checkConceptTenantForEdit($concept);
+
+        $params = $this->getRequest()->getParams();
+        if (!$form->isValid($params)) {
+            return $this->_forward('edit');
+        }
+        
+        $form->populate($params);
+        
+        Editor_Forms_Concept_FormToConcept::toConcept(
+            $concept,
+            $form->getValues(),
+            OpenSKOS_Db_Table_Users::fromIdentity()
+        );
+        
+        $validator = new ResourceValidator(
+            $this->getConceptManager(),
+            $this->getTenant()
+        );
+        
+        if ($validator->validate($concept)) {
+            if ($form->getIsCreate()) {
+                $concept->selfGenerateUri();
+            }
+
+            $this->getConceptManager()->replace($concept);
+            
+            //        $this->_handleStatusAutomatedActions($concept, $formData);
+            
+        } else {
+            return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
+        }
+        
+        $this->_helper->redirector('view', 'concept', 'editor', array('uri' => $concept->getUri()));
     }
+
 
     public function viewAction()
     {
@@ -294,11 +188,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             }
 
             $this->view->assign('currentConcept', $concept);
-            $this->view->assign('conceptManager', $this->getDI()->get('\OpenSkos2\ConceptManager'));
-            $this->view->assign(
-                'conceptSchemes',
-                $this->getDI()->get('\OpenSkos2\ConceptSchemeManager')->fetch([], 0, 200)
-            );
+            $this->view->assign('conceptManager', $this->getConceptManager());
+            $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
             $this->view->assign('footerData', $this->_generateFooter($concept));
             
         } catch (Zend_Exception $e) {
@@ -324,7 +215,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $data = array();
         
-        $narrowers = $this->getDI()->get('\OpenSkos2\ConceptManager')->fetchRelations(
+        $narrowers = $this->getConceptManager()->fetchRelations(
             $this->_getConcept()->getUri(),
             Skos::NARROWER
         );
@@ -444,7 +335,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $updateExtraData['modified_by'] = $user->id;
                 $updateExtraData['modified_timestamp'] = date("Y-m-d\TH:i:s\Z");
 
-                if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED && $status == OpenSKOS_Concept_Status::APPROVED) {
+                if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED &&
+                        $status == OpenSKOS_Concept_Status::APPROVED) {
                     $updateExtraData['approved_by'] = $user->id;
                     $updateExtraData['approved_timestamp'] = date("Y-m-d\TH:i:s\Z");
                 }
@@ -467,7 +359,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $uri = $this->getRequest()->getParam('uri');
         if (!empty($uri)) {
-            return $this->getDI()->get('\OpenSkos2\ConceptManager')->fetchByUri($uri);
+            return $this->getConceptManager()->fetchByUri($uri);
         } else {
             return null;
         }
@@ -517,10 +409,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $dates = $concept->getProperty($properties['date']);
                 
                 // @TODO We only pick the first date now
-                $date = $dates[0]->getValue()
-                    // @TODO there is a timezone already. Check that
-                    ->setTimezone(new DateTimeZone(ini_get('date.timezone')))
-                    ->format('d-m-Y H:i:s');
+                // @TODO Always have date time or string as value
+                if ($dates[0]->getValue() instanceof \DateTime) {
+                    $date = $dates[0]->getValue()
+                        // @TODO there is a timezone already. Check that
+                        ->setTimezone(new DateTimeZone(ini_get('date.timezone')))
+                        ->format('d-m-Y H:i:s');
+                } else {
+                    $date = date('d-m-Y H:i:s', strtotime($dates[0]->getValue()));
+                }
             }
             
             $footerData[$field]['user'] = !empty($userName) ? $userName : 'N/A';
@@ -534,15 +431,21 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      * Check if the user's tenant and the concept's tenant are the same. 
      * If not - do not allow edit and return to view with error.
      * 
-     * @param $concept Api_Models_Concept
+     * @param $concept OpenSkos2\Concept
      */
-    protected function _checkConceptTenantForEdit($concept)
+    protected function checkConceptTenantForEdit($concept)
     {
         if (null !== $concept) {
-            $conceptTenantData = $concept->toArray(array('tenant'));
-            if ($conceptTenantData['tenant'] != $this->getCurrentUser()->tenant) {
-                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not edit concepts of different tenants.'));
-                $this->_helper->redirector('view', 'concept', 'editor', array('uuid' => $this->getRequest()->getParam('uuid')));
+            if ($concept->getTenant() != $this->getCurrentUser()->tenant) {
+                $this->getHelper('FlashMessenger')
+                    ->setNamespace('error')
+                    ->addMessage(_('You can not edit concepts of different tenants.'));
+                $this->_helper->redirector(
+                    'view',
+                    'concept',
+                    'editor',
+                    ['uuid' => $this->getRequest()->getParam('uuid')]
+                );
             }
         }
     }
@@ -622,6 +525,25 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 }
             }
         }
+    }
+    
+    /**
+     * @return OpenSkos2\ConceptManager
+     */
+    protected function getConceptManager()
+    {
+        return $this->getDI()->get('\OpenSkos2\ConceptManager');
+    }
+    
+    /**
+     * @return OpenSkos2\Tenant
+     */
+    protected function getTenant()
+    {
+        return new OpenSkos2\Tenant(
+            $this->getCurrentUser()->tenant,
+            null //@TODO unique per tenant notation
+        );
     }
     
     /**

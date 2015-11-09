@@ -209,6 +209,8 @@ class Editor_Models_Concept extends Api_Models_Concept
                     $topConcept[$conceptData['conceptSchemesId'][$scheme]] = $this->isTopConceptOf($scheme);
                 }
 
+                
+                
                 foreach (self::$classes['SemanticRelations'] as $relation) {
                     if (!isset($conceptData[$relation]) || !is_array($conceptData[$relation])) {
                         $conceptData[$relation] = array();
@@ -220,6 +222,9 @@ class Editor_Models_Concept extends Api_Models_Concept
                         }
                     }
                 }
+                
+                
+                
             }
             $conceptData['topConceptOf'] = $topConcept;
         }

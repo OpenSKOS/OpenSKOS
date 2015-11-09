@@ -25,21 +25,9 @@
 
     <?php if (!empty($this->errors)) : ?>
         <div class="errors">
-            <?php foreach ($this->errors as $error) : ?>
+            <?php foreach ($this->errors as $errorMessage) : ?>
                 <div>
-                    <?php echo $error->getMessage(); ?><br />
-                    <?php if (count($error->getConflictedConcepts()) > 0) : ?>
-                        <ul>
-                            <?php foreach ($error->getConflictedConcepts() as $concept) : ?>
-                                <li class="concept-link">
-                                    <span class="concept-link-content">
-                                        <a href="#"><?php echo $concept->getMlField('prefLabel', Zend_Registry::get('Zend_Locale')->getLanguage()); ?></a>
-                                    </span>
-                                    <span class="uri"><?php echo $concept['uri']; ?></span>
-                                </li>
-                            <?php endforeach ?>
-                        </ul>
-                    <?php endif ?>
+                    <?php echo $errorMessage ?><br />
                 </div>
             <?php endforeach ?>
         </div>

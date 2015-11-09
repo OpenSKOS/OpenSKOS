@@ -151,7 +151,7 @@ class Command implements LoggerAwareInterface
                         new Literal($message->getImportedConceptStatus())
                     );
                 }
-
+                
                 // @TODO Those properties has to have types, rather then ignoring them from a list
                 $nonLangProperties = [Skos::NOTATION, OpenSkos::STATUS];
                 if ($message->getFallbackLanguage()) {
