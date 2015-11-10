@@ -18,7 +18,6 @@
  */
 
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Literal;
@@ -51,19 +50,7 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function translatedPropertiesToConcept(Concept &$concept, $formData)
     {
-        $translatedProperties = [
-            'prefLabel' => Skos::PREFLABEL,
-            'altLabel' => Skos::ALTLABEL,
-            'hiddenLabel' => Skos::HIDDENLABEL,
-            'changeNote' => Skos::CHANGENOTE,
-            'definition' => Skos::DEFINITION,
-            'editorialNote' => Skos::EDITORIALNOTE,
-            'example' => Skos::EXAMPLE,
-            'historyNote' => Skos::HISTORYNOTE,
-            'note' => Skos::NOTE,
-            'scopeNote' => Skos::SCOPENOTE,
-        ];
-        foreach ($translatedProperties as $field => $property) {
+        foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
             if (!empty($formData[$field])) {
                 $propertyValues = [];
                 foreach ($formData[$field] as $language => $values) {
@@ -85,13 +72,7 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function flatPropertiesToConcept(Concept &$concept, $formData)
     {
-        $flatFields = [
-            'status' => OpenSkos::STATUS,
-            'notation' => Skos::NOTATION, // @TODO array
-            'uuid' => OpenSkos::UUID, // @TODO Readonly/generated
-            'toBeChecked' => OpenSkos::TOBECHECKED,
-        ];
-        foreach ($flatFields as $field => $property) {
+        foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
             if (!empty($formData[$field])) {
                 $concept->setProperty($property, new Literal($formData[$field]));
             }
@@ -119,23 +100,7 @@ class Editor_Forms_Concept_FormToConcept
             return $uris;
         };
         
-        $resourcesProperties = [
-            'inScheme' => Skos::INSCHEME,
-            'topConceptOf' => Skos::TOPCONCEPTOF,
-            
-            'narrower' => Skos::NARROWER,
-            'broader' => Skos::BROADER,
-            'related' => Skos::RELATED,
-            
-            'broadMatch' => Skos::BROADMATCH,
-            'narrowMatch' => Skos::NARROWMATCH,
-            'relatedMatch' => Skos::RELATEDMATCH,
-            'mappingRelation' => Skos::MAPPINGRELATION,
-            'closeMatch' => Skos::CLOSEMATCH,
-            'exactMatch' => Skos::EXACTMATCH,
-        ];
-        
-        foreach ($resourcesProperties as $field => $property) {
+        foreach (Editor_Forms_Concept::getResourceBasedFieldsMap() as $field => $property) {
             if (isset($formData[$field])) {
                 $concept->setProperties($property, $fieldToUris($formData[$field]));
             } else {
@@ -156,6 +121,8 @@ class Editor_Forms_Concept_FormToConcept
     protected static function metaDataToConcept(Concept &$concept, $formData, OpenSKOS_Db_Table_Row_User $user)
     {
         // @TODO on import and post as well!
+        
+        
         $forFirstTimeInEditor = [
             OpenSkos::TENANT => new Literal($user->tenant),
             OpenSkos::SET => new Uri('http:://todo/gtaa'),

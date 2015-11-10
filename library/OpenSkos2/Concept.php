@@ -193,6 +193,24 @@ class Concept extends Resource
             return false;
         }
     }
+    
+    /**
+     * Does the concept have any relations or mapping properties.
+     * @return bool
+     */
+    public function hasAnyRelations()
+    {
+        $relationProperties = array_merge(
+            self::$classes['SemanticRelations'],
+            self::$classes['MappingProperties']
+        );
+        foreach ($relationProperties as $relationProperty) {
+            if (!$this->isPropertyEmpty($relationProperty)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Generates an uri for the concept.

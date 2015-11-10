@@ -48,7 +48,7 @@ var EditorConceptStatus = new Class({
         this.selectedStatus = e.target.get('value');
         
         if (this.selectedStatus == this.deleteStatus) {
-            Editor.View.showDeleteBox($('uuid').get('value'));
+            Editor.View.showDeleteBox($('uri').get('value'));
             var self = this;
             SqueezeBox.addEvent('close', function() {
                 self.returnOldStatus();

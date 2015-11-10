@@ -27,6 +27,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
 
 class Editor_ConceptController extends OpenSKOS_Controller_Editor
@@ -44,6 +45,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
         
         $languageCode = $this->getInitialLanguage();
+        
+        //@TODO Make those as default values.
         $form->populate([
             'conceptLanguages' => [
                 strtoupper($languageCode) => [
@@ -165,7 +168,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
             $this->getConceptManager()->replace($concept);
             
-            //        $this->_handleStatusAutomatedActions($concept, $formData);
+            // @TODO       $this->_handleStatusAutomatedActions($concept, $formData);
             
         } else {
             return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
@@ -177,24 +180,24 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
     public function viewAction()
     {
+        $this->_helper->_layout->setLayout('editor_central_content');
+            
         try {
-            $this->_helper->_layout->setLayout('editor_central_content');
-            
             $concept = $this->_getConcept();
-            
-            $user = OpenSKOS_Db_Table_Users::fromIdentity();
-            if (!empty($user)) {
-                $user->updateUserHistory($concept->getUri());
-            }
-
-            $this->view->assign('currentConcept', $concept);
-            $this->view->assign('conceptManager', $this->getConceptManager());
-            $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
-            $this->view->assign('footerData', $this->_generateFooter($concept));
-            
-        } catch (Zend_Exception $e) {
+        } catch (ResourceNotFoundException $e) {
             $this->view->assign('errorMessage', $e->getMessage());
+            return null;
         }
+        
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (!empty($user)) {
+            $user->updateUserHistory($concept->getUri());
+        }
+
+        $this->view->assign('currentConcept', $concept);
+        $this->view->assign('conceptManager', $this->getConceptManager());
+        $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
+        $this->view->assign('footerData', $this->_generateFooter($concept));
     }
 
     public function deleteAction()
@@ -204,7 +207,10 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $concept = $this->_getConcept();
 
         if (!$concept->hasAnyRelations()) {
-            $concept->delete(true);
+            $this->getConceptManager()->deleteSoft(
+                $concept,
+                $this->getCurrentUser()->getFoafPerson()
+            );
             $this->getHelper('json')->sendJson(array('status' => 'ok'));
         } else {
             $this->getHelper('json')->sendJson(array('status' => 'error', 'message' => _('A concept can not be deleted while there are semantic relations or mapping properties associated with it.')));
@@ -354,12 +360,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
     /**
      * @return OpenSkos2\Concept
+     * @throws ResourceNotFoundException
      */
     protected function _getConcept()
     {
         $uri = $this->getRequest()->getParam('uri');
         if (!empty($uri)) {
-            return $this->getConceptManager()->fetchByUri($uri);
+            $concept = $this->getConceptManager()->fetchByUri($uri);
+            
+            //!TODO Handle deleted all around the system.
+            if ($concept->isDeleted()) {
+                throw new ResourceNotFoundException('The concpet was not found (it is deleted).');
+            }
+            
+            return $concept;
         } else {
             return null;
         }

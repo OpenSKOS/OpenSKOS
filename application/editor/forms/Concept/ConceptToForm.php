@@ -17,7 +17,6 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Literal;
@@ -42,6 +41,8 @@ class Editor_Forms_Concept_ConceptToForm
         self::schemesToForm($concept, $formData);
         self::relationsToForm($concept, $formData);
         
+        $formData['uri'] = $concept->getUri();
+        
         return $formData;
     }
     
@@ -65,19 +66,7 @@ class Editor_Forms_Concept_ConceptToForm
      */
     protected static function translatedPropertiesToForm(Concept $concept, &$formData)
     {
-        $translatedProperties = [
-            'prefLabel' => Skos::PREFLABEL,
-            'altLabel' => Skos::ALTLABEL,
-            'hiddenLabel' => Skos::HIDDENLABEL,
-            'changeNote' => Skos::CHANGENOTE,
-            'definition' => Skos::DEFINITION,
-            'editorialNote' => Skos::EDITORIALNOTE,
-            'example' => Skos::EXAMPLE,
-            'historyNote' => Skos::HISTORYNOTE,
-            'note' => Skos::NOTE,
-            'scopeNote' => Skos::SCOPENOTE,
-        ];
-        foreach ($translatedProperties as $field => $property) {
+        foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
             $groupedValues = [];
             
             foreach ($concept->getProperty($property) as $value) {
@@ -110,13 +99,7 @@ class Editor_Forms_Concept_ConceptToForm
      */
     protected static function flatPropertiesToForm(Concept $concept, &$formData)
     {
-        $flatFields = [
-            'status' => OpenSkos::STATUS,
-            'notation' => Skos::NOTATION,
-            'uuid' => OpenSkos::UUID,
-            'toBeChecked' => OpenSkos::TOBECHECKED,
-        ];
-        foreach ($flatFields as $field => $property) {
+        foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
             $formData[$field] = $concept->getPropertyFlatValue($property);
         }
     }
@@ -149,35 +132,26 @@ class Editor_Forms_Concept_ConceptToForm
     {
         $conceptManager = self::getDI()->get('\OpenSkos2\ConceptManager');
         
-        $perSchemeRelations = [
-            'narrower' => Skos::NARROWER,
-            'broader' => Skos::BROADER,
-            'related' => Skos::RELATED,
-        ];
-        foreach ($perSchemeRelations as $relationKey => $relationType) {
+        foreach (Editor_Forms_Concept::getPerSchemeRelationsMap() as $relationKey => $relationProperty) {
             foreach ($concept->getProperty(Skos::INSCHEME) as $scheme) {
                 $formData[$relationKey][$scheme->getUri()] = $conceptManager->fetchRelations(
                     $concept->getUri(),
-                    $relationType,
+                    $relationProperty,
                     $scheme->getUri()
                 );
             }
         }
         
-        $schemeIndependentRelations = array(
-            'broadMatch' => Skos::BROADMATCH,
-            'narrowMatch' => Skos::NARROWMATCH,
-            'relatedMatch' => Skos::RELATEDMATCH,
-            'mappingRelation' => Skos::MAPPINGRELATION,
-            'closeMatch' => Skos::CLOSEMATCH,
-            'exactMatch' => Skos::EXACTMATCH,
-        );
-        foreach ($schemeIndependentRelations as $relationKey => $relationType) {
+        foreach (Editor_Forms_Concept::getSchemeIndependentRelationsMap() as $relationKey => $relationProperty) {
             $formData[$relationKey][] = $conceptManager->fetchRelations(
                 $concept->getUri(),
-                $relationType
+                $relationProperty
             );
         }
+        
+        // @TODO Mark out relations which are not actually inside the $concept object. Or make other solution.
+        // @TODO It also brakes validation on edit with broader transitive for example.
+        // @TODO It also adds all inferred relations as actual relations on first edit.
     }
     
     /**
