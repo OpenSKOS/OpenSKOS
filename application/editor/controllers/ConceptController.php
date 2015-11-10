@@ -165,7 +165,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             if ($form->getIsCreate()) {
                 $concept->selfGenerateUri();
             }
-
+            
             $this->getConceptManager()->replace($concept);
             
             // @TODO       $this->_handleStatusAutomatedActions($concept, $formData);
@@ -308,9 +308,11 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      */
     public function checkPrefLabelAction()
     {
-        $prefLabel = $this->getRequest()->getPost('prefLabel');
-        $count = Editor_Models_ApiClient::factory()->getConceptsCountByPrefLabel($prefLabel);
-        $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => array('doExist' => $count > 0)));
+        $doExist = $this->getConceptManager()->askForPrefLabel(
+            $this->getRequest()->getPost('prefLabel')
+        );
+        
+        $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => ['doExist' => $doExist]]);
     }
 
     /**

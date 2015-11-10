@@ -361,20 +361,20 @@ class ResourceManager
      * @param string $excludeUri
      * @return boolean
      */
-    public function askForMatch(array $params, $excludeUri = null)
+    public function askForMatch(array $matchProperties, $excludeUri = null)
     {
         $select = '';
         $filter = 'FILTER(' . PHP_EOL;
 
         if (!empty($this->resourceType)) {
-            $params[] = [
+            $matchProperties[] = [
                 'predicate' => RdfNamespace::TYPE,
                 'value' => new Uri($this->resourceType),
             ];
         }
         
         $filters = [];
-        foreach ($params as $i => $data) {
+        foreach ($matchProperties as $i => $data) {
             $predicate = $data['predicate'];
             $operator = '=';
 
