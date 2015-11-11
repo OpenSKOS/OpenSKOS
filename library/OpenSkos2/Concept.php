@@ -95,9 +95,9 @@ class Concept extends Resource
 
     /**
      * Resource constructor.
-     * @param string $uri
+     * @param string $uri , optional
      */
-    public function __construct($uri)
+    public function __construct($uri = null)
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
@@ -192,6 +192,24 @@ class Concept extends Resource
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Does the concept have any relations or mapping properties.
+     * @return bool
+     */
+    public function hasAnyRelations()
+    {
+        $relationProperties = array_merge(
+            self::$classes['SemanticRelations'],
+            self::$classes['MappingProperties']
+        );
+        foreach ($relationProperties as $relationProperty) {
+            if (!$this->isPropertyEmpty($relationProperty)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

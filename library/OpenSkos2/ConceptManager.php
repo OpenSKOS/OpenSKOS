@@ -170,6 +170,21 @@ class ConceptManager extends ResourceManager
     }
     
     /**
+     * Checks if there is a concept with the same pref label.
+     * @param string $prefLabel
+     * @return bool
+     */
+    public function askForPrefLabel($prefLabel)
+    {
+        return $this->askForMatch([
+            [
+                'predicate' => Skos::PREFLABEL,
+                'value' => new Literal($prefLabel),
+            ]
+        ]);
+    }
+    
+    /**
      * Perform a full text query
      * lucene / solr queries are possible
      * for the available fields see schema.xml

@@ -133,6 +133,10 @@ class Editor_Forms_Concept extends OpenSKOS_Form
      */
     protected function buildHeader()
     {
+        $this->addElement('hidden', 'uri', array(
+            'decorators' => array()
+        ));
+        
         $this->addElement('hidden', 'uuid', array(
             'decorators' => array()
         ));
@@ -380,28 +384,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 
         $this->buildMappingProperties();
 
-        if ($this->_isCreate) {
-            $this->addElement('select', 'baseUri', array(
-                'label' => 'Base URI:',
-                'decorators' => array('ViewHelper', 'Label')
-            ));
-            $this->getElement('baseUri')->setRegisterInArrayValidator(false);
-
-            $this->addElement('hidden', 'hiddenBr1', array(
-                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly' => true)))
-            ));
-        }
-
-        $this->addElement('text', 'uri', array(
-            'label' => 'URI:',
-            'readonly' => true,
-            'decorators' => array('ViewHelper', 'Label')
-        ));
-
-        $this->addElement('hidden', 'hiddenBr2', array(
-            'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly' => true)))
-        ));
-
         $this->addElement('text', 'notation', array(
             'label' => 'Notation:',
             'readonly' => true,
@@ -461,22 +443,85 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 
         return $this;
     }
-
-    public static function getHelperFields()
+    
+    /**
+     * @return array
+     */
+    public static function getTranslatedFieldsMap()
     {
-        return array(
-            'conceptLanguages',
-            'conceptSchemes',
-            'conceptLanguageSelect',
-            'conceptSchemeSelect',
-            'wrapLeftTop',
-            'conceptPropertySelect',
-            'conceptPropertyContent',
-            'wrapLeftBottom',
-            'wrapRightTop',
-            'wrapRightBottom');
+        return [
+            'prefLabel' => Skos::PREFLABEL,
+            'altLabel' => Skos::ALTLABEL,
+            'hiddenLabel' => Skos::HIDDENLABEL,
+            'changeNote' => Skos::CHANGENOTE,
+            'definition' => Skos::DEFINITION,
+            'editorialNote' => Skos::EDITORIALNOTE,
+            'example' => Skos::EXAMPLE,
+            'historyNote' => Skos::HISTORYNOTE,
+            'note' => Skos::NOTE,
+            'scopeNote' => Skos::SCOPENOTE,
+        ];
     }
-
+    
+    /**
+     * @return array
+     */
+    public static function getFlatFieldsMap()
+    {
+        return [
+            'status' => OpenSkos::STATUS,
+            'notation' => Skos::NOTATION, // @TODO array
+            'uuid' => OpenSkos::UUID, // @TODO Readonly/generated
+            'toBeChecked' => OpenSkos::TOBECHECKED,
+        ];
+    }
+    
+    /**
+     * @return array
+     */
+    public static function getResourceBasedFieldsMap()
+    {
+        $map = [
+            'inScheme' => Skos::INSCHEME,
+            'topConceptOf' => Skos::TOPCONCEPTOF,
+        ];
+        
+        $map = array_merge(
+            $map,
+            self::getPerSchemeRelationsMap(),
+            self::getSchemeIndependentRelationsMap()
+        );
+        
+        return $map;
+    }
+    
+    /**
+     * @return array
+     */
+    public static function getPerSchemeRelationsMap()
+    {
+        return [
+            'narrower' => Skos::NARROWER,
+            'broader' => Skos::BROADER,
+            'related' => Skos::RELATED,
+        ];
+    }
+    
+    /**
+     * @return array
+     */
+    public static function getSchemeIndependentRelationsMap()
+    {
+        return [
+            'broadMatch' => Skos::BROADMATCH,
+            'narrowMatch' => Skos::NARROWMATCH,
+            'relatedMatch' => Skos::RELATEDMATCH,
+            'mappingRelation' => Skos::MAPPINGRELATION,
+            'closeMatch' => Skos::CLOSEMATCH,
+            'exactMatch' => Skos::EXACTMATCH,
+        ];
+    }
+    
     /**
      * @param OpenSkos2\Concept Pass the edited concept for some checks.
      * @param OpenSKOS_Db_Table_Row_Tenant Passes tenant. If not gets it from concept.

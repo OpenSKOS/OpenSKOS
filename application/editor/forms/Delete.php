@@ -33,7 +33,7 @@ class Editor_Forms_Delete extends Zend_Form
         
     protected function buildHiddenInputs()
     {
-        $this->addElement('hidden', 'uuid', array(
+        $this->addElement('hidden', 'uri', array(
                 'filters' => array('StringTrim'),
                 'label' => '',
         ));

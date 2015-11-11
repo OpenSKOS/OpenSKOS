@@ -202,7 +202,7 @@ var EditorView = new Class({
             SqueezeBox.close();
         }, 1000); // Dealy the closing by 1s so that the file download can start.
     },
-    showDeleteBox: function (uuid) {
+    showDeleteBox: function (uri) {
         var deleteBox = $('delete-box').clone();
         deleteBox.getElement('form').set('send', {
             noCache: true,
@@ -212,7 +212,7 @@ var EditorView = new Class({
             e.stop();
             new Element(e.target).send()
         });
-        deleteBox.getElement('form').getElement('[name=uuid]').set('value', uuid);
+        deleteBox.getElement('form').getElement('[name=uri]').set('value', uri);
         deleteBox.getElement('[name=cancelButton]').addEvent('click', function () {
             SqueezeBox.close();
         });
