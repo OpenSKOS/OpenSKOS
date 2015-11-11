@@ -95,9 +95,9 @@ class Concept extends Resource
 
     /**
      * Resource constructor.
-     * @param string $uri
+     * @param string $uri , optional
      */
-    public function __construct($uri)
+    public function __construct($uri = null)
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));

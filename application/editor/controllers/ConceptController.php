@@ -137,18 +137,18 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $this->_requireAccess('editor.concepts', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
         }
         
-        if ($form->getIsCreate()) {
-            $concept = new Concept();
-        }
-        
         $this->checkConceptTenantForEdit($concept);
-
+        
         $params = $this->getRequest()->getParams();
         if (!$form->isValid($params)) {
             return $this->_forward('edit');
         }
         
         $form->populate($params);
+        
+        if ($form->getIsCreate()) {
+            $concept = new Concept();
+        }
         
         Editor_Forms_Concept_FormToConcept::toConcept(
             $concept,
