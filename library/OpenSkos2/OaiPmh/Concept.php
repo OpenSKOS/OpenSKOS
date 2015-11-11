@@ -28,7 +28,7 @@ use OpenSkos2\Api\Transform\DataRdf;
 class Concept implements Record
 {
     /**
-     * @var SkosConcept $concept 
+     * @var SkosConcept $concept
      */
     private $concept;
     
