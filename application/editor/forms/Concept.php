@@ -21,6 +21,7 @@
  */
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 
 class Editor_Forms_Concept extends OpenSKOS_Form
 {
@@ -357,14 +358,26 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'class' => 'concept-edit-property-action',
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
         ));
-
+        
+        
+        
+        
+//        $skosXlLabels = array(
+//            'skosXlPrefLabel' => _('Skos Xl preferred label'),
+//            'skosXlAltLabel' => _('Skos Xl alt label'),
+//            'skosXlHiddenLabel' => _('Skos Xl hidden label'),
+//        );
+        
+        
+        
+        
         $this->addElement('hidden', 'wrapLeftBottom', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly' => true)))
         ));
 
         return $this;
     }
-
+    
     /**
      * @return Editor_Forms_Concept
      */
@@ -519,6 +532,19 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'mappingRelation' => Skos::MAPPINGRELATION,
             'closeMatch' => Skos::CLOSEMATCH,
             'exactMatch' => Skos::EXACTMATCH,
+        ];
+    }
+    
+    /**
+     * This are skos xl labels. Each of them results in a resource which is joined to the concept.
+     * @return array
+     */
+    public static function getSkosXlLablesMap()
+    {
+        return [
+            'skosxl:prefLabel' => SkosXl::PREFLABEL, // Only one item of those
+            'skosxl:altLabel' => SkosXl::ALTLABEL,
+            'skosxl:hiddenLabel' => SkosXl::HIDDENLABEL,
         ];
     }
     

@@ -18,6 +18,8 @@
  */
 namespace OpenSkos2;
 
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\SkosXl;
 use \EasyRdf\RdfNamespace;
 
 class Namespaces
@@ -27,8 +29,18 @@ class Namespaces
      * @var array
      */
     protected static $additionalNamespaces = [
-        'openskos' => 'http://openskos.org/xmlns#',
+        'openskos' => OpenSkos::NAME_SPACE,
+        'skosxl' => SkosXl::NAME_SPACE,
     ];
+    
+    /**
+     * Gets list of additional namespaces which are not commonly used. (not used in EasyRdf)
+     * @return array [prefix => namespace]
+     */
+    public static function getAdditionalNamespaces()
+    {
+        return self::$additionalNamespaces;
+    }
     
     /**
      * Makes http://openskos.org/xmlns#status to be openskos:status
