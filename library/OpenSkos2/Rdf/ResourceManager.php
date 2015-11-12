@@ -412,7 +412,7 @@ class ResourceManager
 
     /**
      * Makes query (with full sparql patterns) from our search patterns.
-     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),] 
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
      * or [0 => ['?subject', Skos::NOTATION, new Literal('AM002'),]
      * @param string $subject
      * @return string
