@@ -24,11 +24,10 @@ namespace OpenSkos2\Api\Response\ResultSet;
  */
 class JsonResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
-
     /**
      * @var \OpenSkos2\Api\ConceptResultSet
      */
-    private $result;
+    protected $result;
 
     /**
      *
@@ -46,14 +45,21 @@ class JsonResponse implements \OpenSkos2\Api\Response\ResponseInterface
      */
     public function getResponse()
     {
-        $response = [
+        return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
+    }
+    
+    /**
+     * Gets the response data.
+     * @return array
+     */
+    protected function getResponseData()
+    {
+        return [
             'response' => [
                 'numFound' => $this->result->getTotal(),
                 'docs' => $this->getDocs()
             ]
         ];
-
-        return new \Zend\Diactoros\Response\JsonResponse($response);
     }
 
     /**
@@ -61,7 +67,7 @@ class JsonResponse implements \OpenSkos2\Api\Response\ResponseInterface
      *
      * @return array
      */
-    private function getDocs()
+    protected function getDocs()
     {
         $docs = [];
         foreach ($this->result->getConcepts() as $concept) {

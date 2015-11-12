@@ -113,6 +113,12 @@ class Concept
             case 'json':
                 $response = (new \OpenSkos2\Api\Response\ResultSet\JsonResponse($result))->getResponse();
                 break;
+            case 'jsonp':
+                $response = (new \OpenSkos2\Api\Response\ResultSet\JsonpResponse(
+                    $result,
+                    $params['callback']
+                ))->getResponse();
+                break;
             case 'rdf':
                 $response = (new \OpenSkos2\Api\Response\ResultSet\RdfResponse($result))->getResponse();
                 break;
