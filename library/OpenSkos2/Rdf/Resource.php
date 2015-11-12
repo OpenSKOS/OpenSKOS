@@ -71,8 +71,14 @@ class Resource extends Uri implements ResourceIdentifier
             return $this;
         }
         foreach ($this->properties[$predicate] as $obj) {
-            if ($obj->getValue() === $value->getValue() && $obj->getLanguage() === $value->getLanguage()) {
-                return $this;
+            if ($obj instanceof Literal && $value instanceof Literal) {
+                if ($obj->getValue() === $value->getValue() && $obj->getLanguage() === $value->getLanguage()) {
+                    return $this;
+                }
+            } elseif ($obj instanceof Uri && $value instanceof Uri) {
+                if ($obj->getUri() === $value->getUri()) {
+                    return $this;
+                }
             }
         }
         $this->properties[$predicate][] = $value;
