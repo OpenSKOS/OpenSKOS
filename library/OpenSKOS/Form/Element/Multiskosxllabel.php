@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -14,20 +15,17 @@
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\SkosXl;
-?>
-<script>
-    <?php $addOrEdit = $this->isCreate ? 'addLabel' : 'editLabel'?>
-        
-    window.parent.Editor.Label.<?= $addOrEdit?>(
-        '<?= $this->label->getUri();?>',
-        '<?= $this->label->getProperty(SkosXl::LITERALFORM)[0]->getValue();?>',
-        '<?= $this->label->getProperty(SkosXl::LITERALFORM)[0]->getLanguage();?>'
-    );
-    
-    window.parent.SqueezeBox.close();
-</script>
+class OpenSKOS_Form_Element_Multiskosxllabel extends OpenSKOS_Form_Element_Multi
+{
+    const MULTITEXT_PARTIAL_VIEW = 'partials/multiskosxllabel.phtml';
+
+    public function __construct($groupName, $groupLabel, $partialView = self::MULTITEXT_PARTIAL_VIEW)
+    {
+        parent::__construct($groupName, $groupLabel);
+        $this->setPartialView($partialView);
+    }
+}

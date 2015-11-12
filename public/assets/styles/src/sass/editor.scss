@@ -1037,7 +1037,7 @@ ul#history-list {
         padding: 24px 0px;
     };
 
-    .concept-multi-hidden-remove, .concept-multi-remove, .concept-link-remove-action {
+    .concept-multi-hidden-remove, .concept-multi-remove, .concept-link-remove-action, .skos-xl-label-remove {
         background-image: url(../images/verwijder.gif);
         width: 16px;
         height: 16px;
@@ -1045,8 +1045,16 @@ ul#history-list {
         cursor: pointer;
     };
 
-    .concept-multi-add, .concept-multi-hidden-add {
+    .concept-multi-add, .concept-multi-hidden-add, .skos-xl-label-add {
         background-image: url(../images/nieuw.gif);
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        cursor: pointer;
+    };
+    
+    .skos-xl-label-edit {
+        background-image: url(../images/show-advanced-search-options-2.png);
         width: 16px;
         height: 16px;
         display: inline-block;
@@ -1312,8 +1320,11 @@ a:visited.disabled {
 }
 
 button,
+a.button,
 input[type=button],
 input[type=submit] {
+    text-decoration: none;
+    display: inline-block;
     height: 22px;
     cursor: pointer;
     color: $purple;
@@ -1335,7 +1346,7 @@ input[type=submit] {
         bottom: 1px;
     };
 
-    &.hover {
+    &.hover, &:hover {
         color: $purple-lighter;
     }
 
@@ -1354,6 +1365,11 @@ input[type=submit] {
     &.relate {
         @include buttonRelate();
     };
+}
+
+a.button {
+    line-height: 18px;
+    height: 18px;
 }
 
 #concept-edit,

@@ -16,12 +16,13 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+use OpenSkos2\Namespaces\SkosXl;
 ?>
-<?php $this->headTitle ($this->translate('Create a concept'))?>
-<div id="concept-edit-form">
-<h2><?php echo $this->translate('Create concept')?></h2>
-<?php echo $this->form;?>
+<?php $this->headTitle($this->translate('Choose label'))?>
+<div>
+    <?php foreach ($this->labels as $label):?>
+        <div>
+            <a href=""><?= $label->getProperty(SkosXl::LITERALFORM)[0]?></a>
+        </div>
+    <?php endforeach?>
 </div>
-<span id="doc-properties-not-saved-confirmation" class="do-not-show"><?php echo $this->translate('A document property is not saved. Do you want to continue?')?></span>
-
-<?= $this->render('concept/partials/status-interaction.phtml') ?>

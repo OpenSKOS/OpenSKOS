@@ -73,6 +73,11 @@ class ResourceManager
      */
     public function insert(Resource $resource)
     {
+        // Put type if we have it and it is missing.
+        if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
+            $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
+        }
+        
         $this->client->insert(EasyRdf::resourceToGraph($resource));
 
         // Add resource to solr

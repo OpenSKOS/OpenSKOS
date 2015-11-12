@@ -17,11 +17,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php $this->headTitle ($this->translate('Create a concept'))?>
-<div id="concept-edit-form">
-<h2><?php echo $this->translate('Create concept')?></h2>
-<?php echo $this->form;?>
+<?php $this->headTitle($this->translate('Add openskos xl label to concept'))?>
+<div>
+    <a class="button" href="<?= $this->url(['controller' => 'label', 'action' => 'choose'])?>">
+        <?= $this->translate('Choose existing')?>
+    </a>
+    <a class="button" href="<?= $this->url(['controller' => 'label', 'action' => 'create'])?>">
+        <?= $this->translate('Create new')?>
+    </a>
 </div>
-<span id="doc-properties-not-saved-confirmation" class="do-not-show"><?php echo $this->translate('A document property is not saved. Do you want to continue?')?></span>
-
-<?= $this->render('concept/partials/status-interaction.phtml') ?>

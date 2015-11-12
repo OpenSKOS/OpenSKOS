@@ -1631,20 +1631,30 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #concept-edit-left {
   padding: 24px 0px;
 }
-#concept-edit-form .concept-multi-hidden-remove, #concept-edit-form .concept-multi-remove, #concept-edit-form .concept-link-remove-action,
+#concept-edit-form .concept-multi-hidden-remove, #concept-edit-form .concept-multi-remove, #concept-edit-form .concept-link-remove-action, #concept-edit-form .skos-xl-label-remove,
 #concept-scheme-edit-form .concept-multi-hidden-remove,
 #concept-scheme-edit-form .concept-multi-remove,
-#concept-scheme-edit-form .concept-link-remove-action {
+#concept-scheme-edit-form .concept-link-remove-action,
+#concept-scheme-edit-form .skos-xl-label-remove {
   background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
   cursor: pointer;
 }
-#concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add,
+#concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add, #concept-edit-form .skos-xl-label-add,
 #concept-scheme-edit-form .concept-multi-add,
-#concept-scheme-edit-form .concept-multi-hidden-add {
+#concept-scheme-edit-form .concept-multi-hidden-add,
+#concept-scheme-edit-form .skos-xl-label-add {
   background-image: url(../images/nieuw.gif);
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  cursor: pointer;
+}
+#concept-edit-form .skos-xl-label-edit,
+#concept-scheme-edit-form .skos-xl-label-edit {
+  background-image: url(../images/show-advanced-search-options-2.png);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1899,8 +1909,11 @@ a:visited.disabled {
 
 /* Buttons */
 button,
+a.button,
 input[type=button],
 input[type=submit] {
+  text-decoration: none;
+  display: inline-block;
   height: 22px;
   cursor: pointer;
   color: #6B1750;
@@ -1916,36 +1929,50 @@ input[type=submit] {
   padding-right: 18px;
   padding-bottom: 1px;
 }
-button.hover,
+button.hover, button:hover,
+a.button.hover,
+a.button:hover,
 input[type=button].hover,
-input[type=submit].hover {
+input[type=button]:hover,
+input[type=submit].hover,
+input[type=submit]:hover {
   color: #bb1a88;
 }
 button.selection,
+a.button.selection,
 input[type=button].selection,
 input[type=submit].selection {
   padding-left: 20px;
   background: url("../images/button-background-selection.png") #fff no-repeat left bottom;
 }
 button.switch,
+a.button.switch,
 input[type=button].switch,
 input[type=submit].switch {
   background: url("../images/button-background-switch.png") #fff no-repeat left bottom;
 }
 button.export,
+a.button.export,
 input[type=button].export,
 input[type=submit].export {
   background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.delete,
+a.button.delete,
 input[type=button].delete,
 input[type=submit].delete {
   background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.relate,
+a.button.relate,
 input[type=button].relate,
 input[type=submit].relate {
   background: url("../images/button-background-relate.png") #fff no-repeat left bottom;
+}
+
+a.button {
+  line-height: 18px;
+  height: 18px;
 }
 
 #concept-edit,

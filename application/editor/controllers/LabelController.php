@@ -28,6 +28,11 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         $this->_helper->_layout->setLayout('editor_modal_box');
     }
     
+    public function addToConceptAction()
+    {
+        
+    }
+    
     public function createAction()
     {
         $this->view->form = Editor_Forms_Label::getInstance();
@@ -55,7 +60,8 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         $form = Editor_Forms_Label::getInstance();
         $label = $this->getLabel();
         
-        if (empty($label)) {
+        $isCreate = empty($label);
+        if ($isCreate) {
             $label = new Label(Label::generateUri());
         }
         
@@ -72,6 +78,13 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         $this->getLabelManager()->replace($label);
         
         $this->view->label = $label;
+        $this->view->isCreate = $isCreate;
+    }
+    
+    public function chooseAction()
+    {
+        // @TODO
+        $this->view->labels = $this->getLabelManager()->fetch();
     }
     
     /**
