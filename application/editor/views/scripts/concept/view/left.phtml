@@ -17,6 +17,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
+
+$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
 ?>
 
 <div id="concept-language-tab-container" class="concept-language-tab-container">
@@ -24,14 +28,15 @@ use OpenSkos2\Namespaces\Skos;
         <ul id="tab-links-language">
             <?php $isFirst = true; ?>
             <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
-                <li id="tab_<?php echo $languageCode; ?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false ?> active<?php endif ?>">
-                    <a href="#" id="language_<?php echo $languageCode; ?>"><?php echo strtoupper($languageCode); ?></a>
+                <li id="tab_<?= $languageCode; ?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false ?> active<?php endif ?>">
+                    <a href="#" id="language_<?= $languageCode; ?>"><?= strtoupper($languageCode); ?></a>
                 </li>
             <?php endforeach ?>
         </ul>
     </div>
 
     <?php
+    // @TODO Merge those lists with the once in the form.
     $labelNames = array(
         Skos::PREFLABEL => _('Preferred label'),
         Skos::ALTLABEL => _('Alternative label'),
@@ -46,20 +51,25 @@ use OpenSkos2\Namespaces\Skos;
         Skos::EDITORIALNOTE => _('Editorial note'),
         Skos::HISTORYNOTE => _('History note')
     );
+    $skosXlNames = array(
+        SkosXl::PREFLABEL => _('Skos Xl preferred label'),
+        SkosXl::ALTLABEL => _('Skos Xl alternative label'),
+        SkosXl::HIDDENLABEL => _('Skos Xl hidden label'),
+    );
     ?>
     <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
-        <div id="tab_language_<?php echo $languageCode; ?>" class="tab-content">
+        <div id="tab_language_<?= $languageCode; ?>" class="tab-content">
             <div class="concept-left" id="concept-lexical">
                 <div class="concept-left-content">
                     <ul id="concept-lexical-list">
                         <?php foreach ($labelNames as $labelKey => $labelTitle): ?>
                             <?php if ($this->currentConcept->hasPropertyInLanguage($labelKey, $languageCode)) : ?>
                                 <li>
-                                    <div class="concept-lexical-field"><?php echo $labelTitle; ?></div> 
+                                    <div class="concept-lexical-field"><?= $labelTitle; ?></div> 
                                     <div class="concept-lexical-values">
                                         <ul>
                                             <?php foreach ($this->currentConcept->retrievePropertyInLanguage($labelKey, $languageCode) as $label): ?>
-                                                <li id="pref_Label"><?php echo $label; ?></li>
+                                                <li id="pref_Label"><?= $label; ?></li>
                                             <?php endforeach ?>
                                         </ul>
                                     </div>
@@ -77,11 +87,47 @@ use OpenSkos2\Namespaces\Skos;
                         <?php foreach ($propertyNames as $docKey => $docTitle): ?>
                             <?php if ($this->currentConcept->hasPropertyInLanguage($docKey, $languageCode)) : ?>
                                 <li>
-                                    <div class="concept-document-field"><?php echo $docTitle; ?></div> 
+                                    <div class="concept-document-field"><?= $docTitle; ?></div> 
                                     <div class="concept-document-values">
                                         <ul>
                                             <?php foreach ($this->currentConcept->retrievePropertyInLanguage($docKey, $languageCode) as $docValue): ?>
-                                                <li id="pref_Label"><?php echo $docValue; ?></li>
+                                                <li id="pref_Label"><?= $docValue; ?></li>
+                                            <?php endforeach ?>
+                                        </ul>
+                                    </div>
+                                    <div class="clear"></div>
+                                </li>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="concept-left" id="concept-skos-xl-labels">
+                <div class="concept-right-content">
+                    <ul>
+                        <?php foreach ($skosXlNames as $property => $title): ?>
+                            <?php
+                                // @TODO Optimize - do not load each label separately.
+                                // Gets all literal forms in the current language.
+                                $literalForms = [];
+                                foreach ($this->currentConcept->getProperty($property) as $labelUri) {
+                                    if ($labelManager->askForUri($labelUri)) {
+                                        $literalForm = $labelManager->fetchByUri($labelUri)->getProperty(SkosXl::LITERALFORM)[0];
+                                        if ($literalForm->getLanguage() == $languageCode) {
+                                            $literalForms[] = $literalForm->getValue();
+                                        }
+                                    }
+                                }
+                            ?>
+                        
+                            <?php if (!empty($literalForms)) : ?>
+                                <li>
+                                    <div class="concept-lexical-field"><?= $title; ?></div> 
+                                    <div class="concept-lexical-values">
+                                        <ul>
+                                            <?php foreach ($literalForms as $literalForm): ?>
+                                                <li><?= $literalForm; ?></li>
                                             <?php endforeach ?>
                                         </ul>
                                     </div>

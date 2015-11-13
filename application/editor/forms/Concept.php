@@ -508,7 +508,8 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         $map = array_merge(
             $map,
             self::getPerSchemeRelationsMap(),
-            self::getSchemeIndependentRelationsMap()
+            self::getSchemeIndependentRelationsMap(),
+            self::getSkosXlLablesMap()
         );
         
         return $map;
@@ -548,9 +549,9 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     public static function getSkosXlLablesMap()
     {
         return [
-            'skosxl:prefLabel' => SkosXl::PREFLABEL, // Only one item of those
-            'skosxl:altLabel' => SkosXl::ALTLABEL,
-            'skosxl:hiddenLabel' => SkosXl::HIDDENLABEL,
+            'skosXlPrefLabel' => SkosXl::PREFLABEL,
+            'skosXlAltLabel' => SkosXl::ALTLABEL,
+            'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         ];
     }
     

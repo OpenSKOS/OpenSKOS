@@ -40,6 +40,7 @@ class Editor_Forms_Concept_ConceptToForm
         self::flatPropertiesToForm($concept, $formData);
         self::schemesToForm($concept, $formData);
         self::relationsToForm($concept, $formData);
+        self::skosXlLabelsToForm($concept, $formData);
         
         $formData['uri'] = $concept->getUri();
         
@@ -152,6 +153,20 @@ class Editor_Forms_Concept_ConceptToForm
         // @TODO Mark out relations which are not actually inside the $concept object. Or make other solution.
         // @TODO It also brakes validation on edit with broader transitive for example.
         // @TODO It also adds all inferred relations as actual relations on first edit.
+    }
+    
+    /**
+     * Skos xl labels to form.
+     * @param Concept $concept
+     * @param array &$formData
+     */
+    protected static function skosXlLabelsToForm(Concept $concept, &$formData)
+    {
+        foreach (Editor_Forms_Concept::getSkosXlLablesMap() as $field => $property) {
+            foreach ($concept->getProperty($property) as $value) {
+                $formData[$field][] = $value->getUri();
+            }
+        }
     }
     
     /**

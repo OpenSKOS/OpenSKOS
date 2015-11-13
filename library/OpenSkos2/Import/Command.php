@@ -166,56 +166,13 @@ class Command implements LoggerAwareInterface
                         }
                     }
                 }
-
-                $resourceToInsert->setProperty(
-                    DcTerms::MODIFIED,
-                    new Literal(date('c'), null, Literal::TYPE_DATETIME)
+                
+                $resourceToInsert->ensureMetadata(
+                    $this->tenant->getCode(),
+                    $message->getCollection(),
+                    $message->getUser(),
+                    $currentVersion ? $currentVersion->getStatus(): null
                 );
-
-                $resourceToInsert->setProperty(
-                    DcTerms::CONTRIBUTOR,
-                    $message->getUser()
-                );
-
-                if (!$resourceToInsert->hasProperty(DcTerms::DATESUBMITTED)) {
-                    $resourceToInsert->setProperty(
-                        DcTerms::DATESUBMITTED,
-                        new Literal(date('c'), null, Literal::TYPE_DATETIME)
-                    );
-                }
-
-                if (!$resourceToInsert->hasProperty(DcTerms::CREATOR)) {
-                    $resourceToInsert->setProperty(
-                        DcTerms::CREATOR,
-                        $message->getUser()
-                    );
-                }
-
-
-                $oldStatus = $currentVersion? $currentVersion->getStatus(): null;
-                if ($oldStatus !== $resourceToInsert->getStatus()) {
-                    //status change
-                    $resourceToInsert->unsetProperty(DcTerms::DATEACCEPTED);
-                    $resourceToInsert->unsetProperty(OpenSkos::ACCEPTEDBY);
-                    $resourceToInsert->unsetProperty(OpenSkos::DATE_DELETED);
-                    $resourceToInsert->unsetProperty(OpenSkos::DELETEDBY);
-
-                    switch ($resourceToInsert->getStatus()) {
-                        case \OpenSkos2\Concept::STATUS_APPROVED:
-                            $resourceToInsert->addProperty(
-                                DcTerms::DATEACCEPTED,
-                                new Literal(date('c'), null, Literal::TYPE_DATETIME)
-                            );
-                            $resourceToInsert->addProperty(OpenSkos::ACCEPTEDBY, $message->getUser());
-                            break;
-                        case \OpenSkos2\Concept::STATUS_DELETED:
-                            $resourceToInsert->addProperty(
-                                OpenSkos::DATE_DELETED,
-                                new Literal(date('c'), null, Literal::TYPE_DATETIME)
-                            );
-                            $resourceToInsert->addProperty(OpenSkos::DELETEDBY, $message->getUser());
-                    }
-                }
             }
             
             if (isset($currentVersions[$resourceToInsert->getUri()])) {

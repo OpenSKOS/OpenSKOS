@@ -37,10 +37,12 @@ class Editor_Forms_Concept_FormToConcept
      */
     public static function toConcept(Concept &$concept, $formData, OpenSKOS_Db_Table_Row_User $user)
     {
+        $oldStatus = $concept->getStatus();
+        
         self::translatedPropertiesToConcept($concept, $formData);
         self::flatPropertiesToConcept($concept, $formData);
         self::resourcesToConcept($concept, $formData);
-        self::metaDataToConcept($concept, $formData, $user);
+        self::metadataToConcept($concept, $user, $oldStatus);
     }
     
     /**
@@ -54,9 +56,11 @@ class Editor_Forms_Concept_FormToConcept
             if (!empty($formData[$field])) {
                 $propertyValues = [];
                 foreach ($formData[$field] as $language => $values) {
-                    foreach ($values as $value) {
-                        if (!empty($value)) {
-                            $propertyValues[] = new Literal($value, $language);
+                    if (is_string($language)) { // If int - it is a template
+                        foreach ($values as $value) {
+                            if (!empty($value)) {
+                                $propertyValues[] = new Literal($value, $language);
+                            }
                         }
                     }
                 }
@@ -115,43 +119,19 @@ class Editor_Forms_Concept_FormToConcept
     /**
      * Per scheme relations + mapping properties.
      * @param Concept &$concept
-     * @param array $formData
      * @param OpenSKOS_Db_Table_Row_User $user
+     * @param string $oldStatus
      */
-    protected static function metaDataToConcept(Concept &$concept, $formData, OpenSKOS_Db_Table_Row_User $user)
-    {
-        // @TODO on import and post as well!
-        
-        
-        $forFirstTimeInEditor = [
-            OpenSkos::TENANT => new Literal($user->tenant),
-            OpenSkos::SET => new Uri('http:://todo/gtaa'),
-            DcTerms::CREATOR => $user->getFoafPerson(),
-            DcTerms::DATESUBMITTED => new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME),
-        ];
-        
-        foreach ($forFirstTimeInEditor as $property => $defaultValue) {
-            if (!$concept->hasProperty($property)) {
-                $concept->setProperty($property, $defaultValue);
-            }
-        }
-        
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-        };
-        
-        $concept->setProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-        $concept->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        
-        if ($formData['status'] == OpenSKOS_Concept_Status::APPROVED &&
-                ($concept->getStatus() != OpenSKOS_Concept_Status::APPROVED)) {
-            $concept->setProperty(OpenSkos::ACCEPTEDBY, $user->getFoafPerson());
-            $concept->setProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-        }
-        
-        if (OpenSKOS_Concept_Status::isStatusLikeDeleted($formData['status'])) {
-            $concept->setProperty(OpenSkos::DELETEDBY, $user->getFoafPerson());
-            $concept->setProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-        }
+    protected static function metadataToConcept(
+        Concept &$concept,
+        OpenSKOS_Db_Table_Row_User $user,
+        $oldStatus
+    ) {
+        $concept->ensureMetadata(
+            $user->tenant,
+            new Uri('http://todo/gtaa'),
+            $user->getFoafPerson(),
+            $oldStatus
+        );
     }
 }

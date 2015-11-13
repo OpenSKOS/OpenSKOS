@@ -1654,8 +1654,6 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 }
 #concept-edit-form .skos-xl-label-edit,
 #concept-scheme-edit-form .skos-xl-label-edit {
-  background-image: url(../images/show-advanced-search-options-2.png);
-  width: 16px;
   height: 16px;
   display: inline-block;
   cursor: pointer;

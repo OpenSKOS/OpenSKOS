@@ -1,15 +1,52 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\Namespaces\SkosXl;
+
+// @TODO Optimize and load all labels of the concept at once.
+$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
+?>
+
 <div class="multi-field-skos-xl-label <?= $this->inputClasses; ?>">
     <label class="concept-multi-label"><?= $this->inputLabel; ?></label>    
-    <a class="skos-xl-label-add" href="<?= $this->url(['controller' => 'label', 'action' => 'add-to-concept'])?>"></a>
+    <a class="skos-xl-label-add" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'add-to-concept'], null, true)?>"></a>
     <div class="skos-xl-label template">
         <input type="hidden" name="<?= $this->inputName; ?>[]" value="" class="uri"/>
         <span class="literalForm"></span>
-        <span class="skos-xl-label-edit" href="<?= $this->url(['controller' => 'label', 'action' => 'edit'])?>"></span>
         <span class="skos-xl-label-remove"></span>
+        <span class="skos-xl-label-edit" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'edit'], null, true)?>">(edit)</span>
     </div>
     <?php if (!empty($this->inputValues)):?>
-        <?php foreach ($this->inputValues as $labelUris): ?>
-            <?php var_dump($labelUris)?>
+        <?php foreach ($this->inputValues as $labelUri): ?>
+            <?php if ($labelManager->askForUri($labelUri)):?>
+                <?php $literalForm = $labelManager->fetchByUri($labelUri)->getProperty(SkosXl::LITERALFORM)[0];?>
+                <div class="skos-xl-label <?= $literalForm->getLanguage()?>">
+                    <input type="hidden" name="<?= $this->inputName; ?>[]" value="<?= $labelUri?>" class="uri"/>
+                    <span class="literalForm"><?= $literalForm->getValue()?></span>
+                    <span class="skos-xl-label-remove"></span>
+                    <span class="skos-xl-label-edit" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'edit'], null, true)?>">(edit)</span>
+                </div>
+            <?php else:?>
+                <div>
+                    <?= $labelUri?>
+                </div>
+            <?php endif;?>
         <?php endforeach ?>
     <?php endif?>
 </div>

@@ -228,15 +228,14 @@ class Concept
             
             $this->conceptEditAllowed($concept, $tenant, $user);
             
-            // Update properties
-            $concept->setProperties(Dc::DATE_SUBMITTED, $existingConcept->getProperty(Dc::DATE_SUBMITTED));
-            $concept->setProperties(DcTerms::CREATOR, $existingConcept->getProperty(DcTerms::CREATOR));
-            $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-            $concept->addProperty(OpenSkos::SET, $collection->getUri());
-            $concept->addProperty(DcTerms::MODIFIED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+            $concept->ensureMetadata(
+                $tenant->code,
+                $collection->getUri(),
+                $user->getFoafPerson(),
+                $existingConcept->getStatus()
+            );
             
-            $this->manager->delete($existingConcept);
-            $this->manager->insert($concept);
+            $this->manager->replace($concept);
             
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
@@ -307,11 +306,12 @@ class Concept
         $collection = $this->getCollection($params, $tenant);
         $user = $this->getUserFromParams($params);
         
-        $concept->addProperty(Dc::DATE_SUBMITTED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
-        $concept->addProperty(DcTerms::CREATOR, $user->getFoafPerson());
-        $concept->addProperty(DcTerms::CONTRIBUTOR, $user->getFoafPerson());
-        $concept->addProperty(OpenSkos::SET, $collection->getUri());
-
+        $concept->ensureMetadata(
+            $tenant->code,
+            $collection->getUri(),
+            $user->getFoafPerson()
+        );
+        
         if (!$this->uniquePrefLabel($concept)) {
             throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
         }

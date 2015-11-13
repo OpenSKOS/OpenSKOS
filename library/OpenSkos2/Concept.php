@@ -20,6 +20,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
@@ -171,11 +172,12 @@ class Concept extends Resource
     
     /**
      * Get institution row
-     *
+     * @TODO Remove dependency on OpenSKOS v1 library
      * @return OpenSKOS_Db_Table_Row_Tenant
      */
     public function getInstitution()
     {
+        // @TODO Remove dependency on OpenSKOS v1 library
         $model = new OpenSKOS_Db_Table_Tenants();
         return $model->find($this->getTenant())->current();
     }
@@ -210,6 +212,56 @@ class Concept extends Resource
             }
         }
         return false;
+    }
+    
+    /**
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param string $tenantCode
+     * @param Uri $set
+     * @param Uri $person
+     * @param string , optional $oldStatus
+     */
+    public function ensureMetadata($tenantCode, Uri $set, Uri $person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::TENANT => new Literal($tenantCode),
+            OpenSkos::SET => $set,
+            DcTerms::CREATOR => $person,
+            DcTerms::DATESUBMITTED => $nowLiteral(),
+        ];
+        
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
+            }
+        }
+        
+        // @TODO Should we add modified instead of replace it. Or put it only on create.
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        
+        // Status is updated
+        if ($oldStatus != $this->getStatus()) {
+            $this->unsetProperty(DcTerms::DATEACCEPTED);
+            $this->unsetProperty(OpenSkos::ACCEPTEDBY);
+            $this->unsetProperty(OpenSkos::DATE_DELETED);
+            $this->unsetProperty(OpenSkos::DELETEDBY);
+
+            switch ($this->getStatus()) {
+                case \OpenSkos2\Concept::STATUS_APPROVED:
+                    $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    break;
+                case \OpenSkos2\Concept::STATUS_DELETED:
+                    $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
+                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    break;
+            }
+        }
     }
 
     /**

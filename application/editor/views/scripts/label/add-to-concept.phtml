@@ -17,12 +17,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php $this->headTitle($this->translate('Add openskos xl label to concept'))?>
+<?php $this->headTitle($this->translate('Add skos xl label to the concept'))?>
 <div>
-    <a class="button" href="<?= $this->url(['controller' => 'label', 'action' => 'choose'])?>">
+    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'choose'], null, true)?>">
         <?= $this->translate('Choose existing')?>
     </a>
-    <a class="button" href="<?= $this->url(['controller' => 'label', 'action' => 'create'])?>">
+    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'create'], null, true)?>">
         <?= $this->translate('Create new')?>
     </a>
 </div>
