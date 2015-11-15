@@ -16,13 +16,26 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\SkosXl;
+
 ?>
 <?php $this->headTitle($this->translate('Choose label'))?>
-<div>
-    <?php foreach ($this->labels as $label):?>
-        <div>
-            <a href=""><?= $label->getProperty(SkosXl::LITERALFORM)[0]?></a>
-        </div>
-    <?php endforeach?>
+<div class="choose-skos-xl-labels">
+    <form id="skosXlLabelsAutocompleteForm" class="autocomplete-form" method="get" action="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'autocomplete'], null, true)?>">
+        <input class="language" name="language" type="hidden" value="<?= $this->language?>" />
+        <input class="autocomplete" name="query" type="text" value="" />
+    </form>
+    <ul id="skosXlLabelsAutocompleteList" class="list">
+        <li class="item template">
+            <a class="link" href="#">
+                <span class="literalForm"></span>
+            </a>
+        </li>
+    </ul>
 </div>
+
+<script>
+    window.parent.Editor.Label.initAutocomplete(
+        $('skosXlLabelsAutocompleteForm'),
+        $('skosXlLabelsAutocompleteList')
+    );
+</script>

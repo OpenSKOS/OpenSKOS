@@ -30,12 +30,16 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
     
     public function addToConceptAction()
     {
-        
+        $this->view->language = $this->getRequest()->getParam('language');
     }
     
     public function createAction()
     {
-        $this->view->form = Editor_Forms_Label::getInstance();
+        $form = Editor_Forms_Label::getInstance();
+        $form->populate([
+            'language' => $this->getRequest()->getParam('language'),
+        ]);
+        $this->view->form = $form;
     }
     
     public function editAction()
@@ -83,10 +87,34 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
     
     public function chooseAction()
     {
-        // @TODO
-        $this->view->labels = $this->getLabelManager()->fetch();
+        $this->view->language = $this->getRequest()->getParam('language');
     }
     
+    public function autocompleteAction()
+    {
+        $labels = $this->getLabelManager()->autocomplete(
+            $this->getRequest()->getParam('query'),
+            $this->getRequest()->getParam('language')
+        );
+        
+        $labelsData = [];
+        foreach ($labels as $label) {
+            $literalForm = $label->getProperty(SkosXl::LITERALFORM)[0];
+            $labelsData[] = [
+                'uri' => $label->getUri(),
+                'language' => $literalForm->getLanguage(),
+                'literalForm' => $literalForm->getValue(),
+            ];
+        }
+        
+        $response = new Zend\Diactoros\Response\JsonResponse([
+            'status' => 'ok',
+            'labels' => $labelsData,
+        ]);
+        $this->emitResponse($response);
+    }
+
+
     /**
      * @return OpenSkos2\SkosXl\Label
      * @throws ResourceNotFoundException

@@ -17,7 +17,8 @@
 
 var EditorLabel = new Class({
     Binds: [
-        'labelAdded'
+        'labelAdded',
+        'autocompleteListLabels',
     ],
     addingToContainer: null,
     initialize: function () {
@@ -25,7 +26,9 @@ var EditorLabel = new Class({
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-add)', function (ev) {
             ev.stop();
             self.addingToContainer = ev.target.getParent('.multi-field-skos-xl-label');
-            SqueezeBox.open(ev.target.getProperty('href'), {size: {x: 450, y: 500}, handler: 'iframe'});
+            var href = ev.target.getProperty('href');
+            href += '?language=' + Editor.Concept.getCurrentLanguage();
+            SqueezeBox.open(href, {size: {x: 450, y: 500}, handler: 'iframe'});
         });
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-edit)', function (ev) {
             ev.stop();
@@ -38,12 +41,20 @@ var EditorLabel = new Class({
             ev.target.getParent('.skos-xl-label').dispose();
         });
     },
+    showLabelsPerLanguageTab: function () {
+        var language = Editor.Concept.getCurrentLanguage();
+        var container = $('concept-edit-language-skos-xl-labels');
+        
+        container.getElements('.skos-xl-label:not(.' + language + ')').hide();
+        container.getElements('.skos-xl-label.' + language).show();
+    },
     addLabel: function (uri, literalForm, language) {
         if (!this.addingToContainer.getElement('.uri[value="' + uri + '"')) {
             var newElement = this.addingToContainer.getElement('.template').clone();
             newElement.removeClass('template');
             this.populateElement(newElement, uri, literalForm, language);
             this.addingToContainer.adopt(newElement);
+            this.showLabelsPerLanguageTab();
         }
     },
     editLabel: function (uri, literalForm, language) {
@@ -58,5 +69,50 @@ var EditorLabel = new Class({
         if (!element.hasClass(language)) {
             element.addClass(language);
         }
+    },
+    initAutocomplete: function (formEl, listEl) {
+        var self = this;
+        formEl.set('send', {
+            noCache: true,
+            onComplete: function (response) {
+                if (JSON.validate(response)) {
+                    var data = JSON.decode(response);
+                    if (data.status === 'ok') {
+                        self.autocompleteListLabels(listEl, data['labels']);
+                    }
+                }
+                // @TODO Show error
+            }
+        });
+        
+        formEl.getElement('[name=query]').addEvent('keyup', function () {
+            formEl.send();
+        });
+        
+        formEl.send();
+    },
+    autocompleteListLabels: function (listEl, labels) {
+        var self = this;
+        listEl.getElements('.item:not(.template)').each(function (el) {
+            el.dispose();
+        });
+        
+        var template = listEl.getElement('.template');
+        labels.each(function (label) {
+            var newElement = template.clone();
+            
+            newElement.removeClass('template');
+            newElement.getElement('.link').addEvent('click', function () {
+                self.addLabel(
+                    label['uri'],
+                    label['literalForm'],
+                    label['language']
+                );
+                SqueezeBox.close();
+            });
+            newElement.getElement('.literalForm').set('html', label['literalForm']);
+            
+            listEl.adopt(newElement);
+        });
     }
 });

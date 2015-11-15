@@ -19,10 +19,10 @@
 ?>
 <?php $this->headTitle($this->translate('Add skos xl label to the concept'))?>
 <div>
-    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'choose'], null, true)?>">
+    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'choose', 'language' => $this->language], null, true)?>">
         <?= $this->translate('Choose existing')?>
     </a>
-    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'create'], null, true)?>">
+    <a class="button" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'create', 'language' => $this->language], null, true)?>">
         <?= $this->translate('Create new')?>
     </a>
 </div>

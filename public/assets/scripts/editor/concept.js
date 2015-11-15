@@ -175,6 +175,8 @@ var EditorConcept = new Class({
                 }
             });
         });
+        
+        Editor.Label.showLabelsPerLanguageTab();
     },
     addLanguageLayer: function (languageCode) {
         if (!this._hasLanguageLayer(languageCode)) {
@@ -411,6 +413,9 @@ var EditorConcept = new Class({
         } else {
             return true;
         }
+    },
+    getCurrentLanguage: function () {
+        return this._getCurrentLanguage();
     },
     _getOpenTab: function (inputName) {
         var tabValue = null;

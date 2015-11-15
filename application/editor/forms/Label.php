@@ -41,14 +41,10 @@ class Editor_Forms_Label extends OpenSKOS_Form
             'decorators' => array()
         ));
         
-        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-        $languages = $editorOptions['languages'];
-
-        $this->addElement('select', 'language', [
-            'label' => 'Language',
-            'multiOptions' => array_merge(['' => ''], $languages),
-        ]);
-        
+        $this->addElement('hidden', 'language', array(
+            'decorators' => array()
+        ));
+                
         $this->addElement('text', 'literalForm', [
             'label' => 'Literal form',
             'filters' => array('StringTrim'),
