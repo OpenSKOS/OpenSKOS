@@ -366,7 +366,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
         if ($withCreator) {
             $tenant = $this->getTenant();
             $root->appendChild($doc->createElement('dcterms:creator', htmlspecialchars($tenant->name)))
-                    ->setAttribute('rdf:about', $helper->serverUrl('/api/institution/' . $tenant->code));
+                    ->setAttribute('rdf:about', $helper->serverUrl('/api/institutions/' . $tenant->code));
         }
         return $doc;
     }

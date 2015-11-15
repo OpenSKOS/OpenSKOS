@@ -88,7 +88,7 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 	public function toRdf($forOAI = false)
 	{
 		$helper = new Zend_View_Helper_ServerUrl();
-		$about = $helper->serverUrl('/api/institution/'.$this->code);
+		$about = $helper->serverUrl('/api/institutions/'.$this->code);
 		$data = array();
 		foreach ($this as $key => $val) {
 			$data[$key] = htmlspecialchars($val);
