@@ -245,12 +245,12 @@ class Repository implements InterfaceRepository
             $pSet['collection'],
             $pSet['conceptScheme']
         );
-
+        
         $items = [];
 
         $showToken = false;
         foreach ($concepts as $i => $concept) {
-            if ($i === $this->limit) {
+            if ($i === ($this->limit - 1)) {
                 $showToken = true;
                 continue;
             }
@@ -261,7 +261,7 @@ class Repository implements InterfaceRepository
         if ($showToken) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
-
+        
         return new OaiRecordList($items, $token);
     }
 
@@ -378,7 +378,7 @@ class Repository implements InterfaceRepository
         }
 
         $return['collection'] = $collection;
-
+        
         $conceptScheme = null;
         if (!empty($arrSet[2])) {
             $conceptScheme = new Literal($arrSet[2]);
