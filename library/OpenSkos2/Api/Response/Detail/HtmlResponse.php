@@ -19,25 +19,13 @@
 
 namespace OpenSkos2\Api\Response\Detail;
 
+use OpenSkos2\Api\Response\DetailResponse;
+
 /**
  * Provide the html output for find-concepts api
  */
-class HTMLResponse implements \OpenSkos2\Api\Response\ResponseInterface
+class HTMLResponse extends DetailResponse
 {
-
-    /**
-     * @var \EasyRdf\Graph
-     */
-    private $concept;
-
-    /**
-     * @param \OpenSkos2\Concept $concept
-     */
-    public function __construct(\OpenSkos2\Concept $concept)
-    {
-        $this->concept = $concept;
-    }
-
     /**
      * Get response
      *

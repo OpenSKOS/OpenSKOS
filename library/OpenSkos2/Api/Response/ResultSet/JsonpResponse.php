@@ -34,9 +34,10 @@ class JsonpResponse extends JsonResponse
      * @param \OpenSkos2\Api\ConceptResultSet $result
      * @param string $callback
      */
-    public function __construct(\OpenSkos2\Api\ConceptResultSet $result, $callback)
+    public function __construct(\OpenSkos2\Api\ConceptResultSet $result, $callback, $propertiesList = null)
     {
         $this->result = $result;
+        $this->propertiesList = $propertiesList;
         $this->callback = $callback;
     }
 

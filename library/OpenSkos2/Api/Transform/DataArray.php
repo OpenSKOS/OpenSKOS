@@ -19,24 +19,34 @@
 
 namespace OpenSkos2\Api\Transform;
 
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
+
 /**
  * Transform \OpenSkos2\Concept to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
  */
 class DataArray
 {
-    
     /**
      * @var \OpenSkos2\Concept
      */
     private $concept;
     
     /**
-     * @param \OpenSkos2\Concept $concept
+     * @var array
      */
-    public function __construct(\OpenSkos2\Concept $concept)
+    private $propertiesList;
+    
+    /**
+     * @param \OpenSkos2\Concept $concept
+     * @param array $propertiesList Properties to serialize.
+     */
+    public function __construct(\OpenSkos2\Concept $concept, $propertiesList = null)
     {
         $this->concept = $concept;
+        $this->propertiesList = $propertiesList;
     }
     
     /**
@@ -48,83 +58,17 @@ class DataArray
     {
         $concept = $this->concept;
         
-        $map = [
-            'created_timestamp' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::CREATED,
-                'repeatable' => false
-            ],
-            'modified_timestamp' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::MODIFIED,
-                'repeatable' => false
-            ],
-            //'approved_timestamp' => ['uri' => \OpenSkos2\Namespaces\DcTerms::MODIFIED, 'repeatable' => false],
-            'status' => [
-                'uri' => \OpenSkos2\Namespaces\OpenSkos::STATUS,
-                'repeatable' => false
-            ],
-            'tenant' => [
-                'uri' => \OpenSkos2\Namespaces\OpenSkos::TENANT,
-                'repeatable' => false
-            ],
-            'collection' => [
-                'uri' => \OpenSkos2\Namespaces\OpenSkos::SET,
-                'repeatable' => false
-            ],
-            'uuid' => [
-                'uri' => \OpenSkos2\Namespaces\OpenSkos::UUID,
-                'repeatable' => false
-            ],
-            'prefLabel' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::PREFLABEL,
-                'repeatable' => false
-            ],
-            'altLabel' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::ALTLABEL,
-                'repeatable' => true
-            ],
-            'related' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::RELATED,
-                'repeatable' => true
-            ],
-            'SemanticRelations' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::SEMANTICRELATION,
-                'repeatable' => false
-            ],
-            'inScheme' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::INSCHEME,
-                'repeatable' => true
-            ],
-            'topConceptOf' => [
-                'uri' => \OpenSkos2\Namespaces\Skos::TOPCONCEPTOF,
-                'repeatable' => true
-            ],
-            'dcterms_dateAccepted' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::DATEACCEPTED,
-                'repeatable' => true
-            ],
-            'dcterms_modified' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::MODIFIED,
-                'repeatable' => true
-            ],
-            'dcterms_creator' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::CREATOR,
-                'repeatable' => true
-            ],
-            'dcterms_dateSubmitted' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::DATESUBMITTED,
-                'repeatable' => true
-            ],
-            'dcterms_contributor' => [
-                'uri' => \OpenSkos2\Namespaces\DcTerms::CONTRIBUTOR,
-                'repeatable' => true
-            ],
-        ];
-
         /* @var $concept \OpenSkos2\Concept */
-        $newConcept = [
-            'uri' => $concept->getUri()
-        ];
-        foreach ($map as $field => $prop) {
+        $newConcept = [];
+        if ($this->doIncludeProperty('uri')) {
+            $newConcept['uri'] = $concept->getUri();
+        }
+        
+        foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
+            if (!$this->doIncludeProperty($prop['uri'])) {
+                continue;
+            }
+            
             $data = $concept->getProperty($prop['uri']);
             if (empty($data)) {
                 continue;
@@ -132,6 +76,16 @@ class DataArray
             $newConcept = $this->getPropertyValue($data, $field, $prop, $newConcept);
         }
         return $newConcept;
+    }
+    
+    /**
+     * Should the property be included in the serialized data.
+     * @param string $property
+     * @return bool
+     */
+    protected function doIncludeProperty($property)
+    {
+        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
     }
     
     /**
@@ -175,5 +129,69 @@ class DataArray
         }
         
         return $concept;
+    }
+    
+    /**
+     * Gets map of fields to properties. Including info for if a field is repeatable.
+     * @return array
+     */
+    public static function getFieldsPlusIsRepeatableMap()
+    {
+        $isRepeatable = [
+            DcTerms::CREATED => false,
+            DcTerms::MODIFIED => false,
+            OpenSkos::STATUS => false,
+            OpenSkos::TENANT => false,
+            OpenSkos::SET => false,
+            OpenSkos::UUID => false,
+            Skos::PREFLABEL => false,
+            Skos::ALTLABEL => true,
+            Skos::RELATED => true,
+            Skos::SEMANTICRELATION => false,
+            Skos::INSCHEME => true,
+            Skos::TOPCONCEPTOF => true,
+            DcTerms::DATEACCEPTED => true,
+            DcTerms::MODIFIED => true,
+            DcTerms::CREATOR => true,
+            DcTerms::DATESUBMITTED => true,
+            DcTerms::CONTRIBUTOR => true,
+        ];
+        
+        $map = [];
+        foreach (self::getFieldsMap() as $field => $property) {
+            $map[$field] = [
+                'uri' => $property,
+                'repeatable' => $isRepeatable[$property],
+            ];
+        }
+        
+        return $map;
+    }
+    
+    /**
+     * Gets map of fields to property uris.
+     * @return array
+     */
+    public static function getFieldsMap()
+    {
+        return [
+            'created_timestamp' => DcTerms::CREATED,
+            'modified_timestamp' => DcTerms::MODIFIED,
+            'status' => OpenSkos::STATUS,
+            'tenant' => OpenSkos::TENANT,
+            'collection' => OpenSkos::SET,
+            'uuid' => OpenSkos::UUID,
+            'prefLabel' => Skos::PREFLABEL,
+            'altLabel' => Skos::ALTLABEL,
+            'related' => Skos::RELATED,
+            'SemanticRelations' => Skos::SEMANTICRELATION,
+            'inScheme' => Skos::INSCHEME,
+            'topConceptOf' => Skos::TOPCONCEPTOF,
+            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'dcterms_creator' => DcTerms::CREATOR,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+        ];
     }
 }

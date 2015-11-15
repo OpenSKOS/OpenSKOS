@@ -19,6 +19,8 @@
 namespace OpenSkos2\SkosXl;
 
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\Namespaces\SkosXl;
 
 class LabelManager extends ResourceManager
 {
@@ -27,4 +29,30 @@ class LabelManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Label::TYPE;
+    
+    public function autoComplete($query, $language)
+    {
+        // @TODO Implement
+        
+        $labelsAll = $this->fetch();
+        
+        $labels = new LabelCollection([]);
+        foreach ($labelsAll as $label) {
+            $literalForm = $label->getPropertyFlatValue(SkosXl::LITERALFORM, $language);
+            if (!empty($literalForm) && preg_match('/^' . preg_quote($query) . '/i', $literalForm)) {
+                $labels[] = $label;
+            }
+        }
+        
+        $labels->uasort(
+            function (Label $label1, Label $label2) use ($language) {
+                return strcmp(
+                    $label1->getPropertyFlatValue(SkosXl::LITERALFORM, $language),
+                    $label2->getPropertyFlatValue(SkosXl::LITERALFORM, $language)
+                );
+            }
+        );
+        
+        return $labels;
+    }
 }

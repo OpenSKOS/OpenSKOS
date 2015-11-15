@@ -19,26 +19,13 @@
 
 namespace OpenSkos2\Api\Response\ResultSet;
 
+use OpenSkos2\Api\Response\ResultSetResponse;
+
 /**
  * Provide the json output for find-concepts api
  */
-class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
+class RdfResponse extends ResultSetResponse
 {
-
-    /**
-     * @var \OpenSkos2\Api\ConceptResultSet
-     */
-    private $result;
-
-    /**
-     *
-     * @param \OpenSkos2\Api\ConceptResultSet $result
-     */
-    public function __construct(\OpenSkos2\Api\ConceptResultSet $result)
-    {
-        $this->result = $result;
-    }
-
     /**
      * Get response
      *
@@ -80,7 +67,7 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
             // or both of them with something shared.
             
             /* @var $concept \OpenSkos2\Concept */
-            $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
+            $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept, true, $this->propertiesList))->transform();
             $conceptXML =  new \DOMDocument();
             $conceptXML->loadXML($xml);
                         

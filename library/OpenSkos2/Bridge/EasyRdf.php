@@ -22,6 +22,8 @@ namespace OpenSkos2\Bridge;
 use EasyRdf\Graph;
 use OpenSkos2\Collection;
 use OpenSkos2\CollectionCollection;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\Person;
@@ -124,6 +126,8 @@ class EasyRdf
                     return new Collection($uri);
                 case Person::TYPE:
                     return new Person($uri);
+                case Label::TYPE:
+                    return new Label($uri);
                 default:
                     return new Resource($uri);
             }
@@ -147,6 +151,8 @@ class EasyRdf
                 return new \OpenSkos2\ConceptSchemeCollection();
             case Collection::TYPE:
                 return new CollectionCollection();
+            case Label::TYPE:
+                return new LabelCollection();
             default:
                 return new ResourceCollection();
         }

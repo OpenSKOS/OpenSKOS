@@ -17,23 +17,31 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Api\Response\Detail;
-
-use OpenSkos2\Api\Response\DetailResponse;
+namespace OpenSkos2\Api\Response;
 
 /**
  * Provide the json output for find-concepts api
  */
-class JsonResponse extends DetailResponse
+abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
     /**
-     * Get response
-     *
-     * @return \Psr\Http\Message\ResponseInterface
+     * @var \OpenSkos2\Api\ConceptResultSet
      */
-    public function getResponse()
+    protected $result;
+
+    /**
+     * @var []
+     */
+    protected $propertiesList;
+    
+    /**
+     *
+     * @param \OpenSkos2\Api\ConceptResultSet $result
+     * @param array $propertiesList Properties to serialize.
+     */
+    public function __construct(\OpenSkos2\Api\ConceptResultSet $result, $propertiesList = null)
     {
-        $body = (new \OpenSkos2\Api\Transform\DataArray($this->concept, $this->propertiesList))->transform();
-        return new \Zend\Diactoros\Response\JsonResponse($body);
+        $this->result = $result;
+        $this->propertiesList = $propertiesList;
     }
 }

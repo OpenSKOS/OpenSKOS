@@ -62,4 +62,19 @@ class Namespaces
             return $shortName;
         }
     }
+    
+    /**
+     * Makes openskos:status to be http://openskos.org/xmlns#status
+     * If not possible - return the same string
+     * @param string $shortProperty
+     * @return string
+     */
+    public static function expandProperty($shortProperty)
+    {
+        foreach (self::$additionalNamespaces as $prefix => $uri) {
+            \EasyRdf\RdfNamespace::set($prefix, $uri);
+        }
+        
+        return RdfNamespace::expand($shortProperty);
+    }
 }

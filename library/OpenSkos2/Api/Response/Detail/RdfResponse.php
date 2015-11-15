@@ -19,26 +19,13 @@
 
 namespace OpenSkos2\Api\Response\Detail;
 
+use OpenSkos2\Api\Response\DetailResponse;
+
 /**
  * Provide the json output for find-concepts api
  */
-class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
+class RdfResponse extends DetailResponse
 {
-
-    /**
-     * @var \OpenSkos2\Concept
-     */
-    private $concept;
-
-    /**
-     *
-     * @param \OpenSkos2\Concept $concept
-     */
-    public function __construct(\OpenSkos2\Concept $concept)
-    {
-        $this->concept = $concept;
-    }
-
     /**
      * Get response
      *
@@ -47,7 +34,7 @@ class RdfResponse implements \OpenSkos2\Api\Response\ResponseInterface
     public function getResponse()
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $concept = (new \OpenSkos2\Api\Transform\DataRdf($this->concept))->transform();
+        $concept = (new \OpenSkos2\Api\Transform\DataRdf($this->concept, true, $this->propertiesList))->transform();
         $stream->write($concept);
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)

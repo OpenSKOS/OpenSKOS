@@ -19,17 +19,13 @@
 
 namespace OpenSkos2\Api\Response\Detail;
 
+use OpenSkos2\Api\Response\DetailResponse;
+
 /**
  * Provide the json output for find-concepts api
  */
-class JsonpResponse implements \OpenSkos2\Api\Response\ResponseInterface
+class JsonpResponse extends DetailResponse
 {
-
-    /**
-     * @var \EasyRdf\Graph
-     */
-    private $concept;
-
     /**
      * JSONP Callback
      * @var string
@@ -39,13 +35,15 @@ class JsonpResponse implements \OpenSkos2\Api\Response\ResponseInterface
     /**
      * @param \OpenSkos2\Concept $concept
      * @param string $callback
+     * @param \OpenSkos2\Concept $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Concept $concept, $callback)
+    public function __construct(\OpenSkos2\Concept $concept, $callback, $propertiesList = null)
     {
         $this->concept = $concept;
+        $this->propertiesList = $propertiesList;
         $this->callback = $callback;
     }
-
+    
     /**
      * Get response
      *
@@ -54,7 +52,7 @@ class JsonpResponse implements \OpenSkos2\Api\Response\ResponseInterface
     public function getResponse()
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $body = (new \OpenSkos2\Api\Transform\DataArray($this->concept))->transform();
+        $body = (new \OpenSkos2\Api\Transform\DataArray($this->concept, $this->propertiesList))->transform();
         $jsonp = $this->callback . '(' . json_encode($body) . ');';
         $stream->write($jsonp);
         $response = (new \Zend\Diactoros\Response($stream))

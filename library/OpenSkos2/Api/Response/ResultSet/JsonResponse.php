@@ -19,25 +19,13 @@
 
 namespace OpenSkos2\Api\Response\ResultSet;
 
+use OpenSkos2\Api\Response\ResultSetResponse;
+
 /**
  * Provide the json output for find-concepts api
  */
-class JsonResponse implements \OpenSkos2\Api\Response\ResponseInterface
+class JsonResponse extends ResultSetResponse
 {
-    /**
-     * @var \OpenSkos2\Api\ConceptResultSet
-     */
-    protected $result;
-
-    /**
-     *
-     * @param \OpenSkos2\Api\ConceptResultSet $result
-     */
-    public function __construct(\OpenSkos2\Api\ConceptResultSet $result)
-    {
-        $this->result = $result;
-    }
-
     /**
      * Get response
      *
@@ -71,7 +59,7 @@ class JsonResponse implements \OpenSkos2\Api\Response\ResponseInterface
     {
         $docs = [];
         foreach ($this->result->getConcepts() as $concept) {
-            $nConcept = (new \OpenSkos2\Api\Transform\DataArray($concept))->transform();
+            $nConcept = (new \OpenSkos2\Api\Transform\DataArray($concept, $this->propertiesList))->transform();
             $docs[] = json_encode($nConcept);
         }
 

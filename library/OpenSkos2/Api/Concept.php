@@ -22,6 +22,7 @@ namespace OpenSkos2\Api;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Converter\Text;
+use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -30,6 +31,14 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSKOS_Db_Table_Row_Collection;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
+use OpenSkos2\Api\Response\ResultSet\RdfResponse;
+use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
+use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
+use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
+use OpenSkos2\Api\Response\Detail\HTMLResponse as DetailHTMLResponse;
+use OpenSkos2\Api\Exception\InvalidPredicateException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -108,19 +117,22 @@ class Concept
         $total = $countResult[0]->count->getValue();
 
         $result = new ConceptResultSet($concepts, $total, $start);
-
+        
+        if (isset($params['fl'])) {
+            $propertiesList = $this->fieldsListToProperties($params['fl']);
+        } else {
+            $propertiesList = [];
+        }
+        
         switch ($context) {
             case 'json':
-                $response = (new \OpenSkos2\Api\Response\ResultSet\JsonResponse($result))->getResponse();
+                $response = (new JsonResponse($result, $propertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new \OpenSkos2\Api\Response\ResultSet\JsonpResponse(
-                    $result,
-                    $params['callback']
-                ))->getResponse();
+                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
                 break;
             case 'rdf':
-                $response = (new \OpenSkos2\Api\Response\ResultSet\RdfResponse($result))->getResponse();
+                $response = (new RdfResponse($result, $propertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
@@ -142,19 +154,23 @@ class Concept
     {
         $concept = $this->getConcept($uuid);
 
+        $params = $request->getQueryParams();
+        
+        if (isset($params['fl'])) {
+            $propertiesList = $this->fieldsListToProperties($params['fl']);
+        } else {
+            $propertiesList = [];
+        }
+        
         switch ($context) {
             case 'json':
-                $response = (new \OpenSkos2\Api\Response\Detail\JsonResponse($concept))->getResponse();
+                $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $params = $request->getQueryParams();
-                $response = (new \OpenSkos2\Api\Response\Detail\JsonpResponse(
-                    $concept,
-                    $params['callback']
-                ))->getResponse();
+                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList))->getResponse();
                 break;
             case 'rdf':
-                $response = (new \OpenSkos2\Api\Response\Detail\RdfResponse($concept))->getResponse();
+                $response = (new DetailRdfResponse($concept, $propertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
@@ -283,7 +299,48 @@ class Concept
         $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
         return $this->getSuccessResponse($xml, 202);
     }
-
+    
+    /**
+     * Gets a list (array or string) of fields and try to recognise the properties from it.
+     * @param array $fieldsList
+     * @return array
+     */
+    protected function fieldsListToProperties($fieldsList)
+    {
+        if (!is_array($fieldsList)) {
+            $fieldsList = array_map('trim', explode(',', $fieldsList));
+        }
+        
+        $propertiesList = [];
+        $fieldsMap = Transform\DataArray::getFieldsMap();
+        // Tries to search for the field in fields map.
+        // If not found there tries to expand it from short property.
+        // If not that - just pass it as it is.
+        foreach ($fieldsList as $field) {
+            if (!empty($field)) {
+                if (isset($fieldsMap[$field])) {
+                    $propertiesList[] = $fieldsMap[$field];
+                } else {
+                    $propertiesList[] = Namespaces::expandProperty($field);
+                }
+            }
+        }
+        
+        // Check if we have a nice properties list at the end.
+        foreach ($propertiesList as $propertyUri) {
+            if ($propertyUri == 'uri') {
+                continue;
+            }
+            if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
+                throw new InvalidPredicateException(
+                    'The field "' . $propertyUri . '" from fields list is not recognised.'
+                );
+            }
+        }
+        
+        return $propertiesList;
+    }
+    
     /**
      * Handle the action of creating the concept
      *
