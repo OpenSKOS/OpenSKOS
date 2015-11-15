@@ -56,6 +56,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @apiGroup FindConcept
      * @apiParam {String} q search term
      * @apiParam {String} rows Amount of rows to return
+     * @apiParam {String} fl List of fields to return
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
@@ -127,6 +128,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @api {get} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
      * @apiGroup FindConcept
+     * @apiParam {String} fl List of fields to return
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
