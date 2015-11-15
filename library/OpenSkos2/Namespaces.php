@@ -19,6 +19,7 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\SkosXl;
 use \EasyRdf\RdfNamespace;
 
@@ -31,6 +32,7 @@ class Namespaces
     protected static $additionalNamespaces = [
         'openskos' => OpenSkos::NAME_SPACE,
         'skosxl' => SkosXl::NAME_SPACE,
+        'dc' => Dc::NAME_SPACE, // Very important for distinguishing dcterms and dc prefixes.
     ];
     
     /**
