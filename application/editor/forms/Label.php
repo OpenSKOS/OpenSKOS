@@ -37,13 +37,15 @@ class Editor_Forms_Label extends OpenSKOS_Form
     
     protected function buildInputs()
     {
-        $this->addElement('hidden', 'uri', array(
+        $this->addElement('hidden', 'uri', [
             'decorators' => array()
-        ));
+        ]);
         
-        $this->addElement('hidden', 'language', array(
-            'decorators' => array()
-        ));
+        $this->addElement('text', 'language', [
+            'label' => 'Language',
+            'decorators' => array(),
+            'readonly' => true,
+        ]);
                 
         $this->addElement('text', 'literalForm', [
             'label' => 'Literal form',
@@ -54,10 +56,10 @@ class Editor_Forms_Label extends OpenSKOS_Form
     
     protected function buildButtons()
     {
-        $this->addElement('button', 'cancelButton', array(
-                'label' => 'Cancel',
-                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'openOnly' => true)))
-        ));
+//        $this->addElement('button', 'cancelButton', array(
+//                'label' => 'Cancel',
+//                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'openOnly' => true)))
+//        ));
         $this->addElement('submit', 'okButton', array(
                 'label' => 'Ok',
                 'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))

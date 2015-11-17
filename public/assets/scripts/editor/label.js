@@ -18,6 +18,7 @@
 var EditorLabel = new Class({
     Binds: [
         'labelAdded',
+        'showLabelsPerLanguageTab',
         'autocompleteListLabels',
     ],
     addingToContainer: null,
@@ -28,17 +29,18 @@ var EditorLabel = new Class({
             self.addingToContainer = ev.target.getParent('.multi-field-skos-xl-label');
             var href = ev.target.getProperty('href');
             href += '?language=' + Editor.Concept.getCurrentLanguage();
-            SqueezeBox.open(href, {size: {x: 450, y: 500}, handler: 'iframe'});
+            SqueezeBox.open(href, {size: {x: 400, y: 300}, handler: 'iframe'});
         });
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-edit)', function (ev) {
             ev.stop();
             var uri = ev.target.getParent('.skos-xl-label').getElement('.uri').get('value');
             var href = ev.target.getProperty('href') + '/uri/' + encodeURIComponent(uri);
-            SqueezeBox.open(href, {size: {x: 450, y: 500}, handler: 'iframe'});
+            SqueezeBox.open(href, {size: {x: 400, y: 300}, handler: 'iframe'});
         });
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-remove)', function (ev) {
             ev.stop();
             ev.target.getParent('.skos-xl-label').dispose();
+            self.ensureOnePrefLabelPerLanguage();
         });
     },
     showLabelsPerLanguageTab: function () {
@@ -47,6 +49,8 @@ var EditorLabel = new Class({
         
         container.getElements('.skos-xl-label:not(.' + language + ')').hide();
         container.getElements('.skos-xl-label.' + language).show();
+        
+        this.ensureOnePrefLabelPerLanguage();
     },
     addLabel: function (uri, literalForm, language) {
         if (!this.addingToContainer.getElement('.uri[value="' + uri + '"')) {
@@ -55,6 +59,7 @@ var EditorLabel = new Class({
             this.populateElement(newElement, uri, literalForm, language);
             this.addingToContainer.adopt(newElement);
             this.showLabelsPerLanguageTab();
+            this.ensureOnePrefLabelPerLanguage();
         }
     },
     editLabel: function (uri, literalForm, language) {
@@ -114,5 +119,15 @@ var EditorLabel = new Class({
             
             listEl.adopt(newElement);
         });
+    },
+    ensureOnePrefLabelPerLanguage: function () {
+        var language = Editor.Concept.getCurrentLanguage();
+        var container = $('concept-edit-language-skos-xl-labels');
+        
+        if (container.getElement('.skosXlPrefLabel .skos-xl-label.' + language)) {
+            container.getElement('.skosXlPrefLabel .skos-xl-label-add').hide();
+        } else {
+            container.getElement('.skosXlPrefLabel .skos-xl-label-add').show();
+        }
     }
 });

@@ -2078,3 +2078,63 @@ form#uploadicon dd {
 .share-collection {
   float: left;
 }
+
+#concept-edit-property-action {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.multi-field-skos-xl-label {
+  padding-left: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+.multi-field-skos-xl-label .concept-multi-label {
+  font-weight: bold;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+.multi-field-skos-xl-label .skos-xl-label {
+  /*color: #6B1750;*/
+}
+.multi-field-skos-xl-label .skos-xl-label-remove, .multi-field-skos-xl-label .skos-xl-label-add {
+  position: relative;
+  top: 3px;
+}
+
+#label-edit-form #uri-label {
+  height: 0px;
+}
+#label-edit-form #literalForm-label, #label-edit-form #literalForm-element, #label-edit-form #language-label, #label-edit-form #language-element {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+#label-edit-form #literalForm-label, #label-edit-form #language-label {
+  width: 70px;
+}
+#label-edit-form #literalForm-element, #label-edit-form #language-element {
+  margin-left: 0px;
+}
+#label-edit-form #literalForm, #label-edit-form #language {
+  width: 270px;
+}
+#label-edit-form #language {
+  border: 0px;
+  font-weight: bold;
+}
+
+.choose-skos-xl-labels {
+  width: 300px;
+}
+.choose-skos-xl-labels .autocomplete {
+  width: 265px;
+}
+.choose-skos-xl-labels .list {
+  margin: 0;
+  padding: 6px 0px 4px 4px;
+  list-style: none;
+}

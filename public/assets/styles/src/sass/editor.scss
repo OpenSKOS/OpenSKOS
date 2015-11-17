@@ -1480,3 +1480,66 @@ form#uploadicon {
 .share-collection {
     float: left;
 }
+
+#concept-edit-property-action {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.multi-field-skos-xl-label {
+    padding-left: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 8px;
+    margin-top: 16px;
+    .concept-multi-label {
+        font-weight: bold;
+        display: inline-block;
+        padding-bottom: 8px;
+    }
+    .skos-xl-label {
+        /*color: #6B1750;*/
+    }
+    .skos-xl-label-remove, .skos-xl-label-add {
+        position: relative;
+        top: 3px;
+    }
+}
+
+#label-edit-form {
+    #uri-label {
+        height: 0px;
+    }
+    #literalForm-label, #literalForm-element, #language-label, #language-element {
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+    #literalForm-label, #language-label {
+        width: 70px;
+    }
+    #literalForm-element, #language-element {
+        margin-left: 0px;
+    }
+    #literalForm, #language {
+        width: 270px;
+    }
+    #language {
+        border: 0px;
+        font-weight: bold;
+    }
+}
+
+.choose-skos-xl-labels {
+    width: 300px;
+    .autocomplete {
+        width:  265px;
+    }
+    
+    .list {
+        margin: 0;
+        padding: 6px 0px 4px 4px;
+        list-style: none;
+    }
+}

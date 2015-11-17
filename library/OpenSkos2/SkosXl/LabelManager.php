@@ -30,13 +30,13 @@ class LabelManager extends ResourceManager
      */
     protected $resourceType = Label::TYPE;
     
-    public function autoComplete($query, $language)
+    public function autoComplete($query, $language, $limit = 15)
     {
         // @TODO Implement
         
         $labelsAll = $this->fetch();
         
-        $labels = new LabelCollection([]);
+        $labels = [];
         foreach ($labelsAll as $label) {
             $literalForm = $label->getPropertyFlatValue(SkosXl::LITERALFORM, $language);
             if (!empty($literalForm) && preg_match('/^' . preg_quote($query) . '/i', $literalForm)) {
@@ -44,7 +44,8 @@ class LabelManager extends ResourceManager
             }
         }
         
-        $labels->uasort(
+        uasort(
+            $labels,
             function (Label $label1, Label $label2) use ($language) {
                 return strcmp(
                     $label1->getPropertyFlatValue(SkosXl::LITERALFORM, $language),
@@ -53,6 +54,6 @@ class LabelManager extends ResourceManager
             }
         );
         
-        return $labels;
+        return new LabelCollection(array_slice($labels, 0, $limit));
     }
 }
