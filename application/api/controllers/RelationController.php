@@ -85,5 +85,5 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     public function deleteAction()
     {
         $this->_501('DELETE');
-    } 
+    }
 }

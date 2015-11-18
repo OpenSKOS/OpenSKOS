@@ -166,7 +166,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $concept->selfGenerateUri();
             }
             
-            $this->getConceptManager()->replace($concept);
+            $this->getConceptManager()->replaceAndCleanRelations($concept);
             
             // @TODO       $this->_handleStatusAutomatedActions($concept, $formData);
             

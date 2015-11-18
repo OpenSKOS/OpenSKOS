@@ -251,7 +251,7 @@ class Concept
                 $existingConcept->getStatus()
             );
             
-            $this->manager->replace($concept);
+            $this->manager->replaceAndCleanRelations($concept);
             
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());

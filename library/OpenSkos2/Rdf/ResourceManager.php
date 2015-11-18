@@ -124,8 +124,7 @@ class ResourceManager
             $resource->unsetProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
 
-        $this->delete($resource);
-        $this->insert($resource);
+        $this->replace($resource);
         
         // Update solr
         $update = $this->solr->createUpdate();
@@ -151,7 +150,6 @@ class ResourceManager
     }
 
     /**
-     *
      * @todo Keep SOLR in sync
      * @param Object[] $simplePatterns
      */
@@ -162,6 +160,22 @@ class ResourceManager
             $query .= "<{$predicate}> " . $this->valueToTurtle($value) . ";\n";
         }
         $query .= "?predicate ?object\n}";
+
+        $this->client->update($query);
+    }
+    
+    /**
+     * Delete all triples where patterns match and 
+     * @todo Keep SOLR in sync
+     * @param Object[] $simplePatterns
+     */
+    public function deleteBySingleTriples($simplePatterns)
+    {
+        $query = 'DELETE WHERE {' . PHP_EOL;
+        foreach ($simplePatterns as $predicate => $value) {
+            $query .= '?subject <' . $predicate . '> ' . $this->valueToTurtle($value) . ' . ' . PHP_EOL;
+        }
+        $query .= PHP_EOL . '}';
 
         $this->client->update($query);
     }

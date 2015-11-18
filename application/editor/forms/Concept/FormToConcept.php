@@ -17,6 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Concept;
@@ -92,6 +93,10 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function resourcesToConcept(Concept &$concept, $formData)
     {
+        // @TODO Select "asserted only" on update. Else after first update the inferred
+        // relations will get explicitly declared (asserted). Then unset can be removed as well.
+        self::unsetAllRelations($concept);
+        
         $fieldToUris = function ($value) {
             $uris = [];
             if (!empty($value)) {
@@ -112,8 +117,35 @@ class Editor_Forms_Concept_FormToConcept
             }
         }
         
-        // @TODO Delete relation from both.
-        // @TODO Remove topConceptOf for schemes in which it is not already part
+        self::filterTopConceptOf($concept);
+    }
+    
+    /**
+     * Clear all relations of the concept before setting the relations from the form.
+     * This will remove any hidden, inferred relations like boraderTransitive and narrowerTransitive.
+     * If the relation does not come from the form - we don't want it.
+     * @param Concept $concept
+     */
+    protected static function unsetAllRelations(Concept &$concept)
+    {
+        foreach (Skos::getRelationsTypes() as $relationType) {
+            $concept->unsetProperty($relationType);
+        }
+    }
+    
+    /**
+     * Remove all top concept of for schemes which the concept is not inScheme.
+     * @param Concept $concept
+     */
+    protected static function filterTopConceptOf(Concept &$concept)
+    {
+        $filteredTopConceptOf = [];
+        foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) {
+            if ($concept->isTopConceptOf($schemeUri)) {
+                $filteredTopConceptOf[] = $schemeUri;
+            }
+        }
+        $concept->setProperties(Skos::TOPCONCEPTOF, $filteredTopConceptOf);
     }
     
     /**

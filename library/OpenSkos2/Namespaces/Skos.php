@@ -67,4 +67,20 @@ class Skos
     const RELATEDMATCH = 'http://www.w3.org/2004/02/skos/core#relatedMatch';
         
     const HTML_REFERENCE ='http://www.w3.org/2009/08/skos-reference/skos.html';
+    
+    public static function getRelationsTypes()
+    {
+        //@TODO Collections
+        return [
+            Skos::BROADER,
+            Skos::NARROWER,
+            Skos::BROADERTRANSITIVE,
+            Skos::NARROWERTRANSITIVE,
+            Skos::BROADMATCH,
+            Skos::NARROWMATCH,
+            Skos::RELATED,
+            Skos::TOPCONCEPTOF,
+            Skos::HASTOPCONCEPT,
+        ];
+    }
 }

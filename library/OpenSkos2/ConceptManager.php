@@ -24,6 +24,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
 
@@ -58,20 +59,17 @@ class ConceptManager extends ResourceManager
     private $concatFieldSeperator = '@@';
     
     /**
-     * Supported relation types to add or remove
-     * @var array
+     * Deletes and then inserts the resourse.
+     * For concepts also deletes all relations for which the concept is object.
+     * @param \OpenSkos2\Rdf\Resource $resource
      */
-    private $relationTypes = [
-        Skos::BROADER,
-        Skos::NARROWER,
-        Skos::BROADERTRANSITIVE,
-        Skos::NARROWERTRANSITIVE,
-        Skos::BROADMATCH,
-        Skos::NARROWMATCH,
-        Skos::RELATED,
-        Skos::TOPCONCEPTOF,
-        Skos::HASTOPCONCEPT,
-    ];
+    public function replaceAndCleanRelations(Concept $concept)
+    {
+        // @TODO Danger if one of the operations fail. Need transaction or something.
+        // @TODO What to do with imports. When several concepts are imported at once.
+        $this->deleteRelationsWhereObject($concept);
+        parent::replace($concept);
+    }
 
     /**
      * Perform basic autocomplete search on pref and alt labels
@@ -123,7 +121,7 @@ class ConceptManager extends ResourceManager
      */
     public function addRelation($uri, $relationType, $uris)
     {
-        if (!in_array($relationType, $this->relationTypes, true)) {
+        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -171,6 +169,19 @@ class ConceptManager extends ResourceManager
         } while (!(count($relations) < $step));
         
         return $allRelations;
+    }
+    
+    /**
+     * Delete all relations for which the concepts is object (target)
+     * @param Uri $resource
+     */
+    public function deleteRelationsWhereObject(Concept $concept)
+    {
+        foreach (Skos::getRelationsTypes() as $relationType) {
+            $this->deleteBySingleTriples([
+                $relationType => $concept
+            ]);
+        }
     }
     
     /**
