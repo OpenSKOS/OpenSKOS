@@ -61,33 +61,27 @@ class Relation
     {
         $body = $request->getParsedBody();
 
-        if (!isset($body['tenant'])) {
-            throw new Exception\ApiException('Missing tenant', 400);
-        }
-
-        $tenant = $this->getTenant($body['tenant']);
-
         if (!isset($body['key'])) {
             throw new Exception\ApiException('Missing relation', 400);
         }
-
-        $user = $this->getUserByKey($body['key']);
-
         if (!isset($body['concept'])) {
             throw new Exception\ApiException('Missing concept', 400);
         }
-
-        $concept = $this->manager->fetchByUri($body['concept']);
-        $this->conceptEditAllowed($concept, $tenant, $user);
-        
-        if (!isset($body['type']) || !is_string($body['type'])) {
+        if (!isset($body['related'])) {
+            throw new Exception\ApiException('Missing related', 400);
+        }
+        if (!isset($body['type'])) {
             throw new Exception\ApiException('Missing type', 400);
         }
+        
+        $user = $this->getUserByKey($body['key']);
 
-        if (!isset($body['related']) || !is_array($body['related'])) {
-            throw new Exception\ApiException('Missing realted', 400);
-        }
+        $concept = $this->manager->fetchByUri($body['concept']);
+        $this->conceptEditAllowed($concept, $concept->getInstitution(), $user);
 
+        $relatedConcept = $this->manager->fetchByUri($body['concept']);
+        $this->conceptEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
+        
         try {
             $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
         } catch (\Exception $exc) {

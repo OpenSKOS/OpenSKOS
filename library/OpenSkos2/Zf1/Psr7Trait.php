@@ -38,9 +38,10 @@ trait Psr7Trait
         // for < PHP 5.6 support see: http://php.net/manual/en/wrappers.php.php#wrappers.php.input
         $stream = new \Zend\Diactoros\Stream('php://memory', 'r+');
         $stream->write($this->getRequest()->getRawBody());
-
+        
         return \Zend\Diactoros\ServerRequestFactory::fromGlobals()
-                ->withBody($stream);
+                ->withBody($stream)
+                ->withParsedBody($this->getParsedBody());
     }
 
     /**
@@ -52,5 +53,17 @@ trait Psr7Trait
     {
         (new \Zend\Diactoros\Response\SapiEmitter())->emit($response);
         exit; // find better way to prevent output from zf1
+    }
+    
+    /**
+     * Gets request parsed body
+     * @return array
+     */
+    protected function getParsedBody()
+    {
+        $parsedBody = [];
+        parse_str(urldecode($this->getRequest()->getRawBody()), $parsedBody);
+        
+        return $parsedBody;
     }
 }

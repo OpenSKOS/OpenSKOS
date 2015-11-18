@@ -55,7 +55,6 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     * @apiParam {String} concept The uri to the concept e.g http://openskos.org/1
     * @apiParam {String} type The uri of the relation e.g http://www.w3.org/2004/02/skos/core#narrower
     * @apiParam {Array}  related The uri's of the related concepts e.g http://openskos.org/123
-    * @apiParam {String} tenant The tenant code
     * @apiParam {String} key A valid API key
     * @apiSuccess (200) {String} Concept uri
     * @apiSuccessExample {String} Success-Response

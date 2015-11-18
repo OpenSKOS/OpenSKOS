@@ -118,7 +118,7 @@ class ConceptManager extends ResourceManager
      *
      * @param string $uri
      * @param string $relationType
-     * @param array $uris
+     * @param array|string $uris
      * @throws Exception\InvalidArgumentException
      */
     public function addRelation($uri, $relationType, $uris)
@@ -128,8 +128,12 @@ class ConceptManager extends ResourceManager
         }
 
         $graph = new \EasyRdf\Graph();
+        
+        if (!is_array($uris)) {
+            $uris = [$uris];
+        }
         foreach ($uris as $related) {
-            $graph->add($uri, $relationType, $related);
+            $graph->addResource($uri, $relationType, $related);
         }
 
         $this->client->insert($graph);
