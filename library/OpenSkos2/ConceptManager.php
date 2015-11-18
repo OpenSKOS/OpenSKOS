@@ -124,6 +124,13 @@ class ConceptManager extends ResourceManager
         if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
+        
+        // @TODO Add check everywhere we may need it.
+        if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
+            throw new Exception\InvalidArgumentException(
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            );
+        }
 
         $graph = new \EasyRdf\Graph();
         
@@ -135,6 +142,33 @@ class ConceptManager extends ResourceManager
         }
 
         $this->client->insert($graph);
+    }
+    
+    /**
+     * Delete relations between two skos concepts.
+     * Deletes in both directions (narrower and broader for example).
+     * @param string $subjectUri
+     * @param string $relationType
+     * @param string $objectUri
+     * @throws Exception\InvalidArgumentException
+     */
+    public function deleteRelation($subjectUri, $relationType, $objectUri)
+    {
+        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+
+        $this->deleteMatchingTriples(
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
+        );
+        
+        $this->deleteMatchingTriples(
+            new Uri($objectUri),
+            Skos::getInferredRelationsMap()[$relationType],
+            new Uri($subjectUri)
+        );
     }
     
     /**
@@ -178,9 +212,7 @@ class ConceptManager extends ResourceManager
     public function deleteRelationsWhereObject(Concept $concept)
     {
         foreach (Skos::getRelationsTypes() as $relationType) {
-            $this->deleteBySingleTriples([
-                $relationType => $concept
-            ]);
+            $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
     }
     

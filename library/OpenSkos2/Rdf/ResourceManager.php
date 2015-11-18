@@ -165,16 +165,19 @@ class ResourceManager
     }
     
     /**
-     * Delete all triples where patterns match and 
+     * Delete all triples where pattern matches
      * @todo Keep SOLR in sync
-     * @param Object[] $simplePatterns
+     * @param Object|string $subject Put "?subject" to match all.
+     * @param string $predicate
+     * @param Object|string $object Put "?object" to match all.
      */
-    public function deleteBySingleTriples($simplePatterns)
+    public function deleteMatchingTriples($subject, $predicate, $object)
     {
+        // @TODO Refactor
         $query = 'DELETE WHERE {' . PHP_EOL;
-        foreach ($simplePatterns as $predicate => $value) {
-            $query .= '?subject <' . $predicate . '> ' . $this->valueToTurtle($value) . ' . ' . PHP_EOL;
-        }
+        $query .= $subject == '?subject' ? '?subject' : $this->valueToTurtle($subject);
+        $query .= ' <' . $predicate . '> ';
+        $query .= $object == '?object' ? '?object' : $this->valueToTurtle($object);
         $query .= PHP_EOL . '}';
 
         $this->client->update($query);

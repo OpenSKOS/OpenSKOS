@@ -68,19 +68,48 @@ class Skos
         
     const HTML_REFERENCE ='http://www.w3.org/2009/08/skos-reference/skos.html';
     
+    /**
+     * Gets list of relations types used around skos.
+     * @return array
+     */
     public static function getRelationsTypes()
     {
         //@TODO Collections
         return [
             Skos::BROADER,
             Skos::NARROWER,
+            Skos::RELATED,
             Skos::BROADERTRANSITIVE,
             Skos::NARROWERTRANSITIVE,
             Skos::BROADMATCH,
             Skos::NARROWMATCH,
-            Skos::RELATED,
+            Skos::CLOSEMATCH,
+            Skos::EXACTMATCH,
+            Skos::RELATEDMATCH,
             Skos::TOPCONCEPTOF,
             Skos::HASTOPCONCEPT,
+        ];
+    }
+    
+    /**
+     * Gets map of which relation inferes to which relation.
+     * The tranitive inferres are not in that list. Can not be handled with a map.
+     * @return type
+     */
+    public static function getInferredRelationsMap()
+    {
+        //@TODO Collections
+        return [
+            Skos::BROADER => Skos::NARROWER,
+            Skos::NARROWER => Skos::BROADER,
+            Skos::BROADMATCH => Skos::NARROWMATCH,
+            Skos::NARROWMATCH => Skos::NARROWMATCH,
+            Skos::RELATED => Skos::RELATED,
+            Skos::CLOSEMATCH => Skos::CLOSEMATCH,
+            Skos::EXACTMATCH => Skos::EXACTMATCH,
+            Skos::RELATEDMATCH => Skos::RELATEDMATCH,
+            Skos::TOPCONCEPTOF => Skos::HASTOPCONCEPT,
+            Skos::HASTOPCONCEPT => Skos::TOPCONCEPTOF,
         ];
     }
 }
