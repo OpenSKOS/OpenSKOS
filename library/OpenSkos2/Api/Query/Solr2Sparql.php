@@ -146,6 +146,8 @@ class Solr2Sparql
 
         $q = $params['q'];
 
+        $q = $this->fixWildcardQuery($q);
+        
         // Search term does not contain specific fields d a search on alt / pref label
         $tQuery = $this->tokenizeQuery($q);
 
@@ -158,6 +160,17 @@ class Solr2Sparql
         }
         
         return $query;
+    }
+    
+    /**
+     * Replaces * with .*. But not .* with ..*
+     * @param string $q
+     * @return string
+     */
+    private function fixWildcardQuery($q)
+    {
+        // Replace * with .*. Only if it is not .* already
+        return str_replace('..*', '.*', str_replace('*', '.*', $q));
     }
     
     /**
