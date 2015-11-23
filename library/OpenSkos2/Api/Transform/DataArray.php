@@ -102,7 +102,11 @@ class DataArray
         foreach ($prop as $val) {
             // Some values only have a URI but not getValue or getLanguage
             if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
-                $concept[$field] = $val->getUri();
+                if ($settings['repeatable'] === true) {
+                    $concept[$field][] = $val->getUri();
+                } else {
+                    $concept[$field] = $val->getUri();
+                }
                 continue;
             }
 
