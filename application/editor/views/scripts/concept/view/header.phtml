@@ -17,18 +17,29 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 ?>
 
 <div id="concept-header">
-    <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']): ?>
-        <div id="concept-status">
-            <span><?php echo $this->translate('Status:'); ?> </span>
-            <?php echo ($this->currentConcept->isPropertyEmpty(OpenSkos::STATUS) ? $this->translate('undefined') : $this->translate($this->currentConcept->getPropertyFlatValue(OpenSkos::STATUS))); ?>
+    <div id="concept-header-items">
+        <div class="item">
+            <span><?php echo $this->translate('URI:'); ?> </span>
+            <?php echo $this->currentConcept->getUri(); ?>
         </div>
-    <?php endif ?>
-    <div id="concept-checked">
-        <span><?php echo $this->translate('To be checked:'); ?> </span>
-        <?php echo $this->currentConcept->isPropertyTrue(OpenSkos::TOBECHECKED) ? $this->translate('Yes') : $this->translate('No'); ?>
+        <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']): ?>
+            <div class="item" id="concept-status">
+                <span><?php echo $this->translate('Status:'); ?> </span>
+                <?php echo ($this->currentConcept->isPropertyEmpty(OpenSkos::STATUS) ? $this->translate('undefined') : $this->translate($this->currentConcept->getPropertyFlatValue(OpenSkos::STATUS))); ?>
+            </div>
+        <?php endif ?>
+        <div class="item" id="concept-checked">
+            <span><?php echo $this->translate('To be checked:'); ?> </span>
+            <?php echo $this->currentConcept->isPropertyTrue(OpenSkos::TOBECHECKED) ? $this->translate('Yes') : $this->translate('No'); ?>
+        </div>
+        <div class="item">
+            <span><?php echo $this->translate('Notations:'); ?> </span>
+            <?php echo $this->currentConcept->getPropertyFlatValue(Skos::NOTATION); ?>
+        </div>
     </div>
     <div id="concept-action">
         <input id="uri" type="hidden" value="<?php echo $this->currentConcept->getUri(); ?>" />
@@ -45,5 +56,5 @@ use OpenSkos2\Namespaces\OpenSkos;
             <?php echo $this->translate('Export'); ?>
         </button>
     </div>
-    <p>&nbsp;</p>
+    <div class="clear">&nbsp;</div>
 </div>

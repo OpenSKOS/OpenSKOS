@@ -27,6 +27,43 @@ use OpenSkos2\Rdf\Literal;
 class Editor_Forms_Concept_ConceptToForm
 {
     /**
+     * Get form data for creating new concept based on lang and pref label.
+     * @param string $language
+     * @param string $prefLabel
+     * @return array
+     */
+    public static function getNewConceptFormData($language, $prefLabel)
+    {
+        return [
+            'conceptLanguages' => [
+                strtoupper($language) => [
+                    strtoupper($language) => $language
+                ]
+            ],
+            'prefLabel' => [
+                [
+                    'languageCode' => $language,
+                    'value' => [
+                        $prefLabel
+                    ],
+                ],
+            ],
+            'altLabel' => [
+                [
+                    'languageCode' => $language,
+                    'value' => [''],
+                ],
+            ],
+            'hiddenLabel' => [
+                [
+                    'languageCode' => $language,
+                    'value' => [''],
+                ],
+            ],
+        ];
+    }
+    
+    /**
      * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
      * @param Concept $concept
      * @return array
@@ -38,6 +75,7 @@ class Editor_Forms_Concept_ConceptToForm
         self::languagesToForm($concept, $formData);
         self::translatedPropertiesToForm($concept, $formData);
         self::flatPropertiesToForm($concept, $formData);
+        self::multiValuedNoLangPropertiesToForm($concept, $formData);
         self::schemesToForm($concept, $formData);
         self::relationsToForm($concept, $formData);
         self::skosXlLabelsToForm($concept, $formData);
@@ -91,8 +129,36 @@ class Editor_Forms_Concept_ConceptToForm
                 $formData[$field] = array_values($groupedValues);
             }
         }
+        
+        self::ensureAltAndHiddenLabels($concept, $formData);
     }
     
+    /**
+     * Ensure we have alt label and hidden label everywher
+     * @param Concept $concept
+     * @param array $formData
+     */
+    protected static function ensureAltAndHiddenLabels(Concept $concept, &$formData)
+    {
+        $translatedFieldsMap = Editor_Forms_Concept::getTranslatedFieldsMap();
+        
+        foreach ($concept->retrieveLanguages() as $language) {
+            if (!$concept->hasPropertyInLanguage(Skos::ALTLABEL, $language)) {
+                $formData[array_search(Skos::ALTLABEL, $translatedFieldsMap)][] = [
+                    'languageCode' => $language,
+                    'value' => [''],
+                ];
+            }
+            if (!$concept->hasPropertyInLanguage(Skos::HIDDENLABEL, $language)) {
+                $formData[array_search(Skos::HIDDENLABEL, $translatedFieldsMap)][] = [
+                    'languageCode' => $language,
+                    'value' => [''],
+                ];
+            }
+        }
+    }
+
+
     /**
      * Properties like pref label, alt label etc.
      * @param Concept $concept
@@ -101,7 +167,23 @@ class Editor_Forms_Concept_ConceptToForm
     protected static function flatPropertiesToForm(Concept $concept, &$formData)
     {
         foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
+            // @TODO Should fail if having more than one value.
             $formData[$field] = $concept->getPropertyFlatValue($property);
+        }
+    }
+    
+    /**
+     * Properties like pref label, alt label etc.
+     * @param Concept $concept
+     * @param array &$formData
+     */
+    protected static function multiValuedNoLangPropertiesToForm(Concept $concept, &$formData)
+    {
+        foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
+            $formData[$field] = [];
+            foreach ($concept->getProperty($property) as $value) {
+                $formData[$field][] = $value->getValue();
+            }
         }
     }
     

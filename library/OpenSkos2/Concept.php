@@ -32,7 +32,6 @@ use Rhumsaa\Uuid\Uuid;
 
 class Concept extends Resource
 {
-
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
     /**
@@ -45,6 +44,13 @@ class Concept extends Resource
     const STATUS_REJECTED = 'rejected';
     const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
+    
+    /**
+     * A default notations type if other is not supported.
+     * @TODO Move to config.
+     * @TODO Support specifying of notation types different then this.
+     */
+    const DEFAULT_NOTATION_TYPE = 'http://openskos.org/notations-system';
     
     public static $classes = array(
         'ConceptSchemes' => [
@@ -228,6 +234,8 @@ class Concept extends Resource
         };
         
         $forFirstTimeInOpenSkos = [
+            // @TODO Seems uuid can be skiped. Seems not required for backward compatibility.
+            // OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
             OpenSkos::SET => $set,
             DcTerms::CREATOR => $person,
@@ -260,6 +268,17 @@ class Concept extends Resource
                     $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
                     $this->addProperty(OpenSkos::DELETEDBY, $person);
                     break;
+            }
+        }
+        
+        // @TODO Support notations type
+        // Hardcode notations type - it is always required.
+        if ($this->hasProperty(Skos::NOTATION)) {
+            $notations = $this->getProperty(Skos::NOTATION);
+            foreach ($notations as $notation) {
+                if ($notation instanceof Literal && $notation->getType() === null) {
+                    $notation->setType(self::DEFAULT_NOTATION_TYPE);
+                }
             }
         }
     }
@@ -310,6 +329,8 @@ class Concept extends Resource
     public static function generateUri($collectionUri, $firstNotation = null)
     {
         $separator = '/';
+        
+        $collectionUri = rtrim($collectionUri, $separator);
         
         if (empty($firstNotation)) {
             $uri = $collectionUri . $separator . Uuid::uuid4();

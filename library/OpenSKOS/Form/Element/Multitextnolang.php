@@ -17,9 +17,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class OpenSKOS_Form_Element_Multiskosxllabel extends OpenSKOS_Form_Element_Multi
+class OpenSKOS_Form_Element_Multitextnolang extends OpenSKOS_Form_Element_Multi
 {
-    const MULTITEXT_PARTIAL_VIEW = 'partials/multiskosxllabel.phtml';
+    const MULTITEXT_PARTIAL_VIEW = 'partials/multitextnolang.phtml';
 
     public function __construct($groupName, $groupLabel, $partialView = self::MULTITEXT_PARTIAL_VIEW)
     {

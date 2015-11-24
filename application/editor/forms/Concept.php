@@ -138,10 +138,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'decorators' => array()
         ));
         
-        $this->addElement('hidden', 'uuid', array(
-            'decorators' => array()
-        ));
-
         $this->buildStatuses();
 
         if (!$this->_isProposalOnly) {
@@ -150,7 +146,12 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
             ));
         }
-
+        
+        $this->buildMultiElements(
+            ['notation' => _('Notations:')],
+            'OpenSKOS_Form_Element_Multitextnolang'
+        );
+        
         if (!$this->_isCreate) {
             $this->addElement('submit', 'conceptSave', array(
                 'label' => _('Ok'),
@@ -186,11 +187,25 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         }
 
         $this->addDisplayGroup(
-                array('status', 'statusOtherConceptCancel', 'statusOtherConceptOk', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 'concept-header', array(
-            'legend' => 'header',
-            'disableDefaultDecorators' => true,
-            'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header'))))
+            [
+                'status',
+                'statusOtherConceptCancel',
+                'statusOtherConceptOk',
+                'toBeChecked',
+                'notation',
+                'conceptSave',
+                'conceptSwitch',
+                'conceptExport',
+                'conceptDelete'
+            ],
+            'concept-header',
+            [
+                'legend' => 'header',
+                'disableDefaultDecorators' => true,
+                'decorators' => array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header')))
+            ]
         );
+                
         return $this;
     }
 
@@ -321,7 +336,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-left', 'openOnly' => true)))
         ));
 
-
         $labels = array();
         $labels['prefLabel'] = 'Preferred label';
 
@@ -359,9 +373,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
         ));
         
-        
-        
-        
         $skosXlLabels = [
             'skosXlPrefLabel' => _('Skos Xl preferred label'),
             'skosXlAltLabel' => _('Skos Xl alt label'),
@@ -374,8 +385,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             null,
             'concept-edit-language-skos-xl-labels'
         );
-        
-        
         
         $this->addElement('hidden', 'wrapLeftBottom', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly' => true)))
@@ -402,13 +411,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         }
 
         $this->buildMappingProperties();
-
-        $this->addElement('text', 'notation', array(
-            'label' => 'Notation:',
-            'readonly' => true,
-            'decorators' => array('ViewHelper', 'Label')
-        ));
-
 
         $this->addElement('hidden', 'hiddenBr3', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'br', 'openOnly' => true)))
@@ -489,9 +491,17 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     {
         return [
             'status' => OpenSkos::STATUS,
-            'notation' => Skos::NOTATION, // @TODO array
-            'uuid' => OpenSkos::UUID, // @TODO Readonly/generated
             'toBeChecked' => OpenSkos::TOBECHECKED,
+        ];
+    }
+    
+    /**
+     * @return array
+     */
+    public static function multiValuedNoLangFieldsMap()
+    {
+        return [
+            'notation' => Skos::NOTATION,
         ];
     }
     

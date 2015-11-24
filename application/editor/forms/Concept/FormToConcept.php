@@ -18,8 +18,6 @@
  */
 
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
@@ -33,17 +31,23 @@ class Editor_Forms_Concept_FormToConcept
      * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
      * @param Concept &$concept
      * @param array $formData
+     * @param OpenSKOS_Db_Table_Row_User $set
      * @param OpenSKOS_Db_Table_Row_User $user
      * @return array
      */
-    public static function toConcept(Concept &$concept, $formData, OpenSKOS_Db_Table_Row_User $user)
-    {
+    public static function toConcept(
+        Concept &$concept,
+        $formData,
+        OpenSKOS_Db_Table_Row_Collection $set,
+        OpenSKOS_Db_Table_Row_User $user
+    ) {
         $oldStatus = $concept->getStatus();
         
         self::translatedPropertiesToConcept($concept, $formData);
         self::flatPropertiesToConcept($concept, $formData);
+        self::multiValuedNoLangPropertiesToConcept($concept, $formData);
         self::resourcesToConcept($concept, $formData);
-        self::metadataToConcept($concept, $user, $oldStatus);
+        self::metadataToConcept($concept, $set, $user, $oldStatus);
     }
     
     /**
@@ -80,9 +84,27 @@ class Editor_Forms_Concept_FormToConcept
         foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
             if (!empty($formData[$field])) {
                 $concept->setProperty($property, new Literal($formData[$field]));
+            } else {
+                $concept->unsetProperty($property);
             }
-            
-            // @TODO Delete property if no value
+        }
+    }
+    
+    /**
+     * Properties like pref label, alt label etc.
+     * @param Concept $concept
+     * @param array &$formData
+     */
+    protected static function multiValuedNoLangPropertiesToConcept(Concept &$concept, $formData)
+    {
+        foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
+            $concept->unsetProperty($property);
+            if (!empty($formData[$field])) {
+                $values = array_filter(array_map('trim', $formData[$field]));
+                foreach ($values as $value) {
+                    $concept->addProperty($property, new Literal($value));
+                }
+            }
         }
     }
     
@@ -151,17 +173,19 @@ class Editor_Forms_Concept_FormToConcept
     /**
      * Per scheme relations + mapping properties.
      * @param Concept &$concept
+     * @param OpenSKOS_Db_Table_Row_Collection $set
      * @param OpenSKOS_Db_Table_Row_User $user
      * @param string $oldStatus
      */
     protected static function metadataToConcept(
         Concept &$concept,
+        OpenSKOS_Db_Table_Row_Collection $set,
         OpenSKOS_Db_Table_Row_User $user,
         $oldStatus
     ) {
         $concept->ensureMetadata(
             $user->tenant,
-            new Uri('http://todo/gtaa'),
+            $set->getUri(),
             $user->getFoafPerson(),
             $oldStatus
         );

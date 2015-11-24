@@ -44,15 +44,19 @@ class OpenSKOS_Form extends Zend_Form
             $this->addElement($element);
         }
         if (null !== $wrapperId) {
-            $this->addDisplayGroup(
-                array_keys($elementData),
-                $wrapperId,
-                [
-                    'legend' => $groupName,
-                    'disableDefaultDecorators' => true,
-                    'decorators' => ['Fieldset', 'FormElements', ['HtmlTag', ['tag' => 'div', 'id' => $wrapperId]]]
-                ]
-            );
+            if ($this->getDisplayGroup($wrapperId) !== null) {
+                $this->getDisplayGroup($wrapperId)->addElement($element);
+            } else {
+                $this->addDisplayGroup(
+                    array_keys($elementData),
+                    $wrapperId,
+                    [
+                        'legend' => $groupName,
+                        'disableDefaultDecorators' => true,
+                        'decorators' => ['Fieldset', 'FormElements', ['HtmlTag', ['tag' => 'div', 'id' => $wrapperId]]]
+                    ]
+                );
+            }
         }
         return $this;
     }

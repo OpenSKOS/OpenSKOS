@@ -102,6 +102,16 @@ class Literal implements Object
     {
         return $this->type;
     }
+    
+    /**
+     * @param string $type
+     * @return self
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
 
     /**
      * Output the literal as string.

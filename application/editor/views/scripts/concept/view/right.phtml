@@ -37,14 +37,6 @@ use OpenSkos2\Namespaces\DcTerms;
         </ul>
     </div>
 
-    <div class="concept-scheme-uri">
-        <span><?php echo $this->translate('URI:'); ?> </span>
-        <?php echo $this->currentConcept->getUri(); ?>
-    </div>
-    <div class="concept-scheme-notation">
-        <span><?php echo $this->translate('Notation:'); ?> </span>
-        <?php echo $this->currentConcept->getPropertyFlatValue(Skos::NOTATION); ?>
-    </div>
     <?php if (!$this->currentConcept->isPropertyEmpty(DcTerms::CONTRIBUTOR)): ?>
         <div class="concept-contributor">
             <span><?php echo $this->translate('Contributor:'); ?> </span>

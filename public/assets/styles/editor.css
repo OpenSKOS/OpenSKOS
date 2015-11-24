@@ -501,23 +501,23 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
 
 #concept-edit-header,
 #concept-header {
-  padding: 10px 4px 4px 20px;
+  padding: 10px 20px 10px 20px;
   background-color: #ebebeb;
   margin-bottom: 22px;
 }
 
-#concept-checked, #concept-status {
-  width: 200px;
+#concept-header-items {
   float: left;
-  clear: both;
+}
+#concept-header-items .item {
+  line-height: 18px;
+}
+#concept-header-items .item span {
+  font-weight: bold;
 }
 
 #concept-action {
   float: right;
-}
-
-#concept-checked span, #concept-status span {
-  font-weight: bold;
 }
 
 #concept-view-scheme-tabs,
@@ -583,13 +583,10 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   top: 0px;
   left: 0px;
 }
-#concept-content-right .concept-scheme-uri, #concept-content-right .concept-scheme-notation, #concept-content-right .concept-scheme-istop {
+#concept-content-right .concept-scheme-istop {
   position: absolute;
   left: 0px;
   right: 0px;
-}
-#concept-content-right .concept-scheme-uri {
-  bottom: -30px;
 }
 #concept-content-right .concept-contributor {
   background-color: #F0F0F0;
@@ -598,33 +595,20 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   position: absolute;
   bottom: -178px;
 }
-#concept-content-right .concept-scheme-notation {
-  bottom: -48px;
-}
 #concept-content-right .concept-scheme-istop {
   bottom: -76px;
 }
 
-.concept-scheme-uri,
-.concept-scheme-notation,
 .concept-scheme-istop {
   background-color: #f0f0f0;
   padding-left: 14px;
   padding-right: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   line-height: 1.5em;
 }
-.concept-scheme-uri span,
-.concept-scheme-notation span,
 .concept-scheme-istop span {
   font-weight: 600;
-}
-
-.concept-scheme-uri {
-  padding-top: 10px;
-}
-
-.concept-scheme-istop {
-  padding-bottom: 10px;
 }
 
 .concept-scheme-mappings {
@@ -1558,8 +1542,10 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 }
 #concept-edit-form #status-label,
 #concept-edit-form #concept-edit-checked > label,
+#concept-edit-form #concept-mulit-notation,
 #concept-scheme-edit-form #status-label,
-#concept-scheme-edit-form #concept-edit-checked > label {
+#concept-scheme-edit-form #concept-edit-checked > label,
+#concept-scheme-edit-form #concept-mulit-notation {
   font-weight: bold;
 }
 #concept-edit-form #status-label,
@@ -1567,6 +1553,10 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #status-label,
 #concept-scheme-edit-form #concept-edit-status {
   display: inline !important;
+}
+#concept-edit-form #concept-mulit-notation label,
+#concept-scheme-edit-form #concept-mulit-notation label {
+  font-weight: bold;
 }
 #concept-edit-form #concept-edit-checked,
 #concept-scheme-edit-form #concept-edit-checked {

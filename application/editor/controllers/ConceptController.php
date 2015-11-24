@@ -44,37 +44,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
         
-        $languageCode = $this->getInitialLanguage();
-        
-        //@TODO Make those as default values.
-        $form->populate([
-            'conceptLanguages' => [
-                strtoupper($languageCode) => [
-                    strtoupper($languageCode) => $languageCode
-                ]
-            ],
-            'prefLabel' => [
-                [
-                    'languageCode' => $languageCode,
-                    'value' => [
-                        $this->getRequest()->getParam('label')
-                    ],
-                ],
-            ],
-            'hiddenLabel' => [
-                [
-                    'languageCode' => $languageCode,
-                    'value' => [''],
-                ],
-            ],
-            'altLabel' => [
-                [
-                    'languageCode' => $languageCode,
-                    'value' => [''],
-                ],
-            ],
-        ]);
-        
+        $form->populate(
+            Editor_Forms_Concept_ConceptToForm::getNewConceptFormData(
+                $this->getInitialLanguage(),
+                $this->getRequest()->getParam('label')
+            )
+        );
+         
         $this->view->form = $form->setAction(
             $this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save'))
         );
@@ -108,6 +84,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             Editor_Forms_Concept_FormToConcept::toConcept(
                 $concept,
                 $this->getRequest()->getPost(),
+                $this->getSet(),
                 OpenSKOS_Db_Table_Users::fromIdentity()
             );
         }
@@ -153,6 +130,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         Editor_Forms_Concept_FormToConcept::toConcept(
             $concept,
             $form->getValues(),
+            $this->getSet(),
             OpenSKOS_Db_Table_Users::fromIdentity()
         );
         
@@ -278,6 +256,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         switch ($export->get('type')) {
             case 'concept' : {
+                    // @TODO Update to work with uri
                     $export->set('conceptUuid', $this->getRequest()->getPost('additionalData')); // We have the uuid in additionalData.				
                 } break;
             case 'search' : {
@@ -460,7 +439,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                     'view',
                     'concept',
                     'editor',
-                    ['uuid' => $this->getRequest()->getParam('uuid')]
+                    ['uri' => $this->getRequest()->getParam('uri')]
                 );
             }
         }
@@ -492,6 +471,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      */
     protected function _handleStatusAutomatedActions(Editor_Models_Concept $concept, &$formData, $extraData)
     {
+        // @TODO Implement with the new base.
+        
         if (isset($extraData['statusOtherConcept']) && !empty($extraData['statusOtherConcept'])) {
             $otherConcept = null;
             $otherConceptResponse = Api_Models_Concepts::factory()->getConcepts('uuid:' . $extraData['statusOtherConcept']);
@@ -575,6 +556,22 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $initialLanguage = key($editorOptions['languages']);
         }
         return $initialLanguage;
+    }
+    
+    /**
+     * @return OpenSKOS_Db_Table_Row_Collection
+     */
+    private function getSet()
+    {
+        // @TODO Where to get that from!!! First concept scheme again?
+        
+        $code = 'gtaa';
+        $model = new \OpenSKOS_Db_Table_Collections();
+        $set = $model->findByCode($code, $this->getCurrentUser()->tenant);
+        if (null === $set) {
+            throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
+        }
+        return $set;
     }
 
     protected $conceptSchemesCache;

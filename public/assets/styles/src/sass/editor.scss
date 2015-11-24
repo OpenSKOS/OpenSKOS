@@ -506,23 +506,23 @@ div#right-panel-tab-links {
 
 #concept-edit-header,
 #concept-header {
-    padding: 10px 4px 4px 20px;
+    padding: 10px 20px 10px 20px;
     background-color: #ebebeb;
     margin-bottom: 22px;
 }
 
-#concept-checked, #concept-status {
-    width: 200px;
+#concept-header-items {
     float: left;
-    clear: both;
+    .item {
+        line-height: 18px;
+        span {
+            font-weight: bold;
+        }
+    }
 }
 
 #concept-action {
     float: right;
-}
-
-#concept-checked span, #concept-status span{
-    font-weight: bold;
 }
 
 #concept-view-scheme-tabs,
@@ -593,13 +593,10 @@ div#right-panel-tab-links {
     position: relative;
     top: 0px;
     left: 0px;
-    .concept-scheme-uri, .concept-scheme-notation, .concept-scheme-istop {
+    .concept-scheme-istop {
         position: absolute;
         left: 0px;
         right: 0px;
-    };
-    .concept-scheme-uri {
-        bottom: -30px;
     };
     .concept-contributor {
         background-color: #F0F0F0;
@@ -608,34 +605,23 @@ div#right-panel-tab-links {
         position: absolute;
         bottom: -178px;
     }
-    .concept-scheme-notation {
-        bottom: -48px;
-    };
     .concept-scheme-istop {
         bottom: -76px;
     };
 };
 
-.concept-scheme-uri,
-.concept-scheme-notation,
 .concept-scheme-istop {
     background-color: #f0f0f0;
     padding: {
         left: 14px;
         right: 14px;
+        top: 10px;
+        bottom: 10px;
     }
     line-height: 1.5em;
     span {
         font-weight: 600;
     }
-}
-
-.concept-scheme-uri {
-    padding-top: 10px;
-}
-
-.concept-scheme-istop {
-    padding-bottom: 10px;
 }
 
 .concept-scheme-mappings {
@@ -973,13 +959,21 @@ ul#history-list {
         height: 62px;
     };
     #status-label,
-    #concept-edit-checked > label {
+    #concept-edit-checked > label,
+    #concept-mulit-notation {
         font-weight: bold;
     };
     #status-label,
     #concept-edit-status {
         display: inline !important;
     };
+    
+    #concept-mulit-notation {
+        label {
+            font-weight: bold;
+        }
+    }
+    
     #concept-edit-checked {
         display: block;
     };	

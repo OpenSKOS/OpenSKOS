@@ -64,9 +64,9 @@ class Api_ConceptController extends Api_FindConceptsController
     * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
     * @apiParam {String} collection The collection code for the collection the concept must be put in
     * @apiParam {String} key A valid API key
-    * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept notation and uri (rdf:about) will be automatically generated.
-    *                                           If notation and/or uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
-    *                                           If set to false - the xml must contain both notation and uri (rdf:about). The uri must be based on notation (must contain the notation).
+    * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
+    *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+    *                                           If set to false - the xml must contain uri (rdf:about).
     * @apiSuccess (201) {String} Concept uri
     * @apiSuccessExample {String} Success-Response
     *   HTTP/1.1 201 Created
@@ -107,10 +107,6 @@ class Api_ConceptController extends Api_FindConceptsController
     * @apiErrorExample ConceptExists:
     *   HTTP/1.1 409 Not Found
     *  Concept `uri` already exists
-    * @apiError WrongNotation {String} The concept uri (rdf:about) must be based on notation (must contain the notation)
-    * @apiErrorExample WrongNotation:
-    *   HTTP/1.1 400 Bad request
-    *   The concept uri (rdf:about) must be based on notation (must contain the notation)
     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
     * @apiErrorExample UniquePreflabel:
     *   HTTP/1.1 400 Bad request
@@ -199,10 +195,6 @@ class Api_ConceptController extends Api_FindConceptsController
     * @apiErrorExample ConceptExists:
     *   HTTP/1.1 409 Not Found
     *  Concept `uri` already exists
-    * @apiError WrongNotation {String} The concept uri (rdf:about) must be based on notation (must contain the notation)
-    * @apiErrorExample WrongNotation:
-    *   HTTP/1.1 400 Bad request
-    *   The concept uri (rdf:about) must be based on notation (must contain the notation)
     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
     * @apiErrorExample UniquePreflabel:
     *   HTTP/1.1 400 Bad request
