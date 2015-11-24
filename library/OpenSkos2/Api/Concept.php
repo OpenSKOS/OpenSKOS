@@ -524,7 +524,7 @@ class Concept
     }
 
     /**
-     * Check if we need to generate or not concept identifiers (notation and uri).
+     * Check if we need to generate or not concept identifiers (uri).
      * Validates any existing identifiers.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
@@ -548,7 +548,7 @@ class Concept
             if (!$concept->isBlankNode()) {
                 throw new InvalidArgumentException(
                     'Parameter autoGenerateIdentifiers is set to true, but the '
-                    . 'xml already contains notation (skos:notation) and/or uri (rdf:about).',
+                    . 'xml already contains uri (rdf:about).',
                     400
                 );
             }
