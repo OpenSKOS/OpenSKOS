@@ -77,7 +77,7 @@ class ConceptSchemeManager extends ResourceManager
                 SELECT ?subject ?title ?uuid
                 WHERE {
                     ?subject rdf:type skos:conceptScheme;
-                    skos:Collection ' . $escaped . ';
+                    openskos:set ' . $escaped . ';
                     dc:title ?title;
                     openskos:uuid ?uuid;
             }
