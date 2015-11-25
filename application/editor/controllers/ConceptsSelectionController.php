@@ -19,6 +19,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+
 class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
 {
     public function addAction()
@@ -28,7 +31,7 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
             throw new Zend_Controller_Action_Exception('User not found', 404);
         }
         
-        $addingResult = $user->addConceptsToSelection($this->getRequest()->getPost('uuids'));
+        $addingResult = $user->addConceptsToSelection($this->getRequest()->getPost('uris'));
         
         if ($addingResult) {
             $selection = $user->getConceptsSelection();
@@ -65,7 +68,7 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
         if (null === $user) {
             throw new Zend_Controller_Action_Exception('User not found', 404);
         }
-        $user->removeConceptFromSelection($this->getRequest()->getPost('uuid'));
+        $user->removeConceptFromSelection($this->getRequest()->getPost('uri'));
         
         $selection = $user->getConceptsSelection();
         $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
@@ -74,8 +77,18 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
     protected function _prepareSelectionData($selection)
     {
         $data = array();
+        $schemesCache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
         foreach ($selection as $concept) {
-            $data[] = $concept->toArray(array('uuid', 'uri', 'status', 'schemes', 'previewLabel', 'previewScopeNote'));
+            $conceptData = $concept->toFlatArray([
+                'uri',
+                'caption',
+                OpenSkos::STATUS,
+                Skos::SCOPENOTE
+            ]);
+            
+            $conceptData['schemes'] = $schemesCache->fetchConceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
+            
+            $data[] = $conceptData;
         }
         return $data;
     }
