@@ -20,6 +20,8 @@
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\ConceptSchemeCollection;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\ConceptScheme;
 
 class Editor_Models_ConceptSchemesCache
 {
@@ -88,6 +90,28 @@ class Editor_Models_ConceptSchemesCache
         $result = [];
         foreach ($shemes as $scheme) {
             $result[$scheme->getUri()] = $scheme->getCaption();
+        }
+        return $result;
+    }
+    
+    /**
+     * Fetches array with concept schemes meta data.
+     * @param array $shemesUris
+     * @return array
+     */
+    public function fetchConceptSchemesMeta($shemesUris, $tenant = null)
+    {
+        $shemes = $this->fetchAll($tenant);
+        $result = [];
+        foreach ($shemesUris as $uri) {
+            $scheme = $shemes->findByUri($uri);
+            $schemeMeta = $scheme->toFlatArray([
+                'uri',
+                'caption',
+                DcTerms::TITLE
+            ]);
+            $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
+            $result[] = $schemeMeta;
         }
         return $result;
     }

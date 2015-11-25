@@ -31,7 +31,6 @@ class Editor_IndexController extends OpenSKOS_Controller_Editor
         $this->view->assign('exportForm', Editor_Forms_Export::getInstance());
         $this->view->assign('deleteForm', Editor_Forms_Delete::getInstance());
         $this->view->assign('changeStatusForm', Editor_Forms_ChangeStatus::getInstance());
-        $this->view->assign('historyData', $user->getUserHistory());
         
         $this->view->assign('searchForm', Editor_Forms_Search::getInstance());
     }

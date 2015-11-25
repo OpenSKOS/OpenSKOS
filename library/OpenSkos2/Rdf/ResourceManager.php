@@ -27,6 +27,7 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
+use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -237,6 +238,56 @@ class ResourceManager
     }
     
     /**
+     * Fetches multiple records by list of uris.
+     * @param string[] $uris
+     * @return ResourceCollection
+     * @throws ResourceNotFoundException
+     */
+    public function fetchByUris($uris)
+    {
+        /*
+        DESCRIBE ?subject
+        WHERE {
+                ?subject ?predicate ?object .
+                FILTER (
+                    ?subject = <http://data.beeldengeluid.nl/gtaa/135633>
+                    || ?subject = <http://data.beeldengeluid.nl/gtaa/350064>
+                )
+        }
+        */
+        
+        if (!empty($uris)) {
+            $filters = [];
+            foreach ($uris as $uri) {
+                $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
+            }
+            
+            $query = new QueryBuilder();
+            $query->describe('?subject')
+                ->where('?subject', '?predicate', '?object')
+                ->filter(implode(' || ', $filters));
+            
+            if (!empty($this->resourceType)) {
+                $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
+            }
+            
+            $resources = $this->fetchQuery($query);
+            
+            // Keep the ordering of the passed uris.
+            $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
+                $searchUris = array_values($uris);
+                $ind1 = array_search($resource1->getUri(), $searchUris);
+                $ind2 = array_search($resource2->getUri(), $searchUris);
+                return $ind1 - $ind2;
+            });
+            
+            return $resources;
+        } else {
+            return new ResourceCollection([]);
+        }
+    }
+    
+    /**
      * Asks if a resource with the given uri exists.
      * @param string $uri
      * @return bool
@@ -433,6 +484,55 @@ class ResourceManager
     }
 
     /**
+     * Execute raw query
+     *
+     * @param string $query
+     * @return \EasyRdf\Graph
+     */
+    public function query($query)
+    {
+        return $this->client->query($query);
+    }
+
+    /**
+     * Fetch all resources matching the query.
+     *
+     * @param \Asparagus\QueryBuilder|string $query
+     * @return ResourceCollection
+     */
+    public function fetchQuery($query)
+    {
+        if ($query instanceof \Asparagus\QueryBuilder) {
+            $query = $query->getSPARQL();
+        }
+        
+        $result = $this->client->query($query);
+        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
+    }
+
+    /**
+     * Sends an ask query for if a match is found for the patterns and returns the boolean result.
+     * @param string $query String representation of the patterns.
+     * @return boolean
+     */
+    public function ask($query)
+    {
+        $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
+        return $this->client->query($query)->getBoolean();
+    }
+
+    /**
+     * @param Object $object
+     * @return string
+     * @throws \EasyRdf\Exception
+     */
+    protected function valueToTurtle(Object $object)
+    {
+        $serializer = new NTriple();
+        return $serializer->serialize($object);
+    }
+
+    /**
      * Makes query (with full sparql patterns) from our search patterns.
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
      * or [0 => ['?subject', Skos::NOTATION, new Literal('AM002'),]
@@ -462,54 +562,5 @@ class ResourceManager
         }
 
         return $query;
-    }
-
-    /**
-     * Execute raw query
-     *
-     * @param string $query
-     * @return \EasyRdf\Graph
-     */
-    public function query($query)
-    {
-        return $this->client->query($query);
-    }
-
-    /**
-     * Fetch all resources matching the query.
-     *
-     * @param \Asparagus\QueryBuilder|string $query
-     * @return ResourceCollection
-     */
-    public function fetchQuery($query)
-    {
-        if ($query instanceof \Asparagus\QueryBuilder) {
-            $query = $query->getSPARQL();
-        }
-
-        $result = $this->client->query($query);
-        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
-    }
-
-    /**
-     * Sends an ask query for if a match is found for the patterns and returns the boolean result.
-     * @param string $query String representation of the patterns.
-     * @return boolean
-     */
-    public function ask($query)
-    {
-        $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
-        return $this->client->query($query)->getBoolean();
-    }
-
-    /**
-     * @param Object $object
-     * @return string
-     * @throws \EasyRdf\Exception
-     */
-    protected function valueToTurtle(Object $object)
-    {
-        $serializer = new NTriple();
-        return $serializer->serialize($object);
     }
 }

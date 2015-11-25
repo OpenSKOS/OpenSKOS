@@ -204,6 +204,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             Skos::NARROWER
         );
         
+        $schemesCache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
+        
         foreach ($narrowers as $concept) {
             $conceptData = $concept->toFlatArray([
                 'uri',
@@ -212,7 +214,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 Skos::SCOPENOTE
             ]);
             
-            $conceptData['schemes'] = $this->conceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
+            $conceptData['schemes'] = $schemesCache->fetchConceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
             
             $data[] = $conceptData;
         }
@@ -572,27 +574,5 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
         }
         return $set;
-    }
-
-    protected $conceptSchemesCache;
-    protected function conceptSchemesMeta($shemesUris)
-    {
-        // @TODO Move, share, refactor all places with similar stuff. Have fun
-        if (empty($this->conceptSchemesCache)) {
-            $this->conceptSchemesCache = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager')->fetch([], 0, 200);
-        }
-        
-        $result = [];
-        foreach ($shemesUris as $uri) {
-            $scheme = $this->conceptSchemesCache->findByUri($uri);
-            $schemeMeta = $scheme->toFlatArray([
-                'uri',
-                'caption',
-                DcTerms::TITLE
-            ]);
-            $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
-            $result[] = $schemeMeta;
-        }
-        return $result;
     }
 }
