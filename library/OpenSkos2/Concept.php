@@ -297,21 +297,19 @@ class Concept extends Resource
             );
         }
         
-        
-        // @TODO What is up with collection?
         if ($this->isPropertyEmpty(OpenSkos::SET)) {
             throw new OpenSkosException(
                 'Collection uri is required to generate concept uri.'
             );
         }
         
-        $collectionUri = $this->getProperty(OpenSkos::SET)[0]->getUri();
+        $setUri = $this->getProperty(OpenSkos::SET)[0]->getUri();
         
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = self::generateUri($collectionUri);
+            $uri = self::generateUri($setUri);
         } else {
             $uri = self::generateUri(
-                $collectionUri,
+                $setUri,
                 $this->getProperty(Skos::NOTATION)[0]->getValue()
             );
         }
@@ -322,20 +320,20 @@ class Concept extends Resource
     
     /**
      * Generates concept uri from collection and notation
-     * @param string $collectionUri
+     * @param string $setUri
      * @param string $firstNotation, optional. New uuid will be used if empty
      * @return string
      */
-    public static function generateUri($collectionUri, $firstNotation = null)
+    public static function generateUri($setUri, $firstNotation = null)
     {
         $separator = '/';
         
-        $collectionUri = rtrim($collectionUri, $separator);
+        $setUri = rtrim($setUri, $separator);
         
         if (empty($firstNotation)) {
-            $uri = $collectionUri . $separator . Uuid::uuid4();
+            $uri = $setUri . $separator . Uuid::uuid4();
         } else {
-            $uri = $collectionUri . $separator . $firstNotation;
+            $uri = $setUri . $separator . $firstNotation;
         }
         
         return $uri;

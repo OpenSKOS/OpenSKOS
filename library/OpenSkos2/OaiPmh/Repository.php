@@ -543,7 +543,7 @@ class Repository implements InterfaceRepository
 
         if (!empty($collection)) {
             $collectionN = \OpenSkos2\Sparql\Escape::escapeUri($collection);
-            $select->also('openskos:set', $collectionN);
+            $select->also(OpenSkos::SET, $collectionN);
         }
 
         if (!empty($scheme)) {

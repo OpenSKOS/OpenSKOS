@@ -21,6 +21,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
+use Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\ResourceManager;
@@ -77,7 +78,7 @@ class ConceptSchemeManager extends ResourceManager
                 SELECT ?subject ?title ?uuid
                 WHERE {
                     ?subject rdf:type skos:conceptScheme;
-                    openskos:set ' . $escaped . ';
+                    ' . OpenSkos::SET .  ' ' . $escaped . ';
                     dc:title ?title;
                     openskos:uuid ?uuid;
             }
