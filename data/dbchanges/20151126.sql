@@ -3,4 +3,8 @@ DROP TABLE namespace;
 DROP TABLE notations;
 
 ALTER TABLE collection
-DROP COLUMN uri;
+MODIFY COLUMN uri varchar(255) AFTER id,
+ADD CONSTRAINT unique_uri UNIQUE(uri);
+
+UPDATE collection
+SET uri = NULL;

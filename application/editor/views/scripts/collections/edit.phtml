@@ -31,12 +31,15 @@
 	</div>
 	<?php if ($this->collection->id):?>
 	<div id="collection-stats" class="box">
+                <?php /*
+                @TODO Implement the list of reources per class.
 		<h3>SKOS Concepts per class:</h3>
 		<ul>
 			<?php foreach ($this->collection->getClasses() as $class => $count):?>
 			<li><?php echo OpenSKOS_Rdf_Parser::$namespaces['skos'].$class?>: <?php echo number_format($count, 0)?></li>
 			<?php endforeach?>
 		</ul>
+                */ ?>
 		<?php if ($this->collection->OAI_baseURL):?>
 		<?php if (false):?>
 		<h3><?php echo $this->translate('Schedule an OAI Harvest job')?></h3>

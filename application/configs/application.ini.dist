@@ -22,9 +22,6 @@ editor.languages.nl="Dutch"
 editor.languages.en="English"
 editor.languages.fr="French"
 
-; Concepts and Concept schemes uri configuration
-editor.conceptSchemesDefaultBaseUri="http://data.beeldengeluid.nl/gtaa/"
-
 ; Concept scheme icons configuration
 editor.schemeIcons.uploadPath="/../public/data/icons/uploads"
 editor.schemeIcons.uploadHttpPath="/data/icons/uploads"
@@ -37,9 +34,6 @@ editor.schemeIcons.extension="png"
 ; Export configuration
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
 editor.export.filesHttpPath = "/data/export/"
-
-; Api client configuration
-editor.apiclient.apiurl=http://openskos/api/
 
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
@@ -126,6 +120,7 @@ oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
 ; Api configuration
+api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
 [staging : production]

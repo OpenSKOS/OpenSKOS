@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -20,7 +20,8 @@
 /**
  * This is now openskos set. Because the term collection referes to skos:collection
  */
-class OpenSKOS_Db_Table_Collections extends Zend_Db_Table {
+class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
+{
 
     protected $_name = 'collection';
 
@@ -67,32 +68,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table {
             $select->where('tenant=?', is_a($tenant, 'OpenSKOS_Db_Table_Row_Tenant') ? $tenant->code : $tenant );
         }
         return $this->fetchRow($select);
-    }
-
-    public function getClasses(OpenSKOS_Db_Table_Row_Tenant $tenant, OpenSKOS_Db_Table_Row_Collection $collection = null)
-    {
-        $solr = OpenSKOS_Solr::getInstance();
-        $q = 'deleted:false tenant:' . $tenant->code;
-        if (null !== $collection) {
-            $q .= ' AND collection:' . $collection->id;
-        }
-        $result = $solr->search($q, array(
-            'rows' => 0,
-            'facet' => 'true',
-            'facet.field' => 'class'
-        ));
-        $classes = array();
-        return $result['facet_counts']['facet_fields']['class'];
-    }
-
-    public function getConceptSchemes(OpenSKOS_Db_Table_Row_Collection $collection = null)
-    {
-        $solr = OpenSKOS_Solr::getInstance();
-        $q = 'class:ConceptScheme collection:' . $collection->id . ' AND tenant:' . $collection->tenant . ' AND deleted:false';
-        $result = $solr->search($q, array(
-            'rows' => 1000
-        ));
-        return new OpenSKOS_SKOS_ConceptSchemes($result);
     }
 
     public function uniqueCode($code, Array $data)
@@ -164,10 +139,10 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table {
 
         return $this->getAdapter()->fetchAssoc($select);
     }
-
 }
 
-class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset {
+class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset
+{
 
     public function toRdf()
     {
@@ -177,5 +152,4 @@ class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset {
         }
         return $doc;
     }
-
 }

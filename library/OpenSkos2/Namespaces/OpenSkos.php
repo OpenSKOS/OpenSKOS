@@ -37,9 +37,4 @@ class OpenSkos
     const UUID = 'http://openskos.org/xmlns#uuid';
     
     const SET = 'http://openskos.org/xmlns#set';
-    
-    /**
-     * Not a direct namespace but used as base to build the URI to a specific collection
-     */
-    const SET_BASE = 'http://openskos.org/api/collections/';
 }

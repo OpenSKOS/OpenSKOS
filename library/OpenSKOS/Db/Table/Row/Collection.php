@@ -20,6 +20,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Rdf\Uri;
+
 /**
  * This is now openskos set. Because the term collection referes to skos:collection
  */
@@ -120,17 +122,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         return $this->tenant . ':' . $this->code;
     }
 
-    public function getClasses(OpenSKOS_Db_Table_Row_Tenant $tenant = null)
-    {
-        if (null === $tenant) {
-            $tenant = OpenSKOS_Db_Table_Tenants::fromCode($this->tenant);
-        }
-        if (null === $tenant) {
-            $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
-        }
-        return $this->getTable()->getClasses($tenant, $this);
-    }
-
     public function getConceptSchemes()
     {
         return $this->getTable()->getConceptSchemes($this);
@@ -138,31 +129,33 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 
     /**
      * Return the openskos:concept uri serves also as base for concepts uri's
-     * 
+     * @deprecated since version 2.0
+     * @see get uri
      * @return string
      */
     public function getConceptsBaseUri()
     {
-        if (isset($this->conceptsBaseUrl) && !empty($this->conceptsBaseUrl)) {
-            return $this->conceptsBaseUrl;
-        } else {
-            $editorOptions = OpenSKOS_Application_BootstrapAccess::getOption('editor');
-            if (isset($editorOptions['conceptSchemesDefaultBaseUri'])) {
-                return $editorOptions['conceptSchemesDefaultBaseUri'];
-            } else {
-                return '';
-            }
-        }
+        return $this->conceptsBaseUrl;
     }
 
     /**
-     * Get the collection uri for openskos:collection
+     * Get the set uri for openskos:set
      * 
      * @return \OpenSkos2\Rdf\Uri
      */
     public function getUri()
     {
-        return new \OpenSkos2\Rdf\Uri($this->getConceptsBaseUri());
+        // If we don't have uri yet - use base uri or generate one.
+        if (empty($this->uri)) {
+            $oldBaseUri = $this->getConceptsBaseUri();
+            if (!empty($oldBaseUri)) {
+                $this->uri = $oldBaseUri;
+            } else {
+                $this->uri = rtrim($this->getBaseApiUri(), '/') . '/collections/' . $this->getId();
+            }
+            $this->save();
+        }
+        return new Uri($this->uri);
     }
 
     /**
@@ -184,7 +177,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     ->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
                     ->addElement('checkbox', 'allow_oai', array('label' => _('Allow OpenSKOS OAI Harvesting')))
                     ->addElement('select', 'OAI_baseURL', array('label' => _('OAI baseURL'), 'style' => 'width: 450px;'))
-                    ->addElement('text', 'conceptsBaseUrl', array('label' => _('Concepts base url'), 'style' => 'width: 450px;'))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
                     ->addElement('reset', 'reset', array('label' => _('Reset')))
                     ->addElement('submit', 'cancel', array('label' => _('Cancel')))
@@ -340,5 +332,14 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     ->setAttribute('rdf:about', $helper->serverUrl('/api/institutions/' . $tenant->code));
         }
         return $doc;
+    }
+    
+    /**
+     * @TODO temp function for base api uri
+     */
+    protected function getBaseApiUri()
+    {
+        $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
+        return $apiOptions['baseUri'];
     }
 }
