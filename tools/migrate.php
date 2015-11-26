@@ -142,7 +142,7 @@ $mappings = [
                     echo "Could not find collection with id: {$value}\n";
                     $collections [$value] = null;
                 } else {
-                    $collections [$value] = $collection->getResource();
+                    $collections [$value] = $collection->getUri();
                 }
             }
             return $collections[$value];
