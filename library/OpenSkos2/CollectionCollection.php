@@ -20,6 +20,9 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
 
+/**
+ * This is skos colletion. Different than the OpenSKOS_Db_Table_Row_Collection which is now openskos:set
+ */
 class CollectionCollection extends ResourceCollection
 {
     /**

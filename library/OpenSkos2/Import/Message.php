@@ -46,12 +46,12 @@ class Message
 
     private $deleteSchemes;
 
-    private $clearCollection;
+    private $clearSet;
 
     /**
      * @var Uri
      */
-    private $collection;
+    private $setUri;
 
     /**
      * @var bool Don't import records that already exist
@@ -72,35 +72,35 @@ class Message
      * Message constructor.
      * @param $user
      * @param $file
-     * @param Uri $collection
+     * @param Uri $setUri
      * @param bool $ignoreIncomingStatus
      * @param string $importedConceptStatus
      * @param bool $noUpdates
      * @param bool $toBeChecked
      * @param string $fallbackLanguage
-     * @param bool $clearCollection
+     * @param bool $clearSet
      * @param bool $deleteSchemes
      */
     public function __construct(
         $user,
         $file,
-        Uri $collection,
+        $setUri,
         $ignoreIncomingStatus,
         $importedConceptStatus,
         $noUpdates = false,
         $toBeChecked = false,
         $fallbackLanguage = null,
-        $clearCollection = false,
+        $clearSet = false,
         $deleteSchemes = false
     ) {
         $this->file = $file;
-        $this->collection = $collection;
+        $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
         $this->noUpdates = $noUpdates;
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
-        $this->clearCollection = $clearCollection;
+        $this->clearSet = $clearSet;
         $this->deleteSchemes = $deleteSchemes;
         $this->user = $user;
     }
@@ -116,9 +116,9 @@ class Message
     /**
      * @return Uri
      */
-    public function getCollection()
+    public function getSetUri()
     {
-        return $this->collection;
+        return $this->setUri;
     }
 
     /**
@@ -172,9 +172,9 @@ class Message
     /**
      * @return boolean
      */
-    public function getClearCollection()
+    public function getClearSet()
     {
-        return $this->clearCollection;
+        return $this->clearSet;
     }
 
     /**

@@ -71,7 +71,7 @@ class Command implements LoggerAwareInterface
             // Concept only logic
             // Generate uri if none or blank (_:genid<n>) is given.
             if ($resourceToInsert instanceof Concept) {
-                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $message->getCollection());
+                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $message->getSetUri());
                 
                 if ($resourceToInsert->isBlankNode()) {
                     $resourceToInsert->selfGenerateUri();
@@ -85,7 +85,7 @@ class Command implements LoggerAwareInterface
         }
 
         if ($message->getClearCollection()) {
-            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getCollection()]);
+            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
         }
 
         if ($message->getDeleteSchemes()) {
@@ -169,7 +169,7 @@ class Command implements LoggerAwareInterface
                 
                 $resourceToInsert->ensureMetadata(
                     $this->tenant->getCode(),
-                    $message->getCollection(),
+                    $message->getSetUri(),
                     $message->getUser(),
                     $currentVersion ? $currentVersion->getStatus(): null
                 );

@@ -165,7 +165,7 @@ switch ($action) {
             }
             foreach ($jobs as $job) {
                 /** @var OpenSKOS_Db_Table_Row_Job $job */
-                $collection = $job->getCollection();
+                $set = $job->getCollection();
                 switch ($job->task) {
                     case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
                         //init importer
@@ -187,8 +187,6 @@ switch ($action) {
                         $jobLogger = $job->getLogger();
                         $importer->setLogger($jobLogger);
 
-                        $collectionObject = new \OpenSkos2\Collection("http://example.com/collection#1");
-
                         $job->start()->save();
 
                         $importFiles = $job->getFilesList();
@@ -197,7 +195,7 @@ switch ($action) {
                             $message = new \OpenSkos2\Import\Message(
                                 $foaf,
                                 $filePath,
-                                $collectionObject,
+                                $set->getUri(),
                                 (bool) $job->getParam('ignoreIncomingStatus'),
                                 $job->getParam('status'),
                                 $job->getParam('onlyNewConcepts'),
@@ -222,7 +220,7 @@ switch ($action) {
                         break;
                     case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
                         $job->start()->save();
-                        $harvester = OpenSKOS_Oai_Pmh_Harvester::factory($collection)
+                        $harvester = OpenSKOS_Oai_Pmh_Harvester::factory($set)
                                 ->setFrom($job->getParam('from'))
                                 ->setUntil($job->getParam('until'))
                                 ->setOption('set', $job->getParam('set'));
