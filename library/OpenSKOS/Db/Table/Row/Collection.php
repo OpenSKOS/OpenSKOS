@@ -126,18 +126,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     {
         return $this->getTable()->getConceptSchemes($this);
     }
-
-    /**
-     * Return the openskos:concept uri serves also as base for concepts uri's
-     * @deprecated since version 2.0
-     * @see get uri
-     * @return string
-     */
-    public function getConceptsBaseUri()
-    {
-        return $this->conceptsBaseUrl;
-    }
-
+    
     /**
      * Get the set uri for openskos:set
      * 
@@ -147,9 +136,9 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     {
         // If we don't have uri yet - use base uri or generate one.
         if (empty($this->uri)) {
-            $oldBaseUri = $this->getConceptsBaseUri();
-            if (!empty($oldBaseUri)) {
-                $this->uri = $oldBaseUri;
+            if (!empty($this->conceptsBaseUrl)) {
+                // We will use the base url if possible.
+                $this->uri = $this->conceptsBaseUrl;
             } else {
                 $this->uri = rtrim($this->getBaseApiUri(), '/') . '/collections/' . $this->getId();
             }
