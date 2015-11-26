@@ -60,7 +60,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $tenant = $OPTS->tenant;
 
-$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
+$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant%20deleted%3Afalse&rows=100&wt=json";
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
