@@ -19,44 +19,22 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
 
-    public function setNamespaces($namespaces)
-    {
-        $links = $this->findManyToManyRowset(
-                'OpenSKOS_Db_Table_Namespaces', 'OpenSKOS_Db_Table_CollectionHasNamespaces'
-        );
-
-        $model = new OpenSKOS_Db_Table_CollectionHasNamespaces();
-        foreach ($links as $link) {
-            foreach ($model->find($this->id, $link->prefix) as $row) {
-                $row->delete();
-            }
-        }
-
-        $Namespaces = new OpenSKOS_Db_Table_Namespaces();
-        foreach ($namespaces as $prefix => $uri) {
-            $Namespace = $Namespaces->find($prefix)->current();
-            if (null === $Namespace) {
-                $Namespace = $Namespaces->createRow(array(
-                    'prefix' => $prefix,
-                    'uri' => $uri
-                ));
-                $Namespace->save();
-            }
-            $this->addNamespace($Namespace);
-        }
-        return $this;
-    }
-
+/**
+ * This is now openskos set. Because the term collection referes to skos:collection
+ */
+class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
+{
     /**
      * @return Zend_Db_Table_Rowset
      */
     public function getJobs($task = null)
     {
         //new records do not have jobs:
-        if (null === $this->id)
+        if (null === $this->id) {
             return array();
+        }
+        
         $model = new OpenSKOS_Db_Table_Jobs();
         $select = $model->select()
                 ->where('collection=?', $this->id)
@@ -157,7 +135,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
     {
         return $this->getTable()->getConceptSchemes($this);
     }
-    
+
     /**
      * Return the openskos:concept uri serves also as base for concepts uri's
      * 
@@ -176,7 +154,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
             }
         }
     }
-    
+
     /**
      * Get the collection uri for openskos:collection
      * 
@@ -185,16 +163,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
     public function getUri()
     {
         return new \OpenSkos2\Rdf\Uri($this->getConceptsBaseUri());
-    }
-
-    public function addNamespace(OpenSKOS_Db_Table_Row_Namespace $namespace)
-    {
-        $model = new OpenSKOS_Db_Table_CollectionHasNamespaces();
-        $model->createRow(array(
-            'collection' => $this->id,
-            'namespace' => $namespace->prefix
-        ))->save();
-        return $this;
     }
 
     /**
@@ -228,7 +196,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
                 $form->removeElement('delete');
             }
             $l = $form->getElement('license')->setOptions(
-                    array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
+                array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
             );
             $l->addMultiOption('', _('choose a standard license  or type a custom one:'), '');
             foreach (OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
@@ -271,12 +239,15 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
                             break;
                         case 'external':
                             $uri = rtrim($instance['url'], '?/');
-                            if ($instance['set'] || $instance['metadataPrefix'])
+                            if ($instance['set'] || $instance['metadataPrefix']) {
                                 $uri .= '?';
-                            if ($instance['set'])
+                            }
+                            if ($instance['set']) {
                                 $uri .= '&set=' . $instance['set'];
-                            if ($instance['metadataPrefix'])
+                            }
+                            if ($instance['metadataPrefix']) {
                                 $uri .= '&metadataPrefix=' . $instance['metadataPrefix'];
+                            }
                             $oai_providers[$uri] = $instance['label'];
                             break;
                         default:
@@ -370,40 +341,4 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row {
         }
         return $doc;
     }
-
-    public function getResource()
-    {
-        $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-        /**
-         * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
-         */
-        $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
-
-        if (!$this->uri) {
-            // @TODO Get base url for use here.
-            $this->uri = "http://openskos.org/api/collections/" . $this->getTenant()['code'] . ':' . $this['code'];
-            $this->save();
-        }
-
-        try {
-            return $resourceManager->fetchByUri($this->uri);
-        } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
-            $collection = new \OpenSkos2\Collection($this->uri);
-            $collection->addProperty(\OpenSkos2\Namespaces\DcTerms::TYPE, new \OpenSkos2\Rdf\Literal($this->dc_title));
-            if ($this->dc_description) {
-                $collection->addProperty(
-                        \OpenSkos2\Namespaces\DcTerms::DESCRIPTION, new \OpenSkos2\Rdf\Literal($this->dc_description)
-                );
-            }
-            if ($this->license_url) {
-                $collection->addProperty(
-                        \OpenSkos2\Namespaces\DcTerms::RIGHTS, new \OpenSkos2\Rdf\Uri($this->license_url)
-                );
-            }
-            $resourceManager->insert($collection);
-
-            return $collection;
-        }
-    }
-
 }

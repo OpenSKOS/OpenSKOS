@@ -17,6 +17,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+/**
+ * This is now openskos set. Because the term collection referes to skos:collection
+ */
 class OpenSKOS_Db_Table_Collections extends Zend_Db_Table {
 
     protected $_name = 'collection';
@@ -54,7 +57,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table {
         'Open Data Commons Attribution License (ODC-By) v1.0' => 'http://opendatacommons.org/licenses/by/1.0/'
     );
     protected $_dependentTables = array(
-        'OpenSKOS_Db_Table_CollectionHasNamespaces',
         'OpenSKOS_Db_Table_Jobs'
     );
 
