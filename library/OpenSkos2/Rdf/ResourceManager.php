@@ -55,7 +55,34 @@ class ResourceManager
      * @var \Solarium\Client
      */
     protected $solr;
+    
+    /**
+     * Use that if inserting a large amount of resources.
+     * Call commit at the end.
+     * @var bool
+     */
+    protected $isNoCommitMode = false;
 
+    /**
+     * Use that if inserting a large amount of resources.
+     * Call commit at the end.
+     * @return bool
+     */
+    public function getIsNoCommitMode()
+    {
+        return $this->isNoCommitMode;
+    }
+
+    /**
+     * Use that if inserting a large amount of resources.
+     * Call commit at the end.
+     * @param bool
+     */
+    public function setIsNoCommitMode($isNoCommitMode)
+    {
+        $this->isNoCommitMode = $isNoCommitMode;
+    }
+    
     /**
      * ResourceManager constructor.
      * @param Client $client
@@ -87,7 +114,10 @@ class ResourceManager
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
-        $update->addDocument($resourceDoc)->addCommit(true);
+        
+        if (!$this->getIsNoCommitMode()) {
+            $update->addDocument($resourceDoc)->addCommit(true);
+        }
         
         // Sometimes solr update fails with timeout.
         $exception = null;
@@ -101,7 +131,7 @@ class ResourceManager
             }
         } while ($exception !== null || $tries >= $maxTries);
     }
-    
+        
     /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -145,7 +175,10 @@ class ResourceManager
         $doc->setKey('id', $uri);
         $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
-        $update->addDocument($doc)->addCommit(true);
+        if (!$this->getIsNoCommitMode()) {
+            $update->addDocument($resourceDoc)->addCommit(true);
+        }
+        $result = $this->solr->update($update);
     }
 
     /**
@@ -160,6 +193,8 @@ class ResourceManager
         $update = $this->solr->createUpdate();
         $update->addDeleteById($uri);
         $this->solr->update($update);
+        
+        // @TODO remove from solr
     }
 
     /**
@@ -175,6 +210,8 @@ class ResourceManager
         $query .= "?predicate ?object\n}";
 
         $this->client->update($query);
+        
+        // @TODO remove from solr
     }
     
     /**
