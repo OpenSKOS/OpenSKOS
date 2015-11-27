@@ -102,7 +102,7 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         
         // Collections
         $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $collectionOptions = $modelCollections->getIdToTitleMap($this->_getCurrentTenant()->code);
+        $collectionOptions = $modelCollections->getUriToTitleMap($this->_getCurrentTenant()->code);
         
         $this->addElement('select', 'collection', array(
                 'label' => _('Collection:'),
