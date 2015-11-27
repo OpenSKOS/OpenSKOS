@@ -80,6 +80,7 @@ $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClas
 
 $users = [];
 $notFoundUsers = [];
+$collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
 
@@ -88,8 +89,13 @@ $fetchRowWithRetries = function ($model, $query) {
     $maxTries = 3;
     do {
         try {
+            // Reconnect
+            $modelClass = get_class($model);
+            $model = new $modelClass();
+            // Fetch
             return $model->fetchRow($query);
-        } catch (PDOException $exception) {
+        } catch (\Exception $exception) {
+            echo 'retry mysql connect' . PHP_EOL;
             // Reconnect
             $modelClass = get_class($model);
             $model = new $modelClass();
@@ -102,7 +108,6 @@ $fetchRowWithRetries = function ($model, $query) {
     }
 };
 
-$collections = [];
 $mappings = [
     'users' => [
         'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries) {
