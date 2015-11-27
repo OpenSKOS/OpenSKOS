@@ -115,8 +115,10 @@ class ResourceManager
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
         
+        $update->addDocument($resourceDoc);
+        
         if (!$this->getIsNoCommitMode()) {
-            $update->addDocument($resourceDoc)->addCommit(true);
+            $update->addCommit(true);
         }
         
         // Sometimes solr update fails with timeout.
@@ -125,11 +127,16 @@ class ResourceManager
         $maxTries = 3;
         do {
             try {
+                $exception = null;
                 $result = $this->solr->update($update);
             } catch (\Solarium\Exception\HttpException $exception) {
                 $tries ++;
             }
-        } while ($exception !== null || $tries >= $maxTries);
+        } while ($exception !== null && $tries < $maxTries);
+        
+        if ($exception !== null) {
+            throw $exception;
+        }
     }
         
     /**
@@ -175,8 +182,9 @@ class ResourceManager
         $doc->setKey('id', $uri);
         $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
+        $update->addDocument($resourceDoc);
         if (!$this->getIsNoCommitMode()) {
-            $update->addDocument($resourceDoc)->addCommit(true);
+            $update->addCommit(true);
         }
         $result = $this->solr->update($update);
     }
