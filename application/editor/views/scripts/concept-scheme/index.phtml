@@ -49,8 +49,8 @@ use OpenSkos2\Namespaces\OpenSkos;
                         <?= $conceptScheme->getCaption();?>
                     </td>
                     <td>
-                        <?= $set = $conceptScheme->getPropertySingleValue(OpenSkos::SET)?>
-                        <?= (isset($this->collectionsMap[$set]) ? $this->collectionsMap[$conceptScheme[$set]] : '') ?>
+                        <?php $set = $conceptScheme->getPropertySingleValue(OpenSkos::SET)?>
+                        <?= (isset($this->collectionsMap[$set]) ? $this->collectionsMap[$set] : '') ?>
                     </td>
                     <td>
                         <a id="<?= $conceptScheme->getUri() ?>" class="assign-icon" href="#" title="<?= $this->translate('Change Icon') ?>">

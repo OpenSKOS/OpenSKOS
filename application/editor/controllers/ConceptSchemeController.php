@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -14,10 +15,12 @@
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Alexandar Mitsev
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\ConceptScheme;
 
 class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 {
@@ -61,20 +64,18 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         if ($this->getRequest()->isPost()) {
             $this->view->errors = $form->getErrors();
-            
-            $formData = $this->getRequest()->getPost();
-            
-            
-//            $uriCode = $formData['uriCode'];
-//            $uriBase = $formData['uriBase'];
-//            $extraData = $conceptScheme->transformFormData($formData);
-//            $conceptScheme->setConceptData($formData);
-//            $formData = $conceptScheme->toForm($extraData, $uriCode, $uriBase);
-//            
-//            
+                        
+            $conceptScheme = new ConceptScheme();
+            Editor_Forms_ConceptScheme_FormToConceptScheme::toConceptScheme(
+                $conceptScheme,
+                $this->getRequest()->getPost(),
+                OpenSKOS_Db_Table_Users::fromIdentity()
+            );
             
             $form->reset();
-            $form->populate($formData);
+            $form->populate(
+                Editor_Forms_ConceptScheme_ConceptSchemeToForm::toFormData($conceptScheme)
+            );
         }
         
         $this->view->form = $form->setAction($this->getFrontController()->getRouter()->assemble(array('controller' => 'concept-scheme', 'action' => 'save')));
@@ -93,55 +94,23 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $form = Editor_Forms_ConceptScheme::getInstance();
         $formData = $this->getRequest()->getParams();
         
-        if (! $this->getRequest()->isPost()) {
-            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
-            $this->_helper->redirector('edit');
-        }
-        
-        if (! $form->isValid($formData)) {
+        if (!$form->isValid($formData)) {
             return $this->_forward('create');
         } else {
             $form->populate($formData);
             
-            $conceptScheme = $this->_getConceptScheme();
+            $conceptScheme = new ConceptScheme();
             
-            if (null === $conceptScheme) {
-                $this->_requireAccess('editor.concept-schemes', 'create', self::RESPONSE_TYPE_PARTIAL_HTML);
-                $conceptScheme = new Editor_Models_ConceptScheme(new Api_Models_Concept());
-            } else {
-                $this->_requireAccess('editor.concept-schemes', 'edit', self::RESPONSE_TYPE_PARTIAL_HTML);
-            }
+            Editor_Forms_ConceptScheme_FormToConceptScheme::toConceptScheme(
+                $conceptScheme,
+                $form->getValues(),
+                OpenSKOS_Db_Table_Users::fromIdentity()
+            );
             
-            $oldData = $conceptScheme->getData();
-            $extraData = $conceptScheme->transformFormData($formData);
-            $conceptScheme->setConceptData($formData, $extraData);
+            $this->getConceptSchemeManager()->insert($conceptScheme);
             
-            try {
-                $user = OpenSKOS_Db_Table_Users::fromIdentity();
-            
-                $extraData = array_merge($extraData, array(
-                        'tenant' => $user->tenant,
-                        'modified_by' => (int)$user->id,
-                        'modified_timestamp' =>  date("Y-m-d\TH:i:s\Z")));
-                
-                if (! isset($extraData['uuid']) || empty($extraData['uuid'])) {
-                    $extraData['uuid'] = $conceptScheme['uuid'];
-                    $extraData['created_by'] = $extraData['modified_by'];
-                    $extraData['created_timestamp'] = $extraData['modified_timestamp'];
-                } else {
-                    $extraData['created_by'] = $oldData['created_by'];
-                    $extraData['created_timestamp'] = $oldData['created_timestamp'];
-                }
-                
-                $conceptScheme->save($extraData);
-                
-                // Clears the schemes cache after a new scheme is added.
-                OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
-                
-            } catch (Zend_Exception $e) {
-                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
-                return $this->_forward('edit');
-            }
+            // Clears the schemes cache after a new scheme is added.
+            $this->getDI()->get('Editor_Models_ConceptSchemesCache')->clearCache();
         }
     }
     
@@ -356,23 +325,24 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
             mkdir($iconsAssignPath, '0777', true);
         }
     }
-    
+        
     /**
-     * @return Editor_Models_ConceptScheme
+     * @return OpenSkos2\ConceptScheme
+     * @throws ResourceNotFoundException
      */
     protected function _getConceptScheme()
     {
-        $uuid = $this->getRequest()->getParam('uuid');
-        if (null === $uuid || empty($uuid)) {
+        $uri = $this->getRequest()->getParam('uri');
+        if (!empty($uri)) {
+            $conceptScheme = $this->getConceptSchemeManager()->fetchByUri($uri);
+            
+            //!TODO Handle deleted all around the system.
+            if ($conceptScheme->isDeleted()) {
+                throw new ResourceNotFoundException('The concpet scheme was not found (it is deleted).');
+            }
+        } else {
             return null;
         }
-    
-        $response  = Api_Models_Concepts::factory()->getConcepts('uuid:'.$uuid);
-        if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {
-            throw new Zend_Exception('The requested concept was deleted or not found');
-        }
-            
-        return new Editor_Models_ConceptScheme(new Api_Models_Concept(array_shift($response['response']['docs'])));
     }
     
     /**

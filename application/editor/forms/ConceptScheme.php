@@ -19,6 +19,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Namespaces\DcTerms;
+
 class Editor_Forms_ConceptScheme extends OpenSKOS_Form
 {
 
@@ -244,6 +246,18 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         }
     
         return $this->_currentTenant;
+    }
+    
+    /**
+     * @return array
+     */
+    public static function getTranslatedFieldsMap()
+    {
+        return [
+            'dcterms_title' => DcTerms::TITLE,
+            'dcterms_description' => DcTerms::DESCRIPTION,
+            'dcterms_creator' => DcTerms::CREATOR,
+        ];
     }
     
     /**
