@@ -126,13 +126,13 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $conceptScheme = $this->_getConceptScheme();
         
         $getConceptSchemesWithDeleteJob = $this->_getConceptSchemesWithDeleteJob();
-        if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme['uuid']])) {
+        if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme->getUri()])) {
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray(array(
                     'collection' => $conceptScheme['collection'],
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME,
-                    'parameters' => serialize(array('uuid' => $conceptScheme['uuid'])),
+                    'parameters' => serialize(array('uri' => $conceptScheme->getUri())),
                     'created' => new Zend_Db_Expr('NOW()')
             ))->save();
             
