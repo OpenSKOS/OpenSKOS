@@ -47,10 +47,12 @@ var EditorLabel = new Class({
         var language = Editor.Concept.getCurrentLanguage();
         var container = $('concept-edit-language-skos-xl-labels');
         
-        container.getElements('.skos-xl-label:not(.' + language + ')').hide();
-        container.getElements('.skos-xl-label.' + language).show();
-        
-        this.ensureOnePrefLabelPerLanguage();
+        if (container) {
+            container.getElements('.skos-xl-label:not(.' + language + ')').hide();
+            container.getElements('.skos-xl-label.' + language).show();
+
+            this.ensureOnePrefLabelPerLanguage();
+        }
     },
     addLabel: function (uri, literalForm, language) {
         if (!this.addingToContainer.getElement('.uri[value="' + uri + '"')) {

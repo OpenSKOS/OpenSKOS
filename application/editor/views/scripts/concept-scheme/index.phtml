@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -18,63 +18,64 @@
  * @author     Alexndar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Namespaces\OpenSkos;
+
 ?>
-<?php $this->headTitle($this->translate('Manage concept schemes'))?>
+<?php $this->headTitle($this->translate('Manage concept schemes')) ?>
 
-<p><a href="<?php echo $this->url(array('action' => 'index', 'controller' => 'index')) . '#addConceptScheme/1/'?>"><?php echo $this->translate('Create new concept scheme')?> &raquo;</a></p>
-<p><a href="<?php echo $this->url(array('action' => 'show-icons'))?>"><?php echo $this->translate('Manage icons')?> &raquo;</a></p>
-<?php if ( ! count($this->conceptSchemes)):?>
-<div class="note">
-	<p><?php echo $this->translate('No schemes.')?></p>
-</div>
-<?php else:?>
-<table id="concept-schemes-list">
-	<thead>
-		<tr>
-			<th>#</th>
-			<th><?php echo $this->translate('Scheme')?></th>
-			<th><?php echo $this->translate('Collection')?></th>
-			<th><?php echo $this->translate('Icon')?></th>
-			<th><?php echo $this->translate('Delete')?></th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php foreach ($this->conceptSchemes as $i => $conceptScheme):?>
-		<tr class="<?php echo $i % 2 ? 'even' : 'uneven'?>">
-			<th scope="row"><?php echo $i+1?></th>
-			<td>
-				<?php if (isset($conceptScheme['dcterms_title'])) :?>
-					<?php echo $conceptScheme['dcterms_title'][0]?>
-				<?php else :?>
-					<?php echo $conceptScheme['uri']?>
-				<?php endif?>
-			</td>
-			<td>
-				<?php echo (isset($this->collectionsMap[$conceptScheme['collection']]) ? $this->collectionsMap[$conceptScheme['collection']] : '')?>
-			</td>
-			<td>
-				<a id="<?php echo $conceptScheme['uuid']?>" class="assign-icon" href="#" title="<?php echo $this->translate('Change Icon')?>">
-					<?php if ( ! empty($conceptScheme['iconPath'])):?>
-						<img src="<?php echo $conceptScheme['iconPath']?>" />
-					<?php else:?>
-						<span><?php echo $this->translate('no icon')?></span>
-					<?php endif?>
-				</a>
-			</td>
-			<td>
-				<?php if (isset($this->conceptSchemesWithDeleteJobs[$conceptScheme['uuid']])):?>
-					<a href="<?php echo $this->url(array('controller' => 'jobs', 'action' => 'view', 'job' => $this->conceptSchemesWithDeleteJobs[$conceptScheme['uuid']]))?>" title="<?php echo $this->translate('Go to the delete job details')?>"><?php echo $this->translate('A delete job exists')?></a>
-				<?php else:?>
-					<a class="delete" href="<?php echo $this->url(array('action' => 'delete', 'uuid' => $conceptScheme['uuid']))?>" title="<?php echo $this->translate('Delete')?>"><?php echo $this->translate('Delete concept scheme')?></a>
-				<?php endif?>
-			</td>
-		</tr>
-		<?php endforeach?>
-	</tbody>
-</table>
-<?php endif?>
+<p><a href="<?= $this->url(array('action' => 'index', 'controller' => 'index')) . '#addConceptScheme/1/' ?>"><?= $this->translate('Create new concept scheme') ?> &raquo;</a></p>
+<p><a href="<?= $this->url(array('action' => 'show-icons')) ?>"><?= $this->translate('Manage icons') ?> &raquo;</a></p>
+<?php if (!count($this->conceptSchemes)): ?>
+    <div class="note">
+        <p><?= $this->translate('No schemes.') ?></p>
+    </div>
+<?php else: ?>
+    <table id="concept-schemes-list">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th><?= $this->translate('Scheme') ?></th>
+                <th><?= $this->translate('Collection') ?></th>
+                <th><?= $this->translate('Icon') ?></th>
+                <th><?= $this->translate('Delete') ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($this->conceptSchemes as $i => $conceptScheme): ?>
+                <tr class="<?= $i % 2 ? 'even' : 'uneven' ?>">
+                    <th scope="row"><?= $i + 1 ?></th>
+                    <td>
+                        <?= $conceptScheme->getCaption();?>
+                    </td>
+                    <td>
+                        <?= $set = $conceptScheme->getPropertySingleValue(OpenSkos::SET)?>
+                        <?= (isset($this->collectionsMap[$set]) ? $this->collectionsMap[$conceptScheme[$set]] : '') ?>
+                    </td>
+                    <td>
+                        <a id="<?= $conceptScheme->getUri() ?>" class="assign-icon" href="#" title="<?= $this->translate('Change Icon') ?>">
+                            <?php $iconPath = $conceptScheme->getIconPath();?>
+                            <?php if (!empty($iconPath)): ?>
+                                <img src="<?= $iconPath ?>" />
+                            <?php else: ?>
+                                <span><?= $this->translate('no icon') ?></span>
+                            <?php endif ?>
+                        </a>
+                    </td>
+                    <td>
+                        <?php if (isset($this->conceptSchemesWithDeleteJobs[$conceptScheme->getUri()])): ?>
+                            <a href="<?= $this->url(array('controller' => 'jobs', 'action' => 'view', 'job' => $this->conceptSchemesWithDeleteJobs[$conceptScheme->getUri()])) ?>" title="<?= $this->translate('Go to the delete job details') ?>"><?= $this->translate('A delete job exists') ?></a>
+                        <?php else: ?>
+                            <a class="delete" href="<?= $this->url(array('action' => 'delete', 'uri' => $conceptScheme->getUri())) ?>" title="<?= $this->translate('Delete') ?>"><?= $this->translate('Delete concept scheme') ?></a>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+        </tbody>
+    </table>
+<?php endif ?>
 
-<?php 
+<?php
 $confirmationMessage = $this->translate('Are you sure you want to delete the concept scheme?');
 $js = <<<JS
 window.addEvent('load', function() {
@@ -92,14 +93,15 @@ $this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
 ?>
 
 <div id="assign-icons-box" class="assign-icons-box do-not-show">
-	<input type="hidden" class="schemeUuid" />
-	<?php foreach ($this->uploadedIcons as $icon) :?>
-		<img class="<?php echo $icon['iconFile']?>" src="<?php echo $icon['httpPath']?>" title="<?php echo $icon['iconFile']?>" />
-	<?php endforeach?>
+    <input type="hidden" class="schemeUuid" />
+    <?php foreach ($this->uploadedIcons as $icon) : ?>
+        <img class="<?= $icon['iconFile'] ?>" src="<?= $icon['httpPath'] ?>" title="<?= $icon['iconFile'] ?>" />
+    <?php endforeach ?>
 </div>
 
 <?php
-	$baseUrl = $this->url(array(), 'default', true);
-	if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
-	$this->headScript(Zend_View_Helper_HeadScript::FILE, $baseUrl . 'assets/scripts/editor/conceptSchemesIcons.js');
+$baseUrl = $this->url(array(), 'default', true);
+if ($baseUrl)
+    $baseUrl = rtrim($baseUrl, '/') . '/';
+$this->headScript(Zend_View_Helper_HeadScript::FILE, $baseUrl . 'assets/scripts/editor/conceptSchemesIcons.js');
 ?>

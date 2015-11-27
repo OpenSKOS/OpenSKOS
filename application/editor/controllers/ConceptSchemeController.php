@@ -35,16 +35,16 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.concept-schemes', 'index', self::RESPONSE_TYPE_HTML);
         
         // Clears the schemes cache when we start managing them.
-        OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
+        $this->getDI()->get('Editor_Models_ConceptSchemesCache')->clearCache();
         
         $this->view->uploadedIcons = $this->_getUploadedIcons();
-        $this->view->conceptSchemes = Editor_Models_ApiClient::factory()->getConceptSchemes();
+        $this->view->conceptSchemes = $this->getConceptSchemeManager()->fetch();
         
         $this->view->conceptSchemesWithDeleteJobs = $this->_getConceptSchemesWithDeleteJob();
         
         $user = OpenSKOS_Db_Table_Users::fromIdentity();
         $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $this->view->collectionsMap = $modelCollections->getIdToTitleMap($user->tenant);
+        $this->view->collectionsMap = $modelCollections->getUriToTitleMap($user->tenant);
     }
     
     /**
@@ -57,19 +57,21 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $this->_requireAccess('editor.concept-schemes', 'create', self::RESPONSE_TYPE_PARTIAL_HTML);
     
-        $conceptScheme = Editor_Models_ConceptScheme::factory();
-    
         $form = Editor_Forms_ConceptScheme::getInstance(true);
         
         if ($this->getRequest()->isPost()) {
             $this->view->errors = $form->getErrors();
             
             $formData = $this->getRequest()->getPost();
-            $uriCode = $formData['uriCode'];
-            $uriBase = $formData['uriBase'];
-            $extraData = $conceptScheme->transformFormData($formData);
-            $conceptScheme->setConceptData($formData);
-            $formData = $conceptScheme->toForm($extraData, $uriCode, $uriBase);
+            
+            
+//            $uriCode = $formData['uriCode'];
+//            $uriBase = $formData['uriBase'];
+//            $extraData = $conceptScheme->transformFormData($formData);
+//            $conceptScheme->setConceptData($formData);
+//            $formData = $conceptScheme->toForm($extraData, $uriCode, $uriBase);
+//            
+//            
             
             $form->reset();
             $form->populate($formData);
@@ -396,5 +398,13 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         }
         
         return $conceptSchemesDeleteJobsMap;
+    }
+    
+    /**
+     * @return OpenSkos2\ConceptSchemeManager
+     */
+    protected function getConceptSchemeManager()
+    {
+        return $this->getDI()->get('\OpenSkos2\ConceptSchemeManager');
     }
 }

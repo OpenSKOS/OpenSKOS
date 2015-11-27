@@ -21,6 +21,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Namespaces\DcTerms;
 
@@ -51,6 +52,22 @@ class ConceptScheme extends Resource
         } else {
             return $this->getPropertyFlatValue(DcTerms::TITLE);
         }
+    }
+    
+    /**
+     * Builds the path to the concept scheme icon.
+     * Returns empty string if the file does not exist.
+     *
+     * @todo Moved from Editor_Models_ConceptScheme for backwards compatibility,
+     * refactor later to not depend on the zend application
+     * @param srtring $uuid
+     * @param OpenSKOS_Db_Table_Row_Tenant $tenant optional, Default null.
+     * If not set the currently logged one will be used.
+     * @return string
+     */
+    public function getIconPath($tenant = null)
+    {
+        return self::buildIconPath($this->getPropertySingleValue(OpenSkos::UUID), $tenant);
     }
     
     /**

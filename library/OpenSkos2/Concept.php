@@ -157,10 +157,7 @@ class Concept extends Resource
      */
     public function getUuid()
     {
-        $uuids = $this->getProperty(OpenSkos::UUID);
-        if (isset($uuids[0])) {
-            return $uuids[0]->getValue();
-        }
+        return $this->getPropertySingleValue(OpenSkos::UUID);
     }
 
     /**

@@ -81,13 +81,25 @@ class ResourceManager
         
         $this->client->insert(EasyRdf::resourceToGraph($resource));
 
+        
         // Add resource to solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
         $update->addDocument($resourceDoc)->addCommit(true);
-        $result = $this->solr->update($update);
+        
+        // Sometimes solr update fails with timeout.
+        $exception = null;
+        $tries = 0;
+        $maxTries = 3;
+        do {
+            try {
+                $result = $this->solr->update($update);
+            } catch (\Solarium\Exception\HttpException $exception) {
+                $tries ++;
+            }
+        } while ($exception !== null || $tries >= $maxTries);
     }
     
     /**

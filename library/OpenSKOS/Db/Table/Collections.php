@@ -87,17 +87,17 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
     }
 
     /**
-     * Gets map with id as key and dc_title as value.
+     * Gets map with uri as key and title as value.
      * 
      * @param string $tenant
      * @return array
      */
-    public function getIdToTitleMap($tenant)
+    public function getUriToTitleMap($tenant)
     {
         $collections = $this->fetchAll($this->select()->where('tenant=?', $tenant));
         $collectionsMap = array();
         foreach ($collections as $collection) {
-            $collectionsMap[$collection->id] = $collection->dc_title;
+            $collectionsMap[(string)$collection->getUri()] = $collection->dc_title;
         }
         return $collectionsMap;
     }

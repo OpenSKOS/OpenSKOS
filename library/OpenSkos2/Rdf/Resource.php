@@ -21,6 +21,7 @@ namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Namespaces as Namespaces;
+use OpenSkos2\Exception\OpenSkosException;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -206,7 +207,8 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
-     * Gets the specified property values but filter only those in the specified language.     *
+     * Gets the specified property values but filter only those in the specified language.
+     * @TODO Rename to getPropertyInLanguage
      * @param string $predicate
      * @param string $language
      * @return RdfObject[]
@@ -224,6 +226,7 @@ class Resource extends Uri implements ResourceIdentifier
     
     /**
      * Gets list of all languages that currently exist in the properties of the resource.
+     * @TODO Rename to getLanguages
      * @return string[]
      */
     public function retrieveLanguages()
@@ -240,6 +243,29 @@ class Resource extends Uri implements ResourceIdentifier
         }
         
         return array_keys($languages);
+    }
+    
+    /**
+     * Gets proprty value and checks if it is only one.
+     * @param string $property
+     * @return string|null
+     */
+    public function getPropertySingleValue($property)
+    {
+        $values = $this->getProperty($property);
+        
+        if (count($values) > 1) {
+            throw new OpenSkosException(
+                'Multiple values found for property "' . $property . '" while a single one was requested.'
+                . ' Values ' . implode(', ', $values)
+            );
+        }
+        
+        if (!empty($values)) {
+            return (string) $values[0];
+        } else {
+            return null;
+        }
     }
     
     /**

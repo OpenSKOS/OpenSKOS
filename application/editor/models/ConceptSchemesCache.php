@@ -48,6 +48,14 @@ class Editor_Models_ConceptSchemesCache
     }
     
     /**
+     * Clears the concept schemes cache.
+     */
+    public function clearCache()
+    {
+        $this->cache->clean();
+    }
+    
+    /**
      * Fetches all schemes.
      * @return ConceptSchemeCollection
      */
