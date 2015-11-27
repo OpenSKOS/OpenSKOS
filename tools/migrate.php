@@ -82,10 +82,30 @@ $users = [];
 $notFoundUsers = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
+
+$fetchRowWithRetries = function ($model, $query) {
+    $tries = 0;
+    $maxTries = 3;
+    do {
+        try {
+            return $model->fetchRow($query);
+        } catch (PDOException $exception) {
+            // Reconnect
+            $modelClass = get_class($model);
+            $model = new $modelClass();
+            $tries ++;
+        }
+    } while ($tries < $maxTries);
+
+    if ($exception) {
+        throw $exception;
+    }
+};
+
 $collections = [];
 $mappings = [
     'users' => [
-        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant) {
+        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries) {
             if (!$value) {
                 return null;
             }
@@ -99,12 +119,14 @@ $mappings = [
                  * @var $user OpenSKOS_Db_Table_Row_User
                  */
                 if (is_numeric($value)) {
-                    $user = $userModel->fetchRow(
+                    $user = $fetchRowWithRetries(
+                        $userModel,
                         'id = ' . $userModel->getAdapter()->quote($value) . ' '
                         . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 } else {
-                    $user = $userModel->fetchRow(
+                    $user = $fetchRowWithRetries(
+                        $userModel,
                         'name = ' . $userModel->getAdapter()->quote($value) . ' '
                         . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
@@ -128,7 +150,7 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, &$collections, $tenant) {
+        'callback' => function ($value) use ($collectionModel, &$collections, $tenant, $fetchRowWithRetries) {
             if (!$value) {
                 return null;
             }
@@ -137,7 +159,10 @@ $mappings = [
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
                  */
-                $collection = $collectionModel->fetchRow('id = ' . $collectionModel->getAdapter()->quote($value));
+                $collection = $fetchRowWithRetries(
+                    $collectionModel,
+                    'id = ' . $collectionModel->getAdapter()->quote($value)
+                );
 
                 if (!$collection) {
                     echo "Could not find collection with id: {$value}\n";
