@@ -89,14 +89,11 @@ $fetchRowWithRetries = function ($model, $query) {
     $maxTries = 3;
     do {
         try {
-            // Reconnect
-            $modelClass = get_class($model);
-            $model = new $modelClass();
-            // Fetch
             return $model->fetchRow($query);
         } catch (\Exception $exception) {
             echo 'retry mysql connect' . PHP_EOL;
             // Reconnect
+            $model->getAdapter()->closeConnection();
             $modelClass = get_class($model);
             $model = new $modelClass();
             $tries ++;
