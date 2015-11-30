@@ -213,7 +213,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     {
         $this->_requireAccess('editor.concept-schemes', 'manage-icons', self::RESPONSE_TYPE_JSON);
         
-        $schemeUuid = $this->getRequest()->getParam('schemeUuid');
+        $scheme = $this->_getConceptScheme();
         $iconToAssign = $this->getRequest()->getParam('iconFile');
     
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
@@ -235,12 +235,17 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
             $iconsExtension = 'png';
         }
     
-        copy($iconsUploadPath . '/' . $iconToAssign, $iconsAssignPath . '/' . $schemeUuid . '.' . $iconsExtension);
+        copy($iconsUploadPath . '/' . $iconToAssign, $iconsAssignPath . '/' . $scheme->getUuid() . '.' . $iconsExtension);
     
-        // Clears the schemes cache after a scheme icon is changed.
-        OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
-    
-        $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => array('newIconPath' => Editor_Models_ConceptScheme::buildIconPath($schemeUuid))));
+        // Clears the schemes cache after an icon is assigned.
+        $this->getDI()->get('Editor_Models_ConceptSchemesCache')->clearCache();
+        
+        $this->getHelper('json')->sendJson([
+            'status' => 'ok',
+            'result' => [
+                'newIconPath' => $scheme->getIconPath(OpenSKOS_Db_Table_Tenants::fromIdentity())
+            ]
+        ]);
     }
     
     /**
@@ -333,6 +338,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     protected function _getConceptScheme()
     {
         $uri = $this->getRequest()->getParam('uri');
+        
         if (!empty($uri)) {
             $conceptScheme = $this->getConceptSchemeManager()->fetchByUri($uri);
             
@@ -340,6 +346,8 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
             if ($conceptScheme->isDeleted()) {
                 throw new ResourceNotFoundException('The concpet scheme was not found (it is deleted).');
             }
+            
+            return $conceptScheme;
         } else {
             return null;
         }
@@ -347,7 +355,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     
     /**
      * Gets an array map for all concept schemes which has a delet job started (and not completed yet) for them.
-     * @return array array(conceptSchemeUuid => deleteJobUuid)
+     * @return array array(conceptSchemeUri => deleteJobUuid)
      */
     protected function _getConceptSchemesWithDeleteJob()
     {

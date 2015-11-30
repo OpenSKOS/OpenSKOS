@@ -93,7 +93,7 @@ $this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
 ?>
 
 <div id="assign-icons-box" class="assign-icons-box do-not-show">
-    <input type="hidden" class="schemeUuid" />
+    <input type="hidden" class="schemeUri" />
     <?php foreach ($this->uploadedIcons as $icon) : ?>
         <img class="<?= $icon['iconFile'] ?>" src="<?= $icon['httpPath'] ?>" title="<?= $icon['iconFile'] ?>" />
     <?php endforeach ?>
