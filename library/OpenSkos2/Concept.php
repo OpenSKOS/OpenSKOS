@@ -244,7 +244,7 @@ class Concept extends Resource
             }
         }
         
-        // @TODO Should we add modified instead of replace it. Or put it only on create.
+        // @TODO Should we add modified instead of replace it.
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
         $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
         
@@ -295,7 +295,7 @@ class Concept extends Resource
         
         if ($this->isPropertyEmpty(OpenSkos::SET)) {
             throw new OpenSkosException(
-                'Collection uri is required to generate concept uri.'
+                'Property openskos:set (collection) is required to generate concept uri.'
             );
         }
         

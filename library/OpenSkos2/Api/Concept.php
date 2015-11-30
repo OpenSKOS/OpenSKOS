@@ -365,6 +365,11 @@ class Concept
             $user->getFoafPerson()
         );
         
+        $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
+        if ($autoGenerateUri) {
+            $concept->selfGenerateUri();
+        }
+        
         if (!$this->uniquePrefLabel($concept)) {
             throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
         }
@@ -434,11 +439,6 @@ class Concept
         /** @var $concept \OpenSkos2\Concept **/
         $concept = $resource[0];
         
-        $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
-        if ($autoGenerateUri) {
-            $concept->selfGenerateUri();
-        }
-        
         return $concept;
     }
     
@@ -487,7 +487,10 @@ class Concept
         $model = new \OpenSKOS_Db_Table_Collections();
         $collection = $model->findByCode($code, $tenant);
         if (null === $collection) {
-            throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
+            throw new InvalidArgumentException(
+                'No such collection `'.$code.'` in this tenant.',
+                404
+            );
         }
         return $collection;
     }
