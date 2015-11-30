@@ -185,7 +185,7 @@ class EasyRdf
                         new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Uri) {
-                    $easyResource->addResource($propName, $value->getUri());
+                    $easyResource->addResource($propName, trim($value->getUri()));
                 } else {
                     throw new InvalidArgumentException(
                         "Unexpected value found for property {$propName} " . var_export($value)

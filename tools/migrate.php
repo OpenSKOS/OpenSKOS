@@ -33,6 +33,7 @@ $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
+    'start|s=s' => 'Start from that record'
 );
 
 try {
@@ -44,8 +45,6 @@ try {
 }
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
-
-// Test....
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -65,7 +64,11 @@ $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant%20deleted%3Afalse&rows=100&wt
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
-$counter = 0;
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
 
 
 $getFieldsInClass = function ($class) {
@@ -180,7 +183,13 @@ $mappings = [
         ],
     ],
     'uris' => [
-        'callback' => function ($value) {
+        'callback' => function ($value) use ($logger) {
+            $value = trim($value);
+            if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+                $logger->info('found uri which is not valid "' . $value . '"');
+                // We will keep it and urlencode it to be able to insert it in Jena
+                $value = urlencode($value);
+            }
             return new \OpenSkos2\Rdf\Uri($value);
         },
         'fields' => array_merge(
