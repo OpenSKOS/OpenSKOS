@@ -49,7 +49,7 @@ use OpenSkos2\Namespaces\OpenSkos;
                         <?= $conceptScheme->getCaption();?>
                     </td>
                     <td>
-                        <?php $set = $conceptScheme->getPropertySingleValue(OpenSkos::SET)?>
+                        <?php $set = (string)$conceptScheme->getPropertySingleValue(OpenSkos::SET)?>
                         <?= (isset($this->collectionsMap[$set]) ? $this->collectionsMap[$set] : '') ?>
                     </td>
                     <td>

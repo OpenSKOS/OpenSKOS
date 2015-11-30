@@ -60,7 +60,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $tenant = $OPTS->tenant;
 
-$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant%20deleted%3Afalse&rows=100&wt=json";
+$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
@@ -267,15 +267,21 @@ do {
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
 
+        $uri = $doc['uri'];
+        // Prevent deleted resources from having same uri.
+        if (!empty($doc['deleted'])) {
+            $uri .= rtrim($uri, '/') . '/deleted';
+        }
+        
         switch ($doc['class']) {
             case 'ConceptScheme':
-                $resource = new \OpenSkos2\ConceptScheme($doc['uri']);
+                $resource = new \OpenSkos2\ConceptScheme($uri);
                 break;
             case 'Concept':
-                $resource = new \OpenSkos2\Concept($doc['uri']);
+                $resource = new \OpenSkos2\Concept($uri);
                 break;
             case 'Collection':
-                $resource = new \OpenSkos2\Collection($doc['uri']);
+                $resource = new \OpenSkos2\Collection($uri);
                 break;
             default:
                 throw new Exception("Didn't expect class: " . $doc['class']);
@@ -328,6 +334,11 @@ do {
 
             var_dump($doc);
             throw new Exception("What to do with field {$field}");
+        }
+        
+        // Set status deleted
+        if (!empty($doc['deleted'])) {
+            $resource->setProperty(OpenSkos::STATUS, \OpenSkos2\Concept::STATUS_DELETED);
         }
         
         // Add tenant in graph

@@ -153,11 +153,15 @@ class Concept extends Resource
     /**
      * Get openskos:uuid if it exists
      * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string
+     * @return string|null
      */
     public function getUuid()
     {
-        return $this->getPropertySingleValue(OpenSkos::UUID);
+        if ($this->hasProperty(OpenSkos::UUID)) {
+            return (string)$this->getPropertySingleValue(OpenSkos::UUID);
+        } else {
+            return null;
+        }
     }
 
     /**

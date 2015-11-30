@@ -150,7 +150,7 @@ class Repository implements InterfaceRepository
             $this->repositoryName,
             $this->baseUrl,
             $this->getEarliestDateStamp(),
-            Identity::DELETED_RECORD_NO,
+            Identity::DELETED_RECORD_PERSISTENT,
             $this->adminEmails,
             ImplementationIdentity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ,
             null,

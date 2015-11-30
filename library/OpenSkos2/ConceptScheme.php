@@ -69,11 +69,15 @@ class ConceptScheme extends Resource
     /**
      * Get openskos:uuid if it exists
      * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string
+     * @return string|null
      */
     public function getUuid()
     {
-        return $this->getPropertySingleValue(OpenSkos::UUID);
+        if ($this->hasProperty(OpenSkos::UUID)) {
+            return (string)$this->getPropertySingleValue(OpenSkos::UUID);
+        } else {
+            return null;
+        }
     }
     
     /**
@@ -122,7 +126,7 @@ class ConceptScheme extends Resource
      */
     public function getIconPath($tenant = null)
     {
-        return self::buildIconPath($this->getPropertySingleValue(OpenSkos::UUID), $tenant);
+        return self::buildIconPath((string)$this->getPropertySingleValue(OpenSkos::UUID), $tenant);
     }
     
     /**

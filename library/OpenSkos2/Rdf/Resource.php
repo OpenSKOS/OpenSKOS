@@ -262,7 +262,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         
         if (!empty($values)) {
-            return (string) $values[0];
+            return $values[0];
         } else {
             return null;
         }

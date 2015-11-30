@@ -20,6 +20,8 @@
 namespace OpenSkos2\OaiPmh;
 
 use DOMDocument;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept as SkosConcept;
 use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
@@ -48,11 +50,16 @@ class Concept implements Record
     public function getHeader()
     {
         $concept = $this->concept;
-        $datestamp = $concept->getProperty(\OpenSkos2\Namespaces\DcTerms::MODIFIED)[0]->getValue();
-        $setSpecs = [];
         
-        $tenants = $concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT);
-        $sets = $concept->getProperty(\OpenSkos2\Namespaces\OpenSkos::SET);
+        if (!$concept->isDeleted()) {
+            $datestamp = $concept->getProperty(DcTerms::MODIFIED)[0]->getValue();
+        } else {
+            $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
+        }
+        
+        $setSpecs = [];
+        $tenants = $concept->getProperty(OpenSkos::TENANT);
+        $sets = $concept->getProperty(OpenSkos::SET);
         
         foreach ($tenants as $tenant) {
             $setSpecs[] = (string)$tenant;
@@ -64,7 +71,7 @@ class Concept implements Record
             $setSpecs[] = $cleanSet;
         }
 
-        return new Header($concept->geturi(), $datestamp, $setSpecs);
+        return new Header($concept->getUri(), $datestamp, $setSpecs, $concept->isDeleted());
     }
 
     /**

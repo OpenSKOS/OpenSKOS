@@ -107,6 +107,6 @@ class Editor_Forms_ConceptScheme_ConceptSchemeToForm
      */
     protected static function collectionToForm(ConceptScheme $conceptScheme, &$formData)
     {
-        $formData['collection'] = $conceptScheme->getPropertySingleValue(OpenSkos::SET);
+        $formData['collection'] = (string)$conceptScheme->getPropertySingleValue(OpenSkos::SET);
     }
 }

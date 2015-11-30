@@ -229,7 +229,7 @@ class ResourceManager
      */
     public function deleteMatchingTriples($subject, $predicate, $object)
     {
-        // @TODO Refactor
+        // @TODO Refactor. Not for resource manager.
         $query = 'DELETE WHERE {' . PHP_EOL;
         $query .= $subject == '?subject' ? '?subject' : $this->valueToTurtle($subject);
         $query .= ' <' . $predicate . '> ';
@@ -421,7 +421,7 @@ class ResourceManager
     }
 
     /**
-     * Fetch list of namespaces which are used in the resources in the query.
+     * Fetch list of namespaces which are used among the resources in the database.
      * @return ResourceCollection
      */
     public function fetchNamespaces()
