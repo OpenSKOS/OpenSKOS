@@ -93,7 +93,7 @@ class Autocomplete
         $solrQuery .= ')';
 
         //status
-        if (count($options['status'])) {
+        if (isset($options['status']) && count($options['status'])) {
             $solrQuery .= ' AND (';
             foreach ($options['status'] as $status) {
                 $solrQuery .= 's_status:"'.$status.'" OR ';

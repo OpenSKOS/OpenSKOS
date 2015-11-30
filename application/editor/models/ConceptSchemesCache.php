@@ -113,13 +113,15 @@ class Editor_Models_ConceptSchemesCache
         $result = [];
         foreach ($shemesUris as $uri) {
             $scheme = $shemes->findByUri($uri);
-            $schemeMeta = $scheme->toFlatArray([
-                'uri',
-                'caption',
-                DcTerms::TITLE
-            ]);
-            $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
-            $result[] = $schemeMeta;
+            if ($scheme) {
+                $schemeMeta = $scheme->toFlatArray([
+                    'uri',
+                    'caption',
+                    DcTerms::TITLE
+                ]);
+                $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
+                $result[] = $schemeMeta;
+            }
         }
         return $result;
     }

@@ -21,6 +21,7 @@
  */
 
 use OpenSkos2\ConceptScheme;
+use OpenSkos2\Namespaces\OpenSkos;
 
 class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 {
@@ -127,14 +128,17 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $getConceptSchemesWithDeleteJob = $this->_getConceptSchemesWithDeleteJob();
         if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme->getUri()])) {
+            $collections = new OpenSKOS_Db_Table_Collections();
+            $collection = $collections->findByUri($conceptScheme->getPropertySingleValue(OpenSkos::SET));
+            
             $model = new OpenSKOS_Db_Table_Jobs();
-            $job = $model->fetchNew()->setFromArray(array(
-                    'collection' => $conceptScheme['collection'],
+            $job = $model->fetchNew()->setFromArray([
+                    'collection' => $collection->id,
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME,
                     'parameters' => serialize(array('uri' => $conceptScheme->getUri())),
                     'created' => new Zend_Db_Expr('NOW()')
-            ))->save();
+            ])->save();
             
             $this->getHelper('FlashMessenger')->addMessage(_('A job for deleting the concept scheme was added.'));
         } else {
@@ -370,8 +374,8 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $conceptSchemesDeleteJobsMap = array();
         foreach ($conceptDeleteJobs as $conceptDeleteJob) {
             $params = $conceptDeleteJob->getParams();
-            if (! isset($conceptSchemesDeleteJobsMap[$params['uuid']])) {
-                $conceptSchemesDeleteJobsMap[$params['uuid']] = $conceptDeleteJob->id;
+            if (!isset($conceptSchemesDeleteJobsMap[$params['uri']])) {
+                $conceptSchemesDeleteJobsMap[$params['uri']] = $conceptDeleteJob->id;
             }
         }
         

@@ -262,15 +262,18 @@ switch ($action) {
                         $job->start()->save();
 
                         try {
-                            $response = Api_Models_Concepts::factory()->getConcepts('uuid:' . $job->getParam('uuid'));
-                            if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {
-                                throw new Zend_Exception('The requested concept scheme was not found');
-                            }
-                            $conceptScheme = new Editor_Models_ConceptScheme(new Api_Models_Concept(array_shift($response['response']['docs'])));
-                            $conceptScheme->delete(true, $job['user']);
-
-                            // Clears the schemes cache after the scheme is removed.
-                            OpenSKOS_Cache::getCache()->remove(Editor_Models_ApiClient::CONCEPT_SCHEMES_CACHE_KEY);
+                            $schemesManager = $diContainer->get('\OpenSkos2\ConceptSchemeManager');
+                            $scheme = $schemesManager->fetchByUri($job->getParam('uri'));
+                            $schemesManager->delete($scheme);
+                            
+                            $userModel = new OpenSKOS_Db_Table_Users();
+                            $user = $userModel->find($job['user'])[0];
+                            
+                            $conceptsManager = $diContainer->get('\OpenSkos2\ConceptManager');
+                            $conceptsManager->deleteSoftInScheme($scheme, $user->getFoafPerson());
+                            
+                            // Clears the schemes cache after an icon is assigned.
+                            $diContainer->get('Editor_Models_ConceptSchemesCache')->clearCache();
 
                             $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
                             $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.

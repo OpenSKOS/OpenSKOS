@@ -182,7 +182,7 @@ class ResourceManager
         $doc->setKey('id', $uri);
         $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
-        $update->addDocument($resourceDoc);
+        $update->addDocument($doc);
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }
@@ -201,8 +201,6 @@ class ResourceManager
         $update = $this->solr->createUpdate();
         $update->addDeleteById($uri);
         $this->solr->update($update);
-        
-        // @TODO remove from solr
     }
 
     /**

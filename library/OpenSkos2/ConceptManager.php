@@ -232,6 +232,43 @@ class ConceptManager extends ResourceManager
     }
     
     /**
+     * Deletes all concepts inside a concept scheme.
+     * @param \OpenSkos2\ConceptScheme $scheme
+     * @param \OpenSkos2\Person $deletedBy
+     */
+    public function deleteSoftInScheme(ConceptScheme $scheme, Person $deletedBy)
+    {
+        $start = 0;
+        $step = 100;
+        do {
+            $concepts = $this->fetch(
+                [
+                    Skos::INSCHEME => $scheme,
+                ],
+                $start,
+                $step
+            );
+            
+            foreach ($concepts as $concept) {
+                $inSchemes = $concept->getProperty(Skos::INSCHEME);
+                if (count($inSchemes) == 1) {
+                    $this->deleteSoft($concept, $deletedBy);
+                } else {
+                    $newSchemes = [];
+                    foreach ($inSchemes as $inScheme) {
+                        if (strcasecmp($inScheme->getUri(), $scheme->getUri()) !== 0) {
+                            $newSchemes[] = $inScheme;
+                        }
+                    }
+                    $concept->setProperties(Skos::INSCHEME, $newSchemes);
+                    $this->replace($concept);
+                }
+            }
+            $start += $step;
+        } while (!(count($concepts) < $step));
+    }
+    
+    /**
      * Perform a full text query
      * lucene / solr queries are possible
      * for the available fields see schema.xml
