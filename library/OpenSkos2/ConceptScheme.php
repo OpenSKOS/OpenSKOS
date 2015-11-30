@@ -54,6 +54,26 @@ class ConceptScheme extends Resource
             return $this->getPropertyFlatValue(DcTerms::TITLE);
         }
     }
+        
+    /**
+     * Check if the concept scheme is deleted
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        // @TODO Not supported at all yet.
+        return false;
+    }
+    
+    /**
+     * Get openskos:uuid if it exists
+     * Identifier for backwards compatability. Always use uri as identifier.
+     * @return string
+     */
+    public function getUuid()
+    {
+        return $this->getPropertySingleValue(OpenSkos::UUID);
+    }
     
     /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
@@ -70,8 +90,7 @@ class ConceptScheme extends Resource
         };
         
         $forFirstTimeInOpenSkos = [
-            // @TODO Seems uuid can be skiped. Seems not required for backward compatibility.
-            // OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
             OpenSkos::SET => $set,
             DcTerms::CREATOR => $person,

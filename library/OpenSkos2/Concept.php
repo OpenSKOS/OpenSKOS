@@ -152,7 +152,7 @@ class Concept extends Resource
     
     /**
      * Get openskos:uuid if it exists
-     *
+     * Identifier for backwards compatability. Always use uri as identifier.
      * @return string
      */
     public function getUuid()
@@ -231,8 +231,7 @@ class Concept extends Resource
         };
         
         $forFirstTimeInOpenSkos = [
-            // @TODO Seems uuid can be skiped. Seems not required for backward compatibility.
-            // OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
             OpenSkos::SET => $set,
             DcTerms::CREATOR => $person,
