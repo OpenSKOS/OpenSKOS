@@ -50,19 +50,6 @@ class Solr2Sparql
     private $offset = 0;
 
     /**
-     * Field mapping
-     *
-     * @var array
-     */
-    private $fieldMapping = [
-        'status' => \OpenSkos2\Namespaces\OpenSkos::STATUS,
-        'altLabel' => \OpenSkos2\Namespaces\Skos::ALTLABEL,
-        'prefLabel' => \OpenSkos2\Namespaces\Skos::PREFLABEL,
-        'notation' => \OpenSkos2\Namespaces\Skos::NOTATION,
-        'scopeNote' => \OpenSkos2\Namespaces\Skos::SCOPENOTE
-    ];
-
-    /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      */
     public function __construct(\Psr\Http\Message\ServerRequestInterface $request)
@@ -323,7 +310,7 @@ class Solr2Sparql
         $field = explode('@', $parts[0])[0];
 
         // Check if the field is supported
-        if (!array_key_exists($field, $this->fieldMapping)) {
+        if (!array_key_exists($field, $this->getFieldMapping())) {
             return false;
         }
 
@@ -343,8 +330,10 @@ class Solr2Sparql
         
         $field = explode('@', $parts[0])[0];
 
-        if (array_key_exists($field, $this->fieldMapping)) {
-            return $this->fieldMapping[$field];
+        // @TODO Allow also skos:note syntax + full uri syntax - same as in the fl param.
+        
+        if (array_key_exists($field, $this->getFieldMapping())) {
+            return $this->getFieldMapping()[$field];
         }
     }
 
@@ -359,5 +348,15 @@ class Solr2Sparql
         $parts = explode(':', $queryPart);
         $value = trim($parts[1], ' *');
         return $value;
+    }
+    
+    /**
+     * Gets fields to properties map.
+     * @return array
+     */
+    private function getFieldMapping()
+    {
+        // @TODO Move DataArray::getFieldsMap to some v1 to v2 map class.
+        return \OpenSkos2\Api\Transform\DataArray::getFieldsMap();
     }
 }

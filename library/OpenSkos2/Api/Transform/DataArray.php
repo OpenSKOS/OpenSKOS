@@ -141,31 +141,21 @@ class DataArray
      */
     public static function getFieldsPlusIsRepeatableMap()
     {
-        $isRepeatable = [
-            DcTerms::CREATED => false,
-            DcTerms::MODIFIED => false,
-            OpenSkos::STATUS => false,
-            OpenSkos::TENANT => false,
-            OpenSkos::SET => false,
-            OpenSkos::UUID => false,
-            Skos::PREFLABEL => false,
-            Skos::ALTLABEL => true,
-            Skos::RELATED => true,
-            Skos::SEMANTICRELATION => false,
-            Skos::INSCHEME => true,
-            Skos::TOPCONCEPTOF => true,
-            DcTerms::DATEACCEPTED => true,
-            DcTerms::MODIFIED => true,
-            DcTerms::CREATOR => true,
-            DcTerms::DATESUBMITTED => true,
-            DcTerms::CONTRIBUTOR => true,
+        $notRepeatable = [
+            DcTerms::CREATED,
+            DcTerms::MODIFIED,
+            OpenSkos::STATUS,
+            OpenSkos::TENANT,
+            OpenSkos::SET,
+            OpenSkos::UUID,
+            Skos::PREFLABEL,
         ];
         
         $map = [];
         foreach (self::getFieldsMap() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
-                'repeatable' => $isRepeatable[$property],
+                'repeatable' => !isset($notRepeatable[$property]),
             ];
         }
         
@@ -178,20 +168,45 @@ class DataArray
      */
     public static function getFieldsMap()
     {
+        // @TODO Move that map to some v1 to v2 map class
         return [
-            'created_timestamp' => DcTerms::CREATED,
-            'modified_timestamp' => DcTerms::MODIFIED,
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
             'collection' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
+            'inScheme' => Skos::INSCHEME,
+            
             'prefLabel' => Skos::PREFLABEL,
             'altLabel' => Skos::ALTLABEL,
             'hiddenLabel' => Skos::HIDDENLABEL,
+            
+            'changeNote' => Skos::CHANGENOTE,
+            'definition' => Skos::DEFINITION,
+            'editorialNote' => Skos::EDITORIALNOTE,
+            'example' => Skos::EXAMPLE,
+            'historyNote' => Skos::HISTORYNOTE,
+            'note' => Skos::NOTE,
+            'scopeNote' => Skos::SCOPENOTE,
+            
             'related' => Skos::RELATED,
-            'SemanticRelations' => Skos::SEMANTICRELATION,
-            'inScheme' => Skos::INSCHEME,
+            
+            'broader' => Skos::BROADER,
+            'broaderTransitive' => Skos::BROADERTRANSITIVE,
+            'narrower' => Skos::NARROWER,
+            'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
+            'related' => Skos::RELATED,
+            
+            'broadMatch' => Skos::BROADMATCH,
+            'closeMatch' => Skos::CLOSEMATCH,
+            'exactMatch' => Skos::EXACTMATCH,
+            'mappingRelation' => Skos::MAPPINGRELATION,
+            'narrowMatch' => Skos::NARROWMATCH,
+            'relatedMatch' => Skos::RELATEDMATCH,
+            
             'topConceptOf' => Skos::TOPCONCEPTOF,
+            
+            'created_timestamp' => DcTerms::CREATED,
+            'modified_timestamp' => DcTerms::MODIFIED,
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
             'dcterms_modified' => DcTerms::MODIFIED,
             'dcterms_creator' => DcTerms::CREATOR,
