@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "hash": "ed68a70ced3626b159246b8e90700c27",
@@ -160,7 +160,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/njh/easyrdf/zipball/02864f8996311ff7c6619be70fc1ecf6f3165c48",
+                "url": "https://api.github.com/repos/njh/easyrdf/zipball/1371c8af2abd3a948c50962b2212fce1912000e7",
                 "reference": "02864f8996311ff7c6619be70fc1ecf6f3165c48",
                 "shasum": ""
             },
@@ -779,16 +779,16 @@
         },
         {
             "name": "picturae/oai-pmh",
-            "version": "0.5.4",
+            "version": "0.5.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picturae/OaiPmh.git",
-                "reference": "c8423e211eb487ef2f85739844569722b5baa038"
+                "reference": "f94ebc13ec49393680bd35474084ad00307016d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/c8423e211eb487ef2f85739844569722b5baa038",
-                "reference": "c8423e211eb487ef2f85739844569722b5baa038",
+                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/f94ebc13ec49393680bd35474084ad00307016d8",
+                "reference": "f94ebc13ec49393680bd35474084ad00307016d8",
                 "shasum": ""
             },
             "require": {
@@ -819,7 +819,7 @@
                 }
             ],
             "description": "Picturae OAI-PMH package. Can be used to create a OAI endpoint",
-            "time": "2015-10-13 12:54:59"
+            "time": "2015-12-01 08:40:05"
         },
         {
             "name": "psr/http-message",
