@@ -270,7 +270,7 @@ do {
         $uri = $doc['uri'];
         // Prevent deleted resources from having same uri.
         if (!empty($doc['deleted'])) {
-            $uri .= rtrim($uri, '/') . '/deleted';
+            $uri = rtrim($uri, '/') . '/deleted';
         }
         
         switch ($doc['class']) {
@@ -338,7 +338,7 @@ do {
         
         // Set status deleted
         if (!empty($doc['deleted'])) {
-            $resource->setProperty(OpenSkos::STATUS, \OpenSkos2\Concept::STATUS_DELETED);
+            $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
         }
         
         // Add tenant in graph

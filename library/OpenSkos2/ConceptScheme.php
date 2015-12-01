@@ -42,6 +42,31 @@ class ConceptScheme extends Resource
     }
 
     /**
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(OpenSkos::STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
+        }
+    }
+    
+    /**
+     * Check if the concept is deleted
+     *
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets preview title for the concept.
      * @param string $language
      * @return string
@@ -54,16 +79,6 @@ class ConceptScheme extends Resource
         } else {
             return $this->getPropertyFlatValue(DcTerms::TITLE);
         }
-    }
-        
-    /**
-     * Check if the concept scheme is deleted
-     * @return boolean
-     */
-    public function isDeleted()
-    {
-        // @TODO Not supported. Concept schemes are hard deleted.
-        return false;
     }
     
     /**

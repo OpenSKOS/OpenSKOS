@@ -264,7 +264,7 @@ switch ($action) {
                         try {
                             $schemesManager = $diContainer->get('\OpenSkos2\ConceptSchemeManager');
                             $scheme = $schemesManager->fetchByUri($job->getParam('uri'));
-                            $schemesManager->delete($scheme);
+                            $schemesManager->deleteSoft($scheme);
                             
                             $userModel = new OpenSKOS_Db_Table_Users();
                             $user = $userModel->find($job['user'])[0];

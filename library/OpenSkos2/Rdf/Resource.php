@@ -25,6 +25,11 @@ use OpenSkos2\Exception\OpenSkosException;
 
 class Resource extends Uri implements ResourceIdentifier
 {
+    /**
+     * openskos:status value which marks a resource as deleted.
+     */
+    const STATUS_DELETED = 'deleted';
+    
     protected $properties = [];
 
     /**

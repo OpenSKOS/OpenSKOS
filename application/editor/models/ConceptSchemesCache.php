@@ -65,9 +65,9 @@ class Editor_Models_ConceptSchemesCache
         $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $tenant);
         if ($schemes === false) {
             if (empty($tenant)) {
-                $schemes = $this->manager->fetch();
+                $schemes = $this->manager->fetch([], null, null, true);
             } else {
-                $schemes = $this->manager->fetch([OpenSkos::TENANT => $tenant]);
+                $schemes = $this->manager->fetch([OpenSkos::TENANT => $tenant], null, null, true);
             }
             $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $tenant);
         }

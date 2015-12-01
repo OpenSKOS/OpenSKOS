@@ -365,9 +365,10 @@ class ResourceManager
      * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
      * @param int $offset
      * @param int $limit
+     * @param bool $ignoreDeleted Do not fetch resources which have openskos:status deleted.
      * @return ResourceCollection
      */
-    public function fetch($simplePatterns = [], $offset = null, $limit = null)
+    public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
     {
         /*
         DESCRIBE ?subject {
@@ -388,8 +389,15 @@ class ResourceManager
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
 
         $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
-        $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
-
+        $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
+        
+        if ($ignoreDeleted) {
+            $where .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status . ';
+            $where .= 'FILTER (?status != \'' . Resource::STATUS_DELETED . '\')';
+        }
+        
+        $query .= 'WHERE { ' . $where . '}';
+        
         // We need some order
         // @TODO provide possibility to order on other predicates.
         // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
