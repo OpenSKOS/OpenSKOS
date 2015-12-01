@@ -34,7 +34,6 @@ use OpenSkos2\Namespaces\Xsd;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkos2\Rdf\Uri;
 use OpenSKOS_Db_Table_Row_Collection;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
@@ -543,7 +542,7 @@ class Repository implements InterfaceRepository
 
         if (!empty($collection)) {
             $collectionN = \OpenSkos2\Sparql\Escape::escapeUri($collection);
-            $select->also(OpenSkos::SET, $collectionN);
+            $select->also('openskos:set', $collectionN);
         }
 
         if (!empty($scheme)) {
