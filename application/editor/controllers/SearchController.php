@@ -39,11 +39,19 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
-        $items = $search->search($options);
-        $items['status'] = 'ok';
-        $items['conceptSchemeOptions'] = $this->_getConceptSchemeOptions();
-        $items['profileOptions'] = $this->_getProfilesSelectOptions();
-        $response = new Zend\Diactoros\Response\JsonResponse($items);
+        $concepts = $search->search($options, $numFound);
+        
+        $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
+        
+        $result = [
+            'concepts' => $preview->convertToLinksData($concepts),
+            'numFound' => $numFound,
+            'status' => 'ok',
+            'conceptSchemeOptions' => $this->_getConceptSchemeOptions(),
+            'profileOptions' => $this->_getProfilesSelectOptions(),
+        ];
+        
+        $response = new Zend\Diactoros\Response\JsonResponse($result);
         $this->emitResponse($response);
     }
 

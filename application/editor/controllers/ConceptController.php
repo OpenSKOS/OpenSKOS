@@ -209,25 +209,12 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             Skos::NARROWER
         );
         
-        $schemesCache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
-        
-        foreach ($narrowers as $concept) {
-            $conceptData = $concept->toFlatArray([
-                'uri',
-                'caption',
-                OpenSkos::STATUS,
-                Skos::SCOPENOTE
-            ]);
-            
-            $conceptData['schemes'] = $schemesCache->fetchConceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
-            
-            $data[] = $conceptData;
-        }
+        $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
         
         $this->emitResponse(
             new JsonResponse([
                 'status' => 'ok',
-                'result' => $data
+                'result' => $preview->convertToLinksData($narrowers),
             ])
         );
     }

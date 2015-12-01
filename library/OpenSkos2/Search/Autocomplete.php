@@ -40,7 +40,7 @@ class Autocomplete
      *
      * @param array $options
      */
-    public function search($options)
+    public function search($options, &$numFound)
     {
         $helper = new \Solarium\Core\Query\Helper();
 
@@ -121,6 +121,7 @@ class Autocomplete
             }
             $solrQuery .= ')';
         }
-        return $this->manager->search($solrQuery, $options['rows'], $options['start']);
+        
+        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
     }
 }

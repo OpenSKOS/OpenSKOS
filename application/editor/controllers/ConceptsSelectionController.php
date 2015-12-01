@@ -19,9 +19,6 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
-
 class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
 {
     public function addAction()
@@ -35,9 +32,12 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
         
         if ($addingResult) {
             $selection = $user->getConceptsSelection();
-            $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
+            $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
         } else {
-            $this->getHelper('json')->sendJson(array('status' => 'limitReached', 'limit' => OpenSKOS_Db_Table_Row_User::USER_SELECTION_SIZE));
+            $this->getHelper('json')->sendJson([
+                'status' => 'limitReached',
+                'limit' => OpenSKOS_Db_Table_Row_User::USER_SELECTION_SIZE
+            ]);
         }
     }
     
@@ -49,7 +49,7 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
         }
         
         $selection = $user->getConceptsSelection();
-        $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
+        $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
     }
     
     public function clearAction()
@@ -71,25 +71,16 @@ class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
         $user->removeConceptFromSelection($this->getRequest()->getPost('uri'));
         
         $selection = $user->getConceptsSelection();
-        $this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
+        $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
     }
     
-    protected function _prepareSelectionData($selection)
+    /**
+     * @param ConceptCollection $selection
+     * @return array
+     */
+    protected function prepareSelectionData($selection)
     {
-        $data = array();
-        $schemesCache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
-        foreach ($selection as $concept) {
-            $conceptData = $concept->toFlatArray([
-                'uri',
-                'caption',
-                OpenSkos::STATUS,
-                Skos::SCOPENOTE
-            ]);
-            
-            $conceptData['schemes'] = $schemesCache->fetchConceptSchemesMeta($concept->getProperty(Skos::INSCHEME));
-            
-            $data[] = $conceptData;
-        }
-        return $data;
+        $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
+        return $preview->convertToLinksData($selection);
     }
 }

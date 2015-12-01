@@ -24,7 +24,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
 
@@ -37,31 +36,9 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
 
     /**
-     * String to combine / explode for concat values from sparql
-     *
-     * @var string
-     */
-    private $concatSeperator = '^';
-
-    /**
-     * String to combine and explode group_concat values from sparql
-     *
-     * @var string
-     */
-    private $groupConcatSeperator = '|';
-
-    /**
-     * Field seperator, used to add field names in concatted groups e.g
-     * title@@this is my title
-     *
-     * @var string
-     */
-    private $concatFieldSeperator = '@@';
-    
-    /**
      * Deletes and then inserts the resourse.
      * For concepts also deletes all relations for which the concept is object.
-     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Concept $concept
      */
     public function replaceAndCleanRelations(Concept $concept)
     {
@@ -180,7 +157,7 @@ class ConceptManager extends ResourceManager
      */
     public function fetchRelations($uri, $relationType, $conceptScheme = null)
     {
-        // @TODO It is possible that there are relations to uris, for which there is no a resource.
+        // @TODO It is possible that there are relations to uris, for which there is no resource.
         
         $allRelations = new ConceptCollection([]);
         
@@ -207,7 +184,7 @@ class ConceptManager extends ResourceManager
     
     /**
      * Delete all relations for which the concepts is object (target)
-     * @param Uri $resource
+     * @param Concept $concept
      */
     public function deleteRelationsWhereObject(Concept $concept)
     {
@@ -276,8 +253,10 @@ class ConceptManager extends ResourceManager
      * @param string $query
      * @param int $rows
      * @param int $start
+     * @param int &$numFound output Total number of found records.
+     * @return ConceptCollection
      */
-    public function search($query, $rows = 20, $start = 0)
+    public function search($query, $rows = 20, $start = 0, &$numFound = 0)
     {
         $select = $this->solr->createSelect();
         $select->setStart($start)
@@ -287,125 +266,13 @@ class ConceptManager extends ResourceManager
         
         $solrResult = $this->solr->select($select);
         
-        $conceptUri = [];
+        $numFound = $solrResult->getNumFound();
         
+        $uris = [];
         foreach ($solrResult as $doc) {
-            $conceptUri[] = $doc->uri;
+            $uris[] = $doc->uri;
         }
         
-        $conceptUris = \OpenSkos2\Sparql\Escape::escapeUris($conceptUri);
-
-        // Add asparagus BIND support see: https://github.com/Benestar/asparagus/issues/26
-        $query = '
-            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-            PREFIX openskos: <http://openskos.org/xmlns#>
-            PREFIX dcterms: <http://purl.org/dc/terms/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT ?prefLabel ?uuid ?uri ?status
-                (group_concat (
-                    distinct concat ("uri",
-                        "'.$this->concatFieldSeperator.'",
-                        str(?scheme),
-                        "'.$this->concatSeperator.'",
-                        "caption",
-                        "'.$this->concatFieldSeperator.'",
-                        ?schemeTitleb,
-                        "'.$this->concatSeperator.'",
-                        "uuid",
-                        "'.$this->concatFieldSeperator.'",
-                        ?schemeUuidb);separator = "'.$this->groupConcatSeperator.'") AS ?schemes)
-            WHERE {
-                    ?uri rdf:type skos:Concept ;
-                            skos:prefLabel ?prefLabel ;
-                            openskos:uuid ?uuid ;
-                            openskos:status ?status ;
-                            skos:inScheme ?scheme .
-                    OPTIONAL {
-                        ?uri skos:inScheme ?scheme .
-                            ?scheme dcterms:title ?schemeTitle ;
-                            openskos:uuid ?schemeUuid .
-                    }
-                    FILTER (?uri IN ('.$conceptUris.'))
-              BIND ( IF (BOUND (?schemeUuid), ?schemeUuid, \'\')  as ?schemeUuidb)
-              BIND ( IF (BOUND (?schemeTitle), ?schemeTitle, \'\')  as ?schemeTitleb)
-            }
-            GROUP BY ?prefLabel ?uuid ?uri ?status
-            LIMIT 20';
-        
-        $searchResult = $this->query($query);
-        $items = [];
-        foreach ($searchResult as $literal) {
-            $arrLit = (array)$literal;
-            if (empty($arrLit)) {
-                continue;
-            }
-
-            $concept = [
-                'uri' => (string)$literal->uri,
-                'openskos:uuid' => (string)$literal->uuid, // @TODO Should not be needed anymore. Can be removed
-                'caption' => (string)$literal->prefLabel,
-                'openskos:status' => (string)$literal->status
-            ];
-
-            if (isset($literal->schemes)) {
-                $schemes = $this->decodeConcat((string)$literal->schemes);
-                $concept['schemes'] = $this->addIconToScheme($schemes);
-            }
-
-            if (isset($literal->scopeNotes)) {
-                $concept['skos:scopeNote'] = explode('|', (string)$literal->scopeNotes);
-            }
-
-            $items[] = $concept;
-        }
-        
-        $return = [
-            'numFound' => $solrResult->getNumFound(),
-            'concepts' => $items
-        ];
-        
-        return $return;
-    }
-    
-    /**
-     * Add icon path to schemes
-     *
-     * @param array $schemes
-     * @return array
-     */
-    private function addIconToScheme($schemes)
-    {
-        foreach ($schemes as $i => $scheme) {
-            $scheme['iconPath'] = ConceptScheme::buildIconPath($scheme['uuid']);
-            $schemes[$i] = $scheme;
-        }
-        return $schemes;
-    }
-
-    /**
-     * Decode a string that has concat and group_concat values
-     *
-     * @param string $value
-     * @return array
-     */
-    private function decodeConcat($value)
-    {
-        $decoded = [];
-        $groups = explode($this->groupConcatSeperator, $value);
-        foreach ($groups as $group) {
-            $values = explode($this->concatSeperator, $group);
-            $obj = [];
-            foreach ($values as $groupValue) {
-                if (empty($groupValue)) {
-                    continue;
-                }
-                $fieldAndValue = explode($this->concatFieldSeperator, $groupValue);
-                $fieldName = $fieldAndValue[0];
-                $obj[$fieldName] = $fieldAndValue[1];
-            }
-            $decoded[] = $obj;
-        }
-        return $decoded;
+        return $this->fetchByUris($uris);
     }
 }
