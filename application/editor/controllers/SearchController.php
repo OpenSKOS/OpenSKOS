@@ -69,14 +69,14 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                     $this->view->form->populate($profileSearchOptions);
                 }
             } else {
-                $this->view->form->populate($this->getSearchOptionsForm()->getValues(true));
+                $this->view->form->populate(Editor_Forms_SearchOptions::getDefaultSearchOptions());
             }
         } else {
             // If the form is opened (not submited with errors) populate it with the data from the user session.
             if (!$this->getRequest()->isPost()) {
                 $options = $user->getSearchOptions();
                 if (empty($options)) {
-                    $options = $this->getSearchOptionsForm()->getValues(true);
+                    $options = Editor_Forms_SearchOptions::getDefaultSearchOptions();
                 }
                 $this->view->form->populate($options);
             }
@@ -102,11 +102,13 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $this->view->assign('profilesOptions', $this->_getProfilesSelectOptions());
 
         // Set concept scheme - collections map.
-        $apiClient = new Editor_Models_ApiClient();
-        $conceptSchemes = $apiClient->getConceptSchemeMap('uri', 'collection');
-        $collectionsConceptSchemesMap = array_fill_keys(array_values($conceptSchemes), array());
-        foreach ($conceptSchemes as $conceptSchemeUri => $conceptSchemeCollection) {
-            $collectionsConceptSchemesMap[$conceptSchemeCollection][] = $conceptSchemeUri;
+        $collectionsConceptSchemesMap = [];
+        $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll($user->tenant);
+        foreach ($conceptSchemes as $scheme) {
+            if (!isset($collectionsConceptSchemesMap[$scheme->getSet()])) {
+                $collectionsConceptSchemesMap[$scheme->getSet()] = [];
+            }
+            $collectionsConceptSchemesMap[$scheme->getSet()][] = $scheme->getUri();
         }
 
         $this->view->assign('collectionsConceptSchemesMap', $collectionsConceptSchemesMap);

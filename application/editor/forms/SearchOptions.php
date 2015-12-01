@@ -20,6 +20,12 @@
 class Editor_Forms_SearchOptions extends Zend_Form {
 
     /**
+     * Holds the format in which the dates in the options must be.
+     * @var string
+     */
+    const OPTIONS_DATE_FORMAT = 'dd/MM/yyyy';
+            
+    /**
      * Holds the editor options from configuration.
      *
      * @var array
@@ -294,7 +300,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
             'label' => _('From'),
             'size' => 10,
             'validators' => array(
-                array('date', true, array(OpenSKOS_Solr_Queryparser_Editor::OPTIONS_DATE_FORMAT))),
+                array('date', true, array(self::OPTIONS_DATE_FORMAT))),
             'class' => 'datepicker'
         ));
 
@@ -304,7 +310,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
             'label' => _('To'),
             'size' => 10,
             'validators' => array(
-                array('date', false, array(OpenSKOS_Solr_Queryparser_Editor::OPTIONS_DATE_FORMAT))),
+                array('date', false, array(self::OPTIONS_DATE_FORMAT))),
             'class' => 'datepicker'
         ));
 
@@ -527,7 +533,8 @@ class Editor_Forms_SearchOptions extends Zend_Form {
 
         // We can not filter by status deleted. Those concepts are not shown.
         $statuses = array_diff(
-                OpenSKOS_Concept_Status::getStatuses(), [OpenSKOS_Concept_Status::DELETED]
+            OpenSKOS_Concept_Status::getStatuses(),
+            [OpenSKOS_Concept_Status::DELETED]
         );
 
         foreach ($statuses as $status) {
@@ -548,4 +555,15 @@ class Editor_Forms_SearchOptions extends Zend_Form {
         return $options;
     }
     
+    /**
+     * Gets an array of the default search options.
+     */
+    public static function getDefaultSearchOptions()
+    {
+        // @TODO Not clean at all. Add a dependecy where default options are needed.
+        $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        return self::formValues2Options(
+            $diContainer->get('Editor_Forms_SearchOptions')->getValues(true)
+        );
+    }
 }

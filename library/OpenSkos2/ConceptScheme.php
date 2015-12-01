@@ -96,6 +96,20 @@ class ConceptScheme extends Resource
     }
     
     /**
+     * Get openskos:set if it exists
+     * Identifier for backwards compatability. Always use uri as identifier.
+     * @return string|null
+     */
+    public function getSet()
+    {
+        if ($this->hasProperty(OpenSkos::SET)) {
+            return (string)$this->getPropertySingleValue(OpenSkos::SET);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param string $tenantCode
      * @param Uri $set

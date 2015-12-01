@@ -21,6 +21,7 @@ use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\ConceptSchemeCollection;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\ConceptScheme;
 
 class Editor_Models_ConceptSchemesCache
@@ -67,7 +68,7 @@ class Editor_Models_ConceptSchemesCache
             if (empty($tenant)) {
                 $schemes = $this->manager->fetch([], null, null, true);
             } else {
-                $schemes = $this->manager->fetch([OpenSkos::TENANT => $tenant], null, null, true);
+                $schemes = $this->manager->fetch([OpenSkos::TENANT => new Literal($tenant)], null, null, true);
             }
             $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $tenant);
         }
