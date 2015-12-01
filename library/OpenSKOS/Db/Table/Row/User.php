@@ -239,6 +239,15 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             array_pop($userOptions->userHistory);
         }
     }
+    
+    public function removeFromUserHistory($identifier)
+    {
+        $userOptions = new Zend_Session_Namespace('userOptions');
+        if (!isset($userOptions->userHistory) || !is_array($userOptions->userHistory)) {
+            $userOptions->userHistory = array();
+        }
+        unset($userOptions->userHistory[array_search($identifier, $userOptions->userHistory)]);
+    }
 
     public function clearUserHistory()
     {

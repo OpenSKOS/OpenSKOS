@@ -189,6 +189,12 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $concept,
                 $this->getCurrentUser()->getFoafPerson()
             );
+            
+            $user = OpenSKOS_Db_Table_Users::fromIdentity();
+            if (!empty($user)) {
+                $user->removeFromUserHistory($concept->getUri());
+            }
+            
             $this->getHelper('json')->sendJson(array('status' => 'ok'));
         } else {
             $this->getHelper('json')->sendJson(array('status' => 'error', 'message' => _('A concept can not be deleted while there are semantic relations or mapping properties associated with it.')));
