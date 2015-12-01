@@ -62,7 +62,7 @@ class ConceptScheme extends Resource
      */
     public function isDeleted()
     {
-        // @TODO Not supported at all yet.
+        // @TODO Not supported. Concept schemes are hard deleted.
         return false;
     }
     
