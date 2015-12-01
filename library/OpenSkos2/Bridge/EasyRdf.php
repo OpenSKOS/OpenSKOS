@@ -142,7 +142,7 @@ class EasyRdf
      * @param string $uri
      * @return Resource
      */
-    protected static function createResourceCollection($type)
+    public static function createResourceCollection($type)
     {
         switch ($type) {
             case Concept::TYPE:

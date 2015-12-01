@@ -39,9 +39,12 @@ class Autocomplete
      * Perform a autocomplete search with a search profile from the editor
      *
      * @param array $options
+     * @return ConceptCollection
      */
     public function search($options, &$numFound)
     {
+        // @TODO Created, modified, approved section not implemented yet.
+        
         $helper = new \Solarium\Core\Query\Helper();
 
         $term = $helper->escapePhrase($options['searchText']);
@@ -67,6 +70,11 @@ class Autocomplete
 
                 $solrQuery .= 'a_'.$label.'_'.$lang.':'.$term.$boost.' OR ';
             }
+        }
+        
+        // to be checked
+        if ($options['toBeChecked']) {
+            $solrQuery .= ' AND (b_toBeChecked:true) ';
         }
 
         // notes
@@ -111,7 +119,23 @@ class Autocomplete
         if ($options['orphanedConcepts']) {
             $solrQuery .= ' AND (b_isOrphan:true) ';
         }
+        
+        // sets (collections)
+        if (!empty($options['collections'])) {
+            $solrQuery .= ' AND (';
+            $solrQuery .= 's_set:'
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
+                . ')';
+        }
 
+        // schemes
+        if (!empty($options['conceptScheme'])) {
+            $solrQuery .= ' AND (';
+            $solrQuery .= 's_inScheme:'
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
+                . ')';
+        }
+        
         // tenants
         if (!empty($options['tenants'])) {
             $solrQuery .= ' AND (';

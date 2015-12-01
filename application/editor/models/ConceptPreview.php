@@ -19,7 +19,7 @@
 
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\ConceptCollection;
 
 class Editor_Models_ConceptPreview
 {
@@ -39,10 +39,10 @@ class Editor_Models_ConceptPreview
     /**
      * Converts the concept collection to basic preview data normally used for links.
      * Includes uri, caption, status, skope note, shemes
-     * @param ResourceCollection $concepts
+     * @param ConceptCollection $concepts
      * @return array
      */
-    public function convertToLinksData(ResourceCollection $concepts)
+    public function convertToLinksData(ConceptCollection $concepts)
     {
         $linksData = [];
         foreach ($concepts as $concept) {

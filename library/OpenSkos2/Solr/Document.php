@@ -21,7 +21,7 @@ namespace OpenSkos2\Solr;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Openskos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
@@ -63,12 +63,17 @@ class Document
         Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote'],
         Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote'],
         Skos::NOTATION =>   ['s_notaton', 't_notaton', 'a_notaton'],
-        Openskos::STATUS => ['s_status'],
-        Openskos::TENANT => ['s_tenant'],
-        DcTerms::CREATOR => ['s_creator', 't_creator', 'a_creator'],
-        DcTerms::CONTRIBUTOR => ['s_contributor', 't_contributor', 'a_contributor'],
-        DcTerms::DATEACCEPTED => ['d_created'],
+        Skos::INSCHEME =>   ['s_inScheme'],
+        OpenSkos::STATUS => ['s_status'],
+        OpenSkos::SET => ['s_set'],
+        OpenSkos::TENANT => ['s_tenant'],
+        OpenSkos::TOBECHECKED => ['b_toBeChecked'],
+        DcTerms::CREATOR => ['s_creator'],
+        DcTerms::DATESUBMITTED => ['s_dateSubmited'],
+        DcTerms::CONTRIBUTOR => ['s_contributor'],
         DcTerms::MODIFIED => ['d_modified'],
+        OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
+        DcTerms::DATEACCEPTED => ['d_dateAccepted'],
     ];
 
     /**

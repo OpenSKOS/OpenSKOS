@@ -338,7 +338,7 @@ class ResourceManager
             
             return $resources;
         } else {
-            return new ResourceCollection([]);
+            return EasyRdf::createResourceCollection($this->resourceType);
         }
     }
     
