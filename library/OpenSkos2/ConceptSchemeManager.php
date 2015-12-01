@@ -37,31 +37,6 @@ class ConceptSchemeManager extends ResourceManager
     protected $resourceType = ConceptScheme::TYPE;
 
     /**
-     * Get all concept schema's as an array uri => title
-     */
-    public function getMap()
-    {
-        $prefixes = [
-            'skos' => Skos::NAME_SPACE,
-            'dc' => DcTerms::NAME_SPACE,
-            'rdf' => Namespaces\Rdf::NAME_SPACE,
-        ];
-        $qb = new \Asparagus\QueryBuilder($prefixes);
-        $qb->select('?subject', '?title')
-                ->where('?subject', 'rdf:type', 'skos:conceptScheme')
-                ->also('dc:title', '?title');
-
-        $result = $this->query($qb);
-        $map = [];
-
-        foreach ($result as $row) {
-            $map[(string)$row->subject] = (string)$row->title;
-        }
-
-        return $map;
-    }
-
-    /**
      * Get all scheme's by collection URI
      *
      * @param string $collectionUri e.g http://openskos.org/api/collections/rce:TEST

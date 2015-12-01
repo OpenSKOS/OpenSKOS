@@ -47,13 +47,17 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected $_currentTenant;
 
     /**
-     * @var \OpenSkos2\ConceptSchemeManager
+     * @var Editor_Models_ConceptSchemesCache
      */
-    private $manager;
+    private $schemesCache;
 
-    public function __construct(\OpenSkos2\ConceptSchemeManager $schemeManager, $options = null)
+    /**
+     * @param Editor_Models_ConceptSchemesCache $schemesCache
+     * @param array $options
+     */
+    public function __construct(Editor_Models_ConceptSchemesCache $schemesCache, $options = null)
     {
-        $this->manager = $schemeManager;
+        $this->schemesCache = $schemesCache;
         parent::__construct($options);
     }
 
@@ -362,10 +366,9 @@ class Editor_Forms_SearchOptions extends Zend_Form {
      */
     protected function buildConceptSchemes()
     {
-        $map = $this->manager->getMap();
         $this->addElement('multiCheckbox', 'conceptScheme', [
             'label' => _('Concept schemes'),
-            'multiOptions' => $map
+            'multiOptions' => $this->schemesCache->fetchUrisCaptionsMap($this->_getCurrentTenant()->code)
         ]);
         return $this;
     }
