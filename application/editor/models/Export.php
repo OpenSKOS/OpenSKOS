@@ -353,8 +353,7 @@ class Editor_Models_Export
     {
         switch ($this->get('type')) {
             case 'concept':
-                $concept = Api_Models_Concepts::factory()->getConcept($this->get('conceptUuid'));
-                return $concept['uri'];
+                return $this->get('uri');
             case 'history':
                 //$user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
                 //$concepts = $user->getUserHistory();

@@ -21,7 +21,6 @@
  */
 
 use OpenSkos2\Concept;
-use OpenSkos2\ConceptScheme;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
@@ -263,20 +262,27 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         }
 
         switch ($export->get('type')) {
-            case 'concept' : {
-                    // @TODO Update to work with uri
-                    $export->set('conceptUuid', $this->getRequest()->getPost('additionalData')); // We have the uuid in additionalData.				
-                } break;
-            case 'search' : {
-                    $searchFormData = Zend_Json::decode($this->getRequest()->getPost('additionalData'), Zend_Json::TYPE_ARRAY); // We have the json encoded search form data in additionalData.
+            case 'concept':
+                // We have the uri in additionalData.
+                $export->set('uri', $this->getRequest()->getPost('additionalData'));
+                break;
+            case 'search':
+                // We have the json encoded search form data in additionalData.
+                $searchFormData = Zend_Json::decode(
+                    $this->getRequest()->getPost('additionalData'),
+                    Zend_Json::TYPE_ARRAY
+                );
 
-                    $searchFormData = $this->_fixJsSerializedArrayData('conceptScheme', $searchFormData);
-                    $searchFormData = $this->_fixJsSerializedArrayData('allowedConceptScheme', $searchFormData);
+                $searchFormData = $this->_fixJsSerializedArrayData('conceptScheme', $searchFormData);
+                $searchFormData = $this->_fixJsSerializedArrayData('allowedConceptScheme', $searchFormData);
 
-                    $userForSearch = OpenSKOS_Db_Table_Users::requireById($searchFormData['user']);
-                    $userSearchOptions = $userForSearch->getSearchOptions($user['id'] != $userForSearch['id']);
-                    $export->set('searchOptions', Editor_Forms_Search::mergeSearchOptions($searchFormData, $userSearchOptions));
-                } break;
+                $userForSearch = OpenSKOS_Db_Table_Users::requireById($searchFormData['user']);
+                $userSearchOptions = $userForSearch->getSearchOptions($user['id'] != $userForSearch['id']);
+                $export->set(
+                    'searchOptions',
+                    Editor_Forms_Search::mergeSearchOptions($searchFormData, $userSearchOptions)
+                );
+                break;
         }
 
         if ($export->isTimeConsumingExport()) {
