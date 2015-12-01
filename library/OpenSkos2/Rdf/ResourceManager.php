@@ -179,7 +179,7 @@ class ResourceManager
         // Update solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
-        $doc->setKey('id', $uri);
+        $doc->setKey('uri', $uri);
         $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
         $update->addDocument($doc);
