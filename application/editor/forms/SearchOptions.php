@@ -346,7 +346,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
         $collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
         $collectionsOptions = array();
         foreach ($collections as $collection) {
-            $collectionsOptions[$collection->id] = $collection->dc_title;
+            $collectionsOptions[$collection->uri] = $collection->dc_title;
         }
 
         $this->addElement('multiselect', 'collections', array(
@@ -363,7 +363,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected function buildConceptSchemes()
     {
         $map = $this->manager->getMap();
-        $this->addElement('multiCheckbox', 'f', [
+        $this->addElement('multiCheckbox', 'conceptScheme', [
             'label' => _('Concept schemes'),
             'multiOptions' => $map
         ]);
