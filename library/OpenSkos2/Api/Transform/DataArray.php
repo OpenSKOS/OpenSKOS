@@ -187,6 +187,7 @@ class DataArray
             'uuid' => OpenSkos::UUID,
             'prefLabel' => Skos::PREFLABEL,
             'altLabel' => Skos::ALTLABEL,
+            'hiddenLabel' => Skos::HIDDENLABEL,
             'related' => Skos::RELATED,
             'SemanticRelations' => Skos::SEMANTICRELATION,
             'inScheme' => Skos::INSCHEME,
