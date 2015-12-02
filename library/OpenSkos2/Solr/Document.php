@@ -187,7 +187,7 @@ class Document
                 }
                 break;
             case Literal::TYPE_BOOL:
-                return boolval($value->getValue());
+                return (bool)$value->getValue();
                 break;
             default:
                 return $value->getValue();
