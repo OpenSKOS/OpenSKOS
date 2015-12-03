@@ -22,6 +22,64 @@
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
 
         <copyField source="t_*" dest="search" />
+        
+        
+        
+        <!-- backwards compatibility -->
+        <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
+        <field name="tenant" type="string" indexed="true" stored="false" required="false"/>
+        <field name="collection" type="integer" indexed="true" stored="false" required="false"/>
+        <field name="status" type="string" indexed="true" stored="false" required="false"/>
+        <field name="toBeChecked" type="boolean" indexed="true" stored="false" required="false"/>
+        <field name="notation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <field name="LexicalLabels" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        
+        <field name="prefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="altLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="hiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <field name="DocumentationProperties" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        
+        <field name="note" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="changeNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="definition" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="editorialNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="example" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="historyNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="scopeNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <field name="broader" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="narrower" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="related" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="broaderTransitive" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="narrowerTransitive" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+
+        <field name="broadMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="closeMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="exactMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="mappingRelation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="narrowMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="relatedMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <dynamicField name="dcterms_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <!-- Languages -->
+        <dynamicField name="LexicalLabels@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="prefLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="altLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="hiddenLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <dynamicField name="DocumentationProperties@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="noteLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="changeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="definition@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="editorialNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="example@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="historyNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="scopeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
     </fields>
 
     <defaultSearchField>search</defaultSearchField>

@@ -22,6 +22,7 @@ namespace OpenSkos2\Api\Transform;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\FieldsMaps;
 
 /**
  * Transform \OpenSkos2\Concept to a php array with only native values to encode as json output.
@@ -152,7 +153,7 @@ class DataArray
         ];
         
         $map = [];
-        foreach (self::getFieldsMap() as $field => $property) {
+        foreach (FieldsMaps::getOldToProperties() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
                 'repeatable' => !isset($notRepeatable[$property]),
@@ -160,58 +161,5 @@ class DataArray
         }
         
         return $map;
-    }
-    
-    /**
-     * Gets map of fields to property uris.
-     * @return array
-     */
-    public static function getFieldsMap()
-    {
-        // @TODO Move that map to some v1 to v2 map class
-        return [
-            'status' => OpenSkos::STATUS,
-            'tenant' => OpenSkos::TENANT,
-            'collection' => OpenSkos::SET,
-            'uuid' => OpenSkos::UUID,
-            'inScheme' => Skos::INSCHEME,
-            
-            'prefLabel' => Skos::PREFLABEL,
-            'altLabel' => Skos::ALTLABEL,
-            'hiddenLabel' => Skos::HIDDENLABEL,
-            
-            'changeNote' => Skos::CHANGENOTE,
-            'definition' => Skos::DEFINITION,
-            'editorialNote' => Skos::EDITORIALNOTE,
-            'example' => Skos::EXAMPLE,
-            'historyNote' => Skos::HISTORYNOTE,
-            'note' => Skos::NOTE,
-            'scopeNote' => Skos::SCOPENOTE,
-            
-            'related' => Skos::RELATED,
-            
-            'broader' => Skos::BROADER,
-            'broaderTransitive' => Skos::BROADERTRANSITIVE,
-            'narrower' => Skos::NARROWER,
-            'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
-            'related' => Skos::RELATED,
-            
-            'broadMatch' => Skos::BROADMATCH,
-            'closeMatch' => Skos::CLOSEMATCH,
-            'exactMatch' => Skos::EXACTMATCH,
-            'mappingRelation' => Skos::MAPPINGRELATION,
-            'narrowMatch' => Skos::NARROWMATCH,
-            'relatedMatch' => Skos::RELATEDMATCH,
-            
-            'topConceptOf' => Skos::TOPCONCEPTOF,
-            
-            'created_timestamp' => DcTerms::CREATED,
-            'modified_timestamp' => DcTerms::MODIFIED,
-            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-            'dcterms_modified' => DcTerms::MODIFIED,
-            'dcterms_creator' => DcTerms::CREATOR,
-            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
-        ];
     }
 }

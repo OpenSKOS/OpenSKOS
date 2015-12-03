@@ -35,6 +35,7 @@ use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
+use OpenSkos2\FieldsMaps;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -56,6 +57,13 @@ class Concept
      * @var \OpenSkos2\ConceptManager
      */
     private $manager;
+    
+    /**
+     * Search autocomplete
+     *
+     * @var \OpenSkos2\Search\Autocomplete
+     */
+    private $searchAutocomplete;
 
     /**
      * Amount of concepts to return
@@ -67,10 +75,12 @@ class Concept
     /**
      *
      * @param \OpenSkos2\ConceptManager $manager
+     * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
      */
-    public function __construct(\OpenSkos2\ConceptManager $manager)
+    public function __construct(\OpenSkos2\ConceptManager $manager, \OpenSkos2\Search\Autocomplete $searchAutocomplete)
     {
         $this->manager = $manager;
+        $this->searchAutocomplete = $searchAutocomplete;
     }
 
     /**
@@ -87,11 +97,8 @@ class Concept
      */
     public function findConcepts(ServerRequestInterface $request, $context)
     {
-
-        $solr2sparql = new Query\Solr2Sparql($request);
-
         $params = $request->getQueryParams();
-
+        
         // offset
         $start = 0;
         if (!empty($params['start'])) {
@@ -103,15 +110,18 @@ class Concept
         if (isset($params['rows']) && $params['rows'] < 1001) {
             $limit = (int)$params['rows'];
         }
-
-        $query = $solr2sparql->getSelect($limit, $start);
-        $count = $solr2sparql->getCount();
-
-        $concepts = $this->manager->fetchQuery($query);
-
-        $countResult = $this->manager->query($count);
-        $total = $countResult[0]->count->getValue();
-
+                
+        $options = [
+            'start' => $start,
+            'rows' => $limit,
+            'directQuery' => true,
+        ];
+        if (isset($params['q'])) {
+            $options['searchText'] = $params['q'];
+        }
+        
+        $concepts = $this->searchAutocomplete->search($options, $total);
+        
         $result = new ConceptResultSet($concepts, $total, $start);
         
         if (isset($params['fl'])) {
@@ -308,7 +318,8 @@ class Concept
         }
         
         $propertiesList = [];
-        $fieldsMap = Transform\DataArray::getFieldsMap();
+        $fieldsMap = FieldsMaps::getOldToProperties();
+        
         // Tries to search for the field in fields map.
         // If not found there tries to expand it from short property.
         // If not that - just pass it as it is.

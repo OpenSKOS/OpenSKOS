@@ -52,6 +52,7 @@ return [
     },
     'Editor_Models_ConceptSchemesCache' => function (ContainerInterface $c) {
         return new Editor_Models_ConceptSchemesCache(
+            OpenSKOS_Db_Table_Tenants::fromIdentity()->code,
             $c->get('OpenSkos2\ConceptSchemeManager'),
             OpenSKOS_Cache::getCache()
         );

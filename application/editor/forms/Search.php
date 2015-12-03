@@ -114,7 +114,7 @@ class Editor_Forms_Search extends OpenSKOS_Form
         }
 
         $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
-            ->fetchUrisCaptionsMap(null, $inCollections);
+            ->fetchUrisCaptionsMap($inCollections);
 
         $selectedConceptSchemes = array();
         if (isset($userOptions['conceptScheme'])) {
@@ -149,7 +149,7 @@ class Editor_Forms_Search extends OpenSKOS_Form
                 }
 
                 $conceptSchemesInCollections = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
-                    ->fetchUrisCaptionsMap(null, $inCollections);
+                    ->fetchUrisCaptionsMap($inCollections);
 
                 if (!empty($profileOptions['conceptScheme'])) {
                     foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {

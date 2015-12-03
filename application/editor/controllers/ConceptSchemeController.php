@@ -39,14 +39,16 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.concept-schemes', 'index', self::RESPONSE_TYPE_HTML);
         
         // Clears the schemes cache when we start managing them.
-        $this->getDI()->get('Editor_Models_ConceptSchemesCache')->clearCache();
+        $cache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
+        $cache->clearCache();
+        
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
         
         $this->view->uploadedIcons = $this->_getUploadedIcons();
-        $this->view->conceptSchemes = $this->getConceptSchemeManager()->fetch([], null, null, true);
+        $this->view->conceptSchemes = $cache->fetchAll();
         
         $this->view->conceptSchemesWithDeleteJobs = $this->_getConceptSchemesWithDeleteJob();
         
-        $user = OpenSKOS_Db_Table_Users::fromIdentity();
         $modelCollections = new OpenSKOS_Db_Table_Collections();
         $this->view->collectionsMap = $modelCollections->getUriToTitleMap($user->tenant);
     }

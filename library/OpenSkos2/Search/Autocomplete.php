@@ -19,9 +19,11 @@
 
 namespace OpenSkos2\Search;
 
+use OpenSkos2\Rdf\Resource;
+use OpenSkos2\FieldsMaps;
+
 class Autocomplete
 {
-
     /**
      * @var \OpenSkos2\ConceptManager
      */
@@ -44,80 +46,114 @@ class Autocomplete
     public function search($options, &$numFound)
     {
         // @TODO Created, modified, approved section not implemented yet.
+        // @TODO Ensure all options are arrays.
         
         $helper = new \Solarium\Core\Query\Helper();
-
-        $term = $helper->escapePhrase($options['searchText']);
-        $languages = $options['languages'];
-
-        $solrQuery = '';
-
-        $solrQuery .= '(';
-        // labels
-        foreach ($options['label'] as $label) {
-            foreach ($languages as $lang) {
-                // boost important labels
-                $boost = '';
-                if ($label === 'prefLabel') {
-                    $boost = '^40';
-                }
-                if ($label === 'altLabel') {
-                    $boost = '^20';
-                }
-                if ($label === 'hiddenLabel') {
-                    $boost = '^10';
-                }
-
-                $solrQuery .= 'a_'.$label.'_'.$lang.':'.$term.$boost.' OR ';
-            }
-        }
         
-        // to be checked
-        if ($options['toBeChecked']) {
-            $solrQuery .= ' AND (b_toBeChecked:true) ';
-        }
-
-        // notes
-        foreach ($options['properties'] as $property) {
-            foreach ($languages as $lang) {
-                $solrQuery .= 't_'.$property.':'.$term.' OR ';
+        $parser = new ParserText();
+        
+        $term = $options['searchText'];
+        
+        $isDirectQuery = !empty($options['directQuery']);
+        
+        $solrQuery = '';
+        
+        
+        if ($isDirectQuery) {
+            
+            
+            $term = '(' . $term . ')';
+            $solrQuery = $term;
+            
+            
+        } else {
+            // Fields
+            
+            
+            if ($parser->isSearchTextQuery($term)) {
+                // Custom user query, he has to escape and do everything.
+                $term = '(' . $term . ')';
+            } else {
+                $term = trim($term);
+                if (empty($term)) {
+                    $term = '*';
+                }
+                if (stripos($term, '*') !== false || stripos($term, '?') !== false) {
+                    $term = $parser->escapeSpecialChars($term);
+                } else {
+                    $term = $helper->escapePhrase($term);
+                }
             }
-        }
+            
+            
+            $solrQuery .= '(';
 
-        // strip last or
-        $solrQuery = substr($solrQuery, 0, -4);
+            $languages = $options['languages'];
 
-        // search notation
-        if ($options['searchNotation']) {
-            $solrQuery .= ' OR s_notation:'.$term;
-        }
+            // labels
+            if (!empty($options['label'])) {
+                foreach ($options['label'] as $label) {
+                    foreach ($languages as $lang) {
+                        // boost important labels
+                        $boost = '';
+                        if ($label === 'prefLabel') {
+                            $boost = '^40';
+                        }
+                        if ($label === 'altLabel') {
+                            $boost = '^20';
+                        }
+                        if ($label === 'hiddenLabel') {
+                            $boost = '^10';
+                        }
 
-        // search uri
-        if ($options['searchUri']) {
-            $solrQuery .= ' OR s_uri:'.$term;
-        }
-
-
-        $solrQuery .= ')';
-
-        //status
-        if (isset($options['status']) && count($options['status'])) {
-            $solrQuery .= ' AND (';
-            foreach ($options['status'] as $status) {
-                $solrQuery .= 's_status:"'.$status.'" OR ';
+                        $solrQuery .= 'a_'.$label.'_'.$lang.':'.$term.$boost.' OR ';
+                    }
+                }
             }
+
+            // notes
+            if (!empty($options['properties'])) {
+                foreach ($options['properties'] as $property) {
+                    foreach ($languages as $lang) {
+                        $solrQuery .= 't_'.$property.':'.$term.' OR ';
+                    }
+                }
+            }
+
+            // strip last or
             $solrQuery = substr($solrQuery, 0, -4);
+
+            // search notation
+            if (!empty($options['searchNotation'])) {
+                $solrQuery .= ' OR s_notation:'.$term;
+            }
+
+            // search uri
+            if (!empty($options['searchUri'])) {
+                $solrQuery .= ' OR s_uri:'.$term;
+            }
+
             $solrQuery .= ')';
         }
 
-        // topconcepts
-        if ($options['topConcepts']) {
-            $solrQuery .= ' AND (b_isTopConcept:true) ';
-        }
-
-        // orphaned concepts
-        if ($options['orphanedConcepts']) {
-            $solrQuery .= ' AND (b_isOrphan:true) ';
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //status
+        if (!empty($options['status'])) {
+            $solrQuery .= ' AND (';
+            $solrQuery .= 's_status:'
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
+                . ')';
+        } else {
+            $solrQuery .= ' AND (-s_status:' . Resource::STATUS_DELETED . ')';
         }
         
         // sets (collections)
@@ -139,12 +175,31 @@ class Autocomplete
         // tenants
         if (!empty($options['tenants'])) {
             $solrQuery .= ' AND (';
-            foreach ($options['tenants'] as $tenant) {
-                $solrQuery .= 's_tenant:' . $helper->escapePhrase($tenant) . ' OR ';
-                $solrQuery = substr($solrQuery, 0, -4);
-            }
-            $solrQuery .= ')';
+            $solrQuery .= 's_tenant:'
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
+                . ')';
         }
+        
+        
+        
+        
+        // to be checked
+        if (!empty($options['toBeChecked'])) {
+            $solrQuery .= ' AND (b_toBeChecked:true) ';
+        }
+        
+        // topconcepts
+        if (!empty($options['topConcepts'])) {
+            $solrQuery .= ' AND (b_isTopConcept:true) ';
+        }
+
+        // orphaned concepts
+        if (!empty($options['orphanedConcepts'])) {
+            $solrQuery .= ' AND (b_isOrphan:true) ';
+        }
+        
+        
+//        echo $solrQuery; exit;
         
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
     }

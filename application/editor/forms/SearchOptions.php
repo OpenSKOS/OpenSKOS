@@ -368,7 +368,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     {
         $this->addElement('multiCheckbox', 'conceptScheme', [
             'label' => _('Concept schemes'),
-            'multiOptions' => $this->schemesCache->fetchUrisCaptionsMap($this->_getCurrentTenant()->code)
+            'multiOptions' => $this->schemesCache->fetchUrisCaptionsMap()
         ]);
         return $this;
     }

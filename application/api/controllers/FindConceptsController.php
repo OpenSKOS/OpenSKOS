@@ -100,9 +100,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
 
-        $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
-
-        $concept = new \OpenSkos2\Api\Concept($manager);
+        $concept =$this->getDI()->make('OpenSkos2\Api\Concept');
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $request = $this->getPsrRequest();
@@ -175,10 +173,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
         $id = $this->getId();
 
-        /* @var $manager \OpenSkos2\ConceptManager */
-        $manager = $this->getDI()->get('OpenSkos2\ConceptManager');
-
-        $apiConcept = new \OpenSkos2\Api\Concept($manager);
+        $apiConcept = $this->getDI()->make('OpenSkos2\Api\Concept');
         $context = $this->_helper->contextSwitch()->getCurrentContext();
 
         // Exception for html use ZF 1 easier with linking in the view

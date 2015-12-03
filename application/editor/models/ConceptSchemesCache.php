@@ -29,6 +29,11 @@ class Editor_Models_ConceptSchemesCache
     const CONCEPT_SCHEMES_CACHE_KEY = 'CONCEPT_SCHEMES_CACHE_KEY';
     
     /**
+     * @var string 
+     */
+    protected $tenantCode;
+    
+    /**
      * @var ConceptSchemeManager 
      */
     protected $manager;
@@ -39,11 +44,13 @@ class Editor_Models_ConceptSchemesCache
     protected $cache;
     
     /**
+     * @param string $tenantCode
      * @param ConceptSchemeManager $manager
      * @param Zend_Cache_Core $cache
      */
-    public function __construct(ConceptSchemeManager $manager, Zend_Cache_Core $cache)
+    public function __construct($tenantCode, ConceptSchemeManager $manager, Zend_Cache_Core $cache)
     {
+        $this->tenantCode = $tenantCode;
         $this->manager = $manager;
         $this->cache = $cache;
     }
@@ -60,17 +67,12 @@ class Editor_Models_ConceptSchemesCache
      * Fetches all schemes.
      * @return ConceptSchemeCollection
      */
-    public function fetchAll($tenant = null)
+    public function fetchAll()
     {
-        // @TODO tenant
-        $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $tenant);
+        $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->tenantCode);
         if ($schemes === false) {
-            if (empty($tenant)) {
-                $schemes = $this->manager->fetch([], null, null, true);
-            } else {
-                $schemes = $this->manager->fetch([OpenSkos::TENANT => new Literal($tenant)], null, null, true);
-            }
-            $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $tenant);
+            $schemes = $this->manager->fetch([OpenSkos::TENANT => new Literal($this->tenantCode)], null, null, true);
+            $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $this->tenantCode);
         }
         return $schemes;
     }
@@ -79,9 +81,9 @@ class Editor_Models_ConceptSchemesCache
      * Fetches uri -> scheme map.
      * @return ConceptScheme[]
      */
-    public function fetchUrisMap($tenant = null)
+    public function fetchUrisMap()
     {
-        $shemes = $this->fetchAll($tenant);
+        $shemes = $this->fetchAll();
         $result = [];
         foreach ($shemes as $scheme) {
             $result[$scheme->getUri()] = $scheme;
@@ -93,12 +95,14 @@ class Editor_Models_ConceptSchemesCache
      * Fetches uri -> caption map.
      * @return ConceptScheme[]
      */
-    public function fetchUrisCaptionsMap($tenant = null, $inCollections = [])
+    public function fetchUrisCaptionsMap($inCollections = [])
     {
-        $shemes = $this->fetchAll($tenant);
+        $shemes = $this->fetchAll();
         $result = [];
         foreach ($shemes as $scheme) {
-            $result[$scheme->getUri()] = $scheme->getCaption();
+            if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
+                $result[$scheme->getUri()] = $scheme->getCaption();
+            }
         }
         return $result;
     }
@@ -108,9 +112,9 @@ class Editor_Models_ConceptSchemesCache
      * @param array $shemesUris
      * @return array
      */
-    public function fetchConceptSchemesMeta($shemesUris, $tenant = null)
+    public function fetchConceptSchemesMeta($shemesUris)
     {
-        $shemes = $this->fetchAll($tenant);
+        $shemes = $this->fetchAll();
         $result = [];
         foreach ($shemesUris as $uri) {
             $scheme = $shemes->findByUri($uri);

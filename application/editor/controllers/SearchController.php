@@ -111,7 +111,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         // Set concept scheme - collections map.
         $collectionsConceptSchemesMap = [];
-        $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll($user->tenant);
+        $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll();
         foreach ($conceptSchemes as $scheme) {
             if (!isset($collectionsConceptSchemesMap[$scheme->getSet()])) {
                 $collectionsConceptSchemesMap[$scheme->getSet()] = [];

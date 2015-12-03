@@ -52,7 +52,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
      * @var bool
      */
     protected $_isProposalOnly = false;
-
+    
     public function init()
     {
         $this->setName("Edit concept");
@@ -125,7 +125,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     {
         return $this->_currentStatus;
     }
-
+    
     /**
      * This builds the form header.
      * Holds the status, to be checked and action buttons for the concept form.
