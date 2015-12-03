@@ -22,9 +22,12 @@ namespace OpenSkos2\Solr;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\FieldsMaps;
+use OpenSkos2\Concept;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
 /**
@@ -35,12 +38,12 @@ class Document
     /**
      * @var Resource
      */
-    private $resource;
+    protected $resource;
 
     /**
      * @var DocumentInterface
      */
-    private $document;
+    protected $document;
 
     /**
      * These namespaces will be indexed to solr, if the value contains a language
@@ -50,9 +53,11 @@ class Document
      * s_prefLabel_nl
      * s_prefLabel_en
      *
+     * @TODO We now have old fields mapping + this one. Don't need them both.
+     * 
      * @var array
      */
-    private $mapping = [
+    protected $mapping = [
         Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel'],
         Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel'],
         Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel'],
@@ -96,20 +101,42 @@ class Document
     {
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
+        
+        // Index old fields as well for bacward compatibility.
+        $predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
+        
+        // Dc terms
+        $dcTerms = DcTerms::getAllTerms();
+        
         foreach ($properties as $predicate => $values) {
             if (!array_key_exists($predicate, $this->mapping)) {
                 continue;
             }
 
+            // Exlicitly mapped fields
             $fields = $this->mapping[$predicate];
+            
+            // Old fields
+            if (isset($predicatesToOldField[$predicate])) {
+                $fields[] = $predicatesToOldField[$predicate];
+            }
+            
+            // Dc terms
+            $dcTermKey = array_search($predicate, $dcTerms);
+            if ($dcTermKey !== false) {
+                $fields[] = 'dcterms_' . $dcTermKey;
+            }
             
             foreach ($fields as $field) {
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
         
-        $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
-        $this->document->b_isOrphan = $this->isOrphan();
+        if ($this->resource instanceof Concept) {
+            $this->addConceptClasses($this->resource, $this->document);
+            $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
+            $this->document->b_isOrphan = $this->isOrphan();
+        }
         
         return $this->document;
     }
@@ -119,7 +146,7 @@ class Document
      *
      * @return boolean
      */
-    private function isOrphan()
+    protected function isOrphan()
     {
         if ($this->resource->isPropertyEmpty(Skos::BROADER)) {
             return false;
@@ -142,6 +169,24 @@ class Document
         
         return true;
     }
+    
+    /**
+     * Add lexical labels and documentation properties combined fields to document.
+     * @param Concept $concept
+     * @param DocumentInterface $document
+     */
+    protected function addConceptClasses(Concept $concept, DocumentInterface $document)
+    {
+        foreach (['LexicalLabels', 'DocumentationProperties'] as $propertiesClass) {
+            $values = [];
+            foreach (Concept::$classes[$propertiesClass] as $predicate) {
+                if ($concept->hasProperty($predicate)) {
+                    $values = array_merge($values, $concept->getProperty($predicate));
+                }
+            }
+            $this->mapValuesToField($propertiesClass, $values, $document, '@');
+        }
+    }
 
     /**
      * map [new Literal('test', 'nl')] to s_field@nl => test
@@ -150,24 +195,30 @@ class Document
      * @param array $values
      * @param DocumentInterface $document
      */
-    private function mapValuesToField($field, array $values, DocumentInterface $document)
+    protected function mapValuesToField($field, array $values, DocumentInterface $document, $langSeparator = null)
     {
+        if (empty($langSeparator)) {
+            $langSeparator = '_';
+            if (isset(FieldsMaps::getOldToProperties()[$field])) {
+                $langSeparator = '@'; // The old ones are with @
+            }
+        }
+        
         $data = [];
         foreach ($values as $value) {
-            $newField = $field;
-
+            if (!isset($data[$field])) {
+                $data[$field] = [];
+            }
+            $data[$field][] = $this->valueToSolr($value);
+            
+            // + language
             if (method_exists($value, 'getLanguage') && $value->getLanguage()) {
-                $newField .= '_' . $value->getLanguage();
-            }
-
-            if (!isset($data[$newField])) {
-                $data[$newField] = [];
-            }
-
-            if ($value instanceof Uri) {
-                $data[$newField][] = $value->getUri();
-            } else {
-                $data[$newField][] = $this->valueToSolr($value);
+                $langField = $field . $langSeparator . $value->getLanguage();
+                
+                if (!isset($data[$langField])) {
+                    $data[$langField] = [];
+                }
+                $data[$langField][] = $this->valueToSolr($value);
             }
         }
 
@@ -176,21 +227,28 @@ class Document
         }
     }
     
-    protected function valueToSolr($value)
+    /**
+     * @param Object $value
+     * @return string
+     */
+    protected function valueToSolr(Object $value)
     {
-        switch ($value->getType()) {
-            case Literal::TYPE_DATETIME:
-                if ($value->getValue() instanceof \DateTime) {
-                    return $value->getValue()->format('Y-m-d\TH:i:s.z\Z');
-                } else {
-                    return gmdate('Y-m-d\TH:i:s.z\Z', strtotime($value->getValue()));
-                }
-                break;
-            case Literal::TYPE_BOOL:
-                return (bool)$value->getValue();
-                break;
-            default:
-                return $value->getValue();
+        if ($value instanceof Uri) {
+            return $value->getUri();
+        } else {
+            switch ($value->getType()) {
+                case Literal::TYPE_DATETIME:
+                    if ($value->getValue() instanceof \DateTime) {
+                        return $value->getValue()->format('Y-m-d\TH:i:s.z\Z');
+                    } else {
+                        return gmdate('Y-m-d\TH:i:s.z\Z', strtotime($value->getValue()));
+                    }
+                    break;
+                case Literal::TYPE_BOOL:
+                    return (bool)$value->getValue();
+                default:
+                    return $value->getValue();
+            }
         }
     }
 }

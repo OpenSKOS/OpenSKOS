@@ -80,4 +80,25 @@ class DcTerms
     const TITLE = 'http://purl.org/dc/terms/title';
     const TYPE = 'http://purl.org/dc/terms/type';
     const VALID = 'http://purl.org/dc/terms/valid';
+    
+    /**
+     * Gets all terms in that class.
+     * @return array key => predicate
+     */
+    public static function getAllTerms()
+    {
+        $oClass = new \ReflectionClass(__CLASS__);
+        $constants = $oClass->getConstants();
+        unset($constants['NAME_SPACE']);
+        
+        $constants['ABSTRACT'] = $constants['DC_ABSTRACT'];
+        unset($constants['DC_ABSTRACT']);
+        
+        $result = [];
+        foreach ($constants as $key => $predicate) {
+            $result[strtolower($key)] = $predicate;
+        }
+        
+        return $result;
+    }
 }
