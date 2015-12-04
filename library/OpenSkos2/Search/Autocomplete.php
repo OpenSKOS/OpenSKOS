@@ -199,7 +199,7 @@ class Autocomplete
         }
         
         
-//        echo $solrQuery; exit;
+        echo $solrQuery; exit;
         
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
     }
