@@ -20,7 +20,6 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceCollection;
@@ -40,9 +39,10 @@ class ConceptSchemeManager extends ResourceManager
      * Get all scheme's by collection URI
      *
      * @param string $collectionUri e.g http://openskos.org/api/collections/rce:TEST
+     * @param array $filterUris
      * @return ResourceCollection
      */
-    public function getSchemeByCollectionUri($collectionUri)
+    public function getSchemeByCollectionUri($collectionUri, $filterUris = [])
     {
         $uri = new Uri($collectionUri);
         $escaped = (new NTriple())->serialize($uri);
@@ -56,8 +56,15 @@ class ConceptSchemeManager extends ResourceManager
                     <' . OpenSkos::SET .  '> ' . $escaped . ';
                     dc:title ?title;
                     openskos:uuid ?uuid;
-            }
-        ';
+            ';
+        
+        if (!empty($filterUris)) {
+            $query .= 'FILTER (?subject = '
+                . implode(' || ?subject = ', array_map([$this, 'valueToTurtle'], $filterUris))
+                . ')';
+        }
+        
+        $query .= '}';
 
         $result = $this->query($query);
 

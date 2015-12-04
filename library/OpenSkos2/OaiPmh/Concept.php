@@ -22,7 +22,9 @@ namespace OpenSkos2\OaiPmh;
 use DOMDocument;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept as SkosConcept;
+use OpenSkos2\ConceptSchemeManager;
 use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
@@ -32,15 +34,32 @@ class Concept implements Record
     /**
      * @var SkosConcept $concept
      */
-    private $concept;
+    protected $concept;
+    
+    /**
+     *
+     * @var ConceptSchemeManager
+     */
+    protected $schemeManager;
+    
+    /**
+     *
+     * @var OpenSKOS_Db_Table_Collections
+     */
+    protected $setsModel;
     
     /**
      *
      * @param SkosConcept $concept
      */
-    public function __construct(SkosConcept $concept)
-    {
+    public function __construct(
+        SkosConcept $concept,
+        ConceptSchemeManager $schemeManager,
+        \OpenSKOS_Db_Table_Collections $setsModel
+    ) {
         $this->concept = $concept;
+        $this->schemeManager = $schemeManager;
+        $this->setsModel = $setsModel;
     }
     
     /**
@@ -59,18 +78,32 @@ class Concept implements Record
         
         $setSpecs = [];
         $tenants = $concept->getProperty(OpenSkos::TENANT);
-        $sets = $concept->getProperty(OpenSkos::SET);
+        
+        $sets = [];
+        foreach ($concept->getProperty(OpenSkos::SET) as $setUri) {
+            $set = $this->setsModel->findByUri($setUri);
+            if (!isset($sets[$set->tenant])) {
+                $sets[$set->tenant] = [];
+            }
+            $sets[$set->tenant][] = $set;
+        }
         
         foreach ($tenants as $tenant) {
             $setSpecs[] = (string)$tenant;
+            
+            foreach ($sets[(string)$tenant] as $set) {
+                $setSpecs[] = $tenant . ':' . $set->code;
+                
+                $schemes = $this->schemeManager->getSchemeByCollectionUri(
+                    $set->uri,
+                    $concept->getProperty(Skos::INSCHEME)
+                );
+                foreach ($schemes as $scheme) {
+                    $setSpecs[] = $tenant . ':' . $set->code . ':' . $scheme->getUuid();
+                }
+            }
         }
         
-        foreach ($sets as $set) {
-            $arrSet = explode('/', (string)$set);
-            $cleanSet = end($arrSet);
-            $setSpecs[] = $cleanSet;
-        }
-
         return new Header($concept->getUri(), $datestamp, $setSpecs, $concept->isDeleted());
     }
 

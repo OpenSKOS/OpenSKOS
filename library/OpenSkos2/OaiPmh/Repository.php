@@ -47,7 +47,6 @@ use Picturae\OaiPmh\Interfaces\RecordList;
 use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
-use Zend_Db_Adapter_Abstract;
 
 class Repository implements InterfaceRepository
 {
@@ -110,11 +109,10 @@ class Repository implements InterfaceRepository
     private $offset = 0;
 
     /**
-     * Database adapter
      *
-     * @var Zend_Db_Adapter_Abstract $db,
+     * @var OpenSKOS_Db_Table_Collections
      */
-    private $db;
+    private $setsModel;
 
     /**
      *
@@ -128,7 +126,7 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        Zend_Db_Adapter_Abstract $db,
+        \OpenSKOS_Db_Table_Collections $setsModel,
         $description = null
     ) {
         $this->conceptManager = $conceptManager;
@@ -136,8 +134,8 @@ class Repository implements InterfaceRepository
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
+        $this->setsModel = $setsModel;
         $this->description = $description;
-        $this->db = $db;
     }
 
     /**
@@ -177,11 +175,11 @@ class Repository implements InterfaceRepository
             }
 
             // Collection spec
-            $spec = $row['tenant_code'] . ':' . $row['collection_code'];
-            $items[] = new Set($spec, $row['collection_title']);
+            $spec = $row['tenant_code'] . ':' . $row['code'];
+            $items[] = new Set($spec, $row['dc_title']);
 
             // Concept scheme spec
-            $schemes = $this->schemeManager->getSchemeByCollectionUri($row['collection_uri']);
+            $schemes = $this->schemeManager->getSchemeByCollectionUri($row['uri']);
             foreach ($schemes as $scheme) {
                 $uuidProp = $scheme->getProperty(OpenSkos::UUID);
                 $uuid = $uuidProp[0]->getValue();
@@ -219,7 +217,7 @@ class Repository implements InterfaceRepository
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
 
-        return new OaiConcept($concept);
+        return new OaiConcept($concept, $this->schemeManager, $this->setsModel);
     }
 
     /**
@@ -253,7 +251,7 @@ class Repository implements InterfaceRepository
                 $showToken = true;
                 continue;
             }
-            $items[] = new OaiConcept($concept);
+            $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
         }
 
         $token = null;
@@ -293,7 +291,7 @@ class Repository implements InterfaceRepository
                 continue;
             }
 
-            $items[] = new OaiConcept($concept);
+            $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
         }
 
         $params['offset'] = (int)$params['offset'] + $this->limit;
@@ -394,24 +392,19 @@ class Repository implements InterfaceRepository
      */
     private function getCollections()
     {
-        $sql = $this->db->select()
-                ->from(['col' => 'collection'], [
-                    'collection_code' => 'col.code',
-                    'collection_title' => 'col.dc_title',
-                    'collection_description' => 'col.dc_description',
-                    'collection_uri' => 'col.uri',
-                ])
-                ->join(
-                    ['ten' => 'tenant'],
-                    'col.tenant = ten.code',
-                    [
+        $sql = $this->setsModel->select(true)
+            ->join(
+                ['ten' => 'tenant'],
+                'tenant = ten.code',
+                [
                     'tenant_title' => 'ten.name',
                     'tenant_code' => 'ten.code',
-                        ]
-                )
-                ->order('col.tenant ASC');
+                ]
+            )
+            ->order('tenant ASC')
+            ->setIntegrityCheck(false);
 
-        return $this->db->fetchAll($sql);
+        return $this->setsModel->fetchAll($sql);
     }
 
     /**
