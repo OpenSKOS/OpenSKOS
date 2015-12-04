@@ -41,6 +41,7 @@ class FieldsMaps
             'tenant' => OpenSkos::TENANT,
             'collection' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
+            'notation' => Skos::NOTATION,
             'inScheme' => Skos::INSCHEME,
             
             'prefLabel' => Skos::PREFLABEL,
