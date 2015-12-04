@@ -149,9 +149,9 @@ class Autocomplete
         //status
         if (!empty($options['status'])) {
             $solrQuery .= ' AND (';
-            $solrQuery .= 's_status:'
+            $solrQuery .= 's_status:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
-                . ')';
+                . '))';
         } else {
             $solrQuery .= ' AND (-s_status:' . Resource::STATUS_DELETED . ')';
         }
@@ -159,25 +159,25 @@ class Autocomplete
         // sets (collections)
         if (!empty($options['collections'])) {
             $solrQuery .= ' AND (';
-            $solrQuery .= 's_set:'
+            $solrQuery .= 's_set:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
-                . ')';
+                . '))';
         }
 
         // schemes
         if (!empty($options['conceptScheme'])) {
             $solrQuery .= ' AND (';
-            $solrQuery .= 's_inScheme:'
+            $solrQuery .= 's_inScheme:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
-                . ')';
+                . '))';
         }
         
         // tenants
         if (!empty($options['tenants'])) {
             $solrQuery .= ' AND (';
-            $solrQuery .= 's_tenant:'
+            $solrQuery .= 's_tenant:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
-                . ')';
+                . '))';
         }
         
         
@@ -197,9 +197,6 @@ class Autocomplete
         if (!empty($options['orphanedConcepts'])) {
             $solrQuery .= ' AND (b_isOrphan:true) ';
         }
-        
-        
-        echo $solrQuery; exit;
         
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
     }
