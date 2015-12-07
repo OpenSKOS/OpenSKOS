@@ -220,10 +220,14 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     public function getUserHistory()
     {
-        $userOptions = new Zend_Session_Namespace('userOptions');
-        $conceptUris = isset($userOptions->userHistory) ? $userOptions->userHistory : array();
         $conceptsManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
-        return $conceptsManager->fetchByUris($conceptUris);
+        return $conceptsManager->fetchByUris($this->getUserHistoryUris());
+    }
+    
+    public function getUserHistoryUris()
+    {
+        $userOptions = new Zend_Session_Namespace('userOptions');
+        return isset($userOptions->userHistory) ? $userOptions->userHistory : array();
     }
 
     public function updateUserHistory($identifier)

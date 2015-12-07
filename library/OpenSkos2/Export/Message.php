@@ -26,7 +26,8 @@ class Message
     protected $outputFilePath;
     protected $propertiesToExport;
     
-    protected $searchPatterns;
+    protected $searchOptions;
+    protected $uris;
     
     public function getFormat()
     {
@@ -47,12 +48,7 @@ class Message
     {
         return $this->propertiesToExport;
     }
-
-    public function getSearchPatterns()
-    {
-        return $this->searchPatterns;
-    }
-
+    
     public function setFormat($format)
     {
         $this->format = $format;
@@ -73,15 +69,29 @@ class Message
         $this->propertiesToExport = $propertiesToExport;
     }
 
-    public function setSearchPatterns($searchPatterns)
+    public function getSearchOptions()
     {
-        $this->searchPatterns = $searchPatterns;
+        return $this->searchOptions;
     }
 
-    public function __construct($format, $searchPatterns, $propertiesToExport, $maxDepth, $outputFilePath = null)
+    public function getUris()
+    {
+        return $this->uris;
+    }
+
+    public function setSearchOptions($searchOptions)
+    {
+        $this->searchOptions = $searchOptions;
+    }
+
+    public function setUris($uris)
+    {
+        $this->uris = $uris;
+    }
+
+    public function __construct($format, $propertiesToExport, $maxDepth, $outputFilePath = null)
     {
         $this->format = $format;
-        $this->searchPatterns = $searchPatterns;
         $this->propertiesToExport = $propertiesToExport;
         $this->maxDepth = $maxDepth;
         $this->outputFilePath = $outputFilePath;

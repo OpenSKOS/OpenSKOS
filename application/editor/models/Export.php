@@ -22,10 +22,8 @@
 
 use OpenSkos2\Export\Message;
 use OpenSkos2\Export\Serialiser\FormatFactory;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Concept;
 
 class Editor_Models_Export
@@ -267,15 +265,13 @@ class Editor_Models_Export
 
         // Export is slow if export type is search and the search results are more than MAX_RECORDS_FOR_INSTANT_EXPORT
         if ($this->get('type') == 'search') {
-            $searchPatterns = $this->buildSearchPatterns();
-            if (is_string($searchPatterns)) {
-                // This is one uri
-                $count = 1;
-            } else {
-                $resourceManager = $this->getDi()->make('OpenSkos2\Rdf\ResourceManager');
-                $count = $resourceManager->countResources($searchPatterns);
-            }
-            
+            $searchOptions = $this->get('searchOptions');
+            $searchOptions['start'] = 0;
+            $searchOptions['rows'] = 0;
+
+            $this->getDi()->make('OpenSkos2\Search\Autocomplete')
+                ->search($searchOptions, $count);
+
             return $count > Editor_Models_Export::MAX_RECORDS_FOR_INSTANT_EXPORT;
         }
 
@@ -292,7 +288,6 @@ class Editor_Models_Export
         $result = array();
         $result[] = 'uri';
         
-        // @TODO Fetch from the triple store or have a list in the concept.
         $result[] = OpenSkos::UUID;
         $result[] = OpenSkos::STATUS;
         $result[] = OpenSkos::TOBECHECKED;
@@ -318,7 +313,6 @@ class Editor_Models_Export
      */
     public function getExportFileDetails()
     {
-        // @TODO Move somewhere on appropriate place
         switch ($this->get('format')) {
             case FormatFactory::FORMAT_XML:
                 return array('fileName' => $this->get('outputFileName') . '.xml', 'mimeType' => 'text/xml');
@@ -336,44 +330,27 @@ class Editor_Models_Export
      */
     protected function createExportMessage()
     {
-        return new Message(
+        $fieldsToExport = $this->get('fieldsToExport');
+        if (empty($fieldsToExport)) {
+            $fieldsToExport = $this->getExportableConceptFields();
+        }
+        
+        $message = new Message(
             $this->get('format'),
-            $this->buildSearchPatterns(),
-            $this->get('fieldsToExport'),
+            $fieldsToExport,
             $this->get('maxDepth')
         );
-    }
-    
-    /**
-     * Gets the query for export.
-     * @return string
-     * @throws \Exception
-     */
-    protected function buildSearchPatterns()
-    {
-        switch ($this->get('type')) {
-            case 'concept':
-                return $this->get('uri');
-            case 'history':
-                //$user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
-                //$concepts = $user->getUserHistory();
-                //$hasMore = false;
-                throw new \Exception('Not moved to triplestore yet.');
-            case 'selection':
-                //$user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
-                //$concepts = $user->getConceptsSelection();
-                //$hasMore = false;
-                throw new \Exception('Not moved to triplestore yet.');
-            case 'search':
-                // @TODO $searchOptions = $this->get('searchOptions'); to query
-                
-                // All concepts
-                return [Rdf::TYPE => new Uri(Concept::TYPE)];
+        
+        if ($this->get('type') == 'search') {
+            $message->setSearchOptions($this->get('searchOptions'));
+        } else {
+            $message->setUris($this->get('uris'));
         }
+        
+        return $message;
     }
     
     /**
-     * @TODO Should not use the di like that. Here for quick test.
      * return \DI\Container
      */
     protected function getDi()

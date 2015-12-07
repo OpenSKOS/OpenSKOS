@@ -28,6 +28,7 @@ use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
 
 // @TODO remove scripts and zend dependency.
 class Rtf extends FormatAbstract
@@ -37,8 +38,8 @@ class Rtf extends FormatAbstract
      * @var array
      */
     protected $rtfFieldsTitlesMap = array(
-        'uuid' => 'UUID',
         'uri' => 'URI',
+        OpenSkos::UUID => 'UUID',
         Skos::BROADER => 'BT',
         Skos::NARROWER => 'NT',
         Skos::RELATED => 'RT',
@@ -161,7 +162,7 @@ class Rtf extends FormatAbstract
                     if ($property instanceof Literal) {
                         $resourceData['fields'][] = $this->constructRtfFieldData(
                             $predicate,
-                            $property->getValue(),
+                            (string)$property,
                             $property->getLanguage()
                         );
                     } elseif ($property instanceof Uri) {

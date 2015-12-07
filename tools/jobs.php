@@ -141,6 +141,7 @@ switch ($action) {
 
             $jobs = $model->fetchAll($select);
         }
+        
         if (!count($jobs)) {
             exit(0);
         }

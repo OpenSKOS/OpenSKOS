@@ -18,6 +18,8 @@
 
 namespace OpenSkos2\Export\Serialiser\Exception;
 
+use OpenSkos2\Exception\OpenSkosException;
+
 /**
  * Thrown when the format requires a list of properties to be able to serialise.
  */

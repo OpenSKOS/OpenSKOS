@@ -21,6 +21,7 @@ namespace OpenSkos2\Export;
 
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Export\Serialiser\FormatFactory;
+use OpenSkos2\Search\Autocomplete;
 
 class Command
 {
@@ -28,14 +29,21 @@ class Command
      * @var ResourceManager
      */
     private $resourceManager;
+    
+    /**
+     * Searcher for when search options are provided.
+     * @var \OpenSkos2\Search\Autocomplete
+     */
+    protected $searchAutocomplete;
 
     /**
      * Command constructor.
      * @param ResourceManager $resourceManager
      */
-    public function __construct(ResourceManager $resourceManager)
+    public function __construct(ResourceManager $resourceManager, Autocomplete $searchAutocomplete)
     {
         $this->resourceManager = $resourceManager;
+        $this->searchAutocomplete = $searchAutocomplete;
     }
     
     /**
@@ -52,10 +60,17 @@ class Command
         );
         
         $serialiser = new Serialiser(
-            $this->resourceManager,
-            $format,
-            $message->getSearchPatterns()
+            $format
         );
+        
+        $searchOptions = $message->getSearchOptions();
+        if (!empty($searchOptions)) {
+            $serialiser->setSearchOptions($searchOptions);
+            $serialiser->setSearchAutocomplete($this->searchAutocomplete);
+        } else {
+            $serialiser->setUris($message->getUris());
+            $serialiser->setResourceManager($this->resourceManager);
+        }
         
         if ($message->getOutputFilePath()) {
             $serialiser->writeToFile($message->getOutputFilePath());

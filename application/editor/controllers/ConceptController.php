@@ -251,7 +251,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         switch ($export->get('type')) {
             case 'concept':
                 // We have the uri in additionalData.
-                $export->set('uri', $this->getRequest()->getPost('additionalData'));
+                $export->set('uris', [$this->getRequest()->getPost('additionalData')]);
+                break;
+            case 'history':
+                $export->set('uris', $user->getUserHistoryUris());
+                break;
+            case 'selection':
+                $export->set('uris', $user->getConceptsSelectionUris());
                 break;
             case 'search':
                 // We have the json encoded search form data in additionalData.

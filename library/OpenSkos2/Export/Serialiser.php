@@ -22,6 +22,8 @@ namespace OpenSkos2\Export;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
+use OpenSkos2\Exception\OpenSkosException;
+use OpenSkos2\Search\Autocomplete;
 
 class Serialiser
 {
@@ -37,12 +39,17 @@ class Serialiser
      */
     protected $resourceManager;
     
-    // @TODO Maybe collection with searchPatterns or something.
     /**
-     * The searchPatterns to use to fetch resources from the resource manager.
-     * @var Object[]|string
+     * List of uris to export. Leave empty if search options are used (concepts only)
+     * @var array
      */
-    protected $searchPatterns;
+    protected $uris;
+    
+    /**
+     * The options to use to fetch resources from the search autocomplete (concepts only).
+     * @var array
+     */
+    protected $searchOptions;
     
     /**
      * @var FormatAbstract
@@ -50,15 +57,96 @@ class Serialiser
     protected $format;
     
     /**
+     * Searcher for when search options are provided.
+     * @var \OpenSkos2\Search\Autocomplete
+     */
+    protected $searchAutocomplete;
+    
+    /**
+     * Gets the list of uris to export. Leave empty if search options are used (concepts only)
+     * @return array
+     */
+    public function getUris()
+    {
+        return $this->uris;
+    }
+
+    /**
+     * Gets the options to use to fetch resources from the search autocomplete (concepts only).
+     * @return array
+     */
+    public function getSearchOptions()
+    {
+        return $this->searchOptions;
+    }
+
+    /**
+     * Sets the list of uris to export. Leave empty if search options are used (concepts only)
+     * @param array $uris
+     */
+    public function setUris($uris)
+    {
+        $this->uris = $uris;
+    }
+
+    /**
+     * Sets the options to use to fetch resources from the search autocomplete (concepts only).
+     * @param array $searchOptions
+     */
+    public function setSearchOptions($searchOptions)
+    {
+        $this->searchOptions = $searchOptions;
+    }
+    
+    /**
+     * Gets searcher for when search options are provided.
+     * @return OpenSkos2\Search\Autocomplete
+     */
+    public function getSearchAutocomplete()
+    {
+        if (empty($this->searchAutocomplete)) {
+            throw new OpenSkosException('Search\Autocomplete required during export.');
+        }
+        return $this->searchAutocomplete;
+    }
+
+    /**
+     * Sets searcher for when search options are provided.
+     * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
+     */
+    public function setSearchAutocomplete(Autocomplete $searchAutocomplete)
+    {
+        $this->searchAutocomplete = $searchAutocomplete;
+    }
+    
+    /**
+     * Gets the resource manager to use for fetching the resources to serialise.
+     * @return ResourceManager
+     */
+    public function getResourceManager()
+    {
+        if (empty($this->resourceManager)) {
+            throw new OpenSkosException('Resource manager required during export.');
+        }
+        return $this->resourceManager;
+    }
+
+    /**
+     * Gets the resource manager to use for fetching the resources to serialise.
      * @param ResourceManager $resourceManager
+     */
+    public function setResourceManager(ResourceManager $resourceManager)
+    {
+        $this->resourceManager = $resourceManager;
+    }
+
+    /**
      * @param FormatAbstract $format
      * @param Object[]|string $searchPatterns
      */
-    public function __construct(ResourceManager $resourceManager, FormatAbstract $format = null, $searchPatterns = [])
+    public function __construct(FormatAbstract $format = null)
     {
-        $this->resourceManager = $resourceManager;
         $this->format = $format;
-        $this->searchPatterns = $searchPatterns;
     }
     
     /**
@@ -120,26 +208,16 @@ class Serialiser
      */
     protected function fetchResources($start, $step, &$hasMore)
     {
-        // @TODO Sort
-        
-        if (is_string($this->searchPatterns)) {
-            // Search patterns is is uri.
-            $collection = new ResourceCollection(
-                [
-                    $this->resourceManager->fetchByUri($this->searchPatterns)
-                ]
-            );
+        if (!empty($this->searchOptions)) {
+            $options = $this->searchOptions;
+            $options['start'] = $start;
+            $options['rows'] = $step;
+            $collection = $this->getSearchAutocomplete()->search($options, $numFound);
             
+            $hasMore = ($start + $step) < $numFound;
+        } elseif (!empty($this->uris)) {
+            $collection = $this->getResourceManager()->fetchByUris($this->uris);
             $hasMore = false;
-        } else {
-            $collection = $this->resourceManager->fetch(
-                $this->searchPatterns,
-                $start,
-                $step
-            );
-            
-            // It may make it look once more at the end. But this way we don't need to count first.
-            $hasMore = !(count($collection) < $step);
         }
         
         return $collection;
