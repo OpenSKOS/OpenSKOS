@@ -130,7 +130,7 @@ class Editor_Forms_Concept_ConceptToForm
             }
         }
         
-        self::ensureAltAndHiddenLabels($concept, $formData);
+        self::ensureLabels($concept, $formData);
     }
     
     /**
@@ -138,11 +138,17 @@ class Editor_Forms_Concept_ConceptToForm
      * @param Concept $concept
      * @param array $formData
      */
-    protected static function ensureAltAndHiddenLabels(Concept $concept, &$formData)
+    protected static function ensureLabels(Concept $concept, &$formData)
     {
         $translatedFieldsMap = Editor_Forms_Concept::getTranslatedFieldsMap();
         
         foreach ($concept->retrieveLanguages() as $language) {
+            if (!$concept->hasPropertyInLanguage(Skos::PREFLABEL, $language)) {
+                $formData[array_search(Skos::PREFLABEL, $translatedFieldsMap)][] = [
+                    'languageCode' => $language,
+                    'value' => [''],
+                ];
+            }
             if (!$concept->hasPropertyInLanguage(Skos::ALTLABEL, $language)) {
                 $formData[array_search(Skos::ALTLABEL, $translatedFieldsMap)][] = [
                     'languageCode' => $language,

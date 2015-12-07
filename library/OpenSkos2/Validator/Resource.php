@@ -22,12 +22,17 @@ namespace OpenSkos2\Validator;
 use OpenSkos2\Tenant;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
+use OpenSkos2\Validator\Concept\CycleInBroader;
+use OpenSkos2\Validator\Concept\CycleInNarrower;
 use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
+use OpenSkos2\Validator\Concept\RequriedPrefLabel;
+use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
@@ -141,7 +146,6 @@ class Resource
     
     /**
      * Return all validators for a concept
-     *
      * @return ResourceValidator[]
      */
     private function getConceptValidators()
@@ -150,9 +154,14 @@ class Resource
             new DuplicateBroader(),
             new DuplicateNarrower(),
             new DuplicateRelated(),
+            new CycleBroaderAndNarrower(),
+            new CycleInBroader(),
+            new CycleInNarrower(),
             new InScheme(),
             new RelatedToSelf(),
-            new UniqueNotation()
+            new UniqueNotation(),
+            new RequriedPrefLabel(),
+            new UniquePreflabelInScheme(),
         ];
         
         foreach ($validators as $validator) {
