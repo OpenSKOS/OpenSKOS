@@ -22,6 +22,7 @@ namespace OpenSkos2\Export\Serialiser\Format;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions as EasyRdfOpenSkos;
+use OpenSkos2\Export\Serialiser\Exception\RequiredNamespacesListException;
 
 // @TODO This class ignores properties to export.
 class Xml extends FormatAbstract
