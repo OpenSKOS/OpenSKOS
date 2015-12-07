@@ -45,6 +45,24 @@ class Namespaces
     }
     
     /**
+     * Gets list of namespaces normally used in concept's rdf format.
+     * @return array [prefix => namespace]
+     */
+    public static function getRdfConceptNamespaces()
+    {
+        // @TODO Check ResourceManager->fetchNamespaces().
+        // It is what we need but does not work always.
+        return [
+            'rdf' => \OpenSkos2\Namespaces\Rdf::NAME_SPACE,
+            'dc' => \OpenSkos2\Namespaces\Dc::NAME_SPACE,
+            'dcterms' => \OpenSkos2\Namespaces\DcTerms::NAME_SPACE,
+            'skos' => \OpenSkos2\Namespaces\Skos::NAME_SPACE,
+            'skosxl' => \OpenSkos2\Namespaces\SkosXl::NAME_SPACE,
+            'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
+        ];
+    }
+    
+    /**
      * Makes http://openskos.org/xmlns#status to be openskos:status
      * @param string $property
      * @return string

@@ -52,12 +52,9 @@ class RdfResponse extends ResultSetResponse
         $doc = new \DOMDocument;
         $root = $doc->createElementNS(\OpenSkos2\Namespaces\Rdf::NAME_SPACE, 'rdf:RDF');
         $ns = 'http://www.w3.org/2000/xmlns/';
-        $root->setAttributeNS($ns, 'xmlns:skos', \OpenSkos2\Namespaces\Skos::NAME_SPACE);
-        $root->setAttributeNS($ns, 'xmlns:dc', \OpenSkos2\Namespaces\Dc::NAME_SPACE);
-        $root->setAttributeNS($ns, 'xmlns:dcterms', \OpenSkos2\Namespaces\DcTerms::NAME_SPACE);
-        $root->setAttributeNS($ns, 'xmlns:openskos', \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE);
-        $root->setAttributeNS($ns, 'xmlns:owl', \OpenSkos2\Namespaces\Owl::NAME_SPACE);
-        $root->setAttributeNS($ns, 'xmlns:rdfs', \OpenSkos2\Namespaces\Rdfs::NAME_SPACE);
+        foreach (\OpenSkos2\Namespaces::getRdfConceptNamespaces() as $prefix => $namespace) {
+            $root->setAttributeNS($ns, 'xmlns:' . $prefix, $namespace);
+        }
         $root->setAttribute('openskos:numFound', $this->result->getTotal());
         $root->setAttribute('openskos:start', $this->result->getStart());
         $doc->appendChild($root);

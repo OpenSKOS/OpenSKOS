@@ -434,6 +434,9 @@ class ResourceManager
      */
     public function fetchNamespaces()
     {
+        // @TODO Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
+        return \OpenSkos2\Namespaces::getRdfConceptNamespaces();
+        
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
 
