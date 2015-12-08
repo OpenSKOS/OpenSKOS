@@ -22,6 +22,12 @@ namespace OpenSkos2\Search;
 class ParserText
 {
     /**
+     * Holds the format in which the dates in the options must be.
+     * @var string
+     */
+    const OPTIONS_DATE_FORMAT = 'dd/MM/yyyy';
+    
+    /**
      * Holds the regular expression for splitting the search text for search by text.
      *
      * @var string
@@ -73,5 +79,42 @@ class ParserText
         }
 
         return false;
+    }
+    
+    /**
+     * Builds query for date period - like created_timestamp:[{startDate} TO {endDate}].
+     * @param string $field The field to search by.
+     * @param string $startDate Use as start date (it is converted to timestamp)
+     * @param string $endDate Use as end date (it is converted to timestamp)
+     * @return string
+     */
+    public function buildDatePeriodQuery($field, $startDate, $endDate)
+    {
+        $isStartDateSpecified = !empty($startDate);
+        $isEndDateSpecified = !empty($endDate);
+        if (!$isStartDateSpecified && !$isEndDateSpecified) {
+            return '';
+        }
+        if ($isStartDateSpecified) {
+            $startDate = $this->dateToSolrDate($startDate);
+        } else {
+            $startDate = '*';
+        }
+        if ($isEndDateSpecified) {
+            $endDate = $this->dateToSolrDate($endDate);
+        } else {
+            $endDate = '*';
+        }
+        return $field . ':[' . $startDate . ' TO ' . $endDate . ']';
+    }
+    
+    /**
+     * Converts the given date into a solr date (ISO 8601)
+     * @return string The solr date
+     */
+    public function dateToSolrDate($date)
+    {
+        $parsedDate = new \Zend_Date($date, self::OPTIONS_DATE_FORMAT);
+        return gmdate('Y-m-d\TH:i:s.z\Z', $parsedDate->toString('U'));
     }
 }

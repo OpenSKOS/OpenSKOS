@@ -20,21 +20,28 @@
 namespace OpenSkos2\Search;
 
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\FieldsMaps;
+use Solarium\Core\Query\Helper as QueryHelper;
 
 class Autocomplete
 {
     /**
      * @var \OpenSkos2\ConceptManager
      */
-    private $manager;
+    protected $manager;
+    
+    /**
+     * @var OpenSKOS_Db_Table_Users
+     */
+    protected $usersModel;
 
     /**
      * @param \OpenSkos2\ConceptManager $manager
+     * @param \OpenSKOS_Db_Table_Users $usersModel
      */
-    public function __construct(\OpenSkos2\ConceptManager $manager)
+    public function __construct(\OpenSkos2\ConceptManager $manager, \OpenSKOS_Db_Table_Users $usersModel)
     {
         $this->manager = $manager;
+        $this->usersModel = $usersModel;
     }
 
     /**
@@ -45,10 +52,9 @@ class Autocomplete
      */
     public function search($options, &$numFound)
     {
-        // @TODO Created, modified, approved section not implemented yet.
         // @TODO Ensure all options are arrays.
         
-        $helper = new \Solarium\Core\Query\Helper();
+        $helper = new QueryHelper();
         
         $parser = new ParserText();
         
@@ -138,14 +144,6 @@ class Autocomplete
 
         
         
-        
-        
-        
-        
-        
-        
-        
-        
         //status
         if (!empty($options['status'])) {
             $solrQuery .= ' AND (';
@@ -182,7 +180,6 @@ class Autocomplete
         
         
         
-        
         // to be checked
         if (!empty($options['toBeChecked'])) {
             $solrQuery .= ' AND (b_toBeChecked:true) ';
@@ -198,6 +195,82 @@ class Autocomplete
             $solrQuery .= ' AND (b_isOrphan:true) ';
         }
         
+        
+        
+        $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
+        if (!empty($interactionsQuery)) {
+            $solrQuery .= ' AND (' . $interactionsQuery . ')';
+        }
+        
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
+    }
+    
+    /**
+     * Creates the query for creator, modifier and accepted by in combination with date created and etc.
+     * @param array $options
+     * @param \Solarium\Core\Query\Helper $helper
+     * @param ParserText $parser
+     */
+    protected function interactionsQuery($options, $helper, $parser)
+    {
+        $map = [
+            'created' => [
+                's_creator',
+                'd_dateSubmited',
+            ],
+            'modified' => [
+                's_contributor',
+                'd_modified',
+            ],
+            'approved' => [
+                's_acceptedBy',
+                'd_dateAccepted',
+            ],
+        ];
+        
+        if (empty($options['userInteractionType'])) {
+            $options['userInteractionType'] = [];
+        }
+        
+        $interactionsQueries = [];
+        foreach ($options['userInteractionType'] as $type) {
+            $users = [];
+            if (!empty($options['interactionByRoles'])) {
+                $users = array_merge(
+                    $users,
+                    $this->usersModel->getUrisByRoles(
+                        $options['tenants'],
+                        $options['interactionByRoles']
+                    )
+                );
+            }
+            if (!empty($options['interactionByUsers'])) {
+                $users = array_merge($users, $options['interactionByUsers']);
+            }
+            $users = array_unique($users);
+            
+            $dateQuery = $parser->buildDatePeriodQuery(
+                $map[$type][1],
+                isset($options['interactionDateFrom']) ? $options['interactionDateFrom'] : null,
+                isset($options['interactionDateTo']) ? $options['interactionDateTo'] : null
+            );
+            
+            $query = '';
+            if (!empty($users)) {
+                $query = $map[$type][0] . ':('
+                    . implode(' OR ', array_map([$helper, 'escapePhrase'], $users))
+                    . ')';
+            }
+            
+            if (!empty($query) && !empty($dateQuery)) {
+                $query = '(' . $query . ' AND ' . $dateQuery . ')';
+            } elseif (empty($query) && !empty($dateQuery)) {
+                $query = $dateQuery;
+            }
+            
+            $interactionsQueries[] = $query;
+        }
+        
+        return implode(' OR ', $interactionsQueries);
     }
 }

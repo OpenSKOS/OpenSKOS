@@ -74,7 +74,7 @@ class Document
         OpenSkos::TENANT => ['s_tenant'],
         OpenSkos::TOBECHECKED => ['b_toBeChecked'],
         DcTerms::CREATOR => ['s_creator'],
-        DcTerms::DATESUBMITTED => ['s_dateSubmited'],
+        DcTerms::DATESUBMITTED => ['d_dateSubmited'],
         DcTerms::CONTRIBUTOR => ['s_contributor'],
         DcTerms::MODIFIED => ['d_modified'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],

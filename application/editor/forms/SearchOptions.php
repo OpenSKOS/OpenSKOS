@@ -257,7 +257,11 @@ class Editor_Forms_SearchOptions extends Zend_Form {
         $rolesOptions = array_combine($roles, $roles);
         $userData = array();
         foreach ($users as $user) {
-            $userData[$user->id] = $user->name;
+            if (!empty($user->uri)) {
+                $userData[$user->uri] = $user->name;
+            } else {
+                $userData[$user->getFoafPerson()->getUri()] = $user->name;
+            }
         }
 
         $userInteractionTypes = array();
