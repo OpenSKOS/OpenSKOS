@@ -5,9 +5,9 @@
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
         <!-- date -->
-        <dynamicField name="d_*" type="date" indexed="true" stored="true" required="false" multiValued="true" />
+        <dynamicField name="d_*" type="date" indexed="true" stored="false" required="false" multiValued="true" />
         <!-- string -->
-        <dynamicField name="s_*" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+        <dynamicField name="s_*" type="string" indexed="true" stored="false" required="false" multiValued="true" />
         <!-- search -->
         <dynamicField name="t_*" type="text" indexed="true" stored="false" required="false" multiValued="true" />
         <!-- autocomplete -->
@@ -21,9 +21,9 @@
 
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
 
-        <copyField source="t_*" dest="search" />
-        
-        
+        <field name="skosXlPrefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlAltLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlHiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- backwards compatibility -->
         <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
@@ -67,7 +67,7 @@
         
         <!-- Languages -->
         <dynamicField name="LexicalLabels@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="prefLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="prefLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
         <dynamicField name="altLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="hiddenLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
@@ -80,6 +80,9 @@
         <dynamicField name="historyNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="scopeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
+        <copyField source="prefLabel" dest="search" />
+        <copyField source="altLabel" dest="search" />
+        <copyField source="hiddenLabel" dest="search" />
     </fields>
 
     <defaultSearchField>search</defaultSearchField>

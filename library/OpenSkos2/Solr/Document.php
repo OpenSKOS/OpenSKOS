@@ -113,7 +113,7 @@ class Document
                 continue;
             }
 
-            // Exlicitly mapped fields
+            // Explicitly mapped fields
             $fields = $this->mapping[$predicate];
             
             // Old fields

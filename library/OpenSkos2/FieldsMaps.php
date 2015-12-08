@@ -21,6 +21,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
 
 class FieldsMaps
@@ -34,7 +35,6 @@ class FieldsMaps
     public static function getOldToProperties()
     {
         // @TODO Ensure all fields
-        // @TODO Add skos xl fields
         
         return [
             'status' => OpenSkos::STATUS,
@@ -80,6 +80,10 @@ class FieldsMaps
             'dcterms_creator' => DcTerms::CREATOR,
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
             'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+            
+            'skosXlPrefLabel' => SkosXl::PREFLABEL,
+            'skosXlAltLabel' => SkosXl::ALTLABEL,
+            'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         ];
     }
 }
