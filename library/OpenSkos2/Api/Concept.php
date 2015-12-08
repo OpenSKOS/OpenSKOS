@@ -111,15 +111,19 @@ class Concept
             $limit = (int)$params['rows'];
         }
         
-        // tenant
-        $tenant = $this->getTenantFromParams($params);
-                
         $options = [
             'start' => $start,
             'rows' => $limit,
-            'tenants' => [$tenant->code],
             'directQuery' => true,
         ];
+        
+        // tenant
+        if (isset($params['tenant'])) {
+            $tenant = $this->getTenantFromParams($params);
+            $options['tenants'] = [$tenant->code];
+        }
+        
+        // search query
         if (isset($params['q'])) {
             $options['searchText'] = $params['q'];
         }
