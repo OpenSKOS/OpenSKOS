@@ -56,6 +56,7 @@ class RdfResponse extends ResultSetResponse
             $root->setAttributeNS($ns, 'xmlns:' . $prefix, $namespace);
         }
         $root->setAttribute('openskos:numFound', $this->result->getTotal());
+        $root->setAttribute('openskos:rows', $this->result->getLimit());
         $root->setAttribute('openskos:start', $this->result->getStart());
         $doc->appendChild($root);
 

@@ -126,7 +126,7 @@ class Concept
         
         $concepts = $this->searchAutocomplete->search($options, $total);
         
-        $result = new ConceptResultSet($concepts, $total, $start);
+        $result = new ConceptResultSet($concepts, $total, $start, $limit);
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);

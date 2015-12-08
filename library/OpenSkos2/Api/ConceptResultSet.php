@@ -25,7 +25,6 @@ namespace OpenSkos2\Api;
  */
 class ConceptResultSet
 {
-    
     /**
      * Total
      * @var int
@@ -46,17 +45,26 @@ class ConceptResultSet
     private $start;
     
     /**
+     * Number of rows limit
      *
-     * @param \OpenSkos2\ConceptCollection $concepts
-     * @param type $total
+     * @var int
      */
-    public function __construct(\OpenSkos2\ConceptCollection $concepts, $total, $start)
-    {
-        $this->total = $total;
-        $this->concepts = $concepts;
-        $this->start = $start;
-    }
+    private $limit;
     
+    /**
+     * @param \OpenSkos2\ConceptCollection $concepts
+     * @param int $total
+     * @param int $start
+     * @param int $limit
+     */
+    public function __construct(\OpenSkos2\ConceptCollection $concepts, $total, $start, $limit)
+    {
+        $this->concepts = $concepts;
+        $this->total = $total;
+        $this->start = $start;
+        $this->limit = $limit;
+    }
+
     /**
      *
      * @return int
@@ -83,5 +91,13 @@ class ConceptResultSet
     public function getStart()
     {
         return $this->start;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getLimit()
+    {
+        return $this->limit;
     }
 }

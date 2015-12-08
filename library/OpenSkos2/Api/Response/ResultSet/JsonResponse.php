@@ -45,6 +45,8 @@ class JsonResponse extends ResultSetResponse
         return [
             'response' => [
                 'numFound' => $this->result->getTotal(),
+                'rows' => $this->result->getLimit(),
+                'start' => $this->result->getStart(),
                 'docs' => $this->getDocs()
             ]
         ];

@@ -21,6 +21,7 @@
 <xs:schema version="1.1"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:attribute name="numFound" type="xs:integer"/>
+    <xs:attribute name="rows" type="xs:integer"/>
     <xs:attribute name="start" type="xs:integer"/>
     <xs:attribute name="maxScore" type="xs:decimal"/>
     <xs:element name="status">
