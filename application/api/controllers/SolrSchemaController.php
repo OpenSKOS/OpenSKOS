@@ -33,7 +33,7 @@ class Api_SolrSchemaController extends OpenSKOS_Rest_Controller
     
     public function indexAction()
     {
-        echo Zend_Registry::get('OpenSKOS_Solr')->getSchema(false);
+        echo file_get_contents(APPLICATION_PATH . '/../data/solr/schema.xml');
     }
 
     public function getAction()

@@ -4,28 +4,6 @@
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
-        <!-- date -->
-        <dynamicField name="d_*" type="date" indexed="true" stored="false" required="false" multiValued="true" />
-        <!-- string -->
-        <dynamicField name="s_*" type="string" indexed="true" stored="false" required="false" multiValued="true" />
-        <!-- search -->
-        <dynamicField name="t_*" type="text" indexed="true" stored="false" required="false" multiValued="true" />
-        <!-- autocomplete -->
-        <dynamicField name="a_*" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
-        <!-- int -->
-        <dynamicField name="i_*" type="integer" indexed="true" stored="false" required="false" multiValued="true" />
-        <!-- boolean -->
-        <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
-                        
-        <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
-
-        <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
-
-        <field name="skosXlPrefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="skosXlAltLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="skosXlHiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        
-        <!-- backwards compatibility -->
         <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
         <field name="tenant" type="string" indexed="true" stored="false" required="false"/>
         <field name="collection" type="string" indexed="true" stored="false" required="false"/>
@@ -40,6 +18,10 @@
         <field name="prefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="altLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="hiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        
+        <field name="skosXlPrefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlAltLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlHiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <field name="DocumentationProperties" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        
         <field name="note" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -80,9 +62,28 @@
         <dynamicField name="historyNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="scopeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
+        <!-- universal fields (used internally) -->
+        <!-- date -->
+        <dynamicField name="d_*" type="date" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- string -->
+        <dynamicField name="s_*" type="string" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- search -->
+        <dynamicField name="t_*" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- autocomplete -->
+        <dynamicField name="a_*" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- int -->
+        <dynamicField name="i_*" type="integer" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- boolean -->
+        <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
+        
+        <!-- default search -->                
+        <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+        
         <copyField source="prefLabel" dest="search" />
         <copyField source="altLabel" dest="search" />
         <copyField source="hiddenLabel" dest="search" />
+        
+        <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
     </fields>
 
     <defaultSearchField>search</defaultSearchField>
