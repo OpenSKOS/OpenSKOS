@@ -439,7 +439,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
 
         if (!$this->uri) {
-            $this->uri = "http://openskos.org/users/" . \Rhumsaa\Uuid\Uuid::uuid4();
+            $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
             $this->save();
         }
 
@@ -462,5 +462,14 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     protected function getDI()
     {
         return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+    }
+    
+    /**
+     * @TODO temp function for base api uri
+     */
+    protected function getBaseApiUri()
+    {
+        $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
+        return $apiOptions['baseUri'];
     }
 }
