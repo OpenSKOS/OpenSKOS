@@ -110,10 +110,14 @@ class Concept
         if (isset($params['rows']) && $params['rows'] < 1001) {
             $limit = (int)$params['rows'];
         }
+        
+        // tenant
+        $tenant = $this->getTenantFromParams($params);
                 
         $options = [
             'start' => $start,
             'rows' => $limit,
+            'tenants' => [$tenant->code],
             'directQuery' => true,
         ];
         if (isset($params['q'])) {

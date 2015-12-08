@@ -64,14 +64,9 @@ class Autocomplete
         
         $solrQuery = '';
         
-        
         if ($isDirectQuery) {
-            
-            
             $term = '(' . $term . ')';
             $solrQuery = $term;
-            
-            
         } else {
             // Fields
             
