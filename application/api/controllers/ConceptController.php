@@ -115,7 +115,7 @@ class Api_ConceptController extends Api_FindConceptsController
     public function postAction()
     {
         $request = $this->getPsrRequest();
-        $api = new OpenSkos2\Api\Concept($this->getConceptManager());
+        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
         $response = $api->create($request);
         $this->emitResponse($response);
     }
@@ -203,7 +203,7 @@ class Api_ConceptController extends Api_FindConceptsController
     public function putAction()
     {
         $request = $this->getPsrRequest();
-        $api = new OpenSkos2\Api\Concept($this->getConceptManager());
+        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
         $response = $api->update($request);
         $this->emitResponse($response);
     }
@@ -261,7 +261,7 @@ class Api_ConceptController extends Api_FindConceptsController
     public function deleteAction()
     {
         $request = $this->getPsrRequest();
-        $api = new OpenSkos2\Api\Concept($this->getConceptManager());
+        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
         $response = $api->delete($request);
         $this->emitResponse($response);
     }
