@@ -33,6 +33,7 @@ use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
+use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
@@ -162,6 +163,7 @@ class Resource
             new UniqueNotation(),
             new RequriedPrefLabel(),
             new UniquePreflabelInScheme(),
+            new UniqueUuid(),
         ];
         
         foreach ($validators as $validator) {

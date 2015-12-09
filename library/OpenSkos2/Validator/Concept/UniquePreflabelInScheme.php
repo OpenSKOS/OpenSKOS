@@ -45,6 +45,7 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
         foreach ($preflabel as $label) {
             foreach ($schemes as $scheme) {
                 if ($this->labelExistsInScheme($concept, $label, $scheme)) {
+                    $this->errorMessages[] = 'The pref label already exists in that concept scheme.';
                     return false;
                 }
             }

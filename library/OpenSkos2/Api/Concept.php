@@ -36,6 +36,8 @@ use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\FieldsMaps;
+use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\Tenant as Tenant;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -258,6 +260,8 @@ class Concept
             
             $this->conceptEditAllowed($concept, $tenant, $user);
             
+            $this->validate($concept, $tenant);
+        
             $concept->ensureMetadata(
                 $tenant->code,
                 $collection->getUri(),
@@ -357,6 +361,25 @@ class Concept
     }
     
     /**
+     * Applies all validators to the concept.
+     * @param \OpenSkos2\Concept $concept
+     * @param OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @throws InvalidArgumentException
+     */
+    protected function validate(\OpenSkos2\Concept $concept, \OpenSKOS_Db_Table_Row_Tenant $tenant)
+    {
+        $validator = new ResourceValidator(
+            $this->manager,
+            new Tenant($tenant->code)
+        );
+        
+        
+        if (!$validator->validate($concept)) {
+            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
+        }
+    }
+    
+    /**
      * Handle the action of creating the concept
      *
      * @param ServerRequestInterface $request
@@ -378,6 +401,8 @@ class Concept
         $collection = $this->getCollection($params, $tenant);
         $user = $this->getUserFromParams($params);
         
+        $this->validate($concept, $tenant);
+        
         $concept->ensureMetadata(
             $tenant->code,
             $collection->getUri(),
@@ -387,10 +412,6 @@ class Concept
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
         if ($autoGenerateUri) {
             $concept->selfGenerateUri();
-        }
-        
-        if (!$this->uniquePrefLabel($concept)) {
-            throw new InvalidArgumentException('The concept preflabel must be unique per scheme', 400);
         }
         
         $this->manager->insert($concept);
@@ -585,19 +606,6 @@ class Concept
         }
 
         return $autoGenerateIdentifiers;
-    }
-    
-    /**
-     * Validate preflabel
-     *
-     * @param \OpenSkos2\Concept $concept
-     * @return boolean
-     */
-    private function uniquePrefLabel(\OpenSkos2\Concept $concept)
-    {
-        $validator = new UniquePreflabelInScheme();
-        $validator->setResourceManager($this->manager);
-        return $validator->validate($concept);
     }
     
     /**
