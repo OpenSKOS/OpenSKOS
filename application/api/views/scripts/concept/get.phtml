@@ -17,86 +17,138 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Concept;
+use OpenSkos2\Namespaces;
+
+$di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+
 /* @var $concept \OpenSkos2\Concept */
 $concept = $this->concept;
 
+/* @var $conceptManager \OpenSkos2\ConceptManager */
+$conceptManager = $di->get('OpenSkos2\ConceptManager');
+
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
 $title = $concept->getCaption($lang);
+
 $this->headTitle($title);
 ?>
 <h2><?=$this->escape($title)?></h2>
 <dl>
     <dt><?=$this->translate('Institution')?>:</dt>
-    <dd><a href="<?=$this->url([
+    <dd>
+        <a href="<?=$this->url([
                 'module' => 'api',
                 'controller' => 'institutions',
                 'id' => (string)$concept->getTenant()
             ],
             'rest'
-        )?>.html"><?=$this->escape($concept->getInstitution()->name)?></a></dd>
-    <?php /* @todo Fix skos:Collection to openskos:Collection first before add this
-    <dt><?=$this->translate('Collection')?>:</dt>
-    <dd>
-        <a href="<?=$this->url(array(
-                                    'module' => 'api',
-                                    'controller' => 'collections',
-                                    'id' => $collection->getId()
-                                ), 'rest'
-                )?>.html"><?=$collection->dc_title?></a>
+        )?>.html">
+            <?=$this->escape($concept->getInstitution()->name)?>
+        </a>
     </dd>
-     */
+    
+    <?php
+        $setsModel = new OpenSKOS_Db_Table_Collections();
     ?>
+    
+    <?php foreach ($concept->getProperty(OpenSkos::SET) as $setUri):?>
+        <?php
+            $set = $setsModel->findByUri($setUri->getUri());
+        ?>
+        <dt><?=$this->translate('Set')?>:</dt>
+        <dd>
+            <a href="<?=$this->url(array(
+                                'module' => 'api',
+                                'controller' => 'collections',
+                                'id' => $set->getId()
+                            ), 'rest'
+            )?>.html">
+                <?= $set->dc_title?>
+            </a>
+        </dd>
+    <?php endforeach;?>
     <dt>URI:</dt>
     <dd>
         <a rel="external" href="<?=$this->escape($concept->getUri())?>"><?=$this->escape($concept->getUri())?></a>
     </dd>
     <dt>SKOS Class:</dt>
-    <dd><a rel="external" href="<?=$concept::TYPE?>"><?=$concept::TYPE?></a></dd>
+    <dd>
+        <a rel="external" href="<?=$concept::TYPE?>"><?=$concept::TYPE?></a>
+    </dd>
 </dl>
 
-<?php if ($inScheme = $concept->getProperty(\OpenSkos2\Namespaces\Skos::INSCHEME)):?>
+<?php if ($concept->hasProperty(Skos::INSCHEME)):?>
+    <?php
+        $schemes = $di->get('OpenSkos2\ConceptSchemeManager')->fetchByUris($concept->getProperty(Skos::INSCHEME));
+    ?>
     <h3><?=$this->translate('inScheme')?></h3>
     <ul>
-        <?php foreach ($inScheme as $uri):?>
-            <li><a href="<?php echo $this->url([
-                        'module' => 'api',
-                        'controller' => 'redirect',
-                        'action' => 'index',
-                        'id' => null
-                    ], 'default'
-                    )?>?id=<?=$this->escape($uri)?>&format=html"><?=$this->escape($uri)?></a></li>
+        <?php foreach ($schemes as $scheme):?>
+            <li><?=$this->escape($scheme->getCaption($lang))?></li>
         <?php endforeach?>
     </ul>
 <?php endif?>
 
-<?php foreach (\OpenSkos2\Concept::$classes as $className => $fieldsInClass):?>
+<?php
+    $displayClasses = [
+        'LexicalLabels',
+        'Notations',
+        'DocumentationProperties',
+    ];
+?>
+<?php foreach ($displayClasses as $className):?>
     <h3><?=$this->translate($className)?></h3>
-    <?php foreach ($fieldsInClass as $subClass):?>
+        
+    <?php foreach (Concept::$classes[$className] as $property):?>
+        <?php if (!$concept->isPropertyEmpty($property)):?>
+            <h4>
+                <?= Namespaces::shortenProperty($property)?>
+            </h4>
 
-        <?php
-        $values = $concept->getProperty($subClass);
-        if (!count($values)) {
-            continue;
-        }
-        ?>
-
-        <h4><?=$this->translate('skos:'.$subClass)?></h4>
-
-        <ul class="<?php echo $subClass?>">
-            <?php foreach ($values as $value):?>
-                <li>
-                    <a class="resolvable-concept"
-                       href="<?=$this->url(['module' => 'api', 'controller' => 'concept', 'id' => null], 'rest')?>?id=<?=$value?>&format=html">
+            <ul>
+                <?php foreach ($concept->getProperty($property) as $value):?>
+                    <li>
                         <?php if (method_exists($value, 'getLanguage') && $value->getLanguage()): ?>
-                            <span class="label" xml:lang="<?=$value->getLanguage()?>"><?=$this->escape($value)?></span>
-                            <span class="lang <?=$lang?>">(<?=$lang?>)</span>
+                            <span class="label" xml:lang="<?=$value->getLanguage()?>"><?=$this->escape((string)$value)?></span>
+                            <span class="lang <?=$value->getLanguage()?>">(<?=$value->getLanguage()?>)</span>
                         <?php else:?>
-                            <?=$this->escape($value)?>
+                            <?=$this->escape((string)$value)?>
                         <?php endif?>
-                    </a>
-                </li>
-            <?php endforeach?>
-        </ul>
+                    </li>
+                <?php endforeach?>
+            </ul>
+        <?php endif; ?>
+    <?php endforeach; ?>
+<?php endforeach; ?>
+    
+<?php
+    $relationsClasses = [
+        'SemanticRelations',
+        'MappingProperties',
+    ];
+?>
+<?php foreach ($relationsClasses as $className):?>
+    <h3><?=$this->translate($className)?></h3>
+        
+    <?php foreach (Concept::$classes[$className] as $property):?>
+        <?php $relations = $conceptManager->fetchRelations($concept, $property);?>
+        <?php if ($relations->count() > 0):?>
+            <h4>
+                <?= Namespaces::shortenProperty($property)?>
+            </h4>
+            <ul>
+                <?php foreach ($relations as $relationConcept):?>
+                    <li>
+                        <a href="/api/concept/<?= $relationConcept->getUuid()?>.html">
+                            <?= $this->escape($relationConcept->getCaption($lang))?>
+                        </a>
+                    </li>
+                <?php endforeach?>
+            </ul>
+        <?php endif; ?>
     <?php endforeach; ?>
 <?php endforeach; ?>
 

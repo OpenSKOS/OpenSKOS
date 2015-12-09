@@ -161,8 +161,12 @@ class ConceptManager extends ResourceManager
         
         $allRelations = new ConceptCollection([]);
         
+        if (!$uri instanceof Uri) {
+            $uri = new Uri($uri);
+        }
+        
         $patterns = [
-            [new Uri($uri), $relationType, '?subject'],
+            [$uri, $relationType, '?subject'],
         ];
         
         if (!empty($conceptScheme)) {
