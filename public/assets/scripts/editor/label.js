@@ -29,13 +29,13 @@ var EditorLabel = new Class({
             self.addingToContainer = ev.target.getParent('.multi-field-skos-xl-label');
             var href = ev.target.getProperty('href');
             href += '?language=' + Editor.Concept.getCurrentLanguage();
-            SqueezeBox.open(href, {size: {x: 400, y: 300}, handler: 'iframe'});
+            SqueezeBox.open(href, {size: {x: 400, y: 330}, handler: 'iframe'});
         });
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-edit)', function (ev) {
             ev.stop();
             var uri = ev.target.getParent('.skos-xl-label').getElement('.uri').get('value');
             var href = ev.target.getProperty('href') + '/uri/' + encodeURIComponent(uri);
-            SqueezeBox.open(href, {size: {x: 400, y: 300}, handler: 'iframe'});
+            SqueezeBox.open(href, {size: {x: 400, y: 330}, handler: 'iframe'});
         });
         $(document.body).addEvent('click:relay(.multi-field-skos-xl-label .skos-xl-label-remove)', function (ev) {
             ev.stop();

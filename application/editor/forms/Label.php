@@ -56,10 +56,6 @@ class Editor_Forms_Label extends OpenSKOS_Form
     
     protected function buildButtons()
     {
-//        $this->addElement('button', 'cancelButton', array(
-//                'label' => 'Cancel',
-//                'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span', 'openOnly' => true)))
-//        ));
         $this->addElement('submit', 'okButton', array(
                 'label' => 'Ok',
                 'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
