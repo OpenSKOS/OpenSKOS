@@ -45,6 +45,8 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      * Must have a q query parameter in the request example:
      * /api/autocomplete?q=something
      * 
+     * Can use parameters searchLabel, returnLabel and lang
+     * 
      * Returns
      * 
      * [
@@ -82,6 +84,8 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      * 
      * Must have a term in the path from the request:
      * /api/autocomplete/something
+     * 
+     * Can use parameters searchLabel, returnLabel and lang
      * 
      * Returns
      * 
