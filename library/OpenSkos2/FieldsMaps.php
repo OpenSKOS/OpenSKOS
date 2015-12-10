@@ -86,4 +86,20 @@ class FieldsMaps
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         ];
     }
+    
+    /**
+     * Returns the corresposing property for the given field.
+     * If property not found - returns $field.
+     * @param string $field
+     * @return string
+     */
+    public static function resolveOldField($field)
+    {
+        $map = self::getOldToProperties();
+        if (isset($map[$field])) {
+            return $map[$field];
+        } else {
+            return $field;
+        }
+    }
 }

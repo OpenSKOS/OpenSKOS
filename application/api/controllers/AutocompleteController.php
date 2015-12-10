@@ -17,6 +17,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\FieldsMaps;
+
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
 
@@ -54,13 +56,20 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function indexAction()
     {
-        if (null === ($q = $this->getRequest()->getParam('q'))) {
+        $request = $this->getRequest();
+        
+        if (null === ($q = $request->getParam('q'))) {
             $this->getResponse()
                 ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
         
-        $result = $this->getConceptManager()->autoComplete($q);
+        $result = $this->getConceptManager()->autoComplete(
+            $q,
+            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
+            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $request->getParam('lang')
+        );
         
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
@@ -85,11 +94,17 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function getAction()
     {
+        $request = $this->getRequest();
+        
+        $q = $request->getParam('id');
+        $result = $this->getConceptManager()->autoComplete(
+            $q,
+            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
+            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $request->getParam('lang')
+        );
+        
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        
-        $q = $this->getRequest()->getParam('id');
-        $result = $this->getConceptManager()->autoComplete($q);
-        
         $this->getResponse()->setBody(
             json_encode($result)
         );

@@ -54,36 +54,32 @@ class ConceptManager extends ResourceManager
      * @param string $term
      * @return array
      */
-    public function autoComplete($term)
+    public function autoComplete($term, $searchLabel = Skos::PREFLABEL, $returnLabel = Skos::PREFLABEL, $lang = null)
     {
-        $prefixes = [
-            'skos' => Skos::NAME_SPACE,
-            'openskos' => OpenSkos::NAME_SPACE
-        ];
-
         $literalKey = new Literal('^' . $term);
         $eTerm = (new NTriple())->serialize($literalKey);
 
-        $q = new QueryBuilder($prefixes);
+        $q = new QueryBuilder();
 
         // Do a distinct query on pref and alt labels where string starts with $term
-        $query = $q->selectDistinct('?label')
-                ->union(
-                    $q->newSubgraph()
-                        ->where('?subject', 'openskos:status', '"' . Concept::STATUS_APPROVED . '"')
-                        ->also('skos:prefLabel', '?label'),
-                    $q->newSubgraph()
-                        ->where('?subject', 'openskos:status', '"' . Concept::STATUS_APPROVED . '"')
-                        ->also('skos:altLabel', '?label')
-                )
-                ->filter('regex(str(?label), ' . $eTerm . ', "i")')
-                ->limit(50);
+        $query = $q->selectDistinct('?returnLabel')
+            ->where('?subject', '<' . OpenSkos::STATUS . '>', '"' . Concept::STATUS_APPROVED . '"')
+            ->also('<' . $returnLabel . '>', '?returnLabel')
+            ->also('<' . $searchLabel . '>', '?searchLabel')
+            ->limit(50);
+        
+        $filter = 'regex(str(?searchLabel), ' . $eTerm . ', "i")';
+        if (!empty($lang)) {
+            $filter .= ' && ';
+            $filter .= 'lang(?returnLabel) = "' . $lang . '"';
+        }
+        $query->filter($filter);
 
         $result = $this->query($query);
 
         $items = [];
         foreach ($result as $literal) {
-            $items[] = $literal->label->getValue();
+            $items[] = $literal->returnLabel->getValue();
         }
         return $items;
     }
