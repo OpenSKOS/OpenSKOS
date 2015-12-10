@@ -318,11 +318,13 @@ class Repository implements InterfaceRepository
     public function listMetadataFormats($identifier = null)
     {
         $formats = [];
-        $formats[] = new ImplementationMetadataFormatType(
-            'oai_dc',
-            'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
-            'http://www.openarchives.org/OAI/2.0/oai_dc/'
-        );
+        
+        // @TODO The oai_dc is actually required by the oai-pmh specs. So some day has to be implemented.
+//        $formats[] = new ImplementationMetadataFormatType(
+//            'oai_dc',
+//            'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
+//            'http://www.openarchives.org/OAI/2.0/oai_dc/'
+//        );
 
         $formats[] = new ImplementationMetadataFormatType(
             'oai_rdf',

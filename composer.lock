@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ed68a70ced3626b159246b8e90700c27",
+    "hash": "382c5876918c4663546416ee7b891395",
+    "content-hash": "f0bcc8470d93df1e644ada630237f19b",
     "packages": [
         {
             "name": "benestar/asparagus",
@@ -779,16 +780,16 @@
         },
         {
             "name": "picturae/oai-pmh",
-            "version": "0.5.7",
+            "version": "0.5.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picturae/OaiPmh.git",
-                "reference": "f94ebc13ec49393680bd35474084ad00307016d8"
+                "reference": "a78361a2dc56cc84f261d6fb90a365951a013576"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/f94ebc13ec49393680bd35474084ad00307016d8",
-                "reference": "f94ebc13ec49393680bd35474084ad00307016d8",
+                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/a78361a2dc56cc84f261d6fb90a365951a013576",
+                "reference": "a78361a2dc56cc84f261d6fb90a365951a013576",
                 "shasum": ""
             },
             "require": {
@@ -819,7 +820,7 @@
                 }
             ],
             "description": "Picturae OAI-PMH package. Can be used to create a OAI endpoint",
-            "time": "2015-12-01 08:40:05"
+            "time": "2015-12-10 13:18:44"
         },
         {
             "name": "psr/http-message",
