@@ -259,8 +259,6 @@ class Concept
             $user = $this->getUserFromParams($params);
             
             $this->conceptEditAllowed($concept, $tenant, $user);
-            
-            $this->validate($concept, $tenant);
         
             $concept->ensureMetadata(
                 $tenant->code,
@@ -268,6 +266,8 @@ class Concept
                 $user->getFoafPerson(),
                 $existingConcept->getStatus()
             );
+            
+            $this->validate($concept, $tenant);
             
             $this->manager->replaceAndCleanRelations($concept);
             
@@ -388,7 +388,7 @@ class Concept
     {
         $concept = $this->getConceptFromRequest($request);
         
-        if ($this->manager->askForUri((string)$concept->getUri())) {
+        if (!$concept->isBlankNode() && $this->manager->askForUri((string)$concept->getUri())) {
             throw new InvalidArgumentException(
                 'The concept with uri ' . $concept->getUri() . ' already exists. Use PUT instead.',
                 400
@@ -401,8 +401,6 @@ class Concept
         $collection = $this->getCollection($params, $tenant);
         $user = $this->getUserFromParams($params);
         
-        $this->validate($concept, $tenant);
-        
         $concept->ensureMetadata(
             $tenant->code,
             $collection->getUri(),
@@ -413,6 +411,8 @@ class Concept
         if ($autoGenerateUri) {
             $concept->selfGenerateUri();
         }
+        
+        $this->validate($concept, $tenant);
         
         $this->manager->insert($concept);
         

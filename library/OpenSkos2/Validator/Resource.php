@@ -152,18 +152,18 @@ class Resource
     private function getConceptValidators()
     {
         $validators = [
+            new InScheme(),
+            new UniqueNotation(),
+            new RequriedPrefLabel(),
+            new UniquePreflabelInScheme(),
+            new UniqueUuid(),
             new DuplicateBroader(),
             new DuplicateNarrower(),
             new DuplicateRelated(),
             new CycleBroaderAndNarrower(),
             new CycleInBroader(),
             new CycleInNarrower(),
-            new InScheme(),
             new RelatedToSelf(),
-            new UniqueNotation(),
-            new RequriedPrefLabel(),
-            new UniquePreflabelInScheme(),
-            new UniqueUuid(),
         ];
         
         foreach ($validators as $validator) {

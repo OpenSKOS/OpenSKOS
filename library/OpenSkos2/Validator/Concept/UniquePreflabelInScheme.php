@@ -64,17 +64,25 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
      */
     private function labelExistsInScheme(Concept $concept, $label, $scheme)
     {
-        return $this->resourceManager->askForMatch([
+        $uri = null;
+        if (!$concept->isBlankNode()) {
+            $uri = $concept->getUri();
+        }
+        
+        return $this->resourceManager->askForMatch(
             [
-                'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                'predicate' => Skos::PREFLABEL,
-                'value' => $label
+                [
+                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
+                    'predicate' => Skos::PREFLABEL,
+                    'value' => $label
+                ],
+                [
+                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
+                    'predicate' => Skos::INSCHEME,
+                    'value' => $scheme
+                ]
             ],
-            [
-                'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                'predicate' => Skos::INSCHEME,
-                'value' => $scheme
-            ]
-        ], $concept->getUri());
+            $uri
+        );
     }
 }
