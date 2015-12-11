@@ -240,7 +240,8 @@ class Repository implements InterfaceRepository
             $until,
             $pSet['tenant'],
             $pSet['collection'],
-            $pSet['conceptScheme']
+            $pSet['conceptScheme'],
+            $numFound
         );
         
         $items = [];
@@ -259,7 +260,7 @@ class Repository implements InterfaceRepository
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
         
-        return new OaiRecordList($items, $token);
+        return new OaiRecordList($items, $token, $numFound, 0);
     }
 
     /**
@@ -279,7 +280,8 @@ class Repository implements InterfaceRepository
             $params['until'],
             $pSet['tenant'],
             $pSet['collection'],
-            $pSet['conceptScheme']
+            $pSet['conceptScheme'],
+            $numFound
         );
 
         $items = [];
@@ -294,6 +296,7 @@ class Repository implements InterfaceRepository
             $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
         }
 
+        $cursor = $params['offset'];
         $params['offset'] = (int)$params['offset'] + $this->limit;
 
         $token = null;
@@ -308,7 +311,7 @@ class Repository implements InterfaceRepository
             );
         }
 
-        return new OaiRecordList($items, $token);
+        return new OaiRecordList($items, $token, $numFound, $cursor);
     }
 
     /**
@@ -512,7 +515,8 @@ class Repository implements InterfaceRepository
         \DateTime $till = null,
         $tenant = null,
         $collection = null,
-        $scheme = null
+        $scheme = null,
+        &$numFound = null
     ) {
         $prefixes = [
             'rdf' => Rdf::NAME_SPACE,
@@ -524,11 +528,9 @@ class Repository implements InterfaceRepository
         ];
 
         $qb = new QueryBuilder($prefixes);
-        $select = $qb->describe('?subject')
-                ->where('?subject', 'rdf:type', 'skos:Concept')
-                ->also('dct:modified', '?modified')
-                ->limit($limit)
-                ->offset($offset);
+        
+        $select = $qb->where('?subject', 'rdf:type', 'skos:Concept')
+            ->also('dct:modified', '?modified');
 
         if (!empty($tenant)) {
             $tenantN = NTriple::getInstance()->serialize($tenant);
@@ -553,9 +555,21 @@ class Repository implements InterfaceRepository
 
         if (!empty($till)) {
             $tTill = $till->format(DATE_W3C);
-            $select->filter('?modified >= "' . $tTill . '"^^xsd:dateTime');
+            $select->filter('?modified <= "' . $tTill . '"^^xsd:dateTime');
         }
         
-        return $this->conceptManager->fetchQuery($select);
+        // Count the results.
+        $count = clone($select);
+        $count->select('(COUNT(DISTINCT ?subject) AS ?count)');
+        $countResult = $this->conceptManager->query($count);
+        $numFound = $countResult->offsetGet(0)->count->getValue();
+        
+        // Select the results.
+        $describe = clone($select);
+        $describe->describe('?subject')
+            ->limit($limit)
+            ->offset($offset);
+        
+        return $this->conceptManager->fetchQuery($describe);
     }
 }
