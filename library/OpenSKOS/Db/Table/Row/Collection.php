@@ -254,14 +254,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         return Zend_Controller_Front::getInstance()->getParam('bootstrap');
     }
 
-    public function delete()
-    {
-        $collection_id = $this->id;
-        $result = parent::delete();
-        $solr = OpenSKOS_Solr::getInstance()->delete('collection:' . $collection_id);
-        return $result;
-    }
-
     /**
      * @return OpenSKOS_Db_Table_Row_Tenant
      */

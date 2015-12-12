@@ -38,7 +38,7 @@ return [
     },
     'Solarium\Client' => function (ContainerInterface $c) {
         
-        $solr = OpenSKOS_Application_BootstrapAccess::getOption('resources')['solr'];
+        $solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
 
         return new Solarium\Client([
             'endpoint' => [

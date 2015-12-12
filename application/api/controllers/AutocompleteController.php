@@ -21,18 +21,8 @@ use OpenSkos2\FieldsMaps;
 
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
-
-    /**
-     *
-     * @var Concepts
-     */
-    protected $model;
-    
     public function init()
     {
-        $this->model = Api_Models_Concepts::factory()->setQueryParams(
-            $this->getRequest()->getParams()
-        );
         parent::init();
         $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'json'));

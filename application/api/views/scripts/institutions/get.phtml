@@ -42,12 +42,11 @@
 <h3><?php echo $this->translate('Collections')?></h3>
 <?php 
 	$collections = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
-	$conceptsPerCollection = $this->tenant->getConceptsPerCollection();
 ?>
 <ul id="collections-per-institute">
 <?php foreach ($collections as $collection):?>
 	<li>
-		<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'collections', 'id' => $collection->getId()))?>.html"><?php echo $collection->dc_title?> (<?php echo isset($conceptsPerCollection[$collection->id]) ? number_format($conceptsPerCollection[$collection->id], 0) : 0?> Concepts)</p>
+		<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'collections', 'id' => $collection->getId()))?>.html"><?php echo $collection->dc_title?></p>
 	<?php if ($collection->dc_description):?>
 		<p class="dc_description"><?php echo nl2br($collection->dc_description, true)?></p>
 	<?php endif?>

@@ -68,14 +68,9 @@ resources.translate.options.disableNotices=true
 resources.acl.foo=bar
 
 ; Solr configuration:
-resources.solr.host = localhost
-resources.solr.port = 8983
-resources.solr.context = /solr
-; If you are using a dedicate write solr host uncomment the following lines
-; and configure to point to this solr instance
-;resources.solr.writeHost = localhost
-;resources.solr.writePort = 8983
-;resources.solr.writeContext = /solr
+solr.host = localhost
+solr.port = 8983
+solr.context = /solr
 
 ; Database configuration:
 resources.db.adapter=pdo_mysql
