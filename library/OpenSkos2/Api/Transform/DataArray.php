@@ -143,12 +143,16 @@ class DataArray
     public static function getFieldsPlusIsRepeatableMap()
     {
         $notRepeatable = [
-            DcTerms::CREATED,
+            DcTerms::CREATOR,
+            DcTerms::DATESUBMITTED,
+            DcTerms::DATEACCEPTED,
             DcTerms::MODIFIED,
+            OpenSkos::ACCEPTEDBY,
             OpenSkos::STATUS,
             OpenSkos::TENANT,
             OpenSkos::SET,
             OpenSkos::UUID,
+            OpenSkos::TOBECHECKED,
             Skos::PREFLABEL,
         ];
         
@@ -156,7 +160,7 @@ class DataArray
         foreach (FieldsMaps::getOldToProperties() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
-                'repeatable' => !isset($notRepeatable[$property]),
+                'repeatable' => !in_array($property, $notRepeatable),
             ];
         }
         
