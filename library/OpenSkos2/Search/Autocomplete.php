@@ -65,11 +65,10 @@ class Autocomplete
         $solrQuery = '';
         
         if ($isDirectQuery) {
+            $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
             $term = '(' . $term . ')';
             $solrQuery = $term;
         } else {
-            // Fields
-            
             
             if ($parser->isSearchTextQuery($term)) {
                 // Custom user query, he has to escape and do everything.
