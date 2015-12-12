@@ -184,20 +184,25 @@ class Document
                     $values = array_merge($values, $concept->getProperty($predicate));
                 }
             }
-            $this->mapValuesToField($propertiesClass, $values, $document);
+            $this->mapValuesToField($propertiesClass, $values, $document, '@');
         }
     }
 
     /**
-     * map [new Literal('test', 'nl')] to s_field_nl => test
+     * map [new Literal('test', 'nl')] to s_field@nl => test
      *
      * @param string $field
      * @param array $values
      * @param DocumentInterface $document
      */
-    protected function mapValuesToField($field, array $values, DocumentInterface $document)
+    protected function mapValuesToField($field, array $values, DocumentInterface $document, $langSeparator = null)
     {
-        $langSeparator = '_';
+        if (empty($langSeparator)) {
+            $langSeparator = '_';
+            if (isset(FieldsMaps::getOldToProperties()[$field])) {
+                $langSeparator = '@'; // The old ones are with @
+            }
+        }
         
         $data = [];
         foreach ($values as $value) {
