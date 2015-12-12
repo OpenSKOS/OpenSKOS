@@ -67,11 +67,12 @@ var EditorView = new Class({
                 element.empty().destroy();
         });
     },
-    markConceptActive: function (uuid) {
+    markConceptActive: function (uri) {
         $$('li.concept-link.active').each(function (item) {
             item.removeClass('active');
         });
-        $$('li.concept-link a.' + uuid).each(function (item) {
+        
+        $$('li.concept-link span.uri:contains("' + uri + '")').each(function (item) {
             item.getParent('li.concept-link').addClass('active');
         });
     },

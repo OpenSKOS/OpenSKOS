@@ -25,6 +25,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
@@ -143,10 +144,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $concept->selfGenerateUri();
             }
             
+            $this->handleStatusAutomatedActions($concept, $form->getValues());
+            
             $this->getConceptManager()->replaceAndCleanRelations($concept);
-            
-            // @TODO       $this->_handleStatusAutomatedActions($concept, $formData);
-            
         } else {
             return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
         }
@@ -471,61 +471,39 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     }
 
     /**
-     * Handles tsome automated actions for when status is changed.
-     * @param Editor_Models_Concept $concept
+     * Handles some automated actions for when status is changed.
+     * @param Concept $concept
      * @param array $formData
-     * @param array $extraData
      */
-    protected function _handleStatusAutomatedActions(Editor_Models_Concept $concept, &$formData, $extraData)
+    protected function handleStatusAutomatedActions(Concept $concept, $formData)
     {
-        // @TODO Implement with the new base.
-        
-        if (isset($extraData['statusOtherConcept']) && !empty($extraData['statusOtherConcept'])) {
-            $otherConcept = null;
-            $otherConceptResponse = Api_Models_Concepts::factory()->getConcepts('uuid:' . $extraData['statusOtherConcept']);
-            if (isset($otherConceptResponse['response']['docs']) || (1 === count($otherConceptResponse['response']['docs']))) {
-                $otherConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($otherConceptResponse['response']['docs'])));
-            }
+        if (!empty($formData['statusOtherConcept'])) {
+            
+            if ($this->getConceptManager()->askForUri($formData['statusOtherConcept'])) {
+                $otherConcept = $this->getConceptManager()->fetchByUri($formData['statusOtherConcept']);
+                
+                if ($concept->getStatus() == Concept::STATUS_REDIRECTED ||
+                        $concept->getStatus() == Concept::STATUS_OBSOLETE) {
 
-            if ($otherConcept !== null) {
-                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED || $extraData['status'] == OpenSKOS_Concept_Status::OBSOLETE) {
-
-                    foreach ($concept->getConceptLanguages() as $lang) {
-                        $existingChangeNotes = [];
-                        if (isset($formData['changeNote@' . $lang])) {
-                            $existingChangeNotes = $formData['changeNote@' . $lang];
-                        }
-
-                        $newChangeNotes = [_('Forward') . ': ' . $otherConcept['uri']];
-
-                        $formData['changeNote@' . $lang] = array_unique(array_merge($existingChangeNotes, $newChangeNotes));
+                    foreach ($concept->retrieveLanguages() as $lang) {
+                        $concept->addUniqueProperty(
+                            Skos::CHANGENOTE,
+                            new Literal(_('Forward') . ': ' . $otherConcept->getUri(), $lang)
+                        );
                     }
                 }
 
-                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED) {
-                    $otherConceptUpdateData = [];
-                    foreach ($concept->getConceptLanguages() as $lang) {
-                        $labelToFill = $extraData['statusOtherConceptLabelToFill'];
-
-                        $existingLabels = $otherConcept[$labelToFill . '@' . $lang];
-                        if (empty($existingLabels)) {
-                            $existingLabels = [];
+                if ($concept->getStatus() == Concept::STATUS_REDIRECTED) {
+                    foreach ($concept->retrieveLanguages() as $lang) {
+                        if ($concept->hasPropertyInLanguage(Skos::PREFLABEL, $lang)) {
+                            $otherConcept->addUniqueProperty(
+                                $formData['statusOtherConceptLabelToFill'],
+                                $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]
+                            );
                         }
-
-                        $newLabels = [];
-                        if (isset($formData['prefLabel@' . $lang])) {
-                            $newLabels = $formData['prefLabel@' . $lang];
-                        }
-
-                        $otherConceptUpdateData[$labelToFill . '@' . $lang] = array_unique(array_merge($existingLabels, $newLabels));
                     }
 
-                    $otherConcept->update(
-                            $otherConceptUpdateData, [
-                        'modified_by' => $this->getCurrentUser()->id,
-                        'modified_timestamp' => date("Y-m-d\TH:i:s\Z")
-                            ], true, true
-                    );
+                    $this->getConceptManager()->replace($otherConcept);
                 }
             }
         }
