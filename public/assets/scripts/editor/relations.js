@@ -221,9 +221,11 @@ var EditorRelations = new Class({
         var self = this;
         Array.each($$('.multi-field-complex#' + relation), function (holder) {
             var inserted = false;
-            //if we have a list for the scheme, insert
+            
+            //if we have a list for the scheme, insert            
             Array.each(holder.getElements('ul:not(.template)'), function (ulElement) {
-                if (ulElement.hasClass(schemeUri) || (!schemeUri)) {
+                if ((schemeUri && ulElement.hasClass(schemeUri)) ||
+                        ((!schemeUri) && ulElement.getElements('li:not(.template)').length !== 0)) {
                     //we already have other concepts with the same relation in this scheme.
                     
                     self._createRelationElementLinkOnly(uri, ulElement);
@@ -238,6 +240,8 @@ var EditorRelations = new Class({
             if (!inserted) {
                 //There are no concepts with said relation in the scheme.
                 var ulElement = $$('.multi-field-complex#' + relation + '>ul').pick();
+                ulElement.show();
+                
                 var titleEl = $$('.multi-field-complex#' + relation + '>.concept-complex-title').pick();
                 if (schemeUri) {
                     // If the relation is per scheme - the ui and the title must be cloned.
