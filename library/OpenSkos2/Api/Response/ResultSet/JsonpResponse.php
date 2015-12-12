@@ -20,7 +20,7 @@
 namespace OpenSkos2\Api\Response\ResultSet;
 
 /**
- * Provide the jsonp output for find-concepts api
+ * Provide the jsonp output for find-* api
  */
 class JsonpResponse extends JsonResponse
 {
@@ -31,10 +31,11 @@ class JsonpResponse extends JsonResponse
     protected $callback;
 
     /**
-     * @param \OpenSkos2\Api\ConceptResultSet $result
+     * @param \OpenSkos2\Api\ResourceResultSet $result
      * @param string $callback
+     * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Api\ConceptResultSet $result, $callback, $propertiesList = null)
+    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $callback, $propertiesList = null)
     {
         $this->result = $result;
         $this->propertiesList = $propertiesList;

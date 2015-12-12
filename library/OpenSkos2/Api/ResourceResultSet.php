@@ -20,10 +20,10 @@
 namespace OpenSkos2\Api;
 
 /**
- * API Concept result set
+ * API Resource result set
  * The result set for the API needs the total items found
  */
-class ConceptResultSet
+class ResourceResultSet
 {
     /**
      * Total
@@ -32,10 +32,10 @@ class ConceptResultSet
     private $total;
     
     /**
-     * Concept
-     * @var \OpenSkos2\ConceptCollection
+     * Resource
+     * @var \OpenSkos2\Rdf\ResourceCollection
      */
-    private $concepts;
+    private $resources;
     
     /**
      * Offset from total result
@@ -52,14 +52,14 @@ class ConceptResultSet
     private $limit;
     
     /**
-     * @param \OpenSkos2\ConceptCollection $concepts
+     * @param \OpenSkos2\Rdf\ResourceCollection $resources
      * @param int $total
      * @param int $start
      * @param int $limit
      */
-    public function __construct(\OpenSkos2\ConceptCollection $concepts, $total, $start, $limit)
+    public function __construct(\OpenSkos2\Rdf\ResourceCollection $resources, $total, $start, $limit)
     {
-        $this->concepts = $concepts;
+        $this->resources = $resources;
         $this->total = $total;
         $this->start = $start;
         $this->limit = $limit;
@@ -76,11 +76,11 @@ class ConceptResultSet
     
     /**
      *
-     * @return \OpenSkos2\ConceptCollection
+     * @return \OpenSkos2\Rdf\ResourceCollection
      */
-    public function getConcepts()
+    public function getResources()
     {
-        return $this->concepts;
+        return $this->resources;
     }
     
     /**

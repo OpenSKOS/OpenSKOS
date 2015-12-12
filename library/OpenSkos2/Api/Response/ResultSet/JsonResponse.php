@@ -22,7 +22,7 @@ namespace OpenSkos2\Api\Response\ResultSet;
 use OpenSkos2\Api\Response\ResultSetResponse;
 
 /**
- * Provide the json output for find-concepts api
+ * Provide the json output for find-* api
  */
 class JsonResponse extends ResultSetResponse
 {
@@ -60,9 +60,9 @@ class JsonResponse extends ResultSetResponse
     protected function getDocs()
     {
         $docs = [];
-        foreach ($this->result->getConcepts() as $concept) {
-            $nConcept = (new \OpenSkos2\Api\Transform\DataArray($concept, $this->propertiesList))->transform();
-            $docs[] = $nConcept;
+        foreach ($this->result->getResources() as $resource) {
+            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
+            $docs[] = $nResource;
         }
 
         return $docs;

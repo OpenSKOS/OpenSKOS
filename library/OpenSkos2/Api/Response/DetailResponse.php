@@ -25,9 +25,9 @@ namespace OpenSkos2\Api\Response;
 abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
     /**
-     * @var \OpenSkos2\Concept
+     * @var \OpenSkos2\Rdf\Resource
      */
-    protected $concept;
+    protected $resource;
     
     /**
      * @var []
@@ -35,12 +35,12 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
     protected $propertiesList;
 
     /**
-     * @param \OpenSkos2\Concept $concept
+     * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Concept $concept, $propertiesList = null)
+    public function __construct(\OpenSkos2\Rdf\Resource $resource, $propertiesList = null)
     {
-        $this->concept = $concept;
+        $this->resource = $resource;
         $this->propertiesList = $propertiesList;
     }
 }

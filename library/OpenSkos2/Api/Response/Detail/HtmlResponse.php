@@ -22,7 +22,7 @@ namespace OpenSkos2\Api\Response\Detail;
 use OpenSkos2\Api\Response\DetailResponse;
 
 /**
- * Provide the html output for find-concepts api
+ * Provide the html output for find-* api
  */
 class HTMLResponse extends DetailResponse
 {

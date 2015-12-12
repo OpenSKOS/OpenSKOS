@@ -22,7 +22,7 @@ namespace OpenSkos2\Api\Response\ResultSet;
 use OpenSkos2\Api\Response\ResultSetResponse;
 
 /**
- * Provide the json output for find-concepts api
+ * Provide the json output for find-* api
  */
 class RdfResponse extends ResultSetResponse
 {
@@ -52,6 +52,7 @@ class RdfResponse extends ResultSetResponse
         $doc = new \DOMDocument;
         $root = $doc->createElementNS(\OpenSkos2\Namespaces\Rdf::NAME_SPACE, 'rdf:RDF');
         $ns = 'http://www.w3.org/2000/xmlns/';
+        // @TODO This namespaces are basically for concept. Now there are more resources.
         foreach (\OpenSkos2\Namespaces::getRdfConceptNamespaces() as $prefix => $namespace) {
             $root->setAttributeNS($ns, 'xmlns:' . $prefix, $namespace);
         }
@@ -60,24 +61,24 @@ class RdfResponse extends ResultSetResponse
         $root->setAttribute('openskos:start', $this->result->getStart());
         $doc->appendChild($root);
 
-        foreach ($this->result->getConcepts() as $concept) {
+        foreach ($this->result->getResources() as $resource) {
             // @TODO This can be replaced with something like the OpenSkos2\Export\Serialiser\Format\Xml().
             // or both of them with something shared.
             
-            /* @var $concept \OpenSkos2\Concept */
-            $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept, true, $this->propertiesList))->transform();
-            $conceptXML =  new \DOMDocument();
-            $conceptXML->loadXML($xml);
+            /* @var $resource \OpenSkos2\Rdf\Resource */
+            $xml = (new \OpenSkos2\Api\Transform\DataRdf($resource, true, $this->propertiesList))->transform();
+            $resourceXML =  new \DOMDocument();
+            $resourceXML->loadXML($xml);
                         
             // Rename rdf:RDF to rdf:Description
-            $desc = $conceptXML->createElement('rdf:Description');
-            $desc->setAttribute('rdf:about', $concept->getUri());
-            $this->renameElement($conceptXML->documentElement, $desc);
+            $desc = $resourceXML->createElement('rdf:Description');
+            $desc->setAttribute('rdf:about', $resource->getUri());
+            $this->renameElement($resourceXML->documentElement, $desc);
             
-            $this->moveNodesFromConcept($conceptXML->documentElement);
+            $this->moveNodesFromResource($resourceXML->documentElement);
             
             $root->appendChild(
-                $doc->importNode($conceptXML->documentElement, true)
+                $doc->importNode($resourceXML->documentElement, true)
             );
         }
 
@@ -85,19 +86,16 @@ class RdfResponse extends ResultSetResponse
     }
     
     /**
-     * Move nodes from node skos:Concept to node root rdf:Description
+     * Move nodes from node skos:Resource to node root rdf:Description
      * to stay backwards compatible with the old API
-     * and remove the original skos:Concept element
      */
-    private function moveNodesFromConcept(\DOMElement $concept)
+    private function moveNodesFromResource(\DOMElement $resource)
     {
-        //var_dump($concept->childNodes->item(1)->nodeName); exit;
-        $skosConcept = $concept->childNodes->item(1);
-        foreach ($skosConcept->childNodes as $child) {
-            //var_dump($kosConcept->parentNode->nodeName); exit;
-            $skosConcept->parentNode->appendChild($child->cloneNode(true));
+        $skosResource = $resource->childNodes->item(1);
+        foreach ($skosResource->childNodes as $child) {
+            $skosResource->parentNode->appendChild($child->cloneNode(true));
         }
-        $concept->removeChild($skosConcept);
+        $resource->removeChild($skosResource);
     }
     
     /**
@@ -122,18 +120,19 @@ class RdfResponse extends ResultSetResponse
     }
 
     /**
-     * Add all concept elements as child to the element given
+     * Add all resource elements as child to the element given
      *
      * @param \DOMElement $element
      * @param \DOMDocument $doc
-     * @param \OpenSkos2\Concept $concept
+     * @param \OpenSkos2\Rdf\Resource $resource
      */
-    private function addConcept(\DOMElement $element, \DOMDocument $doc, \OpenSkos2\Concept $concept)
+    private function addResource(\DOMElement $element, \DOMDocument $doc, \OpenSkos2\Rdf\Resource $resource)
     {
         $type = $doc->createElement('rdf:type');
-        $type->setAttribute('rdf:resource', \OpenSkos2\Concept::TYPE);
+        $type->setAttribute('rdf:resource', $resource->getType());
         $element->appendChild($type);
 
+        // @TODO This is map strictly for resources. We have other resources as well now.
         $map = [
             'openskos:status' => \OpenSkos2\Namespaces\OpenSkos::STATUS,
             'skos:notation' => \OpenSkos2\Namespaces\Skos::NOTATION,
@@ -150,7 +149,7 @@ class RdfResponse extends ResultSetResponse
         ];
 
         foreach ($map as $tag => $ns) {
-            $properties = $concept->getProperty($ns);
+            $properties = $resource->getProperty($ns);
             foreach ($properties as $prop) {
                 if ($prop instanceof \OpenSkos2\Rdf\Uri) {
                     $val = $prop->getUri();

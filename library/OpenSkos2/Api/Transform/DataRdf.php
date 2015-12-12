@@ -20,16 +20,16 @@
 namespace OpenSkos2\Api\Transform;
 
 use OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions as EasyRdfOpenSkos;
-use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource;
 
 /**
- * Transform \OpenSkos2\Concept to a RDF string.
+ * Transform Resource to a RDF string.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
  */
 class DataRdf
 {
     /**
-     * @var \OpenSkos2\Concept
+     * @var Resource
      */
     private $concept;
     
@@ -44,11 +44,11 @@ class DataRdf
     private $propertiesList;
     
     /**
-     * @param \OpenSkos2\Concept $concept
+     * @param Resource $concept
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Concept $concept, $includeRdfHeader = true, $propertiesList = null)
+    public function __construct(Resource $concept, $includeRdfHeader = true, $propertiesList = null)
     {
         $this->concept = $concept;
         $this->includeRdfHeader = $includeRdfHeader;
@@ -69,17 +69,17 @@ class DataRdf
     public function transform()
     {
         if (!empty($this->propertiesList)) {
-            $reducedConcept = new Concept($this->concept->getUri());
+            $reducedResource = new Resource($this->concept->getUri());
             foreach ($this->concept->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
-                    $reducedConcept->setProperties($property, $values);
+                    $reducedResource->setProperties($property, $values);
                 }
             }
         } else {
-            $reducedConcept = $this->concept;
+            $reducedResource = $this->concept;
         }
         
-        $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedConcept);
+        $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
         return $concept->serialise(
             'rdfxml_openskos',
             [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]

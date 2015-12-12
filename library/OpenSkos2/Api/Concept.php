@@ -79,7 +79,7 @@ class Concept
      * @param \OpenSkos2\ConceptManager $manager
      * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
      */
-    public function __construct(\OpenSkos2\ConceptManager $manager, \OpenSkos2\Search\Autocomplete $searchAutocomplete)
+    public function __construct(\OpenSkos2\Rdf\ResourceManager $manager, \OpenSkos2\Search\Autocomplete $searchAutocomplete)
     {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -132,7 +132,7 @@ class Concept
         
         $concepts = $this->searchAutocomplete->search($options, $total);
         
-        $result = new ConceptResultSet($concepts, $total, $start, $limit);
+        $result = new ResourceResultSet($concepts, $total, $start, $limit);
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
@@ -258,7 +258,7 @@ class Concept
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUserFromParams($params);
             
-            $this->conceptEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $tenant, $user);
         
             $concept->ensureMetadata(
                 $tenant->code,
@@ -307,7 +307,7 @@ class Concept
             $user = $this->getUserFromParams($params);
             $tenant = $this->getTenantFromParams($params);
             
-            $this->conceptEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $tenant, $user);
             
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {

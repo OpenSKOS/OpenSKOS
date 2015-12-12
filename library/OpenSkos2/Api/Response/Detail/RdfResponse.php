@@ -22,7 +22,7 @@ namespace OpenSkos2\Api\Response\Detail;
 use OpenSkos2\Api\Response\DetailResponse;
 
 /**
- * Provide the json output for find-concepts api
+ * Provide the json output for find-* api
  */
 class RdfResponse extends DetailResponse
 {
@@ -34,8 +34,8 @@ class RdfResponse extends DetailResponse
     public function getResponse()
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $concept = (new \OpenSkos2\Api\Transform\DataRdf($this->concept, true, $this->propertiesList))->transform();
-        $stream->write($concept);
+        $resource = (new \OpenSkos2\Api\Transform\DataRdf($this->resource, true, $this->propertiesList))->transform();
+        $stream->write($resource);
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)
             ->withHeader('Content-Type', 'text/xml; charset=UTF-8');

@@ -100,10 +100,10 @@ class Relation
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept']);
-        $this->conceptEditAllowed($concept, $concept->getInstitution(), $user);
+        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
 
         $relatedConcept = $this->manager->fetchByUri($body['concept']);
-        $this->conceptEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
+        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
         
         try {
             $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
@@ -138,10 +138,10 @@ class Relation
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept']);
-        $this->conceptEditAllowed($concept, $concept->getInstitution(), $user);
+        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
 
         $relatedConcept = $this->manager->fetchByUri($body['concept']);
-        $this->conceptEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
+        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
         
         try {
             $this->manager->deleteRelation($body['concept'], $body['type'], $body['related']);

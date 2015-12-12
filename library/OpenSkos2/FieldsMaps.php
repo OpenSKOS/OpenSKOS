@@ -81,6 +81,8 @@ class FieldsMaps
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
             'dcterms_contributor' => DcTerms::CONTRIBUTOR,
             
+            'dcterms_title' => DcTerms::TITLE,
+            
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,

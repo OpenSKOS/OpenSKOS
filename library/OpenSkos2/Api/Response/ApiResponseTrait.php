@@ -21,7 +21,7 @@ namespace OpenSkos2\Api\Response;
 
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Exception\UnauthorizedException;
-use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Row_User;
@@ -93,15 +93,15 @@ trait ApiResponseTrait
     
     /**
      * Check if the user is from the given tenant
-     * and if the concept matches the tenant
+     * and if the resource matches the tenant
      *
-     * @param Concept $concept
+     * @param Resource $resource
      * @param OpenSKOS_Db_Table_Row_Tenant $tenant
      * @param OpenSKOS_Db_Table_Row_User $user
      * @throws UnauthorizedException
      */
-    public function conceptEditAllowed(
-        Concept $concept,
+    public function resourceEditAllowed(
+        Resource $resource,
         OpenSKOS_Db_Table_Row_Tenant $tenant,
         OpenSKOS_Db_Table_Row_User $user
     ) {
@@ -109,9 +109,9 @@ trait ApiResponseTrait
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
         
-        $conceptTenant = current($concept->getProperty(OpenSkos::TENANT));
-        if ($tenant->code !== (string)$conceptTenant) {
-            throw new UnauthorizedException('Concept has different tenant', 403);
+        $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
+        if ($tenant->code !== (string)$resourceTenant) {
+            throw new UnauthorizedException('Resource has different tenant', 403);
         }
         
         return true;

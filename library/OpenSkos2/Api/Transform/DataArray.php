@@ -22,18 +22,19 @@ namespace OpenSkos2\Api\Transform;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\FieldsMaps;
 
 /**
- * Transform \OpenSkos2\Concept to a php array with only native values to encode as json output.
+ * Transform Resource to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
  */
 class DataArray
 {
     /**
-     * @var \OpenSkos2\Concept
+     * @var Resource
      */
-    private $concept;
+    private $resource;
     
     /**
      * @var array
@@ -41,12 +42,12 @@ class DataArray
     private $propertiesList;
     
     /**
-     * @param \OpenSkos2\Concept $concept
+     * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Concept $concept, $propertiesList = null)
+    public function __construct(Resource $resource, $propertiesList = null)
     {
-        $this->concept = $concept;
+        $this->resource = $resource;
         $this->propertiesList = $propertiesList;
     }
     
@@ -57,12 +58,12 @@ class DataArray
      */
     public function transform()
     {
-        $concept = $this->concept;
+        $resource = $this->resource;
         
-        /* @var $concept \OpenSkos2\Concept */
-        $newConcept = [];
+        /* @var $resource Resource */
+        $newResource = [];
         if ($this->doIncludeProperty('uri')) {
-            $newConcept['uri'] = $concept->getUri();
+            $newResource['uri'] = $resource->getUri();
         }
         
         foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
@@ -70,13 +71,13 @@ class DataArray
                 continue;
             }
             
-            $data = $concept->getProperty($prop['uri']);
+            $data = $resource->getProperty($prop['uri']);
             if (empty($data)) {
                 continue;
             }
-            $newConcept = $this->getPropertyValue($data, $field, $prop, $newConcept);
+            $newResource = $this->getPropertyValue($data, $field, $prop, $newResource);
         }
-        return $newConcept;
+        return $newResource;
     }
     
     /**
@@ -95,18 +96,18 @@ class DataArray
      * @param array $prop
      * @param array $settings
      * #param string $field field name to map
-     * @param array $concept
+     * @param array $resource
      * @return array
      */
-    private function getPropertyValue(array $prop, $field, $settings, $concept)
+    private function getPropertyValue(array $prop, $field, $settings, $resource)
     {
         foreach ($prop as $val) {
             // Some values only have a URI but not getValue or getLanguage
             if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
                 if ($settings['repeatable'] === true) {
-                    $concept[$field][] = $val->getUri();
+                    $resource[$field][] = $val->getUri();
                 } else {
-                    $concept[$field] = $val->getUri();
+                    $resource[$field] = $val->getUri();
                 }
                 continue;
             }
@@ -127,13 +128,13 @@ class DataArray
             }
             
             if ($settings['repeatable'] === true) {
-                $concept[$langField][] = $value;
+                $resource[$langField][] = $value;
             } else {
-                $concept[$langField] = $value;
+                $resource[$langField] = $value;
             }
         }
         
-        return $concept;
+        return $resource;
     }
     
     /**
@@ -147,6 +148,7 @@ class DataArray
             DcTerms::DATESUBMITTED,
             DcTerms::DATEACCEPTED,
             DcTerms::MODIFIED,
+            DcTerms::TITLE,
             OpenSkos::ACCEPTEDBY,
             OpenSkos::STATUS,
             OpenSkos::TENANT,

@@ -22,7 +22,7 @@ namespace OpenSkos2\Api\Response\Detail;
 use OpenSkos2\Api\Response\DetailResponse;
 
 /**
- * Provide the json output for find-concepts api
+ * Provide the json output for find-* api
  */
 class JsonResponse extends DetailResponse
 {
@@ -33,7 +33,7 @@ class JsonResponse extends DetailResponse
      */
     public function getResponse()
     {
-        $body = (new \OpenSkos2\Api\Transform\DataArray($this->concept, $this->propertiesList))->transform();
+        $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
         return new \Zend\Diactoros\Response\JsonResponse($body);
     }
 }

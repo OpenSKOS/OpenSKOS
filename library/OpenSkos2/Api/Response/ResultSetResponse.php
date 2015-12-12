@@ -25,7 +25,7 @@ namespace OpenSkos2\Api\Response;
 abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
     /**
-     * @var \OpenSkos2\Api\ConceptResultSet
+     * @var \OpenSkos2\Api\ResourceResultSet
      */
     protected $result;
 
@@ -36,10 +36,10 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
     
     /**
      *
-     * @param \OpenSkos2\Api\ConceptResultSet $result
+     * @param \OpenSkos2\Api\ResourceResultSet $result
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Api\ConceptResultSet $result, $propertiesList = null)
+    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $propertiesList = null)
     {
         $this->result = $result;
         $this->propertiesList = $propertiesList;
