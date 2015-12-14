@@ -48,19 +48,19 @@
         <dynamicField name="dcterms_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- Languages -->
-        <dynamicField name="LexicalLabels@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="prefLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
-        <dynamicField name="altLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="hiddenLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="LexicalLabels_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="prefLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
+        <dynamicField name="altLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="hiddenLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <dynamicField name="DocumentationProperties@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="noteLabel@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="changeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="definition@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="editorialNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="example@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="historyNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="scopeNote@*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="DocumentationProperties_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="noteLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="changeNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="definition_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="editorialNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="example_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="historyNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="scopeNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- universal fields (used internally) -->
         <!-- date -->
