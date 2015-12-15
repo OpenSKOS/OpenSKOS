@@ -25,7 +25,6 @@ use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSKOS_Db_Table_Row_Collection;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
@@ -35,6 +34,8 @@ use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
+use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Tenant as Tenant;
@@ -54,11 +55,18 @@ class Concept
     const QUERY_COUNT = 'count';
 
     /**
+     * Resource manager
+     *
+     * @var \OpenSkos2\Rdf\ResourceManager
+     */
+    private $manager;
+    
+    /**
      * Concept manager
      *
      * @var \OpenSkos2\ConceptManager
      */
-    private $manager;
+    private $conceptManager;
     
     /**
      * Search autocomplete
@@ -76,12 +84,17 @@ class Concept
 
     /**
      *
-     * @param \OpenSkos2\ConceptManager $manager
+     * @param \OpenSkos2\Rdf\ResourceManager $manager
+     * @param \OpenSkos2\ConceptManager $conceptManager
      * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
      */
-    public function __construct(\OpenSkos2\Rdf\ResourceManager $manager, \OpenSkos2\Search\Autocomplete $searchAutocomplete)
-    {
+    public function __construct(
+        ResourceManager $manager,
+        ConceptManager $conceptManager,
+        \OpenSkos2\Search\Autocomplete $searchAutocomplete
+    ) {
         $this->manager = $manager;
+        $this->conceptManager = $conceptManager;
         $this->searchAutocomplete = $searchAutocomplete;
     }
 
@@ -411,7 +424,7 @@ class Concept
         if ($autoGenerateUri) {
             $concept->selfGenerateUri(
                 new Tenant($tenant->code),
-                $this->manager
+                $this->conceptManager
             );
         }
         
