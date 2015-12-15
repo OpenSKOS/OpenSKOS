@@ -180,6 +180,7 @@ switch ($action) {
 
                         $importer = new \OpenSkos2\Import\Command(
                             $resourceManager,
+                            $diContainer->get('OpenSkos2\ConceptManager'),
                             new \OpenSkos2\Tenant(
                                 $job->getCollection()->getTenant()['code']
                             )

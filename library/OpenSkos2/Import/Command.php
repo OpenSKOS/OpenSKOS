@@ -27,6 +27,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -41,6 +42,11 @@ class Command implements LoggerAwareInterface
     private $resourceManager;
     
     /**
+     * @var ConceptManager
+     */
+    private $conceptManager;
+    
+    /**
      * @var Tenant
      */
     protected $tenant;
@@ -50,9 +56,13 @@ class Command implements LoggerAwareInterface
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null)
-    {
+    public function __construct(
+        ResourceManager $resourceManager,
+        ConceptManager $conceptManager,
+        Tenant $tenant = null
+    ) {
         $this->resourceManager = $resourceManager;
+        $this->conceptManager = $conceptManager;
         $this->tenant = $tenant;
     }
 
@@ -74,7 +84,7 @@ class Command implements LoggerAwareInterface
                 $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $message->getSetUri());
                 
                 if ($resourceToInsert->isBlankNode()) {
-                    $resourceToInsert->selfGenerateUri();
+                    $resourceToInsert->selfGenerateUri($this->tenant, $this->conceptManager);
                 }
             }
         }

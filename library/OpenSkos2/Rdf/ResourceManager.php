@@ -345,13 +345,14 @@ class ResourceManager
     /**
      * Asks if a resource with the given uri exists.
      * @param string $uri
+     * @param bool $checkAllResourceTypes
      * @return bool
      */
-    public function askForUri($uri)
+    public function askForUri($uri, $checkAllResourceTypes = false)
     {
         $query = '<' . $uri . '> ?predicate ?object';
         
-        if (!empty($this->resourceType)) {
+        if (!$checkAllResourceTypes && !empty($this->resourceType)) {
             $query .= ' . ';
             $query .= '<' . $uri . '> <' . RdfNamespace::TYPE . '> <' . $this->resourceType . '>';
         }

@@ -141,7 +141,10 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         
         if ($validator->validate($concept)) {
             if ($form->getIsCreate()) {
-                $concept->selfGenerateUri();
+                $concept->selfGenerateUri(
+                    $this->getTenant(),
+                    $this->getConceptManager()
+                );
             }
             
             $this->handleStatusAutomatedActions($concept, $form->getValues());
@@ -523,8 +526,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     protected function getTenant()
     {
         return new OpenSkos2\Tenant(
-            $this->getCurrentUser()->tenant,
-            null //@TODO unique per tenant notation
+            $this->getCurrentUser()->tenant
         );
     }
     

@@ -22,6 +22,7 @@ namespace OpenSkos2;
 use Asparagus\QueryBuilder;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Xsd;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
@@ -274,5 +275,28 @@ class ConceptManager extends ResourceManager
         }
         
         return $this->fetchByUris($uris);
+    }
+    
+    /**
+     * Gets the current max numeric notation.
+     * @param \OpenSkos2\Tenant $tenant
+     * @return int|null
+     */
+    public function fetchMaxNumericNotation(Tenant $tenant)
+    {
+        $maxNotationQuery = (new QueryBuilder())
+            ->select('(MAX(<' . Xsd::NONNEGATIVEINTEGER . '>(?notation)) AS ?maxNotation)')
+            ->where('?subject', '<' . Skos::NOTATION . '>', '?notation')
+            ->also('<' . OpenSkos::TENANT . '>', $this->valueToTurtle(new Literal($tenant->getCode())))
+            ->filter('regex(?notation, \'^[0-9]*$\', "i")');
+        
+        $maxNotationResult = $this->query($maxNotationQuery);
+        
+        $maxNotation = null;
+        if (!empty($maxNotationResult->offsetGet(0)->maxNotation)) {
+            $maxNotation = $maxNotationResult->offsetGet(0)->maxNotation->getValue();
+        }
+        
+        return $maxNotation;
     }
 }

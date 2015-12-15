@@ -409,7 +409,10 @@ class Concept
         
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
         if ($autoGenerateUri) {
-            $concept->selfGenerateUri();
+            $concept->selfGenerateUri(
+                new Tenant($tenant->code),
+                $this->manager
+            );
         }
         
         $this->validate($concept, $tenant);
