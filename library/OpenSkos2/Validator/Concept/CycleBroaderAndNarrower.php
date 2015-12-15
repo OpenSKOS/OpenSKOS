@@ -38,8 +38,6 @@ class CycleBroaderAndNarrower extends AbstractConceptValidator
         $broaderTerms = $this->buildArray($concept->getProperty(Skos::BROADER));
         $narrowerTerms = $this->buildArray($concept->getProperty(Skos::NARROWER));
         
-        //var_dump($broaderTerms, $narrowerTerms); exit;
-        
         $duplicate = array_intersect($broaderTerms, $narrowerTerms);
         
         if (empty($duplicate)) {
@@ -63,10 +61,5 @@ class CycleBroaderAndNarrower extends AbstractConceptValidator
             $new[] = (string)$val;
         }
         return $new;
-    }
-    
-    private function checkDuplicate($key1, $key2)
-    {
-        var_dump($key1, $key2);
     }
 }

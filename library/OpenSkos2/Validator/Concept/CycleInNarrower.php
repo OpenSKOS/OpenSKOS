@@ -41,12 +41,12 @@ class CycleInNarrower extends AbstractConceptValidator implements ResourceManage
      */
     protected function validateConcept(Concept $concept)
     {
-        $broaderTerms = $concept->getProperty(Skos::BROADER);
+        $narrowerTerms = $concept->getProperty(Skos::NARROWER);
         
         $uri = new Uri($concept->getUri());
         
-        $query = '?narrower skos:broader+ ' . (new NTriple())->serialize($uri) . PHP_EOL
-                . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
+        $query = '?narrower skos:narrower+ ' . (new NTriple())->serialize($uri) . PHP_EOL
+                . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($narrowerTerms) . '))';
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic narrower relation detected for concept: {$concept->getUri()}";
             
