@@ -373,18 +373,19 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
         ));
         
-        $skosXlLabels = [
-            'skosXlPrefLabel' => _('Skos Xl preferred label'),
-            'skosXlAltLabel' => _('Skos Xl alt label'),
-            'skosXlHiddenLabel' => _('Skos Xl hidden label'),
-        ];
-        $this->buildMultiElements(
-            $skosXlLabels,
-            'OpenSKOS_Form_Element_Multiskosxllabel',
-            [],
-            null,
-            'concept-edit-language-skos-xl-labels'
-        );
+//        Temporary disable skos xl
+//        $skosXlLabels = [
+//            'skosXlPrefLabel' => _('Skos Xl preferred label'),
+//            'skosXlAltLabel' => _('Skos Xl alt label'),
+//            'skosXlHiddenLabel' => _('Skos Xl hidden label'),
+//        ];
+//        $this->buildMultiElements(
+//            $skosXlLabels,
+//            'OpenSKOS_Form_Element_Multiskosxllabel',
+//            [],
+//            null,
+//            'concept-edit-language-skos-xl-labels'
+//        );
         
         $this->addElement('hidden', 'wrapLeftBottom', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly' => true)))
