@@ -19,6 +19,7 @@
 
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptCollection;
 use OpenSkos2\Rdf\Literal;
 
 /**
@@ -222,25 +223,26 @@ class Editor_Forms_Concept_ConceptToForm
         $conceptManager = self::getDI()->get('\OpenSkos2\ConceptManager');
         
         foreach (Editor_Forms_Concept::getPerSchemeRelationsMap() as $relationKey => $relationProperty) {
+            $relations = $conceptManager->fetchByUris(
+                $concept->getProperty($relationProperty)
+            );
+            
             foreach ($concept->getProperty(Skos::INSCHEME) as $scheme) {
-                $formData[$relationKey][$scheme->getUri()] = $conceptManager->fetchRelations(
-                    $concept->getUri(),
-                    $relationProperty,
-                    $scheme->getUri()
-                );
+                $formData[$relationKey][$scheme->getUri()] = new ConceptCollection();
+            }
+            
+            foreach ($relations as $relation) {
+                foreach ($relation->getProperty(Skos::INSCHEME) as $scheme) {
+                    if (isset($formData[$relationKey][$scheme->getUri()])) {
+                        $formData[$relationKey][$scheme->getUri()]->append($relation);
+                    }
+                }
             }
         }
         
         foreach (Editor_Forms_Concept::getSchemeIndependentRelationsMap() as $relationKey => $relationProperty) {
-            $formData[$relationKey][] = $conceptManager->fetchRelations(
-                $concept->getUri(),
-                $relationProperty
-            );
+            $formData[$relationKey][] = $conceptManager->fetchByUris($concept->getProperty($relationProperty));
         }
-        
-        // @TODO Mark out relations which are not actually inside the $concept object. Or make other solution.
-        // @TODO It also brakes validation on edit with broader transitive for example.
-        // @TODO It also adds all inferred relations as actual relations on first edit.
     }
     
     /**
