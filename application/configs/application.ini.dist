@@ -4,6 +4,7 @@
 ; general settings:
 phpSettings.display_startup_errors = 1
 phpSettings.display_errors = 1
+resources.frontController.params.displayExceptions = 1
 includePaths.openskos = APPLICATION_PATH "/../library/openSKOS"
 bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
 bootstrap.class = "Bootstrap"
@@ -100,7 +101,7 @@ resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
 ; @extra routes here@
 
-resources.frontController.params.displayExceptions = 0
+resources.frontController.params.displayExceptions = 1
 resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
