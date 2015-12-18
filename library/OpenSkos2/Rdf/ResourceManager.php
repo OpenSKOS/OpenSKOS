@@ -311,22 +311,28 @@ class ResourceManager
         }
         */
         
+        $resources = EasyRdf::createResourceCollection($this->resourceType);
+        
         if (!empty($uris)) {
-            $filters = [];
-            foreach ($uris as $uri) {
-                $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
+            foreach (array_chunk($uris, 50) as $urisChunk) {
+                $filters = [];
+                foreach ($urisChunk as $uri) {
+                    $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
+                }
+
+                $query = new QueryBuilder();
+                $query->describe('?subject')
+                    ->where('?subject', '?predicate', '?object')
+                    ->filter(implode(' || ', $filters));
+
+                if (!empty($this->resourceType)) {
+                    $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
+                }
+
+                foreach ($this->fetchQuery($query) as $resource) {
+                    $resources->append($resource);
+                }
             }
-            
-            $query = new QueryBuilder();
-            $query->describe('?subject')
-                ->where('?subject', '?predicate', '?object')
-                ->filter(implode(' || ', $filters));
-            
-            if (!empty($this->resourceType)) {
-                $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
-            }
-            
-            $resources = $this->fetchQuery($query);
             
             // Keep the ordering of the passed uris.
             $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
@@ -335,11 +341,9 @@ class ResourceManager
                 $ind2 = array_search($resource2->getUri(), $searchUris);
                 return $ind1 - $ind2;
             });
-            
-            return $resources;
-        } else {
-            return EasyRdf::createResourceCollection($this->resourceType);
         }
+        
+        return $resources;
     }
     
     /**
