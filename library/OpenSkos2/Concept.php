@@ -46,6 +46,23 @@ class Concept extends Resource
     const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
     
+    /**
+     * Get list of all available concept statuses.
+     * @return array
+     */
+    public static function getAvailableStatuses()
+    {
+        return [
+            self::STATUS_CANDIDATE,
+            self::STATUS_APPROVED,
+            self::STATUS_REDIRECTED,
+            self::STATUS_NOT_COMPLIANT,
+            self::STATUS_REJECTED,
+            self::STATUS_OBSOLETE,
+            self::STATUS_DELETED,
+        ];
+    }
+    
     public static $classes = array(
         'ConceptSchemes' => [
             Skos::CONCEPTSCHEME,

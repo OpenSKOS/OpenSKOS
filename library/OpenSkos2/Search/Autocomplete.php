@@ -65,9 +65,11 @@ class Autocomplete
         $solrQuery = '';
         
         if ($isDirectQuery) {
-            $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
-            $term = '(' . $term . ')';
-            $solrQuery = $term;
+            if (!empty($term)) {
+                $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
+                $term = '(' . $term . ')';
+                $solrQuery = $term;
+            }
         } else {
             
             if ($parser->isSearchTextQuery($term)) {
@@ -136,16 +138,18 @@ class Autocomplete
             $solrQuery .= ')';
         }
 
-        
+        if (!empty($solrQuery)) {
+            $solrQuery .= ' AND ';
+        }
         
         //status
         if (!empty($options['status'])) {
-            $solrQuery .= ' AND (';
+            $solrQuery .= ' (';
             $solrQuery .= 's_status:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
                 . '))';
         } else {
-            $solrQuery .= ' AND (-s_status:' . Resource::STATUS_DELETED . ')';
+            $solrQuery .= ' (-s_status:' . Resource::STATUS_DELETED . ')';
         }
         
         // sets (collections)

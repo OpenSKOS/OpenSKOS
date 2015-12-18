@@ -19,21 +19,17 @@
 
 namespace OpenSkos2\OaiPmh;
 
-use Asparagus\QueryBuilder;
 use DateTime;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\Search\Autocomplete;
+use OpenSkos2\Search\ParserText;
 use OpenSkos2\Exception\ResourceNotFoundException;
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Xsd;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSKOS_Db_Table_Row_Collection;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
@@ -102,13 +98,6 @@ class Repository implements InterfaceRepository
     private $conceptManager;
 
     /**
-     * Current offset retrieved from token
-     *
-     * @var int
-     */
-    private $offset = 0;
-
-    /**
      *
      * @var OpenSKOS_Db_Table_Collections
      */
@@ -119,10 +108,27 @@ class Repository implements InterfaceRepository
      * @var ConceptSchemeManager
      */
     private $schemeManager;
+    
+    /**
+     *
+     * @var Autocomplete
+     */
+    private $searchAutocomplete;
 
+    /**
+     * @param ConceptManager $conceptManager
+     * @param ConceptSchemeManager $schemeManager
+     * @param Autocomplete $searchAutocomplete
+     * @param string $repositoryName
+     * @param string $baseUrl
+     * @param array $adminEmails
+     * @param \OpenSKOS_Db_Table_Collections $setsModel
+     * @param type $description
+     */
     public function __construct(
         ConceptManager $conceptManager,
         ConceptSchemeManager $schemeManager,
+        Autocomplete $searchAutocomplete,
         $repositoryName,
         $baseUrl,
         array $adminEmails,
@@ -131,6 +137,7 @@ class Repository implements InterfaceRepository
     ) {
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
+        $this->searchAutocomplete = $searchAutocomplete;
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
@@ -230,7 +237,6 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-
         $pSet = $this->parseSet($set);
 
         $concepts = $this->getConcepts(
@@ -243,7 +249,6 @@ class Repository implements InterfaceRepository
             $pSet['conceptScheme'],
             $numFound
         );
-        
         $items = [];
 
         $showToken = false;
@@ -518,58 +523,38 @@ class Repository implements InterfaceRepository
         $scheme = null,
         &$numFound = null
     ) {
-        $prefixes = [
-            'rdf' => Rdf::NAME_SPACE,
-            'skos' => Skos::NAME_SPACE,
-            'dc' => Dc::NAME_SPACE,
-            'dct' => DcTerms::NAME_SPACE,
-            'openskos' => OpenSkos::NAME_SPACE,
-            'xsd' => Xsd::NAME_SPACE
+        $searchOptions = [
+            'start' => $offset,
+            'rows' => $limit,
+            'directQuery' => true,
+            // We include all statuses.
+            'status' => Concept::getAvailableStatuses(),
         ];
-
-        $qb = new QueryBuilder($prefixes);
         
-        $select = $qb->where('?subject', 'rdf:type', 'skos:Concept')
-            ->also('dct:modified', '?modified');
-
         if (!empty($tenant)) {
-            $tenantN = NTriple::getInstance()->serialize($tenant);
-            $select->also('openskos:tenant', $tenantN);
+            $searchOptions['tenants'] = [$tenant->getValue()];
         }
-
+        
         if (!empty($collection)) {
-            $collectionN = \OpenSkos2\Sparql\Escape::escapeUri($collection);
-            $select->also('openskos:set', $collectionN);
+            $searchOptions['collections'] = [$collection];
         }
 
         if (!empty($scheme)) {
-            $schemeN = NTriple::getInstance()->serialize($scheme);
-            $select->also('skos:inScheme', '?scheme')
-                    ->also('?scheme', 'openskos:uuid', $schemeN);
+            $schemeObj = $this->schemeManager->fetchByUuid($scheme->getValue());
+            $searchOptions['conceptScheme'] = [$schemeObj->getUri()];
         }
 
-        if (!empty($from)) {
-            $tFrom = $from->format(DATE_W3C);
-            $select->filter('?modified >= "' . $tFrom . '"^^xsd:dateTime');
+        if (!empty($from) || !empty($till)) {
+            $parser = new ParserText();
+            $searchOptions['searchText'] = $parser->buildDatePeriodQuery(
+                'd_modified',
+                $from,
+                $till
+            );
+        } else {
+            $searchOptions['searchText'] = '';
         }
 
-        if (!empty($till)) {
-            $tTill = $till->format(DATE_W3C);
-            $select->filter('?modified <= "' . $tTill . '"^^xsd:dateTime');
-        }
-        
-        // Count the results.
-        $count = clone($select);
-        $count->select('(COUNT(DISTINCT ?subject) AS ?count)');
-        $countResult = $this->conceptManager->query($count);
-        $numFound = $countResult->offsetGet(0)->count->getValue();
-        
-        // Select the results.
-        $describe = clone($select);
-        $describe->describe('?subject')
-            ->limit($limit)
-            ->offset($offset);
-        
-        return $this->conceptManager->fetchQuery($describe);
+        return $this->searchAutocomplete->search($searchOptions, $numFound);
     }
 }

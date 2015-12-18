@@ -114,7 +114,13 @@ class ParserText
      */
     public function dateToSolrDate($date)
     {
-        $parsedDate = new \Zend_Date($date, self::OPTIONS_DATE_FORMAT);
-        return gmdate('Y-m-d\TH:i:s.z\Z', $parsedDate->toString('U'));
+        if ($date instanceof \DateTime) {
+            $timestamp = $date->getTimestamp();
+        } else {
+            $parsedDate = new \Zend_Date($date, self::OPTIONS_DATE_FORMAT);
+            $timestamp = $parsedDate->toString('U');
+        }
+        
+        return gmdate('Y-m-d\TH:i:s.z\Z', $timestamp);
     }
 }
