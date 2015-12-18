@@ -94,7 +94,7 @@ class Command implements LoggerAwareInterface
             throw new \Exception('Failed validation');
         }
 
-        if ($message->getClearCollection()) {
+        if ($message->getClearSet()) {
             $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
         }
 
