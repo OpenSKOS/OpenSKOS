@@ -24,10 +24,16 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
     public function testCreateWithoutXML()
     {
         $request = (new \Zend\Diactoros\ServerRequest());
-        $mock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
                 ->disableOriginalConstructor()
                 ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($mock);
+        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
+                     ->disableOriginalConstructor()
+                     ->getMock();
+        $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
+                     ->disableOriginalConstructor()
+                     ->getMock();
+        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
         $response = $concept->create($request);
         
         $this->assertEquals(412, $response->getStatusCode());
@@ -37,10 +43,16 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
     public function testCreateWithoutTenant()
     {
         $request = $this->getRequest();
-        $mock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
-                ->disableOriginalConstructor()
-                ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($mock);
+        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+                            ->disableOriginalConstructor()
+                            ->getMock();
+        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
+                             ->disableOriginalConstructor()
+                             ->getMock();
+        $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
+                                 ->disableOriginalConstructor()
+                                 ->getMock();
+        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
         $response = $concept->create($request);
         
         $this->assertEquals(412, $response->getStatusCode());
