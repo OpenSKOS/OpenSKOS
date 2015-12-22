@@ -282,7 +282,7 @@ class Concept
             
             $this->validate($concept, $tenant);
             
-            $this->manager->replaceAndCleanRelations($concept);
+            $this->conceptManager->replaceAndCleanRelations($concept);
             
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
@@ -558,7 +558,7 @@ class Concept
      * @param string $message
      * @return ResponseInterface
      */
-    private function getErrorResponse($status, $message)
+    protected function getErrorResponse($status, $message)
     {
         $stream = new Stream('php://memory', 'wb+');
         $stream->write($message);
