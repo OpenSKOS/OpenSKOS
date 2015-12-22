@@ -210,14 +210,13 @@ switch ($action) {
                             try {
                                 $importer->handle($message);
 //								$parser->process($job['user']);
+                                $job->finish()->save();
                             } catch (Exception $e) {
 
                                 $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
                                 exit($e->getCode());
                             }
                         }
-
-                        $job->finish()->save();
 
                         break;
                     case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
