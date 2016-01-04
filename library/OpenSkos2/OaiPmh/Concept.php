@@ -77,6 +77,10 @@ class Concept implements Record
         }
         
         $setSpecs = [];
+        
+        // @TODO optimize.
+        // Really needs to be optimized. Takes more than 10 seconds to do it for all concepts in the result
+        
         $tenants = $concept->getProperty(OpenSkos::TENANT);
         
         $sets = [];
@@ -103,6 +107,8 @@ class Concept implements Record
                 }
             }
         }
+        
+        // End @TODO optimize
         
         return new Header($concept->getUri(), $datestamp, $setSpecs, $concept->isDeleted());
     }

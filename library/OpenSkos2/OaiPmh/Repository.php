@@ -150,6 +150,10 @@ class Repository implements InterfaceRepository
      */
     public function identify()
     {
+        // @TODO getEarliestDateStamp is slow.
+        // The oai pmh library is using identify just for getting base url.
+        // Alter the library to work differently.
+        
         return new ImplementationIdentity(
             $this->repositoryName,
             $this->baseUrl,
@@ -250,7 +254,7 @@ class Repository implements InterfaceRepository
             $numFound
         );
         $items = [];
-
+        
         $showToken = false;
         foreach ($concepts as $i => $concept) {
             if ($i === ($this->limit - 1)) {
@@ -259,7 +263,7 @@ class Repository implements InterfaceRepository
             }
             $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
         }
-
+        
         $token = null;
         if ($showToken) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
@@ -491,17 +495,15 @@ class Repository implements InterfaceRepository
             return $this->earliestDateStamp;
         }
 
-        $query = 'PREFIX dcterms: <http://purl.org/dc/terms/>
-            SELECT ?date
-                WHERE {
-                    ?subject dcterms:modified ?date
-                }
-                ORDER BY ASC(?date)
-                LIMIT 1
-            ';
-
+        $query = '
+            SELECT (MIN(?date) AS ?minDate)
+            WHERE {
+                ?subject <' . DcTerms::MODIFIED . '> ?date
+            }';
+        
         $graph = $this->conceptManager->query($query);
-        return $graph[0]->date->getValue();
+        
+        return $graph[0]->minDate->getValue();
     }
 
     /**
