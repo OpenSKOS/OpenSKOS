@@ -491,19 +491,11 @@ class Repository implements InterfaceRepository
      */
     private function getEarliestDateStamp()
     {
-        if ($this->earliestDateStamp) {
-            return $this->earliestDateStamp;
+        if (!$this->earliestDateStamp) {
+            $this->earliestDateStamp = $this->conceptManager->fetchMinModifiedDate();
         }
-
-        $query = '
-            SELECT (MIN(?date) AS ?minDate)
-            WHERE {
-                ?subject <' . DcTerms::MODIFIED . '> ?date
-            }';
         
-        $graph = $this->conceptManager->query($query);
-        
-        return $graph[0]->minDate->getValue();
+        return $this->earliestDateStamp;
     }
 
     /**

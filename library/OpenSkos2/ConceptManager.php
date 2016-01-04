@@ -23,6 +23,8 @@ use Asparagus\QueryBuilder;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Xsd;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
@@ -298,5 +300,29 @@ class ConceptManager extends ResourceManager
         }
         
         return $maxNotation;
+    }
+    
+    /**
+     * Gets the current min dcterms:modified date.
+     * @return \DateTime|null
+     */
+    public function fetchMinModifiedDate()
+    {
+        $minDateQuery = (new QueryBuilder())
+            ->select('(MIN(?date) AS ?minDate)')
+            ->where('?subject', '<' . DcTerms::MODIFIED . '>', '?date')
+            ->also('<' . Rdf::TYPE . '>', '<' . $this->resourceType . '>');
+
+        $minDateResult = $this->query($minDateQuery);
+        
+        $minDate = null;
+        if (!empty($minDateResult->offsetGet(0)->minDate)) {
+            $minDate = $minDateResult->offsetGet(0)->minDate;
+            if ($minDate instanceof \EasyRdf\Literal\DateTime) {
+                $minDate = new \DateTime('@' . $minDate->format('U'));
+            }
+        }
+        
+        return $minDate;
     }
 }

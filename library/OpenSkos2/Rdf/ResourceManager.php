@@ -272,7 +272,7 @@ class ResourceManager
     public function fetchByUri($uri)
     {
         $resource = new Uri($uri);
-        $result = $this->client->query('DESCRIBE '. (new NTriple)->serialize($resource));
+        $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
         $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
 
         // @TODO Add resourceType check.
@@ -477,7 +477,7 @@ class ResourceManager
         $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
 
         /* @var $result EasyRdf\Sparql\Result */
-        $result = $this->client->query($query);
+        $result = $this->query($query);
 
         return $result[0]->count->getValue();
     }
@@ -555,17 +555,6 @@ class ResourceManager
     }
 
     /**
-     * Execute raw query
-     *
-     * @param string $query
-     * @return \EasyRdf\Graph
-     */
-    public function query($query)
-    {
-        return $this->client->query($query);
-    }
-
-    /**
      * Fetch all resources matching the query.
      *
      * @param \Asparagus\QueryBuilder|string $query
@@ -577,7 +566,7 @@ class ResourceManager
             $query = $query->getSPARQL();
         }
         
-        $result = $this->client->query($query);
+        $result = $this->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
 
@@ -589,7 +578,30 @@ class ResourceManager
     public function ask($query)
     {
         $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
-        return $this->client->query($query)->getBoolean();
+        return $this->query($query)->getBoolean();
+    }
+
+    /**
+     * Execute raw query
+     * Retries once on timeout, because when jena stays idle for some time throws a timeout.
+     * 
+     * @param string $query
+     * @return \EasyRdf\Graph
+     */
+    protected function query($query)
+    {
+        try {
+            return $this->client->query($query);
+        } catch (\EasyRdf\Exception $ex) {
+            // message = Request to * timed out
+            // code = 0
+            if (strpos($ex->getMessage(), 'timed out') !== false) {
+                // Retry once on timeout. When jena stays idle for some time throws a timeout.
+                return $this->client->query($query);
+            } else {
+                throw $ex;
+            }
+        }
     }
 
     /**
