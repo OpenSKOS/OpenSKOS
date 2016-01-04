@@ -66,7 +66,10 @@ $autoloader = new OpenSKOS_Autoloader();
 $mainAutoloader = Zend_Loader_Autoloader::getInstance();
 $mainAutoloader->pushAutoloader($autoloader, array('Editor_', 'Api_'));
 
-
+// Use reconnecting adapter
+Zend_Db_Table::setDefaultAdapter(
+    OpenSKOS_Db_Adapter_Pdo_Mysql_Reconnecting::createFromPdoMysql(Zend_Db_Table::getDefaultAdapter())
+);
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
