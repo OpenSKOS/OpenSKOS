@@ -259,13 +259,17 @@ class ConceptManager extends ResourceManager
      * @param int &$numFound output Total number of found records.
      * @return ConceptCollection
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0)
+    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
                 ->setFields(['uri'])
                 ->setQuery($query);
+        
+        if (!empty($sorts)) {
+            $select->setSorts($sorts);
+        }
         
         $solrResult = $this->solr->select($select);
         

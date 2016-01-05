@@ -76,6 +76,15 @@
         <!-- boolean -->
         <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
         
+        <!-- string for sorting -->
+        <dynamicField name="sort_s_*" type="string" indexed="true" stored="false" required="false" multiValued="false" />
+        
+        <!-- int for sorting -->
+        <dynamicField name="sort_i_*" type="integer" indexed="true" stored="false" required="false" multiValued="false" />
+        
+        <!-- date for sorting -->
+        <dynamicField name="sort_d_*" type="date" indexed="true" stored="false" required="false" multiValued="false" />
+        
         <!-- default search -->                
         <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
         

@@ -36,7 +36,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         }
 
         $options = $this->getSearchOptions($searchForm);
-
+        $options['sorts'] = ['sort_s_prefLabel' => 'asc'];
+        
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
         $concepts = $search->search($options, $numFound);

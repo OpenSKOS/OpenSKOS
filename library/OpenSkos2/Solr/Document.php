@@ -58,9 +58,9 @@ class Document
      * @var array
      */
     protected $mapping = [
-        Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel'],
-        Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel'],
-        Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel'],
+        Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel', 'sort_s_prefLabel'],
+        Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel', 'sort_s_altLabel'],
+        Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel', 'sort_s_hiddenLabel'],
         Skos::DEFINITION => ['t_definition', 'a_definition'],
         Skos::EXAMPLE => ['t_example', 'a_example'],
         Skos::CHANGENOTE => ['t_changeNote', 'a_changeNote'],
@@ -216,10 +216,28 @@ class Document
                 $data[$langField][] = $this->valueToSolr($value);
             }
         }
-
-        foreach ($data as $field => $val) {
-            $document->{$field} = $val;
+        
+        // Flat array for sorting
+        if ($this->isSortField($field)) {
+            array_walk($data, function (&$mappedValues) {
+                sort($mappedValues);
+                $mappedValues = implode('; ', $mappedValues);
+            });
         }
+
+        foreach ($data as $mappedField => $val) {
+            $document->{$mappedField} = $val;
+        }
+    }
+    
+    /**
+     * Is the mapping field a sort field.
+     * @param string $field
+     * @return bool
+     */
+    protected function isSortField($field)
+    {
+        return stripos($field, 'sort_') === 0;
     }
     
     /**

@@ -200,7 +200,13 @@ class Autocomplete
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
         
-        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
+        if (!empty($options['sorts'])) {
+            $sorts = $options['sorts'];
+        } else {
+            $sorts = null;
+        }
+        
+        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
     }
     
     /**
