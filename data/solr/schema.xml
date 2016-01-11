@@ -86,7 +86,7 @@
         <dynamicField name="sort_d_*" type="date" indexed="true" stored="false" required="false" multiValued="false" />
         
         <!-- default search -->                
-        <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+        <field name="search" type="string" indexed="true" stored="false" required="false" multiValued="true" />
         
         <copyField source="prefLabel" dest="search" />
         <copyField source="altLabel" dest="search" />
