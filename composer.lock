@@ -780,16 +780,16 @@
         },
         {
             "name": "picturae/oai-pmh",
-            "version": "0.5.11",
+            "version": "0.5.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picturae/OaiPmh.git",
-                "reference": "b5504b1c2a1d960a9d083858e18794a2e382ccfd"
+                "reference": "78dacceb2dc1db11ceacb45cc1ef65cc1ae73913"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/b5504b1c2a1d960a9d083858e18794a2e382ccfd",
-                "reference": "b5504b1c2a1d960a9d083858e18794a2e382ccfd",
+                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/78dacceb2dc1db11ceacb45cc1ef65cc1ae73913",
+                "reference": "78dacceb2dc1db11ceacb45cc1ef65cc1ae73913",
                 "shasum": ""
             },
             "require": {
@@ -820,7 +820,7 @@
                 }
             ],
             "description": "Picturae OAI-PMH package. Can be used to create a OAI endpoint",
-            "time": "2015-12-10 16:53:32"
+            "time": "2016-01-11 12:17:49"
         },
         {
             "name": "psr/http-message",

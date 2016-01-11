@@ -79,6 +79,12 @@ class Repository implements InterfaceRepository
      * @var string|null
      */
     private $description;
+    
+    /**
+     * Used to get tenant:set:schema sets.
+     * @var SetsMap
+     */
+    protected $setsMap;
 
     /**
      * a datetime that is the guaranteed lower limit of all datestamps recording changes,modifications, or deletions
@@ -144,19 +150,22 @@ class Repository implements InterfaceRepository
         $this->setsModel = $setsModel;
         $this->description = $description;
     }
+    
+    /**
+     * @return string the base URL of the repository
+     */
+    public function getBaseUrl()
+    {
+        return $this->baseUrl;
+    }
 
     /**
      * @return Identity
      */
     public function identify()
     {
-        // @TODO getEarliestDateStamp is slow.
-        // The oai pmh library is using identify just for getting base url.
-        // Alter the library to work differently.
-        
         return new ImplementationIdentity(
             $this->repositoryName,
-            $this->baseUrl,
             $this->getEarliestDateStamp(),
             Identity::DELETED_RECORD_PERSISTENT,
             $this->adminEmails,
@@ -228,7 +237,7 @@ class Repository implements InterfaceRepository
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
 
-        return new OaiConcept($concept, $this->schemeManager, $this->setsModel);
+        return new OaiConcept($concept, $this->getSetsMap());
     }
 
     /**
@@ -261,7 +270,7 @@ class Repository implements InterfaceRepository
                 $showToken = true;
                 continue;
             }
-            $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
+            $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
         
         $token = null;
@@ -302,7 +311,7 @@ class Repository implements InterfaceRepository
                 continue;
             }
 
-            $items[] = new OaiConcept($concept, $this->schemeManager, $this->setsModel);
+            $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
 
         $cursor = $params['offset'];
@@ -345,6 +354,18 @@ class Repository implements InterfaceRepository
         );
 
         return $formats;
+    }
+    
+    /**
+     * @return SetsMap
+     */
+    protected function getSetsMap()
+    {
+        // @TODO DI
+        if ($this->setsMap === null) {
+            $this->setsMap = new SetsMap($this->schemeManager, $this->setsModel);
+        }
+        return $this->setsMap;
     }
 
     /**
@@ -523,6 +544,7 @@ class Repository implements InterfaceRepository
             'directQuery' => true,
             // We include all statuses.
             'status' => Concept::getAvailableStatuses(),
+            'sorts' => ['uri' => 'asc'],
         ];
         
         if (!empty($tenant)) {

@@ -110,6 +110,22 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
         }
         return $collectionsMap;
     }
+    
+    /**
+     * Gets map with uri as key and full collection as value.
+     * 
+     * @param string $tenant
+     * @return array
+     */
+    public function getUrisMap($tenant)
+    {
+        $collections = $this->fetchAll($this->select()->where('tenant=?', $tenant));
+        $collectionsMap = array();
+        foreach ($collections as $collection) {
+            $collectionsMap[(string)$collection->getUri()] = $collection;
+        }
+        return $collectionsMap;
+    }
 
     /**
      * Fetches all SQL result rows as an associative array.

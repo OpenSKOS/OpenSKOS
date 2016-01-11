@@ -24,7 +24,6 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept as SkosConcept;
-use OpenSkos2\ConceptSchemeManager;
 use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
@@ -37,31 +36,20 @@ class Concept implements Record
     protected $concept;
     
     /**
-     *
-     * @var ConceptSchemeManager
+     * @var SetsMap
      */
-    protected $schemeManager;
+    protected $setsMap;
     
     /**
-     *
-     * @var OpenSKOS_Db_Table_Collections
-     */
-    protected $setsModel;
-    
-    /**
-     *
      * @param SkosConcept $concept
+     * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
      */
-    public function __construct(
-        SkosConcept $concept,
-        ConceptSchemeManager $schemeManager,
-        \OpenSKOS_Db_Table_Collections $setsModel
-    ) {
+    public function __construct(SkosConcept $concept, SetsMap $setsMap)
+    {
         $this->concept = $concept;
-        $this->schemeManager = $schemeManager;
-        $this->setsModel = $setsModel;
+        $this->setsMap = $setsMap;
     }
-    
+
     /**
      * Get header
      * @return Header
@@ -77,38 +65,16 @@ class Concept implements Record
         }
         
         $setSpecs = [];
-        
-        // @TODO optimize.
-        // Really needs to be optimized. Takes more than 10 seconds to do it for all concepts in the result
-        
-        $tenants = $concept->getProperty(OpenSkos::TENANT);
-        
-        $sets = [];
-        foreach ($concept->getProperty(OpenSkos::SET) as $setUri) {
-            $set = $this->setsModel->findByUri($setUri);
-            if (!isset($sets[$set->tenant])) {
-                $sets[$set->tenant] = [];
-            }
-            $sets[$set->tenant][] = $set;
-        }
-        
-        foreach ($tenants as $tenant) {
+        foreach ($concept->getProperty(OpenSkos::TENANT) as $tenant) {
             $setSpecs[] = (string)$tenant;
-            
-            foreach ($sets[(string)$tenant] as $set) {
+            foreach ($this->setsMap->getSets($tenant, $concept->getProperty(OpenSkos::SET)) as $set) {
                 $setSpecs[] = $tenant . ':' . $set->code;
-                
-                $schemes = $this->schemeManager->getSchemeByCollectionUri(
-                    $set->uri,
-                    $concept->getProperty(Skos::INSCHEME)
-                );
+                $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
                 foreach ($schemes as $scheme) {
                     $setSpecs[] = $tenant . ':' . $set->code . ':' . $scheme->getUuid();
                 }
             }
         }
-        
-        // End @TODO optimize
         
         return new Header($concept->getUri(), $datestamp, $setSpecs, $concept->isDeleted());
     }
