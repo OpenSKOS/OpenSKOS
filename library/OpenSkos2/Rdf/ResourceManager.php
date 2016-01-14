@@ -96,7 +96,7 @@ class ResourceManager
     }
 
     /**
-     * @param Resource $resource
+     * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
      */
     public function insert(Resource $resource)
@@ -243,7 +243,7 @@ class ResourceManager
      * Fetch resource by uuid
      *
      * @param string $uuid
-     * @return OpenSkos2\Rdf\Resource
+     * @return \OpenSkos2\Rdf\Resource
      */
     public function fetchByUuid($uuid)
     {
@@ -476,7 +476,7 @@ class ResourceManager
         $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
         $query .= 'WHERE { ' . $this->simplePatternsToQuery($simplePatterns, '?subject') . ' }';
 
-        /* @var $result EasyRdf\Sparql\Result */
+        /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
 
         return $result[0]->count->getValue();
@@ -603,7 +603,7 @@ class ResourceManager
             }
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
-        
+
         if ($ex !== null) {
             throw $ex;
         }

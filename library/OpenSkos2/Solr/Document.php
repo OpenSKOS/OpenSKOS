@@ -54,7 +54,7 @@ class Document
      * s_prefLabel_en
      *
      * @TODO We now have old fields mapping + this one. Don't need them both.
-     * 
+     *
      * @var array
      */
     protected $mapping = [
@@ -102,7 +102,7 @@ class Document
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
         
-        // Index old fields as well for bacward compatibility.
+        // Index old fields as well for backward compatibility.
         $predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
         
         // Dc terms
