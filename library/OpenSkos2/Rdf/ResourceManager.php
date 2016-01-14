@@ -584,7 +584,7 @@ class ResourceManager
     /**
      * Execute raw query
      * Retries on timeout, because when jena stays idle for some time, sometimes throws a timeout error.
-     * 
+     *
      * @param string $query
      * @return \EasyRdf\Graph
      */
