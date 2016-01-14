@@ -51,7 +51,7 @@ class ParserText
 
     /**
      * Escapes chars that are part of solr syntax.
-     * 
+     *
      * @param string $text
      * @return string
      */
@@ -65,7 +65,7 @@ class ParserText
 
     /**
      * Checks the search text for is it a complex query or a simple search text.
-     * 
+     *
      * @param string $searchText
      */
     public function isSearchTextQuery($searchText)

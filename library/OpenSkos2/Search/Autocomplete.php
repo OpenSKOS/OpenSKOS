@@ -71,7 +71,6 @@ class Autocomplete
                 $solrQuery = $term;
             }
         } else {
-            
             if ($parser->isSearchTextQuery($term)) {
                 // Custom user query, he has to escape and do everything.
                 $term = '(' . $term . ')';
