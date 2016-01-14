@@ -253,7 +253,7 @@ class Repository implements InterfaceRepository
         $pSet = $this->parseSet($set);
 
         $concepts = $this->getConcepts(
-            $this->limit + 1,
+            $this->limit,
             0,
             $from,
             $until,
@@ -262,19 +262,14 @@ class Repository implements InterfaceRepository
             $pSet['conceptScheme'],
             $numFound
         );
-        $items = [];
         
-        $showToken = false;
+        $items = [];
         foreach ($concepts as $i => $concept) {
-            if ($i === ($this->limit - 1)) {
-                $showToken = true;
-                continue;
-            }
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
         
         $token = null;
-        if ($showToken) {
+        if ($numFound > $this->limit) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
         
@@ -291,9 +286,11 @@ class Repository implements InterfaceRepository
 
         $pSet = $this->parseSet($params['set']);
 
+        $cursor = (int)$params['offset'];
+        
         $concepts = $this->getConcepts(
-            $this->limit + 1,
-            $params['offset'],
+            $this->limit,
+            $cursor,
             $params['from'],
             $params['until'],
             $pSet['tenant'],
@@ -303,25 +300,14 @@ class Repository implements InterfaceRepository
         );
 
         $items = [];
-
-        $showToken = false;
         foreach ($concepts as $i => $concept) {
-            if ($i === $this->limit) {
-                $showToken = true;
-                continue;
-            }
-
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
 
-        $cursor = $params['offset'];
-        $params['offset'] = (int)$params['offset'] + $this->limit;
-
         $token = null;
-
-        if ($showToken) {
+        if ($numFound > ($cursor + $this->limit)) {
             $token = $this->encodeResumptionToken(
-                $params['offset'],
+                $cursor + $this->limit,
                 $params['from'],
                 $params['until'],
                 $params['metadataPrefix'],
