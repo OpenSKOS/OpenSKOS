@@ -583,24 +583,29 @@ class ResourceManager
 
     /**
      * Execute raw query
-     * Retries once on timeout, because when jena stays idle for some time throws a timeout.
+     * Retries on timeout, because when jena stays idle for some time, sometimes throws a timeout error.
      * 
      * @param string $query
      * @return \EasyRdf\Graph
      */
     protected function query($query)
     {
-        try {
-            return $this->client->query($query);
-        } catch (\EasyRdf\Exception $ex) {
-            // message = Request to * timed out
-            // code = 0
-            if (strpos($ex->getMessage(), 'timed out') !== false) {
-                // Retry once on timeout. When jena stays idle for some time throws a timeout.
+        $maxTries = 3;
+        $tries = 0;
+        $ex = null;
+        do {
+            try {
                 return $this->client->query($query);
-            } else {
-                throw $ex;
+            } catch (\EasyRdf\Exception $ex) {
+                if (strpos($ex->getMessage(), 'timed out') === false) {
+                    throw $ex;
+                }
             }
+            $tries ++;
+        } while ($tries < $maxTries && $ex !== null);
+        
+        if ($ex !== null) {
+            throw $ex;
         }
     }
 

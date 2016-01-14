@@ -33,6 +33,7 @@
 <#tdbDataset>
         a             tdb:DatasetTDB ;
         tdb:location  "run/databases/openskos" 
+        ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "30000" ] ;
 .
 
 <#tdbGraph> 
