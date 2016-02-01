@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSKOS English translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-07 08:36+0100\n"
-"PO-Revision-Date: 2015-05-07 09:29+0100\n"
+"POT-Creation-Date: 2016-02-01 14:31+0100\n"
+"PO-Revision-Date: 2016-02-01 14:32+0100\n"
 "Last-Translator: David Thornley <d.thornley@picturae.nl>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "Language: en_US\n"
@@ -46,23 +46,21 @@ msgstr ""
 "A file with that name is already scheduled for import. Please delete the job "
 "if you want to import it again."
 
-#: ../application/editor/controllers/CollectionsController.php:159
+#: ../application/editor/controllers/CollectionsController.php:158
 msgid "An import job is scheduled"
 msgstr "An import job is scheduled"
 
-#: ../application/editor/controllers/CollectionsController.php:168
-#: ../application/editor/controllers/ConceptController.php:132
-#: ../application/editor/controllers/ConceptSchemeController.php:95
+#: ../application/editor/controllers/CollectionsController.php:167
 #: ../application/editor/controllers/InstitutionController.php:36
 #: ../application/editor/controllers/UsersController.php:59
 msgid "No POST data recieved"
 msgstr "No POST data recieved"
 
-#: ../application/editor/controllers/CollectionsController.php:175
+#: ../application/editor/controllers/CollectionsController.php:174
 msgid "You can not delete an empty collection."
 msgstr "You can not delete an empty collection."
 
-#: ../application/editor/controllers/CollectionsController.php:179
+#: ../application/editor/controllers/CollectionsController.php:178
 msgid ""
 "The collection has been deleted, it might take a while before changes are "
 "committed to our system."
@@ -70,12 +68,12 @@ msgstr ""
 "The collection has been deleted, it might take a while before changes are "
 "committed to our system."
 
-#: ../application/editor/controllers/CollectionsController.php:223
+#: ../application/editor/controllers/CollectionsController.php:212
 #, php-format
 msgid "Collection `%s` not found"
 msgstr "Collection `%s` not found"
 
-#: ../application/editor/controllers/ConceptController.php:300
+#: ../application/editor/controllers/ConceptController.php:202
 msgid ""
 "A concept can not be deleted while there are semantic relations or mapping "
 "properties associated with it."
@@ -83,24 +81,24 @@ msgstr ""
 "A concept can not be deleted while there are semantic relations or mapping "
 "properties associated with it."
 
-#: ../application/editor/controllers/ConceptController.php:499
+#: ../application/editor/controllers/ConceptController.php:447
 msgid "You can not edit concepts of different tenants."
 msgstr "You can not edit concepts of different tenants."
 
-#: ../application/editor/controllers/ConceptController.php:548
+#: ../application/editor/controllers/ConceptController.php:494
 msgid "Forward"
 msgstr "Forward"
 
-#: ../application/editor/controllers/ConceptSchemeController.php:170
+#: ../application/editor/controllers/ConceptSchemeController.php:145
 msgid "A job for deleting the concept scheme was added."
 msgstr "A job for deleting the concept scheme was added."
 
-#: ../application/editor/controllers/ConceptSchemeController.php:172
+#: ../application/editor/controllers/ConceptSchemeController.php:147
 msgid "A job for deleting the concept scheme already exists."
 msgstr "A job for deleting the concept scheme already exists."
 
 #: ../application/editor/controllers/InstitutionController.php:44
-#: ../application/editor/controllers/UsersController.php:129
+#: ../application/editor/controllers/UsersController.php:128
 msgid "Data saved"
 msgstr "Data saved"
 
@@ -128,16 +126,16 @@ msgstr "Collection not found"
 msgid "You are not allowed to edit this job."
 msgstr "You are not allowed to edit this job."
 
-#: ../application/editor/controllers/LoginController.php:26
+#: ../application/editor/controllers/LoginController.php:28
 msgid "You are already logged in"
 msgstr "You are already logged in"
 
-#: ../application/editor/controllers/LoginController.php:68
-#: ../application/editor/controllers/LoginController.php:135
+#: ../application/editor/controllers/LoginController.php:71
+#: ../application/editor/controllers/LoginController.php:137
 msgid "Succesfully logged in"
 msgstr "Succesfully logged in"
 
-#: ../application/editor/controllers/LoginController.php:139
+#: ../application/editor/controllers/LoginController.php:141
 msgid ""
 "You have succesfully logged in with your Google account, but no user was "
 "found in our system with the emailaddress"
@@ -145,21 +143,21 @@ msgstr ""
 "You have successfully logged in with your Google account, but no user was "
 "found in our system with the email address"
 
-#: ../application/editor/controllers/LoginController.php:141
+#: ../application/editor/controllers/LoginController.php:143
 msgid "Please contact your application manager to give you access to OpenSKOS."
 msgstr ""
 "Please contact your application manager to give you access to OpenSKOS."
 
-#: ../application/editor/controllers/LoginController.php:158
+#: ../application/editor/controllers/LoginController.php:160
 msgid "Unable to verify OAuth state."
 msgstr "Unable to verify OAuth state."
 
-#: ../application/editor/controllers/SearchController.php:215
-#: ../application/editor/controllers/SearchController.php:236
+#: ../application/editor/controllers/SearchController.php:165
+#: ../application/editor/controllers/SearchController.php:186
 msgid "Please fill a profile name."
 msgstr "Please fill a profile name."
 
-#: ../application/editor/controllers/SearchController.php:229
+#: ../application/editor/controllers/SearchController.php:179
 msgid "You are not allowed to edit that search profile."
 msgstr "You are not allowed to edit that search profile."
 
@@ -175,29 +173,34 @@ msgstr "You can not delete yourself."
 msgid "The user has been deleted."
 msgstr "The user has been deleted."
 
-#: ../application/editor/controllers/UsersController.php:151
+#: ../application/editor/controllers/UsersController.php:150
 msgid "User not found"
 msgstr "User not found"
 
-#: ../application/editor/controllers/UsersController.php:157
+#: ../application/editor/controllers/UsersController.php:156
 msgid "You are not allowed to edit this user."
 msgstr "You are not allowed to edit this user."
 
-#: ../application/editor/forms/Concept.php:152
-#: ../application/editor/forms/Concept.php:176
-#: ../application/editor/forms/ConceptScheme.php:127
-#: ../application/editor/forms/SearchOptions.php:350
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:27
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:40
+#: ../application/editor/forms/Concept.php:151
+#: ../application/editor/views/scripts/concept/view/header.phtml:40
+msgid "Notations:"
+msgstr "Notations:"
+
+#: ../application/editor/forms/Concept.php:157
+#: ../application/editor/forms/Concept.php:183
+#: ../application/editor/forms/ConceptScheme.php:130
+#: ../application/editor/forms/SearchOptions.php:386
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:30
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:53
 msgid "Ok"
 msgstr "Ok"
 
-#: ../application/editor/forms/Concept.php:158
+#: ../application/editor/forms/Concept.php:163
 msgid "Switch to view mode"
 msgstr "Switch to view mode"
 
-#: ../application/editor/forms/Concept.php:164
-#: ../application/editor/views/scripts/concept/view.phtml:53
+#: ../application/editor/forms/Concept.php:169
+#: ../application/editor/views/scripts/concept/view/header.phtml:56
 #: ../application/editor/views/scripts/index/index.phtml:50
 #: ../application/editor/views/scripts/index/index.phtml:85
 #: ../application/editor/views/scripts/index/index.phtml:97
@@ -207,100 +210,99 @@ msgstr "Switch to view mode"
 msgid "Export"
 msgstr "Export"
 
-#: ../application/editor/forms/Concept.php:170
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:209
-#: ../library/OpenSKOS/Db/Table/Row/User.php:58
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:38
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:68
+#: ../application/editor/forms/Concept.php:176
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:172
+#: ../library/OpenSKOS/Db/Table/Row/User.php:59
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:41
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:69
 #: ../application/editor/views/scripts/concept-scheme/show-icons.phtml:26
 msgid "Delete"
 msgstr "Delete"
 
-#: ../application/editor/forms/Concept.php:350
+#: ../application/editor/forms/Concept.php:371
 msgid "Add documentation property"
 msgstr "Add documentation property"
 
-#: ../application/editor/forms/Concept.php:373
-#: ../application/editor/views/scripts/concept/view.phtml:184
+#: ../application/editor/forms/Concept.php:408
+#: ../application/editor/views/scripts/concept/view/right.phtml:59
 msgid "Has broader"
 msgstr "Has broader"
 
-#: ../application/editor/forms/Concept.php:374
-#: ../application/editor/views/scripts/concept/view.phtml:185
+#: ../application/editor/forms/Concept.php:409
+#: ../application/editor/views/scripts/concept/view/right.phtml:60
 msgid "Has narrower"
 msgstr "Has narrower"
 
-#: ../application/editor/forms/Concept.php:375
-#: ../application/editor/views/scripts/concept/view.phtml:186
+#: ../application/editor/forms/Concept.php:410
+#: ../application/editor/views/scripts/concept/view/right.phtml:61
 msgid "Has related"
 msgstr "Has related"
 
-#: ../application/editor/forms/Concept.php:445
-#: ../application/editor/views/scripts/concept/view.phtml:234
+#: ../application/editor/forms/Concept.php:455
+#: ../application/editor/views/scripts/concept/view/right.phtml:92
 #: ../application/editor/views/scripts/index/modalboxes/relations.phtml:42
 msgid "Has broader match"
 msgstr "Has broader match"
 
-#: ../application/editor/forms/Concept.php:446
-#: ../application/editor/views/scripts/concept/view.phtml:235
+#: ../application/editor/forms/Concept.php:456
+#: ../application/editor/views/scripts/concept/view/right.phtml:93
 #: ../application/editor/views/scripts/index/modalboxes/relations.phtml:43
 msgid "Has narrower match"
 msgstr "Has narrower match"
 
-#: ../application/editor/forms/Concept.php:447
-#: ../application/editor/views/scripts/concept/view.phtml:236
+#: ../application/editor/forms/Concept.php:457
+#: ../application/editor/views/scripts/concept/view/right.phtml:94
 #: ../application/editor/views/scripts/index/modalboxes/relations.phtml:44
 msgid "Has related match"
 msgstr "Has related match"
 
-#: ../application/editor/forms/Concept.php:448
-#: ../application/editor/views/scripts/concept/view.phtml:237
+#: ../application/editor/forms/Concept.php:458
+#: ../application/editor/views/scripts/concept/view/right.phtml:95
 msgid "Has mapping relation"
 msgstr "Has mapping relation"
 
-#: ../application/editor/forms/Concept.php:449
-#: ../application/editor/views/scripts/concept/view.phtml:238
+#: ../application/editor/forms/Concept.php:459
+#: ../application/editor/views/scripts/concept/view/right.phtml:96
 #: ../application/editor/views/scripts/index/modalboxes/relations.phtml:41
 msgid "Has close match"
 msgstr "Has close match"
 
-#: ../application/editor/forms/Concept.php:450
-#: ../application/editor/views/scripts/concept/view.phtml:239
+#: ../application/editor/forms/Concept.php:460
+#: ../application/editor/views/scripts/concept/view/right.phtml:97
 #: ../application/editor/views/scripts/index/modalboxes/relations.phtml:40
 msgid "Has exact match"
 msgstr "Has exact match"
 
-#: ../application/editor/forms/ConceptScheme.php:107
+#: ../application/editor/forms/ConceptScheme.php:110
 msgid "Collection:"
 msgstr "Collection:"
 
-#: ../application/editor/forms/Export.php:62
+#: ../application/editor/forms/Export.php:69
 msgid "Select one"
 msgstr "Select one"
 
-#: ../application/editor/forms/Login.php:31
+#: ../application/editor/forms/Login.php:32
 msgid "Institution code"
 msgstr "Institution code"
 
-#: ../application/editor/forms/Login.php:37
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:36
-#: ../library/OpenSKOS/Db/Table/Row/User.php:46
+#: ../application/editor/forms/Login.php:38
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:37
+#: ../library/OpenSKOS/Db/Table/Row/User.php:47
 #: ../application/editor/views/scripts/users/index.phtml:39
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../application/editor/forms/Login.php:43
-#: ../library/OpenSKOS/Db/Table/Row/User.php:47
+#: ../application/editor/forms/Login.php:44
+#: ../library/OpenSKOS/Db/Table/Row/User.php:48
 msgid "Password"
 msgstr "Password"
 
-#: ../application/editor/forms/Login.php:45
+#: ../application/editor/forms/Login.php:46
 #: ../application/editor/forms/OAuthLogin.php:43
-#: ../application/editor/forms/OpenIdLogin.php:43
 msgid "Remember me"
 msgstr "Remember me"
 
-#: ../application/editor/forms/Login.php:50
+#: ../application/editor/forms/Login.php:51
 msgid "Login"
 msgstr "Login"
 
@@ -309,180 +311,181 @@ msgid "Truncate"
 msgstr "Truncate"
 
 #: ../application/editor/forms/Search.php:125
-#: ../application/editor/forms/Search.php:167
+#: ../application/editor/forms/Search.php:166
 msgid "Concept scheme"
 msgstr "Concept scheme"
 
-#: ../application/editor/forms/Search.php:175
+#: ../application/editor/forms/Search.php:174
 msgid "Instant results"
 msgstr "Instant results"
 
-#: ../application/editor/forms/Search.php:206
-#: ../application/editor/forms/SearchOptions.php:79
+#: ../application/editor/forms/Search.php:205
+#: ../application/editor/forms/SearchOptions.php:116
 msgid "Default"
 msgstr "Default"
 
-#: ../application/editor/forms/Search.php:210
-#: ../application/editor/forms/SearchOptions.php:83
+#: ../application/editor/forms/Search.php:209
+#: ../application/editor/forms/SearchOptions.php:120
 msgid "Custom"
 msgstr "Custom"
 
-#: ../application/editor/forms/Search.php:221
-#: ../application/editor/forms/SearchOptions.php:86
+#: ../application/editor/forms/Search.php:220
+#: ../application/editor/forms/SearchOptions.php:123
 msgid "Search Profile"
 msgstr "Search Profile"
 
-#: ../application/editor/forms/Search.php:239
+#: ../application/editor/forms/Search.php:240
 msgid "Search"
 msgstr "Search"
 
-#: ../application/editor/forms/SearchOptions.php:65
+#: ../application/editor/forms/SearchOptions.php:102
 msgid "You are not allowed to change your detailed search options."
 msgstr "You are not allowed to change your detailed search options."
 
-#: ../application/editor/forms/SearchOptions.php:92
+#: ../application/editor/forms/SearchOptions.php:129
 msgid "Search Profile Name"
 msgstr "Search Profile Name"
 
-#: ../application/editor/forms/SearchOptions.php:112
+#: ../application/editor/forms/SearchOptions.php:149
 msgid "Language"
 msgstr "Language"
 
-#: ../application/editor/forms/SearchOptions.php:130
+#: ../application/editor/forms/SearchOptions.php:167
 msgid "Lexical label"
 msgstr "Lexical label"
 
-#: ../application/editor/forms/SearchOptions.php:153
+#: ../application/editor/forms/SearchOptions.php:190
 #: ../application/editor/views/scripts/jobs/index.phtml:73
 #: ../application/editor/views/scripts/jobs/view.phtml:50
 msgid "Status"
 msgstr "Status"
 
-#: ../application/editor/forms/SearchOptions.php:164
+#: ../application/editor/forms/SearchOptions.php:201
 msgid "To be checked"
 msgstr "To be checked"
 
-#: ../application/editor/forms/SearchOptions.php:181
+#: ../application/editor/forms/SearchOptions.php:218
 msgid "Document properties"
 msgstr "Document properties"
 
-#: ../application/editor/forms/SearchOptions.php:198
+#: ../application/editor/forms/SearchOptions.php:235
 msgid "Only top concepts"
 msgstr "Only top concepts"
 
-#: ../application/editor/forms/SearchOptions.php:201
+#: ../application/editor/forms/SearchOptions.php:238
 msgid "Only orphaned concepts"
 msgstr "Only orphaned concepts"
 
-#: ../application/editor/forms/SearchOptions.php:204
+#: ../application/editor/forms/SearchOptions.php:241
 msgid "Search in notation"
 msgstr "Search in notation"
 
-#: ../application/editor/forms/SearchOptions.php:207
+#: ../application/editor/forms/SearchOptions.php:244
 msgid "Search in uri"
 msgstr "Search in uri"
 
-#: ../application/editor/forms/SearchOptions.php:232
-#: ../application/editor/forms/SearchOptions.php:255
+#: ../application/editor/forms/SearchOptions.php:273
+#: ../application/editor/forms/SearchOptions.php:294
 msgid "Created, modified or approved"
 msgstr "Created, modified or approved"
 
-#: ../application/editor/forms/SearchOptions.php:242
+#: ../application/editor/forms/SearchOptions.php:283
 msgid "Roles"
 msgstr "Roles"
 
-#: ../application/editor/forms/SearchOptions.php:246
+#: ../application/editor/forms/SearchOptions.php:287
 msgid "Users"
 msgstr "Users"
 
-#: ../application/editor/forms/SearchOptions.php:268
+#: ../application/editor/forms/SearchOptions.php:308
 #: ../application/editor/views/scripts/jobs/view.phtml:104
 msgid "From"
 msgstr "From"
 
-#: ../application/editor/forms/SearchOptions.php:279
+#: ../application/editor/forms/SearchOptions.php:318
 msgid "To"
 msgstr "To"
 
-#: ../application/editor/forms/SearchOptions.php:302
+#: ../application/editor/forms/SearchOptions.php:341
 msgid "Tenants"
 msgstr "Tenants"
 
-#: ../application/editor/forms/SearchOptions.php:322
+#: ../application/editor/forms/SearchOptions.php:361
 #: ../application/api/views/scripts/institutions/get.phtml:42
 msgid "Collections"
 msgstr "Collections"
 
-#: ../application/editor/forms/SearchOptions.php:338
+#: ../application/editor/forms/SearchOptions.php:374
 msgid "Concept schemes"
 msgstr "Concept schemes"
 
-#: ../application/editor/forms/SearchOptions.php:354
+#: ../application/editor/forms/SearchOptions.php:390
 msgid "Reset Defaults"
 msgstr "Reset Defaults"
 
-#: ../application/editor/forms/SearchOptions.php:358
+#: ../application/editor/forms/SearchOptions.php:394
 msgid "Save Profile"
 msgstr "Save Profile"
 
-#: ../application/editor/forms/SearchOptions.php:362
+#: ../application/editor/forms/SearchOptions.php:398
 msgid "Delete Profile"
 msgstr "Delete Profile"
 
-#: ../application/editor/forms/SearchOptions.php:374
+#: ../application/editor/forms/SearchOptions.php:410
 msgid "Save Profile As"
 msgstr "Save Profile As"
 
-#: ../application/editor/forms/SearchOptions.php:524
+#: ../application/editor/forms/SearchOptions.php:535
 msgid "preferred"
 msgstr "preferred"
 
-#: ../application/editor/forms/SearchOptions.php:525
+#: ../application/editor/forms/SearchOptions.php:536
 msgid "alternative"
 msgstr "alternative"
 
-#: ../application/editor/forms/SearchOptions.php:526
+#: ../application/editor/forms/SearchOptions.php:537
 msgid "hidden"
 msgstr "hidden"
 
-#: ../application/editor/forms/SearchOptions.php:528
+#: ../application/editor/forms/SearchOptions.php:539
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:40
 msgid "none"
 msgstr "none"
 
-#: ../application/editor/forms/SearchOptions.php:540
+#: ../application/editor/forms/SearchOptions.php:551
 msgid "definition"
 msgstr "definition"
 
-#: ../application/editor/forms/SearchOptions.php:541
+#: ../application/editor/forms/SearchOptions.php:552
 msgid "example"
 msgstr "example"
 
-#: ../application/editor/forms/SearchOptions.php:542
+#: ../application/editor/forms/SearchOptions.php:553
 msgid "change note"
 msgstr "change note"
 
-#: ../application/editor/forms/SearchOptions.php:543
+#: ../application/editor/forms/SearchOptions.php:554
 msgid "editorial note"
 msgstr "editorial note"
 
-#: ../application/editor/forms/SearchOptions.php:544
+#: ../application/editor/forms/SearchOptions.php:555
 msgid "history note"
 msgstr "history note"
 
-#: ../application/editor/forms/SearchOptions.php:545
+#: ../application/editor/forms/SearchOptions.php:556
 msgid "scope note"
 msgstr "scope note"
 
-#: ../application/editor/forms/SearchOptions.php:547
+#: ../application/editor/forms/SearchOptions.php:558
 msgid "created"
 msgstr "created"
 
-#: ../application/editor/forms/SearchOptions.php:548
+#: ../application/editor/forms/SearchOptions.php:559
 msgid "modified"
 msgstr "modified"
 
-#: ../application/editor/forms/SearchOptions.php:549
-#: ../languages/strings.php:4
+#: ../application/editor/forms/SearchOptions.php:560
+#: ../languages/strings.php:5
 msgid "approved"
 msgstr "approved"
 
@@ -490,107 +493,27 @@ msgstr "approved"
 msgid "Upload"
 msgstr "Upload"
 
-#: ../application/editor/models/ConceptValidator/CycleInBroaders.php:50
-#: ../application/editor/models/ConceptValidator/SameBroaderAndNarrower.php:53
-msgid "One or more of the broader relations create a cycle"
-msgstr "One or more of the broader relations create a cycle"
-
-#: ../application/editor/models/ConceptValidator/CycleInNarrowers.php:50
-msgid "One or more of the narrower relations create a cycle"
-msgstr "One or more of the narrower relations create a cycle"
-
-#: ../application/editor/models/ConceptValidator/DuplicateBroaders.php:47
-msgid "Some concepts are defined more than once as broader"
-msgstr "Some concepts are defined more than once as broader"
-
-#: ../application/editor/models/ConceptValidator/DuplicateNarrowers.php:47
-msgid "Some concepts are defined more than once as narrower"
-msgstr "Some concepts are defined more than once as narrower"
-
-#: ../application/editor/models/ConceptValidator/DuplicateRelated.php:47
-msgid "Some concepts are defined more than once as related"
-msgstr "Some concepts are defined more than once as related"
-
-#: ../application/editor/models/ConceptValidator/ExpiredWithRelations.php:40
-msgid ""
-"Can not change status to \"expired\" while there are still relations to "
-"other concepts."
-msgstr ""
-"Can not change status to \"expired\" while there are still relations to "
-"other concepts."
-
-#: ../application/editor/models/ConceptValidator/ExpiredWithRelations.php:58
-msgid ""
-"Can not relate the concept to any expired concepts. The fallowing concepts "
-"are expired:"
-msgstr ""
-"Can not relate the concept to any expired concepts. The following concepts "
-"are expired:"
-
-#: ../application/editor/models/ConceptValidator/IsAtLeastInOneScheme.php:41
-msgid "The concept must be included in at least one scheme."
-msgstr "The concept must be included in at least one scheme."
-
-#: ../application/editor/models/ConceptValidator/RelatedToItself.php:47
-msgid "The concept can not be related to itself."
-msgstr "The concept can not be related to itself."
-
-#: ../application/editor/models/ConceptValidator/StatusesTransition.php:50
-#, php-format
-msgid "The status transition from \"%s\" to \"%s\" is not allowed."
-msgstr "The status transition from \"%s\" to \"%s\" is not allowed."
-
-#: ../application/editor/models/ConceptValidator/UniqueNotation.php:37
-msgid "Notation not specified."
-msgstr "Notation not specified."
-
-#: ../application/editor/models/ConceptValidator/UniqueNotation.php:47
-msgid "System error. The notation of this concept is already used."
-msgstr "System error. The notation of this concept is already used."
-
-#: ../application/editor/models/ConceptValidator/UniquePrefLabelInScheme.php:62
-msgid ""
-"There is already a concept with same preferred label in one of the schemes."
-msgstr ""
-"There is already a concept with same preferred label in one of the schemes."
-
-#: ../application/editor/models/ConceptValidator/UnneededDirectBroaders.php:54
-msgid ""
-"One or more of broader relations have also a relation via an intermediate "
-"concepts"
-msgstr ""
-"One or more of broader relations have also a relation via an intermediate "
-"concepts"
-
-#: ../application/editor/models/ConceptValidator/UnneededDirectNarrowers.php:55
-msgid ""
-"One or more of narrower relations have also a relation via an intermediate "
-"concepts"
-msgstr ""
-"One or more of narrower relations have also a relation via an intermediate "
-"concepts"
-
-#: ../languages/strings.php:3
+#: ../languages/strings.php:4
 msgid "candidate"
 msgstr "candidate"
 
-#: ../languages/strings.php:5
+#: ../languages/strings.php:6
 msgid "redirected"
 msgstr "redirected"
 
-#: ../languages/strings.php:6
+#: ../languages/strings.php:7
 msgid "not_compliant"
 msgstr "not_compliant"
 
-#: ../languages/strings.php:7
+#: ../languages/strings.php:8
 msgid "rejected"
 msgstr "rejected"
 
-#: ../languages/strings.php:8
+#: ../languages/strings.php:9
 msgid "obsolete"
 msgstr "obsolete"
 
-#: ../languages/strings.php:9
+#: ../languages/strings.php:10
 msgid "deleted"
 msgstr "deleted"
 
@@ -607,15 +530,15 @@ msgstr "Your access level does not allow you access to"
 msgid "Your account is blocked."
 msgstr "Your account is blocked."
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:82
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:62
 msgid "File"
 msgstr "File"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:103
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:83
 msgid "Delete concepts in this collection before import"
 msgstr "Delete concepts in this collection before import"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:104
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:84
 msgid ""
 "Import contains only new concepts. Do not update any concepts if they match "
 "by notation (or uri if useUriAsIdentifier is used)."
@@ -623,188 +546,176 @@ msgstr ""
 "Import contains only new concepts. Do not update any concepts if they match "
 "by notation (or uri if useUriAsIdentifier is used)."
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:105
-msgid ""
-"Use uri as identifier if concept notation does not exist in the importing "
-"concept."
-msgstr ""
-"Use uri as identifier if concept notation does not exist in the importing "
-"concept."
-
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:123
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:102
 msgid "delete concepts in this collection before import"
 msgstr "delete concepts in this collection before import"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:132
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:111
 msgid "choose optional set:"
 msgstr "choose optional set:"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:135
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:114
 msgid "Failed to load sets from OAI!"
 msgstr "Failed to load sets from OAI!"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:196
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:160
 #: ../application/editor/views/scripts/collections/index.phtml:35
 msgid "Code"
 msgstr "Code"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:197
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:161
 #: ../application/editor/views/scripts/collections/index.phtml:36
 msgid "Title"
 msgstr "Title"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:198
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:162
 #: ../application/api/views/scripts/collections/get.phtml:31
 msgid "Description"
 msgstr "Description"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:199
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:35
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:163
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:36
 #: ../application/api/views/scripts/collections/get.phtml:37
 msgid "Website"
 msgstr "Website"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:200
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:164
 msgid "Standard Licence"
 msgstr "Standard Licence"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:201
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:165
 msgid "Custom Licence (name)"
 msgstr "Custom Licence (name)"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:202
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:166
 msgid "Custom (URL)"
 msgstr "Custom (URL)"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:203
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:167
 msgid "Allow OpenSKOS OAI Harvesting"
 msgstr "Allow OpenSKOS OAI Harvesting"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:204
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:168
 msgid "OAI baseURL"
 msgstr "OAI baseURL"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:205
-msgid "Concepts base url"
-msgstr "Concepts base url"
-
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:206
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:45
-#: ../library/OpenSKOS/Db/Table/Row/User.php:55
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:169
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:46
+#: ../library/OpenSKOS/Db/Table/Row/User.php:56
 msgid "Submit"
 msgstr "Submit"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:207
-#: ../library/OpenSKOS/Db/Table/Row/User.php:56
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:170
+#: ../library/OpenSKOS/Db/Table/Row/User.php:57
 msgid "Reset"
 msgstr "Reset"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:208
-#: ../library/OpenSKOS/Db/Table/Row/User.php:57
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:26
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:39
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:171
+#: ../library/OpenSKOS/Db/Table/Row/User.php:58
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:29
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:52
 msgid "Cancel"
 msgstr "Cancel"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:209
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:172
 msgid ""
 "Are you sure you want to delete this collection and corresponding Concepts?"
 msgstr ""
 "Are you sure you want to delete this collection and corresponding Concepts?"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:219
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:182
 msgid "choose a standard license  or type a custom one:"
 msgstr "choose a standard license  or type a custom one:"
 
-#: ../library/OpenSKOS/Db/Table/Row/Collection.php:236
+#: ../library/OpenSKOS/Db/Table/Row/Collection.php:199
 msgid "Pick a provider (or leave empty)..."
 msgstr "Pick a provider (or leave empty)..."
 
-#: ../library/OpenSKOS/Db/Table/Row/Job.php:75
+#: ../library/OpenSKOS/Db/Table/Row/Job.php:80
 msgid "Failed to delete file"
 msgstr "Failed to delete file"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:33
-#: ../library/OpenSKOS/Db/Table/Row/User.php:45
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:34
+#: ../library/OpenSKOS/Db/Table/Row/User.php:46
 #: ../application/editor/views/scripts/jobs/view.phtml:70
 #: ../application/editor/views/scripts/users/index.phtml:38
 #: ../application/editor/views/scripts/users/view.phtml:31
 msgid "Name"
 msgstr "Name"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:34
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:35
 msgid "Organisation unit"
 msgstr "Department"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:37
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:38
 msgid "Street Address"
 msgstr "Street"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:38
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:39
 msgid "Locality"
 msgstr "Locality"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:39
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:40
 msgid "Postal Code"
 msgstr "Postal Code"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:40
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:41
 msgid "Country Name"
 msgstr "Country Name"
 
-#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:42
+#: ../library/OpenSKOS/Db/Table/Row/Tenant.php:43
 msgid "Enable the statuses system for concepts. (check help below *)"
 msgstr "Enable the statuses system for concepts. (check help below *)"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:44
+#: ../library/OpenSKOS/Db/Table/Row/User.php:45
 #: ../application/editor/views/scripts/users/view.phtml:27
 msgid "Tenant"
 msgstr "Tenant"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:48
+#: ../library/OpenSKOS/Db/Table/Row/User.php:49
 msgid "Password (check)"
 msgstr "Password (check)"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:49
+#: ../library/OpenSKOS/Db/Table/Row/User.php:50
 #: ../application/editor/views/scripts/users/index.phtml:40
 #: ../application/editor/views/scripts/users/view.phtml:39
 msgid "Role"
 msgstr "Role"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:50
+#: ../library/OpenSKOS/Db/Table/Row/User.php:51
 #: ../application/editor/views/scripts/users/index.phtml:41
 msgid "Usertype"
 msgstr "Usertype"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:51
+#: ../library/OpenSKOS/Db/Table/Row/User.php:52
 msgid "API Key (required for API users)"
 msgstr "API Key (required for API users)"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:52
+#: ../library/OpenSKOS/Db/Table/Row/User.php:53
 msgid "eduPersonPrincipalName (for SAML authentication)"
 msgstr "eduPersonPrincipalName (for SAML authentication)"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:53
+#: ../library/OpenSKOS/Db/Table/Row/User.php:54
 msgid "Search Profile Id"
 msgstr "Search Profile Id"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:54
+#: ../library/OpenSKOS/Db/Table/Row/User.php:55
 msgid "Disable changing search profile"
 msgstr "Disable changing search profile"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:58
+#: ../library/OpenSKOS/Db/Table/Row/User.php:59
 msgid "Are you sure you want to delete this user?"
 msgstr "Are you sure you want to delete this user?"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:81
+#: ../library/OpenSKOS/Db/Table/Row/User.php:82
 msgid "there is already a user with e-mail address '%value%'"
 msgstr "there is already a user with e-mail address '%value%'"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:90
+#: ../library/OpenSKOS/Db/Table/Row/User.php:91
 msgid "An API Key is required for users that have access to the API"
 msgstr "An API Key is required for users that have access to the API"
 
-#: ../library/OpenSKOS/Db/Table/Row/User.php:97
+#: ../library/OpenSKOS/Db/Table/Row/User.php:98
 msgid "there is already a user with API key '%value%'"
 msgstr "there is already a user with API key '%value%'"
 
@@ -950,7 +861,7 @@ msgid "administrator"
 msgstr "administrator"
 
 #: ../application/api/views/scripts/collections/get.phtml:27
-#: ../application/api/views/scripts/concept/get.phtml:43
+#: ../application/api/views/scripts/concept/get.phtml:40
 msgid "Institution"
 msgstr "Institution"
 
@@ -964,40 +875,19 @@ msgstr "License"
 msgid "ConceptSchemes"
 msgstr "ConceptSchemes"
 
-#: ../application/api/views/scripts/concept/get.phtml:45
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:36
-#: ../application/editor/views/scripts/jobs/index.phtml:68
-#: ../application/editor/views/scripts/jobs/view.phtml:26
-msgid "Collection"
-msgstr "Collection"
+#: ../application/api/views/scripts/concept/get.phtml:61
+msgid "Set"
+msgstr "Set"
 
-#: ../application/api/views/scripts/concept/get.phtml:54
+#: ../application/api/views/scripts/concept/get.phtml:87
 msgid "inScheme"
 msgstr "inScheme"
 
-#: ../application/api/views/scripts/concept/get.phtml:69
-#: ../application/api/views/scripts/concept/get.phtml:80
-#: ../application/api/views/scripts/concept/get.phtml:110
-msgid "skos:"
-msgstr "skos:"
-
-#: ../application/api/views/scripts/concept/get.phtml:98
-msgid "hasTopConcept"
-msgstr "hasTopConcept"
-
-#: ../application/api/views/scripts/concept/get.phtml:98
-msgid "items"
-msgstr "items"
-
-#: ../application/api/views/scripts/concept/get.phtml:108
-msgid "Implicit Semantic Relations"
-msgstr "Implicit Semantic Relations"
-
-#: ../application/api/views/scripts/concept/get.phtml:121
+#: ../application/api/views/scripts/concept/get.phtml:155
 msgid "Alternative formats"
 msgstr "Alternative formats"
 
-#: ../application/api/views/scripts/institutions/get.phtml:55
+#: ../application/api/views/scripts/institutions/get.phtml:54
 msgid "See"
 msgstr "See"
 
@@ -1005,26 +895,6 @@ msgstr "See"
 #: ../application/api/views/scripts/institutions/index.phtml:23
 msgid "Institutions"
 msgstr "Institutions"
-
-#: ../application/api/views/scripts/pagination.phtml:27
-#: ../application/api/views/scripts/pagination.phtml:30
-msgid "First"
-msgstr "First"
-
-#: ../application/api/views/scripts/pagination.phtml:36
-#: ../application/api/views/scripts/pagination.phtml:39
-msgid "Previous"
-msgstr "Previous"
-
-#: ../application/api/views/scripts/pagination.phtml:56
-#: ../application/api/views/scripts/pagination.phtml:59
-msgid "Next"
-msgstr "Next"
-
-#: ../application/api/views/scripts/pagination.phtml:67
-#: ../application/api/views/scripts/pagination.phtml:70
-msgid "Last"
-msgstr "Last"
 
 #: ../application/editor/views/scripts/collections/edit.phtml:23
 msgid "Edit collection"
@@ -1034,31 +904,31 @@ msgstr "Edit collection"
 msgid "Create collection"
 msgstr "Create collection"
 
-#: ../application/editor/views/scripts/collections/edit.phtml:42
+#: ../application/editor/views/scripts/collections/edit.phtml:45
 msgid "Schedule an OAI Harvest job"
 msgstr "Schedule an OAI Harvest job"
 
-#: ../application/editor/views/scripts/collections/edit.phtml:50
+#: ../application/editor/views/scripts/collections/edit.phtml:53
 msgid ""
 "An OAI Harvest job has already been scheduled<br/> on %started% by %user%"
 msgstr ""
 "An OAI Harvest job has already been scheduled<br/> on %started% by %user%"
 
-#: ../application/editor/views/scripts/collections/edit.phtml:60
+#: ../application/editor/views/scripts/collections/edit.phtml:63
 msgid "Import new data"
 msgstr "Import new data"
 
-#: ../application/editor/views/scripts/collections/edit.phtml:61
+#: ../application/editor/views/scripts/collections/edit.phtml:64
 #, php-format
 msgid "Upload a file in (optionaly zipped) rdf-xml format (max. %s)."
 msgstr "Upload a file in (optionaly zipped) rdf-xml format (max. %s)."
 
-#: ../application/editor/views/scripts/collections/edit.phtml:63
+#: ../application/editor/views/scripts/collections/edit.phtml:66
 #, php-format
 msgid "See <a href=\"%s\">API documentation</a> for supported formats."
 msgstr "See <a href=\"%s\">API documentation</a> for supported formats."
 
-#: ../application/editor/views/scripts/collections/edit.phtml:67
+#: ../application/editor/views/scripts/collections/edit.phtml:70
 msgid "Current import jobs for this collection"
 msgstr "Current import jobs for this collection"
 
@@ -1094,28 +964,34 @@ msgstr "The last part of the \"Uri\" is required."
 msgid "The \"Title\" is required and must be filled in each language."
 msgstr "The \"Title\" is required and must be filled in each language."
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:22
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:25
 msgid "Manage concept schemes"
 msgstr "Manage concept schemes"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:24
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:27
 msgid "Create new concept scheme"
 msgstr "Create new concept scheme"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:25
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:28
 #: ../application/editor/views/scripts/concept-scheme/show-icons.phtml:22
 msgid "Manage icons"
 msgstr "Manage icons"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:28
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:31
 msgid "No schemes."
 msgstr "No schemes."
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:35
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:38
 msgid "Scheme"
 msgstr "Scheme"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:37
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:39
+#: ../application/editor/views/scripts/jobs/index.phtml:68
+#: ../application/editor/views/scripts/jobs/view.phtml:26
+msgid "Collection"
+msgstr "Collection"
+
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:40
 msgid "Icon"
 msgstr "Icon"
 
@@ -1123,23 +999,23 @@ msgstr "Icon"
 msgid "Change Icon"
 msgstr "Change Icon"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:60
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:61
 msgid "no icon"
 msgstr "no icon"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:66
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:67
 msgid "Go to the delete job details"
 msgstr "Go to the delete job details"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:66
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:67
 msgid "A delete job exists"
 msgstr "A delete job exists"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:68
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:69
 msgid "Delete concept scheme"
 msgstr "Delete concept scheme"
 
-#: ../application/editor/views/scripts/concept-scheme/index.phtml:78
+#: ../application/editor/views/scripts/concept-scheme/index.phtml:79
 msgid "Are you sure you want to delete the concept scheme?"
 msgstr "Are you sure you want to delete the concept scheme?"
 
@@ -1151,170 +1027,179 @@ msgstr "Concept scheme saved successfully."
 msgid "Are you sure you want to delete this icon?"
 msgstr "Are you sure you want to delete this icon?"
 
-#: ../application/editor/views/scripts/concept/create.phtml:22
+#: ../application/editor/views/scripts/concept/create.phtml:20
 msgid "Create a concept"
 msgstr "Create a concept"
 
-#: ../application/editor/views/scripts/concept/create.phtml:24
+#: ../application/editor/views/scripts/concept/create.phtml:22
 msgid "Create concept"
 msgstr "Create concept"
 
-#: ../application/editor/views/scripts/concept/create.phtml:27
-#: ../application/editor/views/scripts/concept/edit.phtml:69
+#: ../application/editor/views/scripts/concept/create.phtml:25
+#: ../application/editor/views/scripts/concept/edit.phtml:40
 msgid "A document property is not saved. Do you want to continue?"
 msgstr "A document property is not saved. Do you want to continue?"
 
+#: ../application/editor/views/scripts/concept/edit.phtml:20
 #: ../application/editor/views/scripts/concept/edit.phtml:22
-#: ../application/editor/views/scripts/concept/edit.phtml:24
 msgid "Edit concept"
 msgstr "Edit concept"
 
-#: ../application/editor/views/scripts/concept/edit.phtml:52
-#: ../application/editor/views/scripts/concept/view.phtml:286
+#: ../application/editor/views/scripts/concept/edit.phtml:39
+msgid ""
+"Any changes you made will not be saved. Are you sure you want to go back to "
+"view mode?"
+msgstr ""
+"Any changes you made will not be saved. Are you sure you want to go back to "
+"view mode?"
+
+#: ../application/editor/views/scripts/concept/edit.phtml:41
+msgid "The concept was successfully deleted."
+msgstr "The concept was successfully deleted."
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:27
+msgid "Are you sure you want to set that status. It can not be returned."
+msgstr "Are you sure you want to set that status. It can not be undone."
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:34
+msgid "Choose the concept to which this one is redirected."
+msgstr "Choose the concept to which this one is redirected."
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:35
+msgid ""
+"If the concept is replaced from other concept, you can choose the other one "
+"now."
+msgstr ""
+"If the concept is replaced from other concept, you can choose the other one "
+"now."
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:36
+msgid ""
+"To choose - click on a concept in the left search results or in right "
+"history/selection tabs."
+msgstr ""
+"To choose - click on a concept in the left search results or in right "
+"history/selection tabs."
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:40
+msgid "Redirected to concept"
+msgstr "Redirected to concept"
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:44
+msgid "Which label to fill in the chosen concept?"
+msgstr "Which label to fill in the chosen concept?"
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:46
+#: ../application/editor/views/scripts/concept/view/left.phtml:42
+msgid "Alternative label"
+msgstr "Alternative label"
+
+#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:47
+#: ../application/editor/views/scripts/concept/view/left.phtml:43
+msgid "Hidden label"
+msgstr "Hidden label"
+
+#: ../application/editor/views/scripts/concept/view/footer.phtml:23
 #: ../application/editor/views/scripts/jobs/index.phtml:69
 #: ../application/editor/views/scripts/jobs/view.phtml:34
 msgid "Created"
 msgstr "Created"
 
-#: ../application/editor/views/scripts/concept/edit.phtml:57
-#: ../application/editor/views/scripts/concept/view.phtml:291
+#: ../application/editor/views/scripts/concept/view/footer.phtml:28
 msgid "Modified"
 msgstr "Modified"
 
-#: ../application/editor/views/scripts/concept/edit.phtml:62
-#: ../application/editor/views/scripts/concept/view.phtml:296
+#: ../application/editor/views/scripts/concept/view/footer.phtml:33
 msgid "Approved"
 msgstr "Approved"
 
-#: ../application/editor/views/scripts/concept/edit.phtml:68
-msgid ""
-"Any changes you made will not be saved. Are you sure you want to go back to "
-"view mode?"
-msgstr ""
-"Any changes you made will not be saved. Are you sure you want to go back to "
-"view mode?"
+#: ../application/editor/views/scripts/concept/view/header.phtml:26
+msgid "URI:"
+msgstr "URI:"
 
-#: ../application/editor/views/scripts/concept/edit.phtml:70
-msgid "The concept was successfully deleted."
-msgstr "The concept was successfully deleted."
-
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:24
-msgid "Are you sure you want to set that status. It can not be returned."
-msgstr "Are you sure you want to set that status. It can not be undone."
-
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:31
-msgid "Choose the concept to which this one is redirected."
-msgstr "Choose the concept to which this one is redirected."
-
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:32
-msgid "Choose the concept which replaces this one."
-msgstr "Choose the concept which replaces this one."
-
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:33
-msgid ""
-"Click on a concept in the left search or in right history/selection tabs."
-msgstr ""
-"Click on a concept in the left search or in right history/selection tabs."
-
-#: ../application/editor/views/scripts/concept/partials/status-interaction.phtml:36
-msgid "Chosen concept"
-msgstr "Chosen concept"
-
-#: ../application/editor/views/scripts/concept/view.phtml:31
+#: ../application/editor/views/scripts/concept/view/header.phtml:31
 msgid "Status:"
 msgstr "Status:"
 
-#: ../application/editor/views/scripts/concept/view.phtml:32
+#: ../application/editor/views/scripts/concept/view/header.phtml:32
 msgid "undefined"
 msgstr "undefined"
 
-#: ../application/editor/views/scripts/concept/view.phtml:36
+#: ../application/editor/views/scripts/concept/view/header.phtml:36
 msgid "To be checked:"
 msgstr "To be checked:"
 
-#: ../application/editor/views/scripts/concept/view.phtml:37
-#: ../application/editor/views/scripts/concept/view.phtml:179
+#: ../application/editor/views/scripts/concept/view/header.phtml:37
+#: ../application/editor/views/scripts/concept/view/right.phtml:53
 #: ../application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:27
 msgid "Yes"
 msgstr "Yes"
 
-#: ../application/editor/views/scripts/concept/view.phtml:37
-#: ../application/editor/views/scripts/concept/view.phtml:179
+#: ../application/editor/views/scripts/concept/view/header.phtml:37
+#: ../application/editor/views/scripts/concept/view/right.phtml:53
 #: ../application/editor/views/scripts/index/modalboxes/create-confirmation.phtml:26
 msgid "No"
 msgstr "No"
 
-#: ../application/editor/views/scripts/concept/view.phtml:46
+#: ../application/editor/views/scripts/concept/view/header.phtml:49
 msgid "Switch to edit mode"
 msgstr "Switch to edit mode"
 
-#: ../application/editor/views/scripts/concept/view.phtml:49
+#: ../application/editor/views/scripts/concept/view/header.phtml:52
 msgid "Tenant:"
 msgstr "Tenant:"
 
-#: ../application/editor/views/scripts/concept/view.phtml:73
+#: ../application/editor/views/scripts/concept/view/left.phtml:41
 msgid "Preferred label"
 msgstr "Preferred label"
 
-#: ../application/editor/views/scripts/concept/view.phtml:74
-msgid "Alternative label"
-msgstr "Alternative label"
-
-#: ../application/editor/views/scripts/concept/view.phtml:75
-msgid "Hidden label"
-msgstr "Hidden label"
-
-#: ../application/editor/views/scripts/concept/view.phtml:78
+#: ../application/editor/views/scripts/concept/view/left.phtml:46
 msgid "Scope Note"
 msgstr "Scope Note"
 
-#: ../application/editor/views/scripts/concept/view.phtml:79
+#: ../application/editor/views/scripts/concept/view/left.phtml:47
 msgid "Note"
 msgstr "Note"
 
-#: ../application/editor/views/scripts/concept/view.phtml:80
+#: ../application/editor/views/scripts/concept/view/left.phtml:48
 msgid "Example"
 msgstr "Example"
 
-#: ../application/editor/views/scripts/concept/view.phtml:81
+#: ../application/editor/views/scripts/concept/view/left.phtml:49
 msgid "Definition"
 msgstr "Definition"
 
-#: ../application/editor/views/scripts/concept/view.phtml:82
+#: ../application/editor/views/scripts/concept/view/left.phtml:50
 msgid "Change note"
 msgstr "Change note"
 
-#: ../application/editor/views/scripts/concept/view.phtml:83
+#: ../application/editor/views/scripts/concept/view/left.phtml:51
 msgid "Editorial note"
 msgstr "Editorial note"
 
-#: ../application/editor/views/scripts/concept/view.phtml:84
+#: ../application/editor/views/scripts/concept/view/left.phtml:52
 msgid "History note"
 msgstr "History note"
 
-#: ../application/editor/views/scripts/concept/view.phtml:158
-msgid "URI:"
-msgstr "URI:"
+#: ../application/editor/views/scripts/concept/view/left.phtml:55
+msgid "Skos Xl preferred label"
+msgstr "Skos Xl preferred label"
 
-#: ../application/editor/views/scripts/concept/view.phtml:162
-msgid "Notation:"
-msgstr "Notation:"
+#: ../application/editor/views/scripts/concept/view/left.phtml:56
+msgid "Skos Xl alternative label"
+msgstr "Skos Xl alternative label"
 
-#: ../application/editor/views/scripts/concept/view.phtml:167
+#: ../application/editor/views/scripts/concept/view/left.phtml:57
+msgid "Skos Xl hidden label"
+msgstr "Skos Xl hidden label"
+
+#: ../application/editor/views/scripts/concept/view/right.phtml:42
 msgid "Contributor:"
 msgstr "Contributor:"
 
-#: ../application/editor/views/scripts/concept/view.phtml:178
+#: ../application/editor/views/scripts/concept/view/right.phtml:52
 msgid "Is top concept:"
 msgstr "Is top concept:"
-
-#: ../application/editor/views/scripts/export/rtf.phtml:29
-msgid "Openskos Exported Concepts"
-msgstr "Openskos Exported Concepts"
-
-#: ../application/editor/views/scripts/export/rtf.phtml:54
-msgid "NARROWERS"
-msgstr "NARROWERS"
 
 #: ../application/editor/views/scripts/index/index.phtml:23
 #: ../application/editor/views/scripts/search/index.phtml:23
@@ -1648,6 +1533,35 @@ msgstr "URL used for Harvesting"
 msgid "Remove job"
 msgstr "Remove job"
 
+#: ../application/editor/views/scripts/label/add-to-concept.phtml:20
+msgid "Add skos xl label to the concept"
+msgstr "Add skos xl label to the concept"
+
+#: ../application/editor/views/scripts/label/add-to-concept.phtml:23
+msgid "Choose existing"
+msgstr "Choose existing"
+
+#: ../application/editor/views/scripts/label/add-to-concept.phtml:26
+msgid "Create new"
+msgstr "Create new"
+
+#: ../application/editor/views/scripts/label/choose.phtml:21
+msgid "Choose label"
+msgstr "Choose label"
+
+#: ../application/editor/views/scripts/label/choose.phtml:35
+#: ../application/editor/views/scripts/label/create.phtml:24
+msgid "Back"
+msgstr "Back"
+
+#: ../application/editor/views/scripts/label/create.phtml:20
+msgid "Create a new skos xl label"
+msgstr "Create a new skis xl label"
+
+#: ../application/editor/views/scripts/label/edit.phtml:22
+msgid "Edit skos xl label (will apply to all concpts with that label)"
+msgstr "Edit skis xl label (will apply to all concepts with that label)"
+
 #: ../application/editor/views/scripts/login/index.phtml:22
 msgid "Login for OpenSKOS Editor"
 msgstr "Login for OpenSKOS Editor"
@@ -1721,7 +1635,7 @@ msgstr "Edit password"
 msgid "Are you sure you want to logout?"
 msgstr "Are you sure you want to logout?"
 
-#: ../application/layouts/editor.phtml:97
+#: ../application/layouts/editor.phtml:98
 msgid "Aangemeld als"
 msgstr "Logged in as"
 
@@ -1732,6 +1646,119 @@ msgstr "Welcome"
 #: ../application/layouts/main.phtml:73
 msgid "logout"
 msgstr "logout"
+
+#: ../library/OpenSkos2/Export/Serialiser/Format/scripts/rtf.phtml:29
+msgid "Openskos Exported Concepts"
+msgstr "Openskos Exported Concepts"
+
+#: ../library/OpenSkos2/Export/Serialiser/Format/scripts/rtf.phtml:54
+msgid "NARROWERS"
+msgstr "NARROWERS"
+
+#~ msgid "One or more of the broader relations create a cycle"
+#~ msgstr "One or more of the broader relations create a cycle"
+
+#~ msgid "One or more of the narrower relations create a cycle"
+#~ msgstr "One or more of the narrower relations create a cycle"
+
+#~ msgid "Some concepts are defined more than once as broader"
+#~ msgstr "Some concepts are defined more than once as broader"
+
+#~ msgid "Some concepts are defined more than once as narrower"
+#~ msgstr "Some concepts are defined more than once as narrower"
+
+#~ msgid "Some concepts are defined more than once as related"
+#~ msgstr "Some concepts are defined more than once as related"
+
+#~ msgid ""
+#~ "Can not change status to \"expired\" while there are still relations to "
+#~ "other concepts."
+#~ msgstr ""
+#~ "Can not change status to \"expired\" while there are still relations to "
+#~ "other concepts."
+
+#~ msgid ""
+#~ "Can not relate the concept to any expired concepts. The fallowing "
+#~ "concepts are expired:"
+#~ msgstr ""
+#~ "Can not relate the concept to any expired concepts. The following "
+#~ "concepts are expired:"
+
+#~ msgid "The concept must be included in at least one scheme."
+#~ msgstr "The concept must be included in at least one scheme."
+
+#~ msgid "The concept can not be related to itself."
+#~ msgstr "The concept can not be related to itself."
+
+#~ msgid "The status transition from \"%s\" to \"%s\" is not allowed."
+#~ msgstr "The status transition from \"%s\" to \"%s\" is not allowed."
+
+#~ msgid "Notation not specified."
+#~ msgstr "Notation not specified."
+
+#~ msgid "System error. The notation of this concept is already used."
+#~ msgstr "System error. The notation of this concept is already used."
+
+#~ msgid ""
+#~ "There is already a concept with same preferred label in one of the "
+#~ "schemes."
+#~ msgstr ""
+#~ "There is already a concept with same preferred label in one of the "
+#~ "schemes."
+
+#~ msgid ""
+#~ "One or more of broader relations have also a relation via an intermediate "
+#~ "concepts"
+#~ msgstr ""
+#~ "One or more of broader relations have also a relation via an intermediate "
+#~ "concepts"
+
+#~ msgid ""
+#~ "One or more of narrower relations have also a relation via an "
+#~ "intermediate concepts"
+#~ msgstr ""
+#~ "One or more of narrower relations have also a relation via an "
+#~ "intermediate concepts"
+
+#~ msgid ""
+#~ "Use uri as identifier if concept notation does not exist in the importing "
+#~ "concept."
+#~ msgstr ""
+#~ "Use uri as identifier if concept notation does not exist in the importing "
+#~ "concept."
+
+#~ msgid "Concepts base url"
+#~ msgstr "Concepts base url"
+
+#~ msgid "skos:"
+#~ msgstr "skos:"
+
+#~ msgid "hasTopConcept"
+#~ msgstr "hasTopConcept"
+
+#~ msgid "items"
+#~ msgstr "items"
+
+#~ msgid "Implicit Semantic Relations"
+#~ msgstr "Implicit Semantic Relations"
+
+#~ msgid "First"
+#~ msgstr "First"
+
+#~ msgid "Previous"
+#~ msgstr "Previous"
+
+#~ msgid "Next"
+#~ msgstr "Next"
+
+#~ msgid "Last"
+#~ msgstr "Last"
+
+#~ msgid "Choose the concept which replaces this one."
+#~ msgstr "Choose the concept which replaces this one."
+
+#~ msgid "Chosen concept"
+#~ msgstr "Chosen concept"
 
 #~ msgid "expired"
 #~ msgstr "expired"
