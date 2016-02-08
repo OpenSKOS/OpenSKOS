@@ -143,8 +143,8 @@ class Concept
             $options['searchText'] = $params['q'];
         }
         
-          // sorting
-         //Meertens was here
+        // sorting
+       //Meertens was here
         if (isset($params['sorts'])) {
             $sortmap = $this->prepareSortsForSolr($params['sorts']);
             $options['sorts'] = $sortmap;
@@ -657,6 +657,51 @@ class Concept
             throw new InvalidArgumentException('No key specified', 412);
         }
         return $this->getUserByKey($params['key']);
+    }
+    
+    
+// sortstring is a string of pair of terms "field1 [order1] field2 [order2].... "
+    private function prepareSortsForSolr($sortstring) {
+        //var_dump($sortstring);
+        $sortlist = explode(" ", $sortstring);
+        $l = count($sortlist);
+        $sortmap = [];
+        $i = 0;
+        while ($i < $l - 1) { // the last element will be worked-on after the loop is finished
+            $j = $i;
+            $i++;
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]); 
+            $sortorder = 'asc';
+            if ($sortlist[$i] === "asc" || $sortlist[$i] === 'desc') {
+                $sortorder = $sortlist[$i];
+                $i++;
+            }
+            $sortmap[$sortfield] = $sortorder;
+        };
+        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') { // field name is the last and no order after it
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l-1]); // Fix "@nl" to "_nl"
+            $sortmap[$sortfield] = 'asc';
+        };
+        return $sortmap;
+    }
+    
+    private function prepareSortFieldForSolr($term) { // translate field name  to am internal sort-field name
+        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) -3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
+            return $term;
+        }
+        if ($this->isDateField($term)) {
+            return "sort_d_" . $term;
+        } else {
+            if (strpos($term, "@") !== false) { 
+                return str_replace("@", "_", $term);
+            } else {
+                return "sort_s_" . $term;
+            }
+        }
+    }
+
+    private function isDateField($term){
+        return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
     
 }
