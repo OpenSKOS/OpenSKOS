@@ -143,6 +143,13 @@ class Concept
             $options['searchText'] = $params['q'];
         }
         
+          // sorting
+         //Meertens was here
+        if (isset($params['sorts'])) {
+            $sortmap = $this->prepareSortsForSolr($params['sorts']);
+            $options['sorts'] = $sortmap;
+        }
+        
         $concepts = $this->searchAutocomplete->search($options, $total);
         
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
@@ -651,4 +658,5 @@ class Concept
         }
         return $this->getUserByKey($params['key']);
     }
+    
 }
