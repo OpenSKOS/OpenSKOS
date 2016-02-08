@@ -1,9 +1,9 @@
 <?php
+
 // meertens was here
+use OpenSkos2\Namespaces\Skos as SkosNamespace;
 
-use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
-
-class Api_StatusesController extends OpenSKOS_Rest_Controller
+class Api_SchemataController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {
@@ -21,7 +21,7 @@ class Api_StatusesController extends OpenSKOS_Rest_Controller
     public function indexAction()
     {
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchFacets(OpenSkosNamespace::STATUS, 'Literal');
+        $result = $resourceManager ->fetchFacets(SkosNamespace::INSCHEME, 'Resource');
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody($result);
     }

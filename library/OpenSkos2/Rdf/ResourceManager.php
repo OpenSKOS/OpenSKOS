@@ -487,19 +487,27 @@ class ResourceManager
     /**
      * Meertens was here
      */
-    public function fetchStatuses()
-    {
-        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <'. OpenSkosNamespace::STATUS .'> ?object . }';
+    public function fetchFacets($namespace, $type) {
+        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $namespace . '> ?object . }';
 
         /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
-        //var_dump($result);
+//var_dump($result);
         $items = [];
-        $i=0;
-        foreach ($result as $literal) {
-            //var_dump($literal->object->getValue());
-            $items[$i] = $literal->object->getValue();
-            $i++;
+        $i = 0;
+        if ($type === 'Literal') {
+            foreach ($result as $literal) {
+                $items[$i] = $literal->object->getValue();
+                $i++;
+            }
+        } else {
+            if ($type === 'Resource') {
+                foreach ($result as $resource) {
+                    //var_dump($resource);
+                    $items[$i] = $resource->object->getUri();
+                    $i++;
+                }
+            }
         }
         return json_encode($items);
     }

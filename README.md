@@ -201,7 +201,9 @@ even with sort_c_definition)
 
 Getting the list of all statuses (added by Meertens)
 <server>/public/api/statuses?format=json
-Throws an error on other formats (html and rdf/xml)
+Throws an error on other formats (html and rdf/xml). Implemented via a call to jena.
 
-
+Getting the list of all schemata (added by Meertens)
+<server>/public/api/statuses?format=json
+Throws an error on other formats (html and rdf/xml). Implemented via a call to jena.
 
