@@ -23,7 +23,7 @@ class Api_SchemataController extends OpenSKOS_Rest_Controller
         $resourceManager = $this -> getResourceManager();
         $result = $resourceManager ->fetchFacets(SkosNamespace::INSCHEME, 'Resource');
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody($result);
+        $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }
     
     public function getAction()

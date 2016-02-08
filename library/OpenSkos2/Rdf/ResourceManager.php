@@ -503,13 +503,14 @@ class ResourceManager
         } else {
             if ($type === 'Resource') {
                 foreach ($result as $resource) {
-                    //var_dump($resource);
                     $items[$i] = $resource->object->getUri();
+                    //var_dump($items[$i]);
+                    //var_dump(json_encode($items, JSON_UNESCAPED_SLASHES));
                     $i++;
                 }
             }
         }
-        return json_encode($items);
+        return $items;
     }
 
     /**

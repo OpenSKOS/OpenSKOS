@@ -2,6 +2,7 @@
 // meertens was here
 
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
+use OpenSkos2\Concept;
 
 class Api_StatusesController extends OpenSKOS_Rest_Controller
 {
@@ -21,9 +22,12 @@ class Api_StatusesController extends OpenSKOS_Rest_Controller
     public function indexAction()
     {
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchFacets(OpenSkosNamespace::STATUS, 'Literal');
+        $listFromJena = $resourceManager ->fetchFacets(OpenSkosNamespace::STATUS, 'Literal');
+        $hardcodedList = Concept::getAvailableStatuses();
+        //var_dump($hardcodedList);
+        $result=array_values(array_unique(array_merge($listFromJena, $hardcodedList)));
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody($result);
+        $this->getResponse()->setBody(json_encode($result));
     }
     
     public function getAction()
@@ -45,4 +49,6 @@ class Api_StatusesController extends OpenSKOS_Rest_Controller
     {
         $this->_501('delete');
     }
+    
+    
 }

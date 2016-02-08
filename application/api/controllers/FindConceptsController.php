@@ -17,6 +17,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+// meertens was here 
+use OpenSkos2\Concept;
+
 class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
     public function init()
@@ -104,6 +107,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $request = $this->getPsrRequest();
+        //var_dump($request->getQueryParams());
+        //var_dump(Concept::$classes["LexicalLabels"]);
         $response = $concept->findConcepts($request, $context);
         $this->emitResponse($response);
     }
