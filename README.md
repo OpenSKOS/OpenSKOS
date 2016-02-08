@@ -182,3 +182,26 @@ npm install
 npm run doc
 ```
 Visit: http://example.com/apidoc/
+
+5.6. Using API
+--------------------------------------------------------------------------------
+
+Getting the list of institutions (tenants): 
+<base uri>/public/api/institutions?format=json
+
+Getting the list of sets (former tenant collections, still called "collections" 
+in API): <base uri>/public/api/collections?format=json
+
+Getting concepts sorted (added by Meertens): 
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20desc
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20asc
+(However it seems that sorting e.g. on definitions does not work on solr level, 
+even with sort_c_definition)
+
+Getting the list of all statuses (added by Meertens)
+<server>/public/api/statuses?format=json
+Throws an error on other formats (html and rdf/xml)
+
+
+

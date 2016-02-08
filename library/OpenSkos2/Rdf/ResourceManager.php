@@ -29,6 +29,8 @@ use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use Asparagus\QueryBuilder;
 
+
+
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 
@@ -479,7 +481,27 @@ class ResourceManager
         /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
 
-        return $result[0]->count->getValue();
+        return $result->count->getValue();
+    }
+    
+    /**
+     * Meertens was here
+     */
+    public function fetchStatuses()
+    {
+        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <'. OpenSkosNamespace::STATUS .'> ?object . }';
+
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        //var_dump($result);
+        $items = [];
+        $i=0;
+        foreach ($result as $literal) {
+            //var_dump($literal->object->getValue());
+            $items[$i] = $literal->object->getValue();
+            $i++;
+        }
+        return json_encode($items);
     }
 
     /**

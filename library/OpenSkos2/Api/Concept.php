@@ -659,7 +659,7 @@ class Concept
         return $this->getUserByKey($params['key']);
     }
     
-    
+// meertens was here    
 // sortstring is a string of pair of terms "field1 [order1] field2 [order2].... "
     private function prepareSortsForSolr($sortstring) {
         //var_dump($sortstring);
