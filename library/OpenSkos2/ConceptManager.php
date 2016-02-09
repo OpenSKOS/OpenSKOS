@@ -273,14 +273,19 @@ class ConceptManager extends ResourceManager
         
         $solrResult = $this->solr->select($select);
         
-        $numFound = $solrResult->getNumFound();
+        // olha was here: do not take into account the resources which are not fileterd by type "concept"
+        //$numFound = $solrResult->getNumFound();
         
         $uris = [];
         foreach ($solrResult as $doc) {
             $uris[] = $doc->uri;
         }
         
-        return $this->fetchByUris($uris);
+        //olh was here 
+        $retVal=$this->fetchByUris($uris);
+        //within fetchByUris the resources will be filtered by resource type
+        $numFound = count($retVal);
+        return $retVal;
     }
     
     /**

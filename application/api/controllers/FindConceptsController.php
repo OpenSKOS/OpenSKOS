@@ -99,7 +99,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
                     ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
-
+        
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
 
@@ -107,9 +107,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $request = $this->getPsrRequest();
-        //var_dump($request->getQueryParams());
-        //var_dump(Concept::$classes["LexicalLabels"]);
         $response = $concept->findConcepts($request, $context);
+        //var_dump($response);
         $this->emitResponse($response);
     }
 

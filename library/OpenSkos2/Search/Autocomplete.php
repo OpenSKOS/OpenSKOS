@@ -22,6 +22,7 @@ namespace OpenSkos2\Search;
 use OpenSkos2\Rdf\Resource;
 use Solarium\Core\Query\Helper as QueryHelper;
 
+//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 class Autocomplete
 {
     /**
@@ -67,7 +68,10 @@ class Autocomplete
         if ($isDirectQuery) {
             if (!empty($term)) {
                 $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
-                $term = '(' . $term . ')';
+                // olha was here
+                if (trim($term) !== "*:*") {
+                    $term = '(' . $term . ')';
+                }
                 $solrQuery = $term;
             }
         } else {
@@ -205,7 +209,10 @@ class Autocomplete
             $sorts = null;
         }
         
-        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        //\Tools\Logging::var_error_log("\n solr query in searchAutocomplete ", $solrQuery, dirname(__FILE__) . '/../../../data/Logger.txt');
+        //\Tools\Logging::var_error_log("\n Seacrh result in searchAutocomplete ", $retVal, dirname(__FILE__) . '/../../../data/Logger.txt');
+        return $retVal;
     }
     
     /**
