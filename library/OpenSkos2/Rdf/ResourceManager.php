@@ -397,8 +397,8 @@ class ResourceManager
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
         
         if ($ignoreDeleted) {
-            $where .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status . ';
-            $where .= 'FILTER (?status != \'' . Resource::STATUS_DELETED . '\')';
+            $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
+            $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
         }
         
         $query .= 'WHERE { ' . $where . '}';
