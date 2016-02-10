@@ -20,6 +20,7 @@
 namespace OpenSkos2\Search;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Skos as SkosNamespace;
 use Solarium\Core\Query\Helper as QueryHelper;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
@@ -68,8 +69,9 @@ class Autocomplete
         if ($isDirectQuery) {
             if (!empty($term)) {
                 $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
-                // olha was here
-                if (trim($term) !== "*:*") {
+                $term = $this -> prepareTextFields($term);
+                // olha was here 1
+                if (trim($term) !== "*:*") { // somehow my solr fails on (*:*)
                     $term = '(' . $term . ')';
                 }
                 $solrQuery = $term;
@@ -282,5 +284,16 @@ class Autocomplete
         }
         
         return implode(' OR ', $interactionsQueries);
+    }
+    
+    private function prepareTextFields($searchterm){
+        $tokenizedFields = SkosNamespace::getTokenizedFields();
+        $retVal = $searchterm;
+        foreach ($tokenizedFields as $field){
+            $old = $field . "Text:";
+            $new ="t_".$field . ":";
+           $retVal = str_replace($old, $new, $retVal); 
+        }
+        return $retVal;
     }
 }

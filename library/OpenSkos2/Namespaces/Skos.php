@@ -112,4 +112,21 @@ class Skos
             Skos::HASTOPCONCEPT => Skos::TOPCONCEPTOF,
         ];
     }
+    
+    // meertens was here
+    public static function getTokenizedFields(){
+        return [
+            "prefLabel",
+            "altLabel",
+            "hiddenLabel",
+            "definition",
+            "notation",
+            "note",
+            "skopeNote",
+            "changeNote",
+            "editorialNote",
+            "historicalNote",
+            "example"
+        ];
+    }
 }
