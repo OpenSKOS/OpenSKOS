@@ -19,6 +19,13 @@
         <field name="altLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="hiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
+        <!-- Olha's addition -->
+        <field name="acceptedBy" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
+        <field name="deletedBy" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
+        <field name="deleted" type="date" indexed="true" stored="false" required="false" multiValued="false"/>
+        
+        <!-- -->
+        
         <field name="skosXlPrefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="skosXlAltLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="skosXlHiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -46,6 +53,8 @@
         <field name="relatedMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <dynamicField name="dcterms_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="xmlns_*" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
+        
         
         <!-- Languages -->
         <dynamicField name="LexicalLabels_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
