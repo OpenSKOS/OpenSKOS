@@ -150,6 +150,21 @@ class Concept
             $options['sorts'] = $sortmap;
         }
         
+        //sets (former tenant collections)
+        // meertens was here
+        if (isset($params['sets'])) {
+            $options['collections'] = explode(' ', trim($params['sets']));
+        }
+        
+        //meertesn was here
+        if (isset($params['tenants'])) {
+           $options['tenants'] = explode(' ', trim($params['tenants']));
+        }
+        //meertens was here
+        if (isset($params['conceptScheme'])) {
+            $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
+        }
+        
         $concepts = $this->searchAutocomplete->search($options, $total);
         
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
