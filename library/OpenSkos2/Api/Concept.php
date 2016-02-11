@@ -165,6 +165,10 @@ class Concept
             $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
         }
         
+        if (isset($params['status'])) {
+            $options['status'] = explode(' ', trim($params['status']));
+        }
+        
         $concepts = $this->searchAutocomplete->search($options, $total);
         
         $result = new ResourceResultSet($concepts, $total, $start, $limit);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schema name="spatial" version="1.0">
-
+    
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 

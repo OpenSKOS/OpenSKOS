@@ -94,6 +94,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      */
     public function indexAction()
     {
+        //var_dump($this->getRequest());
         if (null === ($q = $this->getRequest()->getParam('q'))) {
             $this->getResponse()
                     ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
