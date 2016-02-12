@@ -24,27 +24,28 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
 
-class FieldsMaps
-{
-    // @TODO Move to correct namespace/context
+class FieldsMaps {
     
-    /**
-     * Gets map of fields to property uris.
-     * @return array
+    /* The field mapping: copied from migration script, thsi part differs getOldToProperties and getNamesToProperties method
+     * 
+     * 
+     *  'modified_by' => DcTerms::CONTRIBUTOR,
+        'created_by' => DcTerms::CREATOR,
+        'dcterms_creator' => DcTerms::CREATOR, ?? not in the old openskos anyway
+        'approved_by' => OpenSkos::ACCEPTEDBY,
+        'deleted_by' => OpenSkos::DELETEDBY,
+       // Olha: the next two filed are added because no timestam and modified_timestamp in jena's output
+        'timestamp' => DcTerms::DATESUBMITTED,
+        'modified_timestamp' => DcTerms::MODIFIED,
      */
-    public static function getOldToProperties()
-    {
-        // @TODO Ensure all fields
-        
-        return [
+
+private static function getNamesToPropertiesCommon() {
+    return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
             'collection' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
-            'approved_by' => OpenSkos::ACCEPTEDBY,
-            'deleted_by' => OpenSkos::DELETEDBY,
             'date_deleted' => OpenSkos::DATE_DELETED,
-            'timestamp' => OpenSkos::TIMESTAMP,
             
             'notation' => Skos::NOTATION,
             'inScheme' => Skos::INSCHEME,
@@ -78,22 +79,62 @@ class FieldsMaps
             
             'topConceptOf' => Skos::TOPCONCEPTOF,
             
-            'created_timestamp' => DcTerms::CREATED,
-            'modified_timestamp' => DcTerms::MODIFIED,
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-            'dcterms_modified' => DcTerms::MODIFIED,
-            'dcterms_creator' => DcTerms::CREATOR,
-            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
-            
             'dcterms_title' => DcTerms::TITLE,
             
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         ];
+}
+
+    // @TODO Move to correct namespace/context
+    
+    /**
+     * Gets map of fields to property uris.
+     * @return array
+     */
+    // Olha: should not be necessary after migration.
+    public static function getOldToProperties()
+    {
+        $common = self::getNamesToPropertiesCommon();
+        $add = [ // there is also some crap from the previos code: some fields are apparently duplicated
+            'created_by' => DcTerms::CREATOR,
+            'dcterms_creator' => DcTerms::CREATOR,
+            'timestamp' => DcTerms::DATESUBMITTED,
+            'created_timestamp' => DcTerms::CREATED,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'modified_by' => DcTerms::CONTRIBUTOR,
+            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+            'modified_timestamp' => DcTerms::MODIFIED,
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'approved_by' => OpenSkos::ACCEPTEDBY,
+            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'deleted_by' => OpenSkos::DELETEDBY,
+        ];
+        return array_merge($common, $add);
     }
     
+    // some old openskos-fields are replaced with eqivalent dcterms or to be in-line with dcterms
+    
+    public static function getNamesToProperties()
+    {
+        $common = self::getNamesToPropertiesCommon();
+        $add = [
+            // taken from Solr's document.php
+            'creator' => DcTerms::CREATOR,
+            'dateSubmitted' => DcTerms::DATESUBMITTED,
+            'contributor' => DcTerms::CONTRIBUTOR,
+            'modified' => DcTerms::MODIFIED,
+            'acceptedBy' => OpenSkos::ACCEPTEDBY,
+            'dateAccepted' => DcTerms::DATEACCEPTED,
+            'deletedBy' => OpenSkos::DELETEDBY,
+            'dateDeleted' => OpenSkos::DATE_DELETED,
+        ];
+        return array_merge($common, $add);
+    }
+    
+     
     /**
      * Returns the corresposing property for the given field.
      * If property not found - returns $field.

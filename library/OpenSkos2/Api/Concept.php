@@ -370,7 +370,8 @@ class Concept
         }
         
         $propertiesList = [];
-        $fieldsMap = FieldsMaps::getOldToProperties();
+        //olha was here, it used to be getOldToProperties();
+        $fieldsMap = FieldsMaps::getNamesToProperties();
         
         // Tries to search for the field in fields map.
         // If not found there tries to expand it from short property.

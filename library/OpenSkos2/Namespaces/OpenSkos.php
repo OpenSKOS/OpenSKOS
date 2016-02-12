@@ -34,8 +34,6 @@ class OpenSkos
     
     const ACCEPTEDBY = 'http://openskos.org/xmlns#acceptedBy';
     
-    const TIMESTAMP = 'http://openskos.org/xmlns#timestamp';
-    
     const UUID = 'http://openskos.org/xmlns#uuid';
     
     const SET = 'http://openskos.org/xmlns#set';

@@ -80,8 +80,7 @@ class Document
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
         OpenSkos::DELETEDBY => ['s_deletedBy'],
-        OpenSkos::DATE_DELETED => ['d_dateDeleted'],
-        OpenSkos::TIMESTAMP => ['d_timestamp']
+        OpenSkos::DATE_DELETED => ['d_dateDeleted']
     ];
 
     /**
@@ -105,7 +104,7 @@ class Document
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
         
-        // Index old fields as well for backward compatibility.
+        // Index old fields as well for backward compatibility: obsolete after migration
         //$predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
         
         // Dc terms

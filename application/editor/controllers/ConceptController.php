@@ -326,6 +326,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                     continue;
                 }
 
+                // Olha: this piece of code is obsolete because of field names!
                 // The real update data...
                 $updateExtraData['status'] = $status;
 

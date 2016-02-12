@@ -157,7 +157,6 @@ class DataArray
             DcTerms::DATEACCEPTED,
             DcTerms::MODIFIED,
             DcTerms::TITLE,
-            OpenSkos::TIMESTAMP,
             OpenSkos::ACCEPTEDBY,
             OpenSkos::DELETEDBY,
             OpenSkos::DATE_DELETED,
@@ -170,7 +169,9 @@ class DataArray
         ];
         
         $map = [];
-        foreach (FieldsMaps::getOldToProperties() as $field => $property) {
+        // Olha: it is obsolete after successful migration
+        //foreach (FieldsMaps::getOldToProperties() as $field => $property) {
+        foreach (FieldsMaps::getNamesToProperties() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
                 'repeatable' => !in_array($property, $notRepeatable),
