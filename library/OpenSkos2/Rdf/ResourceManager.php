@@ -2,7 +2,7 @@
 
 /**
  * OpenSKOS
- *
+ * /Users/olha/WorkProjects/open-skos-2/OpenSKOS2tempMeertens/library/OpenSkos2/Rdf/ResourceManager.php
  * LICENSE
  *
  * This source file is subject to the GPLv3 license that is bundled
@@ -29,7 +29,7 @@ use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use Asparagus\QueryBuilder;
 
-
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -114,11 +114,9 @@ class ResourceManager
         // Add resource to solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
-        $convert = new \OpenSkos2\Solr\Document($resource, $doc);
-        $resourceDoc = $convert->getDocument();
-        
+        $convert = new \OpenSkos2\Solr\Document($resource, $doc); 
+        $resourceDoc = $convert->getDocument(); 
         $update->addDocument($resourceDoc);
-        
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }

@@ -23,7 +23,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Skos as SkosNamespace;
 use Solarium\Core\Query\Helper as QueryHelper;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 class Autocomplete
 {
     /**
@@ -238,6 +238,10 @@ class Autocomplete
             'approved' => [
                 's_acceptedBy',
                 'd_dateAccepted',
+            ],
+            'deleted' => [
+                's_deletedBy',
+                'd_dateDeleted',
             ],
         ];
         

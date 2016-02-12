@@ -79,6 +79,9 @@ class Document
         DcTerms::MODIFIED => ['d_modified'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
+        OpenSkos::DELETEDBY => ['s_deletedBy'],
+        OpenSkos::DATE_DELETED => ['d_dateDeleted'],
+        OpenSkos::TIMESTAMP => ['d_timestamp']
     ];
 
     /**
@@ -103,7 +106,10 @@ class Document
         $properties = $this->resource->getProperties();
         
         // Index old fields as well for backward compatibility.
-        $predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
+        // 
+        //$predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
+        //Olha: This should not be needed after succesfull migration
+        // If there is a need for it, it measn migration went wrong
         
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();
@@ -117,9 +123,11 @@ class Document
             $fields = $this->mapping[$predicate];
             
             // Old fields
-            if (isset($predicatesToOldField[$predicate])) {
+            // Olha: This should not be needed after succesfull migration
+            // If there is a need for it, it measn migration went wrong
+            /*if (isset($predicatesToOldField[$predicate])) {
                 $fields[] = $predicatesToOldField[$predicate];
-            }
+            }(/
             
             // Dc terms
             $dcTermKey = array_search($predicate, $dcTerms);

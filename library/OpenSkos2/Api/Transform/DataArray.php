@@ -67,16 +67,22 @@ class DataArray
         }
         
         foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
+            //var_dump('field ' . $field);
+            //var_dump('property ' . $prop);
+            //var_dump('uri: ' . $prop['uri']);
             if (!$this->doIncludeProperty($prop['uri'])) {
+                //var_dump($prop['uri']);
                 continue;
             }
             
             $data = $resource->getProperty($prop['uri']);
+            //var_dump('data ' . $data);
             if (empty($data)) {
                 continue;
             }
             $newResource = $this->getPropertyValue($data, $field, $prop, $newResource);
         }
+         
         return $newResource;
     }
     
@@ -104,9 +110,11 @@ class DataArray
         foreach ($prop as $val) {
             // Some values only have a URI but not getValue or getLanguage
             if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
+                //var_dump($resource);
                 if ($settings['repeatable'] === true) {
                     $resource[$field][] = $val->getUri();
                 } else {
+                    //var_dump($resource);
                     $resource[$field] = $val->getUri();
                 }
                 continue;
@@ -149,7 +157,10 @@ class DataArray
             DcTerms::DATEACCEPTED,
             DcTerms::MODIFIED,
             DcTerms::TITLE,
+            OpenSkos::TIMESTAMP,
             OpenSkos::ACCEPTEDBY,
+            OpenSkos::DELETEDBY,
+            OpenSkos::DATE_DELETED,
             OpenSkos::STATUS,
             OpenSkos::TENANT,
             OpenSkos::SET,
@@ -165,7 +176,6 @@ class DataArray
                 'repeatable' => !in_array($property, $notRepeatable),
             ];
         }
-        
         return $map;
     }
 }

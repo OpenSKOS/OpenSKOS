@@ -1,2 +1,0 @@
-
- solr query in searchAutocomplete string(52) "(*:* AND s_status:approved) AND  (-s_status:deleted)"

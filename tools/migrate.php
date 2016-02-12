@@ -152,6 +152,7 @@ $mappings = [
             'dcterms_creator' => DcTerms::CREATOR,
             'approved_by' => OpenSkos::ACCEPTEDBY,
             'deleted_by' => OpenSkos::DELETEDBY,
+            'date_deleted' => OpenSkos::DATE_DELETED,
         ],
     ],
     'collection' => [

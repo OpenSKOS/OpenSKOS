@@ -41,6 +41,11 @@ class FieldsMaps
             'tenant' => OpenSkos::TENANT,
             'collection' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
+            'approved_by' => OpenSkos::ACCEPTEDBY,
+            'deleted_by' => OpenSkos::DELETEDBY,
+            'date_deleted' => OpenSkos::DATE_DELETED,
+            'timestamp' => OpenSkos::TIMESTAMP,
+            
             'notation' => Skos::NOTATION,
             'inScheme' => Skos::INSCHEME,
             

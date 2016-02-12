@@ -186,7 +186,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             $this->view->concept = $apiConcept->getConcept($id);
             return $this->renderScript('concept/get.phtml');
         }
-
+        
         $request = $this->getPsrRequest();
         $response = $apiConcept->getConceptResponse($request, $id, $context);
         $this->emitResponse($response);

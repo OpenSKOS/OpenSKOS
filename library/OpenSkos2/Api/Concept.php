@@ -47,6 +47,7 @@ use Zend\Diactoros\Stream;
 /**
  * Map an API request from the old application to still work with the new backend on Jena
  */
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 class Concept
 {
     use \OpenSkos2\Api\Response\ApiResponseTrait;
@@ -454,8 +455,8 @@ class Concept
             );
         }
         
+        //\Tools\Logging::var_error_log(" concept \n", $concept, '/app/data/Logger.txt');
         $this->validate($concept, $tenant);
-        
         $this->manager->insert($concept);
         
         $rdf = (new Transform\DataRdf($concept))->transform();
