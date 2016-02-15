@@ -154,7 +154,7 @@ class Concept
         //sets (former tenant collections)
         // meertens was here
         if (isset($params['sets'])) {
-            $options['collections'] = explode(' ', trim($params['sets']));
+            $options['sets'] = explode(' ', trim($params['sets']));
         }
         
         //meertesn was here
@@ -171,8 +171,10 @@ class Concept
         }
         
         $concepts = $this->searchAutocomplete->search($options, $total);
+        //var_dump($concepts);
         
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
+        //var_dump($result);
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);

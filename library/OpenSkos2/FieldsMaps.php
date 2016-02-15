@@ -43,7 +43,6 @@ private static function getNamesToPropertiesCommon() {
     return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
-            'collection' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
             'date_deleted' => OpenSkos::DATE_DELETED,
             
@@ -99,6 +98,7 @@ private static function getNamesToPropertiesCommon() {
     {
         $common = self::getNamesToPropertiesCommon();
         $add = [ // there is also some crap from the previos code: some fields are apparently duplicated
+            'collection' => OpenSkos::SET,
             'created_by' => DcTerms::CREATOR,
             'dcterms_creator' => DcTerms::CREATOR,
             'timestamp' => DcTerms::DATESUBMITTED,
@@ -121,7 +121,8 @@ private static function getNamesToPropertiesCommon() {
     {
         $common = self::getNamesToPropertiesCommon();
         $add = [
-            // taken from Solr's document.php
+            // compare with Solr's document.php
+            'set' => OpenSkos::SET,
             'creator' => DcTerms::CREATOR,
             'dateSubmitted' => DcTerms::DATESUBMITTED,
             'contributor' => DcTerms::CONTRIBUTOR,
@@ -141,7 +142,7 @@ private static function getNamesToPropertiesCommon() {
      * @param string $field
      * @return string
      */
-    public static function resolveOldField($field)
+    /*public static function resolveOldField($field)
     {
         $map = self::getOldToProperties();
         if (isset($map[$field])) {
@@ -149,5 +150,5 @@ private static function getNamesToPropertiesCommon() {
         } else {
             return $field;
         }
-    }
+    }*/
 }

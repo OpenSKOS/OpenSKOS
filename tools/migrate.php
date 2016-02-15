@@ -152,9 +152,6 @@ $mappings = [
             'dcterms_creator' => DcTerms::CREATOR,
             'approved_by' => OpenSkos::ACCEPTEDBY,
             'deleted_by' => OpenSkos::DELETEDBY,
-            // Olha: the next two filed are added because no timestamp and modified_timestamp in jena
-            'timestamp' => DcTerms::DATESUBMITTED,
-            'modified_timestamp' => DcTerms::MODIFIED,
         ],
     ],
     'collection' => [
@@ -226,6 +223,8 @@ $mappings = [
             'dcterms_modified'  => DcTerms::MODIFIED,
             'dcterms_dateAccepted'  => DcTerms::DATEACCEPTED,
             'deleted_timestamp'  => OpenSkos::DATE_DELETED,
+            // Olha: the next two filed are added because no timestamp in jena
+            'timestamp' => DcTerms::DATESUBMITTED,
         ]
     ],
     'bool' => [

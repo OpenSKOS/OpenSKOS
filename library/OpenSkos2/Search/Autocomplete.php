@@ -159,10 +159,10 @@ class Autocomplete
         }
         
         // sets (collections)
-        if (!empty($options['collections'])) {
+        if (!empty($options['sets'])) {
             $solrQuery .= ' AND (';
             $solrQuery .= 's_set:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
                 . '))';
         }
 

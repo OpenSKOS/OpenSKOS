@@ -56,10 +56,11 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
         
+        // Olha: resolveOldField is replaced with getNamesToProperties
         $result = $this->getConceptManager()->autoComplete(
             $q,
-            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
-            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
+            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
             $request->getParam('lang')
         );
         
@@ -93,8 +94,8 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
         $q = $request->getParam('id');
         $result = $this->getConceptManager()->autoComplete(
             $q,
-            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
-            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
+            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
             $request->getParam('lang')
         );
         

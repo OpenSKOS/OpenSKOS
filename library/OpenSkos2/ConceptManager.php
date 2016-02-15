@@ -81,8 +81,10 @@ class ConceptManager extends ResourceManager
         $result = $this->query($query);
 
         $items = [];
+        $i=0;
         foreach ($result as $literal) {
-            $items[] = $literal->returnLabel->getValue();
+            $items[$i] = $literal->returnLabel->getValue();
+            $i++;
         }
         return $items;
     }
