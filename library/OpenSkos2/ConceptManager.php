@@ -29,6 +29,7 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Exception;
 
 class ConceptManager extends ResourceManager
 {
@@ -337,12 +338,17 @@ class ConceptManager extends ResourceManager
         return $minDate;
     }
     
-    public function fetchAllRelations($relationType)
-    {
-       // cannot resue ResourceManager's fetchMethods not only because it is not that convenient here
-       // but because it returns rdf-type collections, and relation is not an rdf type
-       $sparqlQuery = 'select ?s ?p ?o where {?s <http://www.w3.org/2004/02/skos/core#'.$relationType.'> ?o . }';
-       $resource= $this->query($sparqlQuery); 
-       return $resource;
+    public function fetchAllRelations($relationType) {
+        // cannot resue ResourceManager's fetchMethods not only because it is not that convenient here
+        // but because it returns rdf-type collections, and relation is not an rdf type
+        $relMap = FieldsMaps::getRelnamesToProperties();
+        if (array_key_exists($relationType, $relMap)) {
+            $sparqlQuery = 'select ?s ?p ?o where {?s <http://www.w3.org/2004/02/skos/core#' . $relationType . '> ?o . }';
+            $resource = $this->query($sparqlQuery);
+            return $resource;
+        } else {
+            throw new \OpenSkos2\Api\Exception\ApiException('Relation ' .$relationType . " is not implemented.", 501);
+        }
     }
+
 }

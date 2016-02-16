@@ -36,14 +36,21 @@ class Relation
         $this->manager = $manager;
     }
     
-    public function findAllPairsForType($request)
-    //public function findAllPairsForType(ServerRequestInterface $request)
-    {
+    public function findAllPairsForType($request) {
+        //public function findAllPairsForType(ServerRequestInterface $request)
         $relType = $request->getQueryParams()['relationType'];
-        $response = $this -> manager ->fetchAllRelations($relType);
-        $intermediate = $this ->prepareRelation($response, $relType);
-        $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
-        return $result;
+        try {
+            $response = $this->manager->fetchAllRelations($relType);
+            $intermediate = $this->prepareRelation($response, $relType);
+            $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
+            return $result;
+        } catch (Exception $exc) {
+            if ($exc instanceof \OpenSkos2\Api\Exception\ApiException) {
+                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+            } else {
+                return $this->getErrorResponse(500, $exc->getMessage());
+            }
+        }
     }
 
     /**

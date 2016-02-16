@@ -135,6 +135,15 @@ private static function getNamesToPropertiesCommon() {
         return array_merge($common, $add);
     }
     
+    /*http://www.w3.org/2004/02/skos/core#broader
+    * http://www.w3.org/2004/02/skos/core#narrower
+    * http://www.w3.org/2004/02/skos/core#hasTopConcept
+    * http://www.w3.org/2004/02/skos/core#topConceptOf
+    * http://www.w3.org/2004/02/skos/core#related
+    * http://www.w3.org/2004/02/skos/core#broadMatch
+    * http://www.w3.org/2004/02/skos/core#narrowMatch
+     * */
+     
     public static function getRelnamesToProperties()
     {
         $result = [
@@ -142,6 +151,11 @@ private static function getNamesToPropertiesCommon() {
             'broader' => Skos::BROADER,
             'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
             'broaderTransitive' => Skos::BROADERTRANSITIVE,
+            'hasTopConcept' => Skos::HASTOPCONCEPT,
+            'topConceptOf' => Skos::TOPCONCEPTOF,
+            'related' => Skos::RELATED,
+            'broadMatch' => Skos::BROADMATCH,
+            'narrowMatch' => Skos::NARROWMATCH,
         ];
         return $result;
     }
