@@ -19,10 +19,10 @@
 
 namespace OpenSkos2\Api;
 
+
 class Relation
 {
-    use Response\ApiResponseTrait;
-
+    use \OpenSkos2\Api\Response\ApiResponseTrait;
     /**
      * @var \OpenSkos2\ConceptManager
      */
@@ -35,12 +35,24 @@ class Relation
     {
         $this->manager = $manager;
     }
+    
+    public function findAllPairsForType($request)
+    //public function findAllPairsForType(ServerRequestInterface $request)
+    {
+        $relType = $request->getQueryParams()['relationType'];
+        $response = $this -> manager ->fetchAllRelations($relType);
+        $intermediate = $this ->prepareRelation($response, $relType);
+        $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
+        return $result;
+    }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return Zend\Diactoros\Response
      */
-    public function addRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    //Olha was here
+    //public function addRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    public function addRelation($request)
     {
         try {
             $this->addConceptRelation($request);
@@ -51,7 +63,7 @@ class Relation
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $stream->write('Relations added');
         $response = (new \Zend\Diactoros\Response())
-            ->withBody($stream);
+                ->withBody($stream);
         return $response;
     }
     
@@ -80,12 +92,16 @@ class Relation
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @throws Exception\ApiException
      */
-    protected function addConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    // Olha was here
+    //protected function addConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    protected function addConceptRelation($request)
     {
-        $body = $request->getParsedBody();
-
+       /* 
+        * Ola was here
+        * $body = $request->getParsedBody();
+        
         if (!isset($body['key'])) {
-            throw new Exception\ApiException('Missing relation', 400);
+            throw new Exception\ApiException('Missing key', 400);
         }
         if (!isset($body['concept'])) {
             throw new Exception\ApiException('Missing concept', 400);
@@ -96,6 +112,8 @@ class Relation
         if (!isset($body['type'])) {
             throw new Exception\ApiException('Missing type', 400);
         }
+        * 
+        *
         
         $user = $this->getUserByKey($body['key']);
 
@@ -110,6 +128,35 @@ class Relation
         } catch (\Exception $exc) {
             throw new Exception\ApiException($exc->getMessage(), 500);
         }
+        * */
+        
+         if (!isset($request['key'])) {
+            throw new Exception\ApiException('Missing key', 400);
+        }
+        if (!isset($request['concept'])) {
+            throw new Exception\ApiException('Missing concept', 400);
+        }
+        if (!isset($request['related'])) {
+            throw new Exception\ApiException('Missing related', 400);
+        }
+        if (!isset($request['type'])) {
+            throw new Exception\ApiException('Missing type', 400);
+        }
+      
+        $user = $this->getUserByKey($request['key']);
+
+        $concept = $this->manager->fetchByUri($request['concept']);
+        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
+
+        $relatedConcept = $this->manager->fetchByUri($request['concept']);
+        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
+        
+        try {
+            $this->manager->addRelation($request['concept'], $request['type'], $request['related']);
+        } catch (\Exception $exc) {
+            throw new Exception\ApiException($exc->getMessage(), 500);
+        }
+        
     }
     
     /**
@@ -148,5 +195,17 @@ class Relation
         } catch (\Exception $exc) {
             throw new Exception\ApiException($exc->getMessage(), 500);
         }
+    }
+    
+    private function prepareRelation($response, $relType){
+        $result = [];
+        foreach ($response as $key => $value) {
+            $triple = [];
+            $triple["s"]=$value->s->getUri();
+            $triple["p"]=$relType;
+            $triple["o"]=$value->o->getUri();
+           array_push($result, $triple);
+        }
+        return $result;
     }
 }

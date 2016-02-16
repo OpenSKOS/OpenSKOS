@@ -135,6 +135,17 @@ private static function getNamesToPropertiesCommon() {
         return array_merge($common, $add);
     }
     
+    public static function getRelnamesToProperties()
+    {
+        $result = [
+            'narrower' => Skos::NARROWER,
+            'broader' => Skos::BROADER,
+            'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
+            'broaderTransitive' => Skos::BROADERTRANSITIVE,
+        ];
+        return $result;
+    }
+    
      
     /**
      * Returns the corresposing property for the given field.

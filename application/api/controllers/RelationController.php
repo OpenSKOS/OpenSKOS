@@ -19,9 +19,22 @@
 
 class API_RelationController extends OpenSKOS_Rest_Controller {
    
+     public function init() {
+        parent::init();
+    }
+
     public function indexAction()
     {
-        $this->_501('GET');
+        if (null === ($relationType = $this->getRequest()->getParam('relationType'))) {
+            $this->getResponse()
+                    ->setHeader('X-Error-Msg', 'Missing required parameter `relationType`');
+            throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
+        }
+        
+        $relations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $request = $this->getPsrRequest();
+        $response = $relations->findAllPairsForType($request);
+        $this->emitResponse($response);
     }
     
     public function getAction()
@@ -64,10 +77,13 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     */
     public function postAction()
     {
-        $request = $this->getPsrRequest();
+        //Olha:
+        $request = $this->getRequest();
+        //var_dump($request->getParams());
+        //$request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addRelation($request);
+        $response = $relation->addRelation($request->getParams());
         $this->emitResponse($response);
     }
 
