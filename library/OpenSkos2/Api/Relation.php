@@ -18,7 +18,8 @@
  */
 
 namespace OpenSkos2\Api;
-
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+use OpenSkos2\Namespaces\Skos;
 
 class Relation
 {
@@ -36,12 +37,12 @@ class Relation
         $this->manager = $manager;
     }
     
-    public function findAllPairsForType($request) {
+    public function findAllPairsForRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
-        $relType = $request->getQueryParams()['relationType'];
+        $relType = $request->getQueryParams()['q'];
         try {
             $response = $this->manager->fetchAllRelations($relType);
-            $intermediate = $this->prepareRelation($response, $relType);
+            $intermediate = $this->createRelationTriples($response, $relType);
             $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
             return $result;
         } catch (Exception $exc) {
@@ -52,6 +53,34 @@ class Relation
             }
         }
     }
+    
+    public function findRelatedConcepts($request, $uri) {
+        // params:uri, relationType, conceptScheme
+        $params = $request->getQueryParams();
+        $relType = 'http://www.w3.org/2004/02/skos/core#' . $params['relationType'];
+        if (!in_array($relType, Skos::getRelationsTypes())){
+           return $this->getErrorResponse(501, 'Relation ' . $params['relationType'] . ' is not implemented.'); 
+        }
+        if (isset($params['inSchema'])) {
+            $schema = $params['inSchema'];
+        } else {
+            $schema = null;
+        }
+        try {
+            $concepts = $this->manager->fetchRelations($uri, $relType, $schema);
+            //var_dump($concepts);
+            $result = new ResourceResultSet($concepts, $concepts->count(), 0, 100000);
+            $response = (new JsonResponse($result, []))->getResponse();
+            return $response;
+        } catch (Exception $exc) {
+            if ($exc instanceof \OpenSkos2\Api\Exception\ApiException) {
+                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+            } else {
+                return $this->getErrorResponse(500, $exc->getMessage());
+            }
+        }
+    }
+    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
@@ -204,7 +233,7 @@ class Relation
         }
     }
     
-    private function prepareRelation($response, $relType){
+    private function createRelationTriples($response, $relType){
         $result = [];
         foreach ($response as $key => $value) {
             $triple = [];

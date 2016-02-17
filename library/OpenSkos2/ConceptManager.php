@@ -339,8 +339,6 @@ class ConceptManager extends ResourceManager
     }
     
     public function fetchAllRelations($relationType) {
-        // cannot resue ResourceManager's fetchMethods not only because it is not that convenient here
-        // but because it returns rdf-type collections, and relation is not an rdf type
         $relMap = FieldsMaps::getRelnamesToProperties();
         if (array_key_exists($relationType, $relMap)) {
             $sparqlQuery = 'select ?s ?p ?o where {?s <http://www.w3.org/2004/02/skos/core#' . $relationType . '> ?o . }';

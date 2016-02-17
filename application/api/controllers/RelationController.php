@@ -16,32 +16,14 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+require_once 'FindRelationsController.php';
 
-class API_RelationController extends OpenSKOS_Rest_Controller {
+class API_RelationController extends Api_FindRelationsController {
    
      public function init() {
         parent::init();
     }
 
-    public function indexAction()
-    {
-        if (null === ($relationType = $this->getRequest()->getParam('relationType'))) {
-            $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `relationType`');
-            throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
-        }
-        
-        $relations =$this->getDI()->make('\OpenSkos2\Api\Relation');
-        $request = $this->getPsrRequest();
-        $response = $relations->findAllPairsForType($request);
-        $this->emitResponse($response);
-    }
-    
-    public function getAction()
-    {
-        $this->_501('GET');
-    }
-    
     /**
     * @apiVersion 1.0.0
     * @apiDescription Add a relation to a SKOS Concept
@@ -124,4 +106,6 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
         $response = $relation->deleteRelation($request);
         $this->emitResponse($response);
     }
+    
+    
 }
