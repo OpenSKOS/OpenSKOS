@@ -160,34 +160,35 @@ class ConceptManager extends ResourceManager
     public function fetchRelations($uri, $relationType, $conceptScheme = null)
     {
         // @TODO It is possible that there are relations to uris, for which there is no resource.
-        
-        $allRelations = new ConceptCollection([]);
-        
-        if (!$uri instanceof Uri) {
-            $uri = new Uri($uri);
-        }
-        
-        $patterns = [
-            [$uri, $relationType, '?subject'],
-        ];
-        
-        if (!empty($conceptScheme)) {
-            $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
-        }
-        
-        $start = 0;
-        $step = 100;
-        do {
-            $relations = $this->fetch($patterns, $start, $step);
-            foreach ($relations as $relation) {
-                $allRelations->append($relation);
+        if (in_array($relationType, Skos::getRelationsTypes())) {
+            $allRelations = new ConceptCollection([]);
+
+            if (!$uri instanceof Uri) {
+                $uri = new Uri($uri);
             }
-            $start += $step;
-        } while (!(count($relations) < $step));
-        
-        return $allRelations;
+
+            $patterns = [
+                [$uri, $relationType, '?subject'],
+            ];
+
+            if (!empty($conceptScheme)) {
+                $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+            }
+
+            $start = 0;
+            $step = 100;
+            do {
+                $relations = $this->fetch($patterns, $start, $step);
+                foreach ($relations as $relation) {
+                    $allRelations->append($relation);
+                }
+                $start += $step;
+            } while (!(count($relations) < $step));
+
+            return $allRelations;
+        } throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $relationType . " is not implemented.", 501);
     }
-    
+
     /**
      * Delete all relations for which the concepts is object (target)
      * @param Concept $concept
@@ -339,9 +340,9 @@ class ConceptManager extends ResourceManager
     }
     
     public function fetchAllRelations($relationType) {
-        $relMap = FieldsMaps::getRelnamesToProperties();
-        if (array_key_exists($relationType, $relMap)) {
-            $sparqlQuery = 'select ?s ?p ?o where {?s <http://www.w3.org/2004/02/skos/core#' . $relationType . '> ?o . }';
+        $relationTypeUri = 'http://www.w3.org/2004/02/skos/core#' . $relationType;
+       if (in_array($relationTypeUri, Skos::getRelationsTypes())) {
+            $sparqlQuery = 'select ?s ?p ?o where {?s <' . $relationTypeUri . '> ?o . }';
             $resource = $this->query($sparqlQuery);
             return $resource;
         } else {

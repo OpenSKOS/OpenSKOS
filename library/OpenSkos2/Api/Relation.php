@@ -55,12 +55,8 @@ class Relation
     }
     
     public function findRelatedConcepts($request, $uri) {
-        // params:uri, relationType, conceptScheme
         $params = $request->getQueryParams();
         $relType = 'http://www.w3.org/2004/02/skos/core#' . $params['relationType'];
-        if (!in_array($relType, Skos::getRelationsTypes())){
-           return $this->getErrorResponse(501, 'Relation ' . $params['relationType'] . ' is not implemented.'); 
-        }
         if (isset($params['inSchema'])) {
             $schema = $params['inSchema'];
         } else {

@@ -21,6 +21,13 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
    
      public function init() {
         parent::init();
+        $this->_helper->contextSwitch()
+                ->initContext($this->getRequestedFormat());
+
+        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
+            //enable layout:
+            $this->getHelper('layout')->enableLayout();
+        }
     }
 
     public function indexAction()
@@ -47,8 +54,8 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
             throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
         }
         
-        $request = $this->getPsrRequest();
         $apiRelations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $request = $this->getPsrRequest();
         $response = $apiRelations->findRelatedConcepts($request, $uri);
         $this->emitResponse($response);
     }
