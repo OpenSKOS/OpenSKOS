@@ -342,7 +342,7 @@ class ConceptManager extends ResourceManager
     public function fetchAllRelations($relationType) {
         $relationTypeUri = 'http://www.w3.org/2004/02/skos/core#' . $relationType;
        if (in_array($relationTypeUri, Skos::getRelationsTypes())) {
-            $sparqlQuery = 'select ?s ?p ?o where {?s <' . $relationTypeUri . '> ?o . }';
+            $sparqlQuery = 'select ?s_uuid ?s_prefLabel ?o_uuid ?o_prefLabel where {?s <' . $relationTypeUri . '> ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid . }';
             $resource = $this->query($sparqlQuery);
             return $resource;
         } else {

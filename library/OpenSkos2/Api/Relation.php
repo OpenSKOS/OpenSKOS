@@ -238,10 +238,9 @@ class Relation
     private function createRelationTriples($response, $relType){
         $result = [];
         foreach ($response as $key => $value) {
-            $triple = [];
-            $triple["s"]=$value->s->getUri();
-            $triple["p"]=$relType;
-            $triple["o"]=$value->o->getUri();
+            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang());
+            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang());
+            $triple=array("s" => $subject, "p" => $relType, "o"=>$object);
            array_push($result, $triple);
         }
         return $result;
