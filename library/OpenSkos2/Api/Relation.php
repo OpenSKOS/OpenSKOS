@@ -229,6 +229,12 @@ class Relation
         }
     }
     
+    public function listAllRelations(){
+         $intermediate = Skos::getRelationsTypes();
+         $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
+         return $result;
+    }
+    
     private function createRelationTriples($response, $relType){
         $result = [];
         foreach ($response as $key => $value) {

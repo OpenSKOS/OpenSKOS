@@ -32,16 +32,16 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
 
     public function indexAction()
     {
-        if (null === ($q = $this->getRequest()->getParam('q'))) {
-            $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
-            throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
-        }
-        
         $relations =$this->getDI()->make('\OpenSkos2\Api\Relation');
-        $request = $this->getPsrRequest();
-        $response = $relations->findAllPairsForRelationType($request);
-        $this->emitResponse($response);
+        $q = $this->getRequest()->getParam('q');
+        if ($q===null) {
+            $response = $relations->listAllRelations();
+            $this->emitResponse($response);
+        } else {
+            $request = $this->getPsrRequest();
+            $response = $relations->findAllPairsForRelationType($request);
+            $this->emitResponse($response);
+        }
     }
     
     public function getAction()
