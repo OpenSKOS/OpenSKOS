@@ -158,6 +158,16 @@ class Repository implements InterfaceRepository
     {
         return $this->baseUrl;
     }
+    
+    /**
+     * @return string
+     * the finest harvesting granularity supported by the repository. The legitimate values are
+     * YYYY-MM-DD and YYYY-MM-DDThh:mm:ssZ with meanings as defined in ISO8601.
+     */
+    public function getGranularity()
+    {
+        return ImplementationIdentity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ;
+    }
 
     /**
      * @return Identity
@@ -169,7 +179,7 @@ class Repository implements InterfaceRepository
             $this->getEarliestDateStamp(),
             Identity::DELETED_RECORD_PERSISTENT,
             $this->adminEmails,
-            ImplementationIdentity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ,
+            $this->getGranularity(),
             null,
             null
         );
