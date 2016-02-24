@@ -42,6 +42,7 @@ class Relation
         $relType = $request->getQueryParams()['q'];
         try {
             $response = $this->manager->fetchAllRelations($relType);
+            //var_dump($response);
             $intermediate = $this->createRelationTriples($response, $relType);
             $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
             return $result;
@@ -238,8 +239,8 @@ class Relation
     private function createRelationTriples($response, $relType){
         $result = [];
         foreach ($response as $key => $value) {
-            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang());
-            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang());
+            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
+            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
             $triple=array("s" => $subject, "p" => $relType, "o"=>$object);
            array_push($result, $triple);
         }
