@@ -343,9 +343,16 @@ class ConceptManager extends ResourceManager
         $rels = explode(",", $relationType);
         $filterStr = "";
         if (count($rels) > 0) {
-             
-            $filterStr = " filter ( true ";
-            for ($i = 0; $i < count($rels); $i++) {
+            $filterStr = " filter ( ";
+            
+            $uri = 'http://www.w3.org/2004/02/skos/core#' . $rels[0];
+            if (in_array($uri, Skos::getRelationsTypes())) {
+                $filterStr = $filterStr . ' ?p = <' . $uri . '>';
+            } else {
+                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[i] . " is not implemented.", 501);
+            }
+            
+            for ($i = 1; $i < count($rels); $i++) {
                 $uri = 'http://www.w3.org/2004/02/skos/core#' . $rels[$i];
                 if (in_array($uri, Skos::getRelationsTypes())) {
                     $filterStr = $filterStr . ' || ?p = <' . $uri . '>';
