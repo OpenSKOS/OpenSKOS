@@ -236,12 +236,12 @@ class Relation
          return $result;
     }
     
-    private function createRelationTriples($response, $relType){
+    private function createRelationTriples($response){
         $result = [];
         foreach ($response as $key => $value) {
             $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
             $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
-            $triple=array("s" => $subject, "p" => $relType, "o"=>$object);
+            $triple=array("s" => $subject, "p" => $value -> p -> getUri(), "o"=>$object);
            array_push($result, $triple);
         }
         return $result;
