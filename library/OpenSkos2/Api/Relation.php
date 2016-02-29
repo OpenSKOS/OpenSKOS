@@ -39,11 +39,20 @@ class Relation
     
     public function findAllPairsForRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
-        $relType = $request->getQueryParams()['q'];
+        $params=$request->getQueryParams();
+        $relType = $params['q'];
+        $sourceSchemata = null;
+        $targetSchemata = null;
+        if (isset($params['sourceSchemata'])) {
+            $sourceSchemata = $params['sourceSchemata'];
+        };
+        if (isset($params['targetSchemata'])) {
+            $targetSchemata = $params['targetSchemata'];
+        }; 
         try {
-            $response = $this->manager->fetchAllRelations($relType);
+            $response = $this->manager->fetchAllRelations($relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
-            $intermediate = $this->createRelationTriples($response, $relType);
+            $intermediate = $this->createRelationTriples($response);
             $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
             return $result;
         } catch (Exception $exc) {

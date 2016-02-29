@@ -207,3 +207,8 @@ Getting the list of all schemata (added by Meertens)
 <server>/public/api/statuses?format=json
 Throws an error on other formats (html and rdf/xml). Implemented via a call to jena.
 
+5.7. Check URI's (examples)
+----------------------------------------------------------------------------------
+
+Getting relations for certain types with given schemata for sources and targets
+http://192.168.99.100/public/api/find-relations?q=broader,narrower&sourceSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2,http://data.beeldengeluid.nl/gtaa/Onderwerpen1&targetSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2
