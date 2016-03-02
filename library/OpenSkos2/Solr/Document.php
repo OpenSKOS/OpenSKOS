@@ -69,6 +69,7 @@ class Document
         Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote', 'scopeNote'],
         Skos::NOTATION =>   ['s_notaton', 't_notaton', 'a_notaton', 'notation'],
         Skos::INSCHEME =>   ['s_inScheme', 'inScheme'],
+        OpenSkos::INSKOSCOLLECTION =>   ['s_inSkosCollection', 'inSkosCollection'],
         OpenSkos::STATUS => ['s_status', 'status'],
         OpenSkos::SET => ['s_set', 'set'],
         OpenSkos::TENANT => ['s_tenant', 'tenant'],

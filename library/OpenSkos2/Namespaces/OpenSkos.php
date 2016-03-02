@@ -37,4 +37,17 @@ class OpenSkos
     const UUID = 'http://openskos.org/xmlns#uuid';
     
     const SET = 'http://openskos.org/xmlns#set';
+    
+    const INSKOSCOLLECTION = 'http://openskos.org/xmlns#inSkosCollection';
+    
+    const HASMEMBER = 'http://openskos.org/xmlns#hasMember';
+    
+     public static function getInversePropertiesMap()
+    {
+        return [
+            OpenSkos::INSKOSCOLLECTION => OpenSkos::HASMEMBER,
+            OpenSkos::HASMEMBER => OpenSkos::INSKOSCOLLECTION
+        ];
+    }
+    
 }

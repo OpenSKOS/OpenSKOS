@@ -107,7 +107,7 @@ class ResourceManager
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
-        
+       
         $this->client->insert(EasyRdf::resourceToGraph($resource));
 
         

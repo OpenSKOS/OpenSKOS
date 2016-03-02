@@ -84,6 +84,9 @@ private static function getNamesToPropertiesCommon() {
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
+        
+            'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
+            'hasMember' => OpenSkos::HASMEMBER,
         ];
 }
 
@@ -97,7 +100,7 @@ private static function getNamesToPropertiesCommon() {
     public static function getOldToProperties()
     {
         $common = self::getNamesToPropertiesCommon();
-        $add = [ // there is also some crap from the previos code: some fields are apparently duplicated
+        $add = [ // there is also some crap from the previous code: some fields are apparently duplicated
             'collection' => OpenSkos::SET,
             'created_by' => DcTerms::CREATOR,
             'dcterms_creator' => DcTerms::CREATOR,

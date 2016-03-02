@@ -158,11 +158,19 @@ class Autocomplete
             $solrQuery .= ' (-s_status:' . Resource::STATUS_DELETED . ')';
         }
         
-        // sets (collections)
+        // sets (former tenant collections)
         if (!empty($options['sets'])) {
             $solrQuery .= ' AND (';
             $solrQuery .= 's_set:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
+                . '))';
+        }
+        
+        // skos collections
+        if (!empty($options['skosCollection'])) {
+            $solrQuery .= ' AND (';
+            $solrQuery .= 's_inSkosCollection:('
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['skosCollection']))
                 . '))';
         }
 

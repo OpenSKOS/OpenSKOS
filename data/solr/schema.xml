@@ -11,6 +11,7 @@
         <field name="notation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="inSkosCollection" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <field name="LexicalLabels" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        

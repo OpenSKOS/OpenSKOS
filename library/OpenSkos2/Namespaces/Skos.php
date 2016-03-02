@@ -96,7 +96,7 @@ class Skos
      * The tranitive inferres are not in that list. Can not be handled with a map.
      * @return type
      */
-    public static function getInferredRelationsMap()
+    public static function getInverseRelationsMap()
     {
         //@TODO Collections
         return [
@@ -109,7 +109,7 @@ class Skos
             Skos::EXACTMATCH => Skos::EXACTMATCH,
             Skos::RELATEDMATCH => Skos::RELATEDMATCH,
             Skos::TOPCONCEPTOF => Skos::HASTOPCONCEPT,
-            Skos::HASTOPCONCEPT => Skos::TOPCONCEPTOF,
+            Skos::HASTOPCONCEPT => Skos::TOPCONCEPTOF
         ];
     }
     

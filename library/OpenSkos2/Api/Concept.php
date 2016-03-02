@@ -151,6 +151,10 @@ class Concept
             $options['sorts'] = $sortmap;
         }
         
+         if (isset($params['skosCollection'])) {
+            $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
+        }
+        
         //sets (former tenant collections)
         // meertens was here
         if (isset($params['sets'])) {
@@ -297,7 +301,7 @@ class Concept
                         
             $tenant = $this->getTenantFromParams($params);
             
-            $collection = $this->getCollection($params, $tenant);
+            $collection = $this->getSet($params, $tenant);
             $user = $this->getUserFromParams($params);
             
             $this->resourceEditAllowed($concept, $tenant, $user);
@@ -441,12 +445,12 @@ class Concept
         $params = $this->getParams($request);
         
         $tenant = $this->getTenantFromParams($params);
-        $collection = $this->getCollection($params, $tenant);
+        $set = $this->getSet($params, $tenant);
         $user = $this->getUserFromParams($params);
         
         $concept->ensureMetadata(
             $tenant->code,
-            $collection->getUri(),
+            $set->getUri(),
             $user->getFoafPerson()
         );
         
@@ -564,7 +568,7 @@ class Concept
      * @params \OpenSKOS_Db_Table_Row_Tenant $tenant
      * @return OpenSKOS_Db_Table_Row_Collection
      */
-    private function getCollection($params, \OpenSKOS_Db_Table_Row_Tenant $tenant)
+    private function getSet($params, \OpenSKOS_Db_Table_Row_Tenant $tenant)
     {
         if (empty($params['collection'])) {
             throw new InvalidArgumentException('No collection specified', 412);

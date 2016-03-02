@@ -336,6 +336,7 @@ class Concept extends Resource
                 $this->getPropertySingleValue(OpenSkos::SET)
             );
         } else {
+            // here refine using if handle proxy is enabled, else-branch is just as it is now, if-branch: the code of isocat-openskos for epic-handle
             $uri = self::assembleUri(
                 $this->getPropertySingleValue(OpenSkos::SET),
                 $this->getProperty(Skos::NOTATION)[0]->getValue()

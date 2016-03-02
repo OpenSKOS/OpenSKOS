@@ -145,9 +145,10 @@ class ConceptManager extends ResourceManager
         
         $this->deleteMatchingTriples(
             new Uri($objectUri),
-            Skos::getInferredRelationsMap()[$relationType],
+            Skos::getInverseRelationsMap()[$relationType],
             new Uri($subjectUri)
         );
+        
     }
     
     /**

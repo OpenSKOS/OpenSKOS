@@ -4,6 +4,7 @@
 # TODO Fill the rules with more if missing. For collection maybe.
 
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix openskos: <http://openskos.org/xmlns#> .
 [
     r1: (?x skos:narrower ?y) -> (?y skos:broader ?x) .
     r2: (?x skos:broader ?y) -> (?y skos:narrower ?x) .
@@ -18,5 +19,8 @@
     r9: (?x skos:related ?y) -> (?y skos:related ?x) .
     r10: (?x skos:relatedMatch ?y) -> (?y skos:relatedMatch ?x) .
     r11: (?x skos:closeMatch ?y) -> (?y skos:closeMatch ?x) .
-    r12: (?x skos:exactMatch ?y) -> (?y skos:exactMatch ?x)
+    r12: (?x skos:exactMatch ?y) -> (?y skos:exactMatch ?x) .
+   
+    r13: (?x openskos:inSkosCollection ?y) -> (?y openskos:hasMember ?x) .
+    r14: (?x openskos:hasMember ?y) -> (?y openskos:inSkosCollection ?x)
 ]
