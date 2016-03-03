@@ -3,7 +3,7 @@
 // meertens was here
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 
-class Api_SkosCollectionsController extends OpenSKOS_Rest_Controller
+class Api_SkosCollectionController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {
@@ -28,12 +28,15 @@ class Api_SkosCollectionsController extends OpenSKOS_Rest_Controller
     
     public function getAction()
     {
-        $this->_501('get');
+       $this->_501('get');
     }
     
     public function postAction()
     {
-        $this->_501('post');
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make('\OpenSkos2\Api\SkosCollection');
+        $response = $api->create($request);
+        $this->emitResponse($response);
     }
     
     public function putAction()

@@ -501,7 +501,7 @@ class Concept
     private function getConceptFromRequest(ServerRequestInterface $request)
     {
         $doc = $this->getDomDocumentFromRequest($request);
-
+         
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
             throw new InvalidArgumentException(
@@ -521,7 +521,7 @@ class Concept
         }
 
         $resource = (new Text($doc->saveXML()))->getResources();
-
+        //var_dump($resource[0]);
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
             throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
         }
@@ -545,12 +545,12 @@ class Concept
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 412);
         }
-        
         $doc = new \DOMDocument();
         if (!@$doc->loadXML($xml)) {
             throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
         }
 
+        
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
             throw new InvalidArgumentException(

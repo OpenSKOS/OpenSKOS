@@ -26,6 +26,8 @@ use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\SkosCollectionCollection;
 use OpenSkos2\Person;
 use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
@@ -43,9 +45,10 @@ class EasyRdf
     public static function graphToResourceCollection(Graph $graph, $expectedType = null)
     {
         $collection = self::createResourceCollection($expectedType);
-
+        
         foreach ($graph->resources() as $resource) {
             /** @var $resource \EasyRdf\Resource */
+           
             $type = $resource->get('rdf:type');
 
             // Filter out resources which are not fully described.
@@ -76,7 +79,9 @@ class EasyRdf
             }
 
             $collection[] = $myResource;
+            
         }
+        //var_dump($collection[0]);
         return $collection;
     }
     
@@ -128,6 +133,8 @@ class EasyRdf
                     return new Person($uri);
                 case Label::TYPE:
                     return new Label($uri);
+                case SkosCollection::TYPE:
+                    return new \OpenSkos2\SkosCollection($uri);
                 default:
                     return new Resource($uri);
             }
@@ -153,6 +160,8 @@ class EasyRdf
                 return new CollectionCollection();
             case Label::TYPE:
                 return new LabelCollection();
+            case SkosCollection::TYPE:
+                return new SkosCollectionCollection();
             default:
                 return new ResourceCollection();
         }

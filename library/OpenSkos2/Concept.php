@@ -30,6 +30,7 @@ use OpenSkos2\ConceptManager;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\Exception\UriGenerationException;
 
 class Concept extends Resource
 {

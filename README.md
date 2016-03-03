@@ -212,3 +212,7 @@ Throws an error on other formats (html and rdf/xml). Implemented via a call to j
 
 Getting relations for certain types with given schemata for sources and targets
 http://192.168.99.100/public/api/find-relations?q=broader,narrower&sourceSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2,http://data.beeldengeluid.nl/gtaa/Onderwerpen1&targetSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2
+
+Getting concepts within given skos:collection(s)
+
+http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollections=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
