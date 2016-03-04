@@ -27,6 +27,7 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
+use OpenSkos2\Namespaces\DcTerms as DcTerms;
 use Asparagus\QueryBuilder;
 use OpenSkos2\SkosCollection;
 
@@ -513,14 +514,14 @@ class ResourceManager
     }
     
      public function fetchSkosCollections() {
-        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . RdfNamespace::TYPE . '>  <' . SkosCollection::TYPE . '> . }';
+        $query = 'SELECT ?uri ?title WHERE { ?uri  <' . RdfNamespace::TYPE . '>  <' . SkosCollection::TYPE . '> . ' .  '?uri  <'. DcTerms::TITLE . '> ?title . }';
 /* @var $result \EasyRdf\Sparql\Result */
+        //var_dump($query);
         $result = $this->query($query);
         $items = [];
         $i = 0;
         foreach ($result as $resource) {
-            $items[$i] = $resource->subject->getUri();
-            //var_dump($items[$i]);
+            $items[$i] = array("uri"=>$resource->uri->getUri(), "title" => $resource->title->getValue());
             //var_dump(json_encode($items, JSON_UNESCAPED_SLASHES));
             $i++;
         }

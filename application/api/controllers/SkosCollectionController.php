@@ -22,8 +22,7 @@ class Api_SkosCollectionController extends OpenSKOS_Rest_Controller
     {
         if ('json' !== $this->_helper->contextSwitch()->getCurrentContext()) {
             $this->_501('This action, which lists the uris of all skos collections, is implemented only for json format output.');
-        }
-        
+        };
         $resourceManager = $this -> getResourceManager();
         $result = $resourceManager ->fetchSkosCollections();
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);

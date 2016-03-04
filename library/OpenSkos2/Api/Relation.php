@@ -209,10 +209,11 @@ class Relation
      */
     protected function deleteConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
     {
+       
         $body = $request->getParsedBody();
-
+        
         if (!isset($body['key'])) {
-            throw new Exception\ApiException('Missing relation', 400);
+            throw new Exception\ApiException('Missing key', 400);
         }
         if (!isset($body['concept'])) {
             throw new Exception\ApiException('Missing concept', 400);
