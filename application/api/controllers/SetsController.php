@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Api_CollectionsController extends OpenSKOS_Rest_Controller
+class Api_SetsController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {

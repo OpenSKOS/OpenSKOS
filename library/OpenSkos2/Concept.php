@@ -134,6 +134,15 @@ class Concept extends Resource
         }
     }
     
+     public function getSkosCollection()
+    {
+        if (!$this->hasProperty(OpenSkos::INSKOSCOLLECTION)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::INSKOSCOLLECTION)[0]->getValue();
+        }
+    }
+    
     /**
      * Check if the concept is deleted
      *
