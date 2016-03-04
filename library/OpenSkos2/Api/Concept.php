@@ -135,7 +135,7 @@ class Concept
         
         // tenant
         if (isset($params['tenant'])) {
-            $tenant = $this->getTenantFromParams($params);
+            $tenant= $this->getTenantFromParams($params);
             $options['tenants'] = [$tenant->code];
         }
         
@@ -300,15 +300,13 @@ class Concept
             $params = $this->getParams($request);
                         
             $tenant = $this->getTenantFromParams($params);
-            
-            $collection = $this->getSet($params, $tenant);
+            $set = $this->getSet($params, $tenant);
             $user = $this->getUserFromParams($params);
             
             $this->resourceEditAllowed($concept, $tenant, $user);
-        
             $concept->ensureMetadata(
                 $tenant->code,
-                $collection->getUri(),
+                $set->getUri(),
                 $user->getFoafPerson(),
                 $existingConcept->getStatus()
             );

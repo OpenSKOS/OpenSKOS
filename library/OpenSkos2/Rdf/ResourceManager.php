@@ -28,6 +28,7 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use Asparagus\QueryBuilder;
+use OpenSkos2\SkosCollection;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
@@ -507,6 +508,21 @@ class ResourceManager
                     $i++;
                 }
             }
+        }
+        return $items;
+    }
+    
+     public function fetchSkosCollections() {
+        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . RdfNamespace::TYPE . '>  <' . SkosCollection::TYPE . '> . }';
+/* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        $items = [];
+        $i = 0;
+        foreach ($result as $resource) {
+            $items[$i] = $resource->subject->getUri();
+            //var_dump($items[$i]);
+            //var_dump(json_encode($items, JSON_UNESCAPED_SLASHES));
+            $i++;
         }
         return $items;
     }

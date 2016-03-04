@@ -20,8 +20,12 @@ class Api_SkosCollectionController extends OpenSKOS_Rest_Controller
     
     public function indexAction()
     {
+        if ('json' !== $this->_helper->contextSwitch()->getCurrentContext()) {
+            $this->_501('This action, which lists the uris of all skos collections, is implemented only for json format output.');
+        }
+        
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchFacets(OpenSkosNamespace::INSKOSCOLLECTION, 'Resource');
+        $result = $resourceManager ->fetchSkosCollections();
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }
