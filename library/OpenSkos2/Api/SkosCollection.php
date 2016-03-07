@@ -22,8 +22,7 @@ use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
-use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\ConceptManager;
+use OpenSkos2\SkosCollectionManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Tenant as Tenant;
@@ -43,7 +42,7 @@ class SkosCollection
     
     private $manager;
     
-    public function __construct(ResourceManager $manager) {
+    public function __construct(SkosCollectionManager $manager) {
         $this->manager = $manager;
     }
     
@@ -68,12 +67,11 @@ class SkosCollection
         }
         $params = $request->getQueryParams($request);
         $user = $this ->getUserFromParams($params);
-        $skoscollectionname = $this->getParamValueFromParams($params, 'name');
-        $skosCollection->ensureMetadata($user->getFoafPerson(), $skoscollectionname);
+        $skosCollection->ensureMetadata($user->getFoafPerson());
         $autoGenerateUri = $this->checkSkosCollectionIdentifiers($request, $skosCollection);
         if ($autoGenerateUri) {
             $tenantcode = $this->getParamValueFromParams($params, 'tenant');
-            $skosCollection->selfGenerateUri($tenantcode, $skoscollectionname, $this->manager);
+            $skosCollection->selfGenerateUri($tenantcode, $this->manager);
         }
         
         //\Tools\Logging::var_error_log(" skosCollectie \n", $skosCollection, '/app/data/Logger.txt');
@@ -83,6 +81,35 @@ class SkosCollection
         
         $rdf = (new Transform\DataRdf($skosCollection))->transform();
         return $this->getSuccessResponse($rdf, 201);
+    }
+    
+    public function delete(ServerRequestInterface $request)
+    {
+        try {
+            $params = $request->getQueryParams();
+            if (empty($params['uri'])) {
+                throw new InvalidArgumentException('Missing uri parameter');
+            }
+            
+            $uri = $params['uri'];
+            $skoscollection = $this->manager->fetchByUri($uri);
+            if (!$skoscollection) {
+                throw new NotFoundException('Skos collection is not found by uri :' . $uri, 404);
+            }
+            
+            $user = $this->getUserFromParams($params);
+            $tenant = $this->getTenantFromParams($params);
+            
+            // I' here now!!! an it is very tricjy with the trait
+            $this->resourceEditAllowed($skoscollection, $tenant, $user);
+            
+            $this->manager->deleteSoft($skoscollection);
+        } catch (ApiException $ex) {
+            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        }
+        
+        $xml = (new \OpenSkos2\Api\Transform\DataRdf($skoscollection))->transform();
+        return $this->getSuccessResponse($xml, 202);
     }
     
     // almost a copy of the same method from concept.php
@@ -101,7 +128,7 @@ class SkosCollection
         //var_dump($resource[0]);
         
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\SkosCollection) {
-            throw new InvalidArgumentException('XML Could not be converted to SKOS-collection', 400);
+            throw new InvalidArgumentException('XML Could not be converted to a SkosCollection object', 400);
         }
 
        $skosCollection = $resource[0];

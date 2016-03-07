@@ -20,14 +20,12 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
 
-/**
- * This is skos colletion. Different than the OpenSKOS_Db_Table_Row_Collection which is now openskos:set
- */
-class CollectionCollection extends ResourceCollection
+
+class SetCollection extends ResourceCollection
 {
     /**
      * What is the basic resource for this collection.
      * @var string NULL means any resource.
      */
-    protected $resourceType = Collection::TYPE;
+    protected $resourceType = Set::TYPE;
 }

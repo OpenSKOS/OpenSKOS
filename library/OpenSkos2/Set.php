@@ -20,10 +20,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 
-/**
- * This is skos colletion. Different than the OpenSKOS_Db_Table_Row_Collection which is now openskos:set
- */
-class Collection extends Resource
+class Set extends Resource
 {
-    const TYPE = 'http://www.w3.org/2004/02/skos/core#Collection';
+    const TYPE = '"http://www.w3.org/2002/07/owl#Ontology"';
 }

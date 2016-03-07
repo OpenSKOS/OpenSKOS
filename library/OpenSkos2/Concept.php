@@ -97,7 +97,7 @@ class Concept extends Resource
             Skos::SEMANTICRELATION,
         ],
         'ConceptCollections' => [
-            Skos::COLLECTION,
+            Skos::SKOSCOLLECTION,
             Skos::ORDEREDCOLLECTION,
             Skos::MEMBER,
             Skos::MEMBERLIST,
@@ -333,7 +333,7 @@ class Concept extends Resource
         
         if ($this->isPropertyEmpty(OpenSkos::SET)) {
             throw new UriGenerationException(
-                'Property openskos:set (collection) is required to generate concept uri.'
+                'Property openskos:set (former tenant collection) is required to generate concept uri.'
             );
         }
         

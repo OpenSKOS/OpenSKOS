@@ -12,6 +12,7 @@ namespace OpenSkos2;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
@@ -25,7 +26,7 @@ use OpenSkos2\Exception\UriGenerationException;
 
 class SkosCollection extends Resource
 {
-    const TYPE = "http://www.w3.org/2002/07/owl#Ontology";
+    const TYPE = Skos::SKOSCOLLECTION;
 
     public function __construct($uri = null) {
         parent::__construct($uri);
@@ -44,16 +45,7 @@ class SkosCollection extends Resource
         
     }
     
-    public function getLicesne() {
-        if ($this->hasProperty(DcTerms::LICENSE)) {
-            return (string) $this->getPropertySingleValue(DcTerms::LICENSE);
-        } else {
-            return null;
-        }
-    }
     
-    
-
     public function getCreator()
     {
         if ($this->hasProperty(DcTerms::CREATOR)) {
@@ -62,12 +54,22 @@ class SkosCollection extends Resource
             return null;
         }
     }
+    
+    public function getComment()
+    {
+        if ($this->hasProperty(Rdfs::COMMENT)) {
+            return (string)$this->getPropertySingleValue(Rdfs::COMMENT);
+        } else {
+            return null;
+        }
+    }
 
-   public function ensureMetadata(Uri $person, $name) {
+   
+   
+   public function ensureMetadata(Uri $person) {
 
         $forFirstTimeInOpenSkos = [
-            DcTerms::CREATOR => $person,
-            DcTerms::TITLE => new Literal($name)
+            DcTerms::CREATOR => $person
         ];
 
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -77,18 +79,18 @@ class SkosCollection extends Resource
         }
     }
 
-    public function selfGenerateUri($tenantcode, $skoscollectionname, \OpenSkos2\Rdf\ResourceManager $manager) {
+    public function selfGenerateUri($tenantcode, \OpenSkos2\SkosCollectionManager $manager) {
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-            'The skos clooection already has an uri. Can not generate new one.'
+            'The skos collection already has an uri. Can not generate a new one.'
             );
         }
 
-        $uri = $this->assembleUri($tenantcode, $skoscollectionname);
+        $uri = $this->assembleUri($tenantcode);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use for skos collections.'
             );
         }
 
@@ -97,8 +99,8 @@ class SkosCollection extends Resource
     }
 
     // how to geberate uri for the skos:collection
-    protected function assembleUri($tenantcode, $skoscollectionname) {
-        $uri = $tenantcode . ':' . $skoscollectionname . Uuid::uuid4();
+    protected function assembleUri($tenantcode) {
+        $uri = $tenantcode . ':' . Uuid::uuid4();
         return $uri;
     }
 

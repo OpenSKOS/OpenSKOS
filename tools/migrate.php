@@ -283,7 +283,7 @@ do {
                 $resource = new \OpenSkos2\Concept($uri);
                 break;
             case 'Collection':
-                $resource = new \OpenSkos2\Collection($uri);
+                $resource = new \OpenSkos2\Set($uri);
                 break;
             default:
                 throw new Exception("Didn't expect class: " . $doc['class']);

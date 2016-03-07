@@ -20,8 +20,8 @@
 namespace OpenSkos2\Bridge;
 
 use EasyRdf\Graph;
-use OpenSkos2\Collection;
-use OpenSkos2\CollectionCollection;
+use OpenSkos2\Set;
+use OpenSkos2\SetCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
@@ -55,6 +55,8 @@ class EasyRdf
             if (!$type) {
                 continue;
             }
+            
+            //var_dump($type);
             
             $myResource = self::createResource(
                 $resource->getUri(),
@@ -127,8 +129,8 @@ class EasyRdf
                     return new Concept($uri);
                 case \OpenSkos2\ConceptScheme::TYPE:
                     return new \OpenSkos2\ConceptScheme($uri);
-                case Collection::TYPE:
-                    return new Collection($uri);
+                case Set::TYPE:
+                    return new Set($uri);
                 case Person::TYPE:
                     return new Person($uri);
                 case Label::TYPE:
@@ -156,8 +158,8 @@ class EasyRdf
                 return new ConceptCollection();
             case \OpenSkos2\ConceptScheme::TYPE:
                 return new \OpenSkos2\ConceptSchemeCollection();
-            case Collection::TYPE:
-                return new CollectionCollection();
+            case Set::TYPE:
+                return new SetCollection();
             case Label::TYPE:
                 return new LabelCollection();
             case SkosCollection::TYPE:

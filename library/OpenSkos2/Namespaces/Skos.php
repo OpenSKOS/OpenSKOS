@@ -53,7 +53,7 @@ class Skos
     const SEMANTICRELATION = 'http://www.w3.org/2004/02/skos/core#semanticRelation';
 
     //ConceptCollections
-    const COLLECTION = 'http://www.w3.org/2004/02/skos/core#Collection';
+    const SKOSCOLLECTION = 'http://www.w3.org/2004/02/skos/core#Collection';
     const ORDEREDCOLLECTION = 'http://www.w3.org/2004/02/skos/core#OrderedCollection';
     const MEMBER = 'http://www.w3.org/2004/02/skos/core#member';
     const MEMBERLIST = 'http://www.w3.org/2004/02/skos/core#memberList';

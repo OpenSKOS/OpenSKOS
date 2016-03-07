@@ -22,4 +22,6 @@ namespace OpenSkos2\Namespaces;
 class Rdfs
 {
     const NAME_SPACE = 'http://www.w3.org/2000/01/rdf-schema#';
+    
+    const COMMENT = 'http://www.w3.org/2000/01/rdf-schema#comment';
 }

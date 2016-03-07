@@ -440,9 +440,11 @@ class Concept
             );
         }
         
-        if (!($this->manager->askForUri($concept->getProperty(OpenSkos::INSKOSCOLLECTION)[0], \OpenSkos2\SkosCollection::TYPE))) {
+        $skosCollectionValues = $concept->getProperty(OpenSkos::INSKOSCOLLECTION);
+        //var_dump($skosCollectionValues);
+        if (!($this->manager->askForUri( $skosCollectionValues[0], \OpenSkos2\SkosCollection::TYPE))) {
             throw new InvalidArgumentException(
-                'The referred skos-collection with uri ' . $concept->getProperty(OpenSkos::INSKOSCOLLECTION)[0] . ' does not exists. Create it first if you want to add concepts to it.',
+                'The referred skos-collection with uri ' . $skosCollectionValues [0] . ' does not exists. Create it first if you want to add concepts to it.',
                 400
             );
         }
