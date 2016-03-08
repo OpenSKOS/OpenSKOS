@@ -92,9 +92,8 @@ class Relation
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return Zend\Diactoros\Response
      */
-    //Olha was here
-    //public function addRelation(\Psr\Http\Message\ServerRequestInterface $request)
-    public function addRelation($request)
+   public function addRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    //public function addRelation($request)
     {
         try {
             $this->addConceptRelation($request);
@@ -134,13 +133,10 @@ class Relation
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @throws Exception\ApiException
      */
-    // Olha was here
-    //protected function addConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
-    protected function addConceptRelation($request)
+    protected function addConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
     {
-       /* 
-        * Ola was here
-        * $body = $request->getParsedBody();
+        $body = $request->getParsedBody();
+        //var_dump($body);
         
         if (!isset($body['key'])) {
             throw new Exception\ApiException('Missing key', 400);
@@ -154,8 +150,7 @@ class Relation
         if (!isset($body['type'])) {
             throw new Exception\ApiException('Missing type', 400);
         }
-        * 
-        *
+       
         
         $user = $this->getUserByKey($body['key']);
 
@@ -170,34 +165,7 @@ class Relation
         } catch (\Exception $exc) {
             throw new Exception\ApiException($exc->getMessage(), 500);
         }
-        * */
         
-         if (!isset($request['key'])) {
-            throw new Exception\ApiException('Missing key', 400);
-        }
-        if (!isset($request['concept'])) {
-            throw new Exception\ApiException('Missing concept', 400);
-        }
-        if (!isset($request['related'])) {
-            throw new Exception\ApiException('Missing related', 400);
-        }
-        if (!isset($request['type'])) {
-            throw new Exception\ApiException('Missing type', 400);
-        }
-      
-        $user = $this->getUserByKey($request['key']);
-
-        $concept = $this->manager->fetchByUri($request['concept']);
-        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
-
-        $relatedConcept = $this->manager->fetchByUri($request['concept']);
-        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
-        
-        try {
-            $this->manager->addRelation($request['concept'], $request['type'], $request['related']);
-        } catch (\Exception $exc) {
-            throw new Exception\ApiException($exc->getMessage(), 500);
-        }
         
     }
     

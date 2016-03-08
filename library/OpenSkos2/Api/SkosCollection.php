@@ -30,7 +30,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-
+use OpenSKOS_Db_Table_Row_User;
+use OpenSkos2\Rdf\Uri;
  /**
      * Resource manager
      *
@@ -83,7 +84,7 @@ class SkosCollection
         return $this->getSuccessResponse($rdf, 201);
     }
     
-    public function delete(ServerRequestInterface $request)
+    public function deleteSkosCollection(ServerRequestInterface $request)
     {
         try {
             $params = $request->getQueryParams();
@@ -98,12 +99,15 @@ class SkosCollection
             }
             
             $user = $this->getUserFromParams($params);
-            $tenant = $this->getTenantFromParams($params);
+            if  (!$this->skosCollectionDeleteAllowed($user)) {
+                 throw new ApiException('You do not have priority to delete skos collection ' . $uri, 403);
+            }
             
-            // I' here now!!! an it is very tricjy with the trait
-            $this->resourceEditAllowed($skoscollection, $tenant, $user);
-            
-            $this->manager->deleteSoft($skoscollection);
+            $concepts = $this->manager->fetchConceptsForSkosCollection($uri);
+            if  (count($concepts)>0) {
+                 throw new ApiException('The skos collection ' . $uri . ' cannot be deleted because it contains concepts. Purge it first. ', 403);
+            }
+            $this->manager->delete(new Uri($uri));
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
@@ -214,6 +218,11 @@ class SkosCollection
         $response = (new Response($stream, $status))
             ->withHeader('Content-Type', 'text/xml; charset="utf-8"');
         return $response;
+    }
+    
+    // not fully implemented yet 
+    public function skosCollectionDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return $user -> role == 'admin';
     }
 
 }

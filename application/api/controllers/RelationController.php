@@ -59,13 +59,10 @@ class API_RelationController extends Api_FindRelationsController {
     */
     public function postAction()
     {
-        //Olha:
-        $request = $this->getRequest();
-        //var_dump($request->getParams());
-        //$request = $this->getPsrRequest();
+       $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addRelation($request->getParams());
+        $response = $relation->addRelation($request);
         $this->emitResponse($response);
     }
 

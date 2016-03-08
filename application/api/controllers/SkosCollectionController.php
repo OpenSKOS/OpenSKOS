@@ -49,6 +49,10 @@ class Api_SkosCollectionController extends OpenSKOS_Rest_Controller
     
     public function deleteAction()
     {
-        $this->_501('delete');
+        $request = $this->getPsrRequest();
+        /* @var $relation \OpenSkos2\Api\Relation */
+        $skoscollection = $this->getDI()->get('\OpenSkos2\Api\SkosCollection');
+        $response = $skoscollection->deleteSkosCollection($request);
+        $this->emitResponse($response);
     }
 }
