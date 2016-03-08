@@ -40,7 +40,7 @@
 	
 	$conceptSchemeOptions = json_encode($this->conceptSchemeOptions);
 	$profilesOptions = json_encode($this->profilesOptions);
-	$collectionsConceptSchemesMap = json_encode($this->collectionsConceptSchemesMap);
+	$setsConceptSchemesMap = json_encode($this->setsConceptSchemesMap);
 	
 $js = <<<JS
 window.addEvent('load', function() {
@@ -75,17 +75,17 @@ window.addEvent('load', function() {
 		});
 	}
 	
-	if ($('collections') && $('conceptScheme-element')) {
-		var collectionsConceptSchemesMap = {$collectionsConceptSchemesMap};
+	if ($('sets') && $('conceptScheme-element')) {
+		var setsConceptSchemesMap = {$setsConceptSchemesMap};
 		var updateConceptSchemes = function () {
 			var showConceptSchemes = [];
-			$('collections').getElements(':selected').each(function (el) {
-				if (collectionsConceptSchemesMap[el.getAttribute('value')]) {
-					showConceptSchemes = showConceptSchemes.concat(collectionsConceptSchemesMap[el.getAttribute('value')]);
+			$('sets').getElements(':selected').each(function (el) {
+				if (setsConceptSchemesMap[el.getAttribute('value')]) {
+					showConceptSchemes = showConceptSchemes.concat(setsConceptSchemesMap[el.getAttribute('value')]);
 				}
 			});
 			
-			if ($('collections').getElements(':selected').length > 0) {
+			if ($('sets').getElements(':selected').length > 0) {
 				$('conceptScheme-element').getElements('input').each(function (el) {
 					if (showConceptSchemes.indexOf(el.getAttribute('value')) !== -1) {
 						el.getParent().show();
@@ -104,7 +104,7 @@ window.addEvent('load', function() {
 				$('conceptScheme-element').getElements('label, br').show();
 			}
 		};
-		$('collections').addEvent('change', updateConceptSchemes);
+		$('sets').addEvent('change', updateConceptSchemes);
 		updateConceptSchemes();
 	}
 });

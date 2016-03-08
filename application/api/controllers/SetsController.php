@@ -35,7 +35,7 @@ class Api_SetsController extends OpenSKOS_Rest_Controller
     
     public function indexAction()
     {
-        $model = new OpenSKOS_Db_Table_Collections();
+        $model = new OpenSKOS_Db_Table_Sets();
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         $select = $model->select();
         if (null !== ($allow_oai = $this->getRequest()->getParam('allow_oai'))) {
@@ -55,7 +55,7 @@ class Api_SetsController extends OpenSKOS_Rest_Controller
             }
         }
         if ($context == 'json' || $context == 'jsonp') {
-            $this->view->assign('collections', $model->fetchAll($select)->toArray());
+            $this->view->assign('sets', $model->fetchAll($select)->toArray());
         } else {
             $this->view->collections = $model->fetchAll($select);
         }
@@ -71,14 +71,14 @@ class Api_SetsController extends OpenSKOS_Rest_Controller
             throw new Zend_Controller_Action_Exception('Insitution `'.$tenantCode.'` not found', 404);
         }
         
-        $modelCollections = new OpenSKOS_Db_Table_Collections();
+        $modelCollections = new OpenSKOS_Db_Table_Sets();
         $collection = $tenant->findDependentRowset(
-            'OpenSKOS_Db_Table_Collections',
+            'OpenSKOS_Db_Table_Sets',
             null,
             $modelCollections->select()->where('code=?', $collectionCode)
         )->current();
         if (null===$collection) {
-            throw new Zend_Controller_Action_Exception('Collection `'.$id.'` not found', 404);
+            throw new Zend_Controller_Action_Exception('Set `'.$id.'` not found', 404);
         }
         
         $context = $this->_helper->contextSwitch()->getCurrentContext();
@@ -88,7 +88,7 @@ class Api_SetsController extends OpenSKOS_Rest_Controller
             }
         } else {
             $this->view->assign('tenant', $tenant);
-            $this->view->assign('collection', $collection);
+            $this->view->assign('set', $collection);
         }
     }
     

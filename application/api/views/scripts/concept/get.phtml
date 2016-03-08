@@ -51,7 +51,7 @@ $this->headTitle($title);
     </dd>
     
     <?php
-        $setsModel = new OpenSKOS_Db_Table_Collections();
+        $setsModel = new OpenSKOS_Db_Table_Sets();
     ?>
     
     <?php foreach ($concept->getProperty(OpenSkos::SET) as $setUri):?>

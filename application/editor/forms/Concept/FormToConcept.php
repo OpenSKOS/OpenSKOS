@@ -38,7 +38,7 @@ class Editor_Forms_Concept_FormToConcept
     public static function toConcept(
         Concept &$concept,
         $formData,
-        OpenSKOS_Db_Table_Row_Collection $set,
+        OpenSKOS_Db_Table_Row_Set $set,
         OpenSKOS_Db_Table_Row_User $user
     ) {
         $oldStatus = $concept->getStatus();
@@ -173,13 +173,13 @@ class Editor_Forms_Concept_FormToConcept
     /**
      * Per scheme relations + mapping properties.
      * @param Concept &$concept
-     * @param OpenSKOS_Db_Table_Row_Collection $set
+     * @param OpenSKOS_Db_Table_Row_Set $set
      * @param OpenSKOS_Db_Table_Row_User $user
      * @param string $oldStatus
      */
     protected static function metadataToConcept(
         Concept &$concept,
-        OpenSKOS_Db_Table_Row_Collection $set,
+        OpenSKOS_Db_Table_Row_Set $set,
         OpenSKOS_Db_Table_Row_User $user,
         $oldStatus
     ) {

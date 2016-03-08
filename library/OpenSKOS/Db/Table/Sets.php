@@ -1,6 +1,6 @@
 <?php
 
-/*
+/* /Users/olha/WorkProjects/open-skos-2/OpenSKOS2tempMeertens/library/OpenSKOS/Db/Table/Collections.php
  * OpenSKOS
  * 
  * LICENSE
@@ -16,21 +16,20 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /**
  * This is now openskos set. Because the term collection referes to skos:collection
  */
-class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
+class OpenSKOS_Db_Table_Sets extends Zend_Db_Table
 {
 
-    protected $_name = 'collection';
+    protected $_name = 'set';
 
     /**
      * Classname for row
      *
      * @var string
      */
-    protected $_rowClass = 'OpenSKOS_Db_Table_Row_Collection';
+    protected $_rowClass = 'OpenSKOS_Db_Table_Row_Set';
 
     /**
      * Classname for rowset
@@ -171,7 +170,7 @@ class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset
 
     public function toRdf()
     {
-        $doc = OpenSKOS_Db_Table_Row_Collection::getRdfDocument();
+        $doc = OpenSKOS_Db_Table_Row_Set::getRdfDocument();
         foreach ($this as $collection) {
             $doc->documentElement->appendChild($doc->importNode($collection->toRdf()->getElementsByTagname('rdf:Description')->item(0), true));
         }

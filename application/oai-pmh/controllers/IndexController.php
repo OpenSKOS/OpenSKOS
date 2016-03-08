@@ -40,7 +40,7 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
             'OpenSKOS - OAI-PMH Service provider',
             $this->getBaseUrl(),
             ['oai-pmh@openskos.org'],
-            new \OpenSKOS_Db_Table_Collections(),
+            new \OpenSKOS_Db_Table_Sets(),
             null
         );
 

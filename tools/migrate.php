@@ -85,7 +85,7 @@ $users = [];
 $notFoundUsers = [];
 $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
-$collectionModel = new OpenSKOS_Db_Table_Collections();
+$collectionModel = new OpenSKOS_Db_Table_Sets();
 
 $fetchRowWithRetries = function ($model, $query) {
     $tries = 0;

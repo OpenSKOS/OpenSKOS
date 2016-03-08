@@ -25,7 +25,7 @@ use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSKOS_Db_Table_Row_Collection;
+use OpenSKOS_Db_Table_Row_Set;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
@@ -573,23 +573,23 @@ class Concept
     /**
      * @params array $queryParams
      * @params \OpenSKOS_Db_Table_Row_Tenant $tenant
-     * @return OpenSKOS_Db_Table_Row_Collection
+     * @return OpenSKOS_Db_Table_Row_Set
      */
     private function getSet($params, \OpenSKOS_Db_Table_Row_Tenant $tenant)
     {
-        if (empty($params['collection'])) {
-            throw new InvalidArgumentException('No collection specified', 412);
+        if (empty($params['set'])) {
+            throw new InvalidArgumentException('No set specified', 412);
         }
-        $code = $params['collection'];
-        $model = new \OpenSKOS_Db_Table_Collections();
-        $collection = $model->findByCode($code, $tenant);
-        if (null === $collection) {
+        $code = $params['set'];
+        $model = new \OpenSKOS_Db_Table_Sets();
+        $set = $model->findByCode($code, $tenant);
+        if (null === $set) {
             throw new InvalidArgumentException(
-                'No such collection `'.$code.'` in this tenant.',
+                'No such set `'.$code.'` in this tenant.',
                 404
             );
         }
-        return $collection;
+        return $set;
     }
 
     /**

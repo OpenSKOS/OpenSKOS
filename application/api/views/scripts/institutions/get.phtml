@@ -39,19 +39,19 @@
 	<dd><?php echo $val?></dd>
 	<?php endforeach?>
 </dl>
-<h3><?php echo $this->translate('Collections')?></h3>
+<h3><?php echo $this->translate('Sets')?></h3>
 <?php 
-	$collections = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
+	$sets = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Sets');
 ?>
-<ul id="collections-per-institute">
-<?php foreach ($collections as $collection):?>
+<ul id="sets-per-institute">
+<?php foreach ($sets as $set):?>
 	<li>
-		<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'collections', 'id' => $collection->getId()))?>.html"><?php echo $collection->dc_title?></p>
-	<?php if ($collection->dc_description):?>
-		<p class="dc_description"><?php echo nl2br($collection->dc_description, true)?></p>
+		<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'sets', 'id' => $set->getId()))?>.html"><?php echo $set->dc_title?></p>
+	<?php if ($set->dc_description):?>
+		<p class="dc_description"><?php echo nl2br($set->dc_description, true)?></p>
 	<?php endif?>
-	<?php if ($collection->website):?>
-		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $collection->website?>"><?php echo $collection->website?></a></p>
+	<?php if ($set->website):?>
+		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $set->website?>"><?php echo $set->website?></a></p>
 	<?php endif?>
 	</li>
 <?php endforeach?>

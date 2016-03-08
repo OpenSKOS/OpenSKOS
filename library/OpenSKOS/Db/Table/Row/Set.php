@@ -23,9 +23,9 @@
 use OpenSkos2\Rdf\Uri;
 
 /**
- * This is now openskos set. Because the term collection referes to skos:collection
+ * This is now openskos set. Because the term set referes to skos:set
  */
-class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
+class OpenSKOS_Db_Table_Row_Set extends Zend_Db_Table_Row
 {
     /**
      * @return Zend_Db_Table_Rowset
@@ -39,7 +39,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         
         $model = new OpenSKOS_Db_Table_Jobs();
         $select = $model->select()
-                ->where('collection=?', $this->id)
+                ->where('set=?', $this->id)
                 ->where('finished IS NULL')
                 ->order('created desc')
                 ->order('started asc');
@@ -80,7 +80,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 
             $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeCheked status of imported concepts'));
             $form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
-            $form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));
+            $form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this set before import')));
             $form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));
 
             $form->addElement('submit', 'submit', array('label' => 'Submit'));
@@ -99,7 +99,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     ->addElement('text', 'until', array('label' => 'Index records modified until', 'style' => 'width: 250px;'))
                     ->addElement('select', 'set', array('label' => 'OAI setSpec', 'style' => 'width: 250px;'))
                     ->addElement('select', 'metadataPrefix', array('label' => 'OAI metadataPrefix', 'style' => 'width: 250px;'))
-                    ->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this collection before import')))
+                    ->addElement('checkbox', 'delete-before-import', array('label' => _('delete concepts in this set before import')))
                     ->addElement('submit', 'submit', array('label' => 'Submit'));
             $form->getElement('delete-before-import')->setValue(1);
         }
@@ -140,7 +140,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                 // We will use the base url if possible.
                 $this->uri = $this->conceptsBaseUrl;
             } else {
-                $this->uri = rtrim($this->getBaseApiUri(), '/') . '/collections/' . $this->getId();
+                $this->uri = rtrim($this->getBaseApiUri(), '/') . '/sets/' . $this->getId();
             }
             $this->save();
         }
@@ -169,7 +169,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
                     ->addElement('reset', 'reset', array('label' => _('Reset')))
                     ->addElement('submit', 'cancel', array('label' => _('Cancel')))
-                    ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this collection and corresponding Concepts?') . '\');'))
+                    ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this set and corresponding Concepts?') . '\');'))
                     ->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
             ;
 
@@ -180,7 +180,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                 array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
             );
             $l->addMultiOption('', _('choose a standard license  or type a custom one:'), '');
-            foreach (OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
+            foreach (OpenSKOS_Db_Table_Sets::$licences as $key => $value) {
                 $l->addMultiOption($value, $key);
             }
 
@@ -205,7 +205,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     switch ($instance['type']) {
                         case 'openskos':
                             //fetch Collections:
-                            $client = new Zend_Http_Client($instance['url'] . '/api/collections');
+                            $client = new Zend_Http_Client($instance['url'] . '/api/sets');
                             $response = $client
                                     ->setParameterGet('allow_oai', 'y')
                                     ->setParameterGet('format', 'json')
@@ -213,9 +213,9 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                             if ($response->isError()) {
                                 throw new Zend_Exception($response->getMessage(), $response->getCode());
                             }
-                            foreach (json_decode($response->getBody())->collections as $collection) {
-                                $uri = $instance['url'] . '/oai-pmh/?set=' . $collection->id;
-                                $oai_providers[$uri] = $collection->dc_title;
+                            foreach (json_decode($response->getBody())->sets as $set) {
+                                $uri = $instance['url'] . '/oai-pmh/?set=' . $set->id;
+                                $oai_providers[$uri] = $set->dc_title;
                             }
                             break;
                         case 'external':
@@ -279,7 +279,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     public function toRdf($withCreator = true)
     {
         $helper = new Zend_View_Helper_ServerUrl();
-        $about = $helper->serverUrl('/api/collections/' . $this->getId());
+        $about = $helper->serverUrl('/api/sets/' . $this->getId());
         $data = array();
         foreach ($this as $key => $val) {
             $data[$key] = htmlspecialchars($val);

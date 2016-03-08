@@ -57,7 +57,7 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
             foreach ($tenant as $key => $val) {
                 $this->view->assign($key, $val);
             }
-            $this->view->assign('collections', $tenant->findDependentRowset('OpenSKOS_Db_Table_Collections')->toArray());
+            $this->view->assign('sets', $tenant->findDependentRowset('OpenSKOS_Db_Table_Sets')->toArray());
         } else {
             $this->view->assign('tenant', $tenant);
         }

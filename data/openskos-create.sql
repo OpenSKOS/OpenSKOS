@@ -26,9 +26,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `openskos`.`collection`
+-- Table `openskos`.`set`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openskos`.`collection` (
+CREATE  TABLE IF NOT EXISTS `openskos`.`set` (
   `id` INT(11) NOT NULL AUTO_INCREMENT ,
   `code` CHAR(10) NULL DEFAULT NULL ,
   `tenant` CHAR(10) NOT NULL ,
@@ -42,10 +42,10 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`collection` (
   `conceptsBaseUrl` VARCHAR(255) NULL DEFAULT NULL,
   `uri` TEXT,
   PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `unique_collection` (`code` ASC, `tenant` ASC) ,
-  INDEX `fk_collection_tenant` (`tenant` ASC) ,
+  UNIQUE INDEX `unique_set` (`code` ASC, `tenant` ASC) ,
+  INDEX `fk_set_tenant` (`tenant` ASC) ,
   INDEX `ix_allow_oai` (`allow_oai` ASC) ,
-  CONSTRAINT `fk_collection_tenant`
+  CONSTRAINT `fk_set_tenant`
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )
     ON DELETE CASCADE
@@ -68,21 +68,21 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `openskos`.`collection_has_namespace`
+-- Table `openskos`.`set_has_namespace`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openskos`.`collection_has_namespace` (
-  `collection` INT(11) NOT NULL ,
+CREATE  TABLE IF NOT EXISTS `openskos`.`set_has_namespace` (
+  `set` INT(11) NOT NULL ,
   `namespace` VARCHAR(25) NOT NULL ,
-  PRIMARY KEY (`collection`, `namespace`) ,
-  INDEX `fk_collection_has_namespace_namespace1` (`namespace` ASC) ,
-  CONSTRAINT `fk_collection_has_namespace_namespace1`
+  PRIMARY KEY (`set`, `namespace`) ,
+  INDEX `fk_set_has_namespace_namespace1` (`namespace` ASC) ,
+  CONSTRAINT `fk_set_has_namespace_namespace1`
     FOREIGN KEY (`namespace` )
     REFERENCES `openskos`.`namespace` (`prefix` )
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `fk_collection_has_namespace_collection1`
-    FOREIGN KEY (`collection` )
-    REFERENCES `openskos`.`collection` (`id` )
+  CONSTRAINT `fk_set_has_namespace_set1`
+    FOREIGN KEY (`set` )
+    REFERENCES `openskos`.`set` (`id` )
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -127,7 +127,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
   `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `collection` INT(11) NOT NULL ,
+  `set` INT(11) NOT NULL ,
   `user` INT(11) NOT NULL ,
   `task` VARCHAR(100) NULL DEFAULT NULL ,
   `parameters` TEXT NULL DEFAULT NULL ,
@@ -140,10 +140,10 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
   INDEX `task` (`task` ASC) ,
   INDEX `finished` (`finished` ASC) ,
   INDEX `fk_job_user` (`user` ASC) ,
-  INDEX `fk_job_collection` (`collection` ASC) ,
-  CONSTRAINT `fk_job_collection`
-    FOREIGN KEY (`collection` )
-    REFERENCES `openskos`.`collection` (`id` )
+  INDEX `fk_job_set` (`set` ASC) ,
+  CONSTRAINT `fk_job_set`
+    FOREIGN KEY (`set` )
+    REFERENCES `openskos`.`set` (`id` )
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_job_user`
@@ -211,6 +211,6 @@ INSERT INTO `namespace` (`prefix`, `uri`) VALUES
 ('skos', 'http://www.w3.org/2004/02/skos/core#'),
 ('time', 'http://www.w3.org/2006/time#');
 
-INSERT INTO collection_has_namespace
+INSERT INTO set_has_namespace
   SELECT DISTINCT id, 'openskos'
-  FROM collection;
+  FROM set;

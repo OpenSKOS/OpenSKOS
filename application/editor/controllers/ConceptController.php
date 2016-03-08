@@ -547,14 +547,14 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     }
     
     /**
-     * @return OpenSKOS_Db_Table_Row_Collection
+     * @return OpenSKOS_Db_Table_Row_Set
      */
     private function getSet()
     {
         // @TODO Where to get that from!!! First concept scheme again?
         
         $code = 'gtaa';
-        $model = new \OpenSKOS_Db_Table_Collections();
+        $model = new \OpenSKOS_Db_Table_Sets();
         $set = $model->findByCode($code, $this->getCurrentUser()->tenant);
         if (null === $set) {
             throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);

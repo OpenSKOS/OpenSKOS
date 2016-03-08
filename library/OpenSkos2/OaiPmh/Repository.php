@@ -30,7 +30,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
-use OpenSKOS_Db_Table_Row_Collection;
+use OpenSKOS_Db_Table_Row_Set;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
@@ -128,7 +128,7 @@ class Repository implements InterfaceRepository
      * @param string $repositoryName
      * @param string $baseUrl
      * @param array $adminEmails
-     * @param \OpenSKOS_Db_Table_Collections $setsModel
+     * @param \OpenSKOS_Db_Table_Sets $setsModel
      * @param type $description
      */
     public function __construct(
@@ -138,7 +138,7 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        \OpenSKOS_Db_Table_Collections $setsModel,
+        \OpenSKOS_Db_Table_Sets $setsModel,
         $description = null
     ) {
         $this->conceptManager = $conceptManager;
@@ -386,7 +386,7 @@ class Repository implements InterfaceRepository
 
         $collection = null;
         if (!empty($arrSet[1])) {
-            $collections = new \OpenSKOS_Db_Table_Collections();
+            $collections = new \OpenSKOS_Db_Table_Sets();
             $collectionRow = $collections->findByCode($arrSet[1], $tenant);
             if ($collectionRow && !empty($collectionRow->uri)) {
                 $collection = $collectionRow->uri;
@@ -409,7 +409,7 @@ class Repository implements InterfaceRepository
     /**
      * Get all collections
      *
-     * @return OpenSKOS_Db_Table_Row_Collection[]
+     * @return OpenSKOS_Db_Table_Row_Set[]
      */
     private function getCollections()
     {

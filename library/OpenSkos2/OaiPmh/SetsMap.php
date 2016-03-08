@@ -52,9 +52,9 @@ class SetsMap
     
     /**
      * @param ConceptSchemeManager $schemeManager
-     * @param \OpenSKOS_Db_Table_Collections $setsModel
+     * @param \OpenSKOS_Db_Table_Sets $setsModel
      */
-    public function __construct(ConceptSchemeManager $schemeManager, \OpenSKOS_Db_Table_Collections $setsModel)
+    public function __construct(ConceptSchemeManager $schemeManager, \OpenSKOS_Db_Table_Sets $setsModel)
     {
         $this->schemeManager = $schemeManager;
         $this->setsModel = $setsModel;
