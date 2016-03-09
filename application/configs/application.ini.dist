@@ -36,6 +36,9 @@ editor.schemeIcons.extension="png"
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
 editor.export.filesHttpPath = "/data/export/"
 
+; Editor behaviour
+editor.allowNotationEdit = "@editor-allow-notation-edit@"
+
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
 ; see http://framework.zend.com/manual/en/zend.view.scripts.html
