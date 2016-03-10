@@ -553,7 +553,11 @@ class Repository implements InterfaceRepository
 
         if (!empty($scheme)) {
             $schemeObj = $this->schemeManager->fetchByUuid($scheme->getValue());
-            $searchOptions['conceptScheme'] = [$schemeObj->getUri()];
+            if ($schemeObj) {
+                $searchOptions['conceptScheme'] = [$schemeObj->getUri()];
+            } else {
+                $searchOptions['conceptScheme'] = [$scheme->getValue()];
+            }
         }
 
         if (!empty($from) || !empty($till)) {
