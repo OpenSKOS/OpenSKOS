@@ -192,8 +192,13 @@ class Autocomplete
             $optionsQuery .= ' AND (b_isOrphan:true) ';
         }
         
+        // combine
         if (!empty($optionsQuery)) {
-            $solrQuery .= ' AND (' . $optionsQuery . ')';
+            if (empty($solrQuery)) {
+                $solrQuery = $optionsQuery;
+            } else {
+                $solrQuery .= ' AND (' . $optionsQuery . ')';
+            }
         }
         
         
