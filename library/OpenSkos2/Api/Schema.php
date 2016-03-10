@@ -66,8 +66,6 @@ class SkosCollection
                 400
             );
         }
-        
-        
         $params = $request->getQueryParams($request);
         $user = $this ->getUserFromParams($params);
         $skosCollection->addMetadata($user->getFoafPerson());
@@ -79,7 +77,7 @@ class SkosCollection
         
         //\Tools\Logging::var_error_log(" skosCollectie \n", $skosCollection, '/app/data/Logger.txt');
         // ??? what zijn de validatie criteria voor de skos:collection
-        $this->validate($skosCollection, $tenant);
+        //$this->validate($skosCollection, $tenant);
         $this->manager->insert($skosCollection);
         
         $rdf = (new Transform\DataRdf($skosCollection))->transform();

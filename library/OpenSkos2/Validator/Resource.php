@@ -142,17 +142,34 @@ class Resource
         if ($resource instanceof \OpenSkos2\Concept) {
             return $this->getConceptValidators();
         }
+        if ($resource instanceof \OpenSkos2\Schema || $resource instanceof \OpenSkos2\SkosCollection) {
+            return $this->getSchemaAndSkosCollectionValidators();
+        }
         return [];
     }
     
     /**
-     * Return all validators for a concept
+     * Return all validators for a schema or Skos:collection
      * @return ResourceValidator[]
      */
+    private function getSchemaAndSkosCollectionValidators()
+    {
+        $validators = [
+            new InSet(),
+            new Title(),
+            new Desciprion(),
+            new Creator(),
+        ];
+        $validators = $this -> refineValidators($validators);
+        return $validators;
+    }
+    
     private function getConceptValidators()
     {
         $validators = [
             new InScheme(),
+            new InSkosCollection(),
+            new InSet(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
             new UniquePreflabelInScheme(),
@@ -165,6 +182,11 @@ class Resource
             new CycleInNarrower(),
             new RelatedToSelf(),
         ];
+        $validators = $this -> refineValidators($validators);
+        return $validators;
+    }
+    
+    private function refineValidators($validators){
         
         foreach ($validators as $validator) {
             if ($validator instanceof ResourceManagerAware) {

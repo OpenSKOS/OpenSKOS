@@ -27,7 +27,7 @@ interface ValidatorInterface
      * @param RdfResource $resource
      * @return bool
      */
-    public function validate(RdfResource $resource);
+    public function validate(RdfResource $resource, $fieldname, $type, $obligatory);
 
     /**
      * @return array

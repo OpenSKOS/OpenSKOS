@@ -32,8 +32,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
      * @param $resource RdfResource
      * @return boolean
      */
-    abstract public function validate(RdfResource $resource);
+    abstract public function validate(RdfResource $resource); // switcher
 
+    
     /**
      * @return string
      */

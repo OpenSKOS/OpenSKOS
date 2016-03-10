@@ -17,24 +17,22 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator\Concept;
+namespace OpenSkos2\Validator\SchemaAndSkosCollection;
 
-use OpenSkos2\Concept;
-use OpenSkos2\Schema;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Validator\AbstractConceptValidator;
+use OpenSkos2\Rdf\Resource as RdfResource;
+use OpenSkos2\Set;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\SubresourceValidator;
-
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class InScheme extends AbstractConceptValidator implements ResourceManagerAware
+class InSet extends AbstractSchemaAndSkosCollectionValidator implements ResourceManagerAware
 {
     use ResourceManagerAwareTrait;
-     
-    protected function validateConcept(Concept $concept)
+    
+    protected function validateSchemaOrSkosCollection(RdfResource $resource)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, Skos::INSCHEME, Schema::TYPE, true);
+        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $resource, OpenSkos::SET, Set::TYPE, true);
         return $retVal;
     }
 }

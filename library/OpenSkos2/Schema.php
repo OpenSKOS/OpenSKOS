@@ -24,9 +24,9 @@ use Rhumsaa\Uuid\Uuid;
 use \OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Exception\UriGenerationException;
 
-class SkosCollection extends Resource
+class Schema extends Resource
 {
-    const TYPE = Skos::SKOSCOLLECTION;
+    const TYPE = Skos::CONCEPTSCHEME;
 
     public function __construct($uri = null) {
         parent::__construct($uri);
