@@ -318,6 +318,10 @@ class Concept
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
             
+            if ($concept->isDeleted()) {
+                throw new NotFoundException('Concept already deleted :' . $id, 410);
+            }
+            
             $user = $this->getUserFromParams($params);
             $tenant = $this->getTenantFromParams($params);
             
