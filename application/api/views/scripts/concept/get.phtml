@@ -58,19 +58,21 @@ $this->headTitle($title);
         <?php
             $set = $setsModel->findByUri($setUri->getUri());
         ?>
+        <dt><?=$this->translate('Set')?>:</dt>
+        <dd>
         <?php if ($set):?>
-            <dt><?=$this->translate('Set')?>:</dt>
-            <dd>
-                <a href="<?=$this->url(array(
-                                    'module' => 'api',
-                                    'controller' => 'collections',
-                                    'id' => $set->getId()
-                                ), 'rest'
-                )?>.html">
-                    <?= $set->dc_title?>
-                </a>
-            </dd>
+            <a href="<?=$this->url(array(
+                                'module' => 'api',
+                                'controller' => 'collections',
+                                'id' => $set->getId()
+                            ), 'rest'
+            )?>.html">
+                <?= $set->dc_title?>
+            </a>
+        <?php else:?>
+            <?= $setUri->getUri()?>
         <?php endif;?>
+        </dd>
     <?php endforeach;?>
     <dt>URI:</dt>
     <dd>
