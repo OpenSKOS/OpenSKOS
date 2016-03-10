@@ -106,8 +106,7 @@ class ResourceManager
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
         
-        $this->client->insert(EasyRdf::resourceToGraph($resource));
-
+        $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
         
         // Add resource to solr
         $update = $this->solr->createUpdate();
@@ -596,6 +595,32 @@ class ResourceManager
         do {
             try {
                 return $this->client->query($query);
+            } catch (\EasyRdf\Exception $ex) {
+                if (strpos($ex->getMessage(), 'timed out') === false) {
+                    throw $ex;
+                }
+            }
+            $tries ++;
+        } while ($tries < $maxTries && $ex !== null);
+
+        if ($ex !== null) {
+            throw $ex;
+        }
+    }
+    
+    /**
+     * Performs client->insert. Retry on timeout.
+     * @param Graph $data
+     * @throws \EasyRdf\Exception
+     */
+    protected function insertWithRetry($data)
+    {
+        $maxTries = 3;
+        $tries = 0;
+        $ex = null;
+        do {
+            try {
+                return $this->client->insert($data);
             } catch (\EasyRdf\Exception $ex) {
                 if (strpos($ex->getMessage(), 'timed out') === false) {
                     throw $ex;
