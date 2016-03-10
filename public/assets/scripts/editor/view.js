@@ -50,7 +50,7 @@ var EditorView = new Class({
         var contentEl = liEl.getElement('.concept-link-content');
         contentEl.adopt(new Element('a', {href: '#', html: conceptData.caption, title: conceptData.caption + (conceptData['skos:skopeNote'] ? ' {' + conceptData['skos:skopeNote'] + '}' : '')}));
 
-        if (conceptData.status) {
+        if (conceptData['openskos:status']) {
             liEl.addClass('status-' + conceptData['openskos:status']);
         }
 
