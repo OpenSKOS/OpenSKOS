@@ -121,11 +121,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     {
         return $this->tenant . ':' . $this->code;
     }
-
-    public function getConceptSchemes()
-    {
-        return $this->getTable()->getConceptSchemes($this);
-    }
     
     /**
      * Get the set uri for openskos:set

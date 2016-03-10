@@ -100,8 +100,8 @@ class SetsMap
         }
         
         if (!isset($this->setsToSchemes[$tenant][$setUri])) {
-            // @TODO tenant? in getSchemeByCollectionUri
-            $allSchemes = $this->schemeManager->getSchemeByCollectionUri($setUri);
+            // @TODO tenant? in getSchemesByCollectionUri
+            $allSchemes = $this->schemeManager->getSchemesByCollectionUri($setUri);
             foreach ($allSchemes as $scheme) {
                 $this->setsToSchemes[$tenant][$setUri][$scheme->getUri()] = $scheme;
             }

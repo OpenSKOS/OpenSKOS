@@ -89,6 +89,10 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
         } else {
             $this->view->assign('tenant', $tenant);
             $this->view->assign('collection', $collection);
+            $this->view->assign(
+                'schemesInCollection',
+                $this->getConceptSchemeManager()->getSchemesByCollectionUri($collection->uri)
+            );
         }
     }
     

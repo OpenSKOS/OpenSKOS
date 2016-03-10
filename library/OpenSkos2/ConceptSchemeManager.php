@@ -42,7 +42,7 @@ class ConceptSchemeManager extends ResourceManager
      * @param array $filterUris
      * @return ResourceCollection
      */
-    public function getSchemeByCollectionUri($collectionUri, $filterUris = [])
+    public function getSchemesByCollectionUri($collectionUri, $filterUris = [])
     {
         $uri = new Uri($collectionUri);
         $escaped = (new NTriple())->serialize($uri);
