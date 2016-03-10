@@ -130,6 +130,7 @@ class Concept
             'start' => $start,
             'rows' => $limit,
             'directQuery' => true,
+            'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
         
         // tenant

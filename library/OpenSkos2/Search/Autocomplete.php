@@ -137,18 +137,18 @@ class Autocomplete
             $solrQuery .= ')';
         }
 
-        if (!empty($solrQuery)) {
-            $solrQuery .= ' AND ';
-        }
+        $restOfQuery = '';
         
         //status
-        if (!empty($options['status'])) {
-            $solrQuery .= ' (';
-            $solrQuery .= 's_status:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
-                . '))';
-        } else {
-            $solrQuery .= ' (-s_status:' . Resource::STATUS_DELETED . ')';
+        if (strpos($solrQuery, 'status') === false) { // We dont add status query if it is in the query already.
+            if (!empty($options['status'])) {
+                $solrQuery .= ' (';
+                $solrQuery .= 's_status:('
+                    . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
+                    . '))';
+            } else {
+                $solrQuery .= ' -s_status:' . Resource::STATUS_DELETED;
+            }
         }
         
         // sets (collections)
@@ -198,6 +198,14 @@ class Autocomplete
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
+        
+        
+        if (!empty($solrQuery) && !empty($restOfQuery)) {
+            $solrQuery .= ' AND ' . $restOfQuery;
+        } elseif (!empty($restOfQuery)) {
+            $solrQuery = $restOfQuery;
+        }
+        
         
         if (!empty($options['sorts'])) {
             $sorts = $options['sorts'];
