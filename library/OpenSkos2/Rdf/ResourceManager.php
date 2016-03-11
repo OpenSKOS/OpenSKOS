@@ -600,6 +600,7 @@ class ResourceManager
                     throw $ex;
                 }
             }
+            sleep(1);
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
 
@@ -626,6 +627,7 @@ class ResourceManager
                     throw $ex;
                 }
             }
+            sleep(1);
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
 
