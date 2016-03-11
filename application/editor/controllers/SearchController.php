@@ -128,39 +128,44 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $form = $this->getSearchOptionsForm();
 
         $request = $this->getRequest();
-        if (!$this->getRequest()->isPost()) {
+        if (!$request->isPost()) {
             return;
         }
 
-        if (!$form->isValid($this->getRequest()->getPost())) {
+        if (!$form->isValid($request->getPost())) {
             return $this->_forward('show-form');
         }
 
         $user = OpenSKOS_Db_Table_Users::requireFromIdentity();
 
         // Reset defaults
-        if ((bool) $this->getRequest()->getParam('resetDefaults', false)) {
+        if ((bool) $request->getParam('resetDefaults', false)) {
             $defaultProfile = $user->getFirstDefaultSearchProfile();
             if ($defaultProfile !== null) {
-                return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => $defaultProfile->id));
+                return $this->_forward(
+                    'show-form',
+                    'search',
+                    'editor',
+                    array('searchProfileId' => $defaultProfile->id)
+                );
             } else {
                 return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => ''));
             }
         }
 
         // Switch profile.
-        if ((bool) $this->getRequest()->getParam('switchProfile', false)) {
+        if ((bool) $request->getParam('switchProfile', false)) {
             return $this->_forward('show-form', 'search', 'editor');
         }
 
         // Save options or profile
-        $options = Editor_Forms_SearchOptions::formValues2Options($this->getRequest()->getPost());
+        $options = Editor_Forms_SearchOptions::formValues2Options($request->getPost());
 
         $profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
 
         // Save profile as new one.
-        if ((bool) $this->getRequest()->getParam('saveAs', false)) {
-            $profileName = $this->getRequest()->getParam('searchProfileNameSaveAs', '');
+        if ((bool) $request->getParam('saveAs', false)) {
+            $profileName = $request->getParam('searchProfileNameSaveAs', '');
             if (empty($profileName)) {
                 $form->getElement('searchProfileNameSaveAs')->addError(_('Please fill a profile name.'));
                 return $this->_forward('show-form');
@@ -168,42 +173,80 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             $newProfileId = $profilesModel->addNew($profileName, $options, $user->id, $user->tenant);
 
             // Switch the form to the new profile
-            return $this->_forward('show-form', 'search', 'editor', array('searchProfileId' => $newProfileId, 'switchProfile' => true, 'reInitForm' => true));
+            return $this->_forward(
+                'show-form',
+                'search',
+                'editor',
+                array('searchProfileId' => $newProfileId, 'switchProfile' => true, 'reInitForm' => true)
+            );
         }
 
-        // Save or delete existing profile.
-        $profileId = intval($this->getRequest()->getParam('searchProfileId', ''));
-        $profile = $profilesModel->find($profileId)->current();
-        if (((bool) $this->getRequest()->getParam('save', false) || (bool) $this->getRequest()->getParam('delete', false)) && !empty($profileId)) {
-            if (!($user->isAllowed('editor.manage-search-profiles', null) || $user->id == $profile->creatorUserId)) {
-                $form->addError(_('You are not allowed to edit that search profile.'));
+        $profileId = intval($request->getParam('searchProfileId', ''));
+        if (empty($profileId) && (bool) $request->getParam('save', false)) {
+            $profileName = $request->getParam('searchProfileName', '');
+            if (empty($profileName)) {
+                $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));
                 return $this->_forward('show-form');
             }
+            $newProfileId = $profilesModel->addNew($profileName, $options, $user->id, $user->tenant);
 
-            if ((bool) $this->getRequest()->getParam('save', false)) {
-                $profileName = $this->getRequest()->getParam('searchProfileName', '');
-                if (empty($profileName)) {
-                    $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));
+            // Switch the form to the new profile
+            return $this->_forward(
+                'show-form',
+                'search',
+                'editor',
+                array('searchProfileId' => $newProfileId, 'switchProfile' => true, 'reInitForm' => true)
+            );
+        }
+        
+        if ((bool) $request->getParam('save', false) || (bool) $request->getParam('delete', false)) {
+            if (!empty($profileId)) {
+                $profile = $profilesModel->find($profileId)->current();
+            
+                if (!($user->isAllowed('editor.manage-search-profiles', null) ||
+                        $user->id == $profile->creatorUserId)) {
+                    $form->addError(_('You are not allowed to edit that search profile.'));
                     return $this->_forward('show-form');
                 }
 
-                $profile->name = $profileName;
-                $profile->setSearchOptions($options);
-                $profile->save();
-                return $this->_forward('show-form', 'search', 'editor', array('switchProfile' => true, 'reInitForm' => true));
-            }
+                if ((bool) $request->getParam('save', false)) {
+                    $profileName = $request->getParam('searchProfileName', '');
+                    if (empty($profileName)) {
+                        $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));
+                        return $this->_forward('show-form');
+                    }
 
-            if ((bool) $this->getRequest()->getParam('delete', false)) {
-                $profile->delete();
-                return $this->_forward('show-form', 'search', 'editor', array('reInitForm' => true));
+                    $profile->name = $profileName;
+                    $profile->setSearchOptions($options);
+                    $profile->save();
+                    return $this->_forward(
+                        'show-form',
+                        'search',
+                        'editor',
+                        array('switchProfile' => true, 'reInitForm' => true)
+                    );
+                }
+
+                if ((bool) $request->getParam('delete', false)) {
+                    $profile->delete();
+                    return $this->_forward('show-form', 'search', 'editor', array('reInitForm' => true));
+                }
+            } else {
+                $form->addError(_('Please choose a profile to save or delete.'));
+                return $this->_forward('show-form');
             }
         }
 
         // Save options for the user
-        if ((bool) $this->getRequest()->getParam('ok', false)) {
+        if ((bool) $request->getParam('ok', false)) {
             if (null !== $profile) {
                 $originalOptions = $profile->getSearchOptions();
-                $originalOptions = Editor_Forms_SearchOptions::formValues2Options($originalOptions); // Make sure that there are no any old or unneeded options in the profile.
+                
+                // Make sure that there are no any old or unneeded options in the profile.
+                $originalOptions = Editor_Forms_SearchOptions::formValues2Options(
+                    $originalOptions
+                );
+                
                 $originalOptions['searchProfileId'] = $profile->id;
             } else {
                 $originalOptions = $this->getSearchOptionsForm()->getValues(true);
@@ -344,6 +387,6 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
      */
     private function getSearchOptionsForm()
     {
-        return $this->getDI()->get('Editor_Forms_SearchOptions');
+        return $this->getDI()->make('Editor_Forms_SearchOptions');
     }
 }
