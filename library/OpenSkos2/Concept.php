@@ -249,6 +249,8 @@ class Concept extends Resource
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
             OpenSkos::SET => $set,
+            // @TODO Make status dependent on if the tenant has statuses system enabled.
+            OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::CREATOR => $person,
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
