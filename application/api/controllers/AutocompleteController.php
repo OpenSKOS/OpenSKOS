@@ -24,6 +24,11 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     public function init()
     {
         parent::init();
+        
+        if ($this->getRequest()->getParam('format', 'json') == 'html') {
+            throw new Exception('Html format is not supported for autocomplete', 400);
+        }
+        
         $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'json'));
         $this->view->setEncoding('UTF-8');
