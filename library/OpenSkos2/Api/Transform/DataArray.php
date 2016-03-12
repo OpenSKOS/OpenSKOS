@@ -150,6 +150,7 @@ class DataArray
             DcTerms::MODIFIED,
             DcTerms::TITLE,
             OpenSkos::ACCEPTEDBY,
+            OpenSkos::MODIFIEDBY,
             OpenSkos::STATUS,
             OpenSkos::TENANT,
             OpenSkos::SET,

@@ -45,6 +45,7 @@
         <field name="narrowMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="relatedMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
+        <dynamicField name="dc_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="dcterms_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- Languages -->

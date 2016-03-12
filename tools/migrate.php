@@ -288,7 +288,9 @@ do {
         }
 
         foreach ($doc as $field => $value) {
-
+            
+            var_dump($field);
+            var_dump($value);
 
             //this is just a copy field
             if (isset($labelMapping[$field])) {
