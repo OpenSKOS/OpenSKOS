@@ -17,8 +17,6 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Dc;
-use OpenSkos2\Namespaces\DcTerms;
 ?>
 
 <div id="concept-scheme-tab-container" class="concept-scheme-tab-container">
@@ -38,26 +36,8 @@ use OpenSkos2\Namespaces\DcTerms;
         </ul>
     </div>
 
-    <?php if (!$this->currentConcept->isPropertyEmpty(DcTerms::CONTRIBUTOR)
-                || !$this->currentConcept->isPropertyEmpty(Dc::CONTRIBUTOR)): ?>
-        <div class="concept-contributor">
-            <span><?php echo $this->translate('Contributor:'); ?> </span>
-            <br />
-            <?php foreach ($this->currentConcept->getProperty(DcTerms::CONTRIBUTOR) as $contributor):?>
-                <?php if ($this->personManager->askForUri($contributor)):?>
-                    <?= $this->personManager->fetchByUri($contributor)->getCaption()?>
-                <?php else:?>
-                    <?= $contributor?>
-                <?php endif;?>
-                <br />
-            <?php endforeach;?>
-            <?php foreach ($this->currentConcept->getProperty(Dc::CONTRIBUTOR) as $contributor):?>
-                <?= $contributor?>
-                <br />
-            <?php endforeach;?>
-        </div>
-    <?php endif ?>
-
+    <?= $this->render('concept/view/contributor.phtml');?>
+    
     <?php if (!$this->currentConcept->isPropertyEmpty(Skos::INSCHEME)): ?>
         <?php foreach ($this->currentConcept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
             <div id="tab_scheme_<?php echo $schemeUri; ?>" class="tab-content">
