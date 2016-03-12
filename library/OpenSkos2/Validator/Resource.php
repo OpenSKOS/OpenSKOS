@@ -29,6 +29,8 @@ use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
+use OpenSkos2\Validator\Concept\SingleStatus;
+use OpenSkos2\Validator\Concept\SinglePrefLabel;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
@@ -153,6 +155,8 @@ class Resource
     {
         $validators = [
             new InScheme(),
+            new SingleStatus(),
+            new SinglePrefLabel(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
             new UniquePreflabelInScheme(),
