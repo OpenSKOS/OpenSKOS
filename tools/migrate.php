@@ -147,7 +147,7 @@ $mappings = [
             return $users[$value];
         },
         'fields' => [
-            'modified_by' => DcTerms::CONTRIBUTOR,
+            'modified_by' => OpenSkos::MODIFIEDBY,
             'created_by' => DcTerms::CREATOR,
             'dcterms_creator' => DcTerms::CREATOR,
             'approved_by' => OpenSkos::ACCEPTEDBY,

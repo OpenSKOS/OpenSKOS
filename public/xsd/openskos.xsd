@@ -44,4 +44,5 @@
     <xs:element name="dateDeleted" />
     <xs:element name="deletedBy" />
     <xs:element name="acceptedBy" />
+    <xs:element name="modifiedBy" />
 </xs:schema>

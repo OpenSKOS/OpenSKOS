@@ -175,6 +175,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         }
 
         $this->view->assign('currentConcept', $concept);
+        $this->view->assign('personManager', $this->getDI()->get('\OpenSkos2\PersonManager'));
         $this->view->assign('conceptManager', $this->getConceptManager());
         $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
         $this->view->assign('footerData', $this->_generateFooter($concept));
@@ -383,7 +384,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 'date' => DcTerms::DATESUBMITTED,
             ],
             'modified' => [
-                'user' => DcTerms::CONTRIBUTOR,
+                'user' => OpenSkos::MODIFIEDBY,
                 'date' => DcTerms::MODIFIED,
             ],
             'approved' => [

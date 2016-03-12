@@ -261,9 +261,8 @@ class Concept extends Resource
             }
         }
         
-        // @TODO Should we add modified instead of replace it.
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
         
         // Status is updated
         if ($oldStatus != $this->getStatus()) {

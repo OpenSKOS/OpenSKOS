@@ -24,4 +24,7 @@ class Dc
      * Namespace
      */
     const NAME_SPACE = 'http://purl.org/dc/elements/1.1/';
+    
+    const CREATOR = 'http://purl.org/dc/elements/1.1/creator';
+    const CONTRIBUTOR = 'http://purl.org/dc/elements/1.1/contributor';
 }

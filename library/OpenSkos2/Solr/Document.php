@@ -76,6 +76,7 @@ class Document
         DcTerms::CREATOR => ['s_creator'],
         DcTerms::DATESUBMITTED => ['d_dateSubmited'],
         DcTerms::CONTRIBUTOR => ['s_contributor'],
+        OpenSkos::MODIFIEDBY => ['s_modifiedBy'],
         DcTerms::MODIFIED => ['d_modified'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],

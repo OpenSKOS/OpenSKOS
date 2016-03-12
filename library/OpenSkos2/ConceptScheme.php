@@ -163,9 +163,8 @@ class ConceptScheme extends Resource
             }
         }
         
-        // @TODO Should we add modified instead of replace it. Or put it only on create.
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
     }
     
     /**
