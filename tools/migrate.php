@@ -25,6 +25,7 @@
  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
@@ -289,9 +290,6 @@ do {
 
         foreach ($doc as $field => $value) {
             
-            var_dump($field);
-            var_dump($value);
-
             //this is just a copy field
             if (isset($labelMapping[$field])) {
                 continue;
@@ -316,6 +314,15 @@ do {
                         $insertValue = $mapping['callback']($v);
                         if ($insertValue !== null) {
                             $resource->addProperty($mapping['fields'][$field], $insertValue);
+                            
+                        } elseif (in_array($field, ['created_by', 'dcterms_creator']) && !empty($v)) {
+                            
+                            // Handle dcterms_creator and dc_creator
+                            if (filter_var($v, FILTER_VALIDATE_URL) === false) {
+                                $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($v));
+                            } else {
+                                $resource->addProperty(DcTerms::CREATOR, new \OpenSkos2\Rdf\Uri($v));
+                            }
                         }
                     }
                     continue 2;
@@ -329,7 +336,17 @@ do {
                 }
 
                 foreach ($value as $v) {
-                    $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
+                    if ($field != 'dcterms_contributor') {
+                        $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
+                    } else {
+                        
+                        // Handle dcterms_contributor and dc_contributor
+                        if (filter_var($v, FILTER_VALIDATE_URL) === false) {
+                            $resource->addProperty(Dc::CONTRIBUTOR, new \OpenSkos2\Rdf\Literal($v));
+                        } else {
+                            $resource->addProperty(DcTerms::CONTRIBUTOR, new \OpenSkos2\Rdf\Uri($v));
+                        }
+                    }
                 }
                 continue;
             }
