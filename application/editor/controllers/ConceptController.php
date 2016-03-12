@@ -23,6 +23,7 @@
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
@@ -380,15 +381,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $footerData = [];
         $footerFields = [
             'created' => [
-                'user' => DcTerms::CREATOR,
+                'user' => [DcTerms::CREATOR, Dc::CREATOR],
                 'date' => DcTerms::DATESUBMITTED,
             ],
             'modified' => [
-                'user' => OpenSkos::MODIFIEDBY,
+                'user' => [OpenSkos::MODIFIEDBY],
                 'date' => DcTerms::MODIFIED,
             ],
             'approved' => [
-                'user' => OpenSkos::ACCEPTEDBY,
+                'user' => [OpenSkos::ACCEPTEDBY],
                 'date' => DcTerms::DATEACCEPTED,
             ],
         ];
@@ -399,12 +400,14 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $usersNames = [];
             $dates = [];
             
-            if (!$concept->isPropertyEmpty($properties['user'])) {
-                foreach ($concept->getProperty($properties['user']) as $user) {
-                    if ($user instanceof Uri && $personManager->askForUri($user)) {
-                        $usersNames[] = $personManager->fetchByUri($user)->getCaption();
-                    } else {
-                        $usersNames[] = $user->getValue();
+            foreach ($properties['user'] as $userProperty) {
+                if (!$concept->isPropertyEmpty($userProperty)) {
+                    foreach ($concept->getProperty($userProperty) as $user) {
+                        if ($user instanceof Uri && $personManager->askForUri($user)) {
+                            $usersNames[] = $personManager->fetchByUri($user)->getCaption();
+                        } else {
+                            $usersNames[] = $user->getValue();
+                        }
                     }
                 }
             }
