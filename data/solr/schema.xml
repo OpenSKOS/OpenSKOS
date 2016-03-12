@@ -112,12 +112,14 @@
         
         <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">
             <analyzer type="index">
-                <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
                 <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30" side="front"/>
             </analyzer>
             <analyzer type="query">
-                <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
          </fieldType>
