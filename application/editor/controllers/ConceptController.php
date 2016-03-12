@@ -396,38 +396,35 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
         
         foreach ($footerFields as $field => $properties) {
-            $userName = null;
-            $date = null;
+            $usersNames = [];
+            $dates = [];
             
             if (!$concept->isPropertyEmpty($properties['user'])) {
-                $users = $concept->getProperty($properties['user']);
-                
-                // @TODO We only pick the first user now
-                $user = $users[0];
-                if ($user instanceof Uri && $personManager->askForUri($user)) {
-                    $userName = $personManager->fetchByUri($user)->getCaption();
-                } else {
-                    $userName = $user->getValue();
+                foreach ($concept->getProperty($properties['user']) as $user) {
+                    if ($user instanceof Uri && $personManager->askForUri($user)) {
+                        $usersNames[] = $personManager->fetchByUri($user)->getCaption();
+                    } else {
+                        $usersNames[] = $user->getValue();
+                    }
                 }
             }
             
             if (!$concept->isPropertyEmpty($properties['date'])) {
-                $dates = $concept->getProperty($properties['date']);
-                
-                // @TODO We only pick the first date now
-                // @TODO Always have date time or string as value
-                if ($dates[0]->getValue() instanceof \DateTime) {
-                    $date = $dates[0]->getValue()
-                        // @TODO there is a timezone already. Check that
-                        ->setTimezone(new DateTimeZone(ini_get('date.timezone')))
-                        ->format('d-m-Y H:i:s');
-                } else {
-                    $date = date('d-m-Y H:i:s', strtotime($dates[0]->getValue()));
+                foreach ($concept->getProperty($properties['date']) as $date) {
+                    // @TODO Always have date time or string as value
+                    if ($date->getValue() instanceof \DateTime) {
+                        $dates[] = $date->getValue()
+                            // @TODO there is a timezone already. Check that
+                            ->setTimezone(new DateTimeZone(ini_get('date.timezone')))
+                            ->format('d-m-Y H:i:s');
+                    } else {
+                        $dates[] = date('d-m-Y H:i:s', strtotime($date->getValue()));
+                    }
                 }
             }
             
-            $footerData[$field]['user'] = !empty($userName) ? $userName : 'N/A';
-            $footerData[$field]['date'] = !empty($date) ? $date : 'N/A';
+            $footerData[$field]['user'] = !empty($usersNames) ? implode('<br />', $usersNames) : 'N/A';
+            $footerData[$field]['date'] = !empty($dates) ? implode('<br />', $dates) : 'N/A';
         }
         
         return $footerData;
