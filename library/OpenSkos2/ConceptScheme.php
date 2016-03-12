@@ -153,9 +153,13 @@ class ConceptScheme extends Resource
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
             OpenSkos::SET => $set,
-            DcTerms::CREATOR => $person,
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
+        
+        // Do not consider dcterms:creator if we have dc:creator
+        if (!$this->hasProperty(Dc::CREATOR)) {
+            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
+        }
         
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
             if (!$this->hasProperty($property)) {

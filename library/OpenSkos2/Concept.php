@@ -20,6 +20,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
@@ -251,9 +252,13 @@ class Concept extends Resource
             OpenSkos::SET => $set,
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
-            DcTerms::CREATOR => $person,
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
+        
+        // Do not consider dcterms:creator if we have dc:creator
+        if (!$this->hasProperty(Dc::CREATOR)) {
+            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
+        }
         
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
             if (!$this->hasProperty($property)) {
