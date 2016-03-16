@@ -19,53 +19,71 @@
 
 namespace OpenSkos2\Bridge;
 
+use DateTime;
 use EasyRdf\Graph;
-use OpenSkos2\Set;
-use OpenSkos2\SetCollection;
-use OpenSkos2\SkosXl\Label;
-use OpenSkos2\SkosXl\LabelCollection;
+use EasyRdf\Literal as Literal2;
+use EasyRdf\Resource as Resource2;
+use OpenSkos2\Tenant;
+use OpenSkos2\TenantCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
-use OpenSkos2\SkosCollection;
-use OpenSkos2\SkosCollectionCollection;
-use OpenSkos2\Person;
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\ConceptSchemeCollection;
 use OpenSkos2\Exception\InvalidArgumentException;
+use OpenSkos2\Person;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Set;
+use OpenSkos2\SetCollection;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\SkosCollectionCollection;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\SkosXl\LabelCollection;
 
-class EasyRdf
-{
+class EasyRdf {
+
     /**
-     * @param \EasyRdf\Graph $graph to $read
+     * @param Graph $graph to $read
      * @param string $expectedType If expected type is set, a collection of that type will be enforced.
      * @return ResourceCollection
      */
-    public static function graphToResourceCollection(Graph $graph, $expectedType = null)
-    {
+    public static function graphToResourceCollection(Graph $graph, $expectedType = null) {
+        //var_dump($graph);
         $collection = self::createResourceCollection($expectedType);
-        
+
+        // make two lists: the types resources which are main resources (roots)
+        // and typeless resources which are to be used as subresources (elements of complex types in xml)
+        $mainResources = array();
+        $subResources = array();
         foreach ($graph->resources() as $resource) {
-            /** @var $resource \EasyRdf\Resource */
-           
             $type = $resource->get('rdf:type');
-
-            // Filter out resources which are not fully described.
             if (!$type) {
-                continue;
+                $subResources[] = $resource;
+            } else {
+                $mainResources[] = $resource;
             }
-            
-            //var_dump($type);
-            
+        }
+        
+        // now compose main resources;
+        foreach ($mainResources as $resource) {
+            $type = $resource->get('rdf:type');
             $myResource = self::createResource(
-                $resource->getUri(),
-                $type
+                            $resource->getUri(), $type
             );
+            self::makeNode($myResource, $resource, $subResources);
+        }
 
-            foreach ($resource->propertyUris() as $propertyUri) {
-                foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
-                    if ($propertyValue instanceof \EasyRdf\Literal) {
+        $collection[] = $myResource;
+
+        return $collection;
+    }
+
+    private static function makeNode(&$myResource, Resource2 $resource, $subResources){
+        foreach ($resource->propertyUris() as $propertyUri) {
+                foreach ($resource->all(new Resource2($propertyUri)) as $propertyValue) {
+                    if ($propertyValue instanceof Literal2) {
                         $myResource->addProperty(
                             $propertyUri,
                             new Literal(
@@ -74,17 +92,15 @@ class EasyRdf
                                 $propertyValue->getDatatypeUri()
                             )
                         );
-                    } elseif ($propertyValue instanceof \EasyRdf\Resource) {
-                        $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
+                    } elseif ($propertyValue instanceof Resource2) {
+                        // recursion
+                        $mySubResource = self::createResource($propertyValue->getUri(), null);
+                        self::makeNode($mySubResource, $propertyValue, $subResources);
+                        $myResource->addProperty($propertyUri,  $mySubResource);
+                        //$myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
             }
-
-            $collection[] = $myResource;
-            
-        }
-        //var_dump($collection[0]);
-        return $collection;
     }
     
     /**
@@ -118,17 +134,21 @@ class EasyRdf
     /**
      * Creates a resource matching the give type.
      * @param string $uri
-     * @param \EasyRdf\Resource|null $type
+     * @param Resource2|null $type
      * @return Resource
      */
     protected static function createResource($uri, $type)
     {
+        //var_dump($type->getUri());
+        //var_dump(Tenant::TYPE);
         if ($type) {
             switch ($type->getUri()) {
+                case Tenant::TYPE:
+                    return new Tenant($uri);
                 case Concept::TYPE:
                     return new Concept($uri);
-                case \OpenSkos2\ConceptScheme::TYPE:
-                    return new \OpenSkos2\ConceptScheme($uri);
+                case ConceptScheme::TYPE:
+                    return new ConceptScheme($uri);
                 case Set::TYPE:
                     return new Set($uri);
                 case Person::TYPE:
@@ -136,7 +156,7 @@ class EasyRdf
                 case Label::TYPE:
                     return new Label($uri);
                 case SkosCollection::TYPE:
-                    return new \OpenSkos2\SkosCollection($uri);
+                    return new SkosCollection($uri);
                 default:
                     return new Resource($uri);
             }
@@ -153,11 +173,15 @@ class EasyRdf
      */
     public static function createResourceCollection($type)
     {
+        //var_dump($type);
+        //var_dump(Tenant::TYPE);
         switch ($type) {
+            case Tenant::TYPE:
+                return new TenantCollection();
             case Concept::TYPE:
                 return new ConceptCollection();
-            case \OpenSkos2\ConceptScheme::TYPE:
-                return new \OpenSkos2\ConceptSchemeCollection();
+            case ConceptScheme::TYPE:
+                return new ConceptSchemeCollection();
             case Set::TYPE:
                 return new SetCollection();
             case Label::TYPE:
@@ -171,12 +195,12 @@ class EasyRdf
 
     /**
      * @param Resource $resource
-     * @param \EasyRdf\Graph $graph
+     * @param Graph $graph
      * @throws InvalidArgumentException
      */
-    protected static function addResourceToGraph(Resource $resource, \EasyRdf\Graph $graph)
+    protected static function addResourceToGraph(Resource $resource, Graph $graph)
     {
-        $easyResource = new \EasyRdf\Resource($resource->getUri(), $graph);
+        $easyResource = new Resource2($resource->getUri(), $graph);
         
         foreach ($resource->getProperties() as $propName => $property) {
             foreach ($property as $value) {
@@ -187,13 +211,13 @@ class EasyRdf
                     $val = $value->getValue();
                     
                     // Convert timestamp to string
-                    if ($val instanceof \DateTime) {
+                    if ($val instanceof DateTime) {
                         $val = $val->format(\DATE_W3C);
                     }
                     
                     $easyResource->addLiteral(
                         $propName,
-                        new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
+                        new Literal2($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, trim($value->getUri()));

@@ -19,9 +19,14 @@
 
 namespace OpenSkos2\Rdf;
 
-use OpenSkos2\Rdf\Object as RdfObject;
-use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Exception\OpenSkosException;
+use OpenSkos2\Exception\UriGenerationException;
+use OpenSkos2\Namespaces as Namespaces;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Object as RdfObject;
+use OpenSkos2\Rdf\Uri;
+use Rhumsaa\Uuid\Uuid;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -68,7 +73,7 @@ class Resource extends Uri implements ResourceIdentifier
      *
      * @param string $predicate
      * @param RdfObject $value
-     * @return \OpenSkos2\Rdf\Resource
+     * @return Resource
      */
     public function addUniqueProperty($predicate, RdfObject $value)
     {
@@ -174,7 +179,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function getType()
     {
-        return current($this->getProperty(\OpenSkos2\Namespaces\Rdf::TYPE));
+        return current($this->getProperty(Rdf::TYPE));
     }
     
     /**
@@ -316,4 +321,33 @@ class Resource extends Uri implements ResourceIdentifier
         
         return $result;
     }
+    
+    public function addMetadata($map) {
+    }
+    
+    public function selfGenerateUri($tenantcode, ResourceManager $manager) {
+        if (!$this->isBlankNode()) {
+            throw new UriGenerationException(
+            'The skos collection already has an uri. Can not generate a new one.'
+            );
+        }
+
+        $uri = $this->assembleUri($tenantcode);
+
+        if ($manager->askForUri($uri, true)) {
+            throw new UriGenerationException(
+            'The generated uri "' . $uri . '" is already in use.'
+            );
+        }
+
+        $this->setUri($uri);
+        return $uri;
+    }
+
+   
+    protected function assembleUri($tenantcode) {
+        $uri = $tenantcode . ':' . Uuid::uuid4();
+        return $uri;
+    }
+
 }

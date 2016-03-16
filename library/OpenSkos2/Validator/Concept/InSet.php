@@ -20,9 +20,8 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Set;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
+use OpenSkos2\Validator\CommonProperties;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
@@ -33,7 +32,7 @@ class InSet extends AbstractConceptValidator implements ResourceManagerAware
     
     protected function validateConcept(Concept $concept)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, OpenSkos::SET, Set::TYPE, true);
+        $retVal = CommonProperties\InSet::validate($concept, $this->getErrorMessages());
         return $retVal;
     }
 }

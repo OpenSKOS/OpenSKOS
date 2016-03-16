@@ -6,57 +6,6 @@ CREATE SCHEMA IF NOT EXISTS `openskos` DEFAULT CHARACTER SET utf8 ;
 USE `openskos` ;
 
 -- -----------------------------------------------------
--- Table `openskos`.`tenant`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openskos`.`tenant` (
-  `code` CHAR(10) NOT NULL ,
-  `name` VARCHAR(150) NULL DEFAULT NULL ,
-  `organisationUnit` VARCHAR(100) NULL DEFAULT NULL ,
-  `website` VARCHAR(100) NULL DEFAULT NULL ,
-  `email` VARCHAR(100) NULL DEFAULT NULL ,
-  `streetAddress` VARCHAR(255) NULL DEFAULT NULL ,
-  `locality` VARCHAR(150) NULL DEFAULT NULL ,
-  `postalCode` VARCHAR(50) NULL DEFAULT NULL ,
-  `countryName` VARCHAR(100) NULL DEFAULT NULL ,
-  `disableSearchInOtherTenants` BOOLEAN,
-  `enableStatusesSystem` BOOLEAN,
-  PRIMARY KEY (`code`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `openskos`.`set`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openskos`.`set` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `code` CHAR(10) NULL DEFAULT NULL ,
-  `tenant` CHAR(10) NOT NULL ,
-  `dc_title` VARCHAR(150) NOT NULL ,
-  `dc_description` TEXT NULL DEFAULT NULL ,
-  `website` VARCHAR(100) NULL DEFAULT NULL ,
-  `license_name` VARCHAR(150) NULL DEFAULT NULL ,
-  `license_url` VARCHAR(255) NULL DEFAULT NULL ,
-  `OAI_baseURL` TEXT NULL DEFAULT NULL ,
-  `allow_oai` ENUM('Y','N') NOT NULL DEFAULT 'Y' ,
-  `conceptsBaseUrl` VARCHAR(255) NULL DEFAULT NULL,
-  `uri` TEXT,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `unique_set` (`code` ASC, `tenant` ASC) ,
-  INDEX `fk_set_tenant` (`tenant` ASC) ,
-  INDEX `ix_allow_oai` (`allow_oai` ASC) ,
-  CONSTRAINT `fk_set_tenant`
-    FOREIGN KEY (`tenant` )
-    REFERENCES `openskos`.`tenant` (`code` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 5
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
-
-
--- -----------------------------------------------------
 -- Table `openskos`.`namespace`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openskos`.`namespace` (
@@ -66,27 +15,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`namespace` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-
--- -----------------------------------------------------
--- Table `openskos`.`set_has_namespace`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openskos`.`set_has_namespace` (
-  `set` INT(11) NOT NULL ,
-  `namespace` VARCHAR(25) NOT NULL ,
-  PRIMARY KEY (`set`, `namespace`) ,
-  INDEX `fk_set_has_namespace_namespace1` (`namespace` ASC) ,
-  CONSTRAINT `fk_set_has_namespace_namespace1`
-    FOREIGN KEY (`namespace` )
-    REFERENCES `openskos`.`namespace` (`prefix` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_set_has_namespace_set1`
-    FOREIGN KEY (`set` )
-    REFERENCES `openskos`.`set` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -110,13 +38,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `uri` TEXT,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
-  INDEX `fk_user_tenant` (`tenant` ASC) ,
   UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) ,
-  CONSTRAINT `fk_user_tenant`
-    FOREIGN KEY (`tenant` )
-    REFERENCES `openskos`.`tenant` (`code` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8;
@@ -127,7 +49,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
   `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `set` INT(11) NOT NULL ,
+  `set` INT(11) NOT NULL , 
   `user` INT(11) NOT NULL ,
   `task` VARCHAR(100) NULL DEFAULT NULL ,
   `parameters` TEXT NULL DEFAULT NULL ,
@@ -140,12 +62,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
   INDEX `task` (`task` ASC) ,
   INDEX `finished` (`finished` ASC) ,
   INDEX `fk_job_user` (`user` ASC) ,
-  INDEX `fk_job_set` (`set` ASC) ,
-  CONSTRAINT `fk_job_set`
-    FOREIGN KEY (`set` )
-    REFERENCES `openskos`.`set` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
   CONSTRAINT `fk_job_user`
     FOREIGN KEY (`user` )
     REFERENCES `openskos`.`user` (`id` )
@@ -165,29 +81,6 @@ CREATE TABLE IF NOT EXISTS `openskos`.`notations` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
--- -----------------------------------------------------
--- Table `openskos`.`search_profiles`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `openskos`.`search_profiles` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(150) NOT NULL,
-  `searchOptions` BLOB,
-  `creatorUserId` INT,
-  `tenant` CHAR(10) NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_search_profile_user`
-    FOREIGN KEY (`creatorUserId`)
-    REFERENCES `openskos`.`user` (`id`)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_search_profile_tenant`
-    FOREIGN KEY (`tenant`)
-    REFERENCES `openskos`.`tenant` (`code`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
@@ -209,8 +102,7 @@ INSERT INTO `namespace` (`prefix`, `uri`) VALUES
 ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
 ('rdfs', 'http://www.w3.org/2000/01/rdf-schema#'),
 ('skos', 'http://www.w3.org/2004/02/skos/core#'),
-('time', 'http://www.w3.org/2006/time#');
+('time', 'http://www.w3.org/2006/time#'),
+('vCard', 'http://www.w3.org/2001/vcard-rdf/3.0#'),
+('org', 'https://www.w3.org/ns/org#');
 
-INSERT INTO set_has_namespace
-  SELECT DISTINCT id, 'openskos'
-  FROM set;

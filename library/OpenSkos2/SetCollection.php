@@ -23,9 +23,6 @@ use OpenSkos2\Rdf\ResourceCollection;
 
 class SetCollection extends ResourceCollection
 {
-    /**
-     * What is the basic resource for this collection.
-     * @var string NULL means any resource.
-     */
+    
     protected $resourceType = Set::TYPE;
 }

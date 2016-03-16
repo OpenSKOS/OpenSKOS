@@ -20,7 +20,6 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dc;
-use OpenSkos2\Namespaces\SkosXl;
 use \EasyRdf\RdfNamespace;
 
 class Namespaces
@@ -96,5 +95,28 @@ class Namespaces
         }
         
         return RdfNamespace::expand($shortProperty);
+    }
+    
+    public static function mapRdfTypeToClassName($type){
+        if ($type) {
+            switch ($type) {
+                case Concept::TYPE:
+                    return "\OpenSkos2\Concept";
+                case \OpenSkos2\ConceptScheme::TYPE:
+                    return "\OpenSkos2\ConceptScheme";
+                case Set::TYPE:
+                    return "\OpenSkos2\Set";
+                case Person::TYPE:
+                    return "\OpenSkos2\Person";
+                case Tenant::TYPE:
+                    return "\OpenSkos2\Tenant";
+                case SkosCollection::TYPE:
+                    return "\OpenSkos2\SkosCollection";
+                default:
+                    return "\OpenSkos2\Rdf\Resource";
+            }
+        } else {
+            return "\OpenSkos2\Rdf\Resource";
+        }
     }
 }

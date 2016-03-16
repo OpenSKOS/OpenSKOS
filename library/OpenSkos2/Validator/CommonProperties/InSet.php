@@ -17,22 +17,20 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator\SchemaAndSkosCollection;
+namespace OpenSkos2\Validator\CommonProperties;
 
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Set;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Validator\SubresourceValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class InSet extends AbstractSchemaAndSkosCollectionValidator implements ResourceManagerAware
+class InSet implements CommonPropertyInterface
 {
     use ResourceManagerAwareTrait;
     
-    protected function validateSchemaOrSkosCollection(RdfResource $resource)
+    public static function validate(RdfResource $resource)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $resource, OpenSkos::SET, Set::TYPE, true);
+        $retVal = CommonProperties\SubresourceValidator::validateSubresource($this->getResourceManager(), $resource, OpenSkos::SET, Set::TYPE, true);
         return $retVal;
     }
 }

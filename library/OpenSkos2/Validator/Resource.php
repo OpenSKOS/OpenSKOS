@@ -36,6 +36,18 @@ use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
+
+use OpenSkos2\Validator\Tenant\OpenskosCode;
+use OpenSkos2\Validator\Tenant\OpenskosUuid;
+use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
+use OpenSkos2\Validator\Tenant\Type;
+use OpenSkos2\Validator\Tenant\OpenskosEnableStatussesSystem;
+use OpenSkos2\Validator\Tenant\vCardAdress;
+use OpenSkos2\Validator\Tenant\vCardEmail;
+use OpenSkos2\Validator\Tenant\vCardURL;
+use OpenSkos2\Validator\Tenant\vCardOrg;
+
+
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -142,8 +154,17 @@ class Resource
         if ($resource instanceof \OpenSkos2\Concept) {
             return $this->getConceptValidators();
         }
-        if ($resource instanceof \OpenSkos2\Schema || $resource instanceof \OpenSkos2\SkosCollection) {
-            return $this->getSchemaAndSkosCollectionValidators();
+        if ($resource instanceof \OpenSkos2\Schema) {
+            return $this->getSchemaValidators();
+        }
+        if ($resource instanceof \OpenSkos2\SkosCollection) {
+            return $this->getSkosCollectionValidators();
+        }
+        if ($resource instanceof \OpenSkos2\Set) {
+            return $this->getSetValidators();
+        }
+        if ($resource instanceof \OpenSkos2\Tenant) {
+            return $this->getTenantValidators();
         }
         return [];
     }
@@ -152,13 +173,60 @@ class Resource
      * Return all validators for a schema or Skos:collection
      * @return ResourceValidator[]
      */
-    private function getSchemaAndSkosCollectionValidators()
+    private function getSchemaValidators()
     {
         $validators = [
-            new InSet(),
-            new Title(),
-            new Desciprion(),
-            new Creator(),
+            new Schema\InSet(),
+            new Schema\Title(),
+            new Schema\Desciprion(),
+            new Schema\Creator(),
+        ];
+        $validators = $this -> refineValidators($validators);
+        return $validators;
+    }
+    
+    private function getSkosCollectionValidators()
+    {
+        $validators = [
+            new SkosCollection\InSet(),
+            new SkosCollection\Title(),
+            new SkosCollection\Desciprion(),
+            new SkosCollection\Creator(),
+        ];
+        $validators = $this -> refineValidators($validators);
+        return $validators;
+    }
+    
+    private function getSetValidators()
+    {
+        $validators = [
+            new Set\License(),
+            new Set\OpenskosAllowOAI(),
+            new Set\OpenskosCode(),
+            new Set\OpenskosConceptBaseUri(),
+            new Set\OpenskosUuid(),
+            new Set\OpenskosOAIBaseUri(),
+            new Set\OpenskosWebPage(),
+            new Set\Publisher(),
+            new Set\Title(),
+            new Set\Type()
+        ];
+        $validators = $this -> refineValidators($validators);
+        return $validators;
+    }
+    
+    private function getTenantValidators()
+    {
+        $validators = [
+            new OpenskosCode(),
+            new OpenskosUuid(),
+            new Type(),
+            new OpenskosDisableSearchInOtherTenants(),
+            new OpenskosEnableStatussesSystem(),
+            new vCardAdress(),
+            new vCardEmail(),
+            new vCardURL(),
+            new vCardOrg()
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;

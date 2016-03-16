@@ -23,6 +23,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
+use OpenSkos2\Validator\CommonProperties\SubresourceValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
@@ -32,7 +33,7 @@ class InSkosCollection extends AbstractConceptValidator implements ResourceManag
     
     protected function validateConcept(Concept $concept)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, OpenSkos::INSKOSCOLLECTION, SkosCollection::TYPE, false);
+        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, OpenSkos::INSKOSCOLLECTION, SkosCollection::TYPE, false, $this->getErrorMessages());
         return $retVal;
     }
 }

@@ -16,6 +16,8 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+///Users/olha/WorkProjects/open-skos-2/OpenSKOS2tempMeertens/library/OpenSkos2/Concept.php
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
@@ -27,8 +29,6 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
-use OpenSKOS_Db_Table_Row_Tenant;
-use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Exception\UriGenerationException;
 

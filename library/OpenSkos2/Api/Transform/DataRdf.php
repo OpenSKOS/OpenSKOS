@@ -31,7 +31,7 @@ class DataRdf
     /**
      * @var Resource
      */
-    private $concept;
+    private $resource;
     
     /**
      * @var bool
@@ -48,9 +48,9 @@ class DataRdf
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(Resource $concept, $includeRdfHeader = true, $propertiesList = null)
+    public function __construct(Resource $resource, $includeRdfHeader = true, $propertiesList = null)
     {
-        $this->concept = $concept;
+        $this->resource = $resource;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
         
@@ -69,14 +69,14 @@ class DataRdf
     public function transform()
     {
         if (!empty($this->propertiesList)) {
-            $reducedResource = new Resource($this->concept->getUri());
-            foreach ($this->concept->getProperties() as $property => $values) {
+            $reducedResource = new Resource($this->resource->getUri());
+            foreach ($this->resource->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
                     $reducedResource->setProperties($property, $values);
                 }
             }
         } else {
-            $reducedResource = $this->concept;
+            $reducedResource = $this->resource;
         }
         
         $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);

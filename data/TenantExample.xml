@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:org="https://www.w3.org/ns/org">
+    <rdf:Description rdf:about="http://example.com/meertens">
+        <rdf:type rdf:resource="https://www.w3.org/ns/org/FormalOrganization"/>
+        <openskos:code>mi</openskos:code>
+        <openskos:uuid>xxx</openskos:uuid>
+        <vCard:ORG rdf:parseType="Resource">
+            <vCard:orgname>Meertens Institute</vCard:orgname>
+            <vCard:orgunit>XXX</vCard:orgunit>
+        </vCard:ORG>
+        <vCard:URL rdf:resource="http://meetens.knaw.nl"/>
+        <vCard:EMAIL>info@meertens.knaw.nl</vCard:EMAIL>
+        <vCard:ADR rdf:parseType="Resource">
+            <vCard:Street> someone's weg </vCard:Street>
+            <vCard:Locality> Amstel </vCard:Locality>
+            <vCard:Pcode> 5555 </vCard:Pcode>
+            <vCard:Country> Netherlands </vCard:Country>
+        </vCard:ADR>
+        <openskos:disableSearchInOtherTenants>false</openskos:disableSearchInOtherTenants>
+        <openskos:enableStatussesSystem>true</openskos:enableStatussesSystem>
+    </rdf:Description>
+</rdf:RDF>

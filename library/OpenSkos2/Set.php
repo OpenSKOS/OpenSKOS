@@ -19,8 +19,25 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\Dcmi;
 
 class Set extends Resource
 {
-    const TYPE = '"http://www.w3.org/2002/07/owl#Ontology"';
+    const TYPE = Dcmi::DATASET;
+    
+     protected $code;
+    
+   
+    public function getCode()
+    {
+        return $this->code;
+    }
+    
+   
+   
+     public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+        //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
 }

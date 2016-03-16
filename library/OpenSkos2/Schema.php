@@ -9,20 +9,12 @@
 
 namespace OpenSkos2;
 
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
-use OpenSKOS_Db_Table_Row_Tenant;
-use OpenSKOS_Db_Table_Tenants;
-use Rhumsaa\Uuid\Uuid;
-use \OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Exception\UriGenerationException;
 
 class Schema extends Resource
 {
@@ -30,7 +22,7 @@ class Schema extends Resource
 
     public function __construct($uri = null) {
         parent::__construct($uri);
-        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+        //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
     
     // how to add get property-reference attribute??
@@ -66,10 +58,10 @@ class Schema extends Resource
 
    
    
-   public function addMetadata(Uri $person) {
+   public function addMetadata($map) {
 
         $forFirstTimeInOpenSkos = [
-            DcTerms::CREATOR => $person
+            DcTerms::CREATOR => $map['user'],
         ];
 
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -79,29 +71,5 @@ class Schema extends Resource
         }
     }
 
-    public function selfGenerateUri($tenantcode, \OpenSkos2\SkosCollectionManager $manager) {
-        if (!$this->isBlankNode()) {
-            throw new UriGenerationException(
-            'The skos collection already has an uri. Can not generate a new one.'
-            );
-        }
-
-        $uri = $this->assembleUri($tenantcode);
-
-        if ($manager->askForUri($uri, true)) {
-            throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use for skos collections.'
-            );
-        }
-
-        $this->setUri($uri);
-        return $uri;
-    }
-
-    // how to geberate uri for the skos:collection
-    protected function assembleUri($tenantcode) {
-        $uri = $tenantcode . ':' . Uuid::uuid4();
-        return $uri;
-    }
-
+    
 }

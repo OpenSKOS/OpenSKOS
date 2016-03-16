@@ -20,6 +20,7 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Rdf\Resource as RdfResource;
+use OpenSkos2\Validator\CommonProperties;
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
@@ -42,4 +43,17 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         return $this->errorMessages;
     }
+    
+    
+    protected function genericValidate($callback, $arg1, $arg2=null, $arg3=null, $arg4=null)
+    {
+        $newErrors = call_user_func(__NAMESPACE__ . $callback, $arg1, $arg2, $arg3, $arg4);
+        if (count($newErrors) > 0) {
+            $this -> errorMessages = array_merge($this -> errorMessages, $newErrors);
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
 }

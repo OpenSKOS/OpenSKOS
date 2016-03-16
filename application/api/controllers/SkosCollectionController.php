@@ -1,7 +1,5 @@
 <?php
 
-// meertens was here
-use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 
 class Api_SkosCollectionController extends OpenSKOS_Rest_Controller
 {

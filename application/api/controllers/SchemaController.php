@@ -3,21 +3,9 @@
 // meertens was here
 use OpenSkos2\Namespaces\Skos as SkosNamespace;
 
-class Api_SchemataController extends OpenSKOS_Rest_Controller
+class Api_SchemaController extends AbstractResourceController
 {
-    public function init()
-    {
-        parent::init();
-        $this->_helper->contextSwitch()
-            ->initContext($this->getRequestedFormat());
-        
-        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
-            $this->getHelper('layout')->enableLayout();
-        }
-        
-    }
-    
+   
     public function indexAction()
     {
         $resourceManager = $this -> getResourceManager();
