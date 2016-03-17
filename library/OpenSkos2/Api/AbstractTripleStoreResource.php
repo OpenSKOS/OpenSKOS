@@ -18,8 +18,6 @@ use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
-
-
 abstract class AbstractTripleStoreResource
 {
     use \OpenSkos2\Api\Response\ApiResponseTrait;
@@ -59,11 +57,12 @@ abstract class AbstractTripleStoreResource
             if ($autoGenerateUri) {
                 $tenantcode = $this->getParamValueFromParams($params, 'tenant');
                 $resourceObject->selfGenerateUri($tenantcode, $this->manager);
-            }
-            
+            };
             $this->validate($resourceObject, $tenantcode);
             $this->manager->insert($resourceObject);
-            $rdf = (new DataRdf($resourceObject))->transform();
+            $savedResource=$this->manager->fetchByUri($resourceObject->getUri());
+            //var_dump($savedResource);
+            $rdf = (new \OpenSkos2\Api\Transform\DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (\Exception $e) {
             return $this->getSuccessResponse($e, 200);

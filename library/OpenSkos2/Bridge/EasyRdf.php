@@ -110,9 +110,7 @@ class EasyRdf {
     public static function resourceToGraph(Resource $resource)
     {
         $graph = new Graph();
-        
         self::addResourceToGraph($resource, $graph);
-
         return $graph;
     }
     
@@ -220,8 +218,11 @@ class EasyRdf {
                         new Literal2($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Uri) {
-                    $easyResource->addResource($propName, trim($value->getUri()));
+                        $easyResource->addResource($propName, trim($value->getUri())); 
+                        self::addResourceToGraph($value, $graph); 
+                    
                 } else {
+                    //var_dump($value);
                     throw new InvalidArgumentException(
                         "Unexpected value found for property {$propName} " . var_export($value)
                     );

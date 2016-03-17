@@ -328,7 +328,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function selfGenerateUri($tenantcode, ResourceManager $manager) {
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-            'The skos collection already has an uri. Can not generate a new one.'
+            'The resource has an uri already. Can not generate a new one.'
             );
         }
 

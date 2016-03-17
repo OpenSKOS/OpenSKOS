@@ -78,9 +78,12 @@ class DataRdf
         } else {
             $reducedResource = $this->resource;
         }
-        
-        $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
-        return $concept->serialise(
+        //var_dump('transform');
+        //var_dump($reducedResource);
+        $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
+        //var_dump('transform2');
+        //var_dump($resource);
+        return $resource->serialise(
             'rdfxml_openskos',
             [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
         );

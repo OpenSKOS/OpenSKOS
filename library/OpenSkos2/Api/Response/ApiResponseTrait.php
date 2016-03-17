@@ -111,9 +111,11 @@ trait ApiResponseTrait
         
         $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
         if ($tenant->code !== (string)$resourceTenant) {
-            throw new UnauthorizedException('Resource has different tenant', 403);
+            throw new UnauthorizedException('Resource has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenant -> code, 403);
         }
         
         return true;
     }
+    
+   
 }

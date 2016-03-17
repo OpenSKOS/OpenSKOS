@@ -20,26 +20,26 @@ namespace OpenSkos2\Namespaces;
 
 class vCard
 {
-    const NAME_SPACE = 'http://www.w3.org/2001/vcard-rdf/3.0#';
+    const NAME_SPACE = 'http://www.w3.org/2006/vcard/ns#';
     
-    const ORG = 'http://www.w3.org/2001/vcard-rdf/3.0#ORG';
+    const ORG = 'http://www.w3.org/2006/vcard/ns#ORG';
     
-    const ORGNAME = 'http://www.w3.org/2001/vcard-rdf/3.0#orgname';
+    const ORGNAME = 'http://www.w3.org/2006/vcard/ns#orgname';
     
-    const ORGUNIT = 'http://www.w3.org/2001/vcard-rdf/3.0#orgunit';
+    const ORGUNIT = 'http://www.w3.org/2006/vcard/ns#orgunit';
     
-    const URL = 'http://www.w3.org/2001/vcard-rdf/3.0#url';
+    const URL = 'http://www.w3.org/2006/vcard/ns#url';
     
-    const EMAIL = 'http://www.w3.org/2001/vcard-rdf/3.0#EMAIL';
+    const EMAIL = 'http://www.w3.org/2006/vcard/ns#EMAIL';
     
-    const ADR = 'http://www.w3.org/2001/vcard-rdf/3.0#ADR';
+    const ADR = 'http://www.w3.org/2006/vcard/ns#ADR';
     
-    const STREET = 'http://www.w3.org/2001/vcard-rdf/3.0#Street';
+    const STREET = 'http://www.w3.org/2006/vcard/ns#Street';
     
-    const LOCALITY = 'http://www.w3.org/2001/vcard-rdf/3.0#Locality';
+    const LOCALITY = 'http://www.w3.org/2006/vcard/ns#Locality';
     
-    const PCODE = 'http://www.w3.org/2001/vcard-rdf/3.0#PCode';
+    const PCODE = 'http://www.w3.org/2006/vcard/ns#PCode';
     
-    const COUNTRY = 'http://www.w3.org/2001/vcard-rdf/3.0#Country';
+    const COUNTRY = 'http://www.w3.org/2006/vcard/ns#Country';
     
 }
