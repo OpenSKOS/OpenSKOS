@@ -2,10 +2,11 @@
 
 namespace OpenSkos2\Api;
 
-
+use DOMDocument;
+use Exception;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Exception\NotFoundException;
+use OpenSkos2\Api\Transform\DataArray;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
@@ -14,23 +15,60 @@ use OpenSkos2\Tenant as Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use Psr\Http\Message\ServerRequestInterface;
+use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
-abstract class AbstractTripleStoreResource
-{
+abstract class AbstractTripleStoreResource {
+
     use \OpenSkos2\Api\Response\ApiResponseTrait;
-    
-    protected $manager; 
-    
-    public function getManager(){
-        return $this -> manager;
+
+    protected $manager;
+
+    public function getManager() {
+        return $this->manager;
     }
-    
-   
+
+    // Id is either an URI or uuid
+    public function findResourceById(ServerRequestInterface $request) {
+        try {
+            $params = $request->getQueryParams();
+            $resource = null;
+            if (isset($params['uuid'])) {
+                $resource = $this->manager->fetchByUuid($params['uuid']);
+            } else {
+                if (isset($params['uri'])) {
+                    $resource = $this->manager->fetchByUri($params['uri']);
+                } else {
+                    throw new InvalidArgumentException('No URI or UUID is given');
+                }
+            }
+
+            $context = 'rdf';
+            if (isset($params['format'])) {
+                $context = $params['format'];
+            }
+            switch ($context) {
+                case 'json':
+                    $prep = (new \OpenSkos2\Api\Transform\DataArray($resource, []))->transform();
+                    $response = $this->getSuccessResponse(json_encode($prep, JSON_UNESCAPED_SLASHES), 200, 'application/json');
+                    break;
+                case 'rdf':
+                    $rdf = (new DataRdf($resource, true, []))->transform();
+                    $response = $this->getSuccessResponse($rdf, 200);
+                    break;
+                default:
+                    throw new InvalidArgumentException('Invalid context: ' . $context);
+            }
+
+            return $response;
+        } catch (Exception $ex) {
+            return $this->getSuccessResponse($ex, 200);
+        }
+    }
+
     public function create(ServerRequestInterface $request) {
-        //var_dump($this->manager);
         try {
             $response = $this->handleCreate($request);
         } catch (ApiException $ex) {
@@ -38,9 +76,8 @@ abstract class AbstractTripleStoreResource
         }
         return $response;
     }
-    
-    private function handleCreate(ServerRequestInterface $request)
-    {
+
+    private function handleCreate(ServerRequestInterface $request) {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
 
@@ -60,79 +97,72 @@ abstract class AbstractTripleStoreResource
             };
             $this->validate($resourceObject, $tenantcode);
             $this->manager->insert($resourceObject);
-            $savedResource=$this->manager->fetchByUri($resourceObject->getUri());
-            //var_dump($savedResource);
-            $rdf = (new \OpenSkos2\Api\Transform\DataRdf($savedResource, true, []))->transform();
+            $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
+            $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->getSuccessResponse($e, 200);
         }
     }
-    
-    public function deleteResourceObject(ServerRequestInterface $request)
-    {
+
+    public function deleteResourceObject(ServerRequestInterface $request) {
         try {
             $params = $request->getQueryParams();
             if (empty($params['uri'])) {
                 throw new InvalidArgumentException('Missing uri parameter');
             }
-            
+
             $uri = $params['uri'];
             $resourceObject = $this->manager->fetchByUri($uri);
             if (!$resourceObject) {
                 throw new NotFoundException('The resource is not found by uri :' . $uri, 404);
             }
-            
+
             $user = $this->getUserFromParams($params);
-            if  (!$this->resourceDeleteAllowed($user)) {
-                 throw new ApiException('You do not have priority to delete rgis resource ' . $uri, 403);
+            if (!$this->resourceDeleteAllowed($user)) {
+                throw new ApiException('You do not have priority to delete rgis resource ' . $uri, 403);
             }
-            
+
             $canBeDeleted = $this->manager->CanBeDeleted();
-            if  (!$canBeDeleted) {
-                 throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. ', 403);
+            if (!$canBeDeleted) {
+                throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. ', 403);
             }
             $this->manager->delete(new Uri($uri));
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
-        
+
         $xml = (new DataRdf($resourceObject))->transform();
         return $this->getSuccessResponse($xml, 202);
     }
-    
-    
-    private function getResourceObjectFromRequestBody(ServerRequestInterface $request)
-    {
+
+    private function getResourceObjectFromRequestBody(ServerRequestInterface $request) {
         $doc = $this->getDomDocumentFromRequest($request);
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
             throw new InvalidArgumentException(
-                'Expected exactly one '
-                . '/rdf:RDF/rdf:Description, got '.$descriptions->length, 412
+            'Expected exactly one '
+            . '/rdf:RDF/rdf:Description, got ' . $descriptions->length, 412
             );
         }
 
         $resources = (new Text($doc->saveXML()))->getResources();
         $resource = $resources[0];
-        //var_dump($resource);
-        $className= Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
+        $className = Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
         if (!isset($resource) || !$resource instanceof $className) {
             throw new InvalidArgumentException('XML Could not be converted to a ' . $className . ' object', 400);
         }
 
         return $resource;
     }
-    
-   
-    private function getDomDocumentFromRequest(ServerRequestInterface $request)
-    {
+
+    private function getDomDocumentFromRequest(ServerRequestInterface $request) {
         $xml = $request->getBody();
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 412);
         }
-        
-        $doc = new \DOMDocument();
+
+        $doc = new DOMDocument();
         if (!@$doc->loadXML($xml)) {
             throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
         }
@@ -140,18 +170,16 @@ abstract class AbstractTripleStoreResource
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
             throw new InvalidArgumentException(
-                'Recieved RDF-XML is not valid: '
-                . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>',
-                412
+            'Recieved RDF-XML is not valid: '
+            . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 412
             );
         }
         //var_dump($doc);
-       
+
         return $doc;
     }
-    
-    
-     private function checkResourceIdentifiers(ServerRequestInterface $request, $resourceObject) {
+
+    private function checkResourceIdentifiers(ServerRequestInterface $request, $resourceObject) {
         $params = $request->getQueryParams();
 
         // We return if an uri must be autogenerated
@@ -181,33 +209,31 @@ abstract class AbstractTripleStoreResource
         return $autoGenerateIdentifiers;
     }
 
-     private function getParamValueFromParams($params, $paramname) {
+    private function getParamValueFromParams($params, $paramname) {
         if (empty($params[$paramname])) {
             throw new InvalidArgumentException('No ' . $paramname . ' specified', 412);
         }
         return $params[$paramname];
     }
-    
-      private function getUserFromParams($params) {
-        $key = $this -> getParamValueFromParams($params, 'key');
+
+    private function getUserFromParams($params) {
+        $key = $this->getParamValueFromParams($params, 'key');
         return $this->getUserByKey($key);
     }
-    
-    private function getSuccessResponse($message, $status = 200)
-    {
+
+    private function getSuccessResponse($message, $status = 200, $format="text/xml") {
         $stream = new Stream('php://memory', 'wb+');
         $stream->write($message);
         $response = (new Response($stream, $status))
-            ->withHeader('Content-Type', 'text/xml; charset="utf-8"');
+                ->withHeader('Content-Type', $format . ' ; charset="utf-8"');
         return $response;
     }
-    
+
     public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
-        return $user -> role == 'admin';
+        return $user->role == 'admin';
     }
-    
-    protected function validate($resourceObject, $tenantcode)
-    {
+
+    protected function validate($resourceObject, $tenantcode) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
         if (!$validator->validate($resourceObject)) {
             //var_dump($validator->getErrorMessages());

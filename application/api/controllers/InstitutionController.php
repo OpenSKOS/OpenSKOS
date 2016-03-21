@@ -18,28 +18,38 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+require_once 'FindInstitutionsController.php';
 
-class Api_InstitutionController extends OpenSKOS_Rest_Controller
+class Api_InstitutionController extends Api_FindInstitutionsController
 {
     public function init()
     {
+        $this->getHelper('layout')->disableLayout();
+        $this->getHelper('viewRenderer')->setNoRender(true);
         parent::init();
-        $this->_helper->contextSwitch()
-            ->initContext($this->getRequest()->getParam('format', 'rdf'));
-        
-        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
-            $this->getHelper('layout')->enableLayout();
-        }
     }
     
     public function indexAction()
     {
+       $this->_helper->viewRenderer->setNoRender(true);
+       $api = $this->getDI()->make('OpenSkos2\Api\Tenant');
+        
+        // Exception for html use ZF 1 easier with linking in the view
+        if ('html' === $this ->getParam('format')) {
+            //$this->view->concept = $apiConcept->getConcept($id);
+            //return $this->renderScript('concept/get.phtml');
+            throw new Exception('HTML format is not implemented yet', 404);
+        }
+        
+        $request = $this->getPsrRequest();
+        $response = $api->findResourceById($request);
+        $this->emitResponse($response);
     }
     
     public function getAction()
     {
-        
+       var_dump("get"); 
+       
     }
     
     public function postAction()

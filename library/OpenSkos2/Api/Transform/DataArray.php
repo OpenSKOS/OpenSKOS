@@ -19,11 +19,15 @@
 
 namespace OpenSkos2\Api\Transform;
 
-use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Rdf\Resource;
+use DateTime;
+use EasyRdf\RdfNamespace;
 use OpenSkos2\FieldsMaps;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Resource as RdfResource;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Validator\Resource;
 
 /**
  * Transform Resource to a php array with only native values to encode as json output.
@@ -42,10 +46,10 @@ class DataArray
     private $propertiesList;
     
     /**
-     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(Resource $resource, $propertiesList = null)
+    public function __construct(RdfResource $resource, $propertiesList = null)
     {
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
@@ -56,7 +60,8 @@ class DataArray
      *
      * @return array
      */
-    public function transform()
+    // TODO: refactor to use transform, which is more universal
+    public function transformConcept()
     {
         $resource = $this->resource;
         
@@ -67,8 +72,8 @@ class DataArray
         }
         
         foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
-            //var_dump('field ' . $field);
-            //var_dump('property ' . $prop);
+            //var_dump($field);
+            //var_dump($prop);
             //var_dump('uri: ' . $prop['uri']);
             if (!$this->doIncludeProperty($prop['uri'])) {
                 //var_dump($prop['uri']);
@@ -86,6 +91,21 @@ class DataArray
         return $newResource;
     }
     
+     public function transform()
+    {
+        $newResource = $this->transformRecursive($this->resource);
+        return $newResource;
+    }
+    public function transformRecursive(RdfResource $rdfresource) {
+        $newResource = [];
+        $newResource['uri'] = $rdfresource->getUri();
+        foreach ($rdfresource->getProperties() as $field => $properties) {
+            $short=RdfNamespace::shorten($field);
+            $newResource = $this->getPropertyValue($properties, $short, array('repeatable' => false), $newResource);
+        }
+        return $newResource;
+    }
+
     /**
      * Should the property be included in the serialized data.
      * @param string $property
@@ -108,8 +128,13 @@ class DataArray
     private function getPropertyValue(array $prop, $field, $settings, $resource)
     {
         foreach ($prop as $val) {
+            if ($val instanceof RdfResource) {
+                $resource[$field] = $this->transformRecursive($val);
+                continue;
+            }
+
             // Some values only have a URI but not getValue or getLanguage
-            if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
+            if ($val instanceof Uri && !method_exists($val, 'getLanguage')) {
                 //var_dump($resource);
                 if ($settings['repeatable'] === true) {
                     $resource[$field][] = $val->getUri();
@@ -122,7 +147,7 @@ class DataArray
 
             $value = $val->getValue();
 
-            if ($value instanceof \DateTime) {
+            if ($value instanceof DateTime) {
                 $value = $value->format(DATE_W3C);
             }
 

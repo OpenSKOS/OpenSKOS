@@ -52,7 +52,7 @@ class JsonpResponse extends DetailResponse
     public function getResponse()
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
+        $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transformConcept();
         $jsonp = $this->callback . '(' . json_encode($body) . ');';
         $stream->write($jsonp);
         $response = (new \Zend\Diactoros\Response($stream))

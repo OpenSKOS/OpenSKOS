@@ -98,7 +98,6 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
      */
     protected function rdfxmlResource($res, $showNodeId, $depth = 1)
     {
-        //var_dump($res);
         $resXml = $this-> rdfxmlResourceRecursive($res, $showNodeId, $depth, null);
         $this->objects[] = $resXml;
     }
@@ -106,7 +105,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     
        private function rdfxmlResourceRecursive($res, $showNodeId, $depth, $type)
     {
-        //var_dump($res);
+        //var_dump($type);
         // Keep track of the resources we have already serialised
         if (isset($this->outputtedResources[$res->getUri()])) {
             return "";
@@ -116,11 +115,10 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
         // If the resource has no properties - don't serialise it
         $properties = $res->propertyUris();
-        if (count($properties) == 0) {
+        if (count($properties) === 0) {
             return "";
         }
         
-        /*$type = $this->determineResType($res);*/
         if ($type) {
             $this->addPrefix($type);
         } else {
@@ -144,22 +142,19 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             }
         } else {
             foreach ($properties as $property) {
-                //var_dump($property);
                 $short = \EasyRdf\RdfNamespace::shorten($property, true);
                 if ($short) {
                     $this->addPrefix($short);
                     $objects = $res->all("<$property>");
-                    if ($short == 'rdf:type' && $type != 'rdf:Description') {
-                        array_shift($objects);
-                    }
-                     //var_dump($objects);
-                     //var_dump("***");
                      foreach ($objects as $object) {
                         if ($object instanceof \EasyRdf\Resource) {
                             $recResult = $this->rdfxmlResourceRecursive($object, $showNodeId, $depth + 1, $short);
-                            //var_dump($recResult);
-                            //var_dump('***');
+                            if ($recResult !== "") {
                             $xmlString .= $recResult;
+                            } else {
+                                // this resource is given by reference and should be treated as a leaf
+                                 $xmlString .= $this->rdfxmlObject($short, $object, $depth + 1);
+                            }
                         } else {
                             $xmlString .= $this->rdfxmlObject($short, $object, $depth + 1);
                         }

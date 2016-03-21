@@ -61,7 +61,7 @@ class JsonResponse extends ResultSetResponse
     {
         $docs = [];
         foreach ($this->result->getResources() as $resource) {
-            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
+            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transformConcept();
             $docs[] = $nResource;
         }
 
