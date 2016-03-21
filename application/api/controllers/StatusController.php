@@ -22,7 +22,7 @@ class Api_StatusesController extends OpenSKOS_Rest_Controller
     public function indexAction()
     {
         $resourceManager = $this -> getResourceManager();
-        $listFromJena = $resourceManager ->fetchFacets(OpenSkosNamespace::STATUS, 'Literal');
+        $listFromJena = $resourceManager ->fetchObjectsWithProperty(OpenSkosNamespace::STATUS, 'Literal');
         $hardcodedList = Concept::getAvailableStatuses();
         //var_dump($hardcodedList);
         $result=array_values(array_unique(array_merge($listFromJena, $hardcodedList)));

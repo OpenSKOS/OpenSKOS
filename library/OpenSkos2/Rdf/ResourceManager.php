@@ -19,17 +19,21 @@
 
 namespace OpenSkos2\Rdf;
 
+use Asparagus\QueryBuilder;
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
+use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
-use OpenSkos2\Exception\InvalidArgumentException;
-use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
-use OpenSkos2\Namespaces\DcTerms as DcTerms;
-use Asparagus\QueryBuilder;
+use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Solr\Document;
+use RuntimeException;
+use Solarium\Client as Client2;
+use Solarium\Exception\HttpException;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
@@ -56,7 +60,7 @@ class ResourceManager
     protected $resourceType = null;
 
     /**
-     * @var \Solarium\Client
+     * @var Client2
      */
     protected $solr;
     
@@ -98,7 +102,7 @@ class ResourceManager
      * @param Client $client
      * @param string $graph
      */
-    public function __construct(Client $client, \Solarium\Client $solr, $graph = null)
+    public function __construct(Client $client, Client2 $solr, $graph = null)
     {
         $this->client = $client;
         $this->graph = $graph;
@@ -106,7 +110,7 @@ class ResourceManager
     }
 
     /**
-     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Resource $resource
      * @throws ResourceAlreadyExistsException
      */
     public function insert(Resource $resource)
@@ -122,7 +126,7 @@ class ResourceManager
         // Add resource to solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
-        $convert = new \OpenSkos2\Solr\Document($resource, $doc); 
+        $convert = new Document($resource, $doc); 
         $resourceDoc = $convert->getDocument(); 
         $update->addDocument($resourceDoc);
         if (!$this->getIsNoCommitMode()) {
@@ -137,7 +141,7 @@ class ResourceManager
             try {
                 $exception = null;
                 $result = $this->solr->update($update);
-            } catch (\Solarium\Exception\HttpException $exception) {
+            } catch (HttpException $exception) {
                 $tries ++;
             }
         } while ($exception !== null && $tries < $maxTries);
@@ -149,7 +153,7 @@ class ResourceManager
         
     /**
      * Deletes and then inserts the resourse.
-     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Resource $resource
      */
     public function replace(Resource $resource)
     {
@@ -165,14 +169,14 @@ class ResourceManager
      * Be careful you need to add the full resource as it will be deleted and added again
      * do not only give a uri or part of the graph
      *
-     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Resource $resource
      * @param Uri $user
      */
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
         $uri = $resource->getUri();
         $resource->unsetProperty(OpenSkosNamespace::STATUS);
-        $status = new Literal(\OpenSkos2\Concept::STATUS_DELETED);
+        $status = new Literal(Concept::STATUS_DELETED);
         $resource->addProperty(OpenSkosNamespace::STATUS, $status);
 
         $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
@@ -188,7 +192,7 @@ class ResourceManager
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
         $doc->setKey('uri', $uri);
-        $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
+        $doc->addField('s_status', Concept::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
         $update->addDocument($doc);
         if (!$this->getIsNoCommitMode()) {
@@ -251,7 +255,7 @@ class ResourceManager
      * Fetch resource by uuid
      *
      * @param string $uuid
-     * @return \OpenSkos2\Rdf\Resource
+     * @return Resource
      */
     public function fetchByUuid($uuid)
     {
@@ -259,10 +263,10 @@ class ResourceManager
             'openskos' => OpenSkosNamespace::NAME_SPACE,
         ];
 
-        $lit = new \OpenSkos2\Rdf\Literal($uuid);
-        $qb = new \Asparagus\QueryBuilder($prefixes);
+        $lit = new Literal($uuid);
+        $qb = new QueryBuilder($prefixes);
         $query = $qb->describe('?subject')
-            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
+            ->where('?subject', 'openskos:uuid', (new NTriple)->serialize($lit));
         $data = $this->fetchQuery($query);
 
         if (!isset($data[0])) {
@@ -292,7 +296,7 @@ class ResourceManager
         }
 
         if (count($resources) > 1) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
             );
         }
@@ -448,7 +452,7 @@ class ResourceManager
     public function fetchNamespaces()
     {
         // @TODO Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
-        return \OpenSkos2\Namespaces::getRdfConceptNamespaces();
+        return Namespaces::getRdfConceptNamespaces();
         
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
@@ -466,7 +470,7 @@ class ResourceManager
         $response = $httpClient->request();
 
         if (!$response->isSuccessful()) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
@@ -490,50 +494,34 @@ class ResourceManager
         return $result->count->getValue();
     }
     
-    /**
-     * Meertens was here
-     */
-    public function fetchFacets($namespace, $type) {
-        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $namespace . '> ?object . }';
-
-        /* @var $result \EasyRdf\Sparql\Result */
+    public function fetchSubjectWithPropertyGiven($propertyUri, $value) {
+        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> "' . $value . '" . }';
         $result = $this->query($query);
-//var_dump($result);
-        $items = [];
-        $i = 0;
-        if ($type === 'Literal') {
-            foreach ($result as $literal) {
-                $items[$i] = $literal->object->getValue();
-                $i++;
-            }
-        } else {
-            if ($type === 'Resource') {
-                foreach ($result as $resource) {
-                    $items[$i] = $resource->object->getUri();
-                    //var_dump($items[$i]);
-                    //var_dump(json_encode($items, JSON_UNESCAPED_SLASHES));
-                    $i++;
-                }
-            }
-        }
-        return $items;
+        $retVal = $this -> makeJsonList($result, 'subject');
+        return $retVal;
     }
     
-     public function fetchResourcesOfThisType() {
-        if  (isset($this -> resourceType)) {
-        $query = 'SELECT ?uri ?title WHERE { ?uri  <' . RdfNamespace::TYPE . '>  <' . $this -> resourceType . '> . ' .  '?uri  <'. DcTerms::TITLE . '> ?title . }';
+    
+   
+    public function fetchObjectsWithProperty($propertyUri) {
+        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . }';
+        //var_dump($query);
         $result = $this->query($query);
+        $retVal = $this -> makeJsonList($result, 'object');
+        return $retVal;
+    }
+    
+    private function makeJsonList($sparqlQueryResult, $triplePart) {
         $items = [];
-        $i = 0;
-        foreach ($result as $resource) {
-            $items[$i] = array("uri"=>$resource->uri->getUri(), "title" => $resource->title->getValue());
-            //var_dump(json_encode($items, JSON_UNESCAPED_SLASHES));
-            $i++;
+        foreach ($sparqlQueryResult as $resource) {
+            $className=get_class($resource->$triplePart);
+            if ('EasyRdf\Literal' === $className) {
+                $items[] = $resource->$triplePart-> getValue();
+            } else {
+                $items[] = $resource->$triplePart -> getUri();
+            }
         }
         return $items;
-        } else {
-            throw new InvalidArgumentException("The resource toype is not defined in this manager");
-        }
     }
 
     /**
@@ -611,12 +599,12 @@ class ResourceManager
     /**
      * Fetch all resources matching the query.
      *
-     * @param \Asparagus\QueryBuilder|string $query
+     * @param QueryBuilder|string $query
      * @return ResourceCollection
      */
     public function fetchQuery($query)
     {
-        if ($query instanceof \Asparagus\QueryBuilder) {
+        if ($query instanceof QueryBuilder) {
             $query = $query->getSPARQL();
         }
         

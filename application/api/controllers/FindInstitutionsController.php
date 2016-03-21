@@ -1,5 +1,7 @@
 <?php
 
+use OpenSkos2\Namespaces\vCard;
+
 /*
  * OpenSKOS
  *
@@ -34,12 +36,11 @@ class Api_FindInstitutionsController extends OpenSKOS_Rest_Controller {
 
     public function indexAction()
     {
-        var_dump("index"); 
         if ('json' !== $this->_helper->contextSwitch()->getCurrentContext()) {
             $this->_501('This action, which lists the uris of all institutions (tenants), is currently  implemented only for json format output.');
         };
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchTenants();
+        $result = $resourceManager ->fetchObjectsWithProperty(vCard::ORGNAME);
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }

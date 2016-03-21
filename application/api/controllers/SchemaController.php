@@ -9,7 +9,7 @@ class Api_SchemaController extends AbstractResourceController
     public function indexAction()
     {
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchFacets(SkosNamespace::INSCHEME, 'Resource');
+        $result = $resourceManager ->fetchObjectsWithProperty(SkosNamespace::INSCHEME, 'Resource');
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }

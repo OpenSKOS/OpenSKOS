@@ -45,11 +45,11 @@ abstract class AbstractTripleStoreResource {
                 }
             }
 
-            $context = 'rdf';
+            $format = 'rdf';
             if (isset($params['format'])) {
-                $context = $params['format'];
+                $format = $params['format'];
             }
-            switch ($context) {
+            switch ($format) {
                 case 'json':
                     $prep = (new \OpenSkos2\Api\Transform\DataArray($resource, []))->transform();
                     $response = $this->getSuccessResponse(json_encode($prep, JSON_UNESCAPED_SLASHES), 200, 'application/json');
@@ -64,7 +64,7 @@ abstract class AbstractTripleStoreResource {
 
             return $response;
         } catch (Exception $ex) {
-            return $this->getSuccessResponse($ex, 200);
+            return $this->getErrorResponse(500, $ex->getMessage());
         }
     }
 
@@ -101,7 +101,7 @@ abstract class AbstractTripleStoreResource {
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (Exception $e) {
-            return $this->getSuccessResponse($e, 200);
+            return $this->getErrorResponse(500, $e->getMessage());
         }
     }
 
