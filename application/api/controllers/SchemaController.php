@@ -3,7 +3,7 @@
 // meertens was here
 use OpenSkos2\Namespaces\Skos as SkosNamespace;
 
-class Api_SchemaController extends AbstractResourceController
+class Api_SchemaController extends AbstractController
 {
    
     public function indexAction()
