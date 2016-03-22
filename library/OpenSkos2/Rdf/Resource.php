@@ -344,9 +344,9 @@ class Resource extends Uri implements ResourceIdentifier
         return $uri;
     }
 
-   
+   // TODO: must be rewritten by using epic
     protected function assembleUri($tenantcode) {
-        $uri = $tenantcode . ':' . Uuid::uuid4();
+        $uri = "http://" . $tenantcode . '/' . Uuid::uuid4();
         return $uri;
     }
 

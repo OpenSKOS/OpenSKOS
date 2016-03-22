@@ -6,7 +6,6 @@ use DOMDocument;
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
-use OpenSkos2\Api\Transform\DataArray;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
@@ -18,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use OpenSkos2\Rdf\Uri;
 
 abstract class AbstractTripleStoreResource {
 
@@ -35,15 +34,17 @@ abstract class AbstractTripleStoreResource {
         try {
             $params = $request->getQueryParams();
             $resource = null;
-            if (isset($params['uuid'])) {
-                $resource = $this->manager->fetchByUuid($params['uuid']);
-            } else {
-                if (isset($params['uri'])) {
-                    $resource = $this->manager->fetchByUri($params['uri']);
+            if (isset($params['id'])) {
+                $id = $params['id'];
+                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                    $resource = $this->manager->fetchByUri($id);
                 } else {
-                    throw new InvalidArgumentException('No URI or UUID is given');
+                    $resource = $this->manager->fetchByUuid($id);
                 }
+            } else {
+                throw new InvalidArgumentException('No Id (URI or UUID) is given');
             }
+
 
             $format = 'rdf';
             if (isset($params['format'])) {
@@ -91,12 +92,34 @@ abstract class AbstractTripleStoreResource {
             $user = $this->getUserFromParams($params);
             $resourceObject->addMetadata(array('user' => $user));
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
+            
             if ($autoGenerateUri) {
                 $tenantcode = $this->getParamValueFromParams($params, 'tenant');
                 $resourceObject->selfGenerateUri($tenantcode, $this->manager);
             };
+            
             $this->validate($resourceObject, $tenantcode);
             $this->manager->insert($resourceObject);
+            $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
+            $rdf = (new DataRdf($savedResource, true, []))->transform();
+            return $this->getSuccessResponse($rdf, 201);
+        } catch (Exception $e) {
+            return $this->getErrorResponse(500, $e->getMessage());
+        }
+    }
+    
+     public function update(ServerRequestInterface $request) {
+        try {
+            $resourceObject = $this->getResourceObjectFromRequestBody($request);
+            $existingResource = $this->manager->fetchByUri((string)$resourceObject->getUri());
+            $params = $request->getQueryParams($request);
+            $user = $this->getUserFromParams($params);
+            $resourceObject->addMetadata(array('user' => $user));
+            $tenantcode = $this->getParamValueFromParams($params, 'tenant');
+            $this->resourceEditAllowed($user);    
+
+            $this->validateForUpdate($resourceObject, $tenantcode, $existingResource);
+            $this->manager->replace($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
@@ -120,7 +143,7 @@ abstract class AbstractTripleStoreResource {
 
             $user = $this->getUserFromParams($params);
             if (!$this->resourceDeleteAllowed($user)) {
-                throw new ApiException('You do not have priority to delete rgis resource ' . $uri, 403);
+                throw new ApiException('You do not have priority to delete this resource ' . $uri, 403);
             }
 
             $canBeDeleted = $this->manager->CanBeDeleted();
@@ -137,6 +160,7 @@ abstract class AbstractTripleStoreResource {
     }
 
     private function getResourceObjectFromRequestBody(ServerRequestInterface $request) {
+        
         $doc = $this->getDomDocumentFromRequest($request);
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
@@ -229,16 +253,28 @@ abstract class AbstractTripleStoreResource {
         return $response;
     }
 
+    // override in superclass when necessary
     public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
         return $user->role == 'admin';
     }
+    
+    // override in superclass when necessary
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return $user->role == 'admin';
+    }
 
+    //override in superclass when necessary 
     protected function validate($resourceObject, $tenantcode) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
         if (!$validator->validate($resourceObject)) {
             //var_dump($validator->getErrorMessages());
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
+    }
+    
+    //override in superclass when necessary 
+    protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
+        $this -> validate($resourceObject, $tenantcode);
     }
 
 }

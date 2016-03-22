@@ -29,7 +29,8 @@ class Api_InstitutionController extends Api_FindInstitutionsController
         parent::init();
     }
     
-    public function indexAction()
+   
+    public function getAction()
     {
        $this->_helper->viewRenderer->setNoRender(true);
        $api = $this->getDI()->make('OpenSkos2\Api\Tenant');
@@ -46,12 +47,6 @@ class Api_InstitutionController extends Api_FindInstitutionsController
         $this->emitResponse($response);
     }
     
-    public function getAction()
-    {
-       var_dump("get"); 
-       
-    }
-    
     public function postAction()
     {
         $request = $this->getPsrRequest();
@@ -62,11 +57,17 @@ class Api_InstitutionController extends Api_FindInstitutionsController
     
     public function putAction()
     {
-        $this->_501('put');
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make('\OpenSkos2\Api\Tenant');
+        $response = $api->update($request);
+        $this->emitResponse($response);
     }
     
     public function deleteAction()
     {
-        $this->_501('delete');
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make('\OpenSkos2\Api\Tenant');
+        $response = $api->deleteResourceObject($request);
+        $this->emitResponse($response);
     }
 }

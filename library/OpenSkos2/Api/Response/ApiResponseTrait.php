@@ -102,15 +102,15 @@ trait ApiResponseTrait
      */
     public function resourceEditAllowed(
         Resource $resource,
-        OpenSKOS_Db_Table_Row_Tenant $tenant,
+        $tenantcode,
         OpenSKOS_Db_Table_Row_User $user
     ) {
-        if ($user->tenant !== $tenant->code) {
+        if ($user->tenant !== $tenantcode) {
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
         
         $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
-        if ($tenant->code !== (string)$resourceTenant) {
+        if ($tenantcode !== (string)$resourceTenant) {
             throw new UnauthorizedException('Resource has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenant -> code, 403);
         }
         

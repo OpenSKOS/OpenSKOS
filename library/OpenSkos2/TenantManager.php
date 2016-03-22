@@ -28,4 +28,9 @@ class TenantManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Tenant::TYPE;
+    
+     //check conditions when it can be depeleted
+    public function CanBeDeleted(){
+        return true;
+    }
 }

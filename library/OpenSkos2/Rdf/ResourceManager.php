@@ -214,6 +214,11 @@ class ResourceManager
         $update->addDeleteById($uri);
         $this->solr->update($update);
     }
+    
+    //override in supercalsses
+    public function CanBeDeleted(){
+        return false;
+    }
 
     /**
      * @todo Keep SOLR in sync
@@ -620,6 +625,7 @@ class ResourceManager
     public function ask($query)
     {
         $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
+        //var_dump( $query);
         return $this->query($query)->getBoolean();
     }
 

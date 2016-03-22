@@ -46,8 +46,8 @@ class Api_FindInstitutionsController extends OpenSKOS_Rest_Controller {
     }
     
    public function getAction()
-    {
-        $this->_501('GET');
+    {    
+       $this->_501('GET');
     }
     
     

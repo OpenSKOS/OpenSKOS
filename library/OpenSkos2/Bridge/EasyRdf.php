@@ -67,6 +67,7 @@ class EasyRdf {
         }
         
         // now compose main resources;
+        $myResource = null;
         foreach ($mainResources as $resource) {
             $type = $resource->get('rdf:type');
             $myResource = self::createResource(
@@ -74,8 +75,9 @@ class EasyRdf {
             );
             self::makeNode($myResource, $resource, $subResources);
         }
-
-        $collection[] = $myResource;
+        if ($myResource !== null) {
+            $collection[] = $myResource;
+        }
 
         return $collection;
     }
