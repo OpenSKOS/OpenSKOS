@@ -27,4 +27,9 @@ class SetManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Set::TYPE;
+    
+     //check conditions when it can be deleted
+    public function CanBeDeleted(){
+        return true;
+    }
 }

@@ -6,6 +6,8 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     protected $resourceClass;
     protected $fullNameResourceClass;
     protected $indexProperty;
+    protected $rdfType;
+    
     
     public function init()
     {
@@ -20,7 +22,8 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
             $this->_501('This action, which lists the uris of all ' . $this -> resourceClass . ' is currently  implemented only for json format output.');
         };
         $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchObjectsWithProperty($this -> indexProperty);
+        $result = $resourceManager ->fetchObjectsWithProperty($this -> indexProperty, $this ->rdfType);
+        
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }

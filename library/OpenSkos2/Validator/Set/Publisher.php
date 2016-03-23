@@ -2,15 +2,16 @@
 
 namespace OpenSkos2\Validator\Set;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Validator\CommonProperties;
+use OpenSkos2\Set;
+use OpenSkos2\Validator\AbstractSetValidator;
+
 class Publisher extends AbstractSetValidator
 {
     
-    protected function validateSet(RdfResource $resource)
+    protected function validateSet(Set $resource)
     {
-        $retVal = CommonProperties\UniqueObligatoryProperty::validate($resource, DcTerms::PUBLISHER, false, $this->getErrorMessages());
-        return $retVal;
+        return parent::genericValidate('\CommonProperties\UniqueOptionalProperty::validate', $resource, DcTerms::PUBLISHER, false, $this->getErrorMessages());
+    
     }
 }

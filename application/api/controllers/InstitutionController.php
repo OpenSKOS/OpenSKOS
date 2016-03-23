@@ -1,6 +1,7 @@
 <?php
 
 use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Org;
 
 require_once 'AbstractController.php';
 

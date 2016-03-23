@@ -170,7 +170,7 @@ abstract class AbstractTripleStoreResource {
             . '/rdf:RDF/rdf:Description, got ' . $descriptions->length, 412
             );
         }
-
+                
         $resources = (new Text($doc->saveXML()))->getResources();
         $resource = $resources[0];
         $className = Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
@@ -284,11 +284,23 @@ abstract class AbstractTripleStoreResource {
             //var_dump($validator->getErrorMessages());
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
+        $uuid = $resourceObject -> getProperty(OpenSkos::UUID);
+        $resType = $this->manager -> getResourceType();
+        $resources= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::UUID, $uuid[0], $resType);
+        if (count($resources)>0) {
+           throw new ApiException('The resource with the uuid ' . $uuid[0] . ' has been already registered.', 400);
+       }
     }
     
     //override in superclass when necessary 
     protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
         $this -> validate($resourceObject, $tenantcode);
+         // do not update uuid: it must be intact forever, connected to uri
+        $uuid = $resourceObject->getProperty(OpenSkos::UUID);
+        $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
+        if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
+            throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
+        }
     }
 
 }

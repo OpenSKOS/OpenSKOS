@@ -19,9 +19,13 @@
 
 namespace OpenSkos2\Validator;
 
-use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Schema;
+use OpenSkos2\Set;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\Tenant;
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
 use OpenSkos2\Validator\Concept\CycleInNarrower;
@@ -29,25 +33,38 @@ use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
+use OpenSkos2\Validator\Concept\InSkosCollection;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
-use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
+use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 
+use OpenSkos2\Validator\Set\OpenskosAllowOAI;
+use OpenSkos2\Validator\Set\OpenskosConceptBaseUri;
+use OpenSkos2\Validator\Set\OpenskosOAIBaseUri;
+use OpenSkos2\Validator\Set\OpenskosWebPage;
+use OpenSkos2\Validator\Set\Publisher;
+use OpenSkos2\Validator\Set\License;
+use OpenSkos2\Validator\Set\OpenskosCode as SetOpenskosCode;
+use OpenSkos2\Validator\Set\OpenskosUuid as SetOpenskosUuid;
+use OpenSkos2\Validator\Set\Type as SetType;
+use OpenSkos2\Validator\Set\Title as SetTitle;
+
+use OpenSkos2\Validator\SkosCollection\Creator;
+use OpenSkos2\Validator\SkosCollection\InSet;
+use OpenSkos2\Validator\SkosCollection\Title;
 use OpenSkos2\Validator\Tenant\OpenskosCode;
-use OpenSkos2\Validator\Tenant\OpenskosUuid;
 use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
-use OpenSkos2\Validator\Tenant\Type;
 use OpenSkos2\Validator\Tenant\OpenskosEnableStatussesSystem;
+use OpenSkos2\Validator\Tenant\OpenskosUuid;
+use OpenSkos2\Validator\Tenant\Type;
 use OpenSkos2\Validator\Tenant\vCardAdress;
 use OpenSkos2\Validator\Tenant\vCardEmail;
-use OpenSkos2\Validator\Tenant\vCardURL;
 use OpenSkos2\Validator\Tenant\vCardOrg;
-
-
+use OpenSkos2\Validator\Tenant\vCardURL;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -80,7 +97,7 @@ class Resource
     /**
      * @param ResourceManager          $resourceManager
      * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
     {
@@ -123,7 +140,7 @@ class Resource
     protected function applyValidators(RdfResource $resource)
     {
         $errorsFound = false;
-        /** @var \OpenSkos2\Validator\ValidatorInterface $validator */
+        /** @var ValidatorInterface $validator */
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
             if ($valid) {
@@ -139,7 +156,7 @@ class Resource
             
             $errorsFound = true;
         }
-
+        
         return !$errorsFound;
     }
 
@@ -151,19 +168,19 @@ class Resource
      */
     private function getValidators(RdfResource $resource)
     {
-        if ($resource instanceof \OpenSkos2\Concept) {
+        if ($resource instanceof Concept) {
             return $this->getConceptValidators();
         }
-        if ($resource instanceof \OpenSkos2\Schema) {
+        if ($resource instanceof Schema) {
             return $this->getSchemaValidators();
         }
-        if ($resource instanceof \OpenSkos2\SkosCollection) {
+        if ($resource instanceof SkosCollection) {
             return $this->getSkosCollectionValidators();
         }
-        if ($resource instanceof \OpenSkos2\Set) {
+        if ($resource instanceof Set) {
             return $this->getSetValidators();
         }
-        if ($resource instanceof \OpenSkos2\Tenant) {
+        if ($resource instanceof Tenant) {
             return $this->getTenantValidators();
         }
         return [];
@@ -176,10 +193,10 @@ class Resource
     private function getSchemaValidators()
     {
         $validators = [
-            new Schema\InSet(),
-            new Schema\Title(),
-            new Schema\Desciprion(),
-            new Schema\Creator(),
+            new InSet(),
+            new Title(),
+            new Desciprion(),
+            new Creator(),
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -188,10 +205,10 @@ class Resource
     private function getSkosCollectionValidators()
     {
         $validators = [
-            new SkosCollection\InSet(),
-            new SkosCollection\Title(),
-            new SkosCollection\Desciprion(),
-            new SkosCollection\Creator(),
+            new InSet(),
+            new Title(),
+            new Desciprion(),
+            new Creator(),
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -200,16 +217,16 @@ class Resource
     private function getSetValidators()
     {
         $validators = [
-            new Set\License(),
-            new Set\OpenskosAllowOAI(),
-            new Set\OpenskosCode(),
-            new Set\OpenskosConceptBaseUri(),
-            new Set\OpenskosUuid(),
-            new Set\OpenskosOAIBaseUri(),
-            new Set\OpenskosWebPage(),
-            new Set\Publisher(),
-            new Set\Title(),
-            new Set\Type()
+            new License(),
+            new OpenskosAllowOAI(),
+            new SetOpenskosCode(),
+            new OpenskosConceptBaseUri(),
+            new SetOpenskosUuid(),
+            new OpenskosOAIBaseUri(),
+            new OpenskosWebPage(),
+            new Publisher(),
+            new SetTitle(),
+            new SetType()
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;

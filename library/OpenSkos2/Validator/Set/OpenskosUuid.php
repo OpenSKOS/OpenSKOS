@@ -2,13 +2,13 @@
 
 namespace OpenSkos2\Validator\Set;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Validator\CommonProperties;
+use OpenSkos2\Set;
+use OpenSkos2\Validator\AbstractSetValidator;
 
 class OpenskosUuid extends AbstractSetValidator
 {
-    protected function validateSet(RdfResource $resource)
+    protected function validateSet(Set $resource)
     {
-        return CommonProperties\OpenskosUuid::validate($resource, $this->getErrorMessages());
+        return parent::genericValidate('\CommonProperties\Uuid::validate', $resource, $this->getErrorMessages());
     }
 }

@@ -499,8 +499,12 @@ class ResourceManager
         return $result->count->getValue();
     }
     
-    public function fetchSubjectWithPropertyGiven($propertyUri, $value) {
-        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> "' . $value . '" . }';
+    public function fetchSubjectWithPropertyGiven($propertyUri, $value, $rdfType=null) {
+        $typeFilter = "";
+        if (isset($rdfType)) {
+            $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
+        }
+        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> "' . $value . '" . '. $typeFilter. '}';
         $result = $this->query($query);
         $retVal = $this -> makeJsonList($result, 'subject');
         return $retVal;
@@ -508,14 +512,18 @@ class ResourceManager
     
     
    
-    public function fetchObjectsWithProperty($propertyUri) {
-        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . }';
-        //var_dump($query);
+    public function fetchObjectsWithProperty($propertyUri, $rdfType=null) {
+        $typeFilter = "";
+        if (isset($rdfType)) {
+            $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
+        }
+        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . '. $typeFilter. '}';
+
         $result = $this->query($query);
-        $retVal = $this -> makeJsonList($result, 'object');
+        $retVal = $this->makeJsonList($result, 'object');
         return $retVal;
     }
-    
+
     private function makeJsonList($sparqlQueryResult, $triplePart) {
         $items = [];
         foreach ($sparqlQueryResult as $resource) {

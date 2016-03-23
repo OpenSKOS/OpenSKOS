@@ -30,12 +30,6 @@ class Tenant extends AbstractTripleStoreResource
     protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
         parent::validate($resourceObject, $tenantcode);
         
-        // do not update uuid: it must be intact forever, connected to uuid
-        $uuid = $resourceObject->getProperty(OpenSkos::UUID);
-        $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
-        if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
-            throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
-        }
         // check the  name and the code (if they are new)
         $name = $this->getInstitutionName($resourceObject);
         $oldName = $this->getInstitutionName($existingResourceObject);

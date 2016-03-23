@@ -2,14 +2,14 @@
 
 namespace OpenSkos2\Validator\Set;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Validator\CommonProperties;
+use OpenSkos2\Validator\AbstractSetValidator;
+use OpenSkos2\Set;
+
 class Type extends AbstractSetValidator
 {
     
-    protected function validateSet(RdfResource $resource)
+    protected function validateSet(Set $resource)
     {
-        $retVal = CommonProperties\Type::validate($resource, $this->getErrorMessages());
-        return $retVal;
+         return parent::genericValidate('\CommonProperties\Type::validate', $resource);
     }
 }

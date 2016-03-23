@@ -19,15 +19,12 @@
 
 namespace OpenSkos2\Validator;
 
-use OpenSkos2Set as Set;
+use OpenSkos2\Set;
 use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractSetValidator extends AbstractResourceValidator
 {
-    /**
-     * @param RdfResource $resource
-     * @return bool
-     */
+   
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof Set) {
@@ -36,9 +33,5 @@ abstract class AbstractSetValidator extends AbstractResourceValidator
         return false;
     }
 
-    /**
-     * @param Concept $concept
-     * @return bool
-     */
     abstract protected function validateSet(Set $set);
 }

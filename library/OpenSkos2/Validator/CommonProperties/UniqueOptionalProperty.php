@@ -9,7 +9,7 @@ class UniqueOptionalProperty
 {
     public static function validate(RdfResource $resource, $type, $isBoolean) {
         $val = $resource->getProperty($type);
-        $retval = attay();
+        $retval = array();
         if (count(array_filter($val)) > 1) {
             $retval[] = 'There must be exactly 1 ' . $type . ' per resource. You have submitted a few of them';
         }

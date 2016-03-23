@@ -29,7 +29,7 @@ class TenantManager extends ResourceManager
      */
     protected $resourceType = Tenant::TYPE;
     
-     //check conditions when it can be depeleted
+     //check conditions when it can be deleted
     public function CanBeDeleted(){
         return true;
     }
