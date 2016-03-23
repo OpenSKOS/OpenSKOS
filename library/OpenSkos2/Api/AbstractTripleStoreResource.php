@@ -18,6 +18,7 @@ use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Namespaces\OpenSkos;
 
 abstract class AbstractTripleStoreResource {
 
@@ -213,14 +214,22 @@ abstract class AbstractTripleStoreResource {
                     $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
             );
         }
-
+        
+        $uuid=$resourceObject->getProperty(OpenSkos::UUID);
+            
         if ($autoGenerateIdentifiers) {
             if (!$resourceObject->isBlankNode()) {
                 throw new InvalidArgumentException(
-                'Parameter autoGenerateIdentifiers is set to true, but the '
+                'Parameter autoGenerateIdentifiers is set to true, but the provided '
                 . 'xml already contains uri (rdf:about).', 400
                 );
-            }
+            };
+            if (count($uuid)>0) {
+                throw new InvalidArgumentException(
+                'Parameter autoGenerateIdentifiers is set to true, but the provided '
+                . 'xml  already contains uuid.', 400
+                );
+            };
         } else {
             // Is uri missing
             if ($resourceObject->isBlankNode()) {
@@ -228,6 +237,11 @@ abstract class AbstractTripleStoreResource {
                 'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             }
+            if (count($uuid)===0) {
+                throw new InvalidArgumentException(
+                'OpenSkos:uuid is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
+                );
+            };
         }
 
         return $autoGenerateIdentifiers;

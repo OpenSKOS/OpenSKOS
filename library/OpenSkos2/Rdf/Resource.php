@@ -23,6 +23,7 @@ use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
@@ -332,7 +333,8 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        $uri = $this->assembleUri($tenantcode);
+        $uuid=Uuid::uuid4();
+        $uri = $this->assembleUri($tenantcode, $uuid);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
@@ -341,12 +343,13 @@ class Resource extends Uri implements ResourceIdentifier
         }
 
         $this->setUri($uri);
+        $this -> setProperty(OpenSkos::UUID, new Literal($uuid));
         return $uri;
     }
 
-   // TODO: must be rewritten by using epic
-    protected function assembleUri($tenantcode) {
-        $uri = "http://" . $tenantcode . '/' . Uuid::uuid4();
+   // TODO: must be rewritten, use epic
+    protected function assembleUri($tenantcode, $uuid) {
+        $uri = "http://" . $tenantcode . '/' . $uuid;
         return $uri;
     }
 
