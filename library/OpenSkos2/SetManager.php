@@ -19,6 +19,7 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Namespaces\DcTerms;
 
 class SetManager extends ResourceManager
 {
@@ -31,5 +32,12 @@ class SetManager extends ResourceManager
      //check conditions when it can be deleted
     public function CanBeDeleted(){
         return true;
+    }
+    
+     public function fetchUriName() {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  }';
+        $response = $this->query($query);
+        $result = $this->makeJsonUriNameMap($response);
+        return $result;
     }
 }

@@ -1,8 +1,5 @@
 <?php
 
-use OpenSkos2\Namespaces\Dcterms;
-use OpenSkos2\Namespaces\Dcmi;
-
 require_once 'AbstractController.php';
 
 class Api_SetController extends AbstractController
@@ -11,10 +8,7 @@ class Api_SetController extends AbstractController
     public function init()
     {
        parent::init();
-       $this -> resourceClass = 'Set';
        $this->fullNameResourceClass = 'OpenSkos2\Api\Set';
-       $this ->indexProperty  = Dcterms::TITLE;
-       $this -> rdfType = Dcmi::DATASET;
     }
     
      public function indexAction()

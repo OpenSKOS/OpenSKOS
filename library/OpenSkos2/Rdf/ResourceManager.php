@@ -504,7 +504,7 @@ class ResourceManager
         if (isset($rdfType)) {
             $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
-        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> "' . $value . '" . '. $typeFilter. '}';
+        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
         $result = $this->query($query);
         $retVal = $this -> makeJsonList($result, 'subject');
         return $retVal;
@@ -536,6 +536,23 @@ class ResourceManager
         }
         return $items;
     }
+    
+    protected function makeJsonUriNameMap($sparqlQueryResult) {
+        $items = [];
+        foreach ($sparqlQueryResult as $resource) {
+            $uri = $resource->uri->getUri();
+            $name = $resource->name->getValue();
+            $items[$name]=$uri;
+        }
+        return $items;
+    }
+    
+    // override in the superclass
+    public function fetchUriName() {
+        return [];
+    }
+    
+    
 
     /**
      * Asks for if the properties map has a match.

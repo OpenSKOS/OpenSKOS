@@ -112,7 +112,11 @@ abstract class AbstractTripleStoreResource {
      public function update(ServerRequestInterface $request) {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
-            $existingResource = $this->manager->fetchByUri((string)$resourceObject->getUri());
+            if ($resourceObject->isBlankNode()) {
+                throw new Exception("Missed uri (rdf:about)!");
+            }
+            $uri = $resourceObject->getUri();
+            $existingResource = $this->manager->fetchByUri((string)$uri);
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
             $resourceObject->addMetadata(array('user' => $user));
@@ -120,6 +124,7 @@ abstract class AbstractTripleStoreResource {
             $this->resourceEditAllowed($user);    
 
             $this->validateForUpdate($resourceObject, $tenantcode, $existingResource);
+           
             $this->manager->replace($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -144,7 +149,7 @@ abstract class AbstractTripleStoreResource {
 
             $user = $this->getUserFromParams($params);
             if (!$this->resourceDeleteAllowed($user)) {
-                throw new ApiException('You do not have priority to delete this resource ' . $uri, 403);
+                throw new ApiException('You do not have rights to delete this resource ' . $uri, 403);
             }
 
             $canBeDeleted = $this->manager->CanBeDeleted();
@@ -286,7 +291,7 @@ abstract class AbstractTripleStoreResource {
         }
         $uuid = $resourceObject -> getProperty(OpenSkos::UUID);
         $resType = $this->manager -> getResourceType();
-        $resources= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::UUID, $uuid[0], $resType);
+        $resources= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"'.$uuid[0].'"' , $resType);
         if (count($resources)>0) {
            throw new ApiException('The resource with the uuid ' . $uuid[0] . ' has been already registered.', 400);
        }
@@ -294,7 +299,10 @@ abstract class AbstractTripleStoreResource {
     
     //override in superclass when necessary 
     protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
-        $this -> validate($resourceObject, $tenantcode);
+        $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
+        if (!$validator->validate($resourceObject)) {
+            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
+        }
          // do not update uuid: it must be intact forever, connected to uri
         $uuid = $resourceObject->getProperty(OpenSkos::UUID);
         $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
@@ -302,5 +310,29 @@ abstract class AbstractTripleStoreResource {
             throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
         }
     }
+    
+    protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
+        $val = $resourceObject->getProperty($propertyUri);
+        $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val[0]) . '"', $rdfType);
+        if (count($resources) > 0) {
+            throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $val[0] . ' has been already registered.', 400);
+        }
+    }
+
+    protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
+        $value= $resourceObject->getProperty($propertyUri);
+        $oldValue = $existingResourceObject ->getProperty($propertyUri);
+        if ($value[0]->getValue() !== $oldValue[0]->getValue()) {
+            // new val should not occur amnogst existing old values of the same property
+            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"'.$value[0].'"', $rdfType);
+            if (count($resources) > 0) {
+                throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $value[0] . ' has been already registered.', 400);
+            }
+        } 
+   }
+    
+   public function fetchUriName(){
+       return $this ->manager-> fetchUriName();
+   }
 
 }

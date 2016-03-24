@@ -20,6 +20,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Tenant;
+use OpenSkos2\Namespaces\vCard;
 
 class TenantManager extends ResourceManager
 {
@@ -32,5 +33,12 @@ class TenantManager extends ResourceManager
      //check conditions when it can be deleted
     public function CanBeDeleted(){
         return true;
+    }
+    
+    public function fetchUriName() {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeJsonUriNameMap($response);
+        return $result;
     }
 }

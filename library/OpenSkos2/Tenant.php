@@ -19,9 +19,8 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Resource as Resource;
-use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Namespaces\vCard;
 /**
  * Representation of tenant.
  */
@@ -29,21 +28,18 @@ class Tenant extends Resource
 {
     
     const TYPE = Org::FORMALORG;
-    
+
     protected $code;
-    
-   
-    public function getCode()
-    {
+
+    public function getCode() {
         return $this->code;
     }
-    
-   
-   
-     public function __construct($uri = null)
-    {
+
+    public function __construct($uri = null) {
         parent::__construct($uri);
         //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
+
+   
 
 }

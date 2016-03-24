@@ -1,12 +1,10 @@
 <?php
+use OpenSkos2\Namespaces\Rdf;
 
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 
 {
-    protected $resourceClass;
     protected $fullNameResourceClass;
-    protected $indexProperty;
-    protected $rdfType;
     
     
     public function init()
@@ -17,35 +15,31 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     }
     
       public function indexAction()
-    {
-        if ('json' !== $this->_helper->contextSwitch()->getCurrentContext()) {
-            $this->_501('This action, which lists the uris of all ' . $this -> resourceClass . ' is currently  implemented only for json format output.');
-        };
-        $resourceManager = $this -> getResourceManager();
-        $result = $resourceManager ->fetchObjectsWithProperty($this -> indexProperty, $this ->rdfType);
-        
-        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
-    }
-   
-     public function getAction()
-    {
-       $this->_helper->viewRenderer->setNoRender(true);
-       $api = $this->getDI()->make($this->fullNameResourceClass);
-        
-        // Exception for html use ZF 1 easier with linking in the view
-        if ('html' === $this ->getParam('format')) {
-            //$this->view->concept = $apiConcept->getConcept($id);
-            //return $this->renderScript('concept/get.phtml');
-            throw new Exception('HTML format is not implemented yet', 404);
+ {
+        $format = $this->getParam('format');
+        if ('json' !== $format) {
+            throw new Exception('Resource listing is implemented only in format=json', 404);
         }
         
         $request = $this->getPsrRequest();
+        $api = $this->getDI()->make($this->fullNameResourceClass);
+        $result = $api->fetchUriName($request);
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
+    }
+
+    public function getAction() {
+        if ('html' === $this->getParam('format')) {
+            throw new Exception('HTML format is not implemented yet', 404);
+        }
+        $this->_helper->viewRenderer->setNoRender(true);
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make($this->fullNameResourceClass);
         $response = $api->findResourceById($request);
         $this->emitResponse($response);
     }
-    
-     public function postAction()
+
+    public function postAction()
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
@@ -68,4 +62,6 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $response = $api->deleteResourceObject($request);
         $this->emitResponse($response);
     }
+    
+    
 }

@@ -1,8 +1,5 @@
 <?php
 
-use OpenSkos2\Namespaces\vCard;
-use OpenSkos2\Namespaces\Org;
-
 require_once 'AbstractController.php';
 
 class Api_InstitutionController extends AbstractController
@@ -10,9 +7,8 @@ class Api_InstitutionController extends AbstractController
     public function init()
     {
        parent::init();
-       $this -> resourceClass = 'Tenant';
        $this->fullNameResourceClass = 'OpenSkos2\Api\Tenant';
-       $this ->indexProperty  = vCard::ORGNAME;
+      
     }
     
      public function indexAction()
@@ -39,4 +35,6 @@ class Api_InstitutionController extends AbstractController
     {
         parent::deleteAction();
     }
+    
+    
 }

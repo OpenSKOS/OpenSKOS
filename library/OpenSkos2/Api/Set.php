@@ -19,15 +19,16 @@ class Set extends AbstractTripleStoreResource
     
      protected function validate($resourceObject, $tenantcode) {
        parent::validate($resourceObject, $tenantcode);
-       $code = $resourceObject->getProperty(OpenSkos::CODE);
-       $sets= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, trim($code[0]),  Dcmi::DATASET);
-       if (count($sets)>0) {
-           throw new ApiException('The set with the code ' . $code[0]. ' has been already registered.', 400);
-       }
-       $title = $resourceObject->getProperty(DcTerms::TITLE);
-       $sets2= $this -> manager -> fetchSubjectWithPropertyGiven(DcTerms::TITLE, trim($title[0]), Dcmi::DATASET);
-       if (count($sets2)>0) {
-           throw new ApiException('The set with the title ' . $title[0]. ' has been already registered.', 400);
-       }
+       $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Dcmi::DATASET);
+       $this->validatePropertyForCreate($resourceObject, OpenSkos::CODE, Dcmi::DATASET);
+    }
+    
+    
+    
+    protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+        // check the  titles and the code (if they are new)
+        $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Dcmi::DATASET);
+        $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, OpenSkos::CODE, Dcmi::DATASET);
     }
 }
