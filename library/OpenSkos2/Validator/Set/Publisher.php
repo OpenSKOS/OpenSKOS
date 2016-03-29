@@ -11,6 +11,7 @@ class Publisher extends AbstractSetValidator
     
     protected function validateSet(Set $resource)
     {
+        // check if this corresponds to the logged-in tenant
         return parent::genericValidate('\CommonProperties\UniqueOptionalProperty::validate', $resource, DcTerms::PUBLISHER, false, $this->getErrorMessages());
     
     }

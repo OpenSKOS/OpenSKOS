@@ -11,7 +11,7 @@ class UniqueObligatoryProperty
         $retval = array();
         $val = $resource->getProperty($type);
         if (!count(array_filter($val))) {
-            $retval[] = $type . ' is required for all resources.';
+            $retval[] = $type . ' is required for all resources of this type';
         }
         if (count(array_filter($val)) > 1) {
             $retval[] = 'There must be exactly 1 ' . $type . ' per resource. A few of them are given, or there are duplications.';

@@ -199,7 +199,7 @@ class Repository implements InterfaceRepository
             $items[] = new Set($spec, $row['dc_title']);
 
             // Concept scheme spec
-            $schemes = $this->schemeManager->getSchemeByCollectionUri($row['uri']);
+            $schemes = $this->schemeManager->getSchemeBySetUri($row['uri']);
             foreach ($schemes as $scheme) {
                 $uuidProp = $scheme->getProperty(OpenSkos::UUID);
                 $uuid = $uuidProp[0]->getValue();

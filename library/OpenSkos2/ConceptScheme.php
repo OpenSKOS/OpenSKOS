@@ -22,15 +22,15 @@ namespace OpenSkos2;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
 
 class ConceptScheme extends Resource
 {
-    const TYPE = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
+    const TYPE = Skos::CONCEPTSCHEME;
     
     /**
      * Resource constructor.
@@ -68,12 +68,12 @@ class ConceptScheme extends Resource
     }
 
     /**
-     * Gets preview title for the concept.
+     * Gets preview title for the concept schema.
      * @param string $language
      * @return string
      * @throws \Exception
      */
-    public function getCaption($language = null)
+    public function getTitle($language = null)
     {
         if ($this->hasPropertyInLanguage(DcTerms::TITLE, $language)) {
             return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
@@ -123,16 +123,13 @@ class ConceptScheme extends Resource
         }
     }
     
-    /**
-     * Get institution row
-     * @TODO Remove dependency on OpenSKOS v1 library
-     * @return OpenSKOS_Db_Table_Row_Tenant
-     */
-    public function getInstitution()
+    public function getDescription()
     {
-        // @TODO Remove dependency on OpenSKOS v1 library
-        $model = new OpenSKOS_Db_Table_Tenants();
-        return $model->find($this->getTenant())->current();
+        if ($this->hasProperty(DcTerms::DESCRIPTION)) {
+            return (string)$this->getPropertySingleValue(DcTerms::DESCRIPTION);
+        } else {
+            return null;
+        }
     }
     
     /**
@@ -141,19 +138,21 @@ class ConceptScheme extends Resource
      * @param Uri $set
      * @param Uri $person
      */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person)
+    public function addMetadata($user, $params)
     {
         //@TODO Combine with concept ensure metadata.
+        
         
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
         
+        
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Literal($tenantCode),
-            OpenSkos::SET => $set,
-            DcTerms::CREATOR => $person,
+            OpenSkos::TENANT => new Literal($params['tenant']),
+            OpenSkos::SET => $params['set'],
+            DcTerms::CREATOR => $user,
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
         
@@ -165,7 +164,7 @@ class ConceptScheme extends Resource
         
         // @TODO Should we add modified instead of replace it. Or put it only on create.
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $user);
     }
     
     /**

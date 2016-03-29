@@ -27,6 +27,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Rdf\Serializer\NTriple;
@@ -119,11 +120,9 @@ class ResourceManager
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
-       
         $this->client->insert(EasyRdf::resourceToGraph($resource));
-
-        
-        // Add resource to solr
+      
+// Add resource to solr
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
         $convert = new Document($resource, $doc); 
@@ -547,9 +546,12 @@ class ResourceManager
         return $items;
     }
     
-    // override in the superclass
+    // override in the superclass whene necessary (e.g. for tenants)
     public function fetchUriName() {
-        return [];
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <'. $this->getResourceType() .'> .}';
+        $response = $this->query($query);
+        $result = $this->makeJsonUriNameMap($response);
+        return $result;
     }
     
     
@@ -724,4 +726,6 @@ class ResourceManager
 
         return $query;
     }
+    
+    
 }

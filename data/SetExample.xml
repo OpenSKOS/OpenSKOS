@@ -2,12 +2,11 @@
 <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:openskos = "http://openskos.org/xmlns#"
 xmlns:dcterms = "http://purl.org/dc/terms/"
-xmlns:dcmitype = "http://purl.org/dc/dcmitype/">
-    <rdf:Description rdf:about="http://example.com/set-example">
-        <rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/> 
-        <openskos:code>xxx</openskos:code>
-        <openskos:uuid>xxx</openskos:uuid>
-        <dcterms:title>CLARIN collection</dcterms:title>
+xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
+    <rdf:Description rdf:about="http://mi/a62c629e-a6b7-41bf-b5ca-4530deffd3c4">
+<openskos:uuid>a62c629e-a6b7-41bf-b5ca-4530deffd3c4s</openskos:uuid>
+        <openskos:code>set4</openskos:code>
+        <dcterms:title>CLARIN collection 4</dcterms:title>
         <dcterms:licence rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:licence>
         <dcterms:publisher rdf:resource="https://openskos.meertens.knaw.nl/api/institution/meertens"></dcterms:publisher>
         <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens"/>

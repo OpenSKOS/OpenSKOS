@@ -24,10 +24,7 @@ use OpenSkos2\Namespaces\vCard;
 
 class TenantManager extends ResourceManager
 {
-    /**
-     * What is the basic resource for this manager.
-     * @var string NULL means any resource.
-     */
+  
     protected $resourceType = Tenant::TYPE;
     
      //check conditions when it can be deleted

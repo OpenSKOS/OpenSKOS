@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:vCard="http://www.w3.org/2006/vcard/ns#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:org="https://www.w3.org/ns/org">
     <rdf:Description>
-        <rdf:type rdf:resource="https://www.w3.org/ns/org#FormalOrganization"/>
         <openskos:code>mi-YL</openskos:code>
         <vCard:ORG rdf:parseType="Resource">
             <vCard:orgname>Meertens YL</vCard:orgname>

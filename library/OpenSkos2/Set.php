@@ -38,6 +38,6 @@ class Set extends Resource
      public function __construct($uri = null)
     {
         parent::__construct($uri);
-        //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 }

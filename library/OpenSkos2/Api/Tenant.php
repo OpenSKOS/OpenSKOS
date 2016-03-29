@@ -15,7 +15,7 @@ class Tenant extends AbstractTripleStoreResource
     }
     
   
-    
+     // specific content validation
     protected function validate($resourceObject, $tenantcode) {
        parent::validate($resourceObject, $tenantcode);
        $name = $this -> getInstitutionName($resourceObject);
@@ -26,6 +26,7 @@ class Tenant extends AbstractTripleStoreResource
        $this->validatePropertyForCreate($resourceObject, OpenSkos::CODE, Org::FORMALORG);
     }
     
+     // specific content validation
     protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
         parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
         

@@ -19,18 +19,17 @@
 
 namespace OpenSkos2\Validator\SkosCollection;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\Validator\AbstractSkosCollectionValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-use OpenSkos2\Validator\CommonProperties;
 
 class InSet extends AbstractSkosCollectionValidator implements ResourceManagerAware
 {
     use ResourceManagerAwareTrait;
     
-    protected function validateSkosCollection(RdfResource $resource)
+    protected function validateSkosCollection(SkosCollection $resource)
     {
-        $retVal = CommonProperties\InSet::validate($resource, $this->getErrorMessages());
-        return $retVal;
+        return parent::genericValidate('\CommonProperties\InSet::validate', $resource);
     }
 }

@@ -35,6 +35,10 @@ class ConceptSchemeManager extends ResourceManager
      */
     protected $resourceType = ConceptScheme::TYPE;
 
+     //TODO: check conditions when it can be deleted
+    public function CanBeDeleted(){
+        return true;
+    }
     /**
      * Get all scheme's by collection URI
      *
@@ -42,7 +46,7 @@ class ConceptSchemeManager extends ResourceManager
      * @param array $filterUris
      * @return ResourceCollection
      */
-    public function getSchemeByCollectionUri($collectionUri, $filterUris = [])
+    public function getSchemeBySetUri($collectionUri, $filterUris = [])
     {
         $uri = new Uri($collectionUri);
         $escaped = (new NTriple())->serialize($uri);

@@ -4,12 +4,10 @@
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\SetManager;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
-
-use OpenSkos2\Api\Exception\ApiException;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\SetManager;
 
 class Set extends AbstractTripleStoreResource
 {
@@ -17,6 +15,7 @@ class Set extends AbstractTripleStoreResource
         $this->manager = $manager;
     }
     
+     // specific content validation
      protected function validate($resourceObject, $tenantcode) {
        parent::validate($resourceObject, $tenantcode);
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Dcmi::DATASET);
@@ -24,7 +23,7 @@ class Set extends AbstractTripleStoreResource
     }
     
     
-    
+     // specific content validation
     protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
         parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
         // check the  titles and the code (if they are new)

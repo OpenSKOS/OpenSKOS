@@ -8,6 +8,8 @@
 
 namespace OpenSkos2;
 
+
+use OpenSkos2\SkosCollection;
 use OpenSkos2\Rdf\ResourceManager;
 
 class SkosCollectionManager extends ResourceManager
@@ -18,10 +20,9 @@ class SkosCollectionManager extends ResourceManager
      */
     protected $resourceType = SkosCollection::TYPE;
     
-    public function fetchConceptsForSkosCollection($uri) {
-        $sparqlQuery = 'select ?s  where {?s <http://openskos.org/xmlns#inSkosCollection>  <' . $uri . '> . }';
-        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
-        $resource = $this->query($sparqlQuery);
-        return $resource;
+     //check conditions when it can be deleted
+    public function CanBeDeleted(){
+        return true;
     }
+    
 }

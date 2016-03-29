@@ -2,12 +2,13 @@
 
 require_once 'AbstractController.php';
 
-class Api_SkosCollectionController extends AbstractController
+class Api_ConceptSchemeController extends AbstractController
 {
+   
      public function init()
     {
        parent::init();
-       $this->fullNameResourceClass = 'OpenSkos2\Api\SkosCollection';
+       $this->fullNameResourceClass = 'OpenSkos2\Api\ConceptScheme';
       
     }
     

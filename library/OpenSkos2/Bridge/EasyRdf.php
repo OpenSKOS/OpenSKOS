@@ -41,6 +41,7 @@ use OpenSkos2\SkosCollection;
 use OpenSkos2\SkosCollectionCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
+use OpenSkos2\Namespaces\Rdf;
 
 class EasyRdf {
 
@@ -83,7 +84,15 @@ class EasyRdf {
     }
 
     private static function makeNode(&$myResource, Resource2 $resource, $subResources){
-        foreach ($resource->propertyUris() as $propertyUri) {
+        $propertyUris = $resource->propertyUris();
+        // type has been already identified and set in the resource constructor
+        // we do no need to duplicate it 
+        $typeIndex = array_search(Rdf::TYPE, $propertyUris);
+        if ($typeIndex){
+            unset($propertyUris[$typeIndex]);
+        }
+        unset($propertyUris[Rdf::TYPE]);
+        foreach ($propertyUris as $propertyUri) {
                 foreach ($resource->all(new Resource2($propertyUri)) as $propertyValue) {
                     if ($propertyValue instanceof Literal2) {
                         $myResource->addProperty(
@@ -99,7 +108,6 @@ class EasyRdf {
                         $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue, $subResources);
                         $myResource->addProperty($propertyUri,  $mySubResource);
-                        //$myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
             }
@@ -219,10 +227,11 @@ class EasyRdf {
                         $propName,
                         new Literal2($val, $value->getLanguage(), $value->getType())
                     );
-                } elseif ($value instanceof Uri) {
+                } else if ($value instanceof Uri) {
                         $easyResource->addResource($propName, trim($value->getUri())); 
+                       if ($value instanceof Resource) {
                         self::addResourceToGraph($value, $graph); 
-                    
+                       }
                 } else {
                     //var_dump($value);
                     throw new InvalidArgumentException(

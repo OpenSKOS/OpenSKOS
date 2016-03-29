@@ -17,20 +17,18 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator\Schema;
+namespace OpenSkos2\Validator\ConceptScheme;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\Validator\AbstractConceptSchemeValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-use OpenSkos2\Validator\CommonProperties;
 
-class InSet extends AbstractSchemaValidator implements ResourceManagerAware
+class InSet extends AbstractConceptSchemeValidator
 {
     use ResourceManagerAwareTrait;
     
-    protected function validateSchema(RdfResource $resource)
+    protected function validateSchema(ConceptScheme $resource)
     {
-        $retVal = CommonProperties\InSet::validate($resource, $this->getErrorMessages());
-        return $retVal;
+      return parent::genericValidate('\CommonProperties\InSet::validate', $resource);
     }
 }

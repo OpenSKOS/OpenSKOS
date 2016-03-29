@@ -20,7 +20,8 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Resource as Resource;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
 /**
  * Representation of tenant.
  */
@@ -37,7 +38,7 @@ class Tenant extends Resource
 
     public function __construct($uri = null) {
         parent::__construct($uri);
-        //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
    

@@ -35,7 +35,7 @@ class InScheme extends AbstractConceptValidator implements ResourceManagerAware
      
     protected function validateConcept(Concept $concept)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, Skos::INSCHEME, Schema::TYPE, true, $this->getErrorMessages());
+        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, Skos::INSCHEME, ConceptScheme::TYPE, true, $this->getErrorMessages());
         return $retVal;
     }
 }

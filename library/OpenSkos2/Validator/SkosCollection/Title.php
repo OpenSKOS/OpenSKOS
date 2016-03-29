@@ -2,13 +2,13 @@
 
 namespace OpenSkos2\Validator\SkosCollection;
 
-use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Validator\CommonProperties;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\Validator\AbstractSkosCollectionValidator;
 
-class Title extends AbstractSkosCollectionValidator
-{
-    protected function validateSkosCollection(RdfResource $resource)
-    {
-        return CommonProperties\Title::validate($resource, $this->getErrorMessages());
+class Title extends AbstractSkosCollectionValidator {
+
+    protected function validateSkosCollection(SkosCollection $resource) {
+        return parent::genericValidate('\CommonProperties\Title::validate', $resource);
     }
+
 }

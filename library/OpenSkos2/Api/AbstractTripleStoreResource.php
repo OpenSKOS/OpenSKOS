@@ -6,10 +6,13 @@ use DOMDocument;
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
+use OpenSkos2\Api\Transform\DataArray;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant as Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
@@ -17,15 +20,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Namespaces\OpenSkos;
 
 abstract class AbstractTripleStoreResource {
 
     use \OpenSkos2\Api\Response\ApiResponseTrait;
 
     protected $manager;
-
+    
     public function getManager() {
         return $this->manager;
     }
@@ -53,7 +54,7 @@ abstract class AbstractTripleStoreResource {
             }
             switch ($format) {
                 case 'json':
-                    $prep = (new \OpenSkos2\Api\Transform\DataArray($resource, []))->transform();
+                    $prep = (new DataArray($resource, []))->transform();
                     $response = $this->getSuccessResponse(json_encode($prep, JSON_UNESCAPED_SLASHES), 200, 'application/json');
                     break;
                 case 'rdf':
@@ -82,7 +83,6 @@ abstract class AbstractTripleStoreResource {
     private function handleCreate(ServerRequestInterface $request) {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
-
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
                 throw new InvalidArgumentException(
                 'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.', 400
@@ -91,14 +91,12 @@ abstract class AbstractTripleStoreResource {
 
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
-            $resourceObject->addMetadata(array('user' => $user));
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
-            
+            $resourceObject->addMetadata($user, $params);
             if ($autoGenerateUri) {
                 $tenantcode = $this->getParamValueFromParams($params, 'tenant');
                 $resourceObject->selfGenerateUri($tenantcode, $this->manager);
             };
-            
             $this->validate($resourceObject, $tenantcode);
             $this->manager->insert($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -166,7 +164,6 @@ abstract class AbstractTripleStoreResource {
     }
 
     private function getResourceObjectFromRequestBody(ServerRequestInterface $request) {
-        
         $doc = $this->getDomDocumentFromRequest($request);
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
@@ -175,7 +172,11 @@ abstract class AbstractTripleStoreResource {
             . '/rdf:RDF/rdf:Description, got ' . $descriptions->length, 412
             );
         }
-                
+        
+        $typeNode = $doc->createElement("rdf:type");
+        $descriptions->item(0)->appendChild($typeNode);
+        $typeNode ->setAttribute("rdf:resource", $this->manager->getResourceType());
+        
         $resources = (new Text($doc->saveXML()))->getResources();
         $resource = $resources[0];
         $className = Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
@@ -221,7 +222,6 @@ abstract class AbstractTripleStoreResource {
         }
         
         $uuid=$resourceObject->getProperty(OpenSkos::UUID);
-            
         if ($autoGenerateIdentifiers) {
             if (!$resourceObject->isBlankNode()) {
                 throw new InvalidArgumentException(
@@ -289,6 +289,7 @@ abstract class AbstractTripleStoreResource {
             //var_dump($validator->getErrorMessages());
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
+        //content validation, where you need to look up the triple store
         $uuid = $resourceObject -> getProperty(OpenSkos::UUID);
         $resType = $this->manager -> getResourceType();
         $resources= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"'.$uuid[0].'"' , $resType);
@@ -303,14 +304,18 @@ abstract class AbstractTripleStoreResource {
         if (!$validator->validate($resourceObject)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
+        // content validation, where you need to look up the triple store
          // do not update uuid: it must be intact forever, connected to uri
         $uuid = $resourceObject->getProperty(OpenSkos::UUID);
+        
         $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
+        var_dump($oldUuid);
         if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
             throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
         }
     }
     
+    // property-content validation, where you need to look up the triple store
     protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
         $val = $resourceObject->getProperty($propertyUri);
         $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val[0]) . '"', $rdfType);
@@ -319,6 +324,7 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
+    // property-content validation, where you need to look up the triple store
     protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
         $value= $resourceObject->getProperty($propertyUri);
         $oldValue = $existingResourceObject ->getProperty($propertyUri);

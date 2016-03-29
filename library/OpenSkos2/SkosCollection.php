@@ -9,14 +9,9 @@
 
 namespace OpenSkos2;
 
-use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Rdf\Uri;
-use Rhumsaa\Uuid\Uuid;
 
 class SkosCollection extends Resource
 {
@@ -24,7 +19,7 @@ class SkosCollection extends Resource
 
     public function __construct($uri = null) {
         parent::__construct($uri);
-        //$this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
     
     // how to add get property-reference attribute??
@@ -49,10 +44,10 @@ class SkosCollection extends Resource
         }
     }
     
-    public function getComment()
+   public function getDescription()
     {
-        if ($this->hasProperty(Rdfs::COMMENT)) {
-            return (string)$this->getPropertySingleValue(Rdfs::COMMENT);
+        if ($this->hasProperty(DcTerms::DESCRIPTION)) {
+            return (string)$this->getPropertySingleValue(DcTerms::DESCRIPTION);
         } else {
             return null;
         }

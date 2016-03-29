@@ -22,10 +22,11 @@ namespace OpenSkos2\Validator;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Schema;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
+
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
 use OpenSkos2\Validator\Concept\CycleInNarrower;
@@ -53,9 +54,18 @@ use OpenSkos2\Validator\Set\OpenskosUuid as SetOpenskosUuid;
 use OpenSkos2\Validator\Set\Type as SetType;
 use OpenSkos2\Validator\Set\Title as SetTitle;
 
-use OpenSkos2\Validator\SkosCollection\Creator;
-use OpenSkos2\Validator\SkosCollection\InSet;
-use OpenSkos2\Validator\SkosCollection\Title;
+use OpenSkos2\Validator\SkosCollection\Creator as SkosCollCreator;
+use OpenSkos2\Validator\SkosCollection\InSet as SkosCollInSet;
+use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
+use OpenSkos2\Validator\SkosCollection\Description as SkosCollDescription;
+use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
+
+use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
+use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
+use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
+use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
+use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
+
 use OpenSkos2\Validator\Tenant\OpenskosCode;
 use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
 use OpenSkos2\Validator\Tenant\OpenskosEnableStatussesSystem;
@@ -65,6 +75,7 @@ use OpenSkos2\Validator\Tenant\vCardAdress;
 use OpenSkos2\Validator\Tenant\vCardEmail;
 use OpenSkos2\Validator\Tenant\vCardOrg;
 use OpenSkos2\Validator\Tenant\vCardURL;
+
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -141,6 +152,7 @@ class Resource
     {
         $errorsFound = false;
         /** @var ValidatorInterface $validator */
+        
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
             if ($valid) {
@@ -167,11 +179,12 @@ class Resource
      * @return array
      */
     private function getValidators(RdfResource $resource)
-    {
+    {   
+        //var_dump($resource);
         if ($resource instanceof Concept) {
             return $this->getConceptValidators();
         }
-        if ($resource instanceof Schema) {
+        if ($resource instanceof ConceptScheme) {
             return $this->getSchemaValidators();
         }
         if ($resource instanceof SkosCollection) {
@@ -193,11 +206,13 @@ class Resource
     private function getSchemaValidators()
     {
         $validators = [
-            new InSet(),
-            new Title(),
-            new Desciprion(),
-            new Creator(),
+            new SchemaInSet(),
+            new SchemaTitle(),
+            new SchemaDescription(),
+            new SchemaCreator(),
+            new SchemaUuid(),
         ];
+        //var_dump($validators);
         $validators = $this -> refineValidators($validators);
         return $validators;
     }
@@ -205,10 +220,11 @@ class Resource
     private function getSkosCollectionValidators()
     {
         $validators = [
-            new InSet(),
-            new Title(),
-            new Desciprion(),
-            new Creator(),
+            new SkosCollInSet(),
+            new SkosCollTitle(),
+            new SkosCollDescription(),
+            new SkosCollCreator(),
+            new SkosCollUuid(),
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;

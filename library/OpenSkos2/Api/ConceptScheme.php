@@ -1,21 +1,14 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\SkosCollectionManager;
+use OpenSkos2\ConceptSchemeManager;
 
-
-class SkosCollection extends AbstractTripleStoreResource
+class ConceptScheme extends AbstractTripleStoreResource
 {
-     public function __construct(SkosCollectionManager $manager) {
+    public function __construct(ConceptSchemeManager $manager) {
         $this->manager = $manager;
     }
     
@@ -32,7 +25,7 @@ class SkosCollection extends AbstractTripleStoreResource
     protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
         parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
         
-        // must not occur as another collection's name if different from the old one 
+        // must not occur as another schema's name if different from the old one 
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
     }
 }
