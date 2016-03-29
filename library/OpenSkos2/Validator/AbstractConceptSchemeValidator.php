@@ -19,5 +19,5 @@ abstract class AbstractConceptSchemeValidator extends AbstractResourceValidator
         return false;
     }
     
-    abstract protected function validateSchema(Schema $schema);
+    abstract protected function validateSchema(ConceptScheme $schema);
 }

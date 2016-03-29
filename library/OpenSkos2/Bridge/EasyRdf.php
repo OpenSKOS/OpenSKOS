@@ -228,10 +228,13 @@ class EasyRdf {
                         new Literal2($val, $value->getLanguage(), $value->getType())
                     );
                 } else if ($value instanceof Uri) {
-                        $easyResource->addResource($propName, trim($value->getUri())); 
-                       if ($value instanceof Resource) {
-                        self::addResourceToGraph($value, $graph); 
-                       }
+                    if ($value instanceof Resource) {
+                        $easyResource->addResource($propName, trim($value->getUri()));
+                        self::addResourceToGraph($value, $graph);
+                    } else {
+                        //var_dump($value->getUri());
+                        $easyResource->addResource($propName, trim($value->getUri()));
+                    }
                 } else {
                     //var_dump($value);
                     throw new InvalidArgumentException(

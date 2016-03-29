@@ -3,7 +3,9 @@
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\ConceptSchemeManager;
 
 class ConceptScheme extends AbstractTripleStoreResource
@@ -18,6 +20,9 @@ class ConceptScheme extends AbstractTripleStoreResource
        
        //must be new
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
+       
+       // set referred by an uri must exist 
+       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
     }
     
     
@@ -27,5 +32,8 @@ class ConceptScheme extends AbstractTripleStoreResource
         
         // must not occur as another schema's name if different from the old one 
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
+        
+        // set referred by an uri must exist 
+        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
     }
 }

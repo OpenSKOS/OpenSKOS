@@ -117,7 +117,7 @@ abstract class AbstractTripleStoreResource {
             $existingResource = $this->manager->fetchByUri((string)$uri);
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
-            $resourceObject->addMetadata(array('user' => $user));
+            $resourceObject->addMetadata($user, $params);
             $tenantcode = $this->getParamValueFromParams($params, 'tenant');
             $this->resourceEditAllowed($user);    
 
@@ -309,13 +309,14 @@ abstract class AbstractTripleStoreResource {
         $uuid = $resourceObject->getProperty(OpenSkos::UUID);
         
         $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
-        var_dump($oldUuid);
         if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
             throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
         }
     }
     
-    // property-content validation, where you need to look up the triple store
+    // property-content validations, where you need to look up the triple store
+    
+    // new property must be new 
     protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
         $val = $resourceObject->getProperty($propertyUri);
         $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val[0]) . '"', $rdfType);
@@ -323,8 +324,17 @@ abstract class AbstractTripleStoreResource {
             throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $val[0] . ' has been already registered.', 400);
         }
     }
+    
+    // the resource referred by the uri must exist
+    protected function validateURI($resourceObject, $uri, $rdfType) {
+        $val = $resourceObject->getProperty($uri);
+        $count = $this->manager->countTriples('<' . trim($val[0]) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
+        if ($count < 1) {
+            throw new ApiException('The sub-resource referred by the uri '. $uri  .' of value '. $val[0] . ' does not exist.', 400);
+        }
+    }
 
-    // property-content validation, where you need to look up the triple store
+   // new property must be new
     protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
         $value= $resourceObject->getProperty($propertyUri);
         $oldValue = $existingResourceObject ->getProperty($propertyUri);

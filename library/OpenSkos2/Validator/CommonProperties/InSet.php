@@ -20,17 +20,14 @@
 namespace OpenSkos2\Validator\CommonProperties;
 
 use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Set;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
 class InSet implements CommonPropertyInterface
 {
-    use ResourceManagerAwareTrait;
     
     public static function validate(RdfResource $resource)
     {
-        $retVal = CommonProperties\SubresourceValidator::validateSubresource($this->getResourceManager(), $resource, OpenSkos::SET, Set::TYPE, true);
+        $retVal = UniqueObligatoryProperty::validate($resource, OpenSkos::SET, false);
         return $retVal;
     }
 }

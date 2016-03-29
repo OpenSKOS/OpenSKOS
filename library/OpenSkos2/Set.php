@@ -20,6 +20,8 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Uri;
 
 class Set extends Resource
 {

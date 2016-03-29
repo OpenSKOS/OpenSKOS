@@ -9,6 +9,6 @@ class Description implements CommonPropertyInterface
     
     public static function validate(RdfResource $resource)
     {
-        return true;
+        return array();
     }
 }

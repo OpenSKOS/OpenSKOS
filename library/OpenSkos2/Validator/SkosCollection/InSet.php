@@ -21,12 +21,9 @@ namespace OpenSkos2\Validator\SkosCollection;
 
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Validator\AbstractSkosCollectionValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class InSet extends AbstractSkosCollectionValidator implements ResourceManagerAware
+class InSet extends AbstractSkosCollectionValidator 
 {
-    use ResourceManagerAwareTrait;
     
     protected function validateSkosCollection(SkosCollection $resource)
     {

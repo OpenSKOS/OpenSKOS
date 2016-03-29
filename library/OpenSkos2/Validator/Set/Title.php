@@ -7,8 +7,9 @@ use OpenSkos2\Set;
 
 class Title extends AbstractSetValidator
 {
-    
     protected function validateSet(Set $resource)
     {
-       return parent::genericValidate('\CommonProperties\Title::validate', $resource);}
+       return parent::genericValidate('\CommonProperties\Title::validate', $resource);
+       
+    }
 }
