@@ -14,23 +14,23 @@
         <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <field name="LexicalLabels" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        
-        <field name="prefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="altLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="hiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="LexicalLabels" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>        
+        <field name="prefLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="altLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="hiddenLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <field name="skosXlPrefLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="skosXlAltLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="skosXlHiddenLabel" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlPrefLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlAltLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="skosXlHiddenLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <field name="DocumentationProperties" type="string" indexed="true" stored="false" required="false" multiValued="true"/>        
-        <field name="note" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="changeNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="definition" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="editorialNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="example" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="historyNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="scopeNote" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="DocumentationProperties" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>        
+        <field name="note" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="changeNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="definition" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="editorialNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="example" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="historyNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="scopeNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <field name="broader" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="narrower" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -45,23 +45,23 @@
         <field name="narrowMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="relatedMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <dynamicField name="dc_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="dcterms_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="dc_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="dcterms_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- Languages -->
-        <dynamicField name="LexicalLabels_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="prefLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="false"/>
-        <dynamicField name="altLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="hiddenLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="LexicalLabels_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="prefLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="false"/>
+        <dynamicField name="altLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="hiddenLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
-        <dynamicField name="DocumentationProperties_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="noteLabel_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="changeNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="definition_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="editorialNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="example_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="historyNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        <dynamicField name="scopeNote_*" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="DocumentationProperties_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="noteLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="changeNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="definition_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="editorialNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="example_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="historyNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <dynamicField name="scopeNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         
         <!-- universal fields (used internally) -->
         <!-- date -->
@@ -87,7 +87,7 @@
         <dynamicField name="sort_d_*" type="date" indexed="true" stored="false" required="false" multiValued="false" />
         
         <!-- default search -->                
-        <field name="search" type="string" indexed="true" stored="false" required="false" multiValued="true" />
+        <field name="search" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true" />
         
         <copyField source="prefLabel" dest="search" />
         <copyField source="altLabel" dest="search" />
@@ -106,6 +106,13 @@
         <fieldType name="long" class="solr.TrieLongField" omitNorms="true"/>
         
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+        
+        <fieldtype name="string_lowercase" class="solr.TextField" positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldtype>
         
         <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
         
