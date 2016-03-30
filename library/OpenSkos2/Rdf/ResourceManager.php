@@ -501,9 +501,7 @@ class ResourceManager
     public function countTriples($subject, $prop, $object) {
         
         $query = 'SELECT (COUNT(*) as ?COUNT) WHERE { ' . $subject.  '  '. $prop.  '  '. $object. ' . }';
-        //var_dump($query);
         $result = $this->query($query);
-        //var_dump($result[0]->COUNT->getValue());
         $retVal = $result[0]->COUNT->getValue();
         return $retVal;
     }

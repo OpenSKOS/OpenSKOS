@@ -304,12 +304,14 @@ class Concept
             $user = $this->getUserFromParams($params);
             
             $this->resourceEditAllowed($concept, $tenant, $user);
-            $concept->ensureMetadata(
+            /* obsolete, remove this peiec of code if it works with the parent add Metadata
+             * $concept->ensureMetadata(
                 $tenant->code,
                 $set->getUri(),
                 $user->getFoafPerson(),
                 $existingConcept->getStatus()
-            );
+            );*/
+            $concept -> addMetadata($user, $params, false);
             
             $this->validate($concept, $tenant);
             
@@ -444,13 +446,13 @@ class Concept
         $tenant = $this->getTenantFromParams($params);
         $set = $this->getSet($params, $tenant);
         $user = $this->getUserFromParams($params);
-        
+        /*
         $concept->ensureMetadata(
             $tenant->code,
             $set->getUri(),
             $user->getFoafPerson()
-        );
-        
+        );*/
+        $concept -> addMetadata($user, $params, true);
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
         if ($autoGenerateUri) {
             $concept->selfGenerateUri(

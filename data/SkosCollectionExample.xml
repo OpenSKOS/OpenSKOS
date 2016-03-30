@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:openskos = "http://openskos.org/xmlns#"
+xmlns:dcterms = "http://purl.org/dc/terms/"
+xmlnsLskos="http://www.w3.org/2004/02/skos/core#">
+    <rdf:Description>
+        <dcterms:title>Collection 1</dcterms:title>
+        <dcterms:description xml:lang="nl">example</dcterms:description>
+    </rdf:Description>
+</rdf:RDF>
+
+	

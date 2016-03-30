@@ -131,40 +131,8 @@ class ConceptScheme extends Resource
             return null;
         }
     }
-    
-    /**
-     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
-     * @param string $tenantCode
-     * @param Uri $set
-     * @param Uri $person
-     */
-    public function addMetadata($user, $params)
-    {
-        //@TODO Combine with concept ensure metadata.
-        $userUri = $user->getFoafPerson()->getUri();
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-        };
-        
-        
-        $forFirstTimeInOpenSkos = [
-            OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Literal($params['tenant']),
-            OpenSkos::SET => new Uri($params['set']),
-            DcTerms::CREATOR => new Uri($userUri),
-            DcTerms::DATESUBMITTED => $nowLiteral(),
-        ];
-        
-        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
-            if (!$this->hasProperty($property)) {
-                $this->setProperty($property, $defaultValue);
-            }
-        }
-        
-        // @TODO Should we add modified instead of replace it. Or put it only on create.
-        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
-    }
+  
+ 
     
     /**
      * Builds the path to the concept scheme icon.

@@ -22,8 +22,9 @@ namespace OpenSkos2\Rdf;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces as Namespaces;
-use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
@@ -183,6 +184,20 @@ class Resource extends Uri implements ResourceIdentifier
         return current($this->getProperty(Rdf::TYPE));
     }
     
+    public function getCreator()
+    {
+        return current($this->getProperty(DcTerms::CREATOR));
+    }
+    
+    public function getDateSubmitted()
+    {
+        return current($this->getProperty(DcTerms::DATESUBMITTED));
+    }
+    
+    public function getUUID()
+    {
+        return current($this->getProperty(OpenSkos::UUID));
+    }
     /**
      * @return string
      */
@@ -323,7 +338,42 @@ class Resource extends Uri implements ResourceIdentifier
         return $result;
     }
     
-    public function addMetadata($map) {
+    // at the moment used intact for concepts, schemata and skos collections
+    // for other resources it is overriden
+     public function addMetadata($user, $params, $oldParams)
+    {
+       
+        $userUri = $user->getFoafPerson()->getUri();
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+        
+        $metadata1 = [
+            OpenSkos::TENANT => new Literal($params['tenant']),
+            OpenSkos::SET => new Uri($params['set']),
+        ];
+        
+        if (count($oldParams)===0){ // a completely new resource under creation
+            $metadata2 = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            DcTerms::CREATOR => new Uri($userUri),
+            DcTerms::DATESUBMITTED => $nowLiteral(),
+        ];
+        } else {
+            $metadata2 = [
+            OpenSkos::UUID => $oldParams['uuid'],
+            DcTerms::CREATOR => new Uri($oldParams['creator']),
+            DcTerms::DATESUBMITTED => new Literal ($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME), 
+            ];
+        }
+        $metadata = array_merge($metadata1,$metadata2);
+        foreach ($metadata as $property => $defaultValue) {
+                $this->setProperty($property, $defaultValue);
+        }
+        
+        // @TODO Should we add modified instead of replace it. Or put it only on create.
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
     }
     
     public function selfGenerateUri($tenantcode, ResourceManager $manager) {

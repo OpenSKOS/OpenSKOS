@@ -9,7 +9,9 @@
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\SkosCollectionManager;
 
 
@@ -24,7 +26,10 @@ class SkosCollection extends AbstractTripleStoreResource
        parent::validate($resourceObject, $tenantcode);
        
        //must be new
-       $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
+       $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
+       
+       // set referred by an uri must exist 
+       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
     }
     
     
@@ -33,6 +38,9 @@ class SkosCollection extends AbstractTripleStoreResource
         parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
         
         // must not occur as another collection's name if different from the old one 
-        $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
+        $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
+    
+        // set referred by an uri must exist 
+       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
     }
 }

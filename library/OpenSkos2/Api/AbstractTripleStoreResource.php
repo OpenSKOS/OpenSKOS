@@ -12,6 +12,7 @@ use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant as Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
@@ -92,7 +93,7 @@ abstract class AbstractTripleStoreResource {
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
-            $resourceObject->addMetadata($user, $params);
+            $resourceObject->addMetadata($user, $params, array());
             if ($autoGenerateUri) {
                 $tenantcode = $this->getParamValueFromParams($params, 'tenant');
                 $resourceObject->selfGenerateUri($tenantcode, $this->manager);
@@ -117,7 +118,15 @@ abstract class AbstractTripleStoreResource {
             $existingResource = $this->manager->fetchByUri((string)$uri);
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
-            $resourceObject->addMetadata($user, $params);
+            
+            $oldParams = [
+                'uuid' => $existingResource -> getUUID(),
+                'creator' => $existingResource -> getCreator(),
+                'dateSubmitted' => $existingResource -> getDateSubmitted(),
+            ];
+            
+            $resourceObject->addMetadata($user, $params, $oldParams);
+            
             $tenantcode = $this->getParamValueFromParams($params, 'tenant');
             $this->resourceEditAllowed($user);    
 
@@ -253,6 +262,7 @@ abstract class AbstractTripleStoreResource {
     }
 
     private function getParamValueFromParams($params, $paramname) {
+        
         if (empty($params[$paramname])) {
             throw new InvalidArgumentException('No ' . $paramname . ' specified', 412);
         }
@@ -306,8 +316,7 @@ abstract class AbstractTripleStoreResource {
         }
         // content validation, where you need to look up the triple store
          // do not update uuid: it must be intact forever, connected to uri
-        $uuid = $resourceObject->getProperty(OpenSkos::UUID);
-        
+        $uuid = $resourceObject->getProperty(OpenSkos::UUID); 
         $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
         if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
             throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
@@ -318,10 +327,12 @@ abstract class AbstractTripleStoreResource {
     
     // new property must be new 
     protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
-        $val = $resourceObject->getProperty($propertyUri);
-        $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val[0]) . '"', $rdfType);
+        $vals = $resourceObject->getProperty($propertyUri);
+        $val=$vals[0];
+        $atlang = $this ->retrieveLanguagePrefix($val);
+        $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val) . '"'.$atlang, $rdfType);
         if (count($resources) > 0) {
-            throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $val[0] . ' has been already registered.', 400);
+            throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $val.$atlang . ' has been already registered.', 400);
         }
     }
     
@@ -336,13 +347,17 @@ abstract class AbstractTripleStoreResource {
 
    // new property must be new
     protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
-        $value= $resourceObject->getProperty($propertyUri);
-        $oldValue = $existingResourceObject ->getProperty($propertyUri);
-        if ($value[0]->getValue() !== $oldValue[0]->getValue()) {
+        $values= $resourceObject->getProperty($propertyUri);
+        $value = $values[0];
+        $lan = $this ->retrieveLanguagePrefix($value);
+        $oldValues = $existingResourceObject ->getProperty($propertyUri);
+        $oldValue = $oldValues[0];
+        $oldLan = $this ->retrieveLanguagePrefix($oldValue);
+        if ($value->getValue() !== $oldValue->getValue() || $lan !== $oldLan) { //  new title is given
             // new val should not occur amnogst existing old values of the same property
-            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"'.$value[0].'"', $rdfType);
+            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"'.$value.'"'.$lan, $rdfType);
             if (count($resources) > 0) {
-                throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $value[0] . ' has been already registered.', 400);
+                throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $value.$lan . ' has been already registered.', 400);
             }
         } 
    }
@@ -350,5 +365,15 @@ abstract class AbstractTripleStoreResource {
    public function fetchUriName(){
        return $this ->manager-> fetchUriName();
    }
+   
+   private function retrieveLanguagePrefix($val){
+        if ($val instanceof Literal) {
+            $lang = $val->getLanguage();
+            if ($lang !== null && $lang !== "") {
+               return "@" . $lang;
+            }
+        }
+        return "";
+    }
 
 }
