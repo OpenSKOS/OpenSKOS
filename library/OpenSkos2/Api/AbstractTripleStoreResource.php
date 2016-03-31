@@ -123,6 +123,7 @@ abstract class AbstractTripleStoreResource {
                 'uuid' => $existingResource -> getUUID(),
                 'creator' => $existingResource -> getCreator(),
                 'dateSubmitted' => $existingResource -> getDateSubmitted(),
+                'status' => $existingResource -> getStatus() // so fat, not null pnly for concepts
             ];
             
             $resourceObject->addMetadata($user, $params, $oldParams);
@@ -296,7 +297,6 @@ abstract class AbstractTripleStoreResource {
     protected function validate($resourceObject, $tenantcode) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
         if (!$validator->validate($resourceObject)) {
-            //var_dump($validator->getErrorMessages());
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
         //content validation, where you need to look up the triple store
@@ -327,6 +327,7 @@ abstract class AbstractTripleStoreResource {
     
     // new property must be new 
     protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
+        
         $vals = $resourceObject->getProperty($propertyUri);
         $val=$vals[0];
         $atlang = $this ->retrieveLanguagePrefix($val);

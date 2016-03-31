@@ -122,7 +122,17 @@ class Concept extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-    
+    /**
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(OpenSkos::STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
+        }
+    }
     
      public function getSkosCollection()
     {
@@ -188,7 +198,17 @@ class Concept extends Resource
         }
     }
     
-    
+    /**
+     * Get institution row
+     * @TODO Remove dependency on OpenSKOS v1 library
+     * @return OpenSKOS_Db_Table_Row_Tenant
+     */
+    public function getInstitution()
+    {
+        // @TODO Remove dependency on OpenSKOS v1 library
+        $model = new OpenSKOS_Db_Table_Tenants();
+        return $model->find($this->getTenant())->current();
+    }
     
     /**
      * Checks if the concept is top concept for the specified scheme.
@@ -222,48 +242,83 @@ class Concept extends Resource
         return false;
     }
     
-    
-    // $oldParams is empty when a resource is created otherwise "update"
-    public function addMetadata($user, $params, $oldParams) {
-        parent::addMetadata($user, $params, $oldParams);
+    /**
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param string $tenantCode
+     * @param Uri $set
+     * @param Uri $person
+     * @param string , optional $oldStatus
+     */
+    public function ensureMetadata($tenantCode, Uri $set, Uri $person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
         
-        $userUri = $user->getFoafPerson()->getUri();
-                $nowLiteral = function () {
-                    return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-                };
-                
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::TENANT => new Literal($tenantCode),
+            OpenSkos::SET => $set,
+            DcTerms::CREATOR => $person,
+            DcTerms::DATESUBMITTED => $nowLiteral(),
+        ];
         
-        if (count($oldParams) > 0) { // updating concept => updating status if it gets new
-            
-            if ($oldParams['status'] !== $this->getStatus()) {
-                
-                $this->unsetProperty(DcTerms::DATEACCEPTED);
-                $this->unsetProperty(OpenSkos::ACCEPTEDBY);
-                $this->unsetProperty(OpenSkos::DATE_DELETED);
-                $this->unsetProperty(OpenSkos::DELETEDBY);
-
-                switch ($this->getStatus()) {
-                    case \OpenSkos2\Concept::STATUS_APPROVED:
-                        $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                        $this->addProperty(OpenSkos::ACCEPTEDBY, new Uri($userUri));
-                        break;
-                    case \OpenSkos2\Concept::STATUS_DELETED:
-                        $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                        $this->addProperty(OpenSkos::DELETEDBY, new Uri($userUri));
-                        break;
-                }
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
             }
-        } else { // when creating, only CANDIDATE status is allowed
+        }
+        
+        // @TODO Should we add modified instead of replace it.
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        
+        // Status is updated
+        if ($oldStatus != $this->getStatus()) {
             $this->unsetProperty(DcTerms::DATEACCEPTED);
             $this->unsetProperty(OpenSkos::ACCEPTEDBY);
             $this->unsetProperty(OpenSkos::DATE_DELETED);
             $this->unsetProperty(OpenSkos::DELETEDBY);
-            $this->unsetProperty(OpenSkos::STATUS);
-            $this->addProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_CANDIDATE));
+
+            switch ($this->getStatus()) {
+                case \OpenSkos2\Concept::STATUS_APPROVED:
+                    $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    break;
+                case \OpenSkos2\Concept::STATUS_DELETED:
+                    $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
+                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    break;
+            }
         }
     }
     
-    
+    public function addMetadata($user, $params, $oldParams) {
+        
+        parent::addMetadata($user, $params, $oldParams);
+        $userUri = $user->getFoafPerson()->getUri();
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+        // Status is updated
+        if ($oldParams['status'] != $this->getStatus()) {
+            $this->unsetProperty(DcTerms::DATEACCEPTED);
+            $this->unsetProperty(OpenSkos::ACCEPTEDBY);
+            $this->unsetProperty(OpenSkos::DATE_DELETED);
+            $this->unsetProperty(OpenSkos::DELETEDBY);
+
+            switch ($this->getStatus()) {
+                case \OpenSkos2\Concept::STATUS_APPROVED:
+                    $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, new Uri($userUri));
+                    break;
+                case \OpenSkos2\Concept::STATUS_DELETED:
+                    $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
+                    $this->addProperty(OpenSkos::DELETEDBY, new Uri($userUri));
+                    break;
+            }
+        }
+    }
     /**
      * Generate notation unique per tenant. Based on tenant notations sequence.
      * @return string
@@ -286,4 +341,72 @@ class Concept extends Resource
         );
     }
     
+    /**
+     * Generates an uri for the concept.
+     * Requires a URI from to an openskos collection
+     *
+     * @return string
+     */
+    public function selfGenerateUri(Tenant $tenant, ConceptManager $conceptManager)
+    {
+        // @TODO Move this and notation generate to separate class.
+        
+        if (!$this->isBlankNode()) {
+            throw new UriGenerationException(
+                'The concept already has an uri. Can not generate new one.'
+            );
+        }
+        
+        if ($this->isPropertyEmpty(OpenSkos::SET)) {
+            throw new UriGenerationException(
+                'Property openskos:set (former tenant collection) is required to generate concept uri.'
+            );
+        }
+        
+        if ($this->isPropertyEmpty(Skos::NOTATION) && $tenant->isNotationAutoGenerated()) {
+            $this->selfGenerateNotation($tenant, $conceptManager);
+        }
+        
+        if ($this->isPropertyEmpty(Skos::NOTATION)) {
+            $uri = self::assembleUri(
+                $this->getPropertySingleValue(OpenSkos::SET)
+            );
+        } else {
+            // here refine using if handle proxy is enabled, else-branch is just as it is now, if-branch: the code of isocat-openskos for epic-handle
+            $uri = self::assembleUri(
+                $this->getPropertySingleValue(OpenSkos::SET),
+                $this->getProperty(Skos::NOTATION)[0]->getValue()
+            );
+        }
+        
+        if ($conceptManager->askForUri($uri, true)) {
+            throw new UriGenerationException(
+                'The generated uri "' . $uri . '" is already in use.'
+            );
+        }
+        
+        $this->setUri($uri);
+        return $uri;
+    }
+    
+    /**
+     * Generates concept uri from collection and notation
+     * @param string $setUri
+     * @param string $firstNotation, optional. New uuid will be used if empty
+     * @return string
+     */
+    protected function assembleUri($setUri, $firstNotation = null)
+    {
+        $separator = '/';
+        
+        $setUri = rtrim($setUri, $separator);
+        
+        if (empty($firstNotation)) {
+            $uri = $setUri . $separator . Uuid::uuid4();
+        } else {
+            $uri = $setUri . $separator . $firstNotation;
+        }
+        
+        return $uri;
+    }
 }

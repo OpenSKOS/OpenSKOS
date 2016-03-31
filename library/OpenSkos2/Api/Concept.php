@@ -1,75 +1,31 @@
 <?php
 
 /*
- * OpenSKOS
- *
- * LICENSE
- *
- * This source file is subject to the GPLv3 license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://www.gnu.org/licenses/gpl-3.0.txt
- *
- * @category   OpenSKOS
- * @package    OpenSKOS
- * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
- * @author     Picturae
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Api\Exception\NotFoundException;
-use OpenSkos2\Converter\Text;
-use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Rdf;
-use OpenSKOS_Db_Table_Row_Set;
-use OpenSkos2\Api\Exception\InvalidArgumentException;
+use OpenSkos2\Namespaces\Org;
+use OpenSkos2\ConceptManager;
+use OpenSkos2\Api\Exception\ApiException;
+use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
+
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
-use OpenSkos2\Api\Exception\InvalidPredicateException;
-use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\ConceptManager;
-use OpenSkos2\FieldsMaps;
-use OpenSkos2\Validator\Resource as ResourceValidator;
-use OpenSkos2\Tenant as Tenant;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
-/**
- * Map an API request from the old application to still work with the new backend on Jena
- */
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-class Concept
-{
-    use \OpenSkos2\Api\Response\ApiResponseTrait;
+class Concept extends AbstractTripleStoreResource {
     
-    const QUERY_DESCRIBE = 'describe';
-    const QUERY_COUNT = 'count';
-
-    /**
-     * Resource manager
-     *
-     * @var \OpenSkos2\Rdf\ResourceManager
-     */
-    private $manager;
-    
-    /**
-     * Concept manager
-     *
-     * @var \OpenSkos2\ConceptManager
-     */
-    private $conceptManager;
-    
-    /**
+     /**
      * Search autocomplete
      *
      * @var \OpenSkos2\Search\Autocomplete
@@ -83,23 +39,12 @@ class Concept
      */
     private $limit = 20;
 
-    /**
-     *
-     * @param \OpenSkos2\Rdf\ResourceManager $manager
-     * @param \OpenSkos2\ConceptManager $conceptManager
-     * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
-     */
-    public function __construct(
-        ResourceManager $manager,
-        ConceptManager $conceptManager,
-        \OpenSkos2\Search\Autocomplete $searchAutocomplete
-    ) {
+    public function __construct(ConceptManager $manager,  \OpenSkos2\Search\Autocomplete $searchAutocomplete) {
         $this->manager = $manager;
-        $this->conceptManager = $conceptManager;
         $this->searchAutocomplete = $searchAutocomplete;
     }
-
-    /**
+    
+     /**
      * Map the following requests
      *
      * /api/find-concepts?q=Kim%20Holland
@@ -111,7 +56,7 @@ class Concept
      * @param string $context
      * @return ResponseInterface
      */
-    public function findConcepts(ServerRequestInterface $request, $context)
+    public function findConcepts(PsrServerRequestInterface $request, $context)
     {
         $params = $request->getQueryParams();
         
@@ -203,7 +148,9 @@ class Concept
         return $response;
     }
 
-    /**
+    
+    
+     /**
      * Get PSR-7 response for concept
      *
      * @param $request \Psr\Http\Message\ServerRequestInterface
@@ -212,7 +159,7 @@ class Concept
      * @throws InvalidArgumentException
      * @return ResponseInterface
      */
-    public function getConceptResponse(ServerRequestInterface $request, $uuid, $context)
+    public function getConceptResponse(PsrServerRequestInterface $request, $uuid, $context)
     {
         $concept = $this->getConcept($uuid);
 
@@ -223,7 +170,6 @@ class Concept
         } else {
             $propertiesList = [];
         }
-        
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
@@ -267,101 +213,6 @@ class Concept
         }
 
         return $concept;
-    }
-
-    /**
-     * Create the concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function create(ServerRequestInterface $request)
-    {
-        try {
-            $response = $this->handleCreate($request);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-        return $response;
-    }
-    
-    /**
-     * Update a concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function update(ServerRequestInterface $request)
-    {
-        try {
-            $concept = $this->getConceptFromRequest($request);
-            $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
-            
-            $params = $this->getParams($request);
-                        
-            $tenant = $this->getTenantFromParams($params);
-            $set = $this->getSet($params, $tenant);
-            $user = $this->getUserFromParams($params);
-            
-            $this->resourceEditAllowed($concept, $tenant, $user);
-            /* obsolete, remove this peiec of code if it works with the parent add Metadata
-             * $concept->ensureMetadata(
-                $tenant->code,
-                $set->getUri(),
-                $user->getFoafPerson(),
-                $existingConcept->getStatus()
-            );*/
-            $concept -> addMetadata($user, $params, false);
-            
-            $this->validate($concept, $tenant);
-            
-            $this->conceptManager->replaceAndCleanRelations($concept);
-            
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
-            return $this->getErrorResponse(404, 'Concept not found try insert');
-        }
-        
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml);
-    }
-
-    /**
-     * Perform a soft delete on a concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws InvalidArgumentException
-     * @throws NotFoundException
-     */
-    public function delete(ServerRequestInterface $request)
-    {
-        try {
-            $params = $request->getQueryParams();
-            if (empty($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter');
-            }
-            
-            $id = $params['id'];
-            /* @var $concept \OpenSkos2\Concept */
-            $concept = $this->manager->fetchByUri($id);
-            if (!$concept) {
-                throw new NotFoundException('Concept not found by id :' . $id, 404);
-            }
-            
-            $user = $this->getUserFromParams($params);
-            $tenant = $this->getTenantFromParams($params);
-            
-            $this->resourceEditAllowed($concept, $tenant, $user);
-            
-            $this->manager->deleteSoft($concept);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-        
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml, 202);
     }
     
     /**
@@ -407,287 +258,39 @@ class Concept
         return $propertiesList;
     }
     
-    /**
-     * Applies all validators to the concept.
-     * @param \OpenSkos2\Concept $concept
-     * @param OpenSKOS_Db_Table_Row_Tenant $tenant
-     * @throws InvalidArgumentException
-     */
-    protected function validate(\OpenSkos2\Concept $concept, \OpenSKOS_Db_Table_Row_Tenant $tenant)
-    {
-        $validator = new ResourceValidator(
-            $this->manager,
-            new Tenant($tenant->code)
-        );
+    // specific content validation
+    protected function validate($resourceObject, $tenantcode) {
+        parent::validate($resourceObject, $tenantcode);
         
-        
-        if (!$validator->validate($concept)) {
-            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
-        }
+        // resources referred by uri's 
+        $this->checkIfReferredResourcesExist($resourceObject);
     }
-    
-    /**
-     * Handle the action of creating the concept
-     *
-     * @param ServerRequestInterface $request
-     */
-    private function handleCreate(ServerRequestInterface $request)
-    {
-        $concept = $this->getConceptFromRequest($request);
-        
-        if (!$concept->isBlankNode() && $this->manager->askForUri((string)$concept->getUri())) {
-            throw new InvalidArgumentException(
-                'The concept with uri ' . $concept->getUri() . ' already exists. Use PUT instead.',
-                400
-            );
-        }
-        $params = $this->getParams($request);
-        
-        $tenant = $this->getTenantFromParams($params);
-        $set = $this->getSet($params, $tenant);
-        $user = $this->getUserFromParams($params);
-        /*
-        $concept->ensureMetadata(
-            $tenant->code,
-            $set->getUri(),
-            $user->getFoafPerson()
-        );*/
-        $concept -> addMetadata($user, $params, true);
-        $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
-        if ($autoGenerateUri) {
-            $concept->selfGenerateUri(
-                new Tenant($tenant->code),
-                $this->conceptManager
-            );
-        }
-        
-        //\Tools\Logging::var_error_log(" concept \n", $concept, '/app/data/Logger.txt');
-        $this->validate($concept, $tenant);
-        $this->manager->insert($concept);
-        
-        $rdf = (new Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($rdf, 201);
+
+    // specific content validation
+    protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+
+        // resources referred by uri's
+        $this->checkIfReferredResourcesExist($resourceObject);
     }
-    
-    /**
-     * Get request params, including parameters send in XML body
-     *
-     * @param ServerRequestInterface $request
-     * @return array
-     */
-    private function getParams(ServerRequestInterface $request)
-    {
-        $params = $request->getQueryParams();
-        $doc = $this->getDomDocumentFromRequest($request);
-        // is a tenant, collection or api key set in the XML?
-        foreach (array('tenant', 'collection', 'key') as $attributeName) {
-            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            if (!empty($value)) {
-                $params[$attributeName] = $value;
-            }
+
+    // To DISCUSS?
+    private function checkIfReferredResourcesExist($resourceObject) {
+        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
+        $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
+        
+       
+        $code = $resourceObject -> getTenant();
+        $tenants = $this->manager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$code .'"', Org::FORMALORG);
+        if (count($tenants) < 1) {
+            throw new ApiException('The tenant referred by the code '. $code  .' does not exist.', 400);
         }
-        return $params;
-    }
-    
-    /**
-     * Get the skos concept from the request to insert or update
-     * does some validation to see if the xml is valid
-     *
-     * @param ServerRequestInterface $request
-     * @return \OpenSkos2\Concept
-     * @throws InvalidArgumentException
-     */
-    private function getConceptFromRequest(ServerRequestInterface $request)
-    {
-        $doc = $this->getDomDocumentFromRequest($request);
+        
          
-        $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
-        if ($descriptions->length != 1) {
-            throw new InvalidArgumentException(
-                'Expected exactly one '
-                . '/rdf:RDF/rdf:Description, got '.$descriptions->length,
-                412
-            );
-        }
-
-        // is a tenant, collection or api key set in the XML?
-        foreach (array('tenant', 'collection', 'key') as $attributeName) {
-            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            // remove the api key
-            if (!empty($value) && $attributeName === 'key') {
-                $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            }
-        }
-
-        $resource = (new Text($doc->saveXML()))->getResources();
-        //var_dump($resource[0]);
-        if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
-            throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
-        }
-
-        /** @var $concept \OpenSkos2\Concept **/
-        $concept = $resource[0];
-        
-        return $concept;
     }
     
-    /**
-     * Get dom document from request
-     *
-     * @param ServerRequestInterface $request
-     * @return \DOMDocument
-     * @throws InvalidArgumentException
-     */
-    private function getDomDocumentFromRequest(ServerRequestInterface $request)
-    {
-        $xml = $request->getBody();
-        if (!$xml) {
-            throw new InvalidArgumentException('No RDF-XML recieved', 412);
-        }
-        $doc = new \DOMDocument();
-        if (!@$doc->loadXML($xml)) {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
-        }
-
-        
-        //do some basic tests
-        if ($doc->documentElement->nodeName != 'rdf:RDF') {
-            throw new InvalidArgumentException(
-                'Recieved RDF-XML is not valid: '
-                . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>',
-                412
-            );
-        }
-        
-        return $doc;
-    }
-
-    /**
-     * @params array $queryParams
-     * @params \OpenSKOS_Db_Table_Row_Tenant $tenant
-     * @return OpenSKOS_Db_Table_Row_Set
-     */
-    private function getSet($params, \OpenSKOS_Db_Table_Row_Tenant $tenant)
-    {
-        if (empty($params['set'])) {
-            throw new InvalidArgumentException('No set specified', 412);
-        }
-        $code = $params['set'];
-        $model = new \OpenSKOS_Db_Table_Sets();
-        $set = $model->findByCode($code, $tenant);
-        if (null === $set) {
-            throw new InvalidArgumentException(
-                'No such set `'.$code.'` in this tenant.',
-                404
-            );
-        }
-        return $set;
-    }
-
-    /**
-     * Get error response
-     *
-     * @param integer $status
-     * @param string $message
-     * @return ResponseInterface
-     */
-    protected function getErrorResponse($status, $message)
-    {
-        $stream = new Stream('php://memory', 'wb+');
-        $stream->write($message);
-        $response = (new Response($stream, $status, ['X-Error-Msg' => $message]));
-        return $response;
-    }
-
-    /**
-     * Get success response
-     *
-     * @param string $message
-     * @param int    $status
-     * @return ResponseInterface
-     */
-    private function getSuccessResponse($message, $status = 200)
-    {
-        $stream = new Stream('php://memory', 'wb+');
-        $stream->write($message);
-        $response = (new Response($stream, $status))
-            ->withHeader('Content-Type', 'text/xml; charset="utf-8"');
-        return $response;
-    }
-
-    /**
-     * Check if we need to generate or not concept identifiers (uri).
-     * Validates any existing identifiers.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \OpenSkos2\Concept $concept
-     * @return boolean If an uri must be autogenerated
-     */
-    private function checkConceptIdentifiers(ServerRequestInterface $request, \OpenSkos2\Concept $concept)
-    {
-        $params = $request->getQueryParams();
-
-        // We return if an uri must be autogenerated
-        $autoGenerateIdentifiers = false;
-        if (!empty($params['autoGenerateIdentifiers'])) {
-            $autoGenerateIdentifiers = filter_var(
-                $params['autoGenerateIdentifiers'],
-                FILTER_VALIDATE_BOOLEAN
-            );
-        }
-
-        if ($autoGenerateIdentifiers) {
-            if (!$concept->isBlankNode()) {
-                throw new InvalidArgumentException(
-                    'Parameter autoGenerateIdentifiers is set to true, but the '
-                    . 'xml already contains uri (rdf:about).',
-                    400
-                );
-            }
-        } else {
-            // Is uri missing
-            if ($concept->isBlankNode()) {
-                throw new InvalidArgumentException(
-                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
-                    400
-                );
-            }
-        }
-
-        return $autoGenerateIdentifiers;
-    }
-    
-    /**
-     * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_Tenant
-     * @throws InvalidArgumentException
-     */
-    private function getTenantFromParams($params)
-    {
-        if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 412);
-        }
-            
-        return $this->getTenant($params['tenant']);
-    }
-    
-    /**
-     *
-     * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_User
-     * @throws InvalidArgumentException
-     */
-    private function getUserFromParams($params)
-    {
-        if (empty($params['key'])) {
-            throw new InvalidArgumentException('No key specified', 412);
-        }
-        return $this->getUserByKey($params['key']);
-    }
-    
-// meertens was here    
-// sortstring is a string of pair of terms "field1 [order1] field2 [order2].... "
-    private function prepareSortsForSolr($sortstring) {
+   private function prepareSortsForSolr($sortstring) {
         //var_dump($sortstring);
         $sortlist = explode(" ", $sortstring);
         $l = count($sortlist);
@@ -729,5 +332,4 @@ class Concept
     private function isDateField($term){
         return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
-    
 }

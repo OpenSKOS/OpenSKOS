@@ -66,7 +66,7 @@ class EasyRdf {
                 $mainResources[] = $resource;
             }
         }
-        
+        //var_dump(count($mainResources));
         // now compose main resources;
         $myResource = null;
         foreach ($mainResources as $resource) {
@@ -75,11 +75,10 @@ class EasyRdf {
                             $resource->getUri(), $type
             );
             self::makeNode($myResource, $resource, $subResources);
+            if ($myResource !== null) {
+                $collection[] = $myResource;
+            }
         }
-        if ($myResource !== null) {
-            $collection[] = $myResource;
-        }
-
         return $collection;
     }
 

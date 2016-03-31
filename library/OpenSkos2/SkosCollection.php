@@ -10,13 +10,10 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use Rhumsaa\Uuid\Uuid;
 
 class SkosCollection extends Resource
 {

@@ -34,6 +34,7 @@ use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
+use OpenSkos2\Validator\Concept\InSet as ConceptInSet;
 use OpenSkos2\Validator\Concept\InSkosCollection;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
@@ -155,9 +156,11 @@ class Resource
         
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
+            //var_dump(get_class($validator));
+            //var_dump($valid);
             if ($valid) {
                 continue;
-            }
+            } 
 
             foreach ($validator->getErrorMessages() as $message) {
                 $this->errorMessages[] = $message;
@@ -270,7 +273,7 @@ class Resource
         $validators = [
             new InScheme(),
             new InSkosCollection(),
-            new InSet(),
+            new ConceptInSet(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
             new UniquePreflabelInScheme(),

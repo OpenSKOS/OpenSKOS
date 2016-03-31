@@ -8,7 +8,7 @@ class Title implements CommonPropertyInterface
 {
     public static function validate(RdfResource $resource)
     {
-        $retVal = UniqueObligatoryProperty::validate($resource, DcTerms::TITLE, false);
+        $retVal = NonUniqueObligatoryProperty::validate($resource, DcTerms::TITLE, false);
         $languages = $resource->retrieveLanguages();
         foreach ($languages as $language) {
             $title = $resource->retrievePropertyInLanguage(DcTerms::TITLE, $language);

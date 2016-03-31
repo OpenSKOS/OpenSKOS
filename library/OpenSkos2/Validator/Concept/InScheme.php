@@ -20,22 +20,12 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Schema;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\SubresourceValidator;
 
-use OpenSkos2\Validator\CommonProperties\SubresourceValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-
-class InScheme extends AbstractConceptValidator implements ResourceManagerAware
+class InScheme extends AbstractConceptValidator 
 {
-    use ResourceManagerAwareTrait;
-     
     protected function validateConcept(Concept $concept)
     {
-        $retVal = SubresourceValidator::validateSubresource($this->getResourceManager(), $concept, Skos::INSCHEME, ConceptScheme::TYPE, true, $this->getErrorMessages());
-        return $retVal;
+        return parent::genericValidate('\CommonProperties\InScheme::validate', $concept);
     }
 }

@@ -49,7 +49,7 @@ class UniqueNotation extends AbstractConceptValidator implements ResourceManager
             'value' => $concept->getProperty(Skos::NOTATION)
         ];
 
-        if ($this->isUniquePerScheme() && !$concept->isPropertyEmpty(Skos::INSCHEME)) {
+        if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $params[] = [
                 'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
                 'predicate' => Skos::INSCHEME,
@@ -64,25 +64,11 @@ class UniqueNotation extends AbstractConceptValidator implements ResourceManager
 
         if (!$hasOther) {
             return true;
-        }
-
-        if ($this->isUniquePerScheme()) {
-            $this->errorMessages[] = 'The concept notation must be unique per concept scheme. '
-                . 'There is another concept with same notation in one of the concept schemes.';
         } else {
-            $this->errorMessages[] = 'The concept notation must be unique per tenant. '
-                . 'There is another concept with same notation in the same tenant.';
+            $this -> errorMessages[] = "The notation in the submitted concept has been alredy used in the given schema: use another notation.";
         }
 
         return false;
     }
 
-    /**
-     * By default validate per scheme unless the tenant requires it unique per tenant.
-     * @return bool
-     */
-    protected function isUniquePerScheme()
-    {
-        return !$this->getTenant()->isNotationUniquePerTenant();
-    }
 }

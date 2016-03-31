@@ -36,10 +36,7 @@ class UniqueUuid extends AbstractConceptValidator implements ResourceManagerAwar
      */
     protected function validateConcept(Concept $concept)
     {
-        if ($concept->isPropertyEmpty(OpenSkos::UUID)) {
-            return true;
-        }
-
+        
         $params = [];
         $params[] = [
             'operator' => Operator::EQUAL,

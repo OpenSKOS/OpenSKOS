@@ -1,5 +1,4 @@
 <?php
-use OpenSkos2\Namespaces\Rdf;
 
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 

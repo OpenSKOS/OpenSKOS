@@ -326,7 +326,8 @@ class ResourceManager
                 )
         }
         */
-        
+        //var_dump($uris);
+        //var_dump($this->resourceType);
         $resources = EasyRdf::createResourceCollection($this->resourceType);
         
         if (!empty($uris)) {
@@ -335,7 +336,7 @@ class ResourceManager
                 foreach ($urisChunk as $uri) {
                     $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
                 }
-
+                //var_dump($filters);
                 $query = new QueryBuilder();
                 $query->describe('?subject')
                     ->where('?subject', '?predicate', '?object')
@@ -349,7 +350,7 @@ class ResourceManager
                     $resources->append($resource);
                 }
             }
-            
+            //var_dump(count($resources));
             // Keep the ordering of the passed uris.
             $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
                 $searchUris = array_values($uris);
@@ -647,8 +648,9 @@ class ResourceManager
         if ($query instanceof QueryBuilder) {
             $query = $query->getSPARQL();
         }
-        
+        //var_dump($query);
         $result = $this->query($query);
+        //var_dump($result);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
 

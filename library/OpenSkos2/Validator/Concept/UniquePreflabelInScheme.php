@@ -50,7 +50,6 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
                 }
             }
         }
-        
         return true;
     }
     

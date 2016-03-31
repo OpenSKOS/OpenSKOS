@@ -207,6 +207,18 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(OpenSkos::STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
+        }
+    }
+    
+    /**
      * Is the current resource a blank node.
      * It is if no uri given or generated uri starting with _:
      * @return boolean
@@ -361,7 +373,7 @@ class Resource extends Uri implements ResourceIdentifier
         ];
         } else {
             $metadata2 = [
-            OpenSkos::UUID => $oldParams['uuid'],
+            OpenSkos::UUID => new Literal($oldParams['uuid']),
             DcTerms::CREATOR => new Uri($oldParams['creator']),
             DcTerms::DATESUBMITTED => new Literal ($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME), 
             ];
