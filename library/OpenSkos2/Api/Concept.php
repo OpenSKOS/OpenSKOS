@@ -14,14 +14,18 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Api\Exception\ApiException;
+use OpenSkos2\Api\Exception\InvalidArgumentException;
+use OpenSkos2\Api\Exception\UnauthorizedException;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
-
+use OpenSKOS_Db_Table_Row_User;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
+
+use  OpenSkos2\Api\Transform\DataRdf;
 
 class Concept extends AbstractTripleStoreResource {
     
@@ -256,6 +260,70 @@ class Concept extends AbstractTripleStoreResource {
         }
         
         return $propertiesList;
+    }
+    
+     public function delete(PsrServerRequestInterface $request)
+    {
+        try {
+            $params = $request->getQueryParams();
+            if (empty($params['id'])) {
+                throw new InvalidArgumentException('Missing id parameter');
+            }
+            
+            $id = $params['id'];
+            /* @var $concept \OpenSkos2\Concept */
+            $concept = $this->manager->fetchByUri($id);
+            if (!$concept) {
+                throw new NotFoundException('Concept not found by id :' . $id, 404);
+            }
+            
+            $user = $this->getUserFromParams($params);
+            $tenant = $this->getTenantFromParams($params);
+            
+            $this->resourceEditAllowed($user, $tenant, $concept);
+            
+            $this->manager->deleteSoft($concept);
+        } catch (ApiException $ex) {
+            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        }
+        
+        $xml = (new DataRdf($concept))->transform();
+        return $this->getSuccessResponse($xml, 202);
+    }
+    
+   
+    public function resourceEditAllowed(
+        OpenSKOS_Db_Table_Row_User $user,
+        $tenantcode,    
+        $concept) {
+        
+        
+        if ($user->tenant !== $tenantcode) {
+            throw new UnauthorizedException('Tenant does not match user given', 403);
+        }
+        
+        $resourceTenant = current($concept->getProperty(OpenSkos::TENANT));
+        if ($tenantcode !== (string)$resourceTenant) {
+            throw new UnauthorizedException('Resource has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenantcode, 403);
+        }
+        if ($user->role !== 'admin') {
+           throw new UnauthorizedException('You do not have permission to delete this concept', 403); 
+        }
+        return true;
+    }
+    
+     /**
+     * @param array $params
+     * @return \OpenSKOS_Db_Table_Row_Tenant
+     * @throws InvalidArgumentException
+     */
+    private function getTenantFromParams($params)
+    {
+        if (empty($params['tenant'])) {
+            throw new InvalidArgumentException('No tenant specified', 412);
+        }
+            
+        return $params['tenant'];
     }
     
     // specific content validation

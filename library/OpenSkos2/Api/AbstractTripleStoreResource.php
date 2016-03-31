@@ -270,12 +270,12 @@ abstract class AbstractTripleStoreResource {
         return $params[$paramname];
     }
 
-    private function getUserFromParams($params) {
+    protected function getUserFromParams($params) {
         $key = $this->getParamValueFromParams($params, 'key');
         return $this->getUserByKey($key);
     }
 
-    private function getSuccessResponse($message, $status = 200, $format="text/xml") {
+    protected function getSuccessResponse($message, $status = 200, $format="text/xml") {
         $stream = new Stream('php://memory', 'wb+');
         $stream->write($message);
         $response = (new Response($stream, $status))
@@ -289,7 +289,7 @@ abstract class AbstractTripleStoreResource {
     }
     
     // override in superclass when necessary
-    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user) {
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
         return $user->role == 'admin';
     }
 
