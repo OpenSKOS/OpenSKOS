@@ -18,21 +18,29 @@
  */
 
 namespace OpenSkos2\Api;
+
+use Exception;
+use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Namespaces\Skos;
+use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
+use Zend\Diactoros\Stream;
 
 class Relation
 {
     use \OpenSkos2\Api\Response\ApiResponseTrait;
     /**
-     * @var \OpenSkos2\ConceptManager
+     * @var ConceptManager
      */
     protected $manager;
 
     /**
-     * @param \OpenSkos2\ConceptManager $manager
+     * @param ConceptManager $manager
      */
-    public function __construct(\OpenSkos2\ConceptManager $manager)
+    public function __construct(ConceptManager $manager)
     {
         $this->manager = $manager;
     }
@@ -53,10 +61,10 @@ class Relation
             $response = $this->manager->fetchAllRelations($relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
             $intermediate = $this->createRelationTriples($response);
-            $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
+            $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {
-            if ($exc instanceof \OpenSkos2\Api\Exception\ApiException) {
+            if ($exc instanceof ApiException) {
                 return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
             } else {
                 return $this->getErrorResponse(500, $exc->getMessage());
@@ -66,7 +74,7 @@ class Relation
     
     public function findRelatedConcepts($request, $uri) {
         $params = $request->getQueryParams();
-        $relType = 'http://www.w3.org/2004/02/skos/core#' . $params['relationType'];
+        $relType = Skos::NAME_SPACE . $params['relationType'];
         if (isset($params['inSchema'])) {
             $schema = $params['inSchema'];
         } else {
@@ -79,7 +87,7 @@ class Relation
             $response = (new JsonResponse($result, []))->getResponse();
             return $response;
         } catch (Exception $exc) {
-            if ($exc instanceof \OpenSkos2\Api\Exception\ApiException) {
+            if ($exc instanceof ApiException) {
                 return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
             } else {
                 return $this->getErrorResponse(500, $exc->getMessage());
@@ -90,39 +98,39 @@ class Relation
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return Zend\Diactoros\Response
+     * @return Response
      */
-   public function addRelation(\Psr\Http\Message\ServerRequestInterface $request)
+   public function addRelation(PsrServerRequestInterface $request)
     //public function addRelation($request)
     {
         try {
             $this->addConceptRelation($request);
-        } catch (Exception\ApiException $exc) {
+        } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
         }
 
-        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
+        $stream = new Stream('php://memory', 'wb+');
         $stream->write('Relations added');
-        $response = (new \Zend\Diactoros\Response())
+        $response = (new Response())
                 ->withBody($stream);
         return $response;
     }
     
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return Zend\Diactoros\Response
+     * @param PsrServerRequestInterface $request
+     * @return Response
      */
-    public function deleteRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    public function deleteRelation(PsrServerRequestInterface $request)
     {
         try {
             $this->deleteConceptRelation($request);
-        } catch (Exception\ApiException $exc) {
+        } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
         }
 
-        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
+        $stream = new Stream('php://memory', 'wb+');
         $stream->write('Relation deleted');
-        $response = (new \Zend\Diactoros\Response())
+        $response = (new Response())
             ->withBody($stream);
         return $response;
     }
@@ -130,40 +138,16 @@ class Relation
     /**
      * Add concept relation
      *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @throws Exception\ApiException
+     * @param PsrServerRequestInterface $request
+     * @throws ApiException
      */
-    protected function addConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    protected function addConceptRelation(PsrServerRequestInterface $request)
     {
-        $body = $request->getParsedBody();
-        //var_dump($body);
-        
-        if (!isset($body['key'])) {
-            throw new Exception\ApiException('Missing key', 400);
-        }
-        if (!isset($body['concept'])) {
-            throw new Exception\ApiException('Missing concept', 400);
-        }
-        if (!isset($body['related'])) {
-            throw new Exception\ApiException('Missing related', 400);
-        }
-        if (!isset($body['type'])) {
-            throw new Exception\ApiException('Missing type', 400);
-        }
-       
-        
-        $user = $this->getUserByKey($body['key']);
-
-        $concept = $this->manager->fetchByUri($body['concept']);
-        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
-
-        $relatedConcept = $this->manager->fetchByUri($body['concept']);
-        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
-        
         try {
+            $body = $this -> preEditChecks($request);
             $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
-        } catch (\Exception $exc) {
-            throw new Exception\ApiException($exc->getMessage(), 500);
+        } catch (Exception$exc) {
+            throw new ApiException($exc->getMessage(), 500);
         }
         
         
@@ -172,45 +156,56 @@ class Relation
     /**
      * Delete concept relation
      *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @throws Exception\ApiException
+     * @param PsrServerRequestInterface $request
+     * @throws ApiException
      */
-    protected function deleteConceptRelation(\Psr\Http\Message\ServerRequestInterface $request)
+    protected function deleteConceptRelation(PsrServerRequestInterface $request)
     {
-       
+       try {
+            $body = $this -> preEditChecks($request);
+            $this->manager->deleteRelation($body['concept'], $body['type'], $body['related']);
+        } catch (Exception$exc) {
+            throw new ApiException($exc->getMessage(), 500);
+        }
+    }
+    
+    
+    private function preEditChecks(PsrServerRequestInterface $request){
+        
         $body = $request->getParsedBody();
         
         if (!isset($body['key'])) {
-            throw new Exception\ApiException('Missing key', 400);
+            throw new ApiException('Missing key', 400);
         }
         if (!isset($body['concept'])) {
-            throw new Exception\ApiException('Missing concept', 400);
+            throw new ApiException('Missing concept', 400);
         }
         if (!isset($body['related'])) {
-            throw new Exception\ApiException('Missing related', 400);
+            throw new ApiException('Missing related', 400);
         }
         if (!isset($body['type'])) {
-            throw new Exception\ApiException('Missing type', 400);
+            throw new ApiException('Missing type', 400);
+        }
+        
+        if (!isset($body['tenant'])) {
+            throw new ApiException('Missing tenant (code)', 400);
         }
         
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept']);
-        $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
+        $concept->editingAllowed($user, $body['tenant']);
 
         $relatedConcept = $this->manager->fetchByUri($body['concept']);
-        $this->resourceEditAllowed($relatedConcept, $relatedConcept->getInstitution(), $user);
+        $relatedConcept->editingAllowed($user, $body['tenant']);
         
-        try {
-            $this->manager->deleteRelation($body['concept'], $body['type'], $body['related']);
-        } catch (\Exception $exc) {
-            throw new Exception\ApiException($exc->getMessage(), 500);
-        }
+        return $body;
     }
+    
     
     public function listAllRelations(){
          $intermediate = Skos::getRelationsTypes();
-         $result = new \Zend\Diactoros\Response\JsonResponse($intermediate);
+         $result = new JsonResponse2($intermediate);
          return $result;
     }
     

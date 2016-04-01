@@ -29,8 +29,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
-use Rhumsaa\Uuid\Uuid;
-use OpenSkos2\Exception\UriGenerationException;
+use OpenSKOS_Db_Table_Row_User;
 
 class Concept extends Resource
 {
@@ -284,6 +283,24 @@ class Concept extends Resource
             Skos::NOTATION,
             new Literal($notation)
         );
+    }
+    
+    public function editingAllowed(
+        OpenSKOS_Db_Table_Row_User $user,
+        $tenantcode) {
+        if ($user->tenant !== $tenantcode) {
+            throw new UnauthorizedException('Tenant does not match user given', 403);
+        }
+        
+        $resourceTenant = current($this->getProperty(OpenSkos::TENANT));
+        if ($tenantcode !== (string)$resourceTenant) {
+            throw new UnauthorizedException('The concept has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenantcode, 403);
+        }
+        // TODO:
+        if ($user->role !== 'admin') {
+           throw new UnauthorizedException('You do not have permission to delete this concept', 403); 
+        }
+        return true;
     }
     
 }

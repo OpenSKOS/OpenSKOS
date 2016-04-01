@@ -11,11 +11,10 @@ namespace OpenSkos2\Api;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
-use OpenSkos2\Api\Exception\UnauthorizedException;
+use OpenSkos2\Api\Exception\NotFoundException;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use OpenSKOS_Db_Table_Row_User;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
@@ -124,10 +123,8 @@ class Concept extends AbstractTripleStoreResource {
         }
         
         $concepts = $this->searchAutocomplete->search($options, $total);
-        //var_dump($concepts);
         
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
-        //var_dump($result);
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
@@ -296,20 +293,8 @@ class Concept extends AbstractTripleStoreResource {
         OpenSKOS_Db_Table_Row_User $user,
         $tenantcode,    
         $concept) {
-        
-        
-        if ($user->tenant !== $tenantcode) {
-            throw new UnauthorizedException('Tenant does not match user given', 403);
-        }
-        
-        $resourceTenant = current($concept->getProperty(OpenSkos::TENANT));
-        if ($tenantcode !== (string)$resourceTenant) {
-            throw new UnauthorizedException('Resource has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenantcode, 403);
-        }
-        if ($user->role !== 'admin') {
-           throw new UnauthorizedException('You do not have permission to delete this concept', 403); 
-        }
-        return true;
+        $retVal = $concept -> editingAllowed($user, $tenantcode);
+        return $retVal;
     }
     
      /**
@@ -348,18 +333,12 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
         
-       
         $code = $resourceObject -> getTenant();
-        $tenants = $this->manager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$code .'"', Org::FORMALORG);
-        if (count($tenants) < 1) {
-            throw new ApiException('The tenant referred by the code '. $code  .' does not exist.', 400);
-        }
-        
-         
+        $tenants = $this->manager->fetchInstitutionUriByCode($code);
     }
     
    private function prepareSortsForSolr($sortstring) {
-        //var_dump($sortstring);
+       
         $sortlist = explode(" ", $sortstring);
         $l = count($sortlist);
         $sortmap = [];

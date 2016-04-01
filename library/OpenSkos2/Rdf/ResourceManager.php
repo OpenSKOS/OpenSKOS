@@ -28,6 +28,7 @@ use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Rdf\Serializer\NTriple;
@@ -326,17 +327,15 @@ class ResourceManager
                 )
         }
         */
-        //var_dump($uris);
-        //var_dump($this->resourceType);
-        $resources = EasyRdf::createResourceCollection($this->resourceType);
         
+        $resources = EasyRdf::createResourceCollection($this->resourceType);
         if (!empty($uris)) {
             foreach (array_chunk($uris, 50) as $urisChunk) {
                 $filters = [];
                 foreach ($urisChunk as $uri) {
                     $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
                 }
-                //var_dump($filters);
+               
                 $query = new QueryBuilder();
                 $query->describe('?subject')
                     ->where('?subject', '?predicate', '?object')
@@ -345,12 +344,13 @@ class ResourceManager
                 if (!empty($this->resourceType)) {
                     $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
                 }
-
+                
                 foreach ($this->fetchQuery($query) as $resource) {
                     $resources->append($resource);
                 }
+                
             }
-            //var_dump(count($resources));
+            
             // Keep the ordering of the passed uris.
             $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
                 $searchUris = array_values($uris);
@@ -648,9 +648,7 @@ class ResourceManager
         if ($query instanceof QueryBuilder) {
             $query = $query->getSPARQL();
         }
-        //var_dump($query);
         $result = $this->query($query);
-        //var_dump($result);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
 
@@ -662,7 +660,6 @@ class ResourceManager
     public function ask($query)
     {
         $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
-        //var_dump( $query);
         return $this->query($query)->getBoolean();
     }
 
@@ -737,5 +734,12 @@ class ResourceManager
         return $query;
     }
     
-    
+    public function fetchInstitutionUriByCode($code) {
+        $tenants = $this->manager->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
+        if (count($tenants) < 1) {
+            throw new ApiException('The tenant referred by the code ' . $code . ' does not exist.', 400);
+        }
+        return $tenants;
+    }
+
 }

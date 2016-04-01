@@ -32,6 +32,7 @@ abstract class AbstractTripleStoreResource {
         return $this->manager;
     }
 
+   
     // Id is either an URI or uuid
     public function findResourceById(ServerRequestInterface $request) {
         try {
@@ -215,8 +216,6 @@ abstract class AbstractTripleStoreResource {
             . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 412
             );
         }
-        //var_dump($doc);
-
         return $doc;
     }
 

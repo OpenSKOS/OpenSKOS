@@ -51,22 +51,23 @@ class EasyRdf {
      * @return ResourceCollection
      */
     public static function graphToResourceCollection(Graph $graph, $expectedType = null) {
-        //var_dump($graph);
         $collection = self::createResourceCollection($expectedType);
 
         // make two lists: the types resources which are main resources (roots)
         // and typeless resources which are to be used as subresources (elements of complex types in xml)
         $mainResources = array();
-        $subResources = array();
+        if ($expectedType !== null) {
         foreach ($graph->resources() as $resource) {
-            $type = $resource->get('rdf:type');
-            if (!$type) {
-                $subResources[] = $resource;
-            } else {
-                $mainResources[] = $resource;
+                $type = $resource->get('rdf:type');
+                if ($type !== null) {
+                    if ($type->getUri() === $expectedType) {
+                        $mainResources[] = $resource;
+                    }
+                }
             }
+        } else {
+            $mainResources = $graph->resources();
         }
-        //var_dump(count($mainResources));
         // now compose main resources;
         $myResource = null;
         foreach ($mainResources as $resource) {
@@ -74,7 +75,7 @@ class EasyRdf {
             $myResource = self::createResource(
                             $resource->getUri(), $type
             );
-            self::makeNode($myResource, $resource, $subResources);
+            self::makeNode($myResource, $resource);
             if ($myResource !== null) {
                 $collection[] = $myResource;
             }
@@ -82,36 +83,32 @@ class EasyRdf {
         return $collection;
     }
 
-    private static function makeNode(&$myResource, Resource2 $resource, $subResources){
+    private static function makeNode(&$myResource, Resource2 $resource) {
         $propertyUris = $resource->propertyUris();
         // type has been already identified and set in the resource constructor
         // we do no need to duplicate it 
-        $typeIndex = array_search(Rdf::TYPE, $propertyUris);
-        if ($typeIndex){
-            unset($propertyUris[$typeIndex]);
-        }
-        unset($propertyUris[Rdf::TYPE]);
+        $propertyUris=array_diff($propertyUris, array(Rdf::TYPE));
+        
         foreach ($propertyUris as $propertyUri) {
-                foreach ($resource->all(new Resource2($propertyUri)) as $propertyValue) {
-                    if ($propertyValue instanceof Literal2) {
-                        $myResource->addProperty(
-                            $propertyUri,
-                            new Literal(
-                                $propertyValue->getValue(),
-                                $propertyValue->getLang(),
-                                $propertyValue->getDatatypeUri()
+            foreach ($resource->all(new Resource2($propertyUri)) as $propertyValue) {
+                if ($propertyValue instanceof Literal2) {
+                    $myResource->addProperty(
+                            $propertyUri, new Literal(
+                            $propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri()
                             )
-                        );
-                    } elseif ($propertyValue instanceof Resource2) {
-                        // recursion
-                        $mySubResource = self::createResource($propertyValue->getUri(), null);
-                        self::makeNode($mySubResource, $propertyValue, $subResources);
-                        $myResource->addProperty($propertyUri,  $mySubResource);
+                    );
+                } elseif ($propertyValue instanceof Resource2) {
+                    // recursion
+                    $mySubResource = self::createResource($propertyValue->getUri(), null);
+                    if ($propertyValue->get('rdf:type') === null) { //a proper subresource, we must/can iterate on it, it does not have a proper references
+                        self::makeNode($mySubResource, $propertyValue);
                     }
+                    $myResource->addProperty($propertyUri, $mySubResource);
                 }
             }
+        }
     }
-    
+
     /**
      * @param Resource $resource
      * @return Graph
@@ -180,8 +177,7 @@ class EasyRdf {
      */
     public static function createResourceCollection($type)
     {
-        //var_dump($type);
-        //var_dump(Tenant::TYPE);
+        
         switch ($type) {
             case Tenant::TYPE:
                 return new TenantCollection();

@@ -221,7 +221,6 @@ class Autocomplete
         }
         
         $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
-        
 //\Tools\Logging::var_error_log("\n solr query in searchAutocomplete ", $solrQuery, dirname(__FILE__) . '/../../../data/Logger.txt');
         //\Tools\Logging::var_error_log("\n Seacrh result in searchAutocomplete ", $retVal, dirname(__FILE__) . '/../../../data/Logger.txt');
         return $retVal;
