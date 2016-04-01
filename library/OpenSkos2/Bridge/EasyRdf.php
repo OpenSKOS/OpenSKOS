@@ -210,6 +210,7 @@ class EasyRdf {
                 /**
                  * @var $value Object
                  */
+                
                 if ($value instanceof Literal) {
                     $val = $value->getValue();
                     

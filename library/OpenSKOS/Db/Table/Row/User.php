@@ -436,7 +436,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         /**
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
-        $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
+        $resourceManager = $diContainer->get('\OpenSkos2\PersonManager');
 
         if (!$this->uri) {
             $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();

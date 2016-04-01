@@ -196,7 +196,7 @@ class Relation
         $concept = $this->manager->fetchByUri($body['concept']);
         $concept->editingAllowed($user, $body['tenant']);
 
-        $relatedConcept = $this->manager->fetchByUri($body['concept']);
+        $relatedConcept = $this->manager->fetchByUri($body['related']);
         $relatedConcept->editingAllowed($user, $body['tenant']);
         
         return $body;

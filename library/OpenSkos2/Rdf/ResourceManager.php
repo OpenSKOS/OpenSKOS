@@ -291,7 +291,7 @@ class ResourceManager
         $resource = new Uri($uri);
         $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
         $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
-
+        
         // @TODO Add resourceType check.
         
         if (count($resources) == 0) {
@@ -299,13 +299,15 @@ class ResourceManager
                 'The requested resource <' . $uri . '> was not found.'
             );
         }
-
+       
+       
         if (count($resources) > 1) {
             throw new RuntimeException(
                 'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
             );
+             
         }
-
+ 
         return $resources[0];
     }
     
@@ -735,7 +737,7 @@ class ResourceManager
     }
     
     public function fetchInstitutionUriByCode($code) {
-        $tenants = $this->manager->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
+        $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
         if (count($tenants) < 1) {
             throw new ApiException('The tenant referred by the code ' . $code . ' does not exist.', 400);
         }

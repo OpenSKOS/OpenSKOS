@@ -26,7 +26,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\DcTerms;
-use Rhumsaa\Uuid\Uuid;
 
 class ConceptScheme extends Resource
 {

@@ -385,7 +385,7 @@ class Resource extends Uri implements ResourceIdentifier
         
         // @TODO Should we add modified instead of replace it. Or put it only on create.
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addUniqueProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
+        $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
     }
     
     public function selfGenerateUri($tenantcode, ResourceManager $manager) {
