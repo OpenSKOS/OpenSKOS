@@ -364,7 +364,6 @@ class Resource extends Uri implements ResourceIdentifier
         
         $metadata1 = [
             OpenSkos::TENANT => new Literal($params['tenant']),
-            OpenSkos::SET => new Uri($params['set']),
         ];
         
         if (count($oldParams)===0){ // a completely new resource under creation
@@ -382,7 +381,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         $metadata = array_merge($metadata1,$metadata2);
         foreach ($metadata as $property => $defaultValue) {
-                $this->setProperty($property, $defaultValue);
+            $this->setProperty($property, $defaultValue);
         }
         
         // @TODO Should we add modified instead of replace it. Or put it only on create.

@@ -43,7 +43,4 @@ class Set extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
     
-    public function addMetadata($user, $params, $firstTime) {
-        
-    }
 }

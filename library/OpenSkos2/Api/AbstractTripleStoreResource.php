@@ -120,17 +120,27 @@ abstract class AbstractTripleStoreResource {
             $params = $request->getQueryParams($request);
             $user = $this->getUserFromParams($params);
             
+             
+            // do not update uuid: it must be intact forever, connected to uri
+             $uuid = $resourceObject->getProperty(OpenSkos::UUID);
+            if (count($uuid)>0) {
+                $oldUuid = $existingResource->getProperty(OpenSkos::UUID);
+                if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
+                    throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
+                }
+            }
+            
             $oldParams = [
                 'uuid' => $existingResource -> getUUID(),
                 'creator' => $existingResource -> getCreator(),
                 'dateSubmitted' => $existingResource -> getDateSubmitted(),
-                'status' => $existingResource -> getStatus() // so fat, not null pnly for concepts
+                'status' => $existingResource -> getStatus() // so fat, not null only for concepts
             ];
             
             $resourceObject->addMetadata($user, $params, $oldParams);
             
             $tenantcode = $this->getParamValueFromParams($params, 'tenant');
-            $this->resourceEditAllowed($user);    
+            $this->resourceEditAllowed($user, $tenantcode, $existingResource);    
 
             $this->validateForUpdate($resourceObject, $tenantcode, $existingResource);
            
@@ -313,13 +323,7 @@ abstract class AbstractTripleStoreResource {
         if (!$validator->validate($resourceObject)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
-        // content validation, where you need to look up the triple store
-         // do not update uuid: it must be intact forever, connected to uri
-        $uuid = $resourceObject->getProperty(OpenSkos::UUID); 
-        $oldUuid = $existingResourceObject ->getProperty(OpenSkos::UUID);
-        if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
-            throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
-        }
+       
     }
     
     // property-content validations, where you need to look up the triple store
