@@ -86,7 +86,7 @@ private static function getNamesToPropertiesCommon() {
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         
             'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
-            'hasMember' => OpenSkos::HASMEMBER,
+            'member' => Skos::MEMBER,
         ];
 }
 

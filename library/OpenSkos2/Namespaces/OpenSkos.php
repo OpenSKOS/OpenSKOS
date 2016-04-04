@@ -40,8 +40,6 @@ class OpenSkos
     
     const INSKOSCOLLECTION = 'http://openskos.org/xmlns#inSkosCollection';
     
-    const HASMEMBER = 'http://openskos.org/xmlns#hasMember';
-    
     const CODE = 'http://openskos.org/xmlns#code';
     
     const DISABLESEARCHINOTERTENANTS = 'http://openskos.org/xmlns#disableSearchInOtherTenants';
@@ -50,18 +48,11 @@ class OpenSkos
     
     const ALLOW_OAI = 'http://openskos.org/xmlns#allow_oai';
     
-     const OAI_BASEURL = 'http://openskos.org/xmlns#oai_baseURL';
+    const OAI_BASEURL = 'http://openskos.org/xmlns#oai_baseURL';
     
     const CONCEPTBASEURI = 'http://openskos.org/xmlns#conceptBaseUri';
     
     const WEBPAGE = 'http://openskos.org/xmlns#webpage';
     
-     public static function getInversePropertiesMap()
-    {
-        return [
-            OpenSkos::INSKOSCOLLECTION => OpenSkos::HASMEMBER,
-            OpenSkos::HASMEMBER => OpenSkos::INSKOSCOLLECTION
-        ];
-    }
-    
+   
 }
