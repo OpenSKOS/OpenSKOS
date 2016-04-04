@@ -4,7 +4,7 @@
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Concept;
 
-class Api_StatusesController extends OpenSKOS_Rest_Controller
+class Api_StatusController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {
