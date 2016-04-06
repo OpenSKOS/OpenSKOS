@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,7 +19,6 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
@@ -28,6 +28,8 @@ require dirname(__FILE__) . '/autoload.inc.php';
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Resource;
+use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
@@ -61,6 +63,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 $tenant = $OPTS->tenant;
 
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
+var_dump($endPoint);
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
@@ -72,11 +75,14 @@ if (!empty($OPTS->start)) {
 
 
 $getFieldsInClass = function ($class) {
-    $return = '';
+    $retVal = '';
     foreach (\OpenSkos2\Concept::$classes[$class] as $field) {
-        $return [str_replace('http://www.w3.org/2004/02/skos/core#', '', $field)] = $field;
+        //$return [str_replace('http://www.w3.org/2004/02/skos/core#', '', $field)] = $field;
+        // olha
+        $index = strrpos($field, "#");
+        $retVal [substr($field, $index + 1)] = $field;
     }
-    return $return;
+    return $retVal;
 };
 
 $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClass('DocumentationProperties'));
@@ -85,7 +91,7 @@ $users = [];
 $notFoundUsers = [];
 $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
-$collectionModel = new OpenSKOS_Db_Table_Sets();
+$collectionModel = new OpenSKOS_Db_Table_Collections();
 
 $fetchRowWithRetries = function ($model, $query) {
     $tries = 0;
@@ -114,26 +120,25 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-            
+
             if (in_array($value, $notFoundUsers)) {
                 return null;
             }
-            
+
             if (!isset($users[$value])) {
                 /**
                  * @var $user OpenSKOS_Db_Table_Row_User
                  */
                 if (is_numeric($value)) {
                     $user = $fetchRowWithRetries(
-                        $userModel,
-                        'id = ' . $userModel->getAdapter()->quote($value) . ' '
-                        . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
+                            $userModel, 'id = ' . $userModel->getAdapter()->quote($value) . ' '
+                            // olha: discrepance tussen tenant-solr (meertens) en tenant-code in Mysql database mi
+                            //. 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 } else {
                     $user = $fetchRowWithRetries(
-                        $userModel,
-                        'name = ' . $userModel->getAdapter()->quote($value) . ' '
-                        . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
+                            $userModel, 'name = ' . $userModel->getAdapter()->quote($value) . ' '
+                            . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 }
                 if (!$user) {
@@ -159,21 +164,29 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-                        
+
             if (!isset($collections[$value])) {
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
                  */
                 $collection = $fetchRowWithRetries(
-                    $collectionModel,
-                    'id = ' . $collectionModel->getAdapter()->quote($value)
+                        $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($value)
                 );
 
                 if (!$collection) {
-                    echo "Could not find collection with id: {$value}\n";
+                    echo "Could not find tenant collection (migrating into set) with id: {$value}\n";
                     $collections [$value] = null;
                 } else {
-                    $collections [$value] = $collection->getUri();
+                    try {
+                        $collections [$value] = $collection->getUri();
+                    } catch (Zend_Db_Table_Row_Exception $ex) {
+                        $uuid = Uuid::uuid4();
+                        //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
+                        // temporary!!!!
+                        $collections [$value] = new \OpenSkos2\Rdf\Uri("http:/tmp-bypass-epic/" . $uuid);
+                        var_dump($ex->getMessage());
+                        var_dump("So, the set (former tenant collection) handle/uri is generated on the fly. ");
+                    }
                 }
             }
             return $collections[$value];
@@ -193,12 +206,9 @@ $mappings = [
             return new \OpenSkos2\Rdf\Uri($value);
         },
         'fields' => array_merge(
-            $getFieldsInClass('SemanticRelations'),
-            $getFieldsInClass('MappingProperties'),
-            $getFieldsInClass('ConceptSchemes'),
-            [
-                'member' => Skos::MEMBER, // for collections ?!?
-            ]
+                $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), $getFieldsInClass('SkosCollections'), [
+            'member' => Skos::MEMBER,
+                ]
         ),
     ],
     'literals' => [
@@ -220,10 +230,10 @@ $mappings = [
             'created_timestamp' => DcTerms::DATESUBMITTED,
             'modified_timestamp' => DcTerms::MODIFIED,
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-            'dcterms_modified'  => DcTerms::MODIFIED,
-            'dcterms_dateAccepted'  => DcTerms::DATEACCEPTED,
-            'deleted_timestamp'  => OpenSkos::DATE_DELETED,
-            // Olha: the next two filed are added because no timestamp in jena
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'deleted_timestamp' => OpenSkos::DATE_DELETED,
+            // Olha: the field below is added because no timestamp in jena
             'timestamp' => DcTerms::DATESUBMITTED,
         ]
     ],
@@ -257,7 +267,7 @@ $mappings = [
             'tenant' => 'tenant',
             'statusOtherConcept' => 'statusOtherConcept',
             'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
-            'ConceptCollections' => 'ConceptCollections',
+            'SkosCollections' => 'SkosCollections',
         ]
     ]
 ];
@@ -268,88 +278,111 @@ do {
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
-
-        $uri = $doc['uri'];
-        // Prevent deleted resources from having same uri.
-        if (!empty($doc['deleted'])) {
-            $uri = rtrim($uri, '/') . '/deleted';
-        }
-        
-        switch ($doc['class']) {
-            case 'ConceptScheme':
-                $resource = new \OpenSkos2\ConceptScheme($uri);
-                break;
-            case 'Concept':
-                $resource = new \OpenSkos2\Concept($uri);
-                break;
-            case 'Collection':
-                $resource = new \OpenSkos2\Set($uri);
-                break;
-            default:
-                throw new Exception("Didn't expect class: " . $doc['class']);
-        }
-
-        foreach ($doc as $field => $value) {
-
-
-            //this is just a copy field
-            if (isset($labelMapping[$field])) {
-                continue;
+        try {
+            $uri = $doc['uri'];
+            // Prevent deleted resources from having same uri.
+            if (!empty($doc['deleted'])) {
+                $uri = rtrim($uri, '/') . '/deleted';
             }
 
-            $lang = null;
-            if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
-                $lang = $m2['lang'];
-                $field = $m2['field'];
+            switch ($doc['class']) {
+                case 'ConceptScheme':
+                    $resource = new \OpenSkos2\ConceptScheme($uri);
+                    break;
+                case 'Concept':
+                    $resource = new \OpenSkos2\Concept($uri);
+                    break;
+                /// 
+                case 'Collection':
+                    $resource = new \OpenSkos2\Set($uri);
+                    break;
+                case 'SKOSCollection': // 
+                    $resource = new \OpenSkos2\SkosCollection($uri);
+                    break;
+                default:
+                    throw new Exception("Didn't expect class: " . $doc['class']);
+            }
+
+            foreach ($doc as $field => $value) {
+
+
+                //this is just a copy field
                 if (isset($labelMapping[$field])) {
-                    foreach ((array)$value as $v) {
-                        $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
+                    continue;
+                }
+
+                $lang = null;
+                if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
+                    $lang = $m2['lang'];
+                    $field = $m2['field'];
+                    if (isset($labelMapping[$field])) {
+                        foreach ((array) $value as $v) {
+                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
+                        }
+                        continue;
+                    }
+                }
+
+                foreach ($mappings as $mapping) {
+                    if (isset($mapping['fields'][$field])) {
+                        foreach ((array) $value as $v) {
+                            $insertValue = $mapping['callback']($v);
+                            if ($insertValue !== null) {
+                                $resource->addProperty($mapping['fields'][$field], $insertValue);
+                            }
+                        }
+                        continue 2;
+                    }
+                }
+
+
+                if (preg_match('#dcterms_(.+)#', $field, $match)) {
+                    if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
+                        $logger->info("found dc field " . $field . " that is already filled (could be double data)");
+                    }
+
+                    foreach ($value as $v) {
+                        $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
                     }
                     continue;
                 }
 
+                throw new Exception("What to do with field {$field}");
             }
 
-            foreach ($mappings as $mapping) {
-                if (isset($mapping['fields'][$field])) {
-                    foreach ((array)$value as $v) {
-                        $insertValue = $mapping['callback']($v);
-                        if ($insertValue !== null) {
-                            $resource->addProperty($mapping['fields'][$field], $insertValue);
-                        }
-                    }
-                    continue 2;
-                }
+            // Set status deleted
+            if (!empty($doc['deleted'])) {
+                $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
             }
 
+            // Add tenant in graph
+            $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
 
-            if (preg_match('#dcterms_(.+)#', $field, $match)) {
-                if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
-                    $logger->info("found dc field " . $field . " that is already filled (could be double data)");
-                }
-
-                foreach ($value as $v) {
-                    $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
-                }
-                continue;
-            }
-
+            $resourceManager->insert($resource);
+        } catch (Exception $ex) {
+            var_dump("The document below has not been added because: " . $ex->getMessage());
             var_dump($doc);
-            throw new Exception("What to do with field {$field}");
+            continue;
         }
-        
-        // Set status deleted
-        if (!empty($doc['deleted'])) {
-            $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
-        }
-        
-        // Add tenant in graph
-        $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
-        
-        $resourceManager->insert($resource);
-
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
 
 echo "done!";
+
+// List of issues:
+
+//1) tenant is "meertens" for solr and "mi" for mysql; mysql's mi is used to fetch a user, commented out now;
+// way out: make two params: tenant for solr and tenant for mysql
+
+// 2) tenant resource is not added properly as a resource, only as a literal (change the code); 
+
+// 3) Sets are not added despite it should have been: there is a bug in the code; at least they are not displayed in the browser
+
+// 4) Set's uri is generated on the fly, because there must be a column uri in the table "collection", which is not on our MySql
+
+// 5) altering test database: had to chnage collection code from 5 to 1, otherwise error reported
+
+// 6) handling corrupted data: instead of exception the corrupted resource is not added with logging and the migration continues
+
+// 7) had to add column "uri" for users, otherwise cannot test my stuff, but it should not influence migration.

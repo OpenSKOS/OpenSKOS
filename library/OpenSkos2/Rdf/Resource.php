@@ -411,14 +411,15 @@ class Resource extends Uri implements ResourceIdentifier
         return $uri;
     }
 
-   // TODO: must be rewritten, use epic
+    
+    
     protected function assembleUri($tenantcode, $uuid) {
         $type = $this ->getResourceType();
         $uri = $this -> generatePidEPIC($uuid, $type);
         return $uri;
     }
     
-    protected function generatePidEPIC($plainUUID, $type) {
+    public static function generatePidEPIC($plainUUID, $type) {
         if (EPICHandleProxy::enabled()) {
             // Create the PID
             $handleServerClient = EPICHandleProxy::getInstance();

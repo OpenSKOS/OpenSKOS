@@ -95,11 +95,11 @@ class Concept extends Resource
             Skos::RELATED,
             Skos::SEMANTICRELATION,
         ],
-        'ConceptCollections' => [
-            Skos::SKOSCOLLECTION,
-            Skos::ORDEREDCOLLECTION,
-            Skos::MEMBER,
-            Skos::MEMBERLIST,
+        'SkosCollections' =>  [ // before Olha: ConceptCollections
+            OpenSkos::INSKOSCOLLECTION, // was Skos::SKOSCOLLECTION before Olha, it is an rdf:type rather than the reference to a Skos-collection from a concepts
+            Skos::ORDEREDCOLLECTION, // ??
+            Skos::MEMBER, //??
+            Skos::MEMBERLIST, //? 
         ],
         'MappingProperties' => [
             Skos::BROADMATCH,
