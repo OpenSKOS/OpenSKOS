@@ -28,7 +28,7 @@ require dirname(__FILE__) . '/autoload.inc.php';
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Namespaces\vCard;
 use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
@@ -92,6 +92,10 @@ $notFoundUsers = [];
 $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
+$tenantModel = new OpenSKOS_Db_Table_Tenants();
+
+$setsToInsert =[]; // parallel to collections: setsToInsert[$value] contains the full row row from MySql, whereas $collections[$value] on ly the uri
+$tenantsToInsert=[]; // $tenantsToInsert[$tenant] contains the row for tenant with name (code??) $tenant. 
 
 $fetchRowWithRetries = function ($model, $query) {
     $tries = 0;
@@ -160,12 +164,13 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, &$collections, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use ($collectionModel, &$collections, &$setsToInsert, $tenant, $fetchRowWithRetries) {
             if (!$value) {
                 return null;
             }
 
-            if (!isset($collections[$value])) {
+            if (!isset($collections[$value])) { // collection-id value ccurs for the first time
+                // look up MySQL
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
                  */
@@ -180,10 +185,13 @@ $mappings = [
                     try {
                         $collections [$value] = $collection->getUri();
                     } catch (Zend_Db_Table_Row_Exception $ex) {
+                        // Meertens situation
                         $uuid = Uuid::uuid4();
                         //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                        // temporary!!!!
-                        $collections [$value] = new \OpenSkos2\Rdf\Uri("http:/tmp-bypass-epic/" . $uuid);
+                        // tmp
+                        $uri = "http://tmp-bypass-epic/set/" . $uuid;
+                        $collections [$value] = new \OpenSkos2\Rdf\Uri($uri);
+                        $setsToInsert[$value]= ['row'=>$collection, 'uri' => $uri, 'uuid' => $uuid];
                         var_dump($ex->getMessage());
                         var_dump("So, the set (former tenant collection) handle/uri is generated on the fly. ");
                     }
@@ -195,6 +203,42 @@ $mappings = [
             'collection' => OpenSkos2\Namespaces\OpenSkos::SET,
         ],
     ],
+    
+    'tenant' => [
+        'callback' => function ($value) use ($tenantModel, &$tenantsToInsert, $tenant, $fetchRowWithRetries) {
+            if (!$value) {
+                return null;
+            }
+
+            if (!isset($tenantsToInsert[$value])) { // collection-id value ccurs for the first time
+                // look up MySQL
+                /**
+                 * @var $collection OpenSKOS_Db_Table_Row_Tenant
+                 */
+                // name can be relaced with id
+                $tenantComplete = $fetchRowWithRetries(
+                        $tenantModel, 'name = ' . $tenantModel->getAdapter()->quote($value)
+                );
+
+                if (!$tenantComplete) {
+                    echo "Could not find tenant  with name: {$value}\n";
+                    $tenantsToInsert [$value] = null;
+                } else {
+                        $uuid = Uuid::uuid4();
+                        //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
+                        // tmp
+                        $uri = "http://tmp-bypass-epic/institution/" . $uuid;
+                        $code = $tenantComplete['code'];
+                        $tenantsToInsert[$code]= ['row'=>$tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
+                }
+            }
+            return new \OpenSkos2\Rdf\Literal($value);
+        },
+        'fields' => [
+            'tenant' => OpenSkos2\Namespaces\OpenSkos::TENANT
+        ]
+    ],
+                
     'uris' => [
         'callback' => function ($value) use ($logger) {
             $value = trim($value);
@@ -264,10 +308,8 @@ $mappings = [
             'DocumentationProperties' => 'DocumentationProperties',
             'SemanticRelations' => 'SemanticRelations',
             'deleted' => 'deleted',
-            'tenant' => 'tenant',
             'statusOtherConcept' => 'statusOtherConcept',
             'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
-            'SkosCollections' => 'SkosCollections',
         ]
     ]
 ];
@@ -284,7 +326,7 @@ do {
             if (!empty($doc['deleted'])) {
                 $uri = rtrim($uri, '/') . '/deleted';
             }
-
+             
             switch ($doc['class']) {
                 case 'ConceptScheme':
                     $resource = new \OpenSkos2\ConceptScheme($uri);
@@ -360,24 +402,73 @@ do {
 
             $resourceManager->insert($resource);
         } catch (Exception $ex) {
-            var_dump("The document below has not been added because: " . $ex->getMessage());
-            var_dump($doc);
-            continue;
+            var_dump("The following document has not been added: " . $ex->getMessage());
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
+// solr resources have been added
+// now add mysql resources (sets and tenants);
 
-echo "done!";
+                foreach ($setsToInsert as $set) {
+                    $setResource = new \OpenSkos2\Set($set['uri']);
+                    //var_dump($set['uuid']);
+                    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
+                    $setResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($set['row']['code']));
+                    $publisher = $tenantsToInsert[$set['row']['tenant']];
+                    $publisherURI = $publisher['uri'];
+                    $setResource->setProperty(DcTerms::PUBLISHER, new \OpenSkos2\Rdf\Uri($publisherURI));
+                    $setResource->setProperty(DcTerms::TITLE, new \OpenSkos2\Rdf\Literal($set['row']['dc_title']));
+                    $setResource->setProperty(DcTerms::DESCRIPTION, new \OpenSkos2\Rdf\Literal($set['row']['dc_description']));
+                    if (isset($set['row']['website'])) {
+                       if  (!empty($set['row']['website'])){
+                       $setResource->setProperty(OpenSkos::WEBPAGE, new \OpenSkos2\Rdf\Uri($set['row']['website']));
+                       }
+                    };
+                    
+                    //$setResource->setProperty(DcTerms::LICENSE, new \OpenSkos2\Rdf\Literal($set['row']['license_url']));
+                    //$setResource->setProperty(OpenSkos::OAI_BASEURL, new \OpenSkos2\Rdf\Uri($set['row']['OAI_baseURL']));
+                    //$setResource->setProperty(OpenSkos::ALLOW_OAI, new \OpenSkos2\Rdf\Literal($set['row']['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                    //$setResource->setProperty(OpenSkos::CONCEPTBASEURI, new \OpenSkos2\Rdf\Uri($set['row']['conceptsBaseUrl']));
+                    $resourceManager->insert($setResource);
+                }
+
+                foreach ($tenantsToInsert as $tenantComplete) {
+                    $tenantResource = new \OpenSkos2\Tenant($tenantComplete['uri']);
+                    //$tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($tenantComplete['uuid']));
+                    $organisation = new \OpenSkos2\Rdf\Resource("nodeID_".Uuid::uuid4());
+                    $organisation->setProperty(vCard::ORGNAME, new \OpenSkos2\Rdf\Literal($tenantComplete['row']['name']));
+                    //$organisation->setProperty(vCard::ORGUNIT, \OpenSkos2\Rdf\Literal($tenantComplete['row']['organistaionUnit']));
+                    $tenantResource->setProperty(vCard::ORG, $organisation);
+                    //$tenantResource->setProperty(OpenSkos::WEBPAGE, new \OpenSkos2\Rdf\Uri($set['row']['website']));
+                    //$tenantResource->setProperty(vCard::EMAIL, new \OpenSkos2\Rdf\Literal($set['row']['email']));
+                    //$adress = new \OpenSkos2\Rdf\Resource();
+                    //$adress->setProperty(vCard::STREET, $tenantComplete['row']['streetAddress']);
+                    //$adress->setProperty(vCard::LOCALITY, $tenantComplete['row']['locality']);
+                    //$adress->setProperty(vCard::PCODE, $tenantComplete['row']['postalCode']);
+                    //$adress->setProperty(vCard::COUNTRY, $tenantComplete['row']['countryName']);
+                    //$tenantResource->setProperty(vCard::ADR, $adress);
+                    //$tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new \OpenSkos2\Rdf\Literal($set['row']['disableSearchInOtherTenants'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                    //$tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new \OpenSkos2\Rdf\Literal($set['row']['enableStatusesSystem'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                    $resourceManager->insert($tenantResource);
+                }
+
+                echo "done!";
 
 // List of issues:
 
 //1) tenant is "meertens" for solr and "mi" for mysql; mysql's mi is used to fetch a user, commented out now;
 // way out: make two params: tenant for solr and tenant for mysql
 
-// 2) tenant resource is not added properly as a resource, only as a literal (change the code); 
+// 2) tenant resource is not added properly as a resource, only as a literal (change the code);
+// there is no document of class Tenant or institution in our current solr
+// look up up the MySql dtabase to create a proper resource
 
-// 3) Sets are not added despite it should have been: there is a bug in the code; at least they are not displayed in the browser
+// 3) Sets are not added: there is no document of class Tenant of institution in our current solr
+// (make a lits of uri's of already inserted sets) before inserting it again
+// look up up the MySQL database to create a proper resource
+// 
+// there is no document of class Tenant of institution in our current solr
 
 // 4) Set's uri is generated on the fly, because there must be a column uri in the table "collection", which is not on our MySql
 
@@ -386,3 +477,5 @@ echo "done!";
 // 6) handling corrupted data: instead of exception the corrupted resource is not added with logging and the migration continues
 
 // 7) had to add column "uri" for users, otherwise cannot test my stuff, but it should not influence migration.
+
+// 8) test relations, it looks like they are not added;
