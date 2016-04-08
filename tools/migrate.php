@@ -405,53 +405,69 @@ do {
             var_dump("The following document has not been added: " . $ex->getMessage());
         }
     }
-} while ($counter < $total && isset($data['response']['docs']));
-
+//} while ($counter < $total && isset($data['response']['docs']));
+    // TMP 
+} while ($counter < 3 && isset($data['response']['docs']));
 // solr resources have been added
 // now add mysql resources (sets and tenants);
 
+                $setPropertyWithCheck = function (&$resource, $property, $val, $isURI, $isBOOL = false) {
+                    if (isset($val)) {
+                        if (!empty($val)) {
+                            if ($isURI) {
+                                $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
+                            } else {
+                                if (!$isBOOL) {
+                                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
+                                } else {
+                                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                                }
+                            }
+                        }
+                    } else {
+                        var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
+                    }
+                };
+
                 foreach ($setsToInsert as $set) {
                     $setResource = new \OpenSkos2\Set($set['uri']);
-                    //var_dump($set['uuid']);
                     $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
-                    $setResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($set['row']['code']));
+                    $setPropertyWithCheck($setResource, OpenSkos::CODE, $set['row']['code'], false);
                     $publisher = $tenantsToInsert[$set['row']['tenant']];
                     $publisherURI = $publisher['uri'];
-                    $setResource->setProperty(DcTerms::PUBLISHER, new \OpenSkos2\Rdf\Uri($publisherURI));
-                    $setResource->setProperty(DcTerms::TITLE, new \OpenSkos2\Rdf\Literal($set['row']['dc_title']));
-                    $setResource->setProperty(DcTerms::DESCRIPTION, new \OpenSkos2\Rdf\Literal($set['row']['dc_description']));
-                    if (isset($set['row']['website'])) {
-                       if  (!empty($set['row']['website'])){
-                       $setResource->setProperty(OpenSkos::WEBPAGE, new \OpenSkos2\Rdf\Uri($set['row']['website']));
-                       }
-                    };
-                    
-                    //$setResource->setProperty(DcTerms::LICENSE, new \OpenSkos2\Rdf\Literal($set['row']['license_url']));
-                    //$setResource->setProperty(OpenSkos::OAI_BASEURL, new \OpenSkos2\Rdf\Uri($set['row']['OAI_baseURL']));
-                    //$setResource->setProperty(OpenSkos::ALLOW_OAI, new \OpenSkos2\Rdf\Literal($set['row']['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
-                    //$setResource->setProperty(OpenSkos::CONCEPTBASEURI, new \OpenSkos2\Rdf\Uri($set['row']['conceptsBaseUrl']));
+                    $setPropertyWithCheck($setResource, DcTerms::PUBLISHER, $publisherURI, true);
+                    $setPropertyWithCheck($setResource, DcTerms::TITLE, $set['row']['dc_title'], false);
+                    $setPropertyWithCheck($setResource, DcTerms::DESCRIPTION, $set['row']['dc_description'], false);
+                    $setPropertyWithCheck($setResource, OpenSkos::WEBPAGE, $set['row']['website'], true);
+                    $setPropertyWithCheck($setResource, DcTerms::LICENSE, $set['row']['license_url'], true);
+                    $setPropertyWithCheck($setResource, OpenSkos::OAI_BASEURL, $set['row']['OAI_baseURL'], true);
+                    $setPropertyWithCheck($setResource, OpenSkos::ALLOW_OAI, $set['row']['allow_oai'], false, true);
+                    $setPropertyWithCheck($setResource, OpenSkos::CONCEPTBASEURI, $set['row']['conceptsBaseUrl'], true);
                     $resourceManager->insert($setResource);
                 }
+                
+                
 
                 foreach ($tenantsToInsert as $tenantComplete) {
                     $tenantResource = new \OpenSkos2\Tenant($tenantComplete['uri']);
-                    //$tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($tenantComplete['uuid']));
+                    $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($tenantComplete['uuid']));
                     $organisation = new \OpenSkos2\Rdf\Resource("nodeID_".Uuid::uuid4());
-                    $organisation->setProperty(vCard::ORGNAME, new \OpenSkos2\Rdf\Literal($tenantComplete['row']['name']));
-                    //$organisation->setProperty(vCard::ORGUNIT, \OpenSkos2\Rdf\Literal($tenantComplete['row']['organistaionUnit']));
+                    $setPropertyWithCheck($organisation, vCard::ORGNAME, $tenantComplete['row']['name'], false);
+                    $setPropertyWithCheck($organisation, vCard::ORGUNIT, $tenantComplete['row']['organisationUnit'], false);
                     $tenantResource->setProperty(vCard::ORG, $organisation);
-                    //$tenantResource->setProperty(OpenSkos::WEBPAGE, new \OpenSkos2\Rdf\Uri($set['row']['website']));
-                    //$tenantResource->setProperty(vCard::EMAIL, new \OpenSkos2\Rdf\Literal($set['row']['email']));
-                    //$adress = new \OpenSkos2\Rdf\Resource();
-                    //$adress->setProperty(vCard::STREET, $tenantComplete['row']['streetAddress']);
-                    //$adress->setProperty(vCard::LOCALITY, $tenantComplete['row']['locality']);
-                    //$adress->setProperty(vCard::PCODE, $tenantComplete['row']['postalCode']);
-                    //$adress->setProperty(vCard::COUNTRY, $tenantComplete['row']['countryName']);
-                    //$tenantResource->setProperty(vCard::ADR, $adress);
-                    //$tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new \OpenSkos2\Rdf\Literal($set['row']['disableSearchInOtherTenants'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
-                    //$tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new \OpenSkos2\Rdf\Literal($set['row']['enableStatusesSystem'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                    $setPropertyWithCheck($tenantResource, OpenSkos::WEBPAGE, $tenantComplete['row']['website'], true);
+                    $setPropertyWithCheck($tenantResource, vCard::EMAIL, $tenantComplete['row']['email'], false);
+                    $adress = new \OpenSkos2\Rdf\Resource("nodeID_".Uuid::uuid4());
+                    $setPropertyWithCheck($adress, vCard::STREET, $tenantComplete['row']['streetAddress'], false);
+                    $setPropertyWithCheck($adress, vCard::LOCALITY, $tenantComplete['row']['locality'], false);
+                    $setPropertyWithCheck($adress, vCard::PCODE, $tenantComplete['row']['postalCode'], false);
+                    $setPropertyWithCheck($adress, vCard::COUNTRY, $tenantComplete['row']['countryName'], false);
+                    $tenantResource->setProperty(vCard::ADR, $adress);
+                    $setPropertyWithCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantComplete['row']['disableSearchInOtherTenants'], false, true);
+                    $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantComplete['row']['enableStatusesSystem'], false, true);
                     $resourceManager->insert($tenantResource);
-                }
+                };
+                
 
                 echo "done!";
 
