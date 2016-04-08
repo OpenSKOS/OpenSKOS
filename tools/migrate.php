@@ -26,9 +26,11 @@
 require dirname(__FILE__) . '/autoload.inc.php';
 
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Org;
 use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
@@ -136,8 +138,7 @@ $mappings = [
                 if (is_numeric($value)) {
                     $user = $fetchRowWithRetries(
                             $userModel, 'id = ' . $userModel->getAdapter()->quote($value) . ' '
-                            // olha: discrepance tussen tenant-solr (meertens) en tenant-code in Mysql database mi
-                            //. 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
+                            . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 } else {
                     $user = $fetchRowWithRetries(
@@ -164,7 +165,7 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, &$collections, &$setsToInsert, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use ($collectionModel, &$collections, &$setsToInsert, $tenant, $fetchRowWithRetries, $resourceManager) {
             if (!$value) {
                 return null;
             }
@@ -179,25 +180,30 @@ $mappings = [
                 );
 
                 if (!$collection) {
-                    echo "Could not find tenant collection (migrating into set) with id: {$value}\n";
+                    echo "Could not find a set (aka tenant collection) with id: {$value}\n";
                     $collections [$value] = null;
                 } else {
                     try {
                         $collections [$value] = $collection->getUri();
                     } catch (Zend_Db_Table_Row_Exception $ex) {
-                        // Meertens situation
-                        $uuid = Uuid::uuid4();
-                        //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                        // tmp
-                        $uri = "http://tmp-bypass-epic/set/" . $uuid;
-                        $collections [$value] = new \OpenSkos2\Rdf\Uri($uri);
-                        $setsToInsert[$value]= ['row'=>$collection, 'uri' => $uri, 'uuid' => $uuid];
-                        var_dump($ex->getMessage());
-                        var_dump("So, the set (former tenant collection) handle/uri is generated on the fly. ");
+                         $collectionTripleStore = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$collection['code']."'", Dcmi::DATASET);
+                         if (count($collectionTripleStore) < 1) {
+                            // Meertens situation
+                            $uuid = Uuid::uuid4();
+                            //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
+                            // tmp
+                            $uri = "http://tmp-bypass-epic/set/" . $uuid;
+                            $setsToInsert[$value] = ['row' => $collection, 'uri' => $uri, 'uuid' => $uuid];
+                            var_dump("The set's (aka tenant-collection's) handle/uri " . $uri. " is generated on the fly. ");
+                            $collections [$value] = new \OpenSkos2\Rdf\Uri($uri);
+                        } else {
+                            $collections [$value] = new \OpenSkos2\Rdf\Uri($collectionTripleStore[0]); 
+                        }
+                        
                     }
                 }
+                return $collections[$value];
             }
-            return $collections[$value];
         },
         'fields' => [
             'collection' => OpenSkos2\Namespaces\OpenSkos::SET,
@@ -205,7 +211,7 @@ $mappings = [
     ],
     
     'tenant' => [
-        'callback' => function ($value) use ($tenantModel, &$tenantsToInsert, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use ($tenantModel, &$tenantsToInsert, $tenant, $fetchRowWithRetries, $resourceManager) {
             if (!$value) {
                 return null;
             }
@@ -217,22 +223,27 @@ $mappings = [
                  */
                 // name can be relaced with id
                 $tenantComplete = $fetchRowWithRetries(
-                        $tenantModel, 'name = ' . $tenantModel->getAdapter()->quote($value)
+                        $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($value)
                 );
 
                 if (!$tenantComplete) {
-                    echo "Could not find tenant  with name: {$value}\n";
+                    echo "Could not find tenant  with code: {$value}\n";
                     $tenantsToInsert [$value] = null;
+                    return null;
                 } else {
-                        $uuid = Uuid::uuid4();
-                        //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                        // tmp
-                        $uri = "http://tmp-bypass-epic/institution/" . $uuid;
-                        $code = $tenantComplete['code'];
-                        $tenantsToInsert[$code]= ['row'=>$tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
-                }
+                        $tenants = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$value."'", Org::FORMALORG);
+                        if (count($tenants) < 1) { // this tenant is not yet in the triple store
+                                $uuid = Uuid::uuid4();
+                                //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
+                                // tmp
+                                $uri = "http://tmp-bypass-epic/institution/" . $uuid;
+                                $tenantsToInsert[$value] = ['row' => $tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
+                                var_dump("The institution's  (" .  $value.  ") handle/uri " . $uri . " is generated on the fly. ");
+                                return new \OpenSkos2\Rdf\Uri($uri);
+                            };
+                        return new \OpenSkos2\Rdf\Uri($tenants[0]);
+                        }
             }
-            return new \OpenSkos2\Rdf\Literal($value);
         },
         'fields' => [
             'tenant' => OpenSkos2\Namespaces\OpenSkos::TENANT
@@ -339,6 +350,7 @@ do {
                     $resource = new \OpenSkos2\Set($uri);
                     break;
                 case 'SKOSCollection': // 
+                    unset($doc['hasTopConcept']);
                     $resource = new \OpenSkos2\SkosCollection($uri);
                     break;
                 default:
@@ -397,17 +409,17 @@ do {
                 $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
             }
 
-            // Add tenant in graph
-            $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+            // Tenant added as a reference in the "mappings"-loop
+            //$resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
 
             $resourceManager->insert($resource);
         } catch (Exception $ex) {
             var_dump("The following document has not been added: " . $ex->getMessage());
         }
     }
-//} while ($counter < $total && isset($data['response']['docs']));
+} while ($counter < $total && isset($data['response']['docs']));
     // TMP 
-} while ($counter < 3 && isset($data['response']['docs']));
+//} while ($counter < 3 && isset($data['response']['docs']));
 // solr resources have been added
 // now add mysql resources (sets and tenants);
 
@@ -428,29 +440,11 @@ do {
                         var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
                     }
                 };
-
-                foreach ($setsToInsert as $set) {
-                    $setResource = new \OpenSkos2\Set($set['uri']);
-                    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
-                    $setPropertyWithCheck($setResource, OpenSkos::CODE, $set['row']['code'], false);
-                    $publisher = $tenantsToInsert[$set['row']['tenant']];
-                    $publisherURI = $publisher['uri'];
-                    $setPropertyWithCheck($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-                    $setPropertyWithCheck($setResource, DcTerms::TITLE, $set['row']['dc_title'], false);
-                    $setPropertyWithCheck($setResource, DcTerms::DESCRIPTION, $set['row']['dc_description'], false);
-                    $setPropertyWithCheck($setResource, OpenSkos::WEBPAGE, $set['row']['website'], true);
-                    $setPropertyWithCheck($setResource, DcTerms::LICENSE, $set['row']['license_url'], true);
-                    $setPropertyWithCheck($setResource, OpenSkos::OAI_BASEURL, $set['row']['OAI_baseURL'], true);
-                    $setPropertyWithCheck($setResource, OpenSkos::ALLOW_OAI, $set['row']['allow_oai'], false, true);
-                    $setPropertyWithCheck($setResource, OpenSkos::CONCEPTBASEURI, $set['row']['conceptsBaseUrl'], true);
-                    $resourceManager->insert($setResource);
-                }
                 
-                
-
-                foreach ($tenantsToInsert as $tenantComplete) {
+                 foreach ($tenantsToInsert as $tenantComplete) {
                     $tenantResource = new \OpenSkos2\Tenant($tenantComplete['uri']);
                     $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($tenantComplete['uuid']));
+                    $setPropertyWithCheck($tenantResource, OpenSkos::CODE, $tenantComplete['row']['code'], false);
                     $organisation = new \OpenSkos2\Rdf\Resource("nodeID_".Uuid::uuid4());
                     $setPropertyWithCheck($organisation, vCard::ORGNAME, $tenantComplete['row']['name'], false);
                     $setPropertyWithCheck($organisation, vCard::ORGUNIT, $tenantComplete['row']['organisationUnit'], false);
@@ -467,31 +461,62 @@ do {
                     $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantComplete['row']['enableStatusesSystem'], false, true);
                     $resourceManager->insert($tenantResource);
                 };
+
+                foreach ($setsToInsert as $set) {
+                    $setResource = new \OpenSkos2\Set($set['uri']);
+                    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
+                    $setPropertyWithCheck($setResource, OpenSkos::CODE, $set['row']['code'], false);
+                    $tenants = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE,"'".$set['row']['tenant']."'", Org::FORMALORG);
+                    if ($count($tenants)<1) {
+                        throw new Exception("Something went terribly worng: the tenat with the code ". $set['row']['tenant'] . " has not been inserted in the triple store before now.");
+                    };
+                    $publisherURI = $tenants[0];
+                    $setPropertyWithCheck($setResource, DcTerms::PUBLISHER, $publisherURI, true);
+                    $setPropertyWithCheck($setResource, DcTerms::TITLE, $set['row']['dc_title'], false);
+                    $setPropertyWithCheck($setResource, DcTerms::DESCRIPTION, $set['row']['dc_description'], false);
+                    $setPropertyWithCheck($setResource, OpenSkos::WEBPAGE, $set['row']['website'], true);
+                    $setPropertyWithCheck($setResource, DcTerms::LICENSE, $set['row']['license_url'], true);
+                    $setPropertyWithCheck($setResource, OpenSkos::OAI_BASEURL, $set['row']['OAI_baseURL'], true);
+                    $setPropertyWithCheck($setResource, OpenSkos::ALLOW_OAI, $set['row']['allow_oai'], false, true);
+                    $setPropertyWithCheck($setResource, OpenSkos::CONCEPTBASEURI, $set['row']['conceptsBaseUrl'], true);
+                    $resourceManager->insert($setResource);
+                }
+                
+                
+
+               
                 
 
                 echo "done!";
 
-// List of issues:
+// List of issues and fixes:
 
 //1) tenant is "meertens" for solr and "mi" for mysql; mysql's mi is used to fetch a user, commented out now;
 // way out: make two params: tenant for solr and tenant for mysql
+// Test data problem/; the mySql instance did not correspond to the Solr instance
 
 // 2) tenant resource is not added properly as a resource, only as a literal (change the code);
 // there is no document of class Tenant or institution in our current solr
 // look up up the MySql dtabase to create a proper resource
+// fixed               
 
 // 3) Sets are not added: there is no document of class Tenant of institution in our current solr
 // (make a lits of uri's of already inserted sets) before inserting it again
 // look up up the MySQL database to create a proper resource
+// Fixed
 // 
 // there is no document of class Tenant of institution in our current solr
+                
 
 // 4) Set's uri is generated on the fly, because there must be a column uri in the table "collection", which is not on our MySql
+// ok
 
 // 5) altering test database: had to chnage collection code from 5 to 1, otherwise error reported
 
 // 6) handling corrupted data: instead of exception the corrupted resource is not added with logging and the migration continues
+                //discuss
 
 // 7) had to add column "uri" for users, otherwise cannot test my stuff, but it should not influence migration.
 
-// 8) test relations, it looks like they are not added;
+// 8) test relations is not possible, becuase they are not a part of CCr database.s
+                
