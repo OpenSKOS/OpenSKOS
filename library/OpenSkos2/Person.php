@@ -25,7 +25,7 @@ use OpenSkos2\Rdf\Uri;
 
 class Person extends Resource
 {
-    const TYPE = 'http://xmlns.com/foaf/0.1/Person';
+    const TYPE = Foaf::PERSON;
     
     /**
      * Resource constructor.

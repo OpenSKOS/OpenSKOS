@@ -21,7 +21,7 @@
  */
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
- * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
+ * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
@@ -31,13 +31,16 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Foaf;
+use OpenSkos2\Namespaces\Rdf;
 use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
-    'start|s=s' => 'Start from that record'
+    'start|s=s' => 'Start from that record',
+    'enablestatusses=s' => 'Enable status system (cnadidate, approved, etc) for the given tenant',
 );
 
 try {
@@ -66,6 +69,9 @@ $tenant = $OPTS->tenant;
 
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 var_dump($endPoint);
+
+$enableStatussesSystem = $OPTS->enablestatusses;
+
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
@@ -97,7 +103,14 @@ $collectionModel = new OpenSKOS_Db_Table_Collections();
 $tenantModel = new OpenSKOS_Db_Table_Tenants();
 
 $setsToInsert =[]; // parallel to collections: setsToInsert[$value] contains the full row row from MySql, whereas $collections[$value] on ly the uri
-$tenantsToInsert=[]; // $tenantsToInsert[$tenant] contains the row for tenant with name (code??) $tenant. 
+$tenantsToInsert=[]; // $tenantsToInsert[$tenant] contains the row for tenant with name $tenant. 
+
+$adapter = $userModel->getAdapter();
+$cols = $userModel->info('cols');
+if (!in_array('uri', $cols)) {
+    $adapter->getConnection()->exec('ALTER TABLE user ADD uri VARCHAR(256)');
+    $adapter->closeConnection();
+}
 
 $fetchRowWithRetries = function ($model, $query) {
     $tries = 0;
@@ -151,7 +164,7 @@ $mappings = [
                     $notFoundUsers[] = $value;
                     $users[$value] = null;
                 } else {
-                    $users[$value] = $user->getFoafPerson();
+                    $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson()->getUri());
                 }
             }
             return $users[$value];
@@ -187,7 +200,7 @@ $mappings = [
                         $collections [$value] = $collection->getUri();
                     } catch (Zend_Db_Table_Row_Exception $ex) {
                          $collectionTripleStore = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$collection['code']."'", Dcmi::DATASET);
-                         if (count($collectionTripleStore) < 1) {
+                         if (count($collectionTripleStore) < 1) { // the set is not yet in the triple store
                             // Meertens situation
                             $uuid = Uuid::uuid4();
                             //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
@@ -414,7 +427,10 @@ do {
 
             $resourceManager->insert($resource);
         } catch (Exception $ex) {
-            var_dump("The following document has not been added: " . $ex->getMessage());
+            var_dump($ex->getMessage());
+            //var_dump($ex->getTraceAsString());
+            var_dump("And the following document has not been added: ");
+            var_dump($doc);
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
@@ -458,16 +474,21 @@ do {
                     $setPropertyWithCheck($adress, vCard::COUNTRY, $tenantComplete['row']['countryName'], false);
                     $tenantResource->setProperty(vCard::ADR, $adress);
                     $setPropertyWithCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantComplete['row']['disableSearchInOtherTenants'], false, true);
-                    $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantComplete['row']['enableStatusesSystem'], false, true);
+                    try {
+                        $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantComplete['row']['enableStatussesSystem'], false, true);
+                    } catch (Zend_Db_Table_Row_Exception $ex) {
+                        $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $enableStatussesSystem, false, true);
+                    }
                     $resourceManager->insert($tenantResource);
                 };
+                
 
                 foreach ($setsToInsert as $set) {
                     $setResource = new \OpenSkos2\Set($set['uri']);
                     $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
                     $setPropertyWithCheck($setResource, OpenSkos::CODE, $set['row']['code'], false);
                     $tenants = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE,"'".$set['row']['tenant']."'", Org::FORMALORG);
-                    if ($count($tenants)<1) {
+                    if (count($tenants)<1) {
                         throw new Exception("Something went terribly worng: the tenat with the code ". $set['row']['tenant'] . " has not been inserted in the triple store before now.");
                     };
                     $publisherURI = $tenants[0];
@@ -481,10 +502,6 @@ do {
                     $setPropertyWithCheck($setResource, OpenSkos::CONCEPTBASEURI, $set['row']['conceptsBaseUrl'], true);
                     $resourceManager->insert($setResource);
                 }
-                
-                
-
-               
                 
 
                 echo "done!";

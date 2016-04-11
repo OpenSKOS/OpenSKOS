@@ -446,9 +446,8 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             return $resourceManager->fetchByUri($this->uri);
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
-            $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+            //$person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
             $resourceManager->insert($person);
-
             return $person;
         }
     }
