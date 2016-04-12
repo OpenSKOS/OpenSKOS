@@ -20,9 +20,9 @@ class SkosCollectionManager extends ResourceManager
      */
     protected $resourceType = SkosCollection::TYPE;
     
-     //check conditions when it can be deleted
-    public function CanBeDeleted(){
-        return true;
+      //TODO: check conditions when it can be deleted
+    public function CanBeDeleted($uri){
+        parent::CanBeDeleted($uri);
     }
     
 }

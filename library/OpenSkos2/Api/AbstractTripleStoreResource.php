@@ -85,7 +85,13 @@ abstract class AbstractTripleStoreResource {
     }
 
     private function handleCreate(ServerRequestInterface $request) {
+       
         try {
+            $params = $request->getQueryParams($request);
+            $user = $this->getUserFromParams($params);
+            if (!$this->resourceCreationAllowed($user)) {
+                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType(), 403); 
+            }
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
                 throw new InvalidArgumentException(
@@ -93,8 +99,6 @@ abstract class AbstractTripleStoreResource {
                 );
             }
 
-            $params = $request->getQueryParams($request);
-            $user = $this->getUserFromParams($params);
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
             $resourceObject->addMetadata($user, $params, array());
             if ($autoGenerateUri) {
@@ -173,9 +177,9 @@ abstract class AbstractTripleStoreResource {
                 throw new ApiException('You do not have rights to delete this resource ' . $uri, 403);
             }
 
-            $canBeDeleted = $this->manager->CanBeDeleted();
+            $canBeDeleted = $this->manager->CanBeDeleted($uri);
             if (!$canBeDeleted) {
-                throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. ', 403);
+                throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
             }
             $this->manager->delete(new Uri($uri));
         } catch (ApiException $ex) {
@@ -294,17 +298,22 @@ abstract class AbstractTripleStoreResource {
         return $response;
     }
 
-    // override in superclass when necessary
-    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
-        return $user->role == 'admin';
+    // override in concrete rclass when necessary
+    protected function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return  ($user->role === ADMINISRATOR || $user->role === ROOT);
     }
     
-    // override in superclass when necessary
-    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
+    // override in concrete class when necessary
+    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
+        return ($user->role === ADMINISRATOR || $user->role === ROOT);
+    }
+    
+     // override in concrete class when necessary
+    protected function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
         return ($user->role === ADMINISRATOR || $user->role === ROOT);
     }
 
-    //override in superclass when necessary 
+    // override in concrete class when necessary
     protected function validate($resourceObject, $tenantcode) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
         if (!$validator->validate($resourceObject)) {
@@ -319,7 +328,7 @@ abstract class AbstractTripleStoreResource {
        }
     }
     
-    //override in superclass when necessary 
+     // override in concrete class when necessary
     protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenantcode));
         if (!$validator->validate($resourceObject)) {

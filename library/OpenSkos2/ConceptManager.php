@@ -31,6 +31,8 @@ use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Exception;
 
+require_once dirname(__FILE__) .'/config.inc.php';
+
 class ConceptManager extends ResourceManager
 {
     /**
@@ -264,7 +266,7 @@ class ConceptManager extends ResourceManager
      * @param int &$numFound output Total number of found records.
      * @return ConceptCollection
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
+    public function search($query, $rows=MAXIMAL_ROWS, $start = 0, &$numFound=0, $sorts = null)
     {
         $select = $this->solr->createSelect();
         $select->setStart($start)
@@ -275,6 +277,7 @@ class ConceptManager extends ResourceManager
         if (!empty($sorts)) {
             $select->setSorts($sorts);
         }
+        
         
         $solrResult = $this->solr->select($select);
         $uris = [];

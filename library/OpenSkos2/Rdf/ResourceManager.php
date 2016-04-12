@@ -215,9 +215,10 @@ class ResourceManager
         $this->solr->update($update);
     }
     
-    //override in supercalsses
-    public function CanBeDeleted(){
-        return false;
+    //override in the sublasses when necessary
+    public function CanBeDeleted($uri){
+        $references =  $this->query('SELECT ?s WHERE {?s ?p <'. $uri . '> . } LIMIT 1');
+        return count($references < 1);
     }
 
     /**

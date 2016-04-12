@@ -8,3 +8,6 @@ define('ADMINISRATOR', 'administrator');
 define('EDITOR', 'editor');
 define('USER', 'user');
 define('GUEST', 'guest');
+
+//
+define('MAXIMAL_ROWS', 1001);

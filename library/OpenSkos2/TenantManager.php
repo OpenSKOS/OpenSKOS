@@ -27,9 +27,9 @@ class TenantManager extends ResourceManager
   
     protected $resourceType = Tenant::TYPE;
     
-     //check conditions when it can be deleted
-    public function CanBeDeleted(){
-        return true;
+     //TODO: check conditions when it can be deleted
+    public function CanBeDeleted($uri){
+        parent::CanBeDeleted($uri);
     }
     
     public function fetchUriName() {

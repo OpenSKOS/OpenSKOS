@@ -37,13 +37,7 @@ class Concept extends AbstractTripleStoreResource {
      */
     private $searchAutocomplete;
 
-    /**
-     * Amount of concepts to return
-     *
-     * @var int
-     */
-    private $limit = 20;
-
+   
     public function __construct(ConceptManager $manager,  \OpenSkos2\Search\Autocomplete $searchAutocomplete) {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -72,8 +66,8 @@ class Concept extends AbstractTripleStoreResource {
         }
 
         // limit
-        $limit = $this->limit;
-        if (isset($params['rows']) && $params['rows'] < 1001) {
+        $limit = MAXIMAL_ROWS;
+        if (isset($params['rows']) && $params['rows'] <  MAXIMAL_ROWS) {
             $limit = (int)$params['rows'];
         }
         
@@ -290,7 +284,10 @@ class Concept extends AbstractTripleStoreResource {
         return $this->getSuccessResponse($xml, 202);
     }
     
-   
+    public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
+        return ($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT);
+    }
+    
     public function resourceEditAllowed(
         OpenSKOS_Db_Table_Row_User $user,
         $tenantcode,    

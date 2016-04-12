@@ -36,8 +36,8 @@ class ConceptSchemeManager extends ResourceManager
     protected $resourceType = ConceptScheme::TYPE;
 
      //TODO: check conditions when it can be deleted
-    public function CanBeDeleted(){
-        return true;
+    public function CanBeDeleted($uri){
+        parent::CanBeDeleted($uri);
     }
     /**
      * Get all scheme's by collection URI

@@ -28,9 +28,9 @@ class SetManager extends ResourceManager
      */
     protected $resourceType = Set::TYPE;
     
-     //check conditions when it can be deleted
-    public function CanBeDeleted(){
-        return true;
+      //TODO: check conditions when it can be deleted
+    public function CanBeDeleted($uri){
+        parent::CanBeDeleted($uri);
     }
     
     
