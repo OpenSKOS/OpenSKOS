@@ -201,11 +201,8 @@ $mappings = [
                     } catch (Zend_Db_Table_Row_Exception $ex) {
                          $collectionTripleStore = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$collection['code']."'", Dcmi::DATASET);
                          if (count($collectionTripleStore) < 1) { // the set is not yet in the triple store
-                            // Meertens situation
                             $uuid = Uuid::uuid4();
-                            //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                            // tmp
-                            $uri = "http://tmp-bypass-epic/set/" . $uuid;
+                            $uri = Resource::generatePidEPIC($uuid, 'Dataset');
                             $setsToInsert[$value] = ['row' => $collection, 'uri' => $uri, 'uuid' => $uuid];
                             var_dump("The set's (aka tenant-collection's) handle/uri " . $uri. " is generated on the fly. ");
                             $collections [$value] = new \OpenSkos2\Rdf\Uri($uri);
@@ -247,9 +244,7 @@ $mappings = [
                         $tenants = $resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$value."'", Org::FORMALORG);
                         if (count($tenants) < 1) { // this tenant is not yet in the triple store
                                 $uuid = Uuid::uuid4();
-                                //$uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                                // tmp
-                                $uri = "http://tmp-bypass-epic/institution/" . $uuid;
+                                $uri = Resource::generatePidEPIC($uuid, 'FormalOrganization');
                                 $tenantsToInsert[$value] = ['row' => $tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
                                 var_dump("The institution's  (" .  $value.  ") handle/uri " . $uri . " is generated on the fly. ");
                                 return new \OpenSkos2\Rdf\Uri($uri);

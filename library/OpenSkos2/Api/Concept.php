@@ -26,6 +26,8 @@ use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 
 use  OpenSkos2\Api\Transform\DataRdf;
 
+require_once dirname(__FILE__) .'/../config.inc.php';
+
 class Concept extends AbstractTripleStoreResource {
     
      /**
@@ -263,8 +265,8 @@ class Concept extends AbstractTripleStoreResource {
     {
         try {
             $params = $request->getQueryParams();
-            if (empty($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter');
+            if (!isset($params['id'])) {
+                throw new InvalidArgumentException('Missing id parameter', 412);
             }
             
             $id = $params['id'];

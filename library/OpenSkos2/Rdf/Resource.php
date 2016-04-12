@@ -420,6 +420,11 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     public static function generatePidEPIC($plainUUID, $type) {
+        // tmp while EPIC service sucks 
+        $tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
+        return $tmpRetVal;
+        /// END TMP
+        
         if (EPICHandleProxy::enabled()) {
             // Create the PID
             $handleServerClient = EPICHandleProxy::getInstance();

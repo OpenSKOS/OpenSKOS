@@ -22,6 +22,8 @@ use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
+require_once dirname(__FILE__) .'/../config.inc.php';
+
 abstract class AbstractTripleStoreResource {
 
     use \OpenSkos2\Api\Response\ApiResponseTrait;
@@ -299,7 +301,7 @@ abstract class AbstractTripleStoreResource {
     
     // override in superclass when necessary
     public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
-        return $user->role == 'admin';
+        return ($user->role === ADMINISRATOR || $user->role === ROOT);
     }
 
     //override in superclass when necessary 

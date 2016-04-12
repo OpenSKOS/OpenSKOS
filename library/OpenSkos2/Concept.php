@@ -20,15 +20,17 @@
 ///Users/olha/WorkProjects/open-skos-2/OpenSKOS2tempMeertens/library/OpenSkos2/Concept.php
 namespace OpenSkos2;
 
-use OpenSkos2\Namespaces\OpenSkos;
+use Exception;
+use OpenSkos2\Api\Exception\UnauthorizedException;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
-use OpenSkos2\ConceptManager;
 use OpenSKOS_Db_Table_Row_User;
 
 class Concept extends Resource
@@ -149,7 +151,7 @@ class Concept extends Resource
      * Gets preview title for the concept.
      * @param string $language
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCaption($language = null)
     {
@@ -242,11 +244,11 @@ class Concept extends Resource
                 $this->unsetProperty(OpenSkos::DELETEDBY);
 
                 switch ($this->getStatus()) {
-                    case \OpenSkos2\Concept::STATUS_APPROVED:
+                    case Concept::STATUS_APPROVED:
                         $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
                         $this->addProperty(OpenSkos::ACCEPTEDBY, new Uri($userUri));
                         break;
-                    case \OpenSkos2\Concept::STATUS_DELETED:
+                    case Concept::STATUS_DELETED:
                         $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
                         $this->addProperty(OpenSkos::DELETEDBY, new Uri($userUri));
                         break;
@@ -258,7 +260,7 @@ class Concept extends Resource
             $this->unsetProperty(OpenSkos::DATE_DELETED);
             $this->unsetProperty(OpenSkos::DELETEDBY);
             $this->unsetProperty(OpenSkos::STATUS);
-            $this->addProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_CANDIDATE));
+            $this->addProperty(OpenSkos::STATUS, new Literal(Concept::STATUS_CANDIDATE));
         }
     }
     
@@ -296,9 +298,9 @@ class Concept extends Resource
         if ($tenantcode !== (string)$resourceTenant) {
             throw new UnauthorizedException('The concept has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenantcode, 403);
         }
-        // TODO:
-        if ($user->role !== 'admin') {
-           throw new UnauthorizedException('You do not have permission to delete this concept', 403); 
+        
+        if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT) ) {
+           throw new UnauthorizedException('You do not have permission to edit or delete this concept', 403); 
         }
         return true;
     }
