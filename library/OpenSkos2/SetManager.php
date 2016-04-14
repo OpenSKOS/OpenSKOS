@@ -30,7 +30,7 @@ class SetManager extends ResourceManager
     
       //TODO: check conditions when it can be deleted
     public function CanBeDeleted($uri){
-        parent::CanBeDeleted($uri);
+        return parent::CanBeDeleted($uri);
     }
     
     

@@ -22,8 +22,8 @@ class SkosCollection extends AbstractTripleStoreResource
     }
     
      // specific content validation
-     protected function validate($resourceObject, $tenantcode) {
-       parent::validate($resourceObject, $tenantcode);
+     protected function validate($resourceObject, $tenant) {
+       parent::validate($resourceObject, $tenant);
        
        //must be new
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
@@ -34,8 +34,8 @@ class SkosCollection extends AbstractTripleStoreResource
     
     
     // specific content validation
-    protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+    protected function validateForUpdate($resourceObject, $tenant,  $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
         
         // must not occur as another collection's name if different from the old one 
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);

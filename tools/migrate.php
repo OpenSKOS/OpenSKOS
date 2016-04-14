@@ -31,8 +31,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Foaf;
-use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\Resource;
 use Rhumsaa\Uuid\Uuid;
 
 $opts = array(

@@ -44,4 +44,16 @@ class Set extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
     
+    
+    
+    public function addMetadata($user, $params, $oldParams) {
+        $metadata = [];
+       if (count($oldParams)>0){ 
+            $metadata = [
+            OpenSkos::UUID => new Literal($oldParams['uuid'])];
+        }
+        foreach ($metadata as $property => $defaultValue) {
+            $this->setProperty($property, $defaultValue);
+        }
+    }
 }

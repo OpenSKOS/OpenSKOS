@@ -17,22 +17,21 @@ class Set extends AbstractTripleStoreResource
     }
     
      // specific content validation
-     protected function validate($resourceObject, $tenantcode) {
-       parent::validate($resourceObject, $tenantcode);
+     protected function validate($resourceObject, $tenant) {
+       parent::validate($resourceObject, $tenant);
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Dcmi::DATASET);
        $this->validatePropertyForCreate($resourceObject, OpenSkos::CODE, Dcmi::DATASET);
-       
        $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
     }
     
     
      // specific content validation
-    protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+    protected function validateForUpdate($resourceObject, $tenant,  $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
         // check the  titles and the code (if they are new)
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Dcmi::DATASET);
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, OpenSkos::CODE, Dcmi::DATASET);
-    
+        
         $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
     }
     

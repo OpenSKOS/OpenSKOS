@@ -22,14 +22,15 @@ namespace OpenSkos2\Rdf;
 use Asparagus\QueryBuilder;
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
+use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Solr\Document;
@@ -217,8 +218,9 @@ class ResourceManager
     
     //override in the sublasses when necessary
     public function CanBeDeleted($uri){
-        $references =  $this->query('SELECT ?s WHERE {?s ?p <'. $uri . '> . } LIMIT 1');
-        return count($references < 1);
+        $query='SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <'. $uri . '> . } LIMIT 1';
+        $references =  $this->query($query);
+        return (($references[0] -> COUNT -> getValue()) < 1);
     }
 
     /**
@@ -740,9 +742,9 @@ class ResourceManager
     public function fetchInstitutionUriByCode($code) {
         $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
         if (count($tenants) < 1) {
-            throw new ApiException('The tenant referred by the code ' . $code . ' does not exist.', 400);
+            throw new ApiException('The tenant referred by the code ' . $code . ' does not exist in the triple store. Look up MySql-s user table. ', 400);
         }
-        return $tenants;
+        return $tenants[0];
     }
 
 }

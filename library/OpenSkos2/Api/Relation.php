@@ -29,17 +29,12 @@ use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 use Zend\Diactoros\Stream;
 
-class Relation
-{
-    use \OpenSkos2\Api\Response\ApiResponseTrait;
-    /**
-     * @var ConceptManager
-     */
-    protected $manager;
+require_once dirname(__FILE__) .'/../config.inc.php';
 
-    /**
-     * @param ConceptManager $manager
-     */
+class Relation extends AbstractTripleStoreResource {
+
+    use \OpenSkos2\Api\Response\ApiResponseTrait;
+    
     public function __construct(ConceptManager $manager)
     {
         $this->manager = $manager;
@@ -47,7 +42,7 @@ class Relation
     
     public function findAllPairsForRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
+        $params=$this->getAndAdaptQueryParams($request);
         $relType = $params['q'];
         $sourceSchemata = null;
         $targetSchemata = null;
@@ -73,7 +68,7 @@ class Relation
     }
     
     public function findRelatedConcepts($request, $uri) {
-        $params = $request->getQueryParams();
+        $params = $this->getAndAdaptQueryParams($request);
         $relType = Skos::NAME_SPACE . $params['relationType'];
         if (isset($params['inSchema'])) {
             $schema = $params['inSchema'];
@@ -83,7 +78,7 @@ class Relation
         try {
             $concepts = $this->manager->fetchRelations($uri, $relType, $schema);
             //var_dump($concepts);
-            $result = new ResourceResultSet($concepts, $concepts->count(), 0, 100000);
+            $result = new ResourceResultSet($concepts, $concepts->count(), 0, MAXIMAL_ROWS);
             $response = (new JsonResponse($result, []))->getResponse();
             return $response;
         } catch (Exception $exc) {
@@ -192,12 +187,12 @@ class Relation
         }
         
         $user = $this->getUserByKey($body['key']);
-
+        
         $concept = $this->manager->fetchByUri($body['concept']);
-        $concept->editingAllowed($user, $body['tenant']);
+        $concept->editingAllowed($user, $this->tenant);
 
         $relatedConcept = $this->manager->fetchByUri($body['related']);
-        $relatedConcept->editingAllowed($user, $body['tenant']);
+        $relatedConcept->editingAllowed($user, $this->tenant);
         
         return $body;
     }

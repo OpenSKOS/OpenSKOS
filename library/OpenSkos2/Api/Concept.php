@@ -11,6 +11,7 @@ namespace OpenSkos2\Api;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
@@ -105,7 +106,7 @@ class Concept extends AbstractTripleStoreResource {
             $options['sets'] = explode(' ', trim($params['sets']));
         }
         
-        //meertesn was here
+       
         if (isset($params['tenants'])) {
            $options['tenants'] = explode(' ', trim($params['tenants']));
         }
@@ -160,7 +161,7 @@ class Concept extends AbstractTripleStoreResource {
     {
         $concept = $this->getConcept($uuid);
 
-        $params = $request->getQueryParams();
+        $params = $this->getAndAdaptQueryParams($request);
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
@@ -258,7 +259,7 @@ class Concept extends AbstractTripleStoreResource {
      public function delete(PsrServerRequestInterface $request)
     {
         try {
-            $params = $request->getQueryParams();
+            $params = $this->getAndAdaptQueryParams($request);
             if (!isset($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter', 412);
             }
@@ -271,9 +272,8 @@ class Concept extends AbstractTripleStoreResource {
             }
             
             $user = $this->getUserFromParams($params);
-            $tenant = $this->getTenantFromParams($params);
-            
-            $this->resourceEditAllowed($user, $tenant, $concept);
+           
+            $this->resourceDeleteAllowed($user, $this->tenant, $concept);
             
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
@@ -288,39 +288,35 @@ class Concept extends AbstractTripleStoreResource {
         return ($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT);
     }
     
+
     public function resourceEditAllowed(
         OpenSKOS_Db_Table_Row_User $user,
-        $tenantcode,    
+        $tenant,    
         $concept) {
-        $retVal = $concept -> editingAllowed($user, $tenantcode);
+        $retVal = $concept -> editingAllowed($user, $tenant);
         return $retVal;
     }
     
-     /**
-     * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_Tenant
-     * @throws InvalidArgumentException
-     */
-    private function getTenantFromParams($params)
-    {
-        if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 412);
-        }
-            
-        return $params['tenant'];
+    public function resourceDeleteAllowed(
+        OpenSKOS_Db_Table_Row_User $user,
+        $tenant,    
+        $concept) {
+        $retVal = $this->resourceEditAllowed($user, $tenant, $concept);
+        return $retVal;
     }
     
+  
+    
     // specific content validation
-    protected function validate($resourceObject, $tenantcode) {
-        parent::validate($resourceObject, $tenantcode);
-        
+    protected function validate($resourceObject, $tenant) {
+        parent::validate($resourceObject, $tenant);
         // resources referred by uri's 
         $this->checkIfReferredResourcesExist($resourceObject);
     }
 
     // specific content validation
-    protected function validateForUpdate($resourceObject, $tenantcode, $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+    protected function validateForUpdate($resourceObject, $tenant, $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
 
         // resources referred by uri's
         $this->checkIfReferredResourcesExist($resourceObject);
@@ -331,9 +327,7 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
         $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
-        
-        $code = $resourceObject -> getTenant();
-        $tenants = $this->manager->fetchInstitutionUriByCode($code);
+        $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
     }
     
    private function prepareSortsForSolr($sortstring) {

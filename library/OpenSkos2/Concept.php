@@ -226,13 +226,30 @@ class Concept extends Resource
     
     // $oldParams is empty when a resource is created otherwise "update"
     public function addMetadata($user, $params, $oldParams) {
-        parent::addMetadata($user, $params, $oldParams);
         
         $userUri = $user->getFoafPerson()->getUri();
-                $nowLiteral = function () {
-                    return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-                };
-                
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+        
+        $metadata = [
+            OpenSkos::TENANT => new Uri($params['tenanturi']),
+        ];
+        
+        if (count($oldParams)===0){ // a completely new concept under creation
+            $metadata[DcTerms::CREATOR] = new Uri($userUri);
+            $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
+        } else {
+            $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
+            $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            $metadata[DcTerms::DATESUBMITTED] = new Literal ($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME); 
+        }
+        foreach ($metadata as $property => $defaultValue) {
+            $this->setProperty($property, $defaultValue);
+        }
+        
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
         
         if (count($oldParams) > 0) { // updating concept => updating status if it gets new
             
@@ -288,15 +305,14 @@ class Concept extends Resource
     }
     
     public function editingAllowed(
-        OpenSKOS_Db_Table_Row_User $user,
-        $tenantcode) {
-        if ($user->tenant !== $tenantcode) {
+        OpenSKOS_Db_Table_Row_User $user, $tenant) {
+        if ($user->tenant !== $tenant['code']) {
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
         
-        $resourceTenant = current($this->getProperty(OpenSkos::TENANT));
-        if ($tenantcode !== (string)$resourceTenant) {
-            throw new UnauthorizedException('The concept has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenantcode, 403);
+        $tenantref = current($this->getProperty(OpenSkos::TENANT));
+        if ($tenant['uri'] !== (string)$tenantref) {
+            throw new UnauthorizedException('The concept has tenant ' . (string)$tenantref . ' which differs from the given ' . $tenant['uri'], 403);
         }
         
         if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT) ) {

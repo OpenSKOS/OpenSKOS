@@ -16,8 +16,8 @@ class Tenant extends AbstractTripleStoreResource
     
   
      // specific content validation
-    protected function validate($resourceObject, $tenantcode) {
-       parent::validate($resourceObject, $tenantcode);
+    protected function validate($resourceObject, $tenant) {
+       parent::validate($resourceObject, $tenant);
        $name = $this -> getInstitutionName($resourceObject);
        $insts= $this -> manager -> fetchSubjectWithPropertyGiven(vCard::ORGNAME, '"'.$name.'"');
        if (count($insts)>0) {
@@ -27,8 +27,8 @@ class Tenant extends AbstractTripleStoreResource
     }
     
      // specific content validation
-    protected function validateForUpdate($resourceObject, $tenantcode,  $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenantcode, $existingResourceObject);
+    protected function validateForUpdate($resourceObject, $tenant,  $existingResourceObject) {
+        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
         
         // check the  name and the code (if they are new)
         $name = $this->getInstitutionName($resourceObject);

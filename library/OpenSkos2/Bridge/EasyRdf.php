@@ -228,8 +228,14 @@ class EasyRdf {
                         $easyResource->addResource($propName, trim($value->getUri()));
                         self::addResourceToGraph($value, $graph);
                     } else {
-                        //var_dump($value->getUri());
-                        $easyResource->addResource($propName, trim($value->getUri()));
+                        $uris = $value->getUri();
+                        if (is_array($uris)) {
+                            foreach ($uris as $uri) {
+                                 $easyResource->addResource($propName, trim($uri));
+                            }
+                        } else {
+                           $easyResource->addResource($propName, trim($uris)); 
+                        }
                     }
                 } else {
                     //var_dump($value);

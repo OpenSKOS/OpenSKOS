@@ -352,41 +352,10 @@ class Resource extends Uri implements ResourceIdentifier
         return $result;
     }
     
-    // at the moment used intact for concepts, schemata and skos collections
-    // for other resources it is overriden
+    // override for a concerete resources
      public function addMetadata($user, $params, $oldParams)
     {
        
-        $userUri = $user->getFoafPerson()->getUri();
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-        };
-        
-        $metadata1 = [
-            OpenSkos::TENANT => new Literal($params['tenant']),
-        ];
-        
-        if (count($oldParams)===0){ // a completely new resource under creation
-            $metadata2 = [
-            OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            DcTerms::CREATOR => new Uri($userUri),
-            DcTerms::DATESUBMITTED => $nowLiteral(),
-        ];
-        } else {
-            $metadata2 = [
-            OpenSkos::UUID => new Literal($oldParams['uuid']),
-            DcTerms::CREATOR => new Uri($oldParams['creator']),
-            DcTerms::DATESUBMITTED => new Literal ($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME), 
-            ];
-        }
-        $metadata = array_merge($metadata1,$metadata2);
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
-        }
-        
-        // @TODO Should we add modified instead of replace it. Or put it only on create.
-        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
     }
     
     public function selfGenerateUri($tenantcode, ResourceManager $manager) {
@@ -396,8 +365,10 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        $uuid=Uuid::uuid4();
-        $uri = $this->assembleUri($tenantcode, $uuid);
+        $uuidPlain=Uuid::uuid4();
+        $uri = $this->assembleUri($tenantcode, $uuidPlain);
+        $index = strrpos($uri, "/");
+        $uuid = substr($uri, $index+1);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(

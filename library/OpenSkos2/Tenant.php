@@ -19,7 +19,9 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Rdf\Resource as Resource;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Uri;
 /**
@@ -41,7 +43,15 @@ class Tenant extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-   public function addMetadata($user, $params, $firstTime) {
+   public function addMetadata($user, $params, $oldParams) {
+       $metadata = [];
+       if (count($oldParams)>0){ 
+            $metadata = [
+            OpenSkos::UUID => new Literal($oldParams['uuid'])];
+        }
+        foreach ($metadata as $property => $defaultValue) {
+            $this->setProperty($property, $defaultValue);
+        }
     }
 
 }
