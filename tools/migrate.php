@@ -291,12 +291,11 @@ $mappings = [
             'approved_timestamp' => DcTerms::DATEACCEPTED,
             'created_timestamp' => DcTerms::DATESUBMITTED,
             'modified_timestamp' => DcTerms::MODIFIED,
+            'deleted_timestamp' => OpenSkos::DATE_DELETED,
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
             'dcterms_modified' => DcTerms::MODIFIED,
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-            'deleted_timestamp' => OpenSkos::DATE_DELETED,
-            // Olha: the field below is added because no timestamp in jena
-            'timestamp' => DcTerms::DATESUBMITTED,
+            'timestamp' => DcTerms::DATE,
         ]
     ],
     'bool' => [
@@ -331,6 +330,8 @@ $mappings = [
         ]
     ]
 ];
+        
+$synonym = ['approved_timestamp' => 'dcterms_dateAccepted','created_timestamp'=>'dcterms_dateSubmitted', 'modified_timestamp'=>'dcterms_modified'] ;        
 
 var_dump($total);
 do {
@@ -364,12 +365,33 @@ do {
                     throw new Exception("Didn't expect class: " . $doc['class']);
             }
 
-            foreach ($doc as $field => $value) {
+            // initialise set-synonym flags
+            $isset_synonym =[];
+            foreach ($synonym as $key => $value){
+                $isset_synonym[$key] = false;
+            };
+            
+           foreach ($doc as $field => $value) {
 
-
+                
                 //this is just a copy field
                 if (isset($labelMapping[$field])) {
                     continue;
+                }
+                
+               
+                if (array_key_exists($field, $synonym)) {
+                    if ($isset_synonym[$field]) {
+                        continue; 
+                    }
+                }
+                
+              
+                $key_synonym=array_search($field, $synonym);
+                if ($key_synonym) {
+                    if ($isset_synonym[$key_synonym]) {
+                        continue; 
+                    }
                 }
 
                 $lang = null;
@@ -390,6 +412,14 @@ do {
                             $insertValue = $mapping['callback']($v);
                             if ($insertValue !== null) {
                                 $resource->addProperty($mapping['fields'][$field], $insertValue);
+                                if (array_key_exists($field, $synonym)) {
+                                    $isset_synonym[$field]=true;
+                                } else {
+                                    if ($key_synonym) {
+                                       $isset_synonym[$key_synonym]=true;
+                                    }
+                                }
+                                
                             }
                         }
                         continue 2;
