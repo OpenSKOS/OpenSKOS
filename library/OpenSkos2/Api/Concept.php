@@ -161,7 +161,7 @@ class Concept extends AbstractTripleStoreResource {
     {
         $concept = $this->getConcept($uuid);
 
-        $params = $this->getAndAdaptQueryParams($request);
+        $params = $request->getQueryParams();
         
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);

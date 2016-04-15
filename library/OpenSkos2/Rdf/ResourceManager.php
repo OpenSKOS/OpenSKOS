@@ -37,6 +37,7 @@ use OpenSkos2\Solr\Document;
 use RuntimeException;
 use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
+use EasyRdf\Resource as Resource2;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
@@ -208,15 +209,20 @@ class ResourceManager
     public function delete(Uri $resource)
     {
         $uri = $resource->getUri();
+        //$querySubresources = 'SELECT ?b ?p2 ?o2  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}';
+        //$subs = $this->query($querySubresources);
+        //var_dump($subs);
+        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-        
+       
         // delete resource in solr
         $update = $this->solr->createUpdate();
         $update->addDeleteById($uri);
         $this->solr->update($update);
+        // what to do with blank nodes in SOLR ??
     }
     
-    //override in the sublasses when necessary
+    //override in the subclasses when necessary
     public function CanBeDeleted($uri){
         $query='SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <'. $uri . '> . } LIMIT 1';
         $references =  $this->query($query);
