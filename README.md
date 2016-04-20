@@ -216,3 +216,7 @@ http://192.168.99.100/public/api/find-relations?q=broader,narrower&sourceSchemat
 Getting concepts within given skos:collection(s)
 
 http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollections=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
+
+Getting deleted concepts:
+
+http://192.168.99.100/public/api/concept?q=*:*&status=deleted

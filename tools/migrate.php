@@ -248,8 +248,9 @@ $mappings = [
                                 $tenantsToInsert[$value] = ['row' => $tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
                                 var_dump("The institution's  (" . $value . ") handle/uri " . $uri . " is generated on the fly. ");
                                 return new \OpenSkos2\Rdf\Uri($uri);
-                            };
-                            return new \OpenSkos2\Rdf\Uri($tenants[0]);
+                            } else {
+                                return new \OpenSkos2\Rdf\Uri($tenants[0]);
+                            }
                         }
                     }
                 },
@@ -416,6 +417,7 @@ $mappings = [
                                     if (isset($mapping['fields'][$field])) {
                                         foreach ((array) $value as $v) {
                                             $insertValue = $mapping['callback']($v);
+                                           
                                             if ($insertValue !== null) {
                                                 $resource->addProperty($mapping['fields'][$field], $insertValue);
 
@@ -481,10 +483,7 @@ $mappings = [
                         }
                     }
                 } while ($counter < $total && isset($data['response']['docs']));
-                // TMP 
-//} while ($counter < 3 && isset($data['response']['docs']));
-// solr resources have been added
-// now add mysql resources (sets and tenants);
+         
 
                 $setPropertyWithCheck = function (&$resource, $property, $val, $isURI, $isBOOL = false) {
                     if (isset($val)) {

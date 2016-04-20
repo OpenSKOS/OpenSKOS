@@ -24,6 +24,7 @@ use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Rdf;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
@@ -42,7 +43,7 @@ class Relation extends AbstractTripleStoreResource {
     
     public function findAllPairsForRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$this->getAndAdaptQueryParams($request);
+        $params=$request->getQueryParams();
         $relType = $params['q'];
         $sourceSchemata = null;
         $targetSchemata = null;
@@ -98,6 +99,7 @@ class Relation extends AbstractTripleStoreResource {
    public function addRelation(PsrServerRequestInterface $request)
     //public function addRelation($request)
     {
+        $params=$this -> getAndAdaptQueryParams($request);
         try {
             $this->addConceptRelation($request);
         } catch (ApiException $exc) {
@@ -140,9 +142,10 @@ class Relation extends AbstractTripleStoreResource {
     {
         try {
             $body = $this -> preEditChecks($request);
+            
             $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
         } catch (Exception$exc) {
-            throw new ApiException($exc->getMessage(), 500);
+            throw new ApiException($exc->getMessage(), $exc->getCode());
         }
         
         
@@ -165,10 +168,10 @@ class Relation extends AbstractTripleStoreResource {
     }
     
     
-    private function preEditChecks(PsrServerRequestInterface $request){
-        
+    private function preEditChecks(PsrServerRequestInterface $request) {
+
         $body = $request->getParsedBody();
-        
+
         if (!isset($body['key'])) {
             throw new ApiException('Missing key', 400);
         }
@@ -181,23 +184,27 @@ class Relation extends AbstractTripleStoreResource {
         if (!isset($body['type'])) {
             throw new ApiException('Missing type', 400);
         }
-        
-        if (!isset($body['tenant'])) {
-            throw new ApiException('Missing tenant (code)', 400);
+
+        $count1 = $this->manager->countTriples('<' . $body['concept'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
+        if ($count1 < 1) {
+            throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 400);
         }
-        
+        $count2 = $this->manager->countTriples('<' . $body['related'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
+        if ($count2 < 1) {
+            throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
+        }
+
         $user = $this->getUserByKey($body['key']);
-        
+
         $concept = $this->manager->fetchByUri($body['concept']);
         $concept->editingAllowed($user, $this->tenant);
 
         $relatedConcept = $this->manager->fetchByUri($body['related']);
         $relatedConcept->editingAllowed($user, $this->tenant);
-        
+
         return $body;
     }
-    
-    
+
     public function listAllRelations(){
          $intermediate = Skos::getRelationsTypes();
          $result = new JsonResponse2($intermediate);

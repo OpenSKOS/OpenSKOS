@@ -102,6 +102,8 @@ class ConceptManager extends ResourceManager
      */
     public function addRelation($uri, $relationType, $uris)
     {
+        
+        
         if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
