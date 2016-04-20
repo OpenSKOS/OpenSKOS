@@ -221,7 +221,16 @@ class ResourceManager
         $this->solr->update($update);
         // what to do with blank nodes in SOLR ??
     }
-    
+   
+public function deleteSolrIntact(Uri $resource)
+    {
+        $uri = $resource->getUri();
+        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+       
+       
+    }
+ 
     //override in the subclasses when necessary
     public function CanBeDeleted($uri){
         $query='SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <'. $uri . '> . } LIMIT 1';
