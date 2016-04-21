@@ -46,11 +46,11 @@ class ConceptManager extends ResourceManager
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
-    public function replaceAndCleanRelations(Concept $concept)
+    public function replaceAndCleanSkosRelations(Concept $concept)
     {
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
-        $this->deleteRelationsWhereObject($concept);
+        $this->deleteSkosRelationsWhereObject($concept);
         parent::replace($concept);
     }
 
@@ -100,11 +100,11 @@ class ConceptManager extends ResourceManager
      * @param array|string $uris
      * @throws Exception\InvalidArgumentException
      */
-    public function addRelation($uri, $relationType, $uris)
+    public function addSkosRelation($uri, $relationType, $uris)
     {
         
         
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
         
@@ -135,9 +135,9 @@ class ConceptManager extends ResourceManager
      * @param string $objectUri
      * @throws Exception\InvalidArgumentException
      */
-    public function deleteRelation($subjectUri, $relationType, $objectUri)
+    public function deleteSkosRelation($subjectUri, $relationType, $objectUri)
     {
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -162,10 +162,10 @@ class ConceptManager extends ResourceManager
      * @param string $conceptScheme , optional Specify if you want relations from single concept scheme only.
      * @return ConceptCollection
      */
-    public function fetchRelations($uri, $relationType, $conceptScheme = null)
+    public function fetchSkosRelations($uri, $relationType, $conceptScheme = null)
     {
         // @TODO It is possible that there are relations to uris, for which there is no resource.
-        if (in_array($relationType, Skos::getRelationsTypes())) {
+        if (in_array($relationType, Skos::getSkosRelationsTypes())) {
             $allRelations = new ConceptCollection([]);
 
             if (!$uri instanceof Uri) {
@@ -194,13 +194,44 @@ class ConceptManager extends ResourceManager
         } throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $relationType . " is not implemented.", 501);
     }
 
+       public function fetchUserRelations($uri, $relationType, $conceptScheme = null)
+    {
+        // @TODO It is possible that there are relations to uris, for which there is no resource.
+        if (in_array($relationType, Skos::getSkosRelationsTypes())) {
+            $allRelations = new ConceptCollection([]);
+
+            if (!$uri instanceof Uri) {
+                $uri = new Uri($uri);
+            }
+
+            $patterns = [
+                [$uri, $relationType, '?subject'],
+            ];
+
+            if (!empty($conceptScheme)) {
+                $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+            }
+
+            $start = 0;
+            $step = 100;
+            do {
+                $relations = $this->fetch($patterns, $start, $step);
+                foreach ($relations as $relation) {
+                    $allRelations->append($relation);
+                }
+                $start += $step;
+            } while (!(count($relations) < $step));
+
+            return $allRelations;
+        } throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $relationType . " is not implemented.", 501);
+    } 
     /**
      * Delete all relations for which the concepts is object (target)
      * @param Concept $concept
      */
-    public function deleteRelationsWhereObject(Concept $concept)
+    public function deleteSkosRelationsWhereObject(Concept $concept)
     {
-        foreach (Skos::getRelationsTypes() as $relationType) {
+        foreach (Skos::getSkosRelationsTypes() as $relationType) {
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
     }
@@ -339,7 +370,7 @@ class ConceptManager extends ResourceManager
         return $minDate;
     }
     
-    public function fetchAllRelations($relationType, $sourceSchemata, $targetSchemata) {
+    public function fetchAllSkosRelations($relationType, $sourceSchemata, $targetSchemata) {
         $rels = [];
         $sSchemata = [];
         $tSchemata = [];
@@ -355,18 +386,18 @@ class ConceptManager extends ResourceManager
         $relFilterStr="";
         if (count($rels) > 0) {
             $uri = 'http://www.w3.org/2004/02/skos/core#' . $rels[0];
-            if (in_array($uri, Skos::getRelationsTypes())) {
+            if (in_array($uri, Skos::getSkosRelationsTypes())) {
                 $relFilterStr = '( ?p = <' . $uri . '>';
             } else {
-                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[i] . " is not implemented.", 501);
+                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[0] . " is not implemented.", 501);
             }
             
             for ($i = 1; $i < count($rels); $i++) {
                 $uri = 'http://www.w3.org/2004/02/skos/core#' . $rels[$i];
-                if (in_array($uri, Skos::getRelationsTypes())) {
+                if (in_array($uri, Skos::getSkosRelationsTypes())) {
                     $relFilterStr = $relFilterStr . ' || ?p = <' . $uri . '>';
                 } else {
-                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[i] . " is not implemented.", 501);
+                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[$i] . " is not implemented.", 501);
                 }
             }
             $relFilterStr = $relFilterStr . " ) ";
@@ -421,4 +452,96 @@ class ConceptManager extends ResourceManager
         return $resource;
     }
 
+    public function fetchAllUserRelations($relationName, $sourceSchemata, $targetSchemata) {
+        $possibleRels = $this -> getUserRelationNames();
+        $rels = [];
+        $sSchemata = [];
+        $tSchemata = [];
+        if (isset($relationName)) {
+        $rels = explode(",", $relationName);
+        }
+        if (isset($sourceSchemata)) {
+        $sSchemata = explode(",", $sourceSchemata);
+        }
+        if (isset($targetSchemata)) {
+        $tSchemata = explode(",", $targetSchemata);
+        }
+        $relFilterStr="";
+        if (count($rels) > 0) {
+            
+            if (in_array($rels[0], $possibleRels)) {
+                $relFilterStr = "( ?rel = '" . $rels[0] . "'";
+            } else {
+                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[0] . " is not implemented.", 501);
+            }
+            
+            for ($i = 1; $i < count($rels); $i++) {
+                if (in_array($rels[$i], $possibleRels)) {
+                    $relFilterStr = $relFilterStr . " || ?rel = '" . $rels[$i] . "'";
+                } else {
+                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[i] . " is not implemented.", 501);
+                }
+            }
+            $relFilterStr = $relFilterStr . " ) ";
+        }
+        $sSchemataFilterStr = "";
+        if (count($sSchemata) > 0) {
+            $sSchemataFilterStr =' ( ?s_schema = <' . $sSchemata[0] . '>';
+            
+            for ($i = 1; $i < count($sSchemata); $i++) {
+                $sSchemataFilterStr =$sSchemataFilterStr . ' || ?s_schema = <' . $sSchemata[$i] . '>';
+            }
+        $sSchemataFilterStr = $sSchemataFilterStr . " ) ";    
+        }
+        $tSchemataFilterStr = "";
+        if (count($tSchemata) > 0) {
+            $tSchemataFilterStr =' ( ?o_schema = <' . $tSchemata[0] . '>';
+            
+            for ($i = 1; $i < count($tSchemata); $i++) {
+                $tSchemataFilterStr =$tSchemataFilterStr. ' || ?o_schema = <' . $tSchemata[$i] . '>';
+            }
+        $tSchemataFilterStr = $tSchemataFilterStr . " ) "; 
+        }
+        $filterStr = "";
+        if ($relFilterStr !== "") {
+            $filterStr = " filter ( " . $relFilterStr;
+            if ($sSchemataFilterStr !== "") {
+                $filterStr = $filterStr . " && " . $sSchemataFilterStr;
+            }
+            if ($tSchemataFilterStr !== "") {
+                $filterStr = $filterStr . " && " . $tSchemataFilterStr . ")";
+            } else {
+                $filterStr = $filterStr . ")";
+            }
+        } else {
+            if ($sSchemataFilterStr !== "") {
+                $filterStr = " filter ( " . $sSchemataFilterStr;
+                if ($tSchemataFilterStr !== "") {
+                    $filterStr = $filterStr . " && " . $tSchemataFilterStr . ")";
+                } else {
+                    $filterStr = $filterStr . ")";
+                }
+            } else {
+                if ($tSchemataFilterStr !== "") {
+                    $filterStr = " filter ( " . $tSchemataFilterStr . ")";
+                }
+            }
+        }
+       
+        $sparqlQuery = 'select ?rel ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s <http://openskos.org/xmlns#related> ?bnode . ?bnode <http://purl.org/dc/terms/title> ?rel . ?bnode <http://purl.org/dc/terms/relation> ?o . ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel ; <http://openskos.org/xmlns#uuid> ?s_uuid ; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
+        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        $resource = $this->query($sparqlQuery);
+        return $resource;
+    }
+    
+    public function getUserRelationNames() {
+        $sparqlQuery = 'select distinct ?rel where {?s <http://openskos.org/xmlns#related> ?bnode . ?bnode <http://purl.org/dc/terms/title> ?rel . }';
+        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        $resource = $this->query($sparqlQuery);
+        $result =[];
+        foreach ($resource as $value) {
+            $result[] = $value -> rel ->getValue();
+        }
+        return $result;
+    }
 }

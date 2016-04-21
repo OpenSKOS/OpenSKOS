@@ -150,7 +150,7 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function unsetAllRelations(Concept &$concept)
     {
-        foreach (Skos::getRelationsTypes() as $relationType) {
+        foreach (Skos::getSkosRelationsTypes() as $relationType) {
             $concept->unsetProperty($relationType);
         }
     }

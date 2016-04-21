@@ -62,7 +62,7 @@ class API_RelationController extends Api_FindRelationsController {
        $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addRelation($request);
+        $response = $relation->addSkosRelation($request);
         $this->emitResponse($response);
     }
 
@@ -100,7 +100,7 @@ class API_RelationController extends Api_FindRelationsController {
         $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->deleteRelation($request);
+        $response = $relation->deleteSkosRelation($request);
         $this->emitResponse($response);
     }
     

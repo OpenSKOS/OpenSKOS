@@ -74,7 +74,7 @@ class Skos
      * Gets list of relations types used around skos.
      * @return array
      */
-    public static function getRelationsTypes()
+    public static function getSkosRelationsTypes()
     {
         //@TODO Collections
         return [

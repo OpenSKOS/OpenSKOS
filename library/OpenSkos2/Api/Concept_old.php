@@ -315,7 +315,7 @@ class Concept
             
             $this->validate($concept, $tenant);
             
-            $this->conceptManager->replaceAndCleanRelations($concept);
+            $this->conceptManager->replaceAndCleanSkosRelations($concept);
             
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());

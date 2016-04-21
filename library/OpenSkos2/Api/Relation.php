@@ -41,7 +41,7 @@ class Relation extends AbstractTripleStoreResource {
         $this->manager = $manager;
     }
     
-    public function findAllPairsForRelationType($request) {
+    public function findAllPairsForSkosRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
         $params=$request->getQueryParams();
         $relType = $params['q'];
@@ -54,9 +54,9 @@ class Relation extends AbstractTripleStoreResource {
             $targetSchemata = $params['targetSchemata'];
         }; 
         try {
-            $response = $this->manager->fetchAllRelations($relType, $sourceSchemata, $targetSchemata);
+            $response = $this->manager->fetchAllSkosRelations($relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
-            $intermediate = $this->createRelationTriples($response);
+            $intermediate = $this->createOutputSkosRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {
@@ -68,7 +68,35 @@ class Relation extends AbstractTripleStoreResource {
         }
     }
     
-    public function findRelatedConcepts($request, $uri) {
+    public function findAllPairsForUserRelationType($request) {
+        //public function findAllPairsForType(ServerRequestInterface $request)
+        $params=$request->getQueryParams();
+        $relType = $params['q'];
+        $sourceSchemata = null;
+        $targetSchemata = null;
+        if (isset($params['sourceSchemata'])) {
+            $sourceSchemata = $params['sourceSchemata'];
+        };
+        if (isset($params['targetSchemata'])) {
+            $targetSchemata = $params['targetSchemata'];
+        }; 
+        try {
+            $response = $this->manager->fetchAllUserRelations($relType, $sourceSchemata, $targetSchemata);
+            //var_dump($response);
+            $intermediate = $this->createOutputUserRelationTriples($response);
+            $result = new JsonResponse2($intermediate);
+            return $result;
+        } catch (Exception $exc) {
+            if ($exc instanceof ApiException) {
+                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+            } else {
+                return $this->getErrorResponse(500, $exc->getMessage());
+            }
+        }
+    }
+    
+    
+    public function findSkosRelatedConcepts($request, $uri) {
         $params = $this->getAndAdaptQueryParams($request);
         $relType = Skos::NAME_SPACE . $params['relationType'];
         if (isset($params['inSchema'])) {
@@ -96,12 +124,12 @@ class Relation extends AbstractTripleStoreResource {
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return Response
      */
-   public function addRelation(PsrServerRequestInterface $request)
+   public function addSkosRelation(PsrServerRequestInterface $request)
     //public function addRelation($request)
     {
         $params=$this -> getAndAdaptQueryParams($request);
         try {
-            $this->addConceptRelation($request);
+            $this->addConceptSkosRelation($request);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
         }
@@ -117,10 +145,10 @@ class Relation extends AbstractTripleStoreResource {
      * @param PsrServerRequestInterface $request
      * @return Response
      */
-    public function deleteRelation(PsrServerRequestInterface $request)
+    public function deleteSkosRelation(PsrServerRequestInterface $request)
     {
         try {
-            $this->deleteConceptRelation($request);
+            $this->deleteConceptSkosRelation($request);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
         }
@@ -138,12 +166,12 @@ class Relation extends AbstractTripleStoreResource {
      * @param PsrServerRequestInterface $request
      * @throws ApiException
      */
-    protected function addConceptRelation(PsrServerRequestInterface $request)
+    protected function addConceptSkosRelation(PsrServerRequestInterface $request)
     {
         try {
-            $body = $this -> preEditChecks($request);
+            $body = $this -> preEditChecksSkosRels($request);
             
-            $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
+            $this->manager->addSkosRelation($body['concept'], $body['type'], $body['related']);
         } catch (Exception$exc) {
             throw new ApiException($exc->getMessage(), $exc->getCode());
         }
@@ -157,18 +185,18 @@ class Relation extends AbstractTripleStoreResource {
      * @param PsrServerRequestInterface $request
      * @throws ApiException
      */
-    protected function deleteConceptRelation(PsrServerRequestInterface $request)
+    protected function deleteConceptSkosRelation(PsrServerRequestInterface $request)
     {
        try {
-            $body = $this -> preEditChecks($request);
-            $this->manager->deleteRelation($body['concept'], $body['type'], $body['related']);
+            $body = $this -> preEditChecksSkosRels($request);
+            $this->manager->deleteSkosRelation($body['concept'], $body['type'], $body['related']);
         } catch (Exception$exc) {
             throw new ApiException($exc->getMessage(), 500);
         }
     }
     
     
-    private function preEditChecks(PsrServerRequestInterface $request) {
+    private function preEditChecksSkosRels(PsrServerRequestInterface $request) {
 
         $body = $request->getParsedBody();
 
@@ -205,20 +233,39 @@ class Relation extends AbstractTripleStoreResource {
         return $body;
     }
 
-    public function listAllRelations(){
-         $intermediate = Skos::getRelationsTypes();
+    public function listAllSkosRelations(){
+         $intermediate = Skos::getSkosRelationsTypes();
          $result = new JsonResponse2($intermediate);
          return $result;
     }
     
-    private function createRelationTriples($response){
+    public function listAllUserRelations(){
+         $intermediate = $this->manager->getUserRelationNames();
+         $result = new JsonResponse2($intermediate);
+         return $result;
+    }
+    
+    private function createOutputSkosRelationTriples($response){
         $result = [];
         foreach ($response as $key => $value) {
             $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
             $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
-            $triple=array("s" => $subject, "p" => $value -> p -> getUri(), "o"=>$object);
+            $triple=array("s" => $subject, "p" => $value -> rel -> getUri(), "o"=>$object);
            array_push($result, $triple);
         }
         return $result;
     }
+    
+    private function createOutputUserRelationTriples($response){
+        $result = [];
+        foreach ($response as $key => $value) {
+            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
+            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
+            $triple=array("s" => $subject, "p" => $value -> rel -> getValue(), "o"=>$object);
+           array_push($result, $triple);
+        }
+        return $result;
+    }
+    
+    
 }

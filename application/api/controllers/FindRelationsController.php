@@ -32,16 +32,25 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
 
     public function indexAction()
     {
-        $relations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $relations = $this->getDI()->make('\OpenSkos2\Api\Relation');
         $q = $this->getRequest()->getParam('q');
-        if ($q===null) {
-            $response = $relations->listAllRelations();
-            $this->emitResponse($response);
+        $userdefined = $this->getRequest()->getParam('userdefined');
+        if ($userdefined === null || $userdefined === 'false') {
+            if ($q === null) {
+                $response = $relations->listAllSkosRelations();
+            } else {
+                $request = $this->getPsrRequest();
+                $response = $relations->findAllPairsForSkosRelationType($request);
+            }
         } else {
-            $request = $this->getPsrRequest();
-            $response = $relations->findAllPairsForRelationType($request);
-            $this->emitResponse($response);
+            if ($q === null) {
+                $response = $relations->listAllUserRelations();
+            } else {
+                $request = $this->getPsrRequest();
+                $response = $relations->findAllPairsForUserRelationType($request);
+            }
         }
+        $this->emitResponse($response);
     }
     
     public function getAction()
@@ -56,7 +65,7 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
         
         $apiRelations =$this->getDI()->make('\OpenSkos2\Api\Relation');
         $request = $this->getPsrRequest();
-        $response = $apiRelations->findRelatedConcepts($request, $uri);
+        $response = $apiRelations->findSkosRelatedConcepts($request, $uri);
         $this->emitResponse($response);
     }
    
