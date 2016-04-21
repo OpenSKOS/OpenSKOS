@@ -105,5 +105,5 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
 	{
 		$this->_501('delete');
 	}
-	
+		
 }
