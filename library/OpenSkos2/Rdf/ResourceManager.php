@@ -761,5 +761,113 @@ public function deleteSolrIntact(Uri $resource)
         }
         return $tenants[0];
     }
+    
+    public function fetchAllRelationsOfType($namespace, $relationType, $sourceSchemata, $targetSchemata) {
+        $rels = [];
+        $sSchemata = [];
+        $tSchemata = [];
+        if (isset($relationType)) {
+        $rels = explode(",", $relationType);
+        }
+        if (isset($sourceSchemata)) {
+        $sSchemata = explode(",", $sourceSchemata);
+        }
+        if (isset($targetSchemata)) {
+        $tSchemata = explode(",", $targetSchemata);
+        }
+        $relFilterStr="";
+        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationNames());
+        if (count($rels) > 0) {
+            $uri = $namespace . $rels[0];
+            if (in_array($uri, $existingRelations)) {
+                $relFilterStr = '( ?p = <' . $uri . '>';
+            } else {
+                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $uri . " is not implemented.", 501);
+            }
+            
+            for ($i = 1; $i < count($rels); $i++) {
+                $uri = $namespace . $rels[$i];
+                if (in_array($uri, $existingRelations)) {
+                    $relFilterStr = $relFilterStr . ' || ?p = <' . $uri . '>';
+                } else {
+                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $uri . " is not implemented.", 501);
+                }
+            }
+            $relFilterStr = $relFilterStr . " ) ";
+        }
+        $sSchemataFilterStr = "";
+        if (count($sSchemata) > 0) {
+            $sSchemataFilterStr =' ( ?s_schema = <' . $sSchemata[0] . '>';
+            
+            for ($i = 1; $i < count($sSchemata); $i++) {
+                $sSchemataFilterStr =$sSchemataFilterStr . ' || ?s_schema = <' . $sSchemata[$i] . '>';
+            }
+        $sSchemataFilterStr = $sSchemataFilterStr . " ) ";    
+        }
+        $tSchemataFilterStr = "";
+        if (count($tSchemata) > 0) {
+            $tSchemataFilterStr =' ( ?o_schema = <' . $tSchemata[0] . '>';
+            
+            for ($i = 1; $i < count($tSchemata); $i++) {
+                $tSchemataFilterStr =$tSchemataFilterStr. ' || ?o_schema = <' . $tSchemata[$i] . '>';
+            }
+        $tSchemataFilterStr = $tSchemataFilterStr . " ) "; 
+        }
+        $filterStr = "";
+        if ($relFilterStr !== "") {
+            $filterStr = " filter ( " . $relFilterStr;
+            if ($sSchemataFilterStr !== "") {
+                $filterStr = $filterStr . " && " . $sSchemataFilterStr;
+            }
+            if ($tSchemataFilterStr !== "") {
+                $filterStr = $filterStr . " && " . $tSchemataFilterStr . ")";
+            } else {
+                $filterStr = $filterStr . ")";
+            }
+        } else {
+            if ($sSchemataFilterStr !== "") {
+                $filterStr = " filter ( " . $sSchemataFilterStr;
+                if ($tSchemataFilterStr !== "") {
+                    $filterStr = $filterStr . " && " . $tSchemataFilterStr . ")";
+                } else {
+                    $filterStr = $filterStr . ")";
+                }
+            } else {
+                if ($tSchemataFilterStr !== "") {
+                    $filterStr = " filter ( " . $tSchemataFilterStr . ")";
+                }
+            }
+        }
+       
+        $sparqlQuery = 'select ?p ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?p ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
+        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        $resource = $this->query($sparqlQuery);
+        return $resource;
+    }
+    
+      
+    public function getUserRelationNames() {
+        $sparqlQuery = 'select distinct ?rel where {?rel <' . Rdf::TYPE . '> <'. Owl::OBJECT_PROPERTY. '>. }';
+        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        $resource = $this->query($sparqlQuery);
+        $result =[];
+        foreach ($resource as $value) {
+            $result[] = $value -> rel ->getValue();
+        }
+        return $result;
+    }
+    
+    protected function createOutputRelationTriples($response){
+        $result = [];
+        foreach ($response as $key => $value) {
+            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
+            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
+            $triple=array("s" => $subject, "p" => $value -> rel -> getUri(), "o"=>$object);
+           array_push($result, $triple);
+        }
+        return $result;
+    }
+    
+
 
 }

@@ -17,7 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class API_FindRelationsController extends OpenSKOS_Rest_Controller {
+class API_FindSkosrelationsController extends OpenSKOS_Rest_Controller {
    
      public function init() {
         parent::init();
@@ -30,29 +30,19 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
         }
     }
 
-    public function indexAction()
-    {
-        $relations = $this->getDI()->make('\OpenSkos2\Api\Relation');
+    public function indexAction() {
+        $relations = $this->getDI()->make('\OpenSkos2\Api\SkosRelation');
         $q = $this->getRequest()->getParam('q');
-        $userdefined = $this->getRequest()->getParam('userdefined');
-        if ($userdefined === null || $userdefined === 'false') {
-            if ($q === null) {
-                $response = $relations->listAllSkosRelations();
-            } else {
-                $request = $this->getPsrRequest();
-                $response = $relations->findAllPairsForSkosRelationType($request);
-            }
+        if ($q === null) {
+            $response = $relations->listAllSkosRelations();
         } else {
-            if ($q === null) {
-                $response = $relations->listAllUserRelations();
-            } else {
-                $request = $this->getPsrRequest();
-                $response = $relations->findAllPairsForUserRelationType($request);
-            }
+            $request = $this->getPsrRequest();
+            $response = $relations->findAllPairsForSkosRelationType($request);
         }
+
         $this->emitResponse($response);
     }
-    
+
     public function getAction()
     {
         $this->_helper->viewRenderer->setNoRender(true);
@@ -63,7 +53,7 @@ class API_FindRelationsController extends OpenSKOS_Rest_Controller {
             throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
         }
         
-        $apiRelations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $apiRelations =$this->getDI()->make('\OpenSkos2\Api\SkosRelation');
         $request = $this->getPsrRequest();
         $response = $apiRelations->findSkosRelatedConcepts($request, $uri);
         $this->emitResponse($response);

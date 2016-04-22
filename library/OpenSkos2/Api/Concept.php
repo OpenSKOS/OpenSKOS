@@ -8,24 +8,31 @@
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
-use OpenSkos2\ConceptManager;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
+use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\Api\Exception\NotFoundException;
-use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
-use OpenSKOS_Db_Table_Row_User;
-use OpenSkos2\Api\Response\ResultSet\JsonResponse;
-use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
-use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
+use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
-
-use  OpenSkos2\Api\Transform\DataRdf;
+use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+use OpenSkos2\Api\Response\ResultSet\RdfResponse;
+use OpenSkos2\Api\Transform\DataRdf;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
+use OpenSkos2\FieldsMaps;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Search\Autocomplete;
+use OpenSKOS_Db_Table_Row_User;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -34,12 +41,12 @@ class Concept extends AbstractTripleStoreResource {
      /**
      * Search autocomplete
      *
-     * @var \OpenSkos2\Search\Autocomplete
+     * @var Autocomplete
      */
     private $searchAutocomplete;
 
    
-    public function __construct(ConceptManager $manager,  \OpenSkos2\Search\Autocomplete $searchAutocomplete) {
+    public function __construct(ConceptManager $manager,  Autocomplete $searchAutocomplete) {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
     }
@@ -188,15 +195,15 @@ class Concept extends AbstractTripleStoreResource {
     /**
      * Get openskos concept
      *
-     * @param string|\OpenSkos2\Rdf\Uri $id
+     * @param string|Uri $id
      * @throws NotFoundException
      * @throws Exception\DeletedException
-     * @return \OpenSkos2\Concept
+     * @return Concept
      */
     public function getConcept($id)
     {
-        /* @var $concept \OpenSkos2\Concept */
-        if ($id instanceof \OpenSkos2\Rdf\Uri) {
+        /* @var $concept Concept */
+        if ($id instanceof Uri) {
             $concept = $this->manager->fetchByUri($id);
         } else {
             $concept = $this->manager->fetchByUuid($id);
@@ -265,7 +272,7 @@ class Concept extends AbstractTripleStoreResource {
             }
             
             $id = $params['id'];
-            /* @var $concept \OpenSkos2\Concept */
+            /* @var $concept Concept */
             $concept = $this->manager->fetchByUri($id);
             if (!$concept) {
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
@@ -312,6 +319,7 @@ class Concept extends AbstractTripleStoreResource {
         parent::validate($resourceObject, $tenant);
         // resources referred by uri's 
         $this->checkIfReferredResourcesExist($resourceObject);
+        $this -> checkUserRelations($resourceObject);
     }
 
     // specific content validation
@@ -320,6 +328,7 @@ class Concept extends AbstractTripleStoreResource {
 
         // resources referred by uri's
         $this->checkIfReferredResourcesExist($resourceObject);
+        $this -> checkUserRelations($resourceObject);
     }
 
     // To DISCUSS?
@@ -328,6 +337,12 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
         $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
+    }
+    
+   private function checkUserRelations($resourceObject) {
+       $userRelations = $this -> manager -> $getUserRelationNames();
+       //$properties = $resourceObject -> 
+       // return ;
     }
     
    private function prepareSortsForSolr($sortstring) {

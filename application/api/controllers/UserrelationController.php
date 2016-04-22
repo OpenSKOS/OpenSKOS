@@ -18,51 +18,54 @@
  */
 require_once 'FindRelationsController.php';
 
-class API_RelationController extends Api_FindRelationsController {
+class API_UserrelationController extends Api_FindRelationsController {
    
-     public function init() {
+    public function init() {
         parent::init();
+        $this->_helper->contextSwitch()
+                ->initContext($this->getRequestedFormat());
+
+        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
+            //enable layout:
+            $this->getHelper('layout')->enableLayout();
+        }
     }
 
-    /**
-    * @apiVersion 1.0.0
-    * @apiDescription Add a relation to a SKOS Concept
-    * The relation will be added on both sides, so if you add 
-    * 2 concepts as narrower the narrower concepts will be updated with broader
-    * 
-    * Post must be send with Content-Type application/x-www-form-urlencoded
-    * or multipart/form-data
-    * 
-    * Supported relations:
-    * http://www.w3.org/2004/02/skos/core#broader
-    * http://www.w3.org/2004/02/skos/core#narrower
-    * http://www.w3.org/2004/02/skos/core#hasTopConcept
-    * http://www.w3.org/2004/02/skos/core#topConceptOf
-    * http://www.w3.org/2004/02/skos/core#related
-    * http://www.w3.org/2004/02/skos/core#broadMatch
-    * http://www.w3.org/2004/02/skos/core#narrowMatch
-    * 
-    * @api {post} /api/relation Add relation to SKOS concept
-    * @apiName RelationConcept
-    * @apiGroup Concept
-    * @apiParam {String} concept The uri to the concept e.g http://openskos.org/1
-    * @apiParam {String} type The uri of the relation e.g http://www.w3.org/2004/02/skos/core#narrower
-    * @apiParam {Array}  related The uri's of the related concepts e.g http://openskos.org/123
-    * @apiParam {String} key A valid API key
-    * @apiSuccess (200) {String} Concept uri
-    * @apiSuccessExample {String} Success-Response
-    *   HTTP/1.1 200 Ok
-    * @apiError MissingKey {String} No key specified
-    * @apiErrorExample MissingKey:
-    *   HTTP/1.1 412 Precondition Failed
-    *   No key specified
-    */
+    public function indexAction() {
+        $relations = $this->getDI()->make('\OpenSkos2\Api\UserRelation');
+        $q = $this->getRequest()->getParam('q');
+        if ($q === null) {
+            $response = $relations->listAllUserRelations();
+        } else {
+            $request = $this->getPsrRequest();
+            $response = $relations->findAllPairsForUserRelationType($request);
+        }
+
+        $this->emitResponse($response);
+    }
+
+    public function getAction()
+    {
+        $this->_helper->viewRenderer->setNoRender(true);
+        $uri = $this->getUri();
+        if (null === ($relationType = $this->getRequest()->getParam('relationType'))) {
+            $this->getResponse()
+                    ->setHeader('X-Error-Msg', 'Missing required parameter `relationType`');
+            throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
+        }
+        
+        $apiRelations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $request = $this->getPsrRequest();
+        $response = $apiRelations->findUserRelatedConcepts($request, $uri);
+        $this->emitResponse($response);
+    }
+    
     public function postAction()
     {
-       $request = $this->getPsrRequest();
-        /* @var $relation \OpenSkos2\Api\Relation */
-        $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addSkosRelation($request);
+        $request = $this->getPsrRequest();
+        /* @var $relation \OpenSkos2\Api\SkosRelation */
+        $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
+        $response = $relation->create($request);
         $this->emitResponse($response);
     }
 
@@ -98,8 +101,8 @@ class API_RelationController extends Api_FindRelationsController {
     public function deleteAction()
     {
         $request = $this->getPsrRequest();
-        /* @var $relation \OpenSkos2\Api\Relation */
-        $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
+        /* @var $relation \OpenSkos2\Api\SkosRelation */
+        $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
         $response = $relation->deleteSkosRelation($request);
         $this->emitResponse($response);
     }

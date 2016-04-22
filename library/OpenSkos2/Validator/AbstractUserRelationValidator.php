@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * OpenSKOS
  *
  * LICENSE
@@ -17,11 +17,21 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Namespaces;
+namespace OpenSkos2\Validator;
 
-class Owl
+use OpenSkos2\UserRelation;
+use OpenSkos2\Rdf\Resource as RdfResource;
+
+abstract class AbstractUserRelationValidator extends AbstractResourceValidator
 {
-    const NAME_SPACE = 'http://www.w3.org/2002/07/owl#';
-    
-    const OBJECT_PROPERTY = 'http://www.w3.org/2002/07/owl#objectProperty';
+   
+    public function validate(RdfResource $resource)
+    {
+        if ($resource instanceof UserRelation) {
+            return $this->validateUserRelation($resource);
+        }
+        return false;
+    }
+
+    abstract protected function validateUserRelation(Set $set);
 }

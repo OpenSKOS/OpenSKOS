@@ -32,7 +32,7 @@ use Zend\Diactoros\Stream;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
-class Relation extends AbstractTripleStoreResource {
+class SkosRelation extends AbstractTripleStoreResource {
 
     use \OpenSkos2\Api\Response\ApiResponseTrait;
     
@@ -54,9 +54,9 @@ class Relation extends AbstractTripleStoreResource {
             $targetSchemata = $params['targetSchemata'];
         }; 
         try {
-            $response = $this->manager->fetchAllSkosRelations($relType, $sourceSchemata, $targetSchemata);
+            $response = $this->manager->fetchAllRelationsOfType(Skos::NAME_SPACE, $relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
-            $intermediate = $this->createOutputSkosRelationTriples($response);
+            $intermediate = $this->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {
@@ -68,32 +68,7 @@ class Relation extends AbstractTripleStoreResource {
         }
     }
     
-    public function findAllPairsForUserRelationType($request) {
-        //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
-        $relType = $params['q'];
-        $sourceSchemata = null;
-        $targetSchemata = null;
-        if (isset($params['sourceSchemata'])) {
-            $sourceSchemata = $params['sourceSchemata'];
-        };
-        if (isset($params['targetSchemata'])) {
-            $targetSchemata = $params['targetSchemata'];
-        }; 
-        try {
-            $response = $this->manager->fetchAllUserRelations($relType, $sourceSchemata, $targetSchemata);
-            //var_dump($response);
-            $intermediate = $this->createOutputUserRelationTriples($response);
-            $result = new JsonResponse2($intermediate);
-            return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
+   
     
     
     public function findSkosRelatedConcepts($request, $uri) {
@@ -239,33 +214,8 @@ class Relation extends AbstractTripleStoreResource {
          return $result;
     }
     
-    public function listAllUserRelations(){
-         $intermediate = $this->manager->getUserRelationNames();
-         $result = new JsonResponse2($intermediate);
-         return $result;
-    }
+  
     
-    private function createOutputSkosRelationTriples($response){
-        $result = [];
-        foreach ($response as $key => $value) {
-            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
-            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
-            $triple=array("s" => $subject, "p" => $value -> rel -> getUri(), "o"=>$object);
-           array_push($result, $triple);
-        }
-        return $result;
-    }
-    
-    private function createOutputUserRelationTriples($response){
-        $result = [];
-        foreach ($response as $key => $value) {
-            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
-            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema" => $value -> o_schema ->getUri());
-            $triple=array("s" => $subject, "p" => $value -> rel -> getValue(), "o"=>$object);
-           array_push($result, $triple);
-        }
-        return $result;
-    }
-    
-    
+  
+ 
 }

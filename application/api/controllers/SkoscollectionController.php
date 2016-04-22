@@ -2,7 +2,7 @@
 
 require_once 'AbstractController.php';
 
-class Api_SkosCollectionController extends AbstractController
+class Api_SkoscollectionController extends AbstractController
 {
      public function init()
     {
