@@ -55,4 +55,6 @@ class OpenSkos
     const WEBPAGE = 'http://openskos.org/xmlns#webpage';
     
     const RELATED = 'http://openskos.org/xmlns#related';
+    
+    const INVERSED = 'http://openskos.org/xmlns#inversed';
 }

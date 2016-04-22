@@ -5,6 +5,7 @@
 
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix openskos: <http://openskos.org/xmlns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 [
     r1: (?x skos:narrower ?y) -> (?y skos:broader ?x) .
     r2: (?x skos:broader ?y) -> (?y skos:narrower ?x) .
@@ -22,5 +23,8 @@
     r12: (?x skos:exactMatch ?y) -> (?y skos:exactMatch ?x) .
    
     r13: (?x openskos:inSkosCollection ?y) -> (?y skos:member ?x) .
-    r14: (?x skos:member ?y) -> (?y openskos:inSkosCollection ?x)
+    r14: (?x skos:member ?y) -> (?y openskos:inSkosCollection ?x) .
+
+    r15: (?x openskos:related ?u) (?u dcterms:relation ?y) (?u dcterms:title 'colder' ) (?u openskos:inversed 'false') makeTemp(?v) ->  (?y openskos:related ?v) (?v dcterms:relation ?x) (?v dcterms:title 'warmer' ) (?u openskos:inversed 'true')  (?v openskos:inversed 'true') drop(3).
+    r16: (?x openskos:related ?u) (?u dcterms:relation ?y) (?u dcterms:title 'warmer' ) (?u openskos:inversed 'false') makeTemp(?v) ->  (?y openskos:related ?v) (?v dcterms:relation ?x) (?v dcterms:title 'colder' ) (?u openskos:inversed 'true' ) (?v openskos:inversed 'true') drop(3)
 ]
