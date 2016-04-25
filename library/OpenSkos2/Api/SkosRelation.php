@@ -54,9 +54,8 @@ class SkosRelation extends AbstractTripleStoreResource {
             $targetSchemata = $params['targetSchemata'];
         }; 
         try {
-            $response = $this->manager->fetchAllRelationsOfType(Skos::NAME_SPACE, $relType, $sourceSchemata, $targetSchemata);
-            //var_dump($response);
-            $intermediate = $this->createOutputRelationTriples($response);
+            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
+            $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {

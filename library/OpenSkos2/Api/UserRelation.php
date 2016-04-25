@@ -86,7 +86,7 @@ class UserRelation extends AbstractTripleStoreResource {
     
  
     public function listAllUserRelations(){
-         $intermediate = $this->manager->getUserRelationNames();
+         $intermediate = $this->manager->getUserRelationUris();
          $result = new JsonResponse2($intermediate);
          return $result;
     }

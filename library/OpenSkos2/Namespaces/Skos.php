@@ -76,7 +76,7 @@ class Skos
      */
     public static function getSkosRelationsTypes()
     {
-        //@TODO Collections
+        
         return [
             Skos::BROADER,
             Skos::NARROWER,

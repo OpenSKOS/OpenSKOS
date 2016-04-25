@@ -31,13 +31,14 @@ use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Solr\Document;
 use RuntimeException;
 use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
-use EasyRdf\Resource as Resource2;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
@@ -762,7 +763,7 @@ public function deleteSolrIntact(Uri $resource)
         return $tenants[0];
     }
     
-    public function fetchAllRelationsOfType($namespace, $relationType, $sourceSchemata, $targetSchemata) {
+    public function fetchAllRelationsOfType($relationType, $sourceSchemata, $targetSchemata) {
         $rels = [];
         $sSchemata = [];
         $tSchemata = [];
@@ -776,21 +777,20 @@ public function deleteSolrIntact(Uri $resource)
         $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr="";
-        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationNames());
+        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationUris());
+        
         if (count($rels) > 0) {
-            $uri = $namespace . $rels[0];
-            if (in_array($uri, $existingRelations)) {
-                $relFilterStr = '( ?p = <' . $uri . '>';
+            if (in_array($rels[0], $existingRelations)) {
+                $relFilterStr = '( ?rel = <' . $rels[0] . '>';
             } else {
-                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $uri . " is not implemented.", 501);
+                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[0] . " is not implemented.", 501);
             }
             
             for ($i = 1; $i < count($rels); $i++) {
-                $uri = $namespace . $rels[$i];
-                if (in_array($uri, $existingRelations)) {
-                    $relFilterStr = $relFilterStr . ' || ?p = <' . $uri . '>';
+                if (in_array($rels[$i], $existingRelations)) {
+                    $relFilterStr = $relFilterStr . ' || ?rel = <' . $rels[$i] . '>';
                 } else {
-                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $uri . " is not implemented.", 501);
+                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[$i] . " is not implemented.", 501);
                 }
             }
             $relFilterStr = $relFilterStr . " ) ";
@@ -839,15 +839,15 @@ public function deleteSolrIntact(Uri $resource)
             }
         }
        
-        $sparqlQuery = 'select ?p ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?p ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
+        $sparqlQuery = 'select ?rel ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
         $resource = $this->query($sparqlQuery);
         return $resource;
     }
     
       
-    public function getUserRelationNames() {
-        $sparqlQuery = 'select distinct ?rel where {?rel <' . Rdf::TYPE . '> <'. Owl::OBJECT_PROPERTY. '>. }';
+    public function getUserRelationUris() {
+        $sparqlQuery = 'select distinct ?rel where {?rel <' . RdfNamespace::TYPE . '> <'. Owl::OBJECT_PROPERTY. '>. }';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
         $resource = $this->query($sparqlQuery);
         $result =[];
@@ -857,7 +857,7 @@ public function deleteSolrIntact(Uri $resource)
         return $result;
     }
     
-    protected function createOutputRelationTriples($response){
+    public function createOutputRelationTriples($response){
         $result = [];
         foreach ($response as $key => $value) {
             $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema"=>$value->s_schema->getUri());
