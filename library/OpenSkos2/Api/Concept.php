@@ -19,7 +19,6 @@ use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
-use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;

@@ -163,6 +163,7 @@ class SkosRelation extends AbstractTripleStoreResource {
     protected function deleteConceptSkosRelation(PsrServerRequestInterface $request)
     {
        try {
+            $params = $this->getAndAdaptQueryParams($request); // sets tenant info
             $body = $this -> preEditChecksSkosRels($request);
             $this->manager->deleteSkosRelation($body['concept'], $body['type'], $body['related']);
         } catch (Exception$exc) {
