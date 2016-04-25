@@ -339,9 +339,9 @@ class Concept extends AbstractTripleStoreResource {
     }
     
    private function checkUserRelations($resourceObject) {
-       $userRelations = $this -> manager -> $getUserRelationNames();
-       //$properties = $resourceObject -> 
-       // return ;
+       var_dump($resourceObject);
+       $userRelations = $this -> manager -> getUserRelationUris();
+       return true;
     }
     
    private function prepareSortsForSolr($sortstring) {

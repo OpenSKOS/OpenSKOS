@@ -40,9 +40,18 @@ class UserRelation extends AbstractTripleStoreResource {
       // specific content validation
      protected function validate($resourceObject, $tenant) {
        parent::validate($resourceObject, $tenant);
-       //must be new
+       //must have new title
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Owl::OBJECT_PROPERTY);
        
+       // title must contain namespace with the proper name separated by #
+       
+       $vals = $resourceObject->getProperty(DcTerms::TITLE);
+       $hakje = strrpos($vals[0], "#");
+       if (strpos($vals[0], 'http://') !== 0 || !$hakje || ($hakje === strlen($vals[0]-1))) {
+            throw new ApiException('The user-defined property name (dcerms:title element) must have the form <namespace>#<name> where <namespace> starts with http:// and name is not empty.', 400);
+        
+       }
+       return true;
     }
     
     
