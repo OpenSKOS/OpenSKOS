@@ -5,6 +5,7 @@
 
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix openskos: <http://openskos.org/xmlns#> .
+@prefix menzo: <http://menzo.org/xmlns#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 [
     r1: (?x skos:narrower ?y) -> (?y skos:broader ?x) .
@@ -26,5 +27,5 @@
     r14: (?x skos:member ?y) -> (?y openskos:inSkosCollection ?x) .
 
     r13: (?x menzo:warmer ?y) -> (?y menzo:colder ?x) .
-    r14: (?x menzo:colder ?y) -> (?y menzo:warmer ?x) .
+    r14: (?x menzo:colder ?y) -> (?y menzo:warmer ?x) 
 ]

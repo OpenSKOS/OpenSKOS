@@ -70,7 +70,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             if (strlen($namespaceStr)) {
                 $namespaceStr .= "\n        ";
             }
-
+  
+           
             if (strlen($prefix) === 0) {
                 $namespaceStr .= ' xmlns="'.htmlspecialchars($url).'"';
             } else {
@@ -145,6 +146,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                 $short = \EasyRdf\RdfNamespace::shorten($property, true);
                 if ($short) {
                     $this->addPrefix($short);
+                    
                     $objects = $res->all("<$property>");
                      foreach ($objects as $object) {
                         if ($object instanceof \EasyRdf\Resource) {

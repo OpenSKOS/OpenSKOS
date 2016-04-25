@@ -777,7 +777,7 @@ public function deleteSolrIntact(Uri $resource)
         $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr="";
-        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationUris());
+        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationQNameUris());
         
         if (count($rels) > 0) {
             if (in_array($rels[0], $existingRelations)) {
@@ -846,8 +846,8 @@ public function deleteSolrIntact(Uri $resource)
     }
     
       
-    public function getUserRelationUris() {
-        $sparqlQuery = 'select distinct ?rel where {?rel <' . RdfNamespace::TYPE . '> <'. Owl::OBJECT_PROPERTY. '>. }';
+    public function getUserRelationQNameUris() {
+        $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <'. Owl::OBJECT_PROPERTY. '> . }';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
         $resource = $this->query($sparqlQuery);
         $result =[];

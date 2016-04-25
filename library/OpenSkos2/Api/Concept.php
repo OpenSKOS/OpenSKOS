@@ -26,6 +26,7 @@ use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Search\Autocomplete;
 use OpenSKOS_Db_Table_Row_User;
@@ -339,8 +340,18 @@ class Concept extends AbstractTripleStoreResource {
     }
     
    private function checkUserRelations($resourceObject) {
-       var_dump($resourceObject);
-       $userRelations = $this -> manager -> getUserRelationUris();
+       $existingRelations = $this -> manager -> getUserRelationQNameUris();
+       $properties = array_keys($resourceObject -> getProperties());
+       $userdefined = [];
+       foreach ($properties as $property) {
+          if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
+              if (in_array($property, $existingRelations)) {
+                 $userdefined[] =  $property; 
+              } else {
+                  throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
+              }
+          }
+       }
        return true;
     }
     

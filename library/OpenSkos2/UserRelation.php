@@ -20,10 +20,12 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Owl;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 
 class UserRelation extends Resource
 {
@@ -41,12 +43,29 @@ class UserRelation extends Resource
     
     public function addMetadata($user, $params, $oldParams) {
        $metadata = [];
-       if (count($oldParams)>0){ 
+        $nowLiteral = function () {
+                return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+            };
+       if (count($oldParams) === 0) { // a completely new resource under creation
+            $userUri = $user->getFoafPerson()->getUri();
+          
+
             $metadata = [
-            OpenSkos::UUID => new Literal($oldParams['uuid'])];
+                DcTerms::CREATOR => new Uri($userUri),
+                DcTerms::DATESUBMITTED => $nowLiteral(),
+            ];
+        } else {
+            $metadata = [
+                DcTerms::CREATOR => new Uri($oldParams['creator']),
+                DcTerms::DATESUBMITTED => new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME),
+                DcTerms::MODIFIED =>  $nowLiteral()
+            ];
         }
         foreach ($metadata as $property => $defaultValue) {
             $this->setProperty($property, $defaultValue);
+        }
+        if (count($oldParams) >0) {
+         $this -> addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
         }
     }
 }

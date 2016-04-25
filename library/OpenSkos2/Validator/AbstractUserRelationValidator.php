@@ -33,5 +33,5 @@ abstract class AbstractUserRelationValidator extends AbstractResourceValidator
         return false;
     }
 
-    abstract protected function validateUserRelation(Set $set);
+    abstract protected function validateUserRelation(UserRelation $ur);
 }

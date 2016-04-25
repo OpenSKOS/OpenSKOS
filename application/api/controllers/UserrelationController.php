@@ -49,13 +49,13 @@ class API_UserrelationController extends AbstractController {
     {
         $this->_helper->viewRenderer->setNoRender(true);
         $uri = $this->getUri();
-        if (null === ($relationType = $this->getRequest()->getParam('relationType'))) {
+        if (null === ($relationType = $this->getRequest()->getParam('q'))) {
             $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `relationType`');
-            throw new Zend_Controller_Exception('Missing required parameter `relationType`', 400);
+                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+            throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
         
-        $apiRelations =$this->getDI()->make('\OpenSkos2\Api\Relation');
+        $apiRelations =$this->getDI()->make('\OpenSkos2\Api\UserRelation');
         $request = $this->getPsrRequest();
         $response = $apiRelations->findUserRelatedConcepts($request, $uri);
         $this->emitResponse($response);
@@ -72,7 +72,11 @@ class API_UserrelationController extends AbstractController {
 
     public function putAction()
     {
-        $this->_501('PUT');
+         $request = $this->getPsrRequest();
+        /* @var $relation \OpenSkos2\Api\SkosRelation */
+        $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
+        $response = $relation->update($request);
+        $this->emitResponse($response);
     }
 
     /**

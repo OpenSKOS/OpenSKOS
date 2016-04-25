@@ -25,7 +25,9 @@ use OpenSkos2\UserRelationManager;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Owl;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
-
+use Psr\Http\Message\ServerRequestInterface;
+use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\Tenant;
 require_once dirname(__FILE__) .'/../config.inc.php';
 
 class UserRelation extends AbstractTripleStoreResource {
@@ -39,21 +41,32 @@ class UserRelation extends AbstractTripleStoreResource {
     
       // specific content validation
      protected function validate($resourceObject, $tenant) {
-       parent::validate($resourceObject, $tenant);
+       $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));
+       if (!$validator->validate($resourceObject)) {
+            throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
+        }
        //must have new title
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Owl::OBJECT_PROPERTY);
        
-       // title must contain namespace with the proper name separated by #
-       
-       $vals = $resourceObject->getProperty(DcTerms::TITLE);
-       $hakje = strrpos($vals[0], "#");
-       if (strpos($vals[0], 'http://') !== 0 || !$hakje || ($hakje === strlen($vals[0]-1))) {
-            throw new ApiException('The user-defined property name (dcerms:title element) must have the form <namespace>#<name> where <namespace> starts with http:// and name is not empty.', 400);
-        
-       }
        return true;
     }
     
+    protected function checkResourceIdentifiers(ServerRequestInterface $request, $resourceObject) {
+        if ($resourceObject->isBlankNode()) {
+            throw new ApiException(
+            'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.', 400
+            );
+        }
+
+       $ttl = $resourceObject->getUri();
+       $hakje = strrpos($ttl, "#");
+       if (strpos($ttl, 'http://') !== 0 || !$hakje || ($hakje === strlen($ttl)-1)) {
+            throw new ApiException('The user-defined relation uri must have the form <namespace>#<name> where <namespace> starts with http:// and name is not empty.', 400);
+        
+       }
+        // do not generate idenitifers
+        return false;
+    }
     
     // specific content validation
     protected function validateForUpdate($resourceObject, $tenant,  $existingResourceObject) {
@@ -79,7 +92,7 @@ class UserRelation extends AbstractTripleStoreResource {
         try {
             $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
-            $intermediate = $this->namager->createOutputRelationTriples($response);
+            $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {
@@ -94,7 +107,7 @@ class UserRelation extends AbstractTripleStoreResource {
     
  
     public function listAllUserRelations(){
-         $intermediate = $this->manager->getUserRelationUriNames();
+         $intermediate = $this->manager->getUserRelationNamesUris();
          $result = new JsonResponse2($intermediate);
          return $result;
     }

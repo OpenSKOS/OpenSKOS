@@ -26,6 +26,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
+use OpenSkos2\UserRelation;
 
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
@@ -64,7 +65,6 @@ use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
 use OpenSkos2\Validator\UserRelation\Creator as UserRelationCreator;
 use OpenSkos2\Validator\UserRelation\Title as UserRelationTitle;
 use OpenSkos2\Validator\UserRelation\Description as UserRelationDescription;
-use OpenSkos2\Validator\UserRelation\OpenskosUuid as UserRelationUuid;
 
 use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
 use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
@@ -135,7 +135,7 @@ class Resource
      * @return boolean
      */
     public function validate(RdfResource $resource)
-    {
+    { 
         return $this->applyValidators($resource);
     }
 
@@ -158,7 +158,6 @@ class Resource
     {
         $errorsFound = false;
         /** @var ValidatorInterface $validator */
-        
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
             //var_dump(get_class($validator));
@@ -188,6 +187,7 @@ class Resource
      */
     private function getValidators(RdfResource $resource)
     {   
+        
         if ($resource instanceof Concept) {
             return $this->getConceptValidators();
         }
@@ -245,9 +245,9 @@ class Resource
         $validators = [
             new UserRelationTitle(),
             new UserRelationDescription(),
-            new UserRelationCreator(),
-            new UserRelationlUuid(),
+            new UserRelationCreator()
         ];
+       
         $validators = $this -> refineValidators($validators);
         return $validators;
     }
