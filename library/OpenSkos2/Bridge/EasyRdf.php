@@ -39,6 +39,8 @@ use OpenSkos2\Set;
 use OpenSkos2\SetCollection;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\SkosCollectionCollection;
+use OpenSkos2\UserRelation;
+use OpenSkos2\UserRelationCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Namespaces\Rdf;
@@ -161,6 +163,8 @@ class EasyRdf {
                     return new Label($uri);
                 case SkosCollection::TYPE:
                     return new SkosCollection($uri);
+                case UserRelation::TYPE:
+                    return new UserRelation($uri);
                 default:
                     return new Resource($uri);
             }
@@ -191,6 +195,8 @@ class EasyRdf {
                 return new LabelCollection();
             case SkosCollection::TYPE:
                 return new SkosCollectionCollection();
+            case UserRelation::TYPE:
+                return new UserRelationCollection();
             default:
                 return new ResourceCollection();
         }

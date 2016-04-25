@@ -34,7 +34,7 @@ class UserRelation extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
-        $this->addProperty(Rdfs::SUBPROPERTY_OF, Skos::RELATED);
+        $this->addProperty(Rdfs::SUBPROPERTY_OF, new Uri(Skos::RELATED));
     }
     
     

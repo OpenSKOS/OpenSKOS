@@ -16,9 +16,10 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-require_once 'FindRelationsController.php';
 
-class API_UserrelationController extends Api_FindRelationsController {
+require_once 'AbstractController.php';
+
+class API_UserrelationController extends AbstractController {
    
     public function init() {
         parent::init();
@@ -103,7 +104,7 @@ class API_UserrelationController extends Api_FindRelationsController {
         $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\SkosRelation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
-        $response = $relation->deleteSkosRelation($request);
+        $response = $relation->deleteResourceObject($request);
         $this->emitResponse($response);
     }
     

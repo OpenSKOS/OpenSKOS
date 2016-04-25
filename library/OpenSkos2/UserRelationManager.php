@@ -21,6 +21,7 @@ namespace OpenSkos2;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Owl;
+use OpenSkos2\Namespaces\DcTerms;
 
 class UserRelationManager extends ResourceManager
 {
@@ -35,5 +36,17 @@ class UserRelationManager extends ResourceManager
         return parent::CanBeDeleted($uri);
     }
     
+    public function getUserRelationUriNames() {
+        $sparqlQuery = 'select ?rel ?name where {?rel <' . Rdf::TYPE . '> <'. Owl::OBJECT_PROPERTY. '> . ?rel <' . DcTerms::TITLE . '> ?name . }';
+        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        $resource = $this->query($sparqlQuery);
+       
+        $result =[];
+        foreach ($resource as $value) {
+            $result[]['uri'] = $value -> rel ->getUri();
+            $result[]['name'] = $value -> name ->getValue();
+        }
+        return $result;
+    }
   
 }

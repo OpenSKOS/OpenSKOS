@@ -188,7 +188,6 @@ class Resource
      */
     private function getValidators(RdfResource $resource)
     {   
-        //var_dump($resource);
         if ($resource instanceof Concept) {
             return $this->getConceptValidators();
         }

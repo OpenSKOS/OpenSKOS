@@ -21,7 +21,7 @@ namespace OpenSkos2\Api;
 
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\ConceptManager;
+use OpenSkos2\UserRelationManager;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Owl;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
@@ -32,7 +32,7 @@ class UserRelation extends AbstractTripleStoreResource {
 
     use \OpenSkos2\Api\Response\ApiResponseTrait;
     
-    public function __construct(ConceptManager $manager)
+    public function __construct(UserRelationManager $manager)
     {
         $this->manager = $manager;
     }
@@ -59,7 +59,6 @@ class UserRelation extends AbstractTripleStoreResource {
         //public function findAllPairsForType(ServerRequestInterface $request)
         $params=$request->getQueryParams();
         $relType = $params['q'];
-        $namespace = $params['namespace'];
         $sourceSchemata = null;
         $targetSchemata = null;
         if (isset($params['sourceSchemata'])) {
@@ -69,9 +68,9 @@ class UserRelation extends AbstractTripleStoreResource {
             $targetSchemata = $params['targetSchemata'];
         }; 
         try {
-            $response = $this->manager->fetchAllRelationsOfType($namespace, $relType, $sourceSchemata, $targetSchemata);
+            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
             //var_dump($response);
-            $intermediate = $this->createOutputRelationTriples($response);
+            $intermediate = $this->namager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
         } catch (Exception $exc) {
@@ -86,7 +85,7 @@ class UserRelation extends AbstractTripleStoreResource {
     
  
     public function listAllUserRelations(){
-         $intermediate = $this->manager->getUserRelationUris();
+         $intermediate = $this->manager->getUserRelationUriNames();
          $result = new JsonResponse2($intermediate);
          return $result;
     }

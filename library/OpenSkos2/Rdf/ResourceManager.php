@@ -852,7 +852,7 @@ public function deleteSolrIntact(Uri $resource)
         $resource = $this->query($sparqlQuery);
         $result =[];
         foreach ($resource as $value) {
-            $result[] = $value -> rel ->getValue();
+            $result[] = $value -> rel ->getUri();
         }
         return $result;
     }

@@ -392,10 +392,10 @@ class Resource extends Uri implements ResourceIdentifier
     
     public static function generatePidEPIC($plainUUID, $type) {
         // tmp while EPIC service sucks 
-        $tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
-        return $tmpRetVal;
+        //$tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
+        //return $tmpRetVal;
         /// END TMP
-        /*
+        
         if (EPICHandleProxy::enabled()) {
             // Create the PID
             $handleServerClient = EPICHandleProxy::getInstance();
@@ -413,7 +413,7 @@ class Resource extends Uri implements ResourceIdentifier
             }
         } else {
             throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object because EPIC is not enabled', 400);
-        }*/
+        }
     }
     
     protected function getResourceType(){
