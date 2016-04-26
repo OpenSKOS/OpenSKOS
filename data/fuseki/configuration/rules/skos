@@ -26,6 +26,6 @@
     r13: (?x openskos:inSkosCollection ?y) -> (?y skos:member ?x) .
     r14: (?x skos:member ?y) -> (?y openskos:inSkosCollection ?x) .
 
-    r13: (?x menzo:warmer ?y) -> (?y menzo:colder ?x) .
-    r14: (?x menzo:colder ?y) -> (?y menzo:warmer ?x) 
+    r13: (?x menzo:stronger ?y) -> (?y menzo:weaker ?x) .
+    r14: (?x menzo:weaker ?y) -> (?y menzo:stronger ?x) 
 ]

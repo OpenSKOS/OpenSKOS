@@ -7,15 +7,13 @@
  */
 
 namespace OpenSkos2\Namespaces;
+use EasyRdf\RdfNamespace;
 
 class NamespaceAdmin
 {
-    static private $namespaces = [Dc::NAME_SPACE, DcTerms::NAME_SPACE, Dcmi::NAME_SPACE, Foaf::NAME_SPACE, 
-        OpenSkos::NAME_SPACE, Org::NAME_SPACE, Owl::NAME_SPACE, Rdf::NAME_SPACE, Rdfs::NAME_SPACE, 
-        Skos::NAME_SPACE, SkosXl::NAME_SPACE, Xsd::NAME_SPACE, vCard::NAME_SPACE];
-    
+   
     public static function getStandardNamespaces() {
-        return self::$namespaces;
+        return array_values(RdfNamespace::namespaces());
     }
     
     public static function getNamespacePrefixCandidate($str) {
@@ -32,7 +30,7 @@ class NamespaceAdmin
     
     public static function isPropertyFromStandardNamespace($property) {
         $prefix = self :: getNamespacePrefixCandidate($property);
-        $retVal = in_array($prefix, self::$namespaces);
+        $retVal = in_array($prefix, self::getStandardNamespaces());
         return $retVal;
     }
 

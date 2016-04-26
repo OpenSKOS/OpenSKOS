@@ -209,12 +209,7 @@ class ResourceManager
      */
     public function delete(Uri $resource)
     {
-        $uri = $resource->getUri();
-        //$querySubresources = 'SELECT ?b ?p2 ?o2  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}';
-        //$subs = $this->query($querySubresources);
-        //var_dump($subs);
-        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
-        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+        $uri = $this -> deleteSolrIntact($resource);
        
         // delete resource in solr
         $update = $this->solr->createUpdate();
@@ -227,8 +222,11 @@ public function deleteSolrIntact(Uri $resource)
     {
         $uri = $resource->getUri();
         $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
-        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-       
+        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {?s <' . $uri . '> ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
+        $this->client->update('DELETE WHERE {<' . $uri . '> ?predicate ?object . }');
+        $this->client->update('DELETE WHERE {?subject <' . $uri . '> ?object . }');
+        $this->client->update('DELETE WHERE {?subject ?predicate <' . $uri . '> . }');
+        return $uri; 
        
     }
  
