@@ -43,14 +43,12 @@ class UserRelation extends Resource
     
     public function addMetadata($user, $params, $oldParams) {
        $metadata = [];
-        $nowLiteral = function () {
+       $nowLiteral = function () {
                 return new Literal(date('c'), null, Literal::TYPE_DATETIME);
             };
+       $userUri = $user->getFoafPerson()->getUri();
        if (count($oldParams) === 0) { // a completely new resource under creation
-            $userUri = $user->getFoafPerson()->getUri();
-          
-
-            $metadata = [
+             $metadata = [
                 DcTerms::CREATOR => new Uri($userUri),
                 DcTerms::DATESUBMITTED => $nowLiteral(),
             ];

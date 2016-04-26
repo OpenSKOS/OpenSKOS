@@ -291,23 +291,17 @@ class Concept extends AbstractTripleStoreResource {
         return $this->getSuccessResponse($xml, 202);
     }
     
-    public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant=null, $resource=null) {
+    protected function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
         return ($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT);
     }
     
 
-    public function resourceEditAllowed(
-        OpenSKOS_Db_Table_Row_User $user,
-        $tenant,    
-        $concept) {
+    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant,    $concept) {
         $retVal = $concept -> editingAllowed($user, $tenant);
         return $retVal;
     }
     
-    public function resourceDeleteAllowed(
-        OpenSKOS_Db_Table_Row_User $user,
-        $tenant,    
-        $concept) {
+    protected function resourceDeleteAllowed( OpenSKOS_Db_Table_Row_User $user, Array $tenant,   $concept) {
         $retVal = $this->resourceEditAllowed($user, $tenant, $concept);
         return $retVal;
     }

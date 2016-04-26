@@ -34,7 +34,7 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 
 class SkosRelation extends AbstractTripleStoreResource {
 
-    use \OpenSkos2\Api\Response\ApiResponseTrait;
+    //use \OpenSkos2\Api\Response\ApiResponseTrait;
     
     public function __construct(ConceptManager $manager)
     {

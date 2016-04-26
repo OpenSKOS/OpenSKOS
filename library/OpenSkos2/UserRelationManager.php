@@ -36,17 +36,4 @@ class UserRelationManager extends ResourceManager
         return parent::CanBeDeleted($uri);
     }
     
-   public function getUserRelationNamesUris() {
-        $sparqlQuery = 'select ?rel ?name where {?rel <' . Rdf::TYPE . '> <'. Owl::OBJECT_PROPERTY. '> . ?rel <' . DcTerms::TITLE . '> ?name . }';
-        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
-        $resource = $this->query($sparqlQuery);
-        $result =[];
-        $i=0;
-        foreach ($resource as $value) {
-            $result[$i]['uri'] = $value -> rel ->getUri();
-            $result[$i]['name']= $value -> name ->getValue();
-            $i++;
-        }
-        return $result;
-    }
 }

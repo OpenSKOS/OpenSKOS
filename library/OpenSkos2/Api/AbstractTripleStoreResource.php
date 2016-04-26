@@ -4,6 +4,7 @@ namespace OpenSkos2\Api;
 
 use DOMDocument;
 use Exception;
+use OpenSkos2\UserRelation;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Transform\DataArray;
@@ -17,6 +18,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant as Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
+use OpenSKOS_Db_Table_Users;
 use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
@@ -26,7 +28,7 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 
 abstract class AbstractTripleStoreResource {
 
-    use \OpenSkos2\Api\Response\ApiResponseTrait;
+    //use \OpenSkos2\Api\Response\ApiResponseTrait;
 
     protected $manager;
     
@@ -130,7 +132,8 @@ abstract class AbstractTripleStoreResource {
         }
     }
     
-     public function update(ServerRequestInterface $request) {
+    // overriden in UserRelation because a user-defined relation does not have UUID
+    public function update(ServerRequestInterface $request) {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             if ($resourceObject->isBlankNode()) {
@@ -141,23 +144,25 @@ abstract class AbstractTripleStoreResource {
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
             
-             
-            // do not update uuid: it must be intact forever, connected to uri
-            $uuid = $resourceObject->getProperty(OpenSkos::UUID);
-            if (count($uuid)>0) {
-                $oldUuid = $existingResource->getProperty(OpenSkos::UUID);
-                if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
-                    throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
-                }
-            }
-            
             $oldParams = [
-                'uuid' => $existingResource -> getUUID(),
                 'creator' => $existingResource -> getCreator(),
                 'dateSubmitted' => $existingResource -> getDateSubmitted(),
                 'status' => $existingResource -> getStatus() // so fat, not null only for concepts
             ];
             
+            
+             
+            if ($this->manager->getResourceType() !== UserRelation::TYPE) { // we do not have an uuid for a user-defined relation
+                // do not update uuid: it must be intact forever, connected to uri
+                $oldUuid = $existingResource->getProperty(OpenSkos::UUID);
+                $oldParams['uuid'] = $oldUuid;
+                $uuid = $resourceObject->getProperty(OpenSkos::UUID);
+                if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
+                    throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
+                }
+            }
+
+
             $resourceObject->addMetadata($user, $params, $oldParams);
             
             $this->resourceEditAllowed($user, $this->tenant, $existingResource);    
@@ -312,25 +317,27 @@ abstract class AbstractTripleStoreResource {
         return $response;
     }
 
-    // override in concrete rclass when necessary
-    protected function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
-        return  ($user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-    
+  
     // in the checking and validation functions below
     // $tenant is a map $tenant['code'], $tenant['uri']
     
-    // override in concrete class when necessary
-   
-    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
-        return ($user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-    
-     // override in concrete class when necessary
+      // override in concrete class when necessary
     protected function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
         return ($user->role === ADMINISRATOR || $user->role === ROOT);
     }
 
+    
+    // override in concrete class when necessary
+    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
+        return ($user->role === ADMINISRATOR || $user->role === ROOT);
+    }
+    
+   
+      // override in concrete rclass when necessary
+    protected function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
+        return  ($user->role === ADMINISRATOR || $user->role === ROOT);
+    }
+    
     
     // override in concrete class when necessary
     protected function validate($resourceObject, Array $tenant) {
@@ -361,14 +368,34 @@ abstract class AbstractTripleStoreResource {
     // a new property must be new (they are single valued ones like: uri, uuid, label, title, notation) 
     protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
         $vals = $resourceObject->getProperty($propertyUri);
-        $val=$vals[0];
-        $atlang = $this ->retrieveLanguagePrefix($val);
-        $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val) . '"'.$atlang, $rdfType);
-        if (count($resources) > 0) {
-            throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $val.$atlang . ' has been already registered.', 400);
+        foreach ($vals as $val) {
+            $atlang = $this->retrieveLanguagePrefix($val);
+            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val) . '"' . $atlang, $rdfType);
+            if (count($resources) > 0) {
+                throw new ApiException('The resource ' . $this->manager->getResourceType() . '  with the property ' . $propertyUri . ' of value ' . $val . $atlang . ' has been already registered.', 400);
+            }
         }
     }
-    
+
+    // a new property must be new (they are single valued ones like: uri, uuid, label, title, notation) 
+    protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
+        $values = $resourceObject->getProperty($propertyUri);
+        $oldValues = $existingResourceObject->getProperty($propertyUri);
+        foreach ($values as $value) {
+            $lan = $this->retrieveLanguagePrefix($value);
+            foreach ($oldValues as $oldValue) {
+                $oldLan = $this->retrieveLanguagePrefix($oldValue);
+                if ($value->getValue() !== $oldValue->getValue() || $lan !== $oldLan) { //  new title is given
+                    // new val should not occur amnogst existing old values of the same property
+                    $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . $value . '"' . $lan, $rdfType);
+                    if (count($resources) > 0) {
+                        throw new ApiException('The resource ' . $this->manager->getResourceType() . '  with the property ' . $propertyUri . ' of value ' . $value . $lan . ' has been already registered.', 400);
+                    }
+                }
+            }
+        }
+    }
+
     // the resource referred by the uri must exist
     protected function validateURI($resourceObject, $uri, $rdfType) {
         $val = $resourceObject->getProperty($uri);
@@ -380,22 +407,7 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-   // a new property must be new (they are single valued ones like: uri, uuid, label, title, notation) 
-    protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
-        $values= $resourceObject->getProperty($propertyUri);
-        $value = $values[0];
-        $lan = $this ->retrieveLanguagePrefix($value);
-        $oldValues = $existingResourceObject ->getProperty($propertyUri);
-        $oldValue = $oldValues[0];
-        $oldLan = $this ->retrieveLanguagePrefix($oldValue);
-        if ($value->getValue() !== $oldValue->getValue() || $lan !== $oldLan) { //  new title is given
-            // new val should not occur amnogst existing old values of the same property
-            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"'.$value.'"'.$lan, $rdfType);
-            if (count($resources) > 0) {
-                throw new ApiException('The resource ' . $this->manager->getResourceType() .'  with the property '. $propertyUri  .' of value '. $value.$lan . ' has been already registered.', 400);
-            }
-        } 
-   }
+   
     
    public function fetchUriName(){
        return $this ->manager-> fetchUriName();
@@ -411,4 +423,42 @@ abstract class AbstractTripleStoreResource {
         return "";
     }
 
+     /**
+     * @params string $key
+     * @return OpenSKOS_Db_Table_Row_User
+     * @throws InvalidArgumentException
+     */
+    protected function getUserByKey($key)
+    {
+        $user = OpenSKOS_Db_Table_Users::fetchByApiKey($key);
+        if (null === $user) {
+            throw new InvalidArgumentException('No such API-key: `' . $key . '`', 401);
+        }
+
+        if (!$user->isApiAllowed()) {
+            throw new InvalidArgumentException('Your user account is not allowed to use the API', 401);
+        }
+
+        if (strtolower($user->active) !== 'y') {
+            throw new InvalidArgumentException('Your user account is blocked', 401);
+        }
+
+        return $user;
+    }
+    
+     /**
+     * Get error response
+     *
+     * @param integer $status
+     * @param string $message
+     * @return ResponseInterface
+     */
+    protected function getErrorResponse($status, $message)
+    {
+        $stream = new Stream('php://memory', 'wb+');
+        $stream->write($message);
+        $response = (new Response($stream, $status, ['X-Error-Msg' => $message]));
+        return $response;
+    }
+    
 }

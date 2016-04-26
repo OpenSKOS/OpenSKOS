@@ -21,28 +21,51 @@ require_once 'AbstractController.php';
 
 class API_UserrelationController extends AbstractController {
    
-    public function init() {
-        parent::init();
-        $this->_helper->contextSwitch()
-                ->initContext($this->getRequestedFormat());
-
-        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
-            $this->getHelper('layout')->enableLayout();
-        }
+    public function init()
+    {
+       parent::init();
+       $this->fullNameResourceClass = 'OpenSkos2\Api\UserRelation';
+      
     }
 
-    public function indexAction() {
-        $relations = $this->getDI()->make('\OpenSkos2\Api\UserRelation');
-        $q = $this->getRequest()->getParam('q');
-        if ($q === null) {
-            $response = $relations->listAllUserRelations();
-        } else {
-            $request = $this->getPsrRequest();
-            $response = $relations->findAllPairsForUserRelationType($request);
+    
+     public function indexAction()
+    {
+       parent::indexAction();
+    }
+   
+    public function getAction()
+    {
+        parent::getAction();
+    }
+    
+    public function postAction()
+    {
+       parent::postAction();
+    }
+    
+    public function putAction()
+    {
+        parent::putAction();
+    }
+    
+    public function deleteAction()
+    {
+        parent::deleteAction();
+    }
+   
+    /*
+     public function indexAction() {
+        $format = $this->getParam('format');
+        if ('json' !== $format) {
+            throw new Exception('Resource listing is implemented only in format=json', 404);
         }
 
-        $this->emitResponse($response);
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make($this->fullNameResourceClass);
+        $result = $api->fetchUriName($request);
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }
 
     public function getAction()
@@ -64,7 +87,6 @@ class API_UserrelationController extends AbstractController {
     public function postAction()
     {
         $request = $this->getPsrRequest();
-        /* @var $relation \OpenSkos2\Api\SkosRelation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
         $response = $relation->create($request);
         $this->emitResponse($response);
@@ -73,44 +95,18 @@ class API_UserrelationController extends AbstractController {
     public function putAction()
     {
          $request = $this->getPsrRequest();
-        /* @var $relation \OpenSkos2\Api\SkosRelation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
         $response = $relation->update($request);
         $this->emitResponse($response);
     }
-
-    /**
-    * @apiVersion 1.0.0
-    * @apiDescription Add a relation to a SKOS Concept
-    * The relation will be deleted from both sides.
-    * If narrower is deleted form the subject the respective broader will be deleted from the object.
-    * 
-    * Post must be send with Content-Type application/x-www-form-urlencoded
-    * or multipart/form-data
-    * 
-    * @api {delete} /api/relation Add relation to SKOS concept
-    * @apiName RelationConcept
-    * @apiGroup Concept
-    * @apiParam {String} concept The uri to the concept e.g http://openskos.org/1
-    * @apiParam {String} type The uri of the relation e.g http://www.w3.org/2004/02/skos/core#narrower
-    * @apiParam {Array}  related The uri's of the related concepts e.g http://openskos.org/123
-    * @apiParam {String} key A valid API key
-    * @apiSuccess (200) {String} Concept uri
-    * @apiSuccessExample {String} Success-Response
-    *   HTTP/1.1 200 Ok
-    * @apiError MissingKey {String} No key specified
-    * @apiErrorExample MissingKey:
-    *   HTTP/1.1 412 Precondition Failed
-    *   No key specified
-    */
+   
     public function deleteAction()
     {
         $request = $this->getPsrRequest();
-        /* @var $relation \OpenSkos2\Api\SkosRelation */
         $relation = $this->getDI()->get('\OpenSkos2\Api\UserRelation');
         $response = $relation->deleteResourceObject($request);
         $this->emitResponse($response);
     }
-    
+    */
     
 }

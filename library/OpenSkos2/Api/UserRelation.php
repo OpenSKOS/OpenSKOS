@@ -32,13 +32,42 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 
 class UserRelation extends AbstractTripleStoreResource {
 
-    use \OpenSkos2\Api\Response\ApiResponseTrait;
+    //use \OpenSkos2\Api\Response\ApiResponseTrait;
     
     public function __construct(UserRelationManager $manager)
     {
         $this->manager = $manager;
     }
     
+    public function findAllPairsForUserRelationType($request) {
+        //public function findAllPairsForType(ServerRequestInterface $request)
+        $params=$request->getQueryParams();
+        $relType = $params['q'];
+        $sourceSchemata = null;
+        $targetSchemata = null;
+        if (isset($params['sourceSchemata'])) {
+            $sourceSchemata = $params['sourceSchemata'];
+        };
+        if (isset($params['targetSchemata'])) {
+            $targetSchemata = $params['targetSchemata'];
+        }; 
+        try {
+            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
+            //var_dump($response);
+            $intermediate = $this->manager->createOutputRelationTriples($response);
+            $result = new JsonResponse2($intermediate);
+            return $result;
+        } catch (Exception $exc) {
+            if ($exc instanceof ApiException) {
+                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+            } else {
+                return $this->getErrorResponse(500, $exc->getMessage());
+            }
+        }
+    }
+    
+    
+ 
       // specific content validation
      protected function validate($resourceObject, $tenant) {
        $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));
@@ -77,41 +106,6 @@ class UserRelation extends AbstractTripleStoreResource {
     }
     
     
-    public function findAllPairsForUserRelationType($request) {
-        //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
-        $relType = $params['q'];
-        $sourceSchemata = null;
-        $targetSchemata = null;
-        if (isset($params['sourceSchemata'])) {
-            $sourceSchemata = $params['sourceSchemata'];
-        };
-        if (isset($params['targetSchemata'])) {
-            $targetSchemata = $params['targetSchemata'];
-        }; 
-        try {
-            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
-            //var_dump($response);
-            $intermediate = $this->manager->createOutputRelationTriples($response);
-            $result = new JsonResponse2($intermediate);
-            return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
     
-    
- 
-    public function listAllUserRelations(){
-         $intermediate = $this->manager->getUserRelationNamesUris();
-         $result = new JsonResponse2($intermediate);
-         return $result;
-    }
-    
- 
   
 }

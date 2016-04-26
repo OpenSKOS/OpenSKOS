@@ -8,6 +8,7 @@ use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\TenantManager;
+
 class Tenant extends AbstractTripleStoreResource
 {
     public function __construct(TenantManager $manager) {
