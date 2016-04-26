@@ -39,35 +39,7 @@ class UserRelation extends AbstractTripleStoreResource {
         $this->manager = $manager;
     }
     
-    public function findAllPairsForUserRelationType($request) {
-        //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
-        $relType = $params['id'];
-        $sourceSchemata = null;
-        $targetSchemata = null;
-        if (isset($params['sourceSchemata'])) {
-            $sourceSchemata = $params['sourceSchemata'];
-        };
-        if (isset($params['targetSchemata'])) {
-            $targetSchemata = $params['targetSchemata'];
-        }; 
-        try {
-            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
-            //var_dump($response);
-            $intermediate = $this->manager->createOutputRelationTriples($response);
-            $result = new JsonResponse2($intermediate);
-            return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
-    
-    
- 
+   
       // specific content validation
      protected function validate($resourceObject, $tenant) {
        $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));

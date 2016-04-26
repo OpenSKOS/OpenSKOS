@@ -21,7 +21,6 @@ namespace OpenSkos2\Api;
 
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
@@ -41,58 +40,16 @@ class SkosRelation extends AbstractTripleStoreResource {
         $this->manager = $manager;
     }
     
-    public function findAllPairsForSkosRelationType($request) {
-        //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
-        $relType = $params['q'];
-        $sourceSchemata = null;
-        $targetSchemata = null;
-        if (isset($params['sourceSchemata'])) {
-            $sourceSchemata = $params['sourceSchemata'];
-        };
-        if (isset($params['targetSchemata'])) {
-            $targetSchemata = $params['targetSchemata'];
-        }; 
-        try {
-            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
-            $intermediate = $this->manager->createOutputRelationTriples($response);
-            $result = new JsonResponse2($intermediate);
-            return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
+    public function fetchUriName() {
+         $uris = Skos::getSkosRelationsTypes();
+         $result = [];
+         foreach ($uris as $uri) {
+              $border = strrpos($uri, "#");
+              $name = substr($uri, $border+1);
+              $result[$name] = $uri;
+         }
+         return $result;
     }
-    
-   
-    
-    
-    public function findSkosRelatedConcepts($request, $uri) {
-        $params = $this->getAndAdaptQueryParams($request);
-        $relType = Skos::NAME_SPACE . $params['relationType'];
-        if (isset($params['inSchema'])) {
-            $schema = $params['inSchema'];
-        } else {
-            $schema = null;
-        }
-        try {
-            $concepts = $this->manager->fetchRelations($uri, $relType, $schema);
-            //var_dump($concepts);
-            $result = new ResourceResultSet($concepts, $concepts->count(), 0, MAXIMAL_ROWS);
-            $response = (new JsonResponse($result, []))->getResponse();
-            return $response;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
-    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

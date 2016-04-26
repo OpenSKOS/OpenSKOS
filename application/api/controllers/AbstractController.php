@@ -18,7 +18,6 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         if ('json' !== $format) {
             throw new Exception('Resource listing is implemented only in format=json', 404);
         }
-
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
         $result = $api->fetchUriName($request);

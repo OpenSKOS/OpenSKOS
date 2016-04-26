@@ -25,6 +25,7 @@ use EasyRdf\Sparql\Client;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptCollection;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
@@ -550,6 +551,38 @@ public function deleteSolrIntact(Uri $resource)
         $retVal = $this->makeJsonList($result, 'object');
         return $retVal;
     }
+    
+     public function fetchRelationsForConcept($uri, $relationType, $conceptScheme = null)
+    {
+      
+            $allRelations = new ConceptCollection([]);
+
+            if (!$uri instanceof Uri) {
+                $uri = new Uri($uri);
+            }
+
+            $patterns = [
+                [$uri, $relationType, '?subject'],
+            ];
+
+            if (!empty($conceptScheme)) {
+                $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+            }
+
+            $start = 0;
+            $step = 100;
+            do {
+                $relations = $this->fetch($patterns, $start, $step);
+                foreach ($relations as $relation) {
+                    $allRelations->append($relation);
+                }
+                $start += $step;
+            } while (!(count($relations) < $step));
+
+            return $allRelations;
+       
+    }
+
 
     private function makeJsonList($sparqlQueryResult, $triplePart) {
         $items = [];
@@ -574,7 +607,7 @@ public function deleteSolrIntact(Uri $resource)
         return $items;
     }
     
-    // override in the superclass whene necessary (e.g. for tenants)
+    // override in the superclass whene necessary 
     public function fetchUriName() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <'. $this->getResourceType() .'> .}';
         $response = $this->query($query);

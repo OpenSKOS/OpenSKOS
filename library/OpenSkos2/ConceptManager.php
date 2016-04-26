@@ -162,38 +162,7 @@ class ConceptManager extends ResourceManager
      * @param string $conceptScheme , optional Specify if you want relations from single concept scheme only.
      * @return ConceptCollection
      */
-    public function fetchSkosRelations($uri, $relationType, $conceptScheme = null)
-    {
-        // @TODO It is possible that there are relations to uris, for which there is no resource.
-        if (in_array($relationType, Skos::getSkosRelationsTypes())) {
-            $allRelations = new ConceptCollection([]);
-
-            if (!$uri instanceof Uri) {
-                $uri = new Uri($uri);
-            }
-
-            $patterns = [
-                [$uri, $relationType, '?subject'],
-            ];
-
-            if (!empty($conceptScheme)) {
-                $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
-            }
-
-            $start = 0;
-            $step = 100;
-            do {
-                $relations = $this->fetch($patterns, $start, $step);
-                foreach ($relations as $relation) {
-                    $allRelations->append($relation);
-                }
-                $start += $step;
-            } while (!(count($relations) < $step));
-
-            return $allRelations;
-        } throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $relationType . " is not implemented.", 501);
-    }
-
+   
   
     /**
      * Delete all relations for which the concepts is object (target)
