@@ -26,6 +26,9 @@
     r13: (?x openskos:inSkosCollection ?y) -> (?y skos:member ?x) .
     r14: (?x skos:member ?y) -> (?y openskos:inSkosCollection ?x) .
 
-    r13: (?x menzo:stronger ?y) -> (?y menzo:weaker ?x) .
-    r14: (?x menzo:weaker ?y) -> (?y menzo:stronger ?x) 
+    r15: (?x menzo:stronger ?y) -> (?y menzo:weaker ?x) .
+    r16: (?x menzo:weaker ?y) -> (?y menzo:stronger ?x) .
+
+    r17: (?x menzo:faster ?y) -> (?y menzo:slower ?x) .
+    r18: (?x menzo:slower ?y) -> (?y menzo:faster ?x) 
 ]

@@ -36,7 +36,16 @@ class API_UserrelationController extends AbstractController {
    
     public function getAction()
     {
-        parent::getAction();
+        $listPairs = $this->getParam('members');
+        if (!isset($listPairs) || $listPairs !== 'true') {
+            $response = parent::getAction();
+        } else {
+            $this->_helper->viewRenderer->setNoRender(true);
+            $request = $this->getPsrRequest();
+            $api = $this->getDI()->make($this->fullNameResourceClass);
+            $response = $api->findAllPairsForUserRelationType($request);
+            $this->emitResponse($response);
+        }
     }
     
     public function postAction()

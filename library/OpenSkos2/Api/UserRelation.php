@@ -42,7 +42,7 @@ class UserRelation extends AbstractTripleStoreResource {
     public function findAllPairsForUserRelationType($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
         $params=$request->getQueryParams();
-        $relType = $params['q'];
+        $relType = $params['id'];
         $sourceSchemata = null;
         $targetSchemata = null;
         if (isset($params['sourceSchemata'])) {
