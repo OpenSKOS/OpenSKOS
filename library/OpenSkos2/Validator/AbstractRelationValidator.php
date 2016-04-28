@@ -19,19 +19,19 @@
 
 namespace OpenSkos2\Validator;
 
-use OpenSkos2\UserRelation;
+use OpenSkos2\Relation;
 use OpenSkos2\Rdf\Resource as RdfResource;
 
-abstract class AbstractUserRelationValidator extends AbstractResourceValidator
+abstract class AbstractRelationValidator extends AbstractResourceValidator
 {
    
     public function validate(RdfResource $resource)
     {
-        if ($resource instanceof UserRelation) {
-            return $this->validateUserRelation($resource);
+        if ($resource instanceof Relation) {
+            return $this->validateRelation($resource);
         }
         return false;
     }
 
-    abstract protected function validateUserRelation(UserRelation $ur);
+    abstract protected function validateRelation(UserRelation $ur);
 }

@@ -32,6 +32,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Solr\Document;
@@ -268,7 +269,6 @@ public function deleteSolrIntact(Uri $resource)
         $query .= ' <' . $predicate . '> ';
         $query .= $object == '?object' ? '?object' : $this->valueToTurtle($object);
         $query .= PHP_EOL . '}';
-        var_dump($query);
         $this->client->update($query);
     }
 
@@ -771,7 +771,7 @@ public function deleteSolrIntact(Uri $resource)
     
      public function fetchRelationUris(){
          $skosrels = Skos::getSkosRelationsTypes();
-         $userrels = array_values(parent::fetchUriName());
+         $userrels = array_values($this->fetchUriName());
          $result = array_merge($skosrels, $userrels);
          return $result;
     }

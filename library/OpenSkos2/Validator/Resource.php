@@ -62,9 +62,9 @@ use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
 use OpenSkos2\Validator\SkosCollection\Description as SkosCollDescription;
 use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
 
-use OpenSkos2\Validator\UserRelation\Creator as UserRelationCreator;
-use OpenSkos2\Validator\UserRelation\Title as UserRelationTitle;
-use OpenSkos2\Validator\UserRelation\Description as UserRelationDescription;
+use OpenSkos2\Validator\Relation\Creator as RelationCreator;
+use OpenSkos2\Validator\Relation\Title as RelationTitle;
+use OpenSkos2\Validator\Relation\Description as RelationDescription;
 
 use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
 use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
@@ -203,8 +203,8 @@ class Resource
         if ($resource instanceof Tenant) {
             return $this->getTenantValidators();
         }
-         if ($resource instanceof UserRelation) {
-            return $this->getUserRelationValidators();
+         if ($resource instanceof Relation) {
+            return $this->getRelationValidators();
         }
         return [];
     }
@@ -240,12 +240,12 @@ class Resource
         return $validators;
     }
     
-     private function getUserRelationValidators()
+     private function getRelationValidators()
     {
         $validators = [
-            new UserRelationTitle(),
-            new UserRelationDescription(),
-            new UserRelationCreator()
+            new RelationTitle(),
+            new RelationDescription(),
+            new RelationCreator()
         ];
        
         $validators = $this -> refineValidators($validators);

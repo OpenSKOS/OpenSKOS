@@ -3,11 +3,11 @@
 namespace OpenSkos2\Validator\UserRelation;
 
 use OpenSkos2\UserRelation;
-use OpenSkos2\Validator\AbstractUserRelationValidator;
+use OpenSkos2\Validator\AbstractRelationValidator;
 
-class Description extends AbstractUserRelationValidator
+class Description extends AbstractRelationValidator
 {
-   protected function validateUserRelation(UserRelation $resource)
+   protected function validateRelation(UserRelation $resource)
     {
         return parent::genericValidate('\CommonProperties\Description::validate', $resource);
     }

@@ -23,8 +23,11 @@ use Exception;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\RelationManager;
 use OpenSkos2\Concept;
+use OpenSkos2\Tenant;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Owl;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
@@ -32,6 +35,7 @@ use Zend\Diactoros\Stream;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
+use OpenSkos2\Validator\Resource as ResourceValidator;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -115,7 +119,7 @@ class Relation extends AbstractTripleStoreResource {
     {
         $params=$this -> getAndAdaptQueryParams($request);
         try {
-            $body = $this -> preEditChecksSkosRels($request);
+            $body = $this -> preEditChecksRels($request);
             $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
@@ -190,7 +194,7 @@ class Relation extends AbstractTripleStoreResource {
 
    
     // used when creating a user-defined relation
-    protected function checkResourceIdentifiers(ServerRequestInterface $request, $resourceObject) {
+    protected function checkResourceIdentifiers(PsrServerRequestInterface $request, $resourceObject) {
         if ($resourceObject->isBlankNode()) {
             throw new ApiException(
             'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.', 400
