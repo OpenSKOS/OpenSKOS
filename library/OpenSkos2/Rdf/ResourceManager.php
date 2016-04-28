@@ -268,7 +268,7 @@ public function deleteSolrIntact(Uri $resource)
         $query .= ' <' . $predicate . '> ';
         $query .= $object == '?object' ? '?object' : $this->valueToTurtle($object);
         $query .= PHP_EOL . '}';
-
+        var_dump($query);
         $this->client->update($query);
     }
 
@@ -302,12 +302,14 @@ public function deleteSolrIntact(Uri $resource)
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUri($uri)
+    public function fetchByUri($uri, $resType=null)
     {
+        if ($resType === null) {
+            $resType = $this->getResourceType();
+        }
         $resource = new Uri($uri);
         $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
-        
+        $resources = EasyRdf::graphToResourceCollection($result, $resType);
         // @TODO Add resourceType check.
         
         if (count($resources) == 0) {
@@ -577,7 +579,7 @@ public function deleteSolrIntact(Uri $resource)
         return $items;
     }
     
-    // override in the superclass whene necessary 
+    // override in the superclass when necessary 
     public function fetchUriName() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <'. $this->getResourceType() .'> .}';
         $response = $this->query($query);
@@ -767,6 +769,12 @@ public function deleteSolrIntact(Uri $resource)
         return $tenants[0];
     }
     
+     public function fetchRelationUris(){
+         $skosrels = Skos::getSkosRelationsTypes();
+         $userrels = array_values(parent::fetchUriName());
+         $result = array_merge($skosrels, $userrels);
+         return $result;
+    }
     
       
     public function getUserRelationQNameUris() {

@@ -4,7 +4,7 @@ namespace OpenSkos2\Api;
 
 use DOMDocument;
 use Exception;
-use OpenSkos2\UserRelation;
+use OpenSkos2\Relation;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Transform\DataArray;
@@ -132,19 +132,19 @@ abstract class AbstractTripleStoreResource {
         }
     }
     
-    // overriden in UserRelation because a user-defined relation does not have UUID
     public function update(ServerRequestInterface $request) {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             if ($resourceObject->isBlankNode()) {
                 throw new Exception("Missed uri (rdf:about)!");
             }
+           
             $uri = $resourceObject->getUri();
             $existingResource = $this->manager->fetchByUri((string)$uri);
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
-            
             $oldParams = [
+                'uuid' => $existingResource -> getUuid(),
                 'creator' => $existingResource -> getCreator(),
                 'dateSubmitted' => $existingResource -> getDateSubmitted(),
                 'status' => $existingResource -> getStatus() // so fat, not null only for concepts
@@ -152,13 +152,13 @@ abstract class AbstractTripleStoreResource {
             
             
              
-            if ($this->manager->getResourceType() !== UserRelation::TYPE) { // we do not have an uuid for a user-defined relation
+            if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
                 // do not update uuid: it must be intact forever, connected to uri
-                $oldUuid = $existingResource->getProperty(OpenSkos::UUID);
-                $oldParams['uuid'] = $oldUuid;
-                $uuid = $resourceObject->getProperty(OpenSkos::UUID);
-                if ($uuid[0]->getValue() !== $oldUuid[0]->getValue()) {
-                    throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldUuid[0], 400);
+                $uuid = $resourceObject->getUuid();
+                if ($uuid !== null && $uuid !== "") {
+                    if ($uuid !== $oldParams['uuid']) {
+                        throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldParams['uuid'], 400);
+                    }
                 }
             }
 

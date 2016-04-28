@@ -22,6 +22,7 @@ namespace OpenSkos2\Api;
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\RelationManager;
+use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
@@ -132,6 +133,7 @@ class Relation extends AbstractTripleStoreResource {
      * @return Response
      */
     public function deleteRelation(PsrServerRequestInterface $request)
+          
     {
         try {
             $params = $this->getAndAdaptQueryParams($request); // sets tenant info
@@ -178,10 +180,9 @@ class Relation extends AbstractTripleStoreResource {
 
         $user = $this->getUserByKey($body['key']);
 
-        $concept = $this->manager->fetchByUri($body['concept']);
+        $concept = $this->manager->fetchByUri($body['concept'], Concept::TYPE);
         $concept->editingAllowed($user, $this->tenant);
-
-        $relatedConcept = $this->manager->fetchByUri($body['related']);
+        $relatedConcept = $this->manager->fetchByUri($body['related'], Concept::TYPE);
         $relatedConcept->editingAllowed($user, $this->tenant);
 
         return $body;

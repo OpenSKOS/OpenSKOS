@@ -49,7 +49,7 @@ class ConceptManager extends ResourceManager
     {
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
-        foreach (RelationManager::fetchUris() as $relationType) {
+        foreach ($this -> fetchRelationUris() as $relationType) {
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
         parent::replace($concept);

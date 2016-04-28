@@ -78,8 +78,8 @@ class API_RelationController extends AbstractController {
         parent::putAction();
     }
     
-    public function deleteAction()
-    {
+    public function deleteAction() {
+
         $remove = $this->getParam('removeDefinition');
         if (isset($remove) && $remove === 'true') { // deleting a user-defined relation
             parent::deleteAction();
@@ -90,5 +90,5 @@ class API_RelationController extends AbstractController {
             $this->emitResponse($response);
         }
     }
-    
+
 }

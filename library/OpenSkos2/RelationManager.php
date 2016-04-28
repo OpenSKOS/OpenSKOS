@@ -23,6 +23,8 @@ use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 
+require_once dirname(__FILE__) .'/config.inc.php';
+
 class RelationManager extends ResourceManager
 {
     /**
@@ -44,13 +46,7 @@ class RelationManager extends ResourceManager
          return $result;
     }
     
-    public static function fetchUris(){
-         $skosrels = Skos::getSkosRelationsTypes();
-         $userrels = array_values(parent::fetchUriName());
-         $result = array_merge($skosrels, $userrels);
-         return $result;
-    }
-    
+   
     public function fetchAllRelationsOfType($relationType, $sourceSchemata, $targetSchemata) {
         $rels = [];
         $sSchemata = [];
@@ -171,7 +167,7 @@ class RelationManager extends ResourceManager
      */
     public function addRelation($uri, $relationType, $uris)
     {
-        if (!in_array($relationType, RelationManager::fetchUris(), true)) {
+        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
         
@@ -204,19 +200,18 @@ class RelationManager extends ResourceManager
      */
     public function deleteRelation($subjectUri, $relationType, $objectUri)
     {
-        if (!in_array($relationType, RelationManager::fetchUris(), true)) {
+        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
-
         $this->deleteMatchingTriples(
             new Uri($subjectUri),
             $relationType,
             new Uri($objectUri)
         );
-        
+        $inverses = array_merge(Skos::getInverseRelationsMap(), inverse_relations());
         $this->deleteMatchingTriples(
             new Uri($objectUri),
-            Skos::getInverseRelationsMap()[$relationType],
+            $inverses[$relationType],
             new Uri($subjectUri)
         );
         
