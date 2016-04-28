@@ -27,7 +27,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 
-class UserRelation extends Resource
+class Relation extends Resource
 {
     const TYPE = Owl::OBJECT_PROPERTY;
     

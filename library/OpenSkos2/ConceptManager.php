@@ -26,10 +26,9 @@ use OpenSkos2\Namespaces\Xsd;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkos2\Exception;
+use OpenSkos2\RelationManager;
+
 
 require_once dirname(__FILE__) .'/config.inc.php';
 
@@ -46,11 +45,13 @@ class ConceptManager extends ResourceManager
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
-    public function replaceAndCleanSkosRelations(Concept $concept)
+    public function replaceAndCleanRelations(Concept $concept)
     {
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
-        $this->deleteSkosRelationsWhereObject($concept);
+        foreach (RelationManager::fetchUris() as $relationType) {
+            $this->deleteMatchingTriples('?subject', $relationType, $concept);
+        }
         parent::replace($concept);
     }
 
@@ -92,89 +93,9 @@ class ConceptManager extends ResourceManager
         return $items;
     }
 
-    /**
-     * Add relations to a skos concept
-     *
-     * @param string $uri
-     * @param string $relationType
-     * @param array|string $uris
-     * @throws Exception\InvalidArgumentException
-     */
-    public function addSkosRelation($uri, $relationType, $uris)
-    {
-        
-        
-        if (!in_array($relationType, Skos::getSkosRelationsTypes(), true)) {
-            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
-        }
-        
-        // @TODO Add check everywhere we may need it.
-        if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
-            throw new Exception\InvalidArgumentException(
-                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
-            );
-        }
-
-        $graph = new \EasyRdf\Graph();
-        
-        if (!is_array($uris)) {
-            $uris = [$uris];
-        }
-        foreach ($uris as $related) {
-            $graph->addResource($uri, $relationType, $related);
-        }
-
-        $this->client->insert($graph);
-    }
-    
-    /**
-     * Delete relations between two skos concepts.
-     * Deletes in both directions (narrower and broader for example).
-     * @param string $subjectUri
-     * @param string $relationType
-     * @param string $objectUri
-     * @throws Exception\InvalidArgumentException
-     */
-    public function deleteSkosRelation($subjectUri, $relationType, $objectUri)
-    {
-        if (!in_array($relationType, Skos::getSkosRelationsTypes(), true)) {
-            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
-        }
-
-        $this->deleteMatchingTriples(
-            new Uri($subjectUri),
-            $relationType,
-            new Uri($objectUri)
-        );
-        
-        $this->deleteMatchingTriples(
-            new Uri($objectUri),
-            Skos::getInverseRelationsMap()[$relationType],
-            new Uri($subjectUri)
-        );
-        
-    }
-    
-    /**
-     * Fetches all relations (can be a large number) for the given relation type.
-     * @param string $uri
-     * @param string $relationType Skos::BROADER for example.
-     * @param string $conceptScheme , optional Specify if you want relations from single concept scheme only.
-     * @return ConceptCollection
-     */
    
-  
-    /**
-     * Delete all relations for which the concepts is object (target)
-     * @param Concept $concept
-     */
-    public function deleteSkosRelationsWhereObject(Concept $concept)
-    {
-        foreach (Skos::getSkosRelationsTypes() as $relationType) {
-            $this->deleteMatchingTriples('?subject', $relationType, $concept);
-        }
-    }
-    
+   
+   
     /**
      * Checks if there is a concept with the same pref label.
      * @param string $prefLabel

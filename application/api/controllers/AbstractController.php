@@ -14,7 +14,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     }
     
     public function indexAction() {
-        $format = $this->getParam('format');
+        $format = $this->getRequestedFormat();
         if ('json' !== $format) {
             throw new Exception('Resource listing is implemented only in format=json', 404);
         }
@@ -26,10 +26,6 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     }
 
     public function getAction() {
-         if ('html' === $this->getParam('format')) {
-            throw new Exception('HTML format is not implemented yet', 404);
-        }
-        $this->_helper->viewRenderer->setNoRender(true);
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
         $response = $api->findResourceById($request);

@@ -19,10 +19,10 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
-use Openskos2\UserRelation;
+use Openskos2\Relation;
 
-class UserRelationCollection extends ResourceCollection
+class RelationCollection extends ResourceCollection
 {
     
-    protected $resourceType = UserRelation::TYPE;
+    protected $resourceType = Relation::TYPE;
 }

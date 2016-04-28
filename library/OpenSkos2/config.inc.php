@@ -10,4 +10,4 @@ define('USER', 'user');
 define('GUEST', 'guest');
 
 //
-define('MAXIMAL_ROWS', 1001);
+define('MAXIMAL_ROWS', 5000);

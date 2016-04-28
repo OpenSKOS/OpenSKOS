@@ -23,8 +23,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-use OpenSkos2\Api\Response\ResultSet\JsonResponse;
-use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -211,56 +209,7 @@ abstract class AbstractTripleStoreResource {
         return $this->getSuccessResponse($xml, 202);
     }
 
-    public function findAllPairsForRelation($request) {
-        //public function findAllPairsForType(ServerRequestInterface $request)
-        $params=$request->getQueryParams();
-        $relType = $params['id'];
-        $sourceSchemata = null;
-        $targetSchemata = null;
-        if (isset($params['sourceSchemata'])) {
-            $sourceSchemata = $params['sourceSchemata'];
-        };
-        if (isset($params['targetSchemata'])) {
-            $targetSchemata = $params['targetSchemata'];
-        }; 
-        try {
-            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
-            $intermediate = $this->manager->createOutputRelationTriples($response);
-            $result = new JsonResponse2($intermediate);
-            return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
     
-    public function findRelatedConcepts($request, $uri) {
-        $params=$request->getQueryParams();
-        $relType = $params['id'];
-        if (isset($params['inSchema'])) {
-            $schema = $params['inSchema'];
-        } else {
-            $schema = null;
-        }
-        try {
-            $concepts = $this->manager->fetchRelationsForConcept($uri, $relType, $schema);
-            //var_dump($concepts);
-            $result = new ResourceResultSet($concepts, $concepts->count(), 0, MAXIMAL_ROWS);
-            $response = (new JsonResponse($result, []))->getResponse();
-            return $response;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
-        }
-    }
-    
-
     
     private function getResourceObjectFromRequestBody(ServerRequestInterface $request) {
         $doc = $this->getDomDocumentFromRequest($request);

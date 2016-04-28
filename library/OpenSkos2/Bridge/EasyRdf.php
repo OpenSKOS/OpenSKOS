@@ -39,8 +39,8 @@ use OpenSkos2\Set;
 use OpenSkos2\SetCollection;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\SkosCollectionCollection;
-use OpenSkos2\UserRelation;
-use OpenSkos2\UserRelationCollection;
+use OpenSkos2\Relation;
+use OpenSkos2\RelationCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Namespaces\Rdf;
@@ -54,15 +54,19 @@ class EasyRdf {
      */
     public static function graphToResourceCollection(Graph $graph, $expectedType = null) {
         $collection = self::createResourceCollection($expectedType);
-
         // make two lists: the types resources which are main resources (roots)
         // and typeless resources which are to be used as subresources (elements of complex types in xml)
         $mainResources = array();
         if ($expectedType !== null) {
+         if ($expectedType instanceof Uri) {
+             $expectedTypeUri=$expectedType->getUri();
+         }   else {
+             $expectedTypeUri = $expectedType;
+         }
         foreach ($graph->resources() as $resource) {
                 $type = $resource->get('rdf:type');
                 if ($type !== null) {
-                    if ($type->getUri() === $expectedType) {
+                    if ($type->getUri() === $expectedTypeUri) {
                         $mainResources[] = $resource;
                     }
                 }
@@ -163,8 +167,8 @@ class EasyRdf {
                     return new Label($uri);
                 case SkosCollection::TYPE:
                     return new SkosCollection($uri);
-                case UserRelation::TYPE:
-                    return new UserRelation($uri);
+                case Relation::TYPE:
+                    return new Relation($uri);
                 default:
                     return new Resource($uri);
             }
@@ -195,8 +199,8 @@ class EasyRdf {
                 return new LabelCollection();
             case SkosCollection::TYPE:
                 return new SkosCollectionCollection();
-            case UserRelation::TYPE:
-                return new UserRelationCollection();
+            case Relation::TYPE:
+                return new RelationCollection();
             default:
                 return new ResourceCollection();
         }

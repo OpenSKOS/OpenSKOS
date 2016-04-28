@@ -220,3 +220,19 @@ http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollections=http://data
 Getting deleted concepts:
 
 http://192.168.99.100/public/api/concept?q=*:*&status=deleted
+
+5.8. Relations
+
+List complete URI's of all relations
+http://192.168.99.100/public/api/relation?format=json
+
+Fetch relation description (work only for user-defined relations)
+http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23slower
+
+Fetch all pairs for a given relations (filtering by source-target schemes is possible)
+http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23slower&members=true
+http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&members=true
+
+Fetch all pairs for a given relations with a given concept as a source
+http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
+http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23faster&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
