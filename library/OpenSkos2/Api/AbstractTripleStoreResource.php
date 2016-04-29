@@ -143,19 +143,24 @@ abstract class AbstractTripleStoreResource {
             $existingResource = $this->manager->fetchByUri((string)$uri);
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
+            $oldUuid = $existingResource -> getUuid();
+            if ($oldUuid instanceof Literal) {
+                $oldUuid = $oldUuid -> getValue();
+            }
             $oldParams = [
-                'uuid' => $existingResource -> getUuid(),
+                'uuid' => $oldUuid,
                 'creator' => $existingResource -> getCreator(),
                 'dateSubmitted' => $existingResource -> getDateSubmitted(),
                 'status' => $existingResource -> getStatus() // so fat, not null only for concepts
             ];
-            
-            
              
             if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
                 // do not update uuid: it must be intact forever, connected to uri
                 $uuid = $resourceObject->getUuid();
-                if ($uuid !== null && $uuid !== "") {
+                if ($uuid instanceof Literal) {
+                    $uuid = $uuid->getValue();
+                }
+                if ($uuid!== false && $uuid !== null) {
                     if ($uuid !== $oldParams['uuid']) {
                         throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldParams['uuid'], 400);
                     }

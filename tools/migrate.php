@@ -74,11 +74,7 @@ $enableStatussesSystem = $OPTS->enablestatusses;
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
+
 
 
 $getFieldsInClass = function ($class) {
@@ -103,9 +99,6 @@ $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
 $tenantModel = new OpenSKOS_Db_Table_Tenants();
-
-$setsToInsert = []; // parallel to collections: setsToInsert[$value] contains the full row row from MySql, whereas $collections[$value] on ly the uri
-$tenantsToInsert = []; // $tenantsToInsert[$tenant] contains the row for tenant with name $tenant. 
 
 $adapter = $userModel->getAdapter();
 $cols = $userModel->info('cols');
@@ -134,6 +127,141 @@ $fetchRowWithRetries = function ($model, $query) {
         throw $exception;
     }
 };
+
+
+
+function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = false) {
+    if (isset($val)) {
+        if (!empty($val)) {
+            if ($isURI) {
+                $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
+            } else {
+                if (!$isBOOL) {
+                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
+                } else {
+                    if (strtolower(strtolower($val)) === 'y' || strtolower($val) === "yes") {
+                        $val = 'true';
+                    }
+                    if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
+                        $val = 'false';
+                    }
+                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                }
+            }
+        }
+    } else {
+        var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
+    }
+};
+
+
+
+function insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
+    $tenantResource = new \OpenSkos2\Tenant($uri);
+    $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
+    set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
+    $organisation = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
+    set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
+    set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit'], false);
+    $tenantResource->setProperty(vCard::ORG, $organisation);
+    set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
+    set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email'], false);
+    $adress = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
+    set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress'], false);
+    set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality'], false);
+    set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode'], false);
+    set_property_with_check($adress, vCard::COUNTRY, $$tenantMySQL['countryName'], false);
+    $tenantResource->setProperty(vCard::ADR, $adress);
+    set_property_with_check($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantMySQL['disableSearchInOtherTenants'], false, true);
+    try {
+        set_property_with_check($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantMySQL['enableStatussesSystem'], false, true);
+    } catch (Zend_Db_Table_Row_Exception $ex) {
+        set_property_with_check($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $enableStatussesSystem, false, true);
+    }
+    $resourceManager->insert($tenantResource);
+};
+
+function insert_set($code, $uri, $uuid, $collectionMySQL, $resourceManager) {
+    $setResource = new \OpenSkos2\Set($uri);
+    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
+    set_property_with_check($setResource, OpenSkos::CODE, $code, false);
+    $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
+    if (count($tenants) < 1) {
+        throw new Exception("Something went terribly worng: the tenat with the code " . $collectionMySQL['tenant'] . " has not been inserted in the triple store before now.");
+    };
+    $publisherURI = $tenants[0];
+    set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
+    set_property_with_check($setResource, DcTerms::TITLE, $collectionMySQL['dc_title'], false);
+    set_property_with_check($setResource, DcTerms::DESCRIPTION, $collectionMySQL['dc_description'], false);
+    set_property_with_check($setResource, OpenSkos::WEBPAGE, $collectionMySQL['website'], true);
+    set_property_with_check($setResource, DcTerms::LICENSE, $collectionMySQL['license_url'], true);
+    set_property_with_check($setResource, OpenSkos::OAI_BASEURL, $collectionMySQL['OAI_baseURL'], true);
+    set_property_with_check($setResource, OpenSkos::ALLOW_OAI, $collectionMySQL['allow_oai'], false, true);
+    set_property_with_check($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl'], true);
+    $resourceManager->insert($setResource);
+};
+
+
+
+function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem) {
+    if (!$code) {
+        return null;
+    }
+    $tripleStoreTenant = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Org::FORMALORG);
+    if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
+        // look up MySQL
+        /**
+         * @var $collection OpenSKOS_Db_Table_Row_Tenant
+         */
+        // name can be relaced with id
+        $tenantMySQL = $fetchRowWithRetries($tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
+        
+        if (!$tenantMySQL) {
+            echo "Could not find tenant  with code: {$code}\n";
+            return null;
+        }
+        
+        $uuid = Uuid::uuid4();
+        $uri = Resource::generatePidEPIC($uuid, 'FormalOrganization');
+        var_dump("The institution's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
+        insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enableStatussesSystem);
+        return new \OpenSkos2\Rdf\Uri($uri);
+    } else {
+        return new \OpenSkos2\Rdf\Uri($tripleStoreTenant[0]);
+    }
+};
+
+
+
+function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManager) {
+    if (!$code) {
+        return null;
+    }
+    $tripleStoreSet = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Dcmi::DATASET);
+    if (count($tripleStoreSet) < 1) { // this tenant is not yet in the triple store
+        /**
+         * @var $collection OpenSKOS_Db_Table_Row_Collection
+         */
+        $collectionMySQL = $fetchRowWithRetries($collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($code)
+        );
+
+        if (!$collectionMySQL) {
+            echo "Could not find a set (aka tenant collection) with id: {$code}\n";
+            return null;
+        }
+        $uuid = Uuid::uuid4();
+        $uri = Resource::generatePidEPIC($uuid, 'Dataset');
+        var_dump("The set's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
+        insert_set($code, $uri, $uuid, $collectionMySQL, $resourceManager);
+        return new \OpenSkos2\Rdf\Uri($uri);
+    } else {
+        return new \OpenSkos2\Rdf\Uri($tripleStoreSet[0]);
+    }
+}
+
+;
+
+
 
 $mappings = [
     'users' => [
@@ -180,375 +308,308 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, &$collections, &$setsToInsert, $tenant, $fetchRowWithRetries, $resourceManager) {
-            if (!$value) {
-                return null;
+        'callback' => function ($value) use ($collectionModel, $fetchRowWithRetries, $resourceManager) {
+            $retVal = fetch_set($value, $collectionModel, $fetchRowWithRetries, $resourceManager);
+            return $retVal;
+        },
+        'fields' => [
+            'collection' => OpenSkos2\Namespaces\OpenSkos::SET,
+        ],
+    ],
+    'tenant' => [
+        'callback' => function ($value) use ($tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem) {
+            $retVal = fetch_tenant($value, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
+            return $retVal;
+        },
+        'fields' => [
+            'tenant' => OpenSkos2\Namespaces\OpenSkos::TENANT
+        ]
+    ],
+    'uris' => [
+        'callback' => function ($value) use ($logger) {
+            $value = trim($value);
+            if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+                $logger->info('found uri which is not valid "' . $value . '"');
+                // We will keep it and urlencode it to be able to insert it in Jena
+                $value = urlencode($value);
             }
-
-            if (!isset($collections[$value])) { // collection-id value ccurs for the first time
-                // look up MySQL
-                /**
-                 * @var $collection OpenSKOS_Db_Table_Row_Collection
-                 */
-                $collection = $fetchRowWithRetries(
-                        $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($value)
-                );
-
-                if (!$collection) {
-                    echo "Could not find a set (aka tenant collection) with id: {$value}\n";
-                    $collections [$value] = null;
-                } else {
-                    try {
-                        $collections [$value] = $collection->getUri();
-                    } catch (Zend_Db_Table_Row_Exception $ex) {
-                        $collectionTripleStore = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collection['code'] . "'", Dcmi::DATASET);
-                        if (count($collectionTripleStore) < 1) { // the set is not yet in the triple store
-                            $uuid = Uuid::uuid4();
-                            $uri = Resource::generatePidEPIC($uuid, 'Dataset');
-                            $setsToInsert[$value] = ['row' => $collection, 'uri' => $uri, 'uuid' => $uuid];
-                            var_dump("The set's (aka tenant-collection's) handle/uri " . $uri . " is generated on the fly. ");
-                            $collections [$value] = new \OpenSkos2\Rdf\Uri($uri);
-                        } else {
-                            $collections [$value] = new \OpenSkos2\Rdf\Uri($collectionTripleStore[0]);
-                        }
-                    }
-                }
-                return $collections[$value];
+            return new \OpenSkos2\Rdf\Uri($value);
+        },
+        'fields' => array_merge(
+                $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), $getFieldsInClass('SkosCollections'), [
+            'member' => Skos::MEMBER,
+                ]
+        ),
+    ],
+    'literals' => [
+        'callback' => function ($value) {
+            return new \OpenSkos2\Rdf\Literal($value);
+        },
+        'fields' => [
+            'status' => OpenSkos::STATUS,
+            'uuid' => OpenSkos::UUID,
+            'notation' => Skos::NOTATION,
+            'dcterms_relation' => DcTerms::RELATION,
+            'dcterms_source' => DcTerms::SOURCE
+        ]
+    ],
+    'dates' => [
+        'callback' => function ($value) {
+            return new \OpenSkos2\Rdf\Literal($value, null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        },
+        'fields' => [
+            'approved_timestamp' => DcTerms::DATEACCEPTED,
+            'created_timestamp' => DcTerms::DATESUBMITTED,
+            'modified_timestamp' => DcTerms::MODIFIED,
+            'deleted_timestamp' => OpenSkos::DATE_DELETED,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'timestamp' => DcTerms::DATE,
+        ]
+    ],
+    'bool' => [
+        'callback' => function ($value) {
+            if ($value) {
+                return new \OpenSkos2\Rdf\Literal(true, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL);
             }
         },
-                'fields' => [
-                    'collection' => OpenSkos2\Namespaces\OpenSkos::SET,
-                ],
-            ],
-            'tenant' => [
-                'callback' => function ($value) use ($tenantModel, &$tenantsToInsert, $tenant, $fetchRowWithRetries, $resourceManager) {
-                    if (!$value) {
-                        return null;
-                    }
-
-                    if (!isset($tenantsToInsert[$value])) { // collection-id value ccurs for the first time
-                        // look up MySQL
-                        /**
-                         * @var $collection OpenSKOS_Db_Table_Row_Tenant
-                         */
-                        // name can be relaced with id
-                        $tenantComplete = $fetchRowWithRetries(
-                                $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($value)
-                        );
-
-                        if (!$tenantComplete) {
-                            echo "Could not find tenant  with code: {$value}\n";
-                            $tenantsToInsert [$value] = null;
-                            return null;
-                        } else {
-                            $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $value . "'", Org::FORMALORG);
-                            if (count($tenants) < 1) { // this tenant is not yet in the triple store
-                                $uuid = Uuid::uuid4();
-                                $uri = Resource::generatePidEPIC($uuid, 'FormalOrganization');
-                                $tenantsToInsert[$value] = ['row' => $tenantComplete, 'uri' => $uri, 'uuid' => $uuid];
-                                var_dump("The institution's  (" . $value . ") handle/uri " . $uri . " is generated on the fly. ");
-                                return new \OpenSkos2\Rdf\Uri($uri);
-                            } else {
-                                return new \OpenSkos2\Rdf\Uri($tenants[0]);
-                            }
-                        }
-                    }
-                },
-                        'fields' => [
-                            'tenant' => OpenSkos2\Namespaces\OpenSkos::TENANT
-                        ]
-                    ],
-                    'uris' => [
-                        'callback' => function ($value) use ($logger) {
-                            $value = trim($value);
-                            if (filter_var($value, FILTER_VALIDATE_URL) === false) {
-                                $logger->info('found uri which is not valid "' . $value . '"');
-                                // We will keep it and urlencode it to be able to insert it in Jena
-                                $value = urlencode($value);
-                            }
-                            return new \OpenSkos2\Rdf\Uri($value);
-                        },
-                        'fields' => array_merge(
-                                $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), $getFieldsInClass('SkosCollections'), [
-                            'member' => Skos::MEMBER,
-                                ]
-                        ),
-                    ],
-                    'literals' => [
-                        'callback' => function ($value) {
-                            return new \OpenSkos2\Rdf\Literal($value);
-                        },
-                        'fields' => [
-                            'status' => OpenSkos::STATUS,
-                            'uuid' => OpenSkos::UUID,
-                            'notation' => Skos::NOTATION,
-                            'dcterms_relation' => DcTerms::RELATION,
-                            'dcterms_source' => DcTerms::SOURCE
-                        ]
-                    ],
-                    'dates' => [
-                        'callback' => function ($value) {
-                            return new \OpenSkos2\Rdf\Literal($value, null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-                        },
-                        'fields' => [
-                            'approved_timestamp' => DcTerms::DATEACCEPTED,
-                            'created_timestamp' => DcTerms::DATESUBMITTED,
-                            'modified_timestamp' => DcTerms::MODIFIED,
-                            'deleted_timestamp' => OpenSkos::DATE_DELETED,
-                            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-                            'dcterms_modified' => DcTerms::MODIFIED,
-                            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-                            'timestamp' => DcTerms::DATE,
-                        ]
-                    ],
-                    'bool' => [
-                        'callback' => function ($value) {
-                            if ($value) {
-                                return new \OpenSkos2\Rdf\Literal(true, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL);
-                            }
-                        },
-                        'fields' => [
-                            'toBeChecked' => OpenSkos::TOBECHECKED
-                        ]
-                    ],
-                    'ignore' => [
-                        'callback' => function ($value) {
-                            return null;
-                        },
-                        'fields' => [
-                            'xml' => 'xml',
-                            'timestamp' => 'timestamp',
-                            'xmlns' => 'xmlns',
-                            'score' => 'score',
-                            'class' => 'class',
-                            'uri' => 'uri',
-                            'prefLabelAutocomplete' => 'prefLabelAutocomplete',
-                            'prefLabelSort' => 'prefLabelSort',
-                            'LexicalLabels' => 'LexicalLabels',
-                            'DocumentationProperties' => 'DocumentationProperties',
-                            'SemanticRelations' => 'SemanticRelations',
-                            'deleted' => 'deleted',
-                            'statusOtherConcept' => 'statusOtherConcept',
-                            'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
-                        ]
-                    ]
-                ];
-
-                $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
-
-                var_dump($total);
-                do {
-                    $logger->info("fetching " . $endPoint . "&start=$counter");
-                    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-                    foreach ($data['response']['docs'] as $doc) {
-                        $counter++;
-                        try {
-                            $uri = $doc['uri'];
-                            // Prevent deleted resources from having same uri.
-                            if (!empty($doc['deleted'])) {
-                                $uri = rtrim($uri, '/') . '/deleted';
-                            }
-
-                            switch ($doc['class']) {
-                                case 'ConceptScheme':
-                                    $resource = new \OpenSkos2\ConceptScheme($uri);
-                                    break;
-                                case 'Concept':
-                                    $resource = new \OpenSkos2\Concept($uri);
-                                    break;
-                                /// 
-                                case 'Collection':
-                                    $resource = new \OpenSkos2\Set($uri);
-                                    break;
-                                case 'SKOSCollection': // 
-                                    unset($doc['hasTopConcept']);
-                                    $resource = new \OpenSkos2\SkosCollection($uri);
-                                    break;
-                                default:
-                                    throw new Exception("Didn't expect class: " . $doc['class']);
-                            }
-
-                            // initialise set-synonym flags
-                            $isset_synonym = [];
-                            foreach ($synonym as $key => $value) {
-                                $isset_synonym[$key] = false;
-                            };
-                            $setLabels = [];
-                            foreach ($doc as $field => $value) {
-
-                                // it is a copy field (label or docproperty) if the language attribute is present.
-                                //  to avoid missing labels and docproperties without languages run
-                                // another loop after exiting this one, to fix orfans  
-                                if (isset($labelMapping[$field])) {
-                                    continue;
-                                }
+        'fields' => [
+            'toBeChecked' => OpenSkos::TOBECHECKED
+        ]
+    ],
+    'ignore' => [
+        'callback' => function ($value) {
+            return null;
+        },
+        'fields' => [
+            'xml' => 'xml',
+            'timestamp' => 'timestamp',
+            'xmlns' => 'xmlns',
+            'score' => 'score',
+            'class' => 'class',
+            'uri' => 'uri',
+            'prefLabelAutocomplete' => 'prefLabelAutocomplete',
+            'prefLabelSort' => 'prefLabelSort',
+            'LexicalLabels' => 'LexicalLabels',
+            'DocumentationProperties' => 'DocumentationProperties',
+            'SemanticRelations' => 'SemanticRelations',
+            'deleted' => 'deleted',
+            'statusOtherConcept' => 'statusOtherConcept',
+            'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
+        ]
+    ]
+];
 
 
-                                if (array_key_exists($field, $synonym)) {
-                                    if ($isset_synonym[$field]) {
-                                        continue;
-                                    }
-                                }
-
-
-                                $key_synonym = array_search($field, $synonym);
-                                if ($key_synonym) {
-                                    if ($isset_synonym[$key_synonym]) {
-                                        continue;
-                                    }
-                                }
-
-                                $lang = null;
-                                if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
-                                    $lang = $m2['lang'];
-                                    $field = $m2['field'];
-                                    if (isset($labelMapping[$field])) {
-                                        foreach ((array) $value as $v) {
-                                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
-                                            $setLabels[$field][] = $v;
-                                        }
-                                        continue;
-                                    }
-                                }
+var_dump("Preprocessing round 1: fetching institutions. # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+do {
+    $logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $counter++;
+        try {
+            if (array_key_exists('tenant', $doc)) {
+                $value = $doc['tenant'];
+                foreach ((array) $value as $v) {
+                    $uri = fetch_tenant($v, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
+                }
+            }
+        } catch (Exception $ex) {
+            var_dump($ex->getMessage());
+        }
+    }
+} while ($counter < $total && isset($data['response']['docs']));
 
 
 
-                                foreach ($mappings as $mapping) {
-                                    if (isset($mapping['fields'][$field])) {
-                                        foreach ((array) $value as $v) {
-                                            $insertValue = $mapping['callback']($v);
-                                           
-                                            if ($insertValue !== null) {
-                                                $resource->addProperty($mapping['fields'][$field], $insertValue);
 
-                                                if (array_key_exists($field, $synonym)) {
-                                                    $isset_synonym[$field] = true;
-                                                } else {
-                                                    if ($key_synonym) {
-                                                        $isset_synonym[$key_synonym] = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        continue 2;
-                                    }
-                                }
+var_dump("Preprocessing round 2: turning collections into triple-store sets.  # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+do {
+    $logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $counter++;
+        try {
+            if (array_key_exists('collection', $doc)) {
+                $value = $doc['collection'];
+                foreach ((array) $value as $v) {
+                    $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
+                }
+            }
+        } catch (Exception $ex) {
+            var_dump($ex->getMessage());
+            
+        }
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+    
 
+$synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
+var_dump("Main run. # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+do {
+    $logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $counter++;
+        try {
+            $uri = $doc['uri'];
+            // Prevent deleted resources from having same uri.
+            if (!empty($doc['deleted'])) {
+                $uri = rtrim($uri, '/') . '/deleted';
+            }
 
-                                if (preg_match('#dcterms_(.+)#', $field, $match)) {
-                                    if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
-                                        $logger->info("found dc field " . $field . " that is already filled (could be double data)");
-                                    }
+            switch ($doc['class']) {
+                case 'ConceptScheme':
+                    $resource = new \OpenSkos2\ConceptScheme($uri);
+                    break;
+                case 'Concept':
+                    $resource = new \OpenSkos2\Concept($uri);
+                    break;
+                /// 
+                case 'Collection':
+                    $resource = new \OpenSkos2\Set($uri);
+                    break;
+                case 'SKOSCollection': // 
+                    unset($doc['hasTopConcept']);
+                    $resource = new \OpenSkos2\SkosCollection($uri);
+                    break;
+                default:
+                    throw new Exception("Didn't expect class: " . $doc['class']);
+            }
 
-                                    foreach ($value as $v) {
-                                        $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
-                                    }
-                                    continue;
-                                }
+            // initialise synonym flags
+            $isset_synonym = [];
+            foreach ($synonym as $key => $value) {
+                $isset_synonym[$key] = false;
+            };
+            $setLabels = [];
+            foreach ($doc as $field => $value) {
 
-                                throw new Exception("What to do with field {$field}");
-                            }
-
-                            // check if there are orfan (without language) labels and documentation properties
-                            foreach ($doc as $field => $value) {
-                                if (array_key_exists($field, $labelMapping)) {
-                                    foreach ((array) $value as $v) {
-                                        if (!array_key_exists($field, $setLabels)) {
-                                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
-                                            $setLabels[$field][] = $v;
-                                        } else {
-                                            if (!in_array($v, $setLabels[$field])) {
-                                                $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
-                                                $setLabels[$field][] = $v;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Set status deleted
-                            if (!empty($doc['deleted'])) {
-                                $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
-                            }
-
-                            // Tenant added as a reference in the "mappings"-loop
-                            //$resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
-                            $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
-                            $resourceManager->insert($resource);
-                        } catch (Exception $ex) {
-                            var_dump($ex->getMessage());
-                            //var_dump($ex->getTraceAsString());
-                            var_dump("And the following document has not been added: ");
-                            var_dump($doc['uri']);
-                        }
-                    }
-                } while ($counter < $total && isset($data['response']['docs']));
-         
-
-                $setPropertyWithCheck = function (&$resource, $property, $val, $isURI, $isBOOL = false) {
-                    if (isset($val)) {
-                        if (!empty($val)) {
-                            if ($isURI) {
-                                $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
-                            } else {
-                                if (!$isBOOL) {
-                                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
-                                } else {
-                                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
-                                }
-                            }
-                        }
-                    } else {
-                        var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
-                    }
-                };
-
-                foreach ($tenantsToInsert as $tenantComplete) {
-                    $tenantResource = new \OpenSkos2\Tenant($tenantComplete['uri']);
-                    $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($tenantComplete['uuid']));
-                    $setPropertyWithCheck($tenantResource, OpenSkos::CODE, $tenantComplete['row']['code'], false);
-                    $organisation = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
-                    $setPropertyWithCheck($organisation, vCard::ORGNAME, $tenantComplete['row']['name'], false);
-                    $setPropertyWithCheck($organisation, vCard::ORGUNIT, $tenantComplete['row']['organisationUnit'], false);
-                    $tenantResource->setProperty(vCard::ORG, $organisation);
-                    $setPropertyWithCheck($tenantResource, OpenSkos::WEBPAGE, $tenantComplete['row']['website'], true);
-                    $setPropertyWithCheck($tenantResource, vCard::EMAIL, $tenantComplete['row']['email'], false);
-                    $adress = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
-                    $setPropertyWithCheck($adress, vCard::STREET, $tenantComplete['row']['streetAddress'], false);
-                    $setPropertyWithCheck($adress, vCard::LOCALITY, $tenantComplete['row']['locality'], false);
-                    $setPropertyWithCheck($adress, vCard::PCODE, $tenantComplete['row']['postalCode'], false);
-                    $setPropertyWithCheck($adress, vCard::COUNTRY, $tenantComplete['row']['countryName'], false);
-                    $tenantResource->setProperty(vCard::ADR, $adress);
-                    $setPropertyWithCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantComplete['row']['disableSearchInOtherTenants'], false, true);
-                    try {
-                        $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantComplete['row']['enableStatussesSystem'], false, true);
-                    } catch (Zend_Db_Table_Row_Exception $ex) {
-                        $setPropertyWithCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $enableStatussesSystem, false, true);
-                    }
-                    $resourceManager->insert($tenantResource);
-                };
-
-
-                foreach ($setsToInsert as $set) {
-                    $setResource = new \OpenSkos2\Set($set['uri']);
-                    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($set['uuid']));
-                    $setPropertyWithCheck($setResource, OpenSkos::CODE, $set['row']['code'], false);
-                    $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $set['row']['tenant'] . "'", Org::FORMALORG);
-                    if (count($tenants) < 1) {
-                        throw new Exception("Something went terribly worng: the tenat with the code " . $set['row']['tenant'] . " has not been inserted in the triple store before now.");
-                    };
-                    $publisherURI = $tenants[0];
-                    $setPropertyWithCheck($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-                    $setPropertyWithCheck($setResource, DcTerms::TITLE, $set['row']['dc_title'], false);
-                    $setPropertyWithCheck($setResource, DcTerms::DESCRIPTION, $set['row']['dc_description'], false);
-                    $setPropertyWithCheck($setResource, OpenSkos::WEBPAGE, $set['row']['website'], true);
-                    $setPropertyWithCheck($setResource, DcTerms::LICENSE, $set['row']['license_url'], true);
-                    $setPropertyWithCheck($setResource, OpenSkos::OAI_BASEURL, $set['row']['OAI_baseURL'], true);
-                    $setPropertyWithCheck($setResource, OpenSkos::ALLOW_OAI, $set['row']['allow_oai'], false, true);
-                    $setPropertyWithCheck($setResource, OpenSkos::CONCEPTBASEURI, $set['row']['conceptsBaseUrl'], true);
-                    $resourceManager->insert($setResource);
+                // it is a copy field (label or docproperty) if the language attribute is present.
+                //  to avoid missing labels and docproperties without languages run
+                // another loop after exiting this one, to fix orfans  
+                if (isset($labelMapping[$field])) {
+                    continue;
                 }
 
 
-                echo "done!";
+                if (array_key_exists($field, $synonym)) {
+                    if ($isset_synonym[$field]) {
+                        continue;
+                    }
+                }
+
+
+                $key_synonym = array_search($field, $synonym);
+                if ($key_synonym) {
+                    if ($isset_synonym[$key_synonym]) {
+                        continue;
+                    }
+                }
+
+                $lang = null;
+                if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
+                    $lang = $m2['lang'];
+                    $field = $m2['field'];
+                    if (isset($labelMapping[$field])) {
+                        foreach ((array) $value as $v) {
+                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
+                            $setLabels[$field][] = $v;
+                        }
+                        continue;
+                    }
+                }
+
+
+
+                foreach ($mappings as $mapping) {
+                    if (isset($mapping['fields'][$field])) {
+                        foreach ((array) $value as $v) {
+                            $insertValue = $mapping['callback']($v);
+                            if ($insertValue !== null) {
+                                $resource->addProperty($mapping['fields'][$field], $insertValue);
+                                if (array_key_exists($field, $synonym)) {
+                                    $isset_synonym[$field] = true;
+                                } else {
+                                    if ($key_synonym) {
+                                        $isset_synonym[$key_synonym] = true;
+                                    }
+                                }
+                            }
+                        }
+                        continue 2;
+                    }
+                }
+
+
+                if (preg_match('#dcterms_(.+)#', $field, $match)) {
+                    if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
+                        $logger->info("found dc field " . $field . " that is already filled (could be double data)");
+                    }
+
+                    foreach ($value as $v) {
+                        $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
+                    }
+                    continue;
+                }
+
+                throw new Exception("What to do with field {$field}");
+            }
+
+            // check if there are orfan (without language) labels and documentation properties
+            foreach ($doc as $field => $value) {
+                if (array_key_exists($field, $labelMapping)) {
+                    foreach ((array) $value as $v) {
+                        if (!array_key_exists($field, $setLabels)) {
+                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
+                            $setLabels[$field][] = $v;
+                        } else {
+                            if (!in_array($v, $setLabels[$field])) {
+                                $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
+                                $setLabels[$field][] = $v;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Set status deleted
+            if (!empty($doc['deleted'])) {
+                $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
+            }
+
+            // Tenant added as a reference in the "mappings"-loop
+            //$resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+            $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
+            $resourceManager->insert($resource);
+        } catch (Exception $ex) {
+            var_dump($ex->getMessage());
+            //var_dump($ex->getTraceAsString());
+            var_dump("And the following document has not been added: ");
+            var_dump($doc['uri']);
+        }
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+
+
+echo "done!\n";
                 
