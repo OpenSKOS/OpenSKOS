@@ -214,7 +214,6 @@ class EasyRdf {
     protected static function addResourceToGraph(Resource $resource, Graph $graph)
     {
         $easyResource = new Resource2($resource->getUri(), $graph);
-        
         foreach ($resource->getProperties() as $propName => $property) {
             foreach ($property as $value) {
                 /**

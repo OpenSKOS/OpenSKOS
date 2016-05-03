@@ -65,6 +65,8 @@ class Concept extends AbstractTripleStoreResource {
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
+        set_time_limit(120);
+        
         $params = $request->getQueryParams();
         
         // offset
@@ -149,7 +151,7 @@ class Concept extends AbstractTripleStoreResource {
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
-
+        set_time_limit(30);
         return $response;
     }
 

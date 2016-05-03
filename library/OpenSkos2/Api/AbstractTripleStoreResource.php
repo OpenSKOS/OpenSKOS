@@ -171,9 +171,7 @@ abstract class AbstractTripleStoreResource {
             $resourceObject->addMetadata($user, $params, $oldParams);
             
             $this->resourceEditAllowed($user, $this->tenant, $existingResource);    
-
             $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
-           
             $this->manager->replace($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();

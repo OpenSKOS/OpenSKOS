@@ -123,8 +123,10 @@ class RelationManager extends ResourceManager
             }
         }
        
-        $sparqlQuery = 'select ?rel ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
+        $sparqlQuery = 'select distinct ?rel ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
+        //$sparqlQuery = 'select ?rel ?s_uuid ?s_prefLabel ?o_uuid ?o_prefLabel where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid . ' . $filterStr . '}';
+        
         $resource = $this->query($sparqlQuery);
         return $resource;
     }

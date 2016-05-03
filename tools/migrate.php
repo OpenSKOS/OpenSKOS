@@ -80,8 +80,6 @@ $total = $init['response']['numFound'];
 $getFieldsInClass = function ($class) {
     $retVal = '';
     foreach (\OpenSkos2\Concept::$classes[$class] as $field) {
-        //$return [str_replace('http://www.w3.org/2004/02/skos/core#', '', $field)] = $field;
-        // olha
         $index = strrpos($field, "#");
         if (!$index) {
             $index = strrpos($field, "/");
@@ -402,7 +400,7 @@ $mappings = [
 ];
 
 
-var_dump("Preprocessing round 1: fetching institutions. # documents to process: ");
+var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
 var_dump($total);
 if (!empty($OPTS->start)) {
     $counter = $OPTS->start;
@@ -410,7 +408,7 @@ if (!empty($OPTS->start)) {
     $counter = 0;
 }
 do {
-    $logger->info("fetching " . $endPoint . "&start=$counter");
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
@@ -430,7 +428,7 @@ do {
 
 
 
-var_dump("Preprocessing round 2: turning collections into triple-store sets.  # documents to process: ");
+var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
 var_dump($total);
 if (!empty($OPTS->start)) {
     $counter = $OPTS->start;
@@ -438,7 +436,7 @@ if (!empty($OPTS->start)) {
     $counter = 0;
 }
 do {
-    $logger->info("fetching " . $endPoint . "&start=$counter");
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
@@ -458,18 +456,9 @@ do {
     
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
-var_dump("Main run. # documents to process: ");
-var_dump($total);
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
-do {
-    $logger->info("fetching " . $endPoint . "&start=$counter");
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-    foreach ($data['response']['docs'] as $doc) {
-        $counter++;
+
+function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $mappings, $logger) {
+    if ($doc['class'] === $class) {
         try {
             $uri = $doc['uri'];
             // Prevent deleted resources from having same uri.
@@ -601,15 +590,101 @@ do {
             //$resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
             $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
             $resourceManager->insert($resource);
+            return 1;
         } catch (Exception $ex) {
             var_dump($ex->getMessage());
             //var_dump($ex->getTraceAsString());
             var_dump("And the following document has not been added: ");
             var_dump($doc['uri']);
         }
+    } else {
+        return 0;
+    }
+}
+
+
+
+var_dump("run Set (aka tenant collection) round, # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+$added=0;
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
+        $added = $added + $check;
+        $counter++;
     }
 } while ($counter < $total && isset($data['response']['docs']));
+var_dump('Sets (aka tenant collections) added: ');
+var_dump($added);
 
+var_dump("run ConceptScheme round, # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+$added=0;
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $check = run_round($doc, $resourceManager, 'ConceptScheme', $synonym, $labelMapping, $mappings, $logger);
+        $added = $added + $check;
+        $counter++;
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+var_dump('ConceptSchemes added: ');
+var_dump($added);
+
+
+var_dump("run SkosCollection round, # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+$added=0;
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+       $check=run_round($doc, $resourceManager, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
+       $added = $added + $check;
+       $counter++;
+        
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+var_dump('SkosCollections added: ');
+var_dump($added);
+
+var_dump("run Concept round, # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+$added = 0;
+do {
+    $logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $check=run_round($doc, $resourceManager, 'Concept', $synonym, $labelMapping, $mappings, $logger);
+        $added = $added + $check;
+        $counter++;
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+var_dump('Concepts added: ');
+var_dump($added);
 
 echo "done!\n";
                 

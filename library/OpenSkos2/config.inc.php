@@ -15,6 +15,6 @@ define('MAXIMAL_ROWS', 5000);
 // inverses
 
 function inverse_relations() {
-    $retVal = ['http://menzo.org/xmlns#stronger' => 'http://menzo.org/xmlns#weaker', 'http://menzo.org/xmlns#weaker' => 'http://menzo.org/xmlns#stronger'];
+    $retVal = ['http://menzo.org/xmlns#faster' => 'http://menzo.org/xmlns#slower', 'http://menzo.org/xmlns#slower' => 'http://menzo.org/xmlns#faster'];
     return $retVal;
 }
