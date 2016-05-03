@@ -210,12 +210,13 @@ Throws an error on other formats (html and rdf/xml). Implemented via a call to j
 5.7. Check URI's (examples)
 ----------------------------------------------------------------------------------
 
-Getting relations for certain types with given schemata for sources and targets
-http://192.168.99.100/public/api/find-relations?q=broader,narrower&sourceSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2,http://data.beeldengeluid.nl/gtaa/Onderwerpen1&targetSchemata=http://data.beeldengeluid.nl/gtaa/Onderwerpen2
+Getting (all) concepts, may take a minute or 2.
+
+http://192.168.99.100/public/api/concepts?q=prefLabel:*
 
 Getting concepts within given skos:collection(s)
 
-http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollections=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
+http://192.168.99.100/public/api/concepts?q=*:*&skosCollections=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
 
 Getting deleted concepts:
 
