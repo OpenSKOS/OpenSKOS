@@ -295,7 +295,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
 ```
 Creating relation triple with its inverse if defined
 ```
-POST http://192.168.99.100/public/api/skosrelation?tenant=meertens
+POST http://192.168.99.100/public/api/relation?tenant=meertens
 ```
 Body:
 ```
