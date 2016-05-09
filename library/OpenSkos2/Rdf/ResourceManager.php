@@ -229,7 +229,8 @@ public function deleteSolrIntact(Uri $resource)
         return $uri; 
        
     }
- 
+    
+  
     //override in the subclasses when necessary
     public function CanBeDeleted($uri){
         $query='SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <'. $uri . '> . } LIMIT 1';

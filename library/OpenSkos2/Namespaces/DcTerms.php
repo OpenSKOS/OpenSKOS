@@ -63,7 +63,7 @@ class DcTerms
     const LICENSE = 'http://purl.org/dc/terms/license';
     const MEDIATOR = 'http://purl.org/dc/terms/mediator';
     const MEDIUM = 'http://purl.org/dc/terms/medium';
-    const MODIFIED = 'http://purl.org/dc/terms/modified';
+    const MODIFIED = 'http://purl.org/dc/terms/modified'; // datum
     const PROVENANCE = 'http://purl.org/dc/terms/provenance';
     const PUBLISHER = 'http://purl.org/dc/terms/publisher';
     const REFERENCES = 'http://purl.org/dc/terms/references';

@@ -22,7 +22,8 @@
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
- */
+ * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
+ *  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
 use OpenSkos2\Namespaces\DcTerms;
@@ -129,6 +130,11 @@ $fetchRowWithRetries = function ($model, $query) {
 
 
 function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = false) {
+    
+    if ( ($val === null || !isset($val)) & $isBOOL) {
+       $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)); 
+    };
+    
     if (isset($val)) {
         if (!empty($val)) {
             if ($isURI) {
@@ -158,17 +164,17 @@ function insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enab
     $tenantResource = new \OpenSkos2\Tenant($uri);
     $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
     set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
-    $organisation = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
+    $organisation = new \OpenSkos2\Rdf\Resource();
     set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
     set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit'], false);
     $tenantResource->setProperty(vCard::ORG, $organisation);
     set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
     set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email'], false);
-    $adress = new \OpenSkos2\Rdf\Resource("nodeID_" . Uuid::uuid4());
+    $adress = new \OpenSkos2\Rdf\Resource();
     set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress'], false);
     set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality'], false);
     set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode'], false);
-    set_property_with_check($adress, vCard::COUNTRY, $$tenantMySQL['countryName'], false);
+    set_property_with_check($adress, vCard::COUNTRY, $tenantMySQL['countryName'], false);
     $tenantResource->setProperty(vCard::ADR, $adress);
     set_property_with_check($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantMySQL['disableSearchInOtherTenants'], false, true);
     try {
@@ -264,12 +270,12 @@ function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManag
 $mappings = [
     'users' => [
         'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries) {
-            if (!$value) {
-                return null;
+            if ($value === null || !$value || !isset($value)) {
+                return new \OpenSkos2\Rdf\Literal("Unknown");
             }
 
             if (in_array($value, $notFoundUsers)) {
-                return null;
+                return new \OpenSkos2\Rdf\Literal("Unknown");
             }
 
             if (!isset($users[$value])) {
@@ -290,11 +296,12 @@ $mappings = [
                 if (!$user) {
                     echo "Could not find user with id/name: {$value}\n";
                     $notFoundUsers[] = $value;
-                    $users[$value] = null;
+                    $users[$value] = new \OpenSkos2\Rdf\Literal("Unknown");
                 } else {
                     $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson()->getUri());
                 }
             }
+            
             return $users[$value];
         },
         'fields' => [
@@ -453,7 +460,26 @@ do {
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
-    
+   
+
+echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
+echo $total;
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
+        $counter ++;       
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+
+
+            
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
@@ -529,11 +555,17 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                 }
 
 
-
+                
                 foreach ($mappings as $mapping) {
                     if (isset($mapping['fields'][$field])) {
+                        
                         foreach ((array) $value as $v) {
+                            
                             $insertValue = $mapping['callback']($v);
+                            if ($field === 'hasTopConcept') {
+                                var_dump($v);
+                                var_dump($insertValue);
+                            }
                             if ($insertValue !== null) {
                                 $resource->addProperty($mapping['fields'][$field], $insertValue);
                                 if (array_key_exists($field, $synonym)) {
@@ -584,11 +616,13 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
             // Set status deleted
             if (!empty($doc['deleted'])) {
                 $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
+                if ($doc['deleted'] === 'false') {
+                    $resource->unsetProperty(OpenSkos::DELETEDBY); // otherwise it is set to unknown which is misleading
+                }
+            } else {
+               $resource->unsetProperty(OpenSkos::DELETEDBY);
             }
 
-            // Tenant added as a reference in the "mappings"-loop
-            //$resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
-            $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
             $resourceManager->insert($resource);
             return 1;
         } catch (Exception $ex) {

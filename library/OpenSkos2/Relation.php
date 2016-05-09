@@ -27,6 +27,8 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 
+require_once dirname(__FILE__) . '/config.inc.php';
+
 class Relation extends Resource
 {
     const TYPE = Owl::OBJECT_PROPERTY;
@@ -53,11 +55,14 @@ class Relation extends Resource
                 DcTerms::DATESUBMITTED => $nowLiteral(),
             ];
         } else {
-            $metadata = [
-                DcTerms::CREATOR => new Uri($oldParams['creator']),
-                DcTerms::DATESUBMITTED => new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME),
-                DcTerms::MODIFIED =>  $nowLiteral()
-            ];
+            if ($oldParams['creator'] === UNKNOWN) {
+                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            } else {
+                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            }
+            $metadata[DcTerms::MODIFIED] = $nowLiteral();
+            $metadata[DcTerms::DATESUBMITTED] = new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME);
+           
         }
         foreach ($metadata as $property => $defaultValue) {
             $this->setProperty($property, $defaultValue);

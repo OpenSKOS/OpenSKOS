@@ -33,6 +33,8 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use OpenSKOS_Db_Table_Row_User;
 
+require_once dirname(__FILE__) . '/config.inc.php';
+
 class Concept extends Resource
 {
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
@@ -241,7 +243,11 @@ class Concept extends Resource
             $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
         } else {
             $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
-            $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            if ($oldParams['creator'] === UNKNOWN) {
+                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            } else {
+                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            }
             $metadata[DcTerms::DATESUBMITTED] = new Literal ($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME); 
         }
         foreach ($metadata as $property => $defaultValue) {

@@ -26,7 +26,6 @@ use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\FieldsMaps;
 use OpenSkos2\Concept;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
@@ -80,7 +79,7 @@ class Document
         DcTerms::MODIFIED => ['d_modified', 'modified'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy', 'acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted', 'dateAccepted'],
-        OpenSkos::DELETEDBY => ['s_deletedBy', 'deletedby'],
+        OpenSkos::DELETEDBY => ['s_deletedBy', 'deletedBy'],
         OpenSkos::DATE_DELETED => ['d_dateDeleted', 'dateDeleted']
     ];
 

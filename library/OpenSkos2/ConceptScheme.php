@@ -27,6 +27,8 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\DcTerms;
 
+require_once dirname(__FILE__) . '/config.inc.php';
+
 class ConceptScheme extends Resource
 {
     const TYPE = Skos::CONCEPTSCHEME;
@@ -203,22 +205,27 @@ class ConceptScheme extends Resource
     public function addMetadata($user, $params, $oldParams) {
         $metadata = [];
 
-        if (count($oldParams) === 0) { // a completely new resource under creation
-            $userUri = $user->getFoafPerson()->getUri();
-            $nowLiteral = function () {
-                return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-            };
+        $userUri = $user->getFoafPerson()->getUri();
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
 
+        if (count($oldParams) === 0) { // a completely new resource under creation
+            
             $metadata = [
                 DcTerms::CREATOR => new Uri($userUri),
                 DcTerms::DATESUBMITTED => $nowLiteral(),
             ];
         } else {
-            $metadata = [
-                OpenSkos::UUID => new Literal($oldParams['uuid']),
-                DcTerms::CREATOR => new Uri($oldParams['creator']),
-                DcTerms::DATESUBMITTED => new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME),
-            ];
+            if ($oldParams['creator'] === UNKNOWN) {
+                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            } else {
+                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            }
+            $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
+            $metadata[DcTerms::DATESUBMITTED] = new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME);
+            $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
         }
         foreach ($metadata as $property => $defaultValue) {
             $this->setProperty($property, $defaultValue);

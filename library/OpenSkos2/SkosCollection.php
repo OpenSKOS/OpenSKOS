@@ -17,6 +17,9 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 
+
+require_once dirname(__FILE__) . '/config.inc.php';
+
 class SkosCollection extends Resource
 {
     const TYPE = Skos::SKOSCOLLECTION;
@@ -71,11 +74,13 @@ class SkosCollection extends Resource
                 DcTerms::DATESUBMITTED => $nowLiteral(),
             ];
         } else {
-            $metadata = [
-                OpenSkos::UUID => new Literal($oldParams['uuid']),
-                DcTerms::CREATOR => new Uri($oldParams['creator']),
-                DcTerms::DATESUBMITTED => new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME),
-            ];
+            if ($oldParams['creator'] === UNKNOWN) {
+                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            } else {
+                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
+            }
+            $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
+            $metadata[DcTerms::DATESUBMITTED] = new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME);
         }
         foreach ($metadata as $property => $defaultValue) {
             $this->setProperty($property, $defaultValue);

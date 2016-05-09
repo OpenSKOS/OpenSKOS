@@ -193,7 +193,8 @@ Getting the list of institutions (tenants):
 
 Getting the list of sets (former tenant collections) : 
 
-```<base uri>/public/api/set?format=json
+```
+<base uri>/public/api/set?format=json
 ```
 
 Getting the list of skos colections : 
@@ -201,7 +202,7 @@ Getting the list of skos colections :
 ```<base uri>/public/api/skoscollection?format=json
 ```
 
-Getting concepts sorted (added by Meertens): 
+Getting concepts sorted: 
 ```
 <server>/public/api/concept?q=prefLabel@en:*&sorts=prefLabel@en
 ```
