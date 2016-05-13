@@ -123,14 +123,25 @@ class RelationManager extends ResourceManager
             }
         }
        
-        $sparqlQuery = 'select distinct ?rel ?s_uuid ?s_prefLabel ?s_schema ?o_uuid ?o_prefLabel ?o_schema where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid; <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ' . $filterStr . '}';
+        $sparqlQuery = 'select distinct ?rel ?s_uuid ?s_prefLabel ?s_schema ?s_schema_title ?o_uuid ?o_prefLabel ?o_schema ?o_schema_title where {?s ?rel ?o. ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel. ?s <http://openskos.org/xmlns#uuid> ?s_uuid. ?s <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?s_schema <http://purl.org/dc/terms/title> ?s_schema_title . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel. ?o <http://openskos.org/xmlns#uuid> ?o_uuid. ?o <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ?o_schema <http://purl.org/dc/terms/title> ?o_schema_title' . $filterStr . '}';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, '/app/data/Logger.txt');
-        //$sparqlQuery = 'select ?rel ?s_uuid ?s_prefLabel ?o_uuid ?o_prefLabel where {?s ?rel ?o; <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel; <http://openskos.org/xmlns#uuid> ?s_uuid . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel; <http://openskos.org/xmlns#uuid> ?o_uuid . ' . $filterStr . '}';
-        
         $resource = $this->query($sparqlQuery);
         return $resource;
     }
     
+    public function createOutputRelationTriples($response){
+        $result = [];
+        foreach ($response as $key => $value) {
+            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema_title"=>$value->s_schema_title->getValue(), "schema_uri"=>$value->s_schema->getUri());
+            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema_title" => $value -> o_schema_title->getValue(), "schema_uri"=>$value->o_schema->getUri());
+            $triple=array("s" => $subject, "p" => $value -> rel -> getUri(), "o"=>$object);
+           array_push($result, $triple);
+        }
+        return $result;
+    }
+    
+
+
     
     // outpu is a list of related concepts
       public function fetchRelationsForConcept($uri, $relationType, $conceptScheme = null) {
