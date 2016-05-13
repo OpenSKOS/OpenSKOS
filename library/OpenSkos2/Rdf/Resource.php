@@ -21,6 +21,7 @@ namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Namespaces as Namespaces;
+use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
 use OpenSkos2\Exception\OpenSkosException;
 
 class Resource extends Uri implements ResourceIdentifier
@@ -59,7 +60,21 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function addProperty($predicate, RdfObject $value)
     {
+        $this->handleSpecialProperties($predicate, $value);
         $this->properties[$predicate][] = $value;
+        return $this;
+    }
+    
+    /**
+     * Add multiple values at once, keeps the existing values
+     * @param string $predicate
+     * @param RdfObject[] $values
+     */
+    public function addProperties($predicate, array $values)
+    {
+        foreach ($values as $value) {
+            $this->addProperty($predicate, $value);
+        }
         return $this;
     }
     
@@ -73,7 +88,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function addUniqueProperty($predicate, RdfObject $value)
     {
         if (!isset($this->properties[$predicate])) {
-            $this->properties[$predicate][] = $value;
+            $this->addProperty($predicate, $value);
             return $this;
         }
         foreach ($this->properties[$predicate] as $obj) {
@@ -87,30 +102,33 @@ class Resource extends Uri implements ResourceIdentifier
                 }
             }
         }
-        $this->properties[$predicate][] = $value;
+        $this->addProperty($predicate, $value);
         return $this;
     }
 
     /**
+     * Set property, overwrite existing values.
      * @param string $predicate
      * @param RdfObject $value
      * @return $this
      */
     public function setProperty($predicate, RdfObject $value)
     {
-        $this->properties[$predicate] = [$value];
+        $this->unsetProperty($predicate)
+            ->addProperty($predicate, $value);
         return $this;
     }
     
     /**
      * Set multiple values at once, override existing values
-     *
      * @param string $predicate
      * @param RdfObject[] $values
      */
     public function setProperties($predicate, array $values)
     {
-        $this->properties[$predicate] = $values;
+        $this->unsetProperty($predicate)
+            ->addProperties($predicate, $values);
+        return $this;
     }
 
     /**
@@ -315,5 +333,19 @@ class Resource extends Uri implements ResourceIdentifier
         }
         
         return $result;
+    }
+    
+    /**
+     * @param string &$predicate
+     * @param RdfObject &$value
+     */
+    protected function handleSpecialProperties(&$predicate, RdfObject &$value)
+    {
+        // @TODO find better way and prevent hidden altering of the properties values in the Resource class.
+        
+        // Status is always transformed to lowercase.
+        if ($predicate == OpenSkos::STATUS) {
+            $value->setValue(strtolower($value->getValue()));
+        }
     }
 }
