@@ -22,7 +22,6 @@ namespace OpenSkos2\Rdf;
 use Asparagus\QueryBuilder;
 use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
-use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
@@ -32,10 +31,12 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Solr\Document;
+use OpenSKOS_Db_Table_Tenants;
+use OpenSKOS_Db_Table_Collections;
 use RuntimeException;
 use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
@@ -762,12 +763,21 @@ public function deleteSolrIntact(Uri $resource)
         return $query;
     }
     
+    
+    
     public function fetchInstitutionUriByCode($code) {
         $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
         if (count($tenants) < 1) {
-            throw new ApiException('The tenant referred by the code ' . $code . ' does not exist in the triple store. Look up MySql-s user table. ', 400);
+            $tenantMySQL =$this ->fetchTenantFromMySqlByCode($code);
+            if (isset($tenantMySQL['uri']) && $tenantMySQL['uri'] !== null && $tenantMySQL['uri'] !== "") {
+                return $tenantMySQL['uri'];
+            } else {
+                return null;
+            };
+            
+        } else {
+            return $tenants[0];
         }
-        return $tenants[0];
     }
     
      public function fetchRelationUris(){
@@ -788,6 +798,39 @@ public function deleteSolrIntact(Uri $resource)
         }
         return $result;
     }
+     
+    public function fetchTenantFromMySqlByCode($code) {
+       $tenantModel = new OpenSKOS_Db_Table_Tenants(); 
+       $tenantMySQL = $this -> fetchRowWithRetries($tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
+       return $tenantMySQL;
+    }
     
+    public function fetchSetFromMySqlByCode($code) {
+       $setModel = new OpenSKOS_Db_Table_Collections(); 
+       $setMySQL = $this -> fetchRowWithRetries($setModel, 'code = ' . $setModel->getAdapter()->quote($code));
+       return $setMySQL;
+    }
+   
+   private function fetchRowWithRetries($model, $query) {
+    $tries = 0;
+    $maxTries = 3;
+    do {
+        try {
+            return $model->fetchRow($query);
+        } catch (\Exception $exception) {
+            echo 'retry mysql connect' . PHP_EOL;
+            // Reconnect
+            $model->getAdapter()->closeConnection();
+            $modelClass = get_class($model);
+            $model = new $modelClass();
+            $tries ++;
+        }
+    } while ($tries < $maxTries);
+
+    if ($exception) {
+        throw $exception;
+    }
+
+   }
     
 }

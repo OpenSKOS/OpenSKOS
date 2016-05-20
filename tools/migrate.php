@@ -106,25 +106,8 @@ if (!in_array('uri', $cols)) {
     $adapter->closeConnection();
 }
 
-$fetchRowWithRetries = function ($model, $query) {
-    $tries = 0;
-    $maxTries = 3;
-    do {
-        try {
-            return $model->fetchRow($query);
-        } catch (\Exception $exception) {
-            echo 'retry mysql connect' . PHP_EOL;
-            // Reconnect
-            $model->getAdapter()->closeConnection();
-            $modelClass = get_class($model);
-            $model = new $modelClass();
-            $tries ++;
-        }
-    } while ($tries < $maxTries);
-
-    if ($exception) {
-        throw $exception;
-    }
+$fetchRowWithRetries = function ($resourceManager, $model, $query) {
+    return $resourceManager -> fetchRowWithEntries($model, $query);
 };
 
 
@@ -218,7 +201,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
          * @var $collection OpenSKOS_Db_Table_Row_Tenant
          */
         // name can be relaced with id
-        $tenantMySQL = $fetchRowWithRetries($tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
+        $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
         
         if (!$tenantMySQL) {
             echo "Could not find tenant  with code: {$code}\n";
@@ -246,7 +229,7 @@ function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManag
         /**
          * @var $collection OpenSKOS_Db_Table_Row_Collection
          */
-        $collectionMySQL = $fetchRowWithRetries($collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($code)
+        $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($code)
         );
 
         if (!$collectionMySQL) {
@@ -269,7 +252,7 @@ function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManag
 
 $mappings = [
     'users' => [
-        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries, $resourceManager) {
             if ($value === null || !$value || !isset($value)) {
                 return new \OpenSkos2\Rdf\Literal("Unknown");
             }
@@ -283,12 +266,12 @@ $mappings = [
                  * @var $user OpenSKOS_Db_Table_Row_User
                  */
                 if (is_numeric($value)) {
-                    $user = $fetchRowWithRetries(
+                    $user = $fetchRowWithRetries($resourceManager,
                             $userModel, 'id = ' . $userModel->getAdapter()->quote($value) . ' '
                             . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 } else {
-                    $user = $fetchRowWithRetries(
+                    $user = $fetchRowWithRetries($resourceManager,
                             $userModel, 'name = ' . $userModel->getAdapter()->quote($value) . ' '
                             . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );

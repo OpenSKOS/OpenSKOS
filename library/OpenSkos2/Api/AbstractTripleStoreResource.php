@@ -13,6 +13,8 @@ use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant as Tenant;
@@ -46,7 +48,7 @@ abstract class AbstractTripleStoreResource {
         }
         $tenantUri = $this -> manager -> fetchInstitutionUriByCode($params['tenant']);
         $params['tenanturi'] = $tenantUri;
-        // side effect: setting up a current-requester tenant vor different sort checks and validations
+        // side effect: setting up a current-requester tenant for different sort checks and validations
         $this->tenant['code'] = $params['tenant'];
         $this->tenant['uri'] = $tenantUri;
         return $params;
@@ -400,13 +402,29 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-    // the resource referred by the uri must exist
-    protected function validateURI($resourceObject, $uri, $rdfType) {
-        $val = $resourceObject->getProperty($uri);
+    // the resource referred by the uri must exist in the triple store, 
+    // or for backward compatibility tenats and sets one must check tenant code and collections code
+    protected function validateURI($resourceObject, $property, $rdfType) {
+        $val = $resourceObject->getProperty($property);
         foreach ($val as $uri) {
             $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
             if ($count < 1) {
-                throw new ApiException('The sub-resource referred by the uri ' . $uri . ' of value ' . $val[0] . ' does not exist.', 400);
+                if ($rdfType !== Org::FORMALORG && $rdfType !== Dcmi::DATASET) {
+                    throw new ApiException('The sub-resource referred by ' . $uri . ' does not exist.', 400);
+                } else {
+                    if ($rdfType === Org::FORMALORG) { // check in the mysql, $uri may be a code
+                        $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
+                        if ($institution === null) {
+                            throw new ApiException('The tenant referred by code' . $uri . ' is not found either in the triple store or in the mysql.', 400); 
+                        }
+                    };
+                    if ($rdfType === Dcmi::DATASET) { // check in the mysql
+                        $set = $this->manager->fetchSetFromMySqlByCode($uri);
+                        if ($set === null) {
+                            throw new ApiException('The set referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                        }
+                    };
+                }
             }
         }
     }

@@ -234,10 +234,15 @@ class Concept extends Resource
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         
-        $metadata = [
-            OpenSkos::TENANT => new Uri($params['tenanturi']),
-        ];
         
+                
+        if ($params['tenanturi'] !== null) {
+            $metadata[OpenSkos::TENANT] = new Uri($params['tenanturi']);
+        } else { // for backward compatibility, when the tenant is only in MySql and there is no uri for it
+            $metadata[OpenSkos::TENANT] = new Literal($params['tenant']);
+        }
+
+
         if (count($oldParams)===0){ // a completely new concept under creation
             $metadata[DcTerms::CREATOR] = new Uri($userUri);
             $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
