@@ -46,6 +46,7 @@ return [
                     'host' => $solr['host'],
                     'port' => $solr['port'],
                     'path' => $solr['context'],
+                    'timeout' => 30,
                 ]
             ]
         ]);
