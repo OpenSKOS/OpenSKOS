@@ -91,7 +91,7 @@ class Command implements LoggerAwareInterface
         
         $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
         if (!$validator->validate($resourceCollection, $this->logger)) {
-            throw new \Exception('Failed validation');
+            throw new \Exception('Failed validation: ' . implode(', ', $validator->getErrorMessages()));
         }
 
         if ($message->getClearSet()) {

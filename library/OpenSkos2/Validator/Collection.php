@@ -76,10 +76,11 @@ class Collection
     {
         $errorsFound = false;
         foreach ($resourceCollection as $resource) {
-            if (!$this->getResourceValidator()->validate($resource)) {
+            $validator = $this->getResourceValidator();
+            if (!$validator->validate($resource)) {
                 $errorsFound = true;
+                $this->errorMessages = array_merge($this->errorMessages, $validator->getErrorMessages());
             }
-            
         }
 
         if ($errorsFound) {
