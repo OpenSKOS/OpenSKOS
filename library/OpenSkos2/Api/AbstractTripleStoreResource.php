@@ -25,6 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
+use OpenSkos2\MyInstitutionModules\UriGeneration\UriGenerator;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -122,7 +123,7 @@ abstract class AbstractTripleStoreResource {
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
             $resourceObject->addMetadata($user, $params, array());
             if ($autoGenerateUri) {
-                $resourceObject->selfGenerateUri($this->tenant['code'], $this->manager);
+                $resourceObject -> selfGenerateUri($this->tenant['code'], $this->manager);
             };
             $this->validate($resourceObject, $this->tenant);
             $this->manager->insert($resourceObject);

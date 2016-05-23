@@ -19,9 +19,9 @@
 
 namespace OpenSkos2\Rdf;
 
-use OpenSkos2\EPIC\EPICHandleProxy;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
+use OpenSkos2\MyInstitutionModules\UriGeneration\UriGenerator;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -29,8 +29,6 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
-use Rhumsaa\Uuid\Uuid;
-use Zend_Controller_Action_Exception;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -370,10 +368,10 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        $uuidPlain=Uuid::uuid4();
-        $uri = $this->assembleUri($tenantcode, $uuidPlain);
-        $index = strrpos($uri, "/");
-        $uuid = substr($uri, $index+1);
+        
+        $type = $this ->getResourceType();
+        $uuid= UriGenerator::generateUUID($tenantcode, $type);
+        $uri = UriGenerator::generateURI($uuid, $tenantcode, $type);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
@@ -387,40 +385,6 @@ class Resource extends Uri implements ResourceIdentifier
         return $uri;
     }
 
-    
-    
-    protected function assembleUri($tenantcode, $uuid) {
-        $type = $this ->getResourceType();
-        $uri = $this -> generatePidEPIC($uuid, $type);
-        return $uri;
-    }
-    
-    public static function generatePidEPIC($plainUUID, $type) {
-        // tmp while EPIC service sucks 
-        //$tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
-        //return $tmpRetVal;
-        /// END TMP
-        
-        if (EPICHandleProxy::enabled()) {
-            // Create the PID
-            $handleServerClient = EPICHandleProxy::getInstance();
-            $forwardLocationPrefix = $handleServerClient->getForwardLocationPrefix();
-            try {
-                $handleServerGUIDPrefix = $handleServerClient->getGuidPrefix();
-                $uuid = $handleServerGUIDPrefix  . $type . "_" . $plainUUID;
-                $handleServerClient->createNewHandleWithGUID($forwardLocationPrefix . $uuid, $uuid);
-                $handleResolverUrl = $handleServerClient->getResolver();
-		$handleServerPrefix = $handleServerClient->getPrefix();
-                $uri = $handleResolverUrl . $handleServerPrefix . "/" . $uuid;
-                return $uri;
-            } catch (Exception $ex) {
-                throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object: ' . $ex->getMessage(), 400);
-            }
-        } else {
-            throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object because EPIC is not enabled', 400);
-        }
-    }
-    
     protected function getResourceType(){
         $rdfType = $this->getProperty(Rdf::TYPE);
         if (count($rdfType)>0) {

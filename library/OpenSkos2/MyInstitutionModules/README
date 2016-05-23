@@ -1,0 +1,9 @@
+MyInstitutionModules must contain
+
+1) UriGeneration/UriGenerator.php, which has two obligatory functions: 
+     
+    public static function generateUUID($tenantcode, $type) 
+    public static function generateURI($plainUUID, $tenantcode, $type)
+
+
+     

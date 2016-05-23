@@ -32,8 +32,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Rdf\Resource;
-use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
@@ -143,9 +141,9 @@ function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = 
 
 
 
-function insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
-    $tenantResource = new \OpenSkos2\Tenant($uri);
-    $tenantResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
+function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
+    $tenantResource = new \OpenSkos2\Tenant();
+    $uri = $tenantResource -> selfGenerateUri($code, $resourceManager);
     set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
     $organisation = new \OpenSkos2\Rdf\Resource();
     set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
@@ -166,11 +164,12 @@ function insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enab
         set_property_with_check($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $enableStatussesSystem, false, true);
     }
     $resourceManager->insert($tenantResource);
+    return $uri;
 };
 
-function insert_set($code, $uri, $uuid, $collectionMySQL, $resourceManager) {
-    $setResource = new \OpenSkos2\Set($uri);
-    $setResource->setProperty(OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
+function insert_set($code, $collectionMySQL, $resourceManager) {
+    $setResource = new \OpenSkos2\Set();
+    $uri = $setResource->selfGenerateUri($code, $resourceManager);
     set_property_with_check($setResource, OpenSkos::CODE, $code, false);
     $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
     if (count($tenants) < 1) {
@@ -186,6 +185,7 @@ function insert_set($code, $uri, $uuid, $collectionMySQL, $resourceManager) {
     set_property_with_check($setResource, OpenSkos::ALLOW_OAI, $collectionMySQL['allow_oai'], false, true);
     set_property_with_check($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl'], true);
     $resourceManager->insert($setResource);
+    return $uri;
 };
 
 
@@ -208,10 +208,8 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
             return null;
         }
         
-        $uuid = Uuid::uuid4();
-        $uri = Resource::generatePidEPIC($uuid, 'FormalOrganization');
+        $uri = insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem);
         var_dump("The institution's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
-        insert_tenant($code, $uri, $uuid, $tenantMySQL, $resourceManager, $enableStatussesSystem);
         return new \OpenSkos2\Rdf\Uri($uri);
     } else {
         return new \OpenSkos2\Rdf\Uri($tripleStoreTenant[0]);
@@ -236,10 +234,8 @@ function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManag
             echo "Could not find a set (aka tenant collection) with id: {$code}\n";
             return null;
         }
-        $uuid = Uuid::uuid4();
-        $uri = Resource::generatePidEPIC($uuid, 'Dataset');
+        $uri = insert_set($code, $collectionMySQL, $resourceManager);
         var_dump("The set's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
-        insert_set($code, $uri, $uuid, $collectionMySQL, $resourceManager);
         return new \OpenSkos2\Rdf\Uri($uri);
     } else {
         return new \OpenSkos2\Rdf\Uri($tripleStoreSet[0]);

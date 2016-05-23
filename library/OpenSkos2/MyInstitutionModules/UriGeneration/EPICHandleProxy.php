@@ -1,16 +1,10 @@
 <?php
 
 
-
-/**
- *
-* @author martinsnijders
-*
-*/
-namespace OpenSkos2\EPIC;
+namespace OpenSkos2\MyInstitutionModules\UriGeneration;
 
 use \Exception;
-require_once dirname(__FILE__) .'/../config.inc.php';
+require_once dirname(__FILE__) .'/../../config.inc.php';
 
 class EPICHandleProxy {
 
