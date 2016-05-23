@@ -25,7 +25,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-use OpenSkos2\MyInstitutionModules\UriGeneration\UriGenerator;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -404,27 +403,32 @@ abstract class AbstractTripleStoreResource {
     }
 
     // the resource referred by the uri must exist in the triple store, 
-    // or for backward compatibility tenats and sets one must check tenant code and collections code
+    // or for backward compatibility of tenants and sets one must check their code as well
+    // if CHECK_MYSQL is set to true (see /../config.inc.php)
     protected function validateURI($resourceObject, $property, $rdfType) {
         $val = $resourceObject->getProperty($property);
         foreach ($val as $uri) {
             $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
             if ($count < 1) {
-                if ($rdfType !== Org::FORMALORG && $rdfType !== Dcmi::DATASET) {
-                    throw new ApiException('The sub-resource referred by ' . $uri . ' does not exist.', 400);
+                if (CHECK_MYSQL) {
+                    if ($rdfType !== Org::FORMALORG && $rdfType !== Dcmi::DATASET) {
+                        throw new ApiException('The sub-resource referred by ' . $uri . ' does not exist.', 400);
+                    } else {
+                        if ($rdfType === Org::FORMALORG) { // check in the mysql, $uri may be a code
+                            $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
+                            if ($institution === null) {
+                                throw new ApiException('The tenant referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                            }
+                        };
+                        if ($rdfType === Dcmi::DATASET) { // check in the mysql
+                            $set = $this->manager->fetchSetFromMySqlByCode($uri);
+                            if ($set === null) {
+                                throw new ApiException('The set referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                            }
+                        };
+                    }
                 } else {
-                    if ($rdfType === Org::FORMALORG) { // check in the mysql, $uri may be a code
-                        $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
-                        if ($institution === null) {
-                            throw new ApiException('The tenant referred by code' . $uri . ' is not found either in the triple store or in the mysql.', 400); 
-                        }
-                    };
-                    if ($rdfType === Dcmi::DATASET) { // check in the mysql
-                        $set = $this->manager->fetchSetFromMySqlByCode($uri);
-                        if ($set === null) {
-                            throw new ApiException('The set referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
-                        }
-                    };
+                    throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. You might try to set CHECK_MYSQL to true and try again with checking MySql database as well. ', 400);
                 }
             }
         }
