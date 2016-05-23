@@ -29,10 +29,10 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Search\Autocomplete;
-use OpenSKOS_Db_Table_Row_User;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
+use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationConcept;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -49,6 +49,7 @@ class Concept extends AbstractTripleStoreResource {
     public function __construct(ConceptManager $manager,  Autocomplete $searchAutocomplete) {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
+        $this->authorisator = new AuthorisationConcept();
     }
     
      /**
@@ -282,7 +283,7 @@ class Concept extends AbstractTripleStoreResource {
             
             $user = $this->getUserFromParams($params);
            
-            $this->resourceDeleteAllowed($user, $this->tenant, $concept);
+            $this->authorisator->resourceDeleteAllowed($user, $this->tenant, $concept);
             
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
@@ -293,21 +294,7 @@ class Concept extends AbstractTripleStoreResource {
         return $this->getSuccessResponse($xml, 202);
     }
     
-    protected function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
-        return ($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-    
-
-    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant,    $concept) {
-        $retVal = $concept -> editingAllowed($user, $tenant);
-        return $retVal;
-    }
-    
-    protected function resourceDeleteAllowed( OpenSKOS_Db_Table_Row_User $user, Array $tenant,   $concept) {
-        $retVal = $this->resourceEditAllowed($user, $tenant, $concept);
-        return $retVal;
-    }
-    
+  
   
     
     // specific content validation

@@ -33,6 +33,7 @@ abstract class AbstractTripleStoreResource {
     //use \OpenSkos2\Api\Response\ApiResponseTrait;
 
     protected $manager;
+    protected $authorisator;
     
     protected $tenant = array();
     
@@ -109,8 +110,8 @@ abstract class AbstractTripleStoreResource {
         try {
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
-            if (!$this->resourceCreationAllowed($user)) {
-                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType(), 403); 
+            if (!$this->authorisator->resourceCreationAllowed($user, $this->tenant['code'], $this->tenant['uri'])) {
+                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $this->tenant['code'], 403); 
             }
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
@@ -172,7 +173,7 @@ abstract class AbstractTripleStoreResource {
 
             $resourceObject->addMetadata($user, $params, $oldParams);
             
-            $this->resourceEditAllowed($user, $this->tenant, $existingResource);    
+            $this->authorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource);    
             $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
             $this->manager->replace($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -197,7 +198,7 @@ abstract class AbstractTripleStoreResource {
             }
 
             $user = $this->getUserFromParams($params);
-            if (!$this->resourceDeleteAllowed($user)) {
+            if (!$this->authorisator->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
                 throw new ApiException('You do not have rights to delete this resource ' . $uri, 403);
             }
 
@@ -324,27 +325,7 @@ abstract class AbstractTripleStoreResource {
     }
 
   
-    // in the checking and validation functions below
-    // $tenant is a map $tenant['code'], $tenant['uri']
-    
-      // override in concrete class when necessary
-    protected function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
-        return ($user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-
-    
-    // override in concrete class when necessary
-    protected function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
-        return ($user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-    
    
-      // override in concrete rclass when necessary
-    protected function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Array $tenant=null, $resource=null) {
-        return  ($user->role === ADMINISRATOR || $user->role === ROOT);
-    }
-    
-    
     // override in concrete class when necessary
     protected function validate($resourceObject, Array $tenant) {
         $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));

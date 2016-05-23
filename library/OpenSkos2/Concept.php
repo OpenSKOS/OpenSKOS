@@ -315,21 +315,4 @@ class Concept extends Resource
         );
     }
     
-    public function editingAllowed(
-        OpenSKOS_Db_Table_Row_User $user, $tenant) {
-        if ($user->tenant !== $tenant['code']) {
-            throw new UnauthorizedException('Tenant does not match user given', 403);
-        }
-        
-        $tenantref = current($this->getProperty(OpenSkos::TENANT));
-        if ($tenant['uri'] !== (string)$tenantref) {
-            throw new UnauthorizedException('The concept has tenant ' . (string)$tenantref . ' which differs from the given ' . $tenant['uri'], 403);
-        }
-        
-        if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT) ) {
-           throw new UnauthorizedException('You do not have permission to edit or delete this concept', 403); 
-        }
-        return true;
-    }
-    
 }

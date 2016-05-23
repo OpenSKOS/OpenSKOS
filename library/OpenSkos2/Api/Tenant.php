@@ -8,11 +8,13 @@ use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\TenantManager;
+use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationTenant;
 
 class Tenant extends AbstractTripleStoreResource
 {
     public function __construct(TenantManager $manager) {
         $this->manager = $manager;
+        $this->authorisator = new AuthorisationTenant();
     }
     
   

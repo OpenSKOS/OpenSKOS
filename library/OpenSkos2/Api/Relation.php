@@ -36,6 +36,8 @@ use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationRelation;
+use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationConcept;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -45,6 +47,7 @@ class Relation extends AbstractTripleStoreResource {
     public function __construct(RelationManager $manager)
     {
         $this->manager = $manager;
+        $this->authorisator = new AuthorisationRelation();
     }
     
     
@@ -184,11 +187,12 @@ class Relation extends AbstractTripleStoreResource {
 
         $user = $this->getUserByKey($body['key']);
 
+        $conceptAuthorisator = new AuthorisationConcept();
         $concept = $this->manager->fetchByUri($body['concept'], Concept::TYPE);
-        $concept->editingAllowed($user, $this->tenant);
+        $conceptAuthorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], Concept::TYPE);
-        $relatedConcept->editingAllowed($user, $this->tenant);
-
+        $conceptAuthorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
+        
         return $body;
     }
 

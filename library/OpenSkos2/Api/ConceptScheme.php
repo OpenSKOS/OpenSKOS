@@ -7,11 +7,13 @@ use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationConceptScheme;
 
 class ConceptScheme extends AbstractTripleStoreResource
 {
     public function __construct(ConceptSchemeManager $manager) {
         $this->manager = $manager;
+        $this->authorisator = new AuthorisationConceptScheme();
     }
     
      // specific content validation

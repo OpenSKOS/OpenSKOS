@@ -12,7 +12,7 @@ define('GUEST', 'guest');
 //
 define('MAXIMAL_ROWS', 5000);
 
-define('CHECK_MYSQL', false);
+define('CHECK_MYSQL', true);
 
 // inverses
 
