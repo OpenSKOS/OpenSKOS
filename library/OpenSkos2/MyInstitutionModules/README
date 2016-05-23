@@ -5,5 +5,12 @@ MyInstitutionModules must contain
     public static function generateUUID($tenantcode, $type) 
     public static function generateURI($plainUUID, $tenantcode, $type)
 
+2) 6 classes AuthorisationConcept, AuthorisationConceptScheme, AuthorisationRelation, AuthorisationSet, AuthorisationSkoscollection, 
+AuthorisationTenant which must have 3 obligatory functions each:
+    
+    public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri);
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource);
+    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource);
+
 
      

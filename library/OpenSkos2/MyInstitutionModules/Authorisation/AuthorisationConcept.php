@@ -31,7 +31,7 @@ class AuthorisationConcept extends AuthorisationResource{
                   throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which is not the uri of the tenant with the code ' . $tenantCode, 403);
                  } 
             } else {
-                throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which is not the uri of the tenant with the code ' . $tenantCode, 403);
+                throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which is not the uri of the tenant with the code ' . $tenantCode . ". You may want to set CHECK_MYSQL to true, if the triple store does not contain ". $tenantCode, 403);
             }
         }
 
