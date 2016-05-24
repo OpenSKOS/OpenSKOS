@@ -42,14 +42,6 @@ class SkosCollection extends Resource
     }
     
     
-    public function getCreator()
-    {
-        if ($this->hasProperty(DcTerms::CREATOR)) {
-            return (string)$this->getPropertySingleValue(DcTerms::CREATOR);
-        } else {
-            return null;
-        }
-    }
     
    public function getDescription()
     {

@@ -16,7 +16,7 @@ One may fork implementation of these function depending on the resource type, gi
 
 2) Deletion.php, with a parameter $resourceManager, which must have 1 obligatory function:
     
-    public function canBeDeleted(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri);
+    public function canBeDeleted($uri);
 
 One may fork implementation of this finction depending on the resource type, given within $resourceManager.
      

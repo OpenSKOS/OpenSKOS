@@ -26,6 +26,7 @@ use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Search\Autocomplete;
@@ -34,6 +35,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
+use Zend\Diactoros\Stream;
+use Zend\Diactoros\Response;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
 
@@ -440,10 +443,10 @@ class Concept extends AbstractTripleStoreResource {
 
         $user = $this->getUserByKey($body['key']);
 
-        $concept = $this->manager->fetchByUri($body['concept'], Concept::TYPE);
-        $this->authorisation->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
-        $relatedConcept = $this->manager->fetchByUri($body['related'], Concept::TYPE);
-        $this->authorisation->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
+        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
+        $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
+        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
+        $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
 
         return $body;
     }

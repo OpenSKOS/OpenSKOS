@@ -26,12 +26,7 @@ class TenantManager extends ResourceManager
 {
   
     protected $resourceType = Tenant::TYPE;
-    
-     //TODO: check conditions when it can be deleted
-    public function CanBeDeleted($uri){
-        return parent::CanBeDeleted($uri);
-    }
-    
+   
     public function fetchUriName() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
         $response = $this->query($query);

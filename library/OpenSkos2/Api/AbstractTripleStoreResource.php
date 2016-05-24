@@ -109,16 +109,9 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-    public function create(ServerRequestInterface $request) {
-        try {
-            $response = $this->handleCreate($request);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-        return $response;
-    }
+   
 
-    private function handleCreate(ServerRequestInterface $request) {
+    public function create(ServerRequestInterface $request) {
        
         try {
             $params = $this->getAndAdaptQueryParams($request);
@@ -145,7 +138,7 @@ abstract class AbstractTripleStoreResource {
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (Exception $e) {
-            return $this->getErrorResponse(500, $e->getMessage());
+            return $this->getErrorResponse($e->getCode(), $e->getMessage());
         }
     }
     
@@ -153,31 +146,31 @@ abstract class AbstractTripleStoreResource {
         try {
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             if ($resourceObject->isBlankNode()) {
-                throw new Exception("Missed uri (rdf:about)!");
+                throw new ApiException("Missed uri (rdf:about)!", 400);
             }
-           
+
             $uri = $resourceObject->getUri();
-            $existingResource = $this->manager->fetchByUri((string)$uri);
+            $existingResource = $this->manager->fetchByUri((string) $uri);
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
-            $oldUuid = $existingResource -> getUuid();
+            $oldUuid = $existingResource->getUuid();
             if ($oldUuid instanceof Literal) {
-                $oldUuid = $oldUuid -> getValue();
+                $oldUuid = $oldUuid->getValue();
             }
             $oldParams = [
                 'uuid' => $oldUuid,
-                'creator' => $existingResource -> getCreator(),
-                'dateSubmitted' => $existingResource -> getDateSubmitted(),
-                'status' => $existingResource -> getStatus() // so fat, not null only for concepts
+                'creator' => $existingResource->getCreator(),
+                'dateSubmitted' => $existingResource->getDateSubmitted(),
+                'status' => $existingResource->getStatus() // so fat, not null only for concepts
             ];
-             
+
             if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
                 // do not update uuid: it must be intact forever, connected to uri
                 $uuid = $resourceObject->getUuid();
                 if ($uuid instanceof Literal) {
                     $uuid = $uuid->getValue();
                 }
-                if ($uuid!== false && $uuid !== null) {
+                if ($uuid !== false && $uuid !== null) {
                     if ($uuid !== $oldParams['uuid']) {
                         throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldParams['uuid'], 400);
                     }
@@ -186,15 +179,17 @@ abstract class AbstractTripleStoreResource {
 
 
             $resourceObject->addMetadata($user, $params, $oldParams);
-            
-            $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource);    
-            $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
-            $this->manager->replace($resourceObject);
-            $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
-            $rdf = (new DataRdf($savedResource, true, []))->transform();
-            return $this->getSuccessResponse($rdf, 201);
+            if ($this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource)) {
+                $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
+                $this->manager->replace($resourceObject);
+                $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
+                $rdf = (new DataRdf($savedResource, true, []))->transform();
+                return $this->getSuccessResponse($rdf, 201);
+            } else {
+                throw new ApiException('You do not have rights to edit resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $this->tenant['code'], 403);
+            }
         } catch (Exception $e) {
-            return $this->getErrorResponse(500, $e->getMessage());
+            return $this->getErrorResponse($e->getCode(), $e->getMessage());
         }
     }
 
@@ -213,24 +208,22 @@ abstract class AbstractTripleStoreResource {
 
             $user = $this->getUserFromParams($params);
             if (!$this->authorisationManager->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
-                throw new ApiException('You do not have rights to delete this resource ' . $uri, 403);
+                 throw new ApiException('You do not have rights to delete resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $this->tenant['code'], 403);
             }
 
-            $canBeDeleted = $this->delitionManager->resourceCanBeDeleted($uri, $this->manager);
+            $canBeDeleted = $this->deletionManager->canBeDeleted($uri, $this->manager);
             if (!$canBeDeleted) {
                 throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
             }
             $this->manager->delete(new Uri($uri));
+
+            $xml = (new DataRdf($resourceObject))->transform();
+            return $this->getSuccessResponse($xml, 202);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
-
-        $xml = (new DataRdf($resourceObject))->transform();
-        return $this->getSuccessResponse($xml, 202);
     }
 
-    
-    
     private function getResourceObjectFromRequestBody(ServerRequestInterface $request) {
         $doc = $this->getDomDocumentFromRequest($request);
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
@@ -412,13 +405,13 @@ abstract class AbstractTripleStoreResource {
                         if ($rdfType === Org::FORMALORG) { // check in the mysql, $uri may be a code
                             $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
                             if ($institution === null) {
-                                throw new ApiException('The tenant referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                                throw new ApiException('The tenant referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
                             }
                         };
                         if ($rdfType === Dcmi::DATASET) { // check in the mysql
                             $set = $this->manager->fetchSetFromMySqlByCode($uri);
                             if ($set === null) {
-                                throw new ApiException('The set referred by code ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                                throw new ApiException('The set referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
                             }
                         };
                     }

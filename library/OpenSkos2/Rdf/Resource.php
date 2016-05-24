@@ -185,12 +185,20 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     public function getCreator()
-    {
-        $tmp = current($this->getProperty(DcTerms::CREATOR));
-        if ($tmp instanceof Literal) { // literal value for UNKNOWN
-            return $tmp -> getValue();
+    {   
+        if ($this->hasProperty(DcTerms::CREATOR)) {
+            $tmp = current($this->getProperty(DcTerms::CREATOR));
+            if ($tmp instanceof Literal) { // literal value for UNKNOWN
+                return $tmp->getValue();
+            } else {
+                if ($tmp instanceof Uri) {
+                    return $tmp->getUri();
+                } else {
+                    return null;
+                }
+            }
         } else {
-            return $tmp -> getUri();
+            return null;
         }
     }
     

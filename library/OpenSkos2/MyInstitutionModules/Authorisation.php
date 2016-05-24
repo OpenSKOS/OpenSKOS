@@ -81,23 +81,36 @@ class Authorisation {
     }
 
     private function resourceDeleteAllowedBasic(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
-        return ($user->role === ADMINISRATOR || $user->role === ROOT);
+        if ($user->tenant !== $tenantCode) {
+            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+        }
+        return ($user->role === ADMINISRATOR || $user->role === ROOT  || $user->role === EDITOR);
     }
 
     private function resourceCreationAllowedBasic(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+           if ($user->tenant !== $tenantCode) {
+            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+        }
         return ($user->role === ADMINISRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
     private function resourceEditAllowedBasic(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+          if ($user->tenant !== $tenantCode) {
+            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+        }
         return ($user->role === ADMINISRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
+    
     private function conceptCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $conceptToPost) {
         // the group of users which can post to certain sets, skos-collections or upon certain schemata, can be limited
         if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-        return ($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT);
+        if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT)) {
+            throw new UnauthorizedException('Your role ' . $user->role . ' does not give you permission to create concepts ', 403);
+        }
+        return true;
     }
 
     private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $concept) {
@@ -113,7 +126,7 @@ class Authorisation {
                     throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which does not correspond to the request-s tenant ' . $tenantCode, 403);
                 }
             } else {
-                throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which idoes not correspond to the request-s tenant  ' . $tenantCode . ". You may want to set CHECK_MYSQL to true, if the triple store does not contain " . $tenantCode, 403);
+                throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which does not correspond to the request-s tenant  ' . $tenantCode . ". You may want to set CHECK_MYSQL to true, if the triple store does not contain " . $tenantCode, 403);
             }
         }
 
@@ -128,8 +141,8 @@ class Authorisation {
         return $retVal;
     }
 
-    private function conceptSchemeCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri);
+    private function conceptSchemeCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
     private function conceptSchemeEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
@@ -140,8 +153,8 @@ class Authorisation {
         return $this->resourceDeleteAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
-    private function setCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri);
+    private function setCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
     private function setEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
@@ -152,8 +165,8 @@ class Authorisation {
         return $this->resourceDeleteAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
-    private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri);
+    private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
     private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
@@ -164,8 +177,8 @@ class Authorisation {
         return $this->resourceDeleteAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
-    private function skosCollectionCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri);
+    private function skosCollectionCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
     private function skosCollectionEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
@@ -176,8 +189,8 @@ class Authorisation {
         return $this->resourceDeleteAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
-    private function relationCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri);
+    private function relationCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {
+        return $this->resourceCreationAllowedBasic($user, $tenantCode, $tenantUri, $resource);
     }
 
     private function relationEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {

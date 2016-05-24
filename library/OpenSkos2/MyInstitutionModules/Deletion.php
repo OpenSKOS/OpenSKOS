@@ -18,7 +18,7 @@ class Deletion {
     }
     
     public function canBeDeleted($uri) {
-        $type = $this->manager->getResourceType();
+        $type = $this->resourceManager->getResourceType();
         switch ($type) {
             case Concept::TYPE:
                 return $this->conceptCanBeDeleted($uri);
@@ -40,7 +40,7 @@ class Deletion {
     
     private function canBeDeletedBasic($uri) {
         $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
-        $references = $this->manager->query($query);
+        $references = $this->resourceManager->query($query);
         return (($references[0]->COUNT->getValue()) < 1);
     }
 
