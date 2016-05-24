@@ -13,14 +13,15 @@ use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\SkosCollectionManager;
-use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationSkosCollection;
-
+use OpenSkos2\MyInstitutionModules\Authorisation;
+use OpenSkos2\MyInstitutionModules\Deletion;
 
 class SkosCollection extends AbstractTripleStoreResource
 {
      public function __construct(SkosCollectionManager $manager) {
         $this->manager = $manager;
-        $this->authorisator = new AuthorisationSkosCollection();
+        $this->authorisationManager = new Authorisation($manager);
+        $this->deletionManager = new Deletion($manager);
     }
     
      // specific content validation

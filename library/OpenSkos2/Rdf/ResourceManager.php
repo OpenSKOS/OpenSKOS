@@ -42,7 +42,8 @@ use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-
+//require_once dirname(__FILE__) .'/../config.inc.php';
+//
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 
@@ -232,12 +233,7 @@ public function deleteSolrIntact(Uri $resource)
     }
     
   
-    //override in the subclasses when necessary
-    public function CanBeDeleted($uri){
-        $query='SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <'. $uri . '> . } LIMIT 1';
-        $references =  $this->query($query);
-        return (($references[0] -> COUNT -> getValue()) < 1);
-    }
+   
 
     /**
      * @todo Keep SOLR in sync
@@ -699,7 +695,7 @@ public function deleteSolrIntact(Uri $resource)
      * @param string $query
      * @return \EasyRdf\Graph
      */
-    protected function query($query)
+    public function query($query)
     {
         $maxTries = 3;
         $tries = 0;
@@ -768,13 +764,7 @@ public function deleteSolrIntact(Uri $resource)
     public function fetchInstitutionUriByCode($code) {
         $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
         if (count($tenants) < 1) {
-            $tenantMySQL =$this ->fetchTenantFromMySqlByCode($code);
-            if (isset($tenantMySQL['uri']) && $tenantMySQL['uri'] !== null && $tenantMySQL['uri'] !== "") {
-                return $tenantMySQL['uri'];
-            } else {
-                return null;
-            };
-            
+            return null;
         } else {
             return $tenants[0];
         }

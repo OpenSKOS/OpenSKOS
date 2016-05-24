@@ -9,13 +9,15 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\SetManager;
-use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationSet;
+use OpenSkos2\MyInstitutionModules\Authorisation;
+use OpenSkos2\MyInstitutionModules\Deletion;
 
 class Set extends AbstractTripleStoreResource
 {
     public function __construct(SetManager $manager) {
         $this->manager = $manager;
-        $this->authorisator = new AuthorisationSet();
+        $this->authorisationManager = new Authorisation($manager);
+        $this->deletionManager = new Deletion($manager);
     }
     
      // specific content validation

@@ -13,7 +13,7 @@ define('GUEST', 'guest');
 define('MAXIMAL_ROWS', 5000);
 
 // should be true for BeG  and false for meertens
-define('CHECK_MYSQL', false);
+define('CHECK_MYSQL', true);
 
 // inverses
 

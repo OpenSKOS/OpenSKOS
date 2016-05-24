@@ -30,11 +30,10 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 
 abstract class AbstractTripleStoreResource {
 
-    //use \OpenSkos2\Api\Response\ApiResponseTrait;
-
+  
     protected $manager;
-    protected $authorisator;
-    
+    protected $authorisationManager;
+    protected $deletionManager;
     protected $tenant = array();
     
     public function getManager() {
@@ -42,20 +41,34 @@ abstract class AbstractTripleStoreResource {
     }
     
     
-    protected function getAndAdaptQueryParams(ServerRequestInterface $request){
+    protected function getAndAdaptQueryParams(ServerRequestInterface $request) {
         $params = $request->getQueryParams();
         if (empty($params['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
         }
-        $tenantUri = $this -> manager -> fetchInstitutionUriByCode($params['tenant']);
+        $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
+        if ($tenantUri === null) {
+            if (!CHECK_MYSQL) {
+                throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
+            } else {
+                $institution = $this->manager->fetchTenantFromMySqlByCode($params['tenant']);
+                if ($institution === null) {
+                    throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' is not found either in the triple store or in the mysql.', 400);
+                } else {
+                    if (isset($institution['uri']) && $institution['uri']!==null && $institution['uri']!=="") {
+                      $tenantUri = $institution['uri'];  
+                    } else {
+                       $tenantUri =  $params['tenant'];
+                    }
+                }
+            }
+        }
         $params['tenanturi'] = $tenantUri;
-        // side effect: setting up a current-requester tenant for different sort checks and validations
-        $this->tenant['code'] = $params['tenant'];
         $this->tenant['uri'] = $tenantUri;
+        $this->tenant['code'] = $params['tenant'];
         return $params;
     }
 
-   
     // Id is either an URI or uuid
     public function findResourceById(ServerRequestInterface $request) {
         try {
@@ -110,10 +123,11 @@ abstract class AbstractTripleStoreResource {
         try {
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
-            if (!$this->authorisator->resourceCreationAllowed($user, $this->tenant['code'], $this->tenant['uri'])) {
-                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $this->tenant['code'], 403); 
-            }
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
+            
+            if (!$this->authorisationManager->resourceCreationAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
+                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $this->tenant['code'] . '. Your role is "' .  $user->role . '"', 403); 
+            }
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
                 throw new InvalidArgumentException(
                 'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.', 400
@@ -173,7 +187,7 @@ abstract class AbstractTripleStoreResource {
 
             $resourceObject->addMetadata($user, $params, $oldParams);
             
-            $this->authorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource);    
+            $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource);    
             $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
             $this->manager->replace($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -198,11 +212,11 @@ abstract class AbstractTripleStoreResource {
             }
 
             $user = $this->getUserFromParams($params);
-            if (!$this->authorisator->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
+            if (!$this->authorisationManager->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
                 throw new ApiException('You do not have rights to delete this resource ' . $uri, 403);
             }
 
-            $canBeDeleted = $this->manager->CanBeDeleted($uri);
+            $canBeDeleted = $this->delitionManager->resourceCanBeDeleted($uri, $this->manager);
             if (!$canBeDeleted) {
                 throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
             }
@@ -449,7 +463,7 @@ abstract class AbstractTripleStoreResource {
         if (strtolower($user->active) !== 'y') {
             throw new InvalidArgumentException('Your user account is blocked', 401);
         }
-
+             
         return $user;
     }
     

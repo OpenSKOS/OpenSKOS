@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenSkos2\MyInstitutionModules\UriGeneration;
+namespace OpenSkos2\MyInstitutionModules;
 
-use OpenSkos2\MyInstitutionModules\UriGeneration\EPICHandleProxy;
+use OpenSkos2\MyInstitutionModules\EPICHandleProxy;
 use Rhumsaa\Uuid\Uuid;
 use Zend_Controller_Action_Exception;
 
-class UriGenerator {
+class UriGeneration {
     
    public static function generateUUID($tenantcode, $type) {
         $uuidPlain=Uuid::uuid4();

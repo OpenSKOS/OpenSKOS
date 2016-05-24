@@ -32,27 +32,28 @@ use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
-use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationConcept;
+use OpenSkos2\MyInstitutionModules\Authorisation;
+use OpenSkos2\MyInstitutionModules\Deletion;
 
-require_once dirname(__FILE__) .'/../config.inc.php';
+require_once dirname(__FILE__) . '/../config.inc.php';
 
 class Concept extends AbstractTripleStoreResource {
-    
-     /**
+
+    /**
      * Search autocomplete
      *
      * @var Autocomplete
      */
     private $searchAutocomplete;
 
-   
-    public function __construct(ConceptManager $manager,  Autocomplete $searchAutocomplete) {
+    public function __construct(ConceptManager $manager, Autocomplete $searchAutocomplete) {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
-        $this->authorisator = new AuthorisationConcept();
+        $this->authorisationManager = new Authorisation($manager);
+        $this->deletionManager = new Deletion($manager);
     }
-    
-     /**
+
+    /**
      * Map the following requests
      *
      * /api/find-concepts?q=Kim%20Holland
@@ -64,81 +65,80 @@ class Concept extends AbstractTripleStoreResource {
      * @param string $context
      * @return ResponseInterface
      */
-    public function findConcepts(PsrServerRequestInterface $request, $context)
-    {
+    public function findConcepts(PsrServerRequestInterface $request, $context) {
         set_time_limit(120);
-        
+
         $params = $request->getQueryParams();
-        
+
         // offset
         $start = 0;
         if (!empty($params['start'])) {
-            $start = (int)$params['start'];
+            $start = (int) $params['start'];
         }
 
         // limit
         $limit = MAXIMAL_ROWS;
-        if (isset($params['rows']) && $params['rows'] <  MAXIMAL_ROWS) {
-            $limit = (int)$params['rows'];
+        if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
+            $limit = (int) $params['rows'];
         }
-        
+
         $options = [
             'start' => $start,
             'rows' => $limit,
             'directQuery' => true,
         ];
-        
+
         // tenant
         if (isset($params['tenant'])) {
-            $tenant= $this->getTenantFromParams($params);
+            $tenant = $this->getTenantFromParams($params);
             $options['tenants'] = [$tenant->code];
         }
-        
+
         // search query
         if (isset($params['q'])) {
             $options['searchText'] = $params['q'];
         }
-        
+
         // sorting
-       //Meertens was here
+        //Meertens was here
         if (isset($params['sorts'])) {
             $sortmap = $this->prepareSortsForSolr($params['sorts']);
             $options['sorts'] = $sortmap;
         }
-        
-         if (isset($params['skosCollection'])) {
+
+        if (isset($params['skosCollection'])) {
             $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
         }
-        
+
         //sets (former tenant collections)
         // meertens was here
         if (isset($params['sets'])) {
             $options['sets'] = explode(' ', trim($params['sets']));
         }
-        
-       
+
+
         if (isset($params['tenants'])) {
-           $options['tenants'] = explode(' ', trim($params['tenants']));
+            $options['tenants'] = explode(' ', trim($params['tenants']));
         }
         //meertens was here
         if (isset($params['conceptScheme'])) {
             $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
         }
-        
+
         if (isset($params['status'])) {
             $options['status'] = explode(' ', trim($params['status']));
         }
-        
+
         $concepts = $this->searchAutocomplete->search($options, $total);
-        
+
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-        
+
         switch ($context) {
             case 'json':
                 $response = (new JsonResponse($result, $propertiesList))->getResponse();
@@ -156,9 +156,7 @@ class Concept extends AbstractTripleStoreResource {
         return $response;
     }
 
-    
-    
-     /**
+    /**
      * Get PSR-7 response for concept
      *
      * @param $request \Psr\Http\Message\ServerRequestInterface
@@ -167,12 +165,11 @@ class Concept extends AbstractTripleStoreResource {
      * @throws InvalidArgumentException
      * @return ResponseInterface
      */
-    public function getConceptResponse(PsrServerRequestInterface $request, $uuid, $context)
-    {
+    public function getConceptResponse(PsrServerRequestInterface $request, $uuid, $context) {
         $concept = $this->getConcept($uuid);
 
         $params = $request->getQueryParams();
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
@@ -203,15 +200,14 @@ class Concept extends AbstractTripleStoreResource {
      * @throws Exception\DeletedException
      * @return Concept
      */
-    public function getConcept($id)
-    {
+    public function getConcept($id) {
         /* @var $concept Concept */
         if ($id instanceof Uri) {
             $concept = $this->manager->fetchByUri($id);
         } else {
             $concept = $this->manager->fetchByUuid($id);
         }
-        
+
         if (!$concept) {
             throw new NotFoundException('Concept not found by id: ' . $id, 404);
         }
@@ -222,22 +218,21 @@ class Concept extends AbstractTripleStoreResource {
 
         return $concept;
     }
-    
+
     /**
      * Gets a list (array or string) of fields and try to recognise the properties from it.
      * @param array $fieldsList
      * @return array
      */
-    protected function fieldsListToProperties($fieldsList)
-    {
+    protected function fieldsListToProperties($fieldsList) {
         if (!is_array($fieldsList)) {
             $fieldsList = array_map('trim', explode(',', $fieldsList));
         }
-        
+
         $propertiesList = [];
         //olha was here, it used to be getOldToProperties();
         $fieldsMap = FieldsMaps::getNamesToProperties();
-        
+
         // Tries to search for the field in fields map.
         // If not found there tries to expand it from short property.
         // If not that - just pass it as it is.
@@ -250,7 +245,7 @@ class Concept extends AbstractTripleStoreResource {
                 }
             }
         }
-        
+
         // Check if we have a nice properties list at the end.
         foreach ($propertiesList as $propertyUri) {
             if ($propertyUri == 'uri') {
@@ -258,51 +253,47 @@ class Concept extends AbstractTripleStoreResource {
             }
             if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
                 throw new InvalidPredicateException(
-                    'The field "' . $propertyUri . '" from fields list is not recognised.'
+                'The field "' . $propertyUri . '" from fields list is not recognised.'
                 );
             }
         }
-        
+
         return $propertiesList;
     }
-    
-     public function delete(PsrServerRequestInterface $request)
-    {
+
+    public function delete(PsrServerRequestInterface $request) {
         try {
             $params = $this->getAndAdaptQueryParams($request);
             if (!isset($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter', 412);
             }
-            
+
             $id = $params['id'];
             /* @var $concept Concept */
             $concept = $this->manager->fetchByUri($id);
             if (!$concept) {
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
-            
+
             $user = $this->getUserFromParams($params);
-           
-            $this->authorisator->resourceDeleteAllowed($user, $this->tenant, $concept);
-            
+
+            $this->authorisationManager->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept);
+
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
-        
+
         $xml = (new DataRdf($concept))->transform();
         return $this->getSuccessResponse($xml, 202);
     }
-    
-  
-  
-    
+
     // specific content validation
     protected function validate($resourceObject, $tenant) {
         parent::validate($resourceObject, $tenant);
         // resources referred by uri's 
         $this->checkIfReferredResourcesExist($resourceObject);
-        $this -> checkUserRelations($resourceObject);
+        $this->checkUserRelations($resourceObject);
     }
 
     // specific content validation
@@ -311,7 +302,7 @@ class Concept extends AbstractTripleStoreResource {
 
         // resources referred by uri's
         $this->checkIfReferredResourcesExist($resourceObject);
-        $this -> checkUserRelations($resourceObject);
+        $this->checkUserRelations($resourceObject);
     }
 
     // To DISCUSS?
@@ -321,25 +312,25 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
         $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
     }
-    
-   private function checkUserRelations($resourceObject) {
-       $existingRelations = $this -> manager -> getUserRelationQNameUris();
-       $properties = array_keys($resourceObject -> getProperties());
-       $userdefined = [];
-       foreach ($properties as $property) {
-          if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
-              if (in_array($property, $existingRelations)) {
-                 $userdefined[] =  $property; 
-              } else {
-                  throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
-              }
-          }
-       }
-       return true;
+
+    private function checkUserRelations($resourceObject) {
+        $existingRelations = $this->manager->getUserRelationQNameUris();
+        $properties = array_keys($resourceObject->getProperties());
+        $userdefined = [];
+        foreach ($properties as $property) {
+            if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
+                if (in_array($property, $existingRelations)) {
+                    $userdefined[] = $property;
+                } else {
+                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
+                }
+            }
+        }
+        return true;
     }
-    
-   private function prepareSortsForSolr($sortstring) {
-       
+
+    private function prepareSortsForSolr($sortstring) {
+
         $sortlist = explode(" ", $sortstring);
         $l = count($sortlist);
         $sortmap = [];
@@ -347,7 +338,7 @@ class Concept extends AbstractTripleStoreResource {
         while ($i < $l - 1) { // the last element will be worked-on after the loop is finished
             $j = $i;
             $i++;
-            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]); 
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]);
             $sortorder = 'asc';
             if ($sortlist[$i] === "asc" || $sortlist[$i] === 'desc') {
                 $sortorder = $sortlist[$i];
@@ -356,20 +347,20 @@ class Concept extends AbstractTripleStoreResource {
             $sortmap[$sortfield] = $sortorder;
         };
         if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') { // field name is the last and no order after it
-            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l-1]); // Fix "@nl" to "_nl"
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l - 1]); // Fix "@nl" to "_nl"
             $sortmap[$sortfield] = 'asc';
         };
         return $sortmap;
     }
-    
+
     private function prepareSortFieldForSolr($term) { // translate field name  to am internal sort-field name
-        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) -3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
+        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
             return $term;
         }
         if ($this->isDateField($term)) {
             return "sort_d_" . $term;
         } else {
-            if (strpos($term, "@") !== false) { 
+            if (strpos($term, "@") !== false) {
                 return str_replace("@", "_", $term);
             } else {
                 return "sort_s_" . $term;
@@ -377,7 +368,84 @@ class Concept extends AbstractTripleStoreResource {
         }
     }
 
-    private function isDateField($term){
+    private function isDateField($term) {
         return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return Response
+     */
+    public function addRelationTriple(PsrServerRequestInterface $request) {
+        $params = $this->getAndAdaptQueryParams($request);
+        try {
+            $body = $this->preEditChecksRels($request);
+            $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
+        } catch (ApiException $exc) {
+            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+        }
+
+        $stream = new Stream('php://memory', 'wb+');
+        $stream->write('Relations added');
+        $response = (new Response())
+                ->withBody($stream);
+        return $response;
+    }
+
+    /**
+     * @param PsrServerRequestInterface $request
+     * @return Response
+     */
+    public function deleteRelationTriple(PsrServerRequestInterface $request) {
+        try {
+            $params = $this->getAndAdaptQueryParams($request); // sets tenant info
+            $body = $this->preEditChecksRels($request);
+            $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
+        } catch (ApiException $exc) {
+            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+        }
+
+        $stream = new Stream('php://memory', 'wb+');
+        $stream->write('Relation deleted');
+        $response = (new Response())
+                ->withBody($stream);
+        return $response;
+    }
+
+    private function preEditChecksRels(PsrServerRequestInterface $request) {
+
+        $body = $request->getParsedBody();
+
+        if (!isset($body['key'])) {
+            throw new ApiException('Missing key', 400);
+        }
+        if (!isset($body['concept'])) {
+            throw new ApiException('Missing concept', 400);
+        }
+        if (!isset($body['related'])) {
+            throw new ApiException('Missing related', 400);
+        }
+        if (!isset($body['type'])) {
+            throw new ApiException('Missing type', 400);
+        }
+
+        $count1 = $this->manager->countTriples('<' . $body['concept'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
+        if ($count1 < 1) {
+            throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 400);
+        }
+        $count2 = $this->manager->countTriples('<' . $body['related'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
+        if ($count2 < 1) {
+            throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
+        }
+
+        $user = $this->getUserByKey($body['key']);
+
+        $concept = $this->manager->fetchByUri($body['concept'], Concept::TYPE);
+        $this->authorisation->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
+        $relatedConcept = $this->manager->fetchByUri($body['related'], Concept::TYPE);
+        $this->authorisation->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
+
+        return $body;
+    }
+
 }

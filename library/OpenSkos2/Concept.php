@@ -21,7 +21,6 @@
 namespace OpenSkos2;
 
 use Exception;
-use OpenSkos2\Api\Exception\UnauthorizedException;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -31,7 +30,6 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
-use OpenSKOS_Db_Table_Row_User;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 

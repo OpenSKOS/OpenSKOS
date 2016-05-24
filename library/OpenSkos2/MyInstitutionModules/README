@@ -1,16 +1,22 @@
 MyInstitutionModules must contain
 
-1) UriGeneration/UriGenerator.php, which has two obligatory functions: 
+1) UriGeneration.php, which has two obligatory functions: 
      
     public static function generateUUID($tenantcode, $type) 
     public static function generateURI($plainUUID, $tenantcode, $type)
 
-2) 6 classes AuthorisationConcept, AuthorisationConceptScheme, AuthorisationRelation, AuthorisationSet, AuthorisationSkoscollection, 
-AuthorisationTenant which must have 3 obligatory functions each:
+2) Authorisation.php, with a parameter $resourceManager, which must have 3 obligatory functions:
     
     public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri);
     public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource);
     public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource);
 
+One may fork implementation of these function depending on the resource type, given within $resourceManager.
 
+
+2) Deletion.php, with a parameter $resourceManager, which must have 1 obligatory function:
+    
+    public function canBeDeleted(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri);
+
+One may fork implementation of this finction depending on the resource type, given within $resourceManager.
      

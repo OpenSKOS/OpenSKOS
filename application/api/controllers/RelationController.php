@@ -20,6 +20,7 @@
 require_once 'AbstractController.php';
 
 class API_RelationController extends AbstractController {
+    
    
     public function init() {
         parent::init();
@@ -65,10 +66,10 @@ class API_RelationController extends AbstractController {
         $create = $this->getParam('create');
         if (isset($create) && $create === 'true') { // creating a new user-defined relation
             parent::postAction();
-        } else { // adding a pair of related concepts
+        } else { // adding a pair of related concepts (amounts to updating concepts)
             $request = $this->getPsrRequest();
-            $api = $this->getDI()->make($this->fullNameResourceClass);
-            $response = $api->addRelation($request);
+            $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
+            $response = $api->addRelationTriple($request);
             $this->emitResponse($response);
         }
     }
@@ -85,8 +86,8 @@ class API_RelationController extends AbstractController {
             parent::deleteAction();
         } else { // deleting a pair of related concepts
             $request = $this->getPsrRequest();
-            $api = $this->getDI()->make($this->fullNameResourceClass);
-            $response = $api->deleteRelation($request);
+            $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
+            $response = $api->deleteRelationTriple($request);
             $this->emitResponse($response);
         }
     }

@@ -36,8 +36,8 @@ use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Validator\Resource as ResourceValidator;
-use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationRelation;
-use OpenSkos2\MyInstitutionModules\Authorisation\AuthorisationConcept;
+use OpenSkos2\MyInstitutionModules\Authorisation;
+use OpenSkos2\MyInstitutionModules\Deletion;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -47,7 +47,8 @@ class Relation extends AbstractTripleStoreResource {
     public function __construct(RelationManager $manager)
     {
         $this->manager = $manager;
-        $this->authorisator = new AuthorisationRelation();
+        $this->authorisationManager = new Authorisation($manager);
+        $this->deletionManager = new Deletion($manager);
     }
     
     
@@ -113,90 +114,6 @@ class Relation extends AbstractTripleStoreResource {
     }
     
 
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return Response
-     */
-   public function addRelation(PsrServerRequestInterface $request)
-    {
-        $params=$this -> getAndAdaptQueryParams($request);
-        try {
-            $body = $this -> preEditChecksRels($request);
-            $this->manager->addRelation($body['concept'], $body['type'], $body['related']);
-        } catch (ApiException $exc) {
-            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-        }
-
-        $stream = new Stream('php://memory', 'wb+');
-        $stream->write('Relations added');
-        $response = (new Response())
-                ->withBody($stream);
-        return $response;
-    }
-    
-    /**
-     * @param PsrServerRequestInterface $request
-     * @return Response
-     */
-    public function deleteRelation(PsrServerRequestInterface $request)
-          
-    {
-        try {
-            $params = $this->getAndAdaptQueryParams($request); // sets tenant info
-            $body = $this -> preEditChecksRels($request);
-            $this->manager->deleteRelation($body['concept'], $body['type'], $body['related']);
-        } catch (ApiException $exc) {
-            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-        }
-
-        $stream = new Stream('php://memory', 'wb+');
-        $stream->write('Relation deleted');
-        $response = (new Response())
-            ->withBody($stream);
-        return $response;
-    }
-    
-    
-   
-    private function preEditChecksRels(PsrServerRequestInterface $request) {
-
-        $body = $request->getParsedBody();
-
-        if (!isset($body['key'])) {
-            throw new ApiException('Missing key', 400);
-        }
-        if (!isset($body['concept'])) {
-            throw new ApiException('Missing concept', 400);
-        }
-        if (!isset($body['related'])) {
-            throw new ApiException('Missing related', 400);
-        }
-        if (!isset($body['type'])) {
-            throw new ApiException('Missing type', 400);
-        }
-
-        $count1 = $this->manager->countTriples('<' . $body['concept'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
-        if ($count1 < 1) {
-            throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 400);
-        }
-        $count2 = $this->manager->countTriples('<' . $body['related'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
-        if ($count2 < 1) {
-            throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
-        }
-
-        $user = $this->getUserByKey($body['key']);
-
-        $conceptAuthorisator = new AuthorisationConcept();
-        $concept = $this->manager->fetchByUri($body['concept'], Concept::TYPE);
-        $conceptAuthorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
-        $relatedConcept = $this->manager->fetchByUri($body['related'], Concept::TYPE);
-        $conceptAuthorisator->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
-        
-        return $body;
-    }
-
-   
     // used when creating a user-defined relation
     protected function checkResourceIdentifiers(PsrServerRequestInterface $request, $resourceObject) {
         if ($resourceObject->isBlankNode()) {
@@ -236,6 +153,4 @@ class Relation extends AbstractTripleStoreResource {
     
     }
     
-    
- 
 }

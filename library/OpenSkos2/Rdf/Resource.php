@@ -21,7 +21,7 @@ namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\MyInstitutionModules\UriGeneration\UriGenerator;
+use OpenSkos2\MyInstitutionModules\UriGeneration;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -370,8 +370,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         
         $type = $this ->getResourceType();
-        $uuid= UriGenerator::generateUUID($tenantcode, $type);
-        $uri = UriGenerator::generateURI($uuid, $tenantcode, $type);
+        $uuid= UriGeneration::generateUUID($tenantcode, $type);
+        $uri = UriGeneration::generateURI($uuid, $tenantcode, $type);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(

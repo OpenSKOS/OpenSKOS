@@ -27,7 +27,6 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\RelationManager;
 
 
 require_once dirname(__FILE__) .'/config.inc.php';
@@ -230,6 +229,66 @@ class ConceptManager extends ResourceManager
         return $minDate;
     }
     
+     /**
+     * Delete relations between two skos concepts.
+     * Deletes in both directions (narrower and broader for example).
+     * @param string $subjectUri
+     * @param string $relationType
+     * @param string $objectUri
+     * @throws Exception\InvalidArgumentException
+     */
+    public function deleteRelationTriple($subjectUri, $relationType, $objectUri)
+    {
+        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+        $this->deleteMatchingTriples(
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
+        );
+        $inverses = array_merge(Skos::getInverseRelationsMap(), inverse_relations());
+        $this->deleteMatchingTriples(
+            new Uri($objectUri),
+            $inverses[$relationType],
+            new Uri($subjectUri)
+        );
+        
+    }
+  
+        /**
+     * Add relations to a skos concept
+     *
+     * @param string $uri
+     * @param string $relationType
+     * @param array|string $uris
+     * @throws Exception\InvalidArgumentException
+     */
+    public function addRelationTriple($uri, $relationType, $uris)
+    {
+        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+        
+        // @TODO Add check everywhere we may need it.
+        if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
+            throw new Exception\InvalidArgumentException(
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            );
+        }
+
+        $graph = new \EasyRdf\Graph();
+        
+        if (!is_array($uris)) {
+            $uris = [$uris];
+        }
+        foreach ($uris as $related) {
+            $graph->addResource($uri, $relationType, $related);
+        }
+
+        $this->client->insert($graph);
+    }
     
+   
     
 }
