@@ -771,7 +771,7 @@ public function deleteSolrIntact(Uri $resource)
     }
     
      public function fetchRelationUris(){
-         $skosrels = Skos::getSkosRelationsTypes();
+         $skosrels = Skos::getSkosRelations();
          $userrels = array_values($this->fetchUriName());
          $result = array_merge($skosrels, $userrels);
          return $result;

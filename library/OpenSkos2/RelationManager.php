@@ -22,6 +22,7 @@ use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\MyInstitutionModules\Relations;
 
 require_once dirname(__FILE__) .'/config.inc.php';
 
@@ -33,15 +34,15 @@ class RelationManager extends ResourceManager
      */
     protected $resourceType = Relation::TYPE;
     
-    public function fetchUriName() {
-         $uris = Skos::getSkosRelationsTypes();
+    public function fetchRelationsNameUri() {
+         $uris = Skos::getSkosRelations();
          $skosrels = [];
          foreach ($uris as $uri) {
               $border = strrpos($uri, "#");
-              $name = substr($uri, $border+1);
+              $name = 'skos:'.substr($uri, $border+1);
               $skosrels[$name] = $uri;
          }
-         $userrels = parent::fetchUriName();
+         $userrels = Relations::$myrelations;
          $result = array_merge($skosrels, $userrels);
          return $result;
     }
@@ -61,7 +62,7 @@ class RelationManager extends ResourceManager
         $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr="";
-        $existingRelations = array_merge(Skos::getSkosRelationsTypes(), $this->getUserRelationQNameUris());
+        $existingRelations = array_merge(Skos::getSkosRelations(), $this->getUserRelationQNameUris());
         
         if (count($rels) > 0) {
             if (in_array($rels[0], $existingRelations)) {
@@ -170,5 +171,5 @@ class RelationManager extends ResourceManager
         return $allRelations;
     }
 
-
+    
 }

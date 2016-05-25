@@ -27,6 +27,8 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\MyInstitutionModules\Relations;
+use OpenSkos2\Api\Exception\ApiException;
 
 
 require_once dirname(__FILE__) .'/config.inc.php';
@@ -247,7 +249,7 @@ class ConceptManager extends ResourceManager
             $relationType,
             new Uri($objectUri)
         );
-        $inverses = array_merge(Skos::getInverseRelationsMap(), inverse_relations());
+        $inverses = array_merge(Skos::getInverseRelationsMap(), Relations::$inverses);
         $this->deleteMatchingTriples(
             new Uri($objectUri),
             $inverses[$relationType],
@@ -289,6 +291,43 @@ class ConceptManager extends ResourceManager
         $this->client->insert($graph);
     }
     
-   
+   // all concepts from transitive closure for $conceptsUri;
+    private function getClosure($conceptUri, $relationUri)
+    {
+        $query = 'select ?trans where {<'. $conceptUri . '>  <' .$relationUri.'>+ ' . '  ?trans . }';
+        $response = $this ->query($query);
+        $retVal = array();
+        $i=0;
+        foreach ($response as $key => $value) {
+            $retVal[$i] = $value -> trans -> getUri();
+            $i++;
+        }
+        return $retVal;
+    }
+    
+    
+    
+    // a relation is invalid if it (possibly with its inverse) creates transitive link of a concept or related concept to itself
+    public function createsInvalidRelation($conceptUri, $relatedConceptUri, $relationUri) {
+        $closure = $this->getClosure($relatedConceptUri, $relationUri);
+        $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
+        if ($transitive) {
+            throw new ApiException('The triple creates transitive link of the source to itself, possibly via inverse relation.', 400);
+        }
+        // overkill??
+        $inverses = array_merge(Skos::getInverseRelationsMap(), Relations::$inverses);
+        if (array_key_exists($relationUri, $inverses)) {
+            $inverseRelUri = $inverses[$relationUri];
+            $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
+            $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
+            if ($transitiveInverse) {
+                throw new ApiException('The triple creates inverse transitive link of the target to itself', 400);
+            }
+            // consistency check: if we want to add aRb, then we must first check if a(-R)^+b, not to have mutually exclusive relations
+            // b is not in the inverse closure of a, but this is checked above
+        }
+        return false;
+    }
+
     
 }

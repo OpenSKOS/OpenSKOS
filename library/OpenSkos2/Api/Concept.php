@@ -20,6 +20,7 @@ use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\RelationManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Dcmi;
@@ -441,6 +442,8 @@ class Concept extends AbstractTripleStoreResource {
             throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
         }
 
+        $this->manager->createsInvalidRelation($body['concept'], $body['related'], $body['type']);
+        
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());

@@ -15,11 +15,5 @@ define('MAXIMAL_ROWS', 5000);
 // should be true for BeG  and false for meertens
 define('CHECK_MYSQL', true);
 
-// inverses
-
-function inverse_relations() {
-    $retVal = ['http://menzo.org/xmlns#faster' => 'http://menzo.org/xmlns#slower', 'http://menzo.org/xmlns#slower' => 'http://menzo.org/xmlns#faster'];
-    return $retVal;
-}
 
 define('UNKNOWN', "Unknown");

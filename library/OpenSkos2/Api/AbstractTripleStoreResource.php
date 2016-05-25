@@ -423,7 +423,7 @@ abstract class AbstractTripleStoreResource {
     }
 
     public function fetchUriName() {
-        return $this->manager->fetchUriName();
+        return $this->manager->fetchRelationsNameUri();
     }
 
  
