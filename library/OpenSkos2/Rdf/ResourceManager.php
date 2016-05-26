@@ -577,7 +577,6 @@ public function deleteSolrIntact(Uri $resource)
         return $items;
     }
     
-    // override in the superclass when necessary 
     public function fetchUriName() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <'. $this->getResourceType() .'> .}';
         $response = $this->query($query);

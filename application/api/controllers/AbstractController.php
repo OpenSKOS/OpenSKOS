@@ -20,7 +20,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         }
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
-        $result = $api->fetchRelationsNameUri($request);
+        $result = $api->fetchUriName($request);
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
     }

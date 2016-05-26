@@ -308,7 +308,7 @@ class ConceptManager extends ResourceManager
     
     
     // a relation is invalid if it (possibly with its inverse) creates transitive link of a concept or related concept to itself
-    public function createsInvalidRelation($conceptUri, $relatedConceptUri, $relationUri) {
+    public function createsCycle($conceptUri, $relatedConceptUri, $relationUri) {
         $closure = $this->getClosure($relatedConceptUri, $relationUri);
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {

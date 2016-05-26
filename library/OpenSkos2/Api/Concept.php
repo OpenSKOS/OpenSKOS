@@ -20,6 +20,7 @@ use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\RelationManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
@@ -36,6 +37,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
+use OpenSkos2\MyInstitutionModules\Relations;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
@@ -297,7 +299,7 @@ class Concept extends AbstractTripleStoreResource {
         parent::validate($resourceObject, $tenant);
         // resources referred by uri's 
         $this->checkIfReferredResourcesExist($resourceObject);
-        $this->checkUserRelations($resourceObject);
+        $this->checkRelationsInConcept($resourceObject);
     }
 
     // specific content validation
@@ -306,7 +308,7 @@ class Concept extends AbstractTripleStoreResource {
 
         // resources referred by uri's
         $this->checkIfReferredResourcesExist($resourceObject);
-        $this->checkUserRelations($resourceObject);
+        $this->checkRelationsInConcept($resourceObject);
     }
 
     // To DISCUSS?
@@ -317,24 +319,38 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
     }
 
-    private function checkUserRelations($resourceObject) {
-        $existingRelations = $this->manager->getUserRelationQNameUris();
-        $properties = array_keys($resourceObject->getProperties());
-        $userdefined = [];
+    
+    private function checkRelationsInConcept(ConceptResource $concept) {
+        $userDefinedRelUris = array_values(Relations::$myrelations);
+        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris()); // amount to asking the triple store
+        $allRelationUris = array_values(RelationManager::fetchRelationsNameUri());
+        $conceptUri = $concept->getUri();
+        $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {
-            if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
-                if (in_array($property, $existingRelations)) {
-                    $userdefined[] = $property;
-                } else {
-                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
+            if (in_array($property, $allRelationUris)) { // is a relation 
+                // if it is a user-defined, it must be registered
+                if (in_array($property, $userDefinedRelUris)) { // is a user-defined relation
+                    if (!in_array($property, $registeredRelationUris)) {
+                        throw new ApiException('The relation  ' . $property . '  is not registered in the triple store. ', 400);
+                    }
+                }
+                // cycle-check
+                $relatedConcepts = $concept->getProperty($property);
+                foreach ($relatedConcepts as $relConcept) {
+                    $this->manager->createsCycle($conceptUri, $relConcept, $property);
+                }
+            } else { // not a property, must be from a standard namespace
+                if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
+                    throw new ApiException('The propery  ' . $property . '  does not belong to standart properties of a concepts and is not a user-defined relation. ', 400);
                 }
             }
         }
         return true;
     }
+    
+    
 
     private function prepareSortsForSolr($sortstring) {
-
         $sortlist = explode(" ", $sortstring);
         $l = count($sortlist);
         $sortmap = [];
@@ -442,7 +458,15 @@ class Concept extends AbstractTripleStoreResource {
             throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
         }
 
-        $this->manager->createsInvalidRelation($body['concept'], $body['related'], $body['type']);
+        $userDefinedRelUris = array_values(Relations::$myrelations);
+        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris()); // amounts to asking the triple store
+        if (in_array($body['type'], $userDefinedRelUris)) { // check if it is registered
+            if (!in_array($body['type'], $registeredRelationUris)) {
+                throw new ApiException('The relation  ' . $body['type'] . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
+            }
+        }
+        
+        $this->manager->createsCycle($body['concept'], $body['related'], $body['type']);
         
         $user = $this->getUserByKey($body['key']);
 

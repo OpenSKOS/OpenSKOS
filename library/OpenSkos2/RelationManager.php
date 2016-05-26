@@ -34,7 +34,7 @@ class RelationManager extends ResourceManager
      */
     protected $resourceType = Relation::TYPE;
     
-    public function fetchRelationsNameUri() {
+    public static function fetchRelationsNameUri() {
          $uris = Skos::getSkosRelations();
          $skosrels = [];
          foreach ($uris as $uri) {
