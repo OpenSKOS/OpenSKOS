@@ -268,10 +268,6 @@ class ConceptManager extends ResourceManager
      */
     public function addRelationTriple($uri, $relationType, $uris)
     {
-        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
-            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
-        }
-        
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
@@ -307,8 +303,10 @@ class ConceptManager extends ResourceManager
     
     
     
+    
+    
     // a relation is invalid if it (possibly with its inverse) creates transitive link of a concept or related concept to itself
-    public function createsCycle($conceptUri, $relatedConceptUri, $relationUri) {
+    public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri) {
         $closure = $this->getClosure($relatedConceptUri, $relationUri);
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
@@ -328,6 +326,27 @@ class ConceptManager extends ResourceManager
         }
         return false;
     }
-
     
+    public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri) {
+        $trans = Relations::$transitive;
+        $closed = null;
+        if (!isset($trans[$relationUri]) || $trans[$relationUri] === null) {
+            $closed = false;
+        } else {
+            $closed = $trans[$relationUri];
+        }
+        if ($closed) {
+            $closure = $this->getClosure($conceptUri, $relationUri);
+            if (in_array($relatedConceptUri, $closure)) {
+                throw new ApiException('The triple creates a relation which alredy exists (in the transitive closure).', 400);
+            }
+        } else {
+            $count = $this->countTriples('<'.$conceptUri.'>', '<'.$relationUri.'>', '<'.$relatedConceptUri.'>');
+            if ($count >0) {
+               throw new ApiException('The triple creates a relation which alredy exists.', 400); 
+            }
+        }
+        return false;
+    }
+
 }

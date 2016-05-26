@@ -1,6 +1,7 @@
 <?php
 
 namespace OpenSkos2\MyInstitutionModules;
+use OpenSkos2\Namespaces\Skos;
 
 class Relations
 {
@@ -22,5 +23,16 @@ class Relations
         Relations::SLOWER => Relations::FASTER,
         Relations::STRONGER => Relations::WEAKER,
         Relations::WEAKER => Relations::STRONGER
+    );
+    
+    // if direct relation belongs to the transitive closure
+    // default is false
+    public static $transitive = array (
+        Relations::FASTER => true,
+        Relations::SLOWER => true,
+        Relations::STRONGER => true,
+        Relations::WEAKER => true,
+        Skos::BROADER => false,
+        Skos::NARROWER => false
     );
 }

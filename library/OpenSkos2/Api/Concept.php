@@ -337,18 +337,22 @@ class Concept extends AbstractTripleStoreResource {
                 // cycle-check
                 $relatedConcepts = $concept->getProperty($property);
                 foreach ($relatedConcepts as $relConcept) {
-                    $this->manager->createsCycle($conceptUri, $relConcept, $property);
+                    // check if related concept exists
+                    $count = $this->manager->countTriples('<' . $relConcept . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
+                    if ($count < 1) {
+                       throw new ApiException('The related concept  ' . $relConcept . '  does not exist. ', 400);
+                    }
+                    $this->manager->relationTripleIsDuplicated($conceptUri, $relConcept, $property);
+                    $this->manager->relationTripleCreatesCycle($conceptUri, $relConcept, $property);
                 }
             } else { // not a property, must be from a standard namespace
                 if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
-                    throw new ApiException('The propery  ' . $property . '  does not belong to standart properties of a concepts and is not a user-defined relation. ', 400);
+                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a user-defined relation. ', 400);
                 }
             }
         }
         return true;
     }
-    
-    
 
     private function prepareSortsForSolr($sortstring) {
         $sortlist = explode(" ", $sortstring);
@@ -460,13 +464,18 @@ class Concept extends AbstractTripleStoreResource {
 
         $userDefinedRelUris = array_values(Relations::$myrelations);
         $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris()); // amounts to asking the triple store
-        if (in_array($body['type'], $userDefinedRelUris)) { // check if it is registered
-            if (!in_array($body['type'], $registeredRelationUris)) {
-                throw new ApiException('The relation  ' . $body['type'] . '  does not belong to standart properties of a concepts and is not a registered user-defined property. You probably want to create and submit it first. ', 400);
+        if (!NamespaceAdmin::isPropertyFromStandardNamespace($body['type'])) { // possibly a user-defined relation
+            if (in_array($body['type'], $userDefinedRelUris)) { // check if it is registered
+                if (!in_array($body['type'], $registeredRelationUris)) {
+                    throw new ApiException('The user-defined relation  ' . $body['type'] . '  is not yet submitted to the triple store. ', 400);
+                }
+            } else {
+                throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos-relation nor a user-defined relation. ', 400);
             }
         }
         
-        $this->manager->createsCycle($body['concept'], $body['related'], $body['type']);
+        $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
+        $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
         
         $user = $this->getUserByKey($body['key']);
 

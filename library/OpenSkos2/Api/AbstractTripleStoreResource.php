@@ -416,7 +416,7 @@ abstract class AbstractTripleStoreResource {
                         };
                     }
                 } else {
-                    throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. You might try to set CHECK_MYSQL to true and try again with checking MySql database as well. ', 400);
+                    throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. ', 400);
                 }
             }
         }

@@ -30,5 +30,8 @@
     r16: (?x menzo:weaker ?y) -> (?y menzo:stronger ?x) .
 
     r17: (?x menzo:faster ?y) -> (?y menzo:slower ?x) .
-    r18: (?x menzo:slower ?y) -> (?y menzo:faster ?x) 
+    r18: (?x menzo:slower ?y) -> (?y menzo:faster ?x) .
+
+    r19: (?x menzo:faster ?y) (?y menzo:faster ?z) -> (?x menzo:faster ?z) .
+    r20: (?x menzo:slower ?y) (?y menzo:slower ?z) -> (?x menzo:slower ?z) .
 ]
