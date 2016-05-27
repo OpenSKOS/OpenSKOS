@@ -94,10 +94,9 @@ class Concept extends AbstractTripleStoreResource {
             'directQuery' => true,
         ];
 
-        // tenant
+      
         if (isset($params['tenant'])) {
-            $tenant = $this->getTenantFromParams($params);
-            $options['tenants'] = [$tenant->code];
+            $options['tenants'] = [$params['tenant']];
         }
 
         // search query

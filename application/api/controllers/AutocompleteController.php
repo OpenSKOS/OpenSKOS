@@ -89,19 +89,19 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     public function getAction()
     {
         $request = $this->getRequest();
-        
+
         $q = $request->getParam('id');
         $result = $this->getConceptManager()->autoComplete(
-            $q,
-            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
-            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
-            $request->getParam('lang')
+                $q, FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')], FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')], $request->getParam('lang')
         );
-        
+
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody(
-            json_encode($result)
-        );
+        $format = $request->getParam('format');
+        if ($format !== 'html') {
+            $this->getResponse()->setBody(json_encode($result));
+        } else {
+            $this->view->assign('items', $result);
+        }
     }
 
     public function postAction()
