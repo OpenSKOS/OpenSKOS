@@ -26,6 +26,7 @@ use OpenSkos2\Namespaces\Xsd;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\MyInstitutionModules\Relations;
 use OpenSkos2\Api\Exception\ApiException;

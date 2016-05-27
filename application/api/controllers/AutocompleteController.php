@@ -63,7 +63,6 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
             FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
             $request->getParam('lang')
         );
-        
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
             json_encode($result)

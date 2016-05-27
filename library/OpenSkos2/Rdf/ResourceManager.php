@@ -769,7 +769,7 @@ public function deleteSolrIntact(Uri $resource)
         }
     }
     
-     public function fetchRelationUris(){
+     public function fetchRelationUris(){ // all relations, not only concept-concept relations
          $skosrels = Skos::getSkosRelations();
          $userrels = array_values($this->fetchUriName());
          $result = array_merge($skosrels, $userrels);

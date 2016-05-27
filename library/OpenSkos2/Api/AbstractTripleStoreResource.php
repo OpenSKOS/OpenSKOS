@@ -395,6 +395,12 @@ abstract class AbstractTripleStoreResource {
     // if CHECK_MYSQL is set to true (see /../config.inc.php)
     protected function validateURI($resourceObject, $property, $rdfType) {
         $val = $resourceObject->getProperty($property);
+        if ($val === null) {
+            return true;
+        }
+        if (count($val)===0) {
+            return true;
+        }
         foreach ($val as $uri) {
             $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
             if ($count < 1) {

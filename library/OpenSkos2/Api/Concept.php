@@ -317,13 +317,14 @@ class Concept extends AbstractTripleStoreResource {
         $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
         $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
+        $this->validateURI($resourceObject, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
     }
 
-    
+    // also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
     private function checkRelationsInConcept(ConceptResource $concept) {
         $userDefinedRelUris = array_values(Relations::$myrelations);
-        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris()); // amount to asking the triple store
-        $allRelationUris = array_values(RelationManager::fetchRelationsNameUri());
+        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
+        $allRelationUris = array_values(RelationManager::fetchConceptConceptRelationsNameUri());
         $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {
@@ -334,7 +335,7 @@ class Concept extends AbstractTripleStoreResource {
                         throw new ApiException('The relation  ' . $property . '  is not registered in the triple store. ', 400);
                     }
                 }
-                // cycle-check
+                // cycle-check and duplication check
                 $relatedConcepts = $concept->getProperty($property);
                 foreach ($relatedConcepts as $relConcept) {
                     // check if related concept exists
@@ -345,7 +346,7 @@ class Concept extends AbstractTripleStoreResource {
                     $this->manager->relationTripleIsDuplicated($conceptUri, $relConcept, $property);
                     $this->manager->relationTripleCreatesCycle($conceptUri, $relConcept, $property);
                 }
-            } else { // not a property, must be from a standard namespace
+            } else { // not a concept-concept relation, must be from a standard namespace
                 if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
                     throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a user-defined relation. ', 400);
                 }
@@ -463,17 +464,20 @@ class Concept extends AbstractTripleStoreResource {
         }
 
         $userDefinedRelUris = array_values(Relations::$myrelations);
-        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris()); // amounts to asking the triple store
-        if (!NamespaceAdmin::isPropertyFromStandardNamespace($body['type'])) { // possibly a user-defined relation
-            if (in_array($body['type'], $userDefinedRelUris)) { // check if it is registered
+        $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
+        $allRelationUris = array_values(RelationManager::fetchConceptConceptRelationsNameUri());
+        if (in_array($body['type'], $allRelationUris)) { // is a concept-concept relation 
+            // if it is a user-defined, it must be registered
+            if (in_array($body['type'], $userDefinedRelUris)) { // is a user-defined relation
                 if (!in_array($body['type'], $registeredRelationUris)) {
-                    throw new ApiException('The user-defined relation  ' . $body['type'] . '  is not yet submitted to the triple store. ', 400);
+                    throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 400);
                 }
-            } else {
-                throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos-relation nor a user-defined relation. ', 400);
             }
+        } else {
+            throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos concept-concept relation nor a user-defined relation. ', 400);
         }
-        
+
+
         $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
         $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
         

@@ -34,8 +34,8 @@ class RelationManager extends ResourceManager
      */
     protected $resourceType = Relation::TYPE;
     
-    public static function fetchRelationsNameUri() {
-         $uris = Skos::getSkosRelations();
+    public static function fetchConceptConceptRelationsNameUri() {
+         $uris = Skos::getSkosConceptConceptRelations();
          $skosrels = [];
          foreach ($uris as $uri) {
               $border = strrpos($uri, "#");
@@ -48,7 +48,7 @@ class RelationManager extends ResourceManager
     }
     
    
-    public function fetchAllRelationsOfType($relationType, $sourceSchemata, $targetSchemata) {
+    public function fetchAllConceptConceptRelationsOfType($relationType, $sourceSchemata, $targetSchemata) {
         $rels = [];
         $sSchemata = [];
         $tSchemata = [];
@@ -62,7 +62,7 @@ class RelationManager extends ResourceManager
         $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr="";
-        $existingRelations = array_merge(Skos::getSkosRelations(), $this->getUserRelationQNameUris());
+        $existingRelations = array_merge(Skos::getSkosConceptConceptRelations(), $this->getUserRelationQNameUris());
         
         if (count($rels) > 0) {
             if (in_array($rels[0], $existingRelations)) {

@@ -14,9 +14,36 @@ MyInstitutionModules must contain
 One may fork implementation of these function depending on the resource type, given within $resourceManager.
 
 
-2) Deletion.php, with a parameter $resourceManager, which must have 1 obligatory function:
+3) Deletion.php, with a parameter $resourceManager, which must have 1 obligatory function:
     
     public function canBeDeleted($uri);
 
 One may fork implementation of this finction depending on the resource type, given within $resourceManager.
+
+4)  Relations.php.  Must contain three static arrays (mappings) $myrelations, $inverses, $transitive, e.g.
+
+ public static $myrelations = array (
+        'menzo:faster' => Relations::FASTER, 
+        'menzo:slower' => Relations::SLOWER, 
+        'menzo:stronger' => Relations::STRONGER, 
+        'menzo:weaker' => Relations::WEAKER
+    );
+    
+    public static $inverses = array (
+        Relations::FASTER => Relations::SLOWER,
+        Relations::SLOWER => Relations::FASTER,
+        Relations::STRONGER => Relations::WEAKER,
+        Relations::WEAKER => Relations::STRONGER
+    );
+    
+    // if the direct relation belongs to the transitive closure
+    // default is false
+    public static $transitive = array (
+        Relations::FASTER => true,
+        Relations::SLOWER => true,
+        Relations::STRONGER => true,
+        Relations::WEAKER => true,
+        Skos::BROADER => false,
+        Skos::NARROWER => false
+    );
      

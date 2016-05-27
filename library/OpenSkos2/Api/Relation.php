@@ -61,7 +61,7 @@ class Relation extends AbstractTripleStoreResource {
             $targetSchemata = $params['targetSchemata'];
         }; 
         try {
-            $response = $this->manager->fetchAllRelationsOfType($relType, $sourceSchemata, $targetSchemata);
+            $response = $this->manager->fetchAllConceptConceptRelationsOfType($relType, $sourceSchemata, $targetSchemata);
             $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;

@@ -31,8 +31,9 @@ class SkosCollection extends AbstractTripleStoreResource
        //must be new
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
        
-       // set referred by an uri must exist 
+       // referred resources must exist 
        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+       $this->validateURI($resourceObject, Skos::MEMBER, Skos::CONCEPT);
     }
     
     
@@ -43,7 +44,8 @@ class SkosCollection extends AbstractTripleStoreResource
         // must not occur as another collection's name if different from the old one 
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
     
-        // set referred by an uri must exist 
+         // referred resources must exist 
        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+       $this->validateURI($resourceObject, Skos::MEMBER, Skos::CONCEPT);
     }
 }

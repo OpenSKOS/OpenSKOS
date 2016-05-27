@@ -93,6 +93,23 @@ class Skos
         ];
     }
     
+     public static function getSkosConceptConceptRelations()
+    {
+        
+        return [
+            Skos::BROADER,
+            Skos::NARROWER,
+            Skos::RELATED,
+            Skos::BROADERTRANSITIVE,
+            Skos::NARROWERTRANSITIVE,
+            Skos::BROADMATCH,
+            Skos::NARROWMATCH,
+            Skos::CLOSEMATCH,
+            Skos::EXACTMATCH,
+            Skos::RELATEDMATCH,
+        ];
+    }
+    
     /**
      * Gets map of which relation inferes to which relation.
      * The tranitive inferres are not in that list. Can not be handled with a map.
