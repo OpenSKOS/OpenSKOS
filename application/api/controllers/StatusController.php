@@ -8,7 +8,8 @@ class Api_StatusController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {
-        parent::init();
+       parent::init();
+       $this ->viewpath="status/";
         $this->_helper->contextSwitch()
             ->initContext($this->getRequestedFormat());
         

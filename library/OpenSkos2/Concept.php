@@ -179,7 +179,7 @@ class Concept extends Resource
     /**
      * Get tenant
      *
-     * @return Literal
+     * @return Uri (good) or Literal (obsolete)
      */
     public function getTenant()
     {
@@ -189,7 +189,7 @@ class Concept extends Resource
         }
     }
     
-    
+  
     
     /**
      * Checks if the concept is top concept for the specified scheme.

@@ -8,7 +8,7 @@ class Api_InstitutionController extends AbstractController
     {
        parent::init();
        $this->fullNameResourceClass = 'OpenSkos2\Api\Tenant';
-      
+       $this ->viewpath="institution/";
     }
     
      public function indexAction()

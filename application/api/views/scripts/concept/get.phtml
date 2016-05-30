@@ -21,6 +21,8 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Org;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -38,35 +40,32 @@ $this->headTitle($title);
 <h2><?=$this->escape($title)?></h2>
 <dl>
     <dt><?=$this->translate('Institution')?>:</dt>
+    <?php $tenantReference=$concept->getTenant();
+    $tenatuuid=$conceptManager->getResourceUuidLookUpMySqlIfNeeded($tenantReference, Org::FORMALORG);
+    ?>
     <dd>
         <a href="<?=$this->url([
                 'module' => 'api',
-                'controller' => 'institutions',
-                'id' => (string)$concept->getTenant()
+                'controller' => 'institution',
+                'id' => $tenatuuid,
             ],
             'rest'
         )?>.html">
-            <?=$this->escape($concept->getInstitution()->name)?>
+            <?=$this->escape($conceptManager->getTenantNameLookUpMySqlIfNeeded($tenantReference))?>
         </a>
     </dd>
     
-    <?php
-        $setsModel = new OpenSKOS_Db_Table_Sets();
-    ?>
     
-    <?php foreach ($concept->getProperty(OpenSkos::SET) as $setUri):?>
-        <?php
-            $set = $setsModel->findByUri($setUri->getUri());
-        ?>
+    <?php foreach ($concept->getProperty(OpenSkos::SET) as $setReference):?>
         <dt><?=$this->translate('Set')?>:</dt>
         <dd>
             <a href="<?=$this->url(array(
                                 'module' => 'api',
-                                'controller' => 'collections',
-                                'id' => $set->getId()
+                                'controller' => 'set',
+                                //'id' => $conceptManager->getResourceUuidLookUpMySqlIfNeeded($setReference, Dcmi::DATASET)
                             ), 'rest'
             )?>.html">
-                <?= $set->dc_title?>
+                <?= $conceptManager ->getSetTitleLookUpMySqlIfNeeded($setReference)?>
             </a>
         </dd>
     <?php endforeach;?>

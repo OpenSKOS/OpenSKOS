@@ -31,8 +31,10 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Solr\Document;
 use OpenSKOS_Db_Table_Tenants;
@@ -377,6 +379,7 @@ public function deleteSolrIntact(Uri $resource)
                 return $ind1 - $ind2;
             });
         }
+        
         
         return $resources;
     }
@@ -821,5 +824,89 @@ public function deleteSolrIntact(Uri $resource)
     }
 
    }
+   
+   // used only for HTML output
+    public function getResourceUuidLookUpMySqlIfNeeded($resourceReference, $resourceType) {
+        if ($resourceReference instanceof Uri) { // "ideal situation", ask the triple store
+            $query = 'SELECT ?uuid WHERE { <' . $resourceReference->getUri() . '>  <' . OpenSkosNamespace::UUID . '> ?uuid .  }';
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->uuid->getValue();
+            } else {
+                return "unknown";
+            }
+        } else { // must be a code of the resource
+            $query = "SELECT ?uuid WHERE { ?resourceuri <" . OpenSkosNamespace::CODE . "> '" . $resourceReference->getValue() . "' . ?resourceuri <" . OpenSkos::UUID . "> ?uuid .  }";
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->uuid->getValue();
+            } else { // MySql
+                $resourceMySql = null;
+                if ($resourceType === Org::FORMALORG) {
+                    $resourceMySql = $this->fetchTenantFromMySqlByCode($resourceReference->getValue());
+                };
+                if ($resourceType === Dcmi::DATASET) {
+                    $resourceMySql = $this->fetchSetFromMySqlByCode($resourceReference-getValue());
+                };
+                if ($resourceMySql !== null) {
+                    if ($resourceMySql['uuid'] !== null && isset($resourceMySql['uuid'])) {
+                        return $resourceMySql['uuid'];
+                    }
+                }
+                throw new ApiException("The resource with the reference " . $resourceReference->getValue() . " does not have uuid and cannot be retrieved. Possible obsolete setting. ", 400);
+            }
+        }
+    }
     
+     
+    // used only for HTML output
+    public function getSetTitleLookUpMySqlIfNeeded($reference) {
+        if ($reference instanceof Uri) { // "ideal situation", ask the triple store
+            $query = 'SELECT ?name WHERE { <' . $reference->getUri() . '>  <' . DcTerms::TITLE . '> ?name .  <' . $reference->getUri() . '>  <' . RdfNamespace::TYPE . '> <'. Dcmi::DATASET.'> .}';
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->name -> getValue();
+            } else {
+                return "unknown";
+            }
+        } else { // must be a code, first ask trile store, then MySql
+            $val = $reference->getValue();
+            $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $val . "' . ?uri <" . DcTerms::TITLE . "> ?name . ?uri <" . RdfNamespace::TYPE . "> <". Dcmi::DATASET."> . }";
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->name->getValue();
+            } else { // MySql
+                $mysqlTenant = $this->fetchSetFromMySqlByCode($val);
+                return $mysqlTenant['dc_title'];
+            }
+        }
+    }
+    
+       
+    // used only for HTML output
+    public function getTenantNameLookUpMySqlIfNeeded($reference) {
+        if ($reference instanceof Uri) { // "ideal situation", ask the triple store
+            $query = 'SELECT ?name WHERE { <' . $reference->getUri() . '>  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->name -> getValue();
+            } else {
+                return "unknown";
+            }
+        } else { // must be a code of the institution, first ask trile store, then MySql
+            $val = $reference -> getValue();
+            $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $val . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
+            $response = $this->query($query);
+            if ($response !== null & count($response) > 0) {
+                return $response[0]->name->getValue();
+            } else { // MySql
+                $mysqlTenant = $this->fetchTenantFromMySqlByCode($val);
+                return $mysqlTenant['name'];
+            }
+        }
+    }
+   
+
+   
+
 }

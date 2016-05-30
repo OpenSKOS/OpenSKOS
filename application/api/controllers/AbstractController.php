@@ -4,6 +4,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
 
 {
     protected $fullNameResourceClass;
+    protected $viewpath;
     
     
     public function init()
@@ -28,8 +29,18 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     public function getAction() {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
-        $response = $api->findResourceById($request);
-        $this->emitResponse($response);
+        $id = $this->getRequest()->getParam('id');
+        if (null === $id) {
+            throw new Zend_Controller_Exception('No id provided', 400);
+        }
+        $context = $this->_helper->contextSwitch()->getCurrentContext();
+        if ('html' === $context) {
+            $this->view->concept = $api->findResourceById($id);
+            return $this->renderScript('/get.phtml');
+        } else {
+            $response = $api->findResourceByIdResponse($request, $id);
+            $this->emitResponse($response);
+        }
     }
 
     public function postAction()

@@ -9,6 +9,7 @@ class Api_SetController extends AbstractController
     {
        parent::init();
        $this->fullNameResourceClass = 'OpenSkos2\Api\Set';
+       $this ->viewpath="set/";
     }
     
      public function indexAction()

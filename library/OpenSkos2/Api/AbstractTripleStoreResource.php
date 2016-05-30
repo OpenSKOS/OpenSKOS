@@ -70,22 +70,13 @@ abstract class AbstractTripleStoreResource {
     }
 
     // Id is either an URI or uuid
-    public function findResourceById(ServerRequestInterface $request) {
+    public function findResourceByIdResponse(ServerRequestInterface $request, $id) {
         try {
             $params = $request->getQueryParams();
-            $resource = null;
             if (isset($params['id'])) {
                 $id = $params['id'];
-                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                    $resource = $this->manager->fetchByUri($id);
-                } else {
-                    $resource = $this->manager->fetchByUuid($id);
-                }
-            } else {
-                throw new InvalidArgumentException('No Id (URI or UUID) is given');
-            }
-
-
+            }; 
+            $resource =  $this -> findResourcebyId($id);
             $format = 'rdf';
             if (isset($params['format'])) {
                 $format = $params['format'];
@@ -109,7 +100,19 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-   
+    // Id is either an URI or uuid
+    public function findResourceById($id) {
+            if ($id!==null && isset($id)){
+                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                    $resource = $this->manager->fetchByUri($id);
+                } else {
+                    $resource = $this->manager->fetchByUuid($id);
+                }
+                return $resource;
+            } else {
+                throw new InvalidArgumentException('No Id (URI or UUID) is given');
+            }
+    }
 
     public function create(ServerRequestInterface $request) {
        
