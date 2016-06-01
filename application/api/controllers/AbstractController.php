@@ -1,12 +1,14 @@
 <?php
 
+
+use EasyRdf\RdfNamespace;
+use OpenSkos2\Namespaces\vCard;
+
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 
 {
     protected $fullNameResourceClass;
     protected $viewpath;
-    
-    
     public function init()
     {
         $this->getHelper('layout')->disableLayout();
@@ -35,12 +37,39 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         }
         $context = $this->_helper->contextSwitch()->getCurrentContext();
         if ('html' === $context) {
-            $this->view->concept = $api->findResourceById($id);
-            return $this->renderScript('/get.phtml');
+           $this->view->resource = $api->findResourceById($id);
+           $this->view->resProperties = $this ->preparePropertiesForHTML($this->view->resource);
+           return $this->renderScript($this->viewpath . 'get.phtml');
         } else {
             $response = $api->findResourceByIdResponse($request, $id);
             $this->emitResponse($response);
         }
+    }
+    
+    private function preparePropertiesForHTML($resource) {
+        $props = $resource->getProperties();
+        $retVal = [];
+        $shortADR = RdfNamespace::shorten(vCard::ADR);
+        $shortORG = RdfNamespace::shorten(vCard::ORG);
+        foreach ($props as $propname => $vals) {
+            $shortName = RdfNamespace::shorten($propname);
+            if ($shortName !== $shortADR && $shortName !== $shortORG) {
+                foreach ($vals as $val) {
+                    $retVal[$shortName] = $val;
+                }
+            } else { // recursive elements
+                if ($vals !== null && isset($vals) && is_array($vals))
+                    if (count($vals) > 0) {
+                        foreach ($vals[0]->getProperties() as $key => $val2) {
+                            $shortName2 = RdfNamespace::shorten($key);
+                            foreach ($val2 as $val3) {
+                                $retVal[$shortName2] = $val3;
+                            }
+                        }
+                    }
+            }
+        }
+        return $retVal;
     }
 
     public function postAction()

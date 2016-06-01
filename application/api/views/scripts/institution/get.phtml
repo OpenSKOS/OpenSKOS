@@ -18,43 +18,50 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-?>
-<?php $this->headTitle ($this->tenant->name)?>
 
-<h2><?php echo $this->escape($this->tenant->name)?></h2>
+use OpenSkos2\Rdf\Literal;
+
+$di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$tenant = $this->resource;
+
+/* @var $tenantManager \OpenSkos2\TenantManager */
+$tenantManager = $di->get('OpenSkos2\TenantManager');
+$code = $tenant->getCode();
+$name = $tenantManager->getTenantNameLookUpMySqlIfNeeded($code);
+$this->headTitle($name);
+?>
+<h2><?php echo $this->escape($name)?></h2>
 <dl>
-	<?php foreach ($this->tenant as $key => $val): if ($key == 'name' || !$val) continue;
-		switch ($key) {
-			case 'email':
-				$val = '<a href="mailto:' . $val.'">'.$val.'</a>';
-				break;
-			case 'website':
-				$val = '<a href="' . $val.'">'.$val.'</a>';
-				break;
-			default:
-				$val = $this->escape($val);
-		}
-	?>
-	<dt><?php echo $this->translate($key)?>:</dt>
-	<dd><?php echo $val?></dd>
-	<?php endforeach?>
+    <?php
+        foreach ($this->resProperties as $key => $val): ?>
+	<dt><?php echo $this->translate($key)?>:</dt><dd><?php echo $val?></dd>
+        <?php endforeach;?>
 </dl>
 <h3><?php echo $this->translate('Sets')?></h3>
 <?php 
-	$sets = $this->tenant->findDependentRowset('OpenSKOS_Db_Table_Sets');
+	$sets = $tenantManager->fetchSetsForTenant($code);
 ?>
 <ul id="sets-per-institute">
-<?php foreach ($sets as $set):?>
-	<li>
-		<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'sets', 'id' => $set->getId()))?>.html"><?php echo $set->dc_title?></p>
-	<?php if ($set->dc_description):?>
-		<p class="dc_description"><?php echo nl2br($set->dc_description, true)?></p>
+<?php foreach ($sets as $seturi => $props):?>
+    <li>
+        <?php if (isset($props['openskos_uuid'])):?>
+	<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $props['openskos_uuid']))?>.html">
+         <?php echo $props['dcterms_title']?></a></p>
+        <?php else:?>
+        <p class="dc_title"><?php echo $props['dcterms_title']?></p>
+        <?php endif?>
+         <?php if ($props['openskos_code']):?>
+		<p><?php echo "code: " . $props['openskos_code']?></p>
+        <?php endif?>
+	<?php if (isset($props['dcterms_description'])):?>
+		<p class="dc_description"><?php echo nl2br($props['dcterms_description'], true)?></p>
 	<?php endif?>
-	<?php if ($set->website):?>
-		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $set->website?>"><?php echo $set->website?></a></p>
+	<?php if (isset($props['openskos_webpage'])):?>
+		<p class="website"><?php echo $this->translate('See')?> <a rel="external" href="<?php echo $props['openskos_webpage']?>"><?php echo $props['openskos_webpage']?></a></p>
 	<?php endif?>
 	</li>
 <?php endforeach?>
+        
 </ul>
 <h3>Alternative formats</h3>
 <ul>

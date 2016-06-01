@@ -186,6 +186,8 @@ class Concept extends Resource
         $values = $this->getProperty(OpenSkos::TENANT);
         if (isset($values[0])) {
             return $values[0];
+        }else{
+            return new Literal(UNKNOWN);
         }
     }
     

@@ -32,10 +32,14 @@ class Tenant extends Resource
     
     const TYPE = Org::FORMALORG;
 
-    protected $code;
-
+    
     public function getCode() {
-        return $this->code;
+        $values = $this->getProperty(OpenSkos::CODE);
+        if (isset($values[0])) {
+            return $values[0];
+        }else{
+            return new Literal(UNKNOWN);
+        }
     }
 
     public function __construct($uri = null) {
