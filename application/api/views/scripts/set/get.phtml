@@ -21,6 +21,7 @@
 
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $set = $this->resource;
@@ -89,7 +90,7 @@ $this->headTitle($name)?>
 	<div id="collection-stats" class="box">
 		<h3>SKOS Concepts in this set:</h3>
 		<ul>
-			<?php $count= $setManager->countConceptsForSet($uri);
+			<?php $count= $setManager->countConceptsForCluster($uri, OpenSkos::SET);
 			echo number_format($count, 0)?>
 		</ul>
 	</div>

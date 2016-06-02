@@ -40,7 +40,7 @@ class ConceptSchemeManager extends ResourceManager
         return parent::CanBeDeleted($uri);
     }
     /**
-     * Get all scheme's by collection URI
+     * Get all scheme's by set URI
      *
      * @param string $collectionUri e.g http://openskos.org/api/collections/rce:TEST
      * @param array $filterUris
@@ -96,4 +96,7 @@ class ConceptSchemeManager extends ResourceManager
 
         return $collection;
     }
+    
+   
+   
 }

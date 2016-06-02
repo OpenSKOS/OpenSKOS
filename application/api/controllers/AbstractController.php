@@ -47,6 +47,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         }
     }
     
+    
     private function preparePropertiesForHTML($resource) {
         $props = $resource->getProperties();
         $retVal = [];
@@ -56,6 +57,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
             $shortName = RdfNamespace::shorten($propname);
             if ($shortName !== $shortADR && $shortName !== $shortORG) {
                 $shortHTMLName = $this->shortenForHTML($propname);
+                $retVal[$shortHTMLName] = '';
                 foreach ($vals as $val) {
                     $retVal[$shortHTMLName] = $val;
                 }
@@ -90,6 +92,8 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $parts = RdfNamespace::splitUri($key, false);
         return $parts[1];
     }
+    
+   
 
     public function postAction()
     {

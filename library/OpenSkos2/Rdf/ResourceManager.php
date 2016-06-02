@@ -907,6 +907,15 @@ public function deleteSolrIntact(Uri $resource)
         }
     }
    
+     // used only for HTML representation
+    public function countConceptsForCluster($clusterUri, $clusterType) {
+        $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
+        . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterUri . '> .'
+                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}';
+        $result = $this->query($query);
+        $tmp = $result[0];
+        return $tmp->count->getValue();
+    }
 
    
 
