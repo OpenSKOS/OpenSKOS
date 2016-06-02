@@ -60,6 +60,16 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
     
+    // used in Tenant and Set
+    public function getCode() {
+        $values = $this->getProperty(OpenSkos::CODE);
+        if (isset($values[0])) {
+            return $values[0];
+        }else{
+            return new Literal(UNKNOWN);
+        }
+    }
+    
     /**
      * @param string $predicate
      * @param RdfObject $value

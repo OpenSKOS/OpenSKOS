@@ -772,6 +772,7 @@ public function deleteSolrIntact(Uri $resource)
         }
     }
     
+  
      public function fetchRelationUris(){ // all relations, not only concept-concept relations
          $skosrels = Skos::getSkosRelations();
          $userrels = array_values($this->fetchUriName());
@@ -871,7 +872,7 @@ public function deleteSolrIntact(Uri $resource)
             }
         } else { // must be a code, first ask trile store, then MySql
             $val = $reference->getValue();
-            $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $val . "' . ?uri <" . DcTerms::TITLE . "> ?name . ?uri <" . RdfNamespace::TYPE . "> <". Dcmi::DATASET."> . }";
+            $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $val . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" . RdfNamespace::TYPE . "> <". Dcmi::DATASET."> . }";
             $response = $this->query($query);
             if ($response !== null & count($response) > 0) {
                 return $response[0]->name->getValue();
