@@ -34,7 +34,8 @@ $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
-    'start|s=s' => 'Start from that record'
+    'start|s=s' => 'Start from that record',
+    'dryrun' => 'Only validate the data, do not migrate it.'
 );
 
 try {
@@ -60,10 +61,12 @@ $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $tenant = $OPTS->tenant;
-
+$isDryRun = $OPTS->getOption('dryrun');
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
+
+$validator = new \OpenSkos2\Validator\Resource($resourceManager, new \OpenSkos2\Tenant($tenant), $logger);
 
 if (!empty($OPTS->start)) {
     $counter = $OPTS->start;
@@ -84,18 +87,19 @@ $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClas
 
 $users = [];
 $notFoundUsers = [];
+$notFoundCollections = [];
 $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
 
-$fetchRowWithRetries = function ($model, $query) {
+$fetchRowWithRetries = function ($model, $query) use ($logger) {
     $tries = 0;
     $maxTries = 3;
     do {
         try {
             return $model->fetchRow($query);
         } catch (\Exception $exception) {
-            echo 'retry mysql connect' . PHP_EOL;
+            $logger->info('retry mysql connect');
             // Reconnect
             $model->getAdapter()->closeConnection();
             $modelClass = get_class($model);
@@ -111,7 +115,15 @@ $fetchRowWithRetries = function ($model, $query) {
 
 $mappings = [
     'users' => [
-        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use (
+            $userModel,
+            &$users,
+            &$notFoundUsers,
+            $tenant,
+            $fetchRowWithRetries,
+            $logger,
+            $isDryRun
+        ) {
             if (!$value) {
                 return null;
             }
@@ -138,11 +150,11 @@ $mappings = [
                     );
                 }
                 if (!$user) {
-                    echo "Could not find user with id/name: {$value}\n";
+                    $logger->info("Could not find user with id/name: {$value}");
                     $notFoundUsers[] = $value;
                     $users[$value] = null;
                 } else {
-                    $users[$value] = $user->getFoafPerson();
+                    $users[$value] = $user->getFoafPerson(!$isDryRun);
                 }
             }
             return $users[$value];
@@ -156,8 +168,20 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, &$collections, $tenant, $fetchRowWithRetries) {
+        'callback' => function ($value) use (
+            $collectionModel,
+            &$collections,
+            &$notFoundCollections,
+            $tenant,
+            $fetchRowWithRetries,
+            $logger,
+            $isDryRun
+        ) {
             if (!$value) {
+                return null;
+            }
+            
+            if (in_array($value, $notFoundCollections)) {
                 return null;
             }
                         
@@ -171,10 +195,11 @@ $mappings = [
                 );
 
                 if (!$collection) {
-                    echo "Could not find collection with id: {$value}\n";
-                    $collections [$value] = null;
+                    $logger->info("Could not find collection with id: {$value}");
+                    $notFoundCollections[] = $value;
+                    $collections[$value] = null;
                 } else {
-                    $collections [$value] = $collection->getUri();
+                    $collections[$value] = $collection->getUri(!$isDryRun);
                 }
             }
             return $collections[$value];
@@ -355,18 +380,30 @@ do {
             throw new Exception("What to do with field {$field}");
         }
         
+        // Add tenant in graph
+        $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+
         // Set status deleted
         if (!empty($doc['deleted'])) {
             $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
         }
         
-        // Add tenant in graph
-        $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
+        // Validate (only if not deleted)
+        if (!$resource->isDeleted() && !$validator->validate($resource)) {
+            if (!$isDryRun) {
+                throw new \Exception(
+                    'Resource <' . $resource->getUri() . '> is not valid. '
+                    . impolode(', ', $validator->getErrorMessages())
+                );
+            }
+        }
         
-        $resourceManager->insert($resource);
-
+        // Insert
+        if (!$isDryRun) {
+            $resourceManager->insert($resource);
+        }
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-echo "done!";
+$logger->info("done!");

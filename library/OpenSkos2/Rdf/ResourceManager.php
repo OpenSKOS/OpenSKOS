@@ -163,7 +163,7 @@ class ResourceManager
     {
         $uri = $resource->getUri();
         $resource->unsetProperty(OpenSkosNamespace::STATUS);
-        $status = new Literal(\OpenSkos2\Concept::STATUS_DELETED);
+        $status = new Literal(Resource::STATUS_DELETED);
         $resource->addProperty(OpenSkosNamespace::STATUS, $status);
 
         $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
@@ -179,7 +179,7 @@ class ResourceManager
         $update = $this->solr->createUpdate();
         $doc = $update->createDocument();
         $doc->setKey('uri', $uri);
-        $doc->addField('s_status', \OpenSkos2\Concept::STATUS_DELETED);
+        $doc->addField('s_status', Resource::STATUS_DELETED);
         $doc->setFieldModifier('s_status', 'set');
         $update->addDocument($doc);
         if (!$this->getIsNoCommitMode()) {

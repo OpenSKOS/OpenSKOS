@@ -125,9 +125,10 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     /**
      * Get the set uri for openskos:set
      * 
+     * @param $autoSave bool , default: true If uri is generated, should it be saved in the database
      * @return \OpenSkos2\Rdf\Uri
      */
-    public function getUri()
+    public function getUri($autoSave = true)
     {
         // If we don't have uri yet - use base uri or generate one.
         if (empty($this->uri)) {
@@ -137,7 +138,10 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             } else {
                 $this->uri = rtrim($this->getBaseApiUri(), '/') . '/collections/' . $this->getId();
             }
-            $this->save();
+            
+            if ($autoSave) {
+                $this->save();
+            }
         }
         return new Uri($this->uri);
     }

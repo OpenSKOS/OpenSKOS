@@ -41,32 +41,7 @@ class ConceptScheme extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-
-    /**
-     * @return string|null
-     */
-    public function getStatus()
-    {
-        if (!$this->hasProperty(OpenSkos::STATUS)) {
-            return null;
-        } else {
-            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
-        }
-    }
     
-    /**
-     * Check if the concept is deleted
-     *
-     * @return boolean
-     */
-    public function isDeleted()
-    {
-        if ($this->getStatus() === self::STATUS_DELETED) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Gets preview title for the concept.
      * @param string $language

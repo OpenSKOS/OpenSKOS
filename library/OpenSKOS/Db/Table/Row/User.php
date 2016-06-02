@@ -428,9 +428,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     }
 
     /**
+     * @param $autoSave bool , default: true If uri is generated, should it be saved in the database
      * @return \OpenSkos2\Person
      */
-    public function getFoafPerson()
+    public function getFoafPerson($autoSave = true)
     {
         $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
         /**
@@ -440,7 +441,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
         if (!$this->uri) {
             $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
-            $this->save();
+            
+            if ($autoSave) {
+                $this->save();
+            }
         }
 
         try {
@@ -448,7 +452,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
-            $resourceManager->insert($person);
+            
+            if ($autoSave) {
+                $resourceManager->insert($person);
+            }
 
             return $person;
         }

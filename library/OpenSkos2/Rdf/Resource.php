@@ -27,6 +27,7 @@ use OpenSkos2\Exception\OpenSkosException;
 class Resource extends Uri implements ResourceIdentifier
 {
     /**
+     * @TODO Separate in StatusAwareResource class or something like that
      * openskos:status value which marks a resource as deleted.
      */
     const STATUS_DELETED = 'deleted';
@@ -167,6 +168,32 @@ class Resource extends Uri implements ResourceIdentifier
         if (!$this->isPropertyEmpty($predicate)) {
             $values = $this->getProperty($predicate);
             return (bool) $values[0]->getValue();
+        }
+        return false;
+    }
+    
+    /**
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(OpenSkos::STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
+        }
+    }
+    
+    /**
+     * Check if the concept is deleted
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
         }
         return false;
     }
@@ -336,6 +363,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     /**
+     * @TODO Separate in StatusAwareResource class or something like that
      * @param string &$predicate
      * @param RdfObject &$value
      */

@@ -124,8 +124,8 @@ class Resource
                 $this->errorMessages[] = $message;
             }
             
-            $this->logger->error('Errors founds while validating resource ' . $resource->getUri());
-            $this->logger->error($validator->getErrorMessages());
+            $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
+            $this->logger->error(implode(', ', $validator->getErrorMessages()));
             
             $errorsFound = true;
         }
