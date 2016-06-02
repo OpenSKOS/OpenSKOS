@@ -401,18 +401,15 @@ do {
             $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
         }
         
-        // Validate (only if not deleted)
-        if (!$resource->isDeleted() && !$validator->validate($resource)) {
-            if (!$isDryRun) {
-                throw new \Exception(
-                    'Resource <' . $resource->getUri() . '> is not valid. '
-                    . impolode(', ', $validator->getErrorMessages())
-                );
-            }
+        // Validate (only if not deleted, all deleted resources are considered valid.
+        if ($resource->isDeleted()) {
+            $isValid = true;
+        } else {
+            $isValid = $validator->validate($resource);
         }
         
         // Insert
-        if (!$isDryRun) {
+        if ($isValid && !$isDryRun) {
             $resourceManager->insert($resource);
         }
     }
