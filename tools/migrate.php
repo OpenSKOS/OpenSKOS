@@ -30,13 +30,14 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 
-$opts = array(
+$opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
-    'dryrun' => 'Only validate the data, do not migrate it.'
-);
+    'dryrun' => 'Only validate the data, do not migrate it.',
+    'debug' => 'Show debug info.',
+];
 
 try {
     $OPTS = new Zend_Console_Getopt($opts);
@@ -58,7 +59,14 @@ $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $resourceManager->setIsNoCommitMode(true);
 
 $logger = new \Monolog\Logger("Logger");
-$logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
+$logLevel = \Monolog\Logger::INFO;
+if ($OPTS->getOption('debug')) {
+    $logLevel = \Monolog\Logger::DEBUG;
+}
+$logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
+    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
+    $logLevel
+));
 
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
@@ -99,7 +107,7 @@ $fetchRowWithRetries = function ($model, $query) use ($logger) {
         try {
             return $model->fetchRow($query);
         } catch (\Exception $exception) {
-            $logger->info('retry mysql connect');
+            $logger->debug('retry mysql connect');
             // Reconnect
             $model->getAdapter()->closeConnection();
             $modelClass = get_class($model);
@@ -150,7 +158,7 @@ $mappings = [
                     );
                 }
                 if (!$user) {
-                    $logger->info("Could not find user with id/name: {$value}");
+                    $logger->notice("Could not find user with id/name: {$value}");
                     $notFoundUsers[] = $value;
                     $users[$value] = null;
                 } else {
@@ -195,7 +203,7 @@ $mappings = [
                 );
 
                 if (!$collection) {
-                    $logger->info("Could not find collection with id: {$value}");
+                    $logger->notice("Could not find collection with id: {$value}");
                     $notFoundCollections[] = $value;
                     $collections[$value] = null;
                 } else {
@@ -212,7 +220,7 @@ $mappings = [
         'callback' => function ($value) use ($logger) {
             $value = trim($value);
             if (filter_var($value, FILTER_VALIDATE_URL) === false) {
-                $logger->info('found uri which is not valid "' . $value . '"');
+                $logger->notice('found uri which is not valid "' . $value . '"');
                 // We will keep it and urlencode it to be able to insert it in Jena
                 $value = urlencode($value);
             }
@@ -286,9 +294,14 @@ $mappings = [
     ]
 ];
 
-var_dump($total);
+$logger->info('Found ' . $total . ' records');
 do {
-    $logger->info("fetching " . $endPoint . "&start=$counter");
+    $logger->debug("fetching " . $endPoint . "&start=$counter");
+    
+    if ($counter % 5000 == 0) {
+        $logger->info('Processed so far: ' . $counter);
+    }
+    
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
@@ -357,7 +370,7 @@ do {
 
             if (preg_match('#dcterms_(.+)#', $field, $match)) {
                 if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
-                    $logger->info("found dc field " . $field . " that is already filled (could be double data)");
+                    $logger->notice("found dc field " . $field . " that is already filled (could be double data)");
                 }
 
                 foreach ($value as $v) {
@@ -406,4 +419,4 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-$logger->info("done!");
+$logger->info("Done!");
