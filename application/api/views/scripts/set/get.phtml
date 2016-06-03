@@ -30,7 +30,7 @@ $set = $this->resource;
 $setManager = $di->get('OpenSkos2\SetManager');
 $code = $set->getCode();
 $uri = $set->getUri();
-$name = $setManager->getSetTitleLookUpMySqlIfNeeded($code);
+$name = $setManager->getSetTitle($code);
 $this->headTitle($name)?>
 
 
@@ -43,8 +43,8 @@ $this->headTitle($name)?>
             $translatedKey = $this->translate($key); ?>
             <dt><?php echo  $translatedKey?>:</dt>
          <?php if ($key==="publisher"):
-             $tenantName = $setManager ->getTenantNameLookUpMySqlIfNeeded($val);
-             $tenantUUID = $setManager -> getResourceUuidLookUpMySqlIfNeeded($val, Org::FORMALORG);
+             $tenantName = $setManager ->getTenantName($val);
+             $tenantUUID = $setManager -> getResourceUuid($val, Org::FORMALORG);
              ?>
 	 <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantUUID))?>.html"><?php echo $tenantName?></a></dd>
          <?php endif?>

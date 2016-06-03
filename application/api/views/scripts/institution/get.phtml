@@ -26,7 +26,7 @@ $tenant = $this->resource;
 /* @var $tenantManager \OpenSkos2\TenantManager */
 $tenantManager = $di->get('OpenSkos2\TenantManager');
 $code = $tenant->getCode();
-$name = $tenantManager->getTenantNameLookUpMySqlIfNeeded($code);
+$name = $tenantManager->getTenantName($code);
 $this->headTitle($name);
 ?>
 <h2><?php echo $this->escape($name)?></h2>

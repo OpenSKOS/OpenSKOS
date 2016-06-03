@@ -57,30 +57,14 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
             $shortName = RdfNamespace::shorten($propname);
             if ($shortName !== $shortADR && $shortName !== $shortORG) {
                 $shortHTMLName = $this->shortenForHTML($propname);
-                $retVal[$shortHTMLName] = '';
-                foreach ($vals as $val) {
-                    $retVal[$shortHTMLName] = $val;
-                }
-            } else { // recursive elements
+                $retVal[$shortHTMLName] = implode(', ', $vals);
+                
+            } else { // recursive elements of organisation
                 if ($vals !== null && isset($vals) && is_array($vals))
                     if (count($vals) > 0) {
                         foreach ($vals[0]->getProperties() as $key => $val2) {
                             $shortName2 = $this->shortenForHTML($key);
-                            foreach ($val2 as $val3) {
-                                if ($val3 instanceof Uri) {
-                                    if ($shortName2 === 'license') {
-                                        $retVal['license_url'] = $val3->getUri();
-                                    } else {
-                                       $retVal[$shortName2] = $val3->getUri(); 
-                                    }
-                                } else { // must be a literal
-                                    if ($shortName2 === 'license') {
-                                        $retVal['license_name'] = $val3->getValue();
-                                    } else {
-                                    $retVal[$shortName2] = $val3->getValue();
-                                    }
-                                }
-                            }
+                            $retVal[$shortName2] = implode(', ', $val2);
                         }
                     }
             }
@@ -88,11 +72,13 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         return $retVal;
     }
 
-     private function shortenForHTML($key) {
+    private function shortenForHTML($key) {
         $parts = RdfNamespace::splitUri($key, false);
         return $parts[1];
     }
     
+    
+   
    
 
     public function postAction()

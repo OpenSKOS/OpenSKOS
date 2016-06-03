@@ -41,7 +41,7 @@ $this->headTitle($title);
 <dl>
     <dt><?=$this->translate('Institution')?>:</dt>
     <?php $tenantReference=$concept->getTenant();
-    $tenatuuid=$conceptManager->getResourceUuidLookUpMySqlIfNeeded($tenantReference, Org::FORMALORG);
+    $tenatuuid=$conceptManager->getResourceUuid($tenantReference, Org::FORMALORG);
     ?>
     <dd>
         <a href="<?=$this->url([
@@ -51,7 +51,7 @@ $this->headTitle($title);
             ],
             'rest'
         )?>.html">
-            <?=$this->escape($conceptManager->getTenantNameLookUpMySqlIfNeeded($tenantReference))?>
+            <?=$this->escape($conceptManager->getTenantName($tenantReference))?>
         </a>
     </dd>
     
@@ -62,10 +62,10 @@ $this->headTitle($title);
             <a href="<?=$this->url(array(
                                 'module' => 'api',
                                 'controller' => 'set',
-                                'id' => $conceptManager->getResourceUuidLookUpMySqlIfNeeded($setReference, Dcmi::DATASET)
+                                'id' => $conceptManager->getResourceUuid($setReference, Dcmi::DATASET)
                             ), 'rest'
             )?>.html">
-                <?= $conceptManager ->getSetTitleLookUpMySqlIfNeeded($setReference)?>
+                <?= $conceptManager ->getSetTitle($setReference)?>
             </a>
         </dd>
     <?php endforeach;?>
