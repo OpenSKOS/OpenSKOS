@@ -42,7 +42,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
            $this->view->resProperties = $this ->preparePropertiesForHTML($this->view->resource);
            return $this->renderScript($this->viewpath . 'get.phtml');
         } else {
-            $response = $api->findResourceByIdResponse($request, $id);
+            $response = $api->findResourceByIdResponse($request, $id, $context);
             $this->emitResponse($response);
         }
     }

@@ -25,6 +25,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
+use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
+
+use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
+use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -70,21 +74,30 @@ abstract class AbstractTripleStoreResource {
     }
 
     // Id is either an URI or uuid
-    public function findResourceByIdResponse(ServerRequestInterface $request, $id) {
+    public function findResourceByIdResponse(ServerRequestInterface $request, $id, $context) {
         try {
             $params = $request->getQueryParams();
             if (isset($params['id'])) {
                 $id = $params['id'];
-            }; 
-            $resource =  $this -> findResourcebyId($id);
-            $format = 'rdf';
-            if (isset($params['format'])) {
-                $format = $params['format'];
+            };
+            $resource = $this->findResourcebyId($id);
+            if (isset($context)) {
+                $format = $context;
+            } else {
+                if (isset($params['format'])) {
+                    $format = $params['format'];
+                } else {
+                    $format = "rdf";
+                }
             }
+
             switch ($format) {
                 case 'json':
                     $prep = (new DataArray($resource, []))->transform();
                     $response = $this->getSuccessResponse(json_encode($prep, JSON_UNESCAPED_SLASHES), 200, 'application/json');
+                    break;
+                case 'jsonp':
+                    $response = (new DetailJsonpResponse($resource, $params['callback'], []))->getResponse();
                     break;
                 case 'rdf':
                     $rdf = (new DataRdf($resource, true, []))->transform();

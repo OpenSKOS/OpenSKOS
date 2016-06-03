@@ -20,7 +20,6 @@
  */
 
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 
@@ -74,6 +73,6 @@ $this->headTitle($name)?>
 <h3>Alternative formats</h3>
 <ul>
 	<li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url())?>">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '&callback=myCallback_1234'?>">JSONP</a></li>
+	<li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234'?>">JSONP</a></li>
 	<li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url())?>">RDF</a></li>
 </ul>

@@ -49,7 +49,7 @@ class JsonpResponse extends DetailResponse
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function getResponse()
+    public function getResponseConcept()
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transformConcept();
@@ -59,4 +59,21 @@ class JsonpResponse extends DetailResponse
             ->withHeader('Content-Type', 'application/javascript');
         return $response;
     }
+    
+     /**
+     * Get response
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getResponse()
+    {
+        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
+        $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
+        $jsonp = $this->callback . '(' . json_encode($body) . ');';
+        $stream->write($jsonp);
+        $response = (new \Zend\Diactoros\Response($stream))
+            ->withHeader('Content-Type', 'application/javascript');
+        return $response;
+    }
+    
 }
