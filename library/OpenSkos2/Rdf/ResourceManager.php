@@ -24,6 +24,7 @@ use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptCollection;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
@@ -919,6 +920,33 @@ public function deleteSolrIntact(Uri $resource)
         return $tmp->count->getValue();
     }
 
-   
+   // output is a list of related concepts, used in both managers: relation and concept.
+      public function fetchRelationsForConcept($uri, $relationType, $conceptScheme = null) {
+
+        $allRelations = new ConceptCollection([]);
+
+        if (!$uri instanceof Uri) {
+            $uri = new Uri($uri);
+        }
+
+        $patterns = [
+            [$uri, $relationType, '?subject'],
+        ];
+
+        if (!empty($conceptScheme)) {
+            $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+        }
+
+        $start = 0;
+        //fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false, $resType=null)
+        $relations = $this->fetch($patterns, $start, MAXIMAL_ROWS, false, new Uri(Concept::TYPE));
+        foreach ($relations as $relation) {
+            $allRelations->append($relation);
+        }
+
+        return $allRelations;
+    }
+
+    
 
 }

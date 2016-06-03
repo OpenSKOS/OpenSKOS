@@ -20,6 +20,7 @@
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
+use OpenSkos2\MyInstitutionModules\Relations;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Org;
@@ -133,7 +134,7 @@ $this->headTitle($title);
     <h3><?=$this->translate($className)?></h3>
         
     <?php foreach (Concept::$classes[$className] as $property):?>
-        <?php $relations = $conceptManager->fetchRelations($concept, $property);?>
+        <?php $relations = $conceptManager->fetchRelationsForConcept($concept, $property);?>
         <?php if ($relations->count() > 0):?>
             <h4>
                 <?= Namespaces::shortenProperty($property)?>
@@ -141,7 +142,7 @@ $this->headTitle($title);
             <ul>
                 <?php foreach ($relations as $relationConcept):?>
                     <li>
-                        <a href="/api/concept/<?= $relationConcept->getUuid()?>.html">
+                        <a href="<?=$this->url(['id' => $relationConcept->getUuid()])?>.html">
                             <?= $this->escape($relationConcept->getCaption($lang))?>
                         </a>
                     </li>
@@ -151,6 +152,27 @@ $this->headTitle($title);
     <?php endforeach; ?>
 <?php endforeach; ?>
 
+<h3>User-defined relations</h3>
+<?php  $specificRelations = Relations::$myrelations;
+         foreach ($specificRelations as $key => $value):?>
+        <?php $relations = $conceptManager->fetchRelationsForConcept($concept, $value);?>
+        <?php if ($relations->count() > 0):?>
+            <h4>
+                <?= $key?>
+            </h4>
+            <ul>
+                <?php foreach ($relations as $relationConcept):?>
+                    <li>
+                        <a href="<?=$this->url(['id' => $relationConcept->getUuid()])?>.html">
+                            <?= $this->escape($relationConcept->getCaption($lang))?>
+                        </a>
+                    </li>
+                <?php endforeach?>
+            </ul>
+        <?php endif; ?>
+    <?php endforeach; ?>    
+    
+    
 <h3><?=$this->translate('Alternative formats')?></h3>
 <ul>
     <li><a class="rdf" href="<?=$this->url(['id' => $concept->getUuid()])?>.rdf">RDF</a></li>

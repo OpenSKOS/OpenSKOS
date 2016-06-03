@@ -93,15 +93,13 @@ abstract class AbstractTripleStoreResource {
 
             switch ($format) {
                 case 'json':
-                    $prep = (new DataArray($resource, []))->transform();
-                    $response = $this->getSuccessResponse(json_encode($prep, JSON_UNESCAPED_SLASHES), 200, 'application/json');
+                    $response = (new DetailJsonResponse($resource, []))->getResponse();
                     break;
                 case 'jsonp':
                     $response = (new DetailJsonpResponse($resource, $params['callback'], []))->getResponse();
                     break;
                 case 'rdf':
-                    $rdf = (new DataRdf($resource, true, []))->transform();
-                    $response = $this->getSuccessResponse($rdf, 200);
+                    $response = (new DetailRdfResponse($resource, []))->getResponse();
                     break;
                 default:
                     throw new InvalidArgumentException('Invalid context: ' . $context);
