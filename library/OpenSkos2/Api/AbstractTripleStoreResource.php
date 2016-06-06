@@ -28,6 +28,10 @@ use Zend\Diactoros\Stream;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
+use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+use OpenSkos2\Api\Response\ResultSet\RdfResponse;
+use OpenSkos2\Api\ResourceResultSet;
 
 require_once dirname(__FILE__) .'/../config.inc.php';
 
@@ -43,6 +47,7 @@ abstract class AbstractTripleStoreResource {
         return $this->manager;
     }
     
+   
     
     protected function getAndAdaptQueryParams(ServerRequestInterface $request) {
         $params = $request->getQueryParams();
@@ -71,6 +76,32 @@ abstract class AbstractTripleStoreResource {
         $this->tenant['code'] = $params['tenant'];
         return $params;
     }
+    
+    public function fetchUriName() {
+        $index =  $this->manager->fetchUriName();
+        return $index;
+    }
+
+    
+    public function fetchFullList($context, $callback) {
+        $index =  $this->manager->fetch();
+        $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
+        switch ($context) {
+                case 'json':
+                    $response = (new JsonResponse($result, []))->getResponse();
+                    break;
+                case 'jsonp':
+                    $response = (new JsonpResponse($result, $callback, []))->getResponse();
+                    break;
+                case 'rdf':
+                    $response = (new RdfResponse($result, []))->getResponse();
+                    break;
+                default:
+                    throw new InvalidArgumentException('Invalid context: ' . $context);
+        }
+        return $response;
+    }
+
 
     // Id is either an URI or uuid
     public function findResourceByIdResponse(ServerRequestInterface $request, $id, $context) {
@@ -335,15 +366,7 @@ abstract class AbstractTripleStoreResource {
         return $this->getUserByKey($key);
     }
 
-    protected function getSuccessResponse($message, $status = 200, $format="text/xml") {
-        $stream = new Stream('php://memory', 'wb+');
-        $stream->write($message);
-        $response = (new Response($stream, $status))
-                ->withHeader('Content-Type', $format . ' ; charset="utf-8"');
-        return $response;
-    }
-
-  
+   
    
     // override in concrete class when necessary
     protected function validate($resourceObject, Array $tenant) {
@@ -440,10 +463,7 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-    public function fetchUriName() {
-        return $this->manager->fetchUriName();
-    }
-
+  
  
    private function retrieveLanguagePrefix($val){
         if ($val instanceof Literal) {
@@ -477,6 +497,16 @@ abstract class AbstractTripleStoreResource {
              
         return $user;
     }
+    
+     protected function getSuccessResponse($message, $status = 200, $format="text/xml") {
+        $stream = new Stream('php://memory', 'wb+');
+        $stream->write($message);
+        $response = (new Response($stream, $status))
+                ->withHeader('Content-Type', $format . ' ; charset="utf-8"');
+        return $response;
+    }
+
+  
     
      /**
      * Get error response

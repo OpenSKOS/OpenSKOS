@@ -3,8 +3,6 @@
 
 use EasyRdf\RdfNamespace;
 use OpenSkos2\Namespaces\vCard;
-use OpenSkos2\Api\Response\Detail\JsonpResponse;
-
 
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 
@@ -24,33 +22,20 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     }
     
     public function indexAction() {
-        $context = $this->_helper->contextSwitch()->getCurrentContext();
-        $format = $this->getRequest()->getParam('format');
-        if ($context === null) { // trye to reset it via $format
-            if ($format !== null) {
-                if ('json' !== $format && 'html' !== $format) {
-                    throw new Exception('Resource listing is implemented only for format json, jsonp or html', 404);
-                } else {
-                    $context = $format; 
-                }
-            } else {
-                $context = 'html'; //default for index
-            }
-        }
-        $request = $this->getPsrRequest();
+        $params = $this->handleParams();
         $api = $this->getDI()->make($this->fullNameResourceClass);
-        $result = $api->fetchUriName($request);
-        if ($context === 'html') {
-           $this->getHelper('layout')->enableLayout();
-           $this->view->resource = $result;
-           return $this->renderScript($this->viewpath . 'index.phtml');
-        } else { 
-            if ($context==='json') {
-            $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-            $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
-            } else { // th only left fileterd option is jsonp 
-                $callback = $this->getRequest()->getParam('callback');
-                $response = JsonpResponse::produceJsonPResponse($result, $callback);
+        if ($params['shortlist']) { // used for meertens fronten
+            $result = $api->fetchUriName();
+            $this->_helper->contextSwitch()->setAutoJsonSerialization(true);
+            return $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
+        } else {
+            if ($params['context'] === 'html') {
+                $index= $api->fetchUriName();
+                $this->getHelper('layout')->enableLayout();
+                $this->view->resource = $index;
+                return $this->renderScript($this->viewpath . 'index.phtml');
+            } else {
+                $response = $api->fetchFullList($params['context'], $params['callback']);
                 $this->emitResponse($response);
             }
         }
@@ -132,5 +117,35 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $this->emitResponse($response);
     }
     
-   
+    private function handleParams() {
+        $retVal=[];
+        $retVal['callback'] = null;
+        $retVal['context'] = $this->_helper->contextSwitch()->getCurrentContext();
+        $request = $this->getRequest();
+        $format = $request->getParam('format');
+        if ($retVal['context'] === null) { // try to reset it via $format
+            if ($format !== null) {
+                $retVal['context'] = $format; 
+                }
+            else {
+                $retVal['context'] = 'rdf'; //default for index
+            }
+        }
+        if ($retVal['context'] === 'jsonp') {
+            $retVal['callback'] =  $request->getParam('callback');
+        } 
+        
+        if ($request->getParam('shortlist') === null) {
+           $retVal['shortlist']= false;
+        } else {
+            if ($request->getParam('shortlist') === 'true') {
+                $retVal['shortlist']= true;
+            } else {
+                $retVal['shortlist'] = false;
+            }
+        }
+        
+        return $retVal;
+    }
+    
 }

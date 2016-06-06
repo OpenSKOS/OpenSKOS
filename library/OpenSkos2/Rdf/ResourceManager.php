@@ -531,6 +531,7 @@ public function deleteSolrIntact(Uri $resource)
         return $retVal;
     }
     
+  
     public function fetchSubjectWithPropertyGiven($propertyUri, $value, $rdfType=null) {
         $typeFilter = "";
         if (isset($rdfType)) {

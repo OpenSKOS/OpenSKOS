@@ -33,6 +33,7 @@ $this->headTitle($name);
 <dl>
     <?php
         foreach ($this->resProperties as $key => $val): ?>
+         <dt><?php echo  $key?>:</dt>
         <?php if ($key==="type"):?>
 	 <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
          <?php endif?>

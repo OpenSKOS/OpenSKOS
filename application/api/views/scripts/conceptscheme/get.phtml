@@ -37,6 +37,7 @@ $this->headTitle($name)?>
     <?php
         foreach ($this->resProperties as $key => $val):?>
         <?php if ($key==="type"):?>
+         <dt><?php echo  $key?>:</dt>
 	 <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
          <?php endif?>
          <?php if ($key==="set"):
