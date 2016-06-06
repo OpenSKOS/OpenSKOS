@@ -18,24 +18,24 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Dcmi;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $list = $this->resource;
-$tenantManager = $di->get('OpenSkos2\TenantManager');
-$this->headTitle ('Institutions')?>
+$setManager = $di->get('OpenSkos2\SetManager');
+$this->headTitle ('Sets')?>
 
 <div class="clear">
 <dl>
 
-<h2><?php echo 'Institutions'?></h2>
-<p>These are the avaliable institutions in this repository:</p>
+<h2><?php echo 'Sets (former tenant collections)'?></h2>
+<p>These are the avaliable sets in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $uuid = $tenantManager -> getResourceUuid($value, Org::FORMALORG);
+            $uuid = $setManager -> getResourceUuid($value, Dcmi::DATASET);
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $uuid), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'set', 'id' => $uuid), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

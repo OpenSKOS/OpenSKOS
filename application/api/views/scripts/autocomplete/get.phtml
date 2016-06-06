@@ -19,8 +19,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php $this->headTitle ($this->translate('Terms'))?>
-<h2><?php echo $this->translate('Terms')?></h2>
+<?php $this->headTitle('Terms')?>
+<h2><?php echo 'Terms'?></h2>
 <p>Following terms satisfying the given criteria are found (search only in "approved" concepts) :</p>
 <ul>
 	<?php foreach ($this->items as $item):?>
@@ -33,6 +33,6 @@
 </ul>
 <h3>Alternative formats</h3>
 <ul>
-	<li><a class="json" href="<?php echo $this->url()?>?format=json">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo $this->url()?>?format=jsonp&callback=myCallback_1234">JSONP</a></li>	
+	<li><a class="json" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $this->term))?>.json">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $this->term))?>.jsonp?callback=myCallback_1234">JSONP</a></li>	
 </ul>

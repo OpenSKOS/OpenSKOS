@@ -2,8 +2,9 @@
 
 
 use EasyRdf\RdfNamespace;
-use EasyRdf\Uri;
 use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Api\Response\Detail\JsonpResponse;
+
 
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 
@@ -12,21 +13,47 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     protected $viewpath;
     public function init()
     {
-        $this->getHelper('layout')->disableLayout();
-        $this->getHelper('viewRenderer')->setNoRender(true);
         parent::init();
+        $this->getHelper('viewRenderer')->setNoRender(true);
+        if ('html' === $this->_helper->contextSwitch()->getCurrentContext()) {
+            //enable layout:
+            $this->getHelper('layout')->enableLayout();
+        } else {
+            $this->getHelper('layout')->disableLayout();
+        }
     }
     
     public function indexAction() {
-        $format = $this->getRequestedFormat();
-        if ('json' !== $format) {
-            throw new Exception('Resource listing is implemented only in format=json', 404);
+        $context = $this->_helper->contextSwitch()->getCurrentContext();
+        $format = $this->getRequest()->getParam('format');
+        if ($context === null) { // trye to reset it via $format
+            if ($format !== null) {
+                if ('json' !== $format && 'html' !== $format) {
+                    throw new Exception('Resource listing is implemented only for format json, jsonp or html', 404);
+                } else {
+                    $context = $format; 
+                }
+            } else {
+                $context = 'html'; //default for index
+            }
         }
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
         $result = $api->fetchUriName($request);
-        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
+        if ($context === 'html') {
+           $this->getHelper('layout')->enableLayout();
+           $this->view->resource = $result;
+           return $this->renderScript($this->viewpath . 'index.phtml');
+        } else { 
+            if ($context==='json') {
+            $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+            $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
+            } else { // th only left fileterd option is jsonp 
+                $callback = $this->getRequest()->getParam('callback');
+                $response = JsonpResponse::produceJsonPResponse($result, $callback);
+                $this->emitResponse($response);
+            }
+        }
     }
 
     public function getAction() {

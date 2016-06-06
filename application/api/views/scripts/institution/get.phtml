@@ -33,7 +33,12 @@ $this->headTitle($name);
 <dl>
     <?php
         foreach ($this->resProperties as $key => $val): ?>
-	<dt><?php echo $this->translate($key)?>:</dt><dd><?php echo $val?></dd>
+        <?php if ($key==="type"):?>
+	 <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
+         <?php endif?>
+         <?php if ($key!=="type"):?>
+	 <dd><?php echo $val?></dd>
+         <?php endif?>
         <?php endforeach;?>
 </dl>
 <h3><?php echo $this->translate('Sets')?></h3>

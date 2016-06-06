@@ -26,7 +26,6 @@ use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
-
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 
@@ -90,7 +89,6 @@ abstract class AbstractTripleStoreResource {
                     $format = "rdf";
                 }
             }
-
             switch ($format) {
                 case 'json':
                     $response = (new DetailJsonResponse($resource, []))->getResponse();

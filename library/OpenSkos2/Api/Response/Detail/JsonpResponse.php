@@ -67,13 +67,19 @@ class JsonpResponse extends DetailResponse
      */
     public function getResponse()
     {
-        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
-        $jsonp = $this->callback . '(' . json_encode($body) . ');';
-        $stream->write($jsonp);
-        $response = (new \Zend\Diactoros\Response($stream))
-            ->withHeader('Content-Type', 'application/javascript');
+        $response = self::produceJsonPResponse($body, $this->callback);
         return $response;
     }
     
+    // also used in undex requests in controllers
+      public static function produceJsonPResponse($body, $callback) {
+        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
+        $jsonp = $callback . '(' . json_encode($body) . ');';
+        $stream->write($jsonp);
+        $response = (new \Zend\Diactoros\Response($stream))
+                ->withHeader('Content-Type', 'application/javascript');
+        return $response;
+    }
+
 }

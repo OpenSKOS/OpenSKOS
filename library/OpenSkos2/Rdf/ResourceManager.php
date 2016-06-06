@@ -864,19 +864,21 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getSetTitle($reference) {
-        // first check if it can be found with reference as set's Uri in the triple store
-        $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . DcTerms::TITLE . '> ?name .  <' . $reference . '>  <' . RdfNamespace::TYPE . '> <' . Dcmi::DATASET . '> .}';
-        $response1 = $this->query($query);
-        if ($response1 !== null & count($response1) > 0) {
-            return $response1[0]->name->getValue();
-        }
-        //if the first attempt above fails, check if the set can be found in the triple store
+       //first, check if the set can be found in the triple store
         // by $reference as the set code 
         $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" . RdfNamespace::TYPE . "> <" . Dcmi::DATASET . "> . }";
         $response = $this->query($query);
         if ($response !== null & count($response) > 0) {
             return $response[0]->name->getValue();
+        } 
+
+// seconds check if it can be found with reference as set's Uri in the triple store
+        $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . DcTerms::TITLE . '> ?name .  <' . $reference . '>  <' . RdfNamespace::TYPE . '> <' . Dcmi::DATASET . '> .}';
+        $response1 = $this->query($query);
+        if ($response1 !== null & count($response1) > 0) {
+            return $response1[0]->name->getValue();
         }
+        
         // if the second attempt fails check MySql if the setting tells it 
         if (CHECK_MYSQL) {
             $mysqlSet = $this->fetchSetFromMySqlByCode($val);
@@ -888,13 +890,7 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getTenantName($reference) {
-        // first check if it can be found with reference as tenant's Uri in the triple store
-        $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
-        $response1 = $this->query($query);
-        if ($response1 !== null & count($response1) > 0) {
-            return $response1[0]->name->getValue();
-        };
-        //if the first attempt above fails, check if the tenant can be found in the triple store
+        //first, check if the tenant can be found in the triple store
         // by $reference as the tenant code
         $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
         $response2 = $this->query($query);
@@ -902,6 +898,13 @@ public function deleteSolrIntact(Uri $resource)
             return $response2[0]->name->getValue();
         };
 
+        // second attempt: check if it can be found with reference as tenant's Uri in the triple store
+        $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
+        $response1 = $this->query($query);
+        if ($response1 !== null & count($response1) > 0) {
+            return $response1[0]->name->getValue();
+        };
+        
         // if the second attempt fails check MySql if the setting tells it 
         if (CHECK_MYSQL) {
             $mysqlTenant = $this->fetchTenantFromMySqlByCode($val);

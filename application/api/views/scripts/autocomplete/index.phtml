@@ -19,5 +19,20 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php
-echo $this->tenants->toRdf()->saveXml();
+<?php $this->headTitle('Terms')?>
+<h2><?php echo 'Terms'?></h2>
+<p>Following terms satisfying the given criteria are found (search only in "approved" concepts) :</p>
+<ul>
+	<?php foreach ($this->items as $item):?>
+	<li>
+		<a>
+			<strong><?php echo $item?></strong>
+		</a>
+	</li>
+	<?php endforeach?>
+</ul>
+<h3>Alternative formats</h3>
+<ul>
+	<li><a class="json" href="<?php echo $this->url()?>?q=<?php echo $this->term?>&format=json">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url()?>?q=<?php echo $this->term?>&format=jsonp&callback=myCallback_1234">JSONP</a></li>	
+</ul>

@@ -18,6 +18,7 @@
  */
 
 use OpenSkos2\FieldsMaps;
+use OpenSkos2\Api\Response\Detail\JsonpResponse;
 
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
@@ -48,25 +49,13 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function indexAction()
     {
-        $request = $this->getRequest();
-        
-        if (null === ($q = $request->getParam('q'))) {
+        if (null === ($q = $this->getRequest()->getParam('q'))) {
             $this->getResponse()
                 ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
         
-        // Olha: resolveOldField is replaced with getNamesToProperties
-        $result = $this->getConceptManager()->autoComplete(
-            $q,
-            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
-            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
-            $request->getParam('lang')
-        );
-        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody(
-            json_encode($result)
-        );
+        return $this->dispatchRequest($q, 'index');
     }
 
     /**
@@ -88,22 +77,70 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function getAction()
     {
+        $q = $this->getRequest()->getParam('id');
+        return $this->dispatchRequest($q, 'get');
+    }
+    
+      private function dispatchRequest($term, $filename){
+        $params = $this->handleContext();
         $request = $this->getRequest();
-
-        $q = $request->getParam('id');
         $result = $this->getConceptManager()->autoComplete(
-                $q, FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')], FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')], $request->getParam('lang')
+            $term,
+            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
+            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
+            $request->getParam('lang')
         );
-
-        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        
+        return $this->output($result, $params['context'], $term, $params['callback'], $filename);
+    }
+    
+  
+    
+    private function handleContext() {
+        $retVal=[];
+        $retVal['callback'] = null;
+        $retVal['context'] = $this->_helper->contextSwitch()->getCurrentContext();
+        $request = $this->getRequest();
         $format = $request->getParam('format');
-        if ($format !== 'html') {
-            $this->getResponse()->setBody(json_encode($result));
+        if ($retVal['context'] === null) { // try to reset it via $format
+            if ($format !== null) {
+                if ('json' !== $format && 'html' !== $format && 'jsonp'!== $format) {
+                    throw new Exception('Autocomplete listing is implemented only in formats json, jsonp or html', 404);
+                } else {
+                    $retVal['context'] = $format; 
+                }
+            } else {
+                $retVal['context'] = 'json'; //default for index
+            }
+        }
+        if ($retVal['context'] === 'jsonp') {
+            $retVal['callback'] =  $request->getParam('callback');
+        } 
+        return $retVal;
+    }
+    
+    
+    private function output($result, $context, $term, $callback, $filename) {
+        if ($context === 'json') {
+            $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+            $this->getResponse()->setBody(
+                    json_encode($result)
+            );
         } else {
-            $this->view->assign('items', $result);
+            if ($context === 'jsonp') {
+                $response = JsonpResponse::produceJsonPResponse($result, $callback);
+                $this->emitResponse($response);
+                
+            } else { //only "html" is left as a possible option
+                $this->getHelper('layout')->enableLayout();
+                $this->view->items = $result;
+                $this->view->term = $term;
+                return $this->renderScript('/autocomplete/'.$filename.'.phtml');
+            }
         }
     }
-
+    
+  
     public function postAction()
     {
         $this->_501('POST');
