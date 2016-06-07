@@ -7,7 +7,6 @@ use Exception;
 use OpenSkos2\Relation;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
-use OpenSkos2\Api\Transform\DataArray;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
@@ -83,8 +82,15 @@ abstract class AbstractTripleStoreResource {
     }
 
     
-    public function fetchFullList($context, $callback) {
+    public function fetchDeatiledList($context, $callback) {
         $index =  $this->manager->fetch();
+        $index=null; // testing mysql database
+        if ($index === null || count($index) === 0) { // backward compatibility: checking MySQL tables if needed
+            $resType = $this->manager->getResourceType();
+            if (CHECK_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
+                    $index = $this->fetchFromMySQL();
+            }
+        }
         $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
         switch ($context) {
                 case 'json':

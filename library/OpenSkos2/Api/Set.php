@@ -9,8 +9,10 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\SetManager;
+use OpenSkos2\SetCollection;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
+use OpenSKOS_Db_Table_Collections;
 
 class Set extends AbstractTripleStoreResource
 {
@@ -20,7 +22,8 @@ class Set extends AbstractTripleStoreResource
         $this->deletionManager = new Deletion($manager);
     }
     
-     // specific content validation
+    
+    // specific content validation
      protected function validate($resourceObject, $tenant) {
        parent::validate($resourceObject, $tenant);
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Dcmi::DATASET);
@@ -39,5 +42,35 @@ class Set extends AbstractTripleStoreResource
         $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
     }
     
-    
+    protected function fetchFromMySQL() {
+        $model = new OpenSKOS_Db_Table_Collections();
+        $select = $model->select();
+        $mysqlres = $model->fetchAll($select);
+        $index = new SetCollection();
+        foreach ($mysqlres as $collection) {
+            $rdfSet = $this->translateCollectionMySqlToRdfSet($collection);
+            $index->append($rdfSet);
+        }
+        return $index;
+    }
+
+    private function translateCollectionMySqlToRdfSet($collectionMySQL) {
+        $setResource = new \OpenSkos2\Set();
+        if (!isset($collectionMySQL['uri'])) {
+            $setResource->setUri('http://unset_uri_in_mysqldatabase');
+        } else {
+            $setResource->setUri($collectionMySQL['uri']);
+        }
+        
+        $this->manager->setLiteralWithEmptinessCheck($setResource, OpenSkos::CODE, $collectionMySQL['code']);
+        $this->manager->setLiteralWithEmptinessCheck($setResource, DcTerms::PUBLISHER, $collectionMySQL['tenant']);
+        $this->manager->setLiteralWithEmptinessCheck($setResource, DcTerms::TITLE, $collectionMySQL['dc_title']);
+        $this->manager->setUriWithEmptinessCheck($setResource, OpenSkos::WEBPAGE, $collectionMySQL['website']);
+        $this->manager->setUriWithEmptinessCheck($setResource, DcTerms::LICENSE, $collectionMySQL['license_url']);
+        $this->manager->setUriWithEmptinessCheck($setResource, OpenSkos::OAI_BASEURL, $collectionMySQL['OAI_baseURL']);
+        $this->manager->setBooleanLiteralWithEmptinessCheck($setResource, OpenSkos::ALLOW_OAI, $collectionMySQL['allow_oai']);
+        $this->manager->setUriWithEmptinessCheck($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl']);
+        return $setResource;
+    }
+
 }

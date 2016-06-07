@@ -29,6 +29,7 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Resource;
 
+require_once dirname(__FILE__) .'/../../config.inc.php';
 /**
  * Transform Resource to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
@@ -100,7 +101,17 @@ class DataArray
         $newResource = [];
         $newResource['uri'] = $rdfresource->getUri();
         foreach ($rdfresource->getProperties() as $field => $properties) {
-            $short=RdfNamespace::shorten($field);
+            
+            if (!$this->doIncludeProperty($field)) {
+                continue;
+            }
+           
+            if (OMIT_JSON_REFICES) {
+                $parts = RdfNamespace::splitUri($field);
+                $short = $parts[1];
+            } else {
+                $short = RdfNamespace::shorten($field);
+            }
             $newResource = $this->getPropertyValue($properties, $short, array('repeatable' => false), $newResource);
         }
         return $newResource;

@@ -72,7 +72,8 @@ class JsonpResponse extends DetailResponse
         return $response;
     }
     
-    // also used in undex requests in controllers
+  
+    // also used in autocomplete controller
       public static function produceJsonPResponse($body, $callback) {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $jsonp = $callback . '(' . json_encode($body) . ');';

@@ -50,7 +50,7 @@ $this->headTitle($name)?>
          <?php if ($key==="type"):?>
 	 <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
          <?php endif?>
-         <?php if ($key==="description"):?>
+         <?php if ($key==="description" ):?>
 	 <dd><?php echo nl2br($val, true)?></dd>
 	<?php endif?>
          <?php if (($key==="uuid") || ($key==="code") || ($key==="title") || ($key==="allow_oai"  ||  $key==="license_name")):?>

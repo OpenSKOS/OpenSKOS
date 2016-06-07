@@ -14,7 +14,7 @@ class Api_SetController extends AbstractController
     
      public function indexAction()
     {
-       parent::indexAction();
+      parent::indexAction();
     }
    
     public function getAction()

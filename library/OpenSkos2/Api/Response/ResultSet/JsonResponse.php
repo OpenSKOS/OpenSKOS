@@ -58,13 +58,12 @@ class JsonResponse extends ResultSetResponse
      * @return array
      */
     protected function getDocs()
-    {
+    { 
         $docs = [];
         foreach ($this->result->getResources() as $resource) {
-            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transformConcept();
+            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
             $docs[] = $nResource;
         }
-
         return $docs;
     }
 }

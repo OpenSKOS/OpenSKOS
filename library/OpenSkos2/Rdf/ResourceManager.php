@@ -461,6 +461,9 @@ public function deleteSolrIntact(Uri $resource)
 
         $query .= '}'; // end sub select
         $resources = $this->fetchQuery($query, $resType);
+        
+       
+        
         // The order by part does not apply to the resources with describe.
         // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
@@ -951,6 +954,32 @@ public function deleteSolrIntact(Uri $resource)
         return $allRelations;
     }
 
-    
+    public function setUriWithEmptinessCheck(&$resource, $property, $val) {
+        if ($val !== null && $val !== '') {
+            $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
+        };
+    }
 
+    public function setLiteralWithEmptinessCheck(&$resource, $property, $val) {
+        if ($val !== null && $val !== '') {
+            $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
+        };
+    }
+    
+    public function setBooleanLiteralWithEmptinessCheck(&$resource, $property, $val) {
+        if ($val === null) {
+            $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+            return;
+        } else {
+            if (strtolower($val) === 'y' || strtolower($val) === "yes") {
+                $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('true', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                return;
+            }
+            if (strtolower($val) === 'n' || strtolower($val) === "no") {
+                $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+                return;
+            }
+        }
+        $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+    }
 }

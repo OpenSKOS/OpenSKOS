@@ -35,7 +35,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
                 $this->view->resource = $index;
                 return $this->renderScript($this->viewpath . 'index.phtml');
             } else {
-                $response = $api->fetchFullList($params['context'], $params['callback']);
+                $response = $api->fetchDeatiledList($params['context'], $params['callback']);
                 $this->emitResponse($response);
             }
         }
