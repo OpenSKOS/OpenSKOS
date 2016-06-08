@@ -58,7 +58,7 @@ class Tenant extends AbstractTripleStoreResource
        return trim($name[0]); 
     }
     
-    protected function fetchFromMySQL() {
+    protected function fetchFromMySQL($params) {
         $model = new OpenSKOS_Db_Table_Tenants();
         $select = $model->select();
         $mysqlres = $model->fetchAll($select);

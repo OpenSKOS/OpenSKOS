@@ -35,7 +35,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
                 $this->view->resource = $index;
                 return $this->renderScript($this->viewpath . 'index.phtml');
             } else {
-                $response = $api->fetchDeatiledList($params['context'], $params['callback']);
+                $response = $api->fetchDeatiledList($params);
                 $this->emitResponse($response);
             }
         }
@@ -143,6 +143,25 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
             } else {
                 $retVal['shortlist'] = false;
             }
+        }
+        $allow_oai = $this->getRequest()->getParam('allow_oai');
+        if (null !== $allow_oai) {
+            switch (strtolower($allow_oai)) {
+                case '1':
+                case 'yes':
+                case 'y':
+                case 'true':
+                    $retVal['allow_oai'] = 'true';
+                    break;
+                case '0':
+                case 'no':
+                case 'n':
+                case 'false':
+                    $retVal['allow_oai'] = 'false';
+                    break;
+            }
+        } else {
+            $retVal['allow_oai'] = null;
         }
         
         return $retVal;

@@ -42,9 +42,15 @@ class Set extends AbstractTripleStoreResource
         $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
     }
     
-    protected function fetchFromMySQL() {
+    protected function fetchFromMySQL($params) {
         $model = new OpenSKOS_Db_Table_Collections();
         $select = $model->select();
+        if ($params['allow_oai']==='true') {
+                    $select->where('allow_oai=?', 'Y');
+        };
+        if ($params['allow_oai']==='false') {
+                    $select->where('allow_oai=?', 'N');
+        };
         $mysqlres = $model->fetchAll($select);
         $index = new SetCollection();
         foreach ($mysqlres as $collection) {

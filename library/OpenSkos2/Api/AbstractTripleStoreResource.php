@@ -82,28 +82,33 @@ abstract class AbstractTripleStoreResource {
     }
 
     
-    public function fetchDeatiledList($context, $callback) {
-        $index =  $this->manager->fetch();
+    public function fetchDeatiledList($params) {
+        $resType = $this->manager->getResourceType();
+        if ($resType === Dcmi::DATASET && $params['allow_oai']!== null) {
+           $index =  $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]); 
+        } else {
+            $index =  $this->manager->fetch();
+        }
         $index=null; // testing mysql database
+        
         if ($index === null || count($index) === 0) { // backward compatibility: checking MySQL tables if needed
-            $resType = $this->manager->getResourceType();
             if (CHECK_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
-                    $index = $this->fetchFromMySQL();
+                    $index = $this->fetchFromMySQL($params);
             }
         }
         $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
-        switch ($context) {
+        switch ($params['context']) {
                 case 'json':
                     $response = (new JsonResponse($result, []))->getResponse();
                     break;
                 case 'jsonp':
-                    $response = (new JsonpResponse($result, $callback, []))->getResponse();
+                    $response = (new JsonpResponse($result, $params['callback'], []))->getResponse();
                     break;
                 case 'rdf':
                     $response = (new RdfResponse($result, []))->getResponse();
                     break;
                 default:
-                    throw new InvalidArgumentException('Invalid context: ' . $context);
+                    throw new InvalidArgumentException('Invalid context: ' . $params['context']);
         }
         return $response;
     }
