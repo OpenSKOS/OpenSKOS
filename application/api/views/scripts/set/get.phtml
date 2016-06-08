@@ -66,7 +66,13 @@ $this->headTitle($name)?>
 <h3><?php echo $this->translate('Concept Schemes')?></h3>
 <ul>
 	<?php 
-        foreach ($setManager->fetchInhabitantsForSet($uri, Skos::CONCEPTSCHEME) as $key=>$value):?>
+        if (CHECK_MYSQL):
+            $schemata = $setManager->fetchInhabitantsForSetViaUri($uri, Skos::CONCEPTSCHEME) ;
+        else: 
+            $schemata = $setManager->fetchInhabitantsForSetViaCode($code, Skos::CONCEPTSCHEME) ;
+        endif;
+        
+        foreach ($schemata as $key=>$value):?>
 	<li> 
 		<a href="<?php echo $this->url(array('controller' => 'conceptscheme', 'id' => $value), 'rest')?>.html">
 			<?php echo $key?>
@@ -78,7 +84,12 @@ $this->headTitle($name)?>
 <h3><?php echo $this->translate('Skos collections')?></h3>
 <ul>
 	<?php 
-        foreach ($setManager->fetchInhabitantsForSet($uri, Skos::SKOSCOLLECTION) as $key=>$value):?>
+        if (CHECK_MYSQL):
+            $skoscollections = $setManager->fetchInhabitantsForSetViaUri($uri, Skos::SKOSCOLLECTION) ;
+        else: 
+            $skoscollections = $setManager->fetchInhabitantsForSetViaCode($code, Skos::SKOSCOLLECTION) ;
+        endif;
+        foreach ($skoscollections as $key=>$value):?>
 	<li> 
 		<a href="<?php echo $this->url(array('controller' => 'skoscollection', 'id' => $value), 'rest')?>.html">
 			<?php echo $key?>

@@ -542,7 +542,7 @@ public function deleteSolrIntact(Uri $resource)
         }
         $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
         $result = $this->query($query);
-        $retVal = $this -> makeJsonList($result, 'subject');
+        $retVal = $this -> makeListOfPrimitiveResults($result, 'subject');
         return $retVal;
     }
     
@@ -556,13 +556,13 @@ public function deleteSolrIntact(Uri $resource)
         $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . '. $typeFilter. '}';
 
         $result = $this->query($query);
-        $retVal = $this->makeJsonList($result, 'object');
+        $retVal = $this->makeListOfPrimitiveResults($result, 'object');
         return $retVal;
     }
     
    
 
-    private function makeJsonList($sparqlQueryResult, $triplePart) {
+    private function makeListOfPrimitiveResults($sparqlQueryResult, $triplePart) {
         $items = [];
         foreach ($sparqlQueryResult as $resource) {
             $className=get_class($resource->$triplePart);
@@ -575,7 +575,7 @@ public function deleteSolrIntact(Uri $resource)
         return $items;
     }
     
-    protected function makeJsonUriNameMap($sparqlQueryResult) {
+    protected function makeNameUriMap($sparqlQueryResult) {
         $items = [];
         foreach ($sparqlQueryResult as $resource) {
             $uri = $resource->uri->getUri();
@@ -585,13 +585,33 @@ public function deleteSolrIntact(Uri $resource)
         return $items;
     }
     
-    public function fetchUriName() {
-        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <'. $this->getResourceType() .'> .}';
+    public function fetchNameUri() {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <' . $this->getResourceType() . '> .}';
         $response = $this->query($query);
-        $result = $this->makeJsonUriNameMap($response);
+        $result = $this->makeNameUriMap($response);
         return $result;
     }
-    
+
+    public function fetchNameCodeFromMySql() {
+        if ($this->getResourceType() === Org::FORMALORG) {
+            $model = new OpenSKOS_Db_Table_Tenants();
+            $name = 'name';
+        } else {
+            if ($this->getResourceType() === Dcmi::DATASET) {
+               $model = new OpenSKOS_Db_Table_Collections();
+               $name='dc_title';
+            } else {
+                return [];
+            }
+        }
+        $select = $model->select();
+        $mysqlres = $model->fetchAll($select);
+        $retVal = [];
+        foreach ($mysqlres as $row) {
+            $retVal[$row[$name]] = $row['code'];
+        }
+        return $retVal;
+    }
     
 
     /**
@@ -780,7 +800,7 @@ public function deleteSolrIntact(Uri $resource)
   
      public function fetchRelationUris(){ // all relations, not only concept-concept relations
          $skosrels = Skos::getSkosRelations();
-         $userrels = array_values($this->fetchUriName());
+         $userrels = array_values($this->fetchNameUri());
          $result = array_merge($skosrels, $userrels);
          return $result;
     }
@@ -833,91 +853,66 @@ public function deleteSolrIntact(Uri $resource)
    
    // used only for HTML output
     public function getResourceUuid($resourceReference, $resourceType) {
-        // first check if it can be found with reference as resource's Uri in the triple store
+        if (CHECK_MYSQL && ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET)) {
+            return $resourceReference;
+        }
+        
         $query = 'SELECT ?uuid WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::UUID . '> ?uuid .  }';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
             return $response1[0]->uuid->getValue();
         }
 
-        //if the first attempt above fails, check if the resource can be found in the triple store
-        // by $reference as the resource's code 
-        $query = "SELECT ?uuid WHERE { ?resourceuri <" . OpenSkosNamespace::CODE . "> '" . $resourceReference . "' . ?resourceuri <" . OpenSkos::UUID . "> ?uuid .  }";
+       $query = "SELECT ?uuid WHERE { ?resourceuri <" . OpenSkosNamespace::CODE . "> '" . $resourceReference . "' . ?resourceuri <" . OpenSkosNameSpace::UUID . "> ?uuid .  }";
         $response2 = $this->query($query);
         if ($response2 !== null & count($response2) > 0) {
             return $response2[0]->uuid->getValue();
         }
-        // if the second attempt fails check MySql if the setting tells it,
-        // and if the resoucrce is tenant or set
-        if (CHECK_MYSQL) {
-            $resourceMySql = null;
-            if ($resourceType === Org::FORMALORG) {
-                $resourceMySql = $this->fetchTenantFromMySqlByCode($resourceReference->getValue());
-            };
-            if ($resourceType === Dcmi::DATASET) {
-                $resourceMySql = $this->fetchSetFromMySqlByCode($resourceReference - getValue());
-            };
-            if ($resourceMySql !== null) {
-                if ($resourceMySql['uuid'] !== null && isset($resourceMySql['uuid'])) {
-                    return $resourceMySql['uuid'];
-                }
-            }
-        }
-        throw new ApiException("The resource with the reference " . $resourceReference . " does not have uuid. ", 400);
+        throw new ApiException("The resource with the reference " . $resourceReference . " does not exist in triple store (and mysql). ", 400);
     }
 
     // used only for HTML output
     public function getSetTitle($reference) {
-       //first, check if the set can be found in the triple store
-        // by $reference as the set code 
+        if (CHECK_MYSQL) {
+            $mysqlSet = $this->fetchSetFromMySqlByCode($reference);
+            return $mysqlSet['dc_title'];
+        }
         $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" . RdfNamespace::TYPE . "> <" . Dcmi::DATASET . "> . }";
         $response = $this->query($query);
         if ($response !== null & count($response) > 0) {
             return $response[0]->name->getValue();
         } 
-
-// seconds check if it can be found with reference as set's Uri in the triple store
+        
         $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . DcTerms::TITLE . '> ?name .  <' . $reference . '>  <' . RdfNamespace::TYPE . '> <' . Dcmi::DATASET . '> .}';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
             return $response1[0]->name->getValue();
         }
         
-        // if the second attempt fails check MySql if the setting tells it 
-        if (CHECK_MYSQL) {
-            $mysqlSet = $this->fetchSetFromMySqlByCode($val);
-            return $mysqlSet['dc_title'];
-        } else {
-            return UNKNOWN;
-        }
     }
 
     // used only for HTML output
     public function getTenantName($reference) {
-        //first, check if the tenant can be found in the triple store
-        // by $reference as the tenant code
+        if (CHECK_MYSQL) {
+            $mysqlTenant = $this->fetchTenantFromMySqlByCode($reference);
+            return $mysqlTenant['name'];
+        } 
+        
         $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
         $response2 = $this->query($query);
         if ($response2 !== null & count($response2) > 0) {
             return $response2[0]->name->getValue();
         };
 
-        // second attempt: check if it can be found with reference as tenant's Uri in the triple store
         $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
             return $response1[0]->name->getValue();
         };
         
-        // if the second attempt fails check MySql if the setting tells it 
-        if (CHECK_MYSQL) {
-            $mysqlTenant = $this->fetchTenantFromMySqlByCode($val);
-            return $mysqlTenant['name'];
-        } else {
-            return UNKNOWN;
-        }
+       
     }
-    // used only for HTML representation
+    // used only for HTML representation to count concepts withit a schema, a set or a skos-collection
     public function countConceptsForCluster($clusterUri, $clusterType) {
         $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
         . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterUri . '> .'

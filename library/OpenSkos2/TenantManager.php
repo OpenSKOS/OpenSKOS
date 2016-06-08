@@ -23,6 +23,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use OpenSkos2\Api\Exception\ApiException;
@@ -32,26 +33,21 @@ class TenantManager extends ResourceManager
   
     protected $resourceType = Tenant::TYPE;
    
-    public function fetchUriName() {
+    public function fetchNameUri() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
         $response = $this->query($query);
-        $result = $this->makeJsonUriNameMap($response);
+        $result = $this->makeNameUriMap($response);
         return $result;
     }
     
     // used only for HTML representation
-    public function fetchSetsForTenant($reference) {
-        $response = null;
-        $retVal = [];
-        if ($reference instanceof Uri) {
-            $tenantUri = $reference->getUri();
-            $query = 'SELECT ?seturi ?p ?o WHERE  {  ?seturi  <' . DcTerms::PUBLISHER . '> <' . $tenantUri . '> .'
-                    . ' ?seturi  ?p ?o .}';
-            $retVal = $this->arrangeTripleStoreSets($response);
+    public function fetchSetsForTenant($code) {
+        if (CHECK_MYSQL) {
+            $response = $this->fetchMySQLSetsForCode($code);
+            $retVal = $this->arrangeMySqlSets($response);
             return $retVal;
-        } else { // must be a code, a literal
-            $tenantCode = $reference->getValue();
-            $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $tenantCode . "' ."
+        } else {
+            $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
                     . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenantUri .'
                     . ' ?seturi  ?p ?o .}';
             $response = $this->query($query);
@@ -59,15 +55,10 @@ class TenantManager extends ResourceManager
                 if (count($response) > 0) {
                     $retVal = $this->arrangeTripleStoreSets($response);
                     return $retVal;
-                } else { // check mysql 
-                    $retVal = $this->checkMySQLSets($tenantCode);
-                    return $retVal;
-                }
-            } else {
-                $retVal = $this->checkMySQLSets($tenantCode);
-                return $retVal;
+                } 
             }
         }
+        return [];
     }
 
     // used only for html output
@@ -101,51 +92,85 @@ class TenantManager extends ResourceManager
         
     }
     
-    // used only for htmll output
+    // used only for html output
     private function arrangeMySQLSets($mysqlresponse) {
         $retVal = [];
         foreach ($mysqlresponse as $row) {
-            if (isset($row['uuid'])) {
-                $id = $row['uuid'];
+            if (isset($row['code'])) {
+                $id = $row['code'];
             } else {
-                if (isset($row['uri'])) {
-                    $id = $row['id'];
-                } else {
-                    if (isset($row['id'])) {
-                        $id = $row['id'];
-                    } else {
-                throw new ApiException("A set with no uuid in MySQL databse is detected", 400);
-                    }
-                }
+                throw new ApiException("A set with no code in MySQL databse is detected", 400);
             }
-            
-            if (!array_key_exists($id, $retVal)) {
-                $retVal[$id]=[];
-            };
+
+            $retVal[$id] = [];
+
             $retVal[$id]['dcterms_title'] = $row['dc_title'];
             if (isset($row['dc_decription'])) {
-               $retVal[$id]['dcterms_description'] = $row['dc_decription'];
+                $retVal[$id]['dcterms_description'] = $row['dc_decription'];
             }
             if (isset($row['website'])) {
                 $retVal[$id]['openskos_webpage'] = $row['website'];
             }
             $retVal[$id]['openskos_code'] = $row['code'];
-            if (isset($row['uuid'])) {
-                $retVal[$id]['openskos_uuid'] = $row['uuid'];
-            }
-        } 
+            $retVal[$id]['openskos_uuid'] = $row['code'];
+        }
         return $retVal;
     }
-    
-    private function checkMySQLSets($tenantCode){
+
+    private function fetchMySQLSetsForCode($tenantCode){
         $model = new OpenSKOS_Db_Table_Tenants();
         $tenant = $model->find($tenantCode)->current();
         if ($tenant===null) {
            throw new ApiException("Tenant with the code '". $tenantCode . "' is not found in MySQL", 400);
         }
         $sets = $tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
-        $retVal = $this->arrangeMySQLSets($sets);
-        return $retVal;
+        return $sets;
     }
+    
+    public function translateTenantMySqlToRdf($tenantMySQL) {
+        $tenantResource = new Tenant();
+        if (!isset($tenantMySQL['uri'])) {
+            $tenantResource->setUri('http://unset_uri_in_mysqldatabase');
+        } else {
+            $tenantResource->setUri($tenantMySQL['uri']);
+        }
+        $tenantResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($tenantMySQL['code']));
+        $organisation = new Resource("node-org");
+        $this->setLiteralWithEmptinessCheck($organisation, vCard::ORGNAME, $tenantMySQL['name']);
+        $this->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit']);
+        $tenantResource->setProperty(vCard::ORG, $organisation);
+        $this->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website']);
+        $this->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, $tenantMySQL['email']);
+
+        $adress = new Resource("node-adr");
+        $this->setLiteralWithEmptinessCheck($adress, vCard::STREET, $tenantMySQL['streetAddress']);
+        $this->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, $tenantMySQL['locality']);
+        $this->setLiteralWithEmptinessCheck($adress, vCard::PCODE, $tenantMySQL['postalCode']);
+        $this->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, $tenantMySQL['countryName']);
+        $tenantResource->setProperty(vCard::ADR, $adress);
+        
+        $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantMySQL['disableSearchInOtherTenants']);
+        if (array_key_exists('enableStatussesSystem', $tenantMySQL)){
+          $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantMySQL['enableStatussesSystem']);
+        } else {
+            $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, ENABLE_STATUSSES_SYSTEM);
+        }
+
+        return $tenantResource;
+    }
+
+    
+    public function fetchFromMySQL($params) {
+        $model = new OpenSKOS_Db_Table_Tenants();
+        $select = $model->select();
+        $mysqlres = $model->fetchAll($select);
+        $index = new TenantCollection();
+        foreach ($mysqlres as $tenant) {
+            $rdfTenant = $this->translateTenantMySqlToRdf($tenant);
+            $index->append($rdfTenant);
+        }
+        return $index;
+    }
+
     
 }

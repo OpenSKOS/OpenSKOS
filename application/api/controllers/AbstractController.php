@@ -25,17 +25,17 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $params = $this->handleParams();
         $api = $this->getDI()->make($this->fullNameResourceClass);
         if ($params['shortlist']) { // used for meertens fronten
-            $result = $api->fetchUriName();
+            $result = $api->mapNameSearchID();
             $this->_helper->contextSwitch()->setAutoJsonSerialization(true);
             return $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
         } else {
             if ($params['context'] === 'html') {
-                $index= $api->fetchUriName();
+                $index= $api->mapNameSearchID();
                 $this->getHelper('layout')->enableLayout();
                 $this->view->resource = $index;
                 return $this->renderScript($this->viewpath . 'index.phtml');
             } else {
-                $response = $api->fetchDeatiledList($params);
+                $response = $api->fetchDeatiledListResponse($params);
                 $this->emitResponse($response);
             }
         }

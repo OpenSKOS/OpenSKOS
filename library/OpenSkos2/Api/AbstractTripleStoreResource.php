@@ -52,50 +52,37 @@ abstract class AbstractTripleStoreResource {
         $params = $request->getQueryParams();
         if (empty($params['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
-        }
-        $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
-        if ($tenantUri === null) {
-            if (!CHECK_MYSQL) {
+        };
+        if (!CHECK_MYSQL) {
+            $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
+            if ($tenantUri === null) {
                 throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
-            } else {
-                $institution = $this->manager->fetchTenantFromMySqlByCode($params['tenant']);
-                if ($institution === null) {
-                    throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' is not found either in the triple store or in the mysql.', 400);
-                } else {
-                    if (isset($institution['uri']) && $institution['uri']!==null && $institution['uri']!=="") {
-                      $tenantUri = $institution['uri'];  
-                    } else {
-                       $tenantUri =  $params['tenant'];
-                    }
-                }
             }
+        } else {
+            $institution = $this->manager->fetchTenantFromMySqlByCode($params['tenant']);
+            if ($institution === null) {
+                throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' is not found either in the triple store or in the mysql.', 400);
+            };
+            $tenantUri = null; // in the old setting institution must be is referred by code
         }
         $params['tenanturi'] = $tenantUri;
         $this->tenant['uri'] = $tenantUri;
         $this->tenant['code'] = $params['tenant'];
         return $params;
     }
-    
-    public function fetchUriName() {
-        $index =  $this->manager->fetchUriName();
+
+    public function mapNameSearchID() {
+        if (CHECK_MYSQL && ($this->manager->getResourceType() === Org::FORMALORG || $this->manager->getResourceType() === Dcmi::DATASET)) {
+            $index = $this->manager->fetchNameCodeFromMySql();
+        } else {
+        $index =  $this->manager->fetchNameUri();
+        }
         return $index;
     }
 
     
-    public function fetchDeatiledList($params) {
-        $resType = $this->manager->getResourceType();
-        if ($resType === Dcmi::DATASET && $params['allow_oai']!== null) {
-           $index =  $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]); 
-        } else {
-            $index =  $this->manager->fetch();
-        }
-        $index=null; // testing mysql database
-        
-        if ($index === null || count($index) === 0) { // backward compatibility: checking MySQL tables if needed
-            if (CHECK_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
-                    $index = $this->fetchFromMySQL($params);
-            }
-        }
+    public function fetchDeatiledListResponse($params) {
+        $index = $this ->fetchDetailedList($params);
         $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
         switch ($params['context']) {
                 case 'json':
@@ -113,7 +100,20 @@ abstract class AbstractTripleStoreResource {
         return $response;
     }
 
-
+    public function fetchDetailedList($params) {
+        $resType = $this->manager->getResourceType();
+        if (CHECK_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
+            $index = $this->manager->fetchFromMySQL($params);
+            return $index;
+        } 
+        if ($resType === Dcmi::DATASET && $params['allow_oai']!== null) {
+           $index =  $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]); 
+        } else {
+            $index =  $this->manager->fetch();
+        }
+        return $index;
+    }
+    
     // Id is either an URI or uuid
     public function findResourceByIdResponse(ServerRequestInterface $request, $id, $context) {
         try {
@@ -153,16 +153,27 @@ abstract class AbstractTripleStoreResource {
 
     // Id is either an URI or uuid
     public function findResourceById($id) {
-            if ($id!==null && isset($id)){
-                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                    $resource = $this->manager->fetchByUri($id);
-                } else {
-                    $resource = $this->manager->fetchByUuid($id);
-                }
+        if ($id !== null && isset($id)) {
+            if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                $resource = $this->manager->fetchByUri($id);
                 return $resource;
-            } else {
-                throw new InvalidArgumentException('No Id (URI or UUID) is given');
             }
+
+            if (CHECK_MYSQL && $this->manager->getResourceType() === Org::FORMALORG) {
+                $mysqlres = $this->manager->fetchTenantFromMySqlByCode($id);
+                $resource = $this->manager->translateTenantMySqlToRdf($mysqlres);
+                return $resource;
+            };
+            if (CHECK_MYSQL && $this->manager->getResourceType() === Dcmi::DATASET) {
+                $mysqlres = $this->manager->fetchSetFromMySqlByCode($id);
+                $resource = $this->manager->translateMySqlCollectionToRdfSet($mysqlres);
+                return $resource;
+            };
+            $resource = $this->manager->fetchByUuid($id);
+            return $resource;
+        } else {
+            throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');
+        }
     }
 
     public function create(ServerRequestInterface $request) {
@@ -448,35 +459,29 @@ abstract class AbstractTripleStoreResource {
             return true;
         }
         foreach ($val as $uri) {
-            $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-            if ($count < 1) {
-                if (CHECK_MYSQL) {
-                    if ($rdfType !== Org::FORMALORG && $rdfType !== Dcmi::DATASET) {
-                        throw new ApiException('The sub-resource referred by ' . $uri . ' does not exist.', 400);
-                    } else {
-                        if ($rdfType === Org::FORMALORG) { // check in the mysql, $uri may be a code
-                            $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
-                            if ($institution === null) {
-                                throw new ApiException('The tenant referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
-                            }
-                        };
-                        if ($rdfType === Dcmi::DATASET) { // check in the mysql
-                            $set = $this->manager->fetchSetFromMySqlByCode($uri);
-                            if ($set === null) {
-                                throw new ApiException('The set referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
-                            }
-                        };
+            if (CHECK_MYSQL) {
+                if ($rdfType === Org::FORMALORG) { // check in the mysql, 
+                    $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
+                    if ($institution === null) {
+                        throw new ApiException('The tenant referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
                     }
-                } else {
+                };
+                if ($rdfType === Dcmi::DATASET) { // check in the mysql
+                    $set = $this->manager->fetchSetFromMySqlByCode($uri);
+                    if ($set === null) {
+                        throw new ApiException('The set referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
+                    }
+                };
+            } else {
+                $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
+                if ($count < 1) {
                     throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. ', 400);
                 }
             }
         }
     }
 
-  
- 
-   private function retrieveLanguagePrefix($val){
+    private function retrieveLanguagePrefix($val){
         if ($val instanceof Literal) {
             $lang = $val->getLanguage();
             if ($lang !== null && $lang !== "") {
