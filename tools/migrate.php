@@ -105,7 +105,7 @@ if (!in_array('uri', $cols)) {
 }
 
 $fetchRowWithRetries = function ($resourceManager, $model, $query) {
-    return $resourceManager -> fetchRowWithEntries($model, $query);
+    return $resourceManager -> fetchRowWithRetries($model, $query);
 };
 
 
@@ -194,6 +194,17 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
     if (!$code) {
         return null;
     }
+    
+    if (TENANTS_AND_SETS_IN_MYSQL) {
+    $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
+        
+        if (!$tenantMySQL) {
+            echo "Could not find tenant  with code: {$code}\n";
+            return null;
+        } else {
+            return new \OpenSkos2\Rdf\Literal($code);
+        }
+    }   
     $tripleStoreTenant = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Org::FORMALORG);
     if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
         // look up MySQL
@@ -218,10 +229,26 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
 
 
 
-function fetch_set($code, $collectionModel, $fetchRowWithRetries, $resourceManager) {
-    if (!$code) {
+function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager) {
+    if (!$id) {
         return null;
     }
+    
+   
+    $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($id)
+    );
+
+    if (!$collectionMySQL) {
+        echo "Could not find a set (aka tenant collection) with id: {$id}\n";
+        return null;
+    }
+
+    if (TENANTS_AND_SETS_IN_MYSQL) {
+        return new \OpenSkos2\Rdf\Literal($collectionMySQL['code']);
+    }
+
+    $code = $collectionMySQL['code'];
+
     $tripleStoreSet = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Dcmi::DATASET);
     if (count($tripleStoreSet) < 1) { // this tenant is not yet in the triple store
         /**
@@ -385,64 +412,64 @@ $mappings = [
     ]
 ];
 
-
-var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
-var_dump($total);
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
-do {
-    //$logger->info("fetching " . $endPoint . "&start=$counter");
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-    foreach ($data['response']['docs'] as $doc) {
-        $counter++;
-        try {
-            if (array_key_exists('tenant', $doc)) {
-                $value = $doc['tenant'];
-                foreach ((array) $value as $v) {
-                    $uri = fetch_tenant($v, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
-                }
-            }
-        } catch (Exception $ex) {
-            var_dump($ex->getMessage());
-        }
+if (!TENANTS_AND_SETS_IN_MYSQL) {
+    var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
+    var_dump($total);
+    if (!empty($OPTS->start)) {
+        $counter = $OPTS->start;
+    } else {
+        $counter = 0;
     }
-} while ($counter < $total && isset($data['response']['docs']));
-
-
-
-
-var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
-var_dump($total);
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
-do {
-    //$logger->info("fetching " . $endPoint . "&start=$counter");
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-    foreach ($data['response']['docs'] as $doc) {
-        $counter++;
-        try {
-            if (array_key_exists('collection', $doc)) {
-                $value = $doc['collection'];
-                foreach ((array) $value as $v) {
-                    $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
+    do {
+        //$logger->info("fetching " . $endPoint . "&start=$counter");
+        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+        foreach ($data['response']['docs'] as $doc) {
+            $counter++;
+            try {
+                if (array_key_exists('tenant', $doc)) {
+                    $value = $doc['tenant'];
+                    foreach ((array) $value as $v) {
+                        $uri = fetch_tenant($v, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
+                    }
                 }
+            } catch (Exception $ex) {
+                var_dump($ex->getMessage());
             }
-        } catch (Exception $ex) {
-            var_dump($ex->getMessage());
-            
         }
+    } while ($counter < $total && isset($data['response']['docs']));
+
+
+
+
+    var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
+    var_dump($total);
+    if (!empty($OPTS->start)) {
+        $counter = $OPTS->start;
+    } else {
+        $counter = 0;
     }
-} while ($counter < $total && isset($data['response']['docs']));
-   
+    do {
+        //$logger->info("fetching " . $endPoint . "&start=$counter");
+        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+        foreach ($data['response']['docs'] as $doc) {
+            $counter++;
+            try {
+                if (array_key_exists('collection', $doc)) {
+                    $value = $doc['collection'];
+                    foreach ((array) $value as $v) {
+                        $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
+                    }
+                }
+            } catch (Exception $ex) {
+                var_dump($ex->getMessage());
+            }
+        }
+    } while ($counter < $total && isset($data['response']['docs']));
+}
 
 echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
 echo $total;
+echo '\n';
 if (!empty($OPTS->start)) {
     $counter = $OPTS->start;
 } else {
@@ -452,8 +479,9 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
+        var_dump($counter);
         $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
-        $counter ++;       
+        $counter ++; 
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
@@ -541,10 +569,6 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                         foreach ((array) $value as $v) {
                             
                             $insertValue = $mapping['callback']($v);
-                            if ($field === 'hasTopConcept') {
-                                var_dump($v);
-                                var_dump($insertValue);
-                            }
                             if ($insertValue !== null) {
                                 $resource->addProperty($mapping['fields'][$field], $insertValue);
                                 if (array_key_exists($field, $synonym)) {
@@ -616,27 +640,29 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
 }
 
 
-
-var_dump("run Set (aka tenant collection) round, # documents to process: ");
-var_dump($total);
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
-$added=0;
-do {
-    //$logger->info("fetching " . $endPoint . "&start=$counter");
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-    foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
-        $added = $added + $check;
-        $counter++;
+if (!TENANTS_AND_SETS_IN_MYSQL) {
+    var_dump("run Set (aka tenant collection) round, # documents to process: ");
+    var_dump($total);
+    if (!empty($OPTS->start)) {
+        $counter = $OPTS->start;
+    } else {
+        $counter = 0;
     }
-} while ($counter < $total && isset($data['response']['docs']));
-var_dump('Sets (aka tenant collections) added: ');
-var_dump($added);
+    $added = 0;
+    do {
+        //$logger->info("fetching " . $endPoint . "&start=$counter");
+        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+        foreach ($data['response']['docs'] as $doc) {
+            $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
+            $added = $added + $check;
+            $counter++;
+        }
+    } while ($counter < $total && isset($data['response']['docs']));
+    var_dump('Sets (aka tenant collections) added: ');
+    var_dump($added);
+}
 
+var_dump('\n');
 var_dump("run ConceptScheme round, # documents to process: ");
 var_dump($total);
 if (!empty($OPTS->start)) {

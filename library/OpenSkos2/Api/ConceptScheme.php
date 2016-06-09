@@ -26,7 +26,7 @@ class ConceptScheme extends AbstractTripleStoreResource
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
        
         // referred resources must exist  
-       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+       $this -> validateSet($resourceObject);
        $this->validateURI($resourceObject, Skos::HASTOPCONCEPT, Skos::CONCEPT);
     }
     
@@ -39,7 +39,7 @@ class ConceptScheme extends AbstractTripleStoreResource
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
         
          // referred resources must exist  
-        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        $this -> validateSet($resourceObject);
         $this->validateURI($resourceObject, Skos::HASTOPCONCEPT, Skos::CONCEPT);
     }
 }

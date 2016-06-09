@@ -829,7 +829,7 @@ public function deleteSolrIntact(Uri $resource)
        return $setMySQL;
     }
    
-   private function fetchRowWithRetries($model, $query) {
+   public function fetchRowWithRetries($model, $query) {
     $tries = 0;
     $maxTries = 3;
     do {
@@ -853,7 +853,7 @@ public function deleteSolrIntact(Uri $resource)
    
    // used only for HTML output
     public function getResourceUuid($resourceReference, $resourceType) {
-        if (CHECK_MYSQL && ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET)) {
+        if (TENANTS_AND_SETS_IN_MYSQL && ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET)) {
             return $resourceReference;
         }
         
@@ -873,7 +873,7 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getSetTitle($reference) {
-        if (CHECK_MYSQL) {
+        if (TENANTS_AND_SETS_IN_MYSQL) {
             $mysqlSet = $this->fetchSetFromMySqlByCode($reference);
             return $mysqlSet['dc_title'];
         }
@@ -893,7 +893,7 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getTenantName($reference) {
-        if (CHECK_MYSQL) {
+        if (TENANTS_AND_SETS_IN_MYSQL) {
             $mysqlTenant = $this->fetchTenantFromMySqlByCode($reference);
             return $mysqlTenant['name'];
         } 
@@ -913,10 +913,24 @@ public function deleteSolrIntact(Uri $resource)
        
     }
     // used only for HTML representation to count concepts withit a schema, a set or a skos-collection
-    public function countConceptsForCluster($clusterUri, $clusterType) {
-        $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
-        . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterUri . '> .'
-                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}';
+    public function countConceptsForCluster($clusterID, $clusterType) {
+        if ($clusterType === OpenSkosNamespace::SET) { // search on code
+            if (TENANTS_AND_SETS_IN_MYSQL) {
+                $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
+             . " WHERE  {  ?uri  <" . OpenSkosNamespace::SET . "> '" .$clusterID ."' . "
+             . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
+            } else {
+            $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
+             . " WHERE  {  ?seturi  <" . OpenSkosNamespace::CODE . "> '" . $clusterID . "' ."
+                 . ' ?uri  <' . OpenSkosNamespace::SET . '> ?seturi . '
+                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
+            }
+            
+        } else {
+           $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
+             . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterID . '> .'
+                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
+        }
         $result = $this->query($query);
         $tmp = $result[0];
         return $tmp->count->getValue();

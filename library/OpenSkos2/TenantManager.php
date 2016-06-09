@@ -42,7 +42,7 @@ class TenantManager extends ResourceManager
     
     // used only for HTML representation
     public function fetchSetsForTenant($code) {
-        if (CHECK_MYSQL) {
+        if (TENANTS_AND_SETS_IN_MYSQL) {
             $response = $this->fetchMySQLSetsForCode($code);
             $retVal = $this->arrangeMySqlSets($response);
             return $retVal;

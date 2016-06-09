@@ -121,7 +121,7 @@ class Authorisation {
 
         $tenantref = current($concept->getProperty(OpenSkos::TENANT));
         if ($tenantUri !== (string) $tenantref) {
-            if (CHECK_MYSQL) { // $tenantref may be a code for older approaches when tenant is not in the triple store but in my sql database, so compare codes
+            if (TENANTS_AND_SETS_IN_MYSQL) { // $tenantref may be a code for older approaches when tenant is not in the triple store but in my sql database, so compare codes
                 if ($tenantCode !== (string) $tenantref) {
                     throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which does not correspond to the request-s tenant ' . $tenantCode, 403);
                 }

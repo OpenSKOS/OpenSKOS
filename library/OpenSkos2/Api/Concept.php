@@ -310,12 +310,12 @@ class Concept extends AbstractTripleStoreResource {
         $this->checkRelationsInConcept($resourceObject);
     }
 
-    // To DISCUSS?
+    
     private function checkIfReferredResourcesExist($resourceObject) {
-        $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        $this -> validateTenant($resourceObject, OpenSkos::TENANT);
+        $this -> validateSet($resourceObject);
         $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
         $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
-        $this->validateURI($resourceObject, OpenSkos::TENANT, Org::FORMALORG);
         $this->validateURI($resourceObject, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
     }
 

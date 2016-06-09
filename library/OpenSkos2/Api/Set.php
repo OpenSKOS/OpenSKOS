@@ -28,7 +28,7 @@ class Set extends AbstractTripleStoreResource
        parent::validate($resourceObject, $tenant);
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Dcmi::DATASET);
        $this->validatePropertyForCreate($resourceObject, OpenSkos::CODE, Dcmi::DATASET);
-       $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
+       $this->validateTenant($resourceObject, DcTerms::PUBLISHER);
     }
     
     
@@ -39,7 +39,7 @@ class Set extends AbstractTripleStoreResource
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Dcmi::DATASET);
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, OpenSkos::CODE, Dcmi::DATASET);
         
-        $this->validateURI($resourceObject, DcTerms::PUBLISHER,Org::FORMALORG);
+        $this->validateTenant($resourceObject, DcTerms::PUBLISHER);
     }
     
     

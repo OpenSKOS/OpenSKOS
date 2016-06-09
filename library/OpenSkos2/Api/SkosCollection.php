@@ -32,7 +32,7 @@ class SkosCollection extends AbstractTripleStoreResource
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
        
        // referred resources must exist 
-       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+       $this->validateSet($resourceObject);
        $this->validateURI($resourceObject, Skos::MEMBER, Skos::CONCEPT);
     }
     
@@ -45,7 +45,7 @@ class SkosCollection extends AbstractTripleStoreResource
         $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Skos::SKOSCOLLECTION);
     
          // referred resources must exist 
-       $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+       $this->validateSet($resourceObject);
        $this->validateURI($resourceObject, Skos::MEMBER, Skos::CONCEPT);
     }
 }

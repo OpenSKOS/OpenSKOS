@@ -53,7 +53,7 @@ abstract class AbstractTripleStoreResource {
         if (empty($params['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
         };
-        if (!CHECK_MYSQL) {
+        if (!TENANTS_AND_SETS_IN_MYSQL) {
             $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
             if ($tenantUri === null) {
                 throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
@@ -72,7 +72,7 @@ abstract class AbstractTripleStoreResource {
     }
 
     public function mapNameSearchID() {
-        if (CHECK_MYSQL && ($this->manager->getResourceType() === Org::FORMALORG || $this->manager->getResourceType() === Dcmi::DATASET)) {
+        if (TENANTS_AND_SETS_IN_MYSQL && ($this->manager->getResourceType() === Org::FORMALORG || $this->manager->getResourceType() === Dcmi::DATASET)) {
             $index = $this->manager->fetchNameCodeFromMySql();
         } else {
         $index =  $this->manager->fetchNameUri();
@@ -102,7 +102,7 @@ abstract class AbstractTripleStoreResource {
 
     public function fetchDetailedList($params) {
         $resType = $this->manager->getResourceType();
-        if (CHECK_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
+        if (TENANTS_AND_SETS_IN_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
             $index = $this->manager->fetchFromMySQL($params);
             return $index;
         } 
@@ -159,12 +159,12 @@ abstract class AbstractTripleStoreResource {
                 return $resource;
             }
 
-            if (CHECK_MYSQL && $this->manager->getResourceType() === Org::FORMALORG) {
+            if (TENANTS_AND_SETS_IN_MYSQL && $this->manager->getResourceType() === Org::FORMALORG) {
                 $mysqlres = $this->manager->fetchTenantFromMySqlByCode($id);
                 $resource = $this->manager->translateTenantMySqlToRdf($mysqlres);
                 return $resource;
             };
-            if (CHECK_MYSQL && $this->manager->getResourceType() === Dcmi::DATASET) {
+            if (TENANTS_AND_SETS_IN_MYSQL && $this->manager->getResourceType() === Dcmi::DATASET) {
                 $mysqlres = $this->manager->fetchSetFromMySqlByCode($id);
                 $resource = $this->manager->translateMySqlCollectionToRdfSet($mysqlres);
                 return $resource;
@@ -448,39 +448,70 @@ abstract class AbstractTripleStoreResource {
     }
 
     // the resource referred by the uri must exist in the triple store, 
-    // or for backward compatibility of tenants and sets one must check their code as well
-    // if CHECK_MYSQL is set to true (see /../config.inc.php)
     protected function validateURI($resourceObject, $property, $rdfType) {
         $val = $resourceObject->getProperty($property);
         if ($val === null) {
             return true;
         }
-        if (count($val)===0) {
+        if (count($val) === 0) {
             return true;
         }
         foreach ($val as $uri) {
-            if (CHECK_MYSQL) {
-                if ($rdfType === Org::FORMALORG) { // check in the mysql, 
-                    $institution = $this->manager->fetchTenantFromMySqlByCode($uri);
-                    if ($institution === null) {
-                        throw new ApiException('The tenant referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
-                    }
-                };
-                if ($rdfType === Dcmi::DATASET) { // check in the mysql
-                    $set = $this->manager->fetchSetFromMySqlByCode($uri);
-                    if ($set === null) {
-                        throw new ApiException('The set referred by code/uri ' . $uri . ' is not found either in the triple store or in the mysql.', 400);
-                    }
-                };
-            } else {
-                $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-                if ($count < 1) {
-                    throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. ', 400);
-                }
+            $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
+            if ($count < 1) {
+                throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. ', 400);
             }
         }
     }
 
+    protected function validateSetMySQL($resourceObject) {
+        $val = $resourceObject->getProperty(OpenSkos::SET);
+        if ($val === null) {
+            return true;
+        }
+        if (count($val) === 0) {
+            return true;
+        }
+        foreach ($val as $code) {
+            $set = $this->manager->fetchSetFromMySqlByCode($code->getValue());
+            if ($set === null) {
+                throw new ApiException('The set referred by code ' . $code->getValue() . ' is not found in the mysql.', 404);
+            } 
+        }
+    }
+    
+    protected function validateTenantMySQL($resourceObject) {
+        $val = $resourceObject->getProperty(OpenSkos::TENANT);
+        if ($val === null) {
+            return true;
+        }
+        if (count($val) === 0) {
+            return true;
+        }
+        foreach ($val as $code) {
+            $tenant = $this->manager->fetchTenantFromMySqlByCode($code->getValue());
+            if ($tenant === null) {
+                throw new ApiException('The tenant referred by code ' . $code->getValue() . ' is not found in the mysql.', 404);
+            } 
+        }
+    }
+    
+    protected function validateTenant($resourceObject, $tenantProperty) {
+    if (TENANTS_AND_SETS_IN_MYSQL){
+            $this->validateTenantMySQL($resourceObject);
+        } else {
+           $this->validateURI($resourceObject, $tenantProperty, Org::FORMALORG);
+        }
+    }   
+
+    protected function validateSet($resourceObject) {
+    if (TENANTS_AND_SETS_IN_MYSQL){
+            $this->validateSetMySQL($resourceObject);
+        } else {
+           $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        }
+    } 
+    
     private function retrieveLanguagePrefix($val){
         if ($val instanceof Literal) {
             $lang = $val->getLanguage();
