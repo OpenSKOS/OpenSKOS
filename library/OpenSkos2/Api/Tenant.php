@@ -8,12 +8,8 @@ use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\TenantManager;
-use OpenSkos2\TenantCollection;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
-use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Tenant as RdfTenant;
-use OpenSKOS_Db_Table_Tenants;
 
 class Tenant extends AbstractTripleStoreResource
 {

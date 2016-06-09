@@ -9,9 +9,7 @@
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\SkosCollectionManager;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;

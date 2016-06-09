@@ -170,6 +170,12 @@ abstract class AbstractTripleStoreResource {
                 return $resource;
             };
             $resource = $this->manager->fetchByUuid($id);
+            if ($resource === null) { // the id might happen to be not an uuid but the code
+                $resources = $this->manager->fetch([OpenSkos::CODE => $id]);
+                if (count($resources)>0) {
+                    $resource=$resources[0];
+                }
+            }
             return $resource;
         } else {
             throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');

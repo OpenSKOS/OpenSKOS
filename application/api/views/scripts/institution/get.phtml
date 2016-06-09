@@ -26,7 +26,7 @@ $tenant = $this->resource;
 /* @var $tenantManager \OpenSkos2\TenantManager */
 $tenantManager = $di->get('OpenSkos2\TenantManager');
 $code = $tenant->getCode();
-$name = $tenantManager->getTenantName($code);
+$name = $tenantManager->getTenantNameByCode($code);
 $this->headTitle($name);
 ?>
 <h2><?php echo $this->escape($name)?></h2>
@@ -49,14 +49,11 @@ $this->headTitle($name);
 <ul id="sets-per-institute">
 <?php foreach ($sets as $seturi => $props):?>
     <li>
-        <?php if (isset($props['openskos_uuid'])):?>
-	<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $props['openskos_uuid']))?>.html">
+        <?php if (isset($props['openskos_code'])):?>
+	<p class="dc_title"><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $props['openskos_code']))?>.html">
          <?php echo $props['dcterms_title']?></a></p>
         <?php else:?>
         <p class="dc_title"><?php echo $props['dcterms_title']?></p>
-        <?php endif?>
-         <?php if ($props['openskos_code']):?>
-		<p><?php echo "code: " . $props['openskos_code']?></p>
         <?php endif?>
 	<?php if (isset($props['dcterms_description'])):?>
 		<p class="dc_description"><?php echo nl2br($props['dcterms_description'], true)?></p>

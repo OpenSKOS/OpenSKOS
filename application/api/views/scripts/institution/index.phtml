@@ -32,10 +32,10 @@ $this->headTitle ('Institutions')?>
 <p>These are the avaliable institutions in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $uuid = $tenantManager -> getResourceUuid($value, Org::FORMALORG);
+            $code = $tenantManager -> getResourceSearchID($value, Org::FORMALORG);
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $uuid), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $code), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

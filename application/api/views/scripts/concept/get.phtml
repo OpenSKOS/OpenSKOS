@@ -42,17 +42,17 @@ $this->headTitle($title);
 <dl>
     <dt><?=$this->translate('Institution')?>:</dt>
     <?php $tenantReference=$concept->getTenant();
-    $tenatuuid=$conceptManager->getResourceUuid($tenantReference, Org::FORMALORG);
+    $tenantCode=$conceptManager->getResourceSearchID($tenantReference, Org::FORMALORG);
     ?>
     <dd>
         <a href="<?=$this->url([
                 'module' => 'api',
                 'controller' => 'institution',
-                'id' => $tenatuuid,
+                'id' => $tenantCode,
             ],
             'rest'
         )?>.html">
-            <?=$this->escape($conceptManager->getTenantName($tenantReference))?>
+            <?=$this->escape($conceptManager->getTenantNameByCode($tenantCode))?>
         </a>
     </dd>
     
@@ -63,7 +63,7 @@ $this->headTitle($title);
             <a href="<?=$this->url(array(
                                 'module' => 'api',
                                 'controller' => 'set',
-                                'id' => $conceptManager->getResourceUuid($setReference, Dcmi::DATASET)
+                                'id' => $conceptManager->getResourceSearchID($setReference, Dcmi::DATASET)
                             ), 'rest'
             )?>.html">
                 <?= $conceptManager ->getSetTitle($setReference)?>

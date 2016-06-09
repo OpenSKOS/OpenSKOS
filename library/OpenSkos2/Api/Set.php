@@ -7,12 +7,9 @@ namespace OpenSkos2\Api;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\SetManager;
-use OpenSkos2\SetCollection;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
-use OpenSKOS_Db_Table_Collections;
 
 class Set extends AbstractTripleStoreResource
 {

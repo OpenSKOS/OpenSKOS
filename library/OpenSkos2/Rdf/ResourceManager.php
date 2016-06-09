@@ -292,7 +292,7 @@ public function deleteSolrIntact(Uri $resource)
         $data = $this->fetchQuery($query);
 
         if (!isset($data[0])) {
-            return;
+            return null;
         }
         return $data[0];
     }
@@ -852,9 +852,17 @@ public function deleteSolrIntact(Uri $resource)
    }
    
    // used only for HTML output
-    public function getResourceUuid($resourceReference, $resourceType) {
+    public function getResourceSearchID($resourceReference, $resourceType) {
         if (TENANTS_AND_SETS_IN_MYSQL && ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET)) {
             return $resourceReference;
+        }
+        
+        if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
+        $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
+        $response2 = $this->query($query);
+        if ($response2 !== null & count($response2) > 0) {
+            return $response2[0]->code->getValue();
+        }  
         }
         
         $query = 'SELECT ?uuid WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::UUID . '> ?uuid .  }';
@@ -863,11 +871,7 @@ public function deleteSolrIntact(Uri $resource)
             return $response1[0]->uuid->getValue();
         }
 
-       $query = "SELECT ?uuid WHERE { ?resourceuri <" . OpenSkosNamespace::CODE . "> '" . $resourceReference . "' . ?resourceuri <" . OpenSkosNameSpace::UUID . "> ?uuid .  }";
-        $response2 = $this->query($query);
-        if ($response2 !== null & count($response2) > 0) {
-            return $response2[0]->uuid->getValue();
-        }
+       
         throw new ApiException("The resource with the reference " . $resourceReference . " does not exist in triple store (and mysql). ", 400);
     }
 
@@ -892,25 +896,18 @@ public function deleteSolrIntact(Uri $resource)
     }
 
     // used only for HTML output
-    public function getTenantName($reference) {
+    public function getTenantNameByCode($code) {
         if (TENANTS_AND_SETS_IN_MYSQL) {
-            $mysqlTenant = $this->fetchTenantFromMySqlByCode($reference);
+            $mysqlTenant = $this->fetchTenantFromMySqlByCode($code);
             return $mysqlTenant['name'];
         } 
         
-        $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
+        $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $code . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
         $response2 = $this->query($query);
         if ($response2 !== null & count($response2) > 0) {
             return $response2[0]->name->getValue();
         };
 
-        $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
-        $response1 = $this->query($query);
-        if ($response1 !== null & count($response1) > 0) {
-            return $response1[0]->name->getValue();
-        };
-        
-       
     }
     // used only for HTML representation to count concepts withit a schema, a set or a skos-collection
     public function countConceptsForCluster($clusterID, $clusterType) {

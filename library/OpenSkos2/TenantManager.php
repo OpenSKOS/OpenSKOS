@@ -112,7 +112,6 @@ class TenantManager extends ResourceManager
                 $retVal[$id]['openskos_webpage'] = $row['website'];
             }
             $retVal[$id]['openskos_code'] = $row['code'];
-            $retVal[$id]['openskos_uuid'] = $row['code'];
         }
         return $retVal;
     }

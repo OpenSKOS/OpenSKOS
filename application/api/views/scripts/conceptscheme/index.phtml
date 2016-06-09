@@ -32,7 +32,7 @@ $this->headTitle ('Concept Schemata')?>
 <p>These are the avaliable concept schemata in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $uuid = $conceptSchemeManager -> getResourceUuid($value, Skos::CONCEPTSCHEME);
+            $uuid = $conceptSchemeManager -> getResourceSearchID($value, Skos::CONCEPTSCHEME);
             ?>
 	<li>
 		<a href="<?php echo $this->url(array('controller'=>'conceptscheme', 'id' => $uuid), 'rest')?>.html">

@@ -90,24 +90,28 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *         <openskos:collection rdf:resource="http://openskos.org/api/collections/rce:EGT"/>
      */
     public function indexAction()
-    {
-        //var_dump($this->getRequest());
-        if (null === ($q = $this->getRequest()->getParam('q'))) {
-            $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
-            throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
+    {   
+        $format = $this->getRequest()->getParam('format');
+        if ($format === 'html') {
+            $this->getHelper('layout')->enableLayout();
+            return $this->renderScript('concept/index.phtml');
+        } else {
+            if (null === ($q = $this->getRequest()->getParam('q'))) {
+                
+                $this->getResponse()
+                        ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+                throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
+            }
+
+            $this->getHelper('layout')->disableLayout();
+            $this->_helper->viewRenderer->setNoRender(true);
+
+            $concept = $this->getDI()->make('OpenSkos2\Api\Concept');
+            $context = $this->_helper->contextSwitch()->getCurrentContext();
+            $request = $this->getPsrRequest();
+            $response = $concept->findConcepts($request, $context);
+            $this->emitResponse($response);
         }
-        
-        $this->getHelper('layout')->disableLayout();
-        $this->_helper->viewRenderer->setNoRender(true);
-
-        $concept =$this->getDI()->make('OpenSkos2\Api\Concept');
-
-        $context = $this->_helper->contextSwitch()->getCurrentContext();
-        $request = $this->getPsrRequest();
-        $response = $concept->findConcepts($request, $context);
-        //var_dump($response);
-        $this->emitResponse($response);
     }
 
     /**
