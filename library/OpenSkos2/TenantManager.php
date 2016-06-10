@@ -51,7 +51,7 @@ class TenantManager extends ResourceManager
             return $retVal;
         } else {
             $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
-                    . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenantUri .'
+                    . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
                     . ' ?seturi  ?p ?o .}';
             $response = $this->query($query);
             if ($response !== null) {
