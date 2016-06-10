@@ -42,14 +42,15 @@ $this->headTitle($name)?>
          <?php endif?>
          <?php if ($key==="set"):
              $setCode = $conceptSchemeManager -> getResourceSearchID($val, Dcmi::DATASET);
+             $setTitle = $conceptSchemeManager -> getSetTitle($val);
              ?>
          <dt><?php echo  $key?>:</dt>
-	 <dd><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $setCode))?>.html"><?php echo $val?></a></dd>
+	 <dd><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $setCode))?>.html"><?php echo $setTitle?></a></dd>
          <?php endif?>
            <?php if ($key==="tenant"):
-             $tenantName = $conceptSchemeManager -> getTenantNameByCode($val);
              $tenantCode = $conceptSchemeManager -> getResourceSearchID($val, Org::FORMALORG);
-             ?>
+             $tenantName = $conceptSchemeManager -> getTenantNameByCode($tenantCode);
+           ?>
           <dt><?php echo  $key?>:</dt>
          <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantCode))?>.html"><?php echo $tenantName?></a></dd>
          <?php endif?>

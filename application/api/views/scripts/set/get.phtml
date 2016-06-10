@@ -42,8 +42,8 @@ $this->headTitle($name)?>
         foreach ($this->resProperties as $key => $val): ?>
          <dt><?php echo  $key?>:</dt>
          <?php if ($key==="publisher"):
-             $tenantName = $setManager ->getTenantNameByCode($val);
              $tenantCode = $setManager -> getResourceSearchID($val, Org::FORMALORG);
+             $tenantName = $setManager -> getTenantNameByCode($tenantCode);
              ?>
 	 <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantCode))?>.html"><?php echo $tenantName?></a></dd>
          <?php endif?>

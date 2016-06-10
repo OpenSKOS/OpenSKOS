@@ -41,15 +41,16 @@ $this->headTitle($name)?>
          <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
          <?php endif?>
          <?php if ($key==="set"):
-             $setUUID = $skosCollectionManager -> getResourceSearchID($val, Dcmi::DATASET);
+              $setCode = $skosCollectionManager -> getResourceSearchID($val, Dcmi::DATASET);
+               $setTitle = $skosCollectionManager -> getSetTitle($val);
              ?>
          <dt><?php echo  $key?>:</dt>
-         <dd><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $setUUID))?>.html"><?php echo $val?></a></dd>
+         <dd><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $setCode))?>.html"><?php echo $setTitle?></a></dd>
          <?php endif?>
            <?php if ($key==="tenant"):
-             $tenantName = $skosCollectionManager -> getTenantNameByCode($val);
              $tenantCode = $skosCollectionManager -> getResourceSearchID($val, Org::FORMALORG);
-             ?>
+             $tenantName = $skosCollectionManager -> getTenantNameByCode($tenantCode);
+           ?>
          <dt><?php echo  $key?>:</dt>
          <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantCode))?>.html"><?php echo $tenantName?></a></dd>
          <?php endif?>

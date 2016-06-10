@@ -858,13 +858,13 @@ public function deleteSolrIntact(Uri $resource)
         }
         
         if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
-        $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
-        $response2 = $this->query($query);
-        if ($response2 !== null & count($response2) > 0) {
-            return $response2[0]->code->getValue();
-        }  
+            $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
+            $response2 = $this->query($query);
+            if ($response2 !== null & count($response2) > 0) {
+                return $response2[0]->code->getValue();
+            }ß
         }
-        
+
         $query = 'SELECT ?uuid WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::UUID . '> ?uuid .  }';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
