@@ -172,7 +172,7 @@ abstract class AbstractTripleStoreResource {
             $resource = $this->manager->fetchByUuid($id);
             if ($resource === null) { // the id might happen to be not an uuid but the code
                 $resources = $this->manager->fetch([OpenSkos::CODE => new Literal($id)]);
-                if (count($resources)>0) {
+                if (count($resources)>0) { 
                     $resource=$resources[0];
                 }
             }

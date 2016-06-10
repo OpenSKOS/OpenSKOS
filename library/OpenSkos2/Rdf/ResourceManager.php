@@ -282,7 +282,7 @@ public function deleteSolrIntact(Uri $resource)
     public function fetchByUuid($uuid)
     {
         $prefixes = [
-            'openskos' => OpenSkosNamespace::NAME_SPACE,
+            'openskos' => OpenSkosNamespace::NAME_SPACE
         ];
 
         $lit = new Literal($uuid);
@@ -434,10 +434,11 @@ public function deleteSolrIntact(Uri $resource)
             $simplePatterns[RdfNamespace::TYPE] = $resType;
         }
 
-        $query = 'DESCRIBE ?subject {' . PHP_EOL;
+        $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
 
-        $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
+        $where .= '?subject ?property ?object . ';
         
         if ($ignoreDeleted) {
             $where .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status . ';
@@ -862,7 +863,7 @@ public function deleteSolrIntact(Uri $resource)
             $response2 = $this->query($query);
             if ($response2 !== null & count($response2) > 0) {
                 return $response2[0]->code->getValue();
-            }ß
+            }
         }
 
         $query = 'SELECT ?uuid WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::UUID . '> ?uuid .  }';

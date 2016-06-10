@@ -21,9 +21,10 @@ namespace OpenSkos2;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use OpenSkos2\Api\Exception\ApiException;
@@ -39,6 +40,8 @@ class TenantManager extends ResourceManager
         $result = $this->makeNameUriMap($response);
         return $result;
     }
+    
+    
     
     // used only for HTML representation
     public function fetchSetsForTenant($code) {
