@@ -447,7 +447,6 @@ public function deleteSolrIntact(Uri $resource)
         }
         
         $query .= 'WHERE { ' . $where . '}';
-        
         // We need some order
         // @TODO provide possibility to order on other predicates.
         // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
@@ -462,6 +461,7 @@ public function deleteSolrIntact(Uri $resource)
         }
 
         $query .= '}'; // end sub select
+        
         $resources = $this->fetchQuery($query, $resType);
         
        
@@ -1010,9 +1010,9 @@ public function deleteSolrIntact(Uri $resource)
                 return $resource;
             };
             
-            $resources = $this->fetch([RdfNamespace::TYPE => new Uri($resourceType), OpenSkosNamespace::UUID => new Literal($id)]);
+            $resources = $this->fetch([OpenSkosNamespace::UUID => new Literal($id)], null, null,  false, new Uri($resourceType));
             if (count($resources)<1) { // the id might happen to be not an uuid but the code
-                $resources = $this->fetch([RdfNamespace::TYPE => new Uri($resourceType), OpenSkosNamespace::CODE => new Literal($id)]);
+                $resources = $this->fetch([OpenSkosNamespace::CODE => new Literal($id)], null, null,  false, new Uri($resourceType));
                 if (count($resources)>0) { 
                     return $resources[0];
                 } else {

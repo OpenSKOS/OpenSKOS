@@ -24,7 +24,7 @@ class ConceptScheme extends AbstractTripleStoreResource
        $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Skos::CONCEPTSCHEME);
        
         // referred resources must exist  
-       $this -> validateSet($resourceObject);
+       $resourceObject = $this -> validateSet($resourceObject);
        $this->validateURI($resourceObject, Skos::HASTOPCONCEPT, Skos::CONCEPT);
     }
     

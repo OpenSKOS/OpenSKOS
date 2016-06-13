@@ -446,11 +446,19 @@ abstract class AbstractTripleStoreResource {
 
    
     protected function validateTenant($resourceObject, $tenantProperty) {
-         return $this -> validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
-    } 
+        try {
+            return $this->validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
+        } catch (Exception $ex) {
+            throw new ApiException($ex->getMessage(), 500);
+        }
+    }
 
     protected function validateSet($resourceObject) {
-        return $this -> validateByID($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        try {
+            return $this->validateByID($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+        } catch (Exception $ex) {
+            throw new ApiException($ex->getMessage(), 500);
+        }
     }
     
     private function validateByID($resourceObject, $property, $resourceType) {
@@ -460,19 +468,23 @@ abstract class AbstractTripleStoreResource {
         }
         if (count($val) === 0) {
             return true;
-
-            foreach ($val as $id) {
-                if ($id instanceof Literal) {
-                    $flatid = $id->getValue();
-                } else {
-                    $flatid = $id->getUri();
-                }
-                $set = $this->findResourceById($flatid, $resourceType);
-                if ($set === null) {
-                    throw new ApiException('The resource of type ' . $resourceType . ' referred by code ' . $flatid . ' is not found.', 404);
-                }
+        }
+        $resourceObject->unsetProperty($property);
+        foreach ($val as $id) {
+            if ($id instanceof Literal) {
+                $flatid = $id->getValue();
+            } else {
+                $flatid = $id->getUri();
+            }
+            $referredResource = $this->manager->findResourceById($flatid, $resourceType);
+            if ($referredResource === null) {
+                throw new ApiException('The resource of type ' . $resourceType . ' referred by code/uuid ' . $flatid . ' is not found.', 404);
+            } else {
+                $resourceObject->setProperty($property, new Uri($referredResource->getUri()));
             }
         }
+
+        return true;
     }
 
     private function retrieveLanguagePrefix($val){
