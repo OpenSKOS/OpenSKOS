@@ -153,33 +153,7 @@ abstract class AbstractTripleStoreResource {
 
     // Id is either an URI or uuid
     public function findResourceById($id) {
-        if ($id !== null && isset($id)) {
-            if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                $resource = $this->manager->fetchByUri($id);
-                return $resource;
-            }
-
-            if (TENANTS_AND_SETS_IN_MYSQL && $this->manager->getResourceType() === Org::FORMALORG) {
-                $mysqlres = $this->manager->fetchTenantFromMySqlByCode($id);
-                $resource = $this->manager->translateTenantMySqlToRdf($mysqlres);
-                return $resource;
-            };
-            if (TENANTS_AND_SETS_IN_MYSQL && $this->manager->getResourceType() === Dcmi::DATASET) {
-                $mysqlres = $this->manager->fetchSetFromMySqlByCode($id);
-                $resource = $this->manager->translateMySqlCollectionToRdfSet($mysqlres);
-                return $resource;
-            };
-            $resource = $this->manager->fetchByUuid($id);
-            if ($resource === null) { // the id might happen to be not an uuid but the code
-                $resources = $this->manager->fetch([OpenSkos::CODE => new Literal($id)]);
-                if (count($resources)>0) { 
-                    $resource=$resources[0];
-                }
-            }
-            return $resource;
-        } else {
-            throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');
-        }
+        return $this->manager->findResourceById($id, $this->manager->getResourceType());
     }
 
     public function create(ServerRequestInterface $request) {
@@ -470,54 +444,37 @@ abstract class AbstractTripleStoreResource {
         }
     }
 
-    protected function validateSetMySQL($resourceObject) {
-        $val = $resourceObject->getProperty(OpenSkos::SET);
-        if ($val === null) {
-            return true;
-        }
-        if (count($val) === 0) {
-            return true;
-        }
-        foreach ($val as $code) {
-            $set = $this->manager->fetchSetFromMySqlByCode($code->getValue());
-            if ($set === null) {
-                throw new ApiException('The set referred by code ' . $code->getValue() . ' is not found in the mysql.', 404);
-            } 
-        }
-    }
-    
-    protected function validateTenantMySQL($resourceObject) {
-        $val = $resourceObject->getProperty(OpenSkos::TENANT);
-        if ($val === null) {
-            return true;
-        }
-        if (count($val) === 0) {
-            return true;
-        }
-        foreach ($val as $code) {
-            $tenant = $this->manager->fetchTenantFromMySqlByCode($code->getValue());
-            if ($tenant === null) {
-                throw new ApiException('The tenant referred by code ' . $code->getValue() . ' is not found in the mysql.', 404);
-            } 
-        }
-    }
-    
+   
     protected function validateTenant($resourceObject, $tenantProperty) {
-    if (TENANTS_AND_SETS_IN_MYSQL){
-            $this->validateTenantMySQL($resourceObject);
-        } else {
-           $this->validateURI($resourceObject, $tenantProperty, Org::FORMALORG);
-        }
-    }   
+         return $this -> validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
+    } 
 
     protected function validateSet($resourceObject) {
-    if (TENANTS_AND_SETS_IN_MYSQL){
-            $this->validateSetMySQL($resourceObject);
-        } else {
-           $this->validateURI($resourceObject, OpenSkos::SET, Dcmi::DATASET);
-        }
-    } 
+        return $this -> validateByID($resourceObject, OpenSkos::SET, Dcmi::DATASET);
+    }
     
+    private function validateByID($resourceObject, $property, $resourceType) {
+        $val = $resourceObject->getProperty($property);
+        if ($val === null) {
+            return true;
+        }
+        if (count($val) === 0) {
+            return true;
+
+            foreach ($val as $id) {
+                if ($id instanceof Literal) {
+                    $flatid = $id->getValue();
+                } else {
+                    $flatid = $id->getUri();
+                }
+                $set = $this->findResourceById($flatid, $resourceType);
+                if ($set === null) {
+                    throw new ApiException('The resource of type ' . $resourceType . ' referred by code ' . $flatid . ' is not found.', 404);
+                }
+            }
+        }
+    }
+
     private function retrieveLanguagePrefix($val){
         if ($val instanceof Literal) {
             $lang = $val->getLanguage();

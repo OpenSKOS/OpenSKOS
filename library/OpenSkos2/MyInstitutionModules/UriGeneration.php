@@ -16,8 +16,8 @@ class UriGeneration {
     
     public static function generateURI($plainUUID, $tenantcode, $type) {
         // tmp while EPIC service does not work
-        //$tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
-        //return $tmpRetVal;
+        $tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
+        return $tmpRetVal;
         /// END TMP
         
         if (EPICHandleProxy::enabled()) {

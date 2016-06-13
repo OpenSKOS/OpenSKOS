@@ -43,6 +43,7 @@ use OpenSKOS_Db_Table_Collections;
 use RuntimeException;
 use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
+use Solarium\Exception\InvalidArgumentException;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 require_once dirname(__FILE__) .'/../config.inc.php';
@@ -988,5 +989,40 @@ public function deleteSolrIntact(Uri $resource)
             }
         }
         $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+    }
+    
+    // Id is either an URI or uuid, or code for tenants and sets
+    public function findResourceById($id, $resourceType) {
+        if ($id !== null && isset($id)) {
+            if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                $resource = $this->fetchByUri($id,$resourceType);
+                return $resource;
+            }
+
+            if (TENANTS_AND_SETS_IN_MYSQL && $resourceType === Org::FORMALORG) {
+                $mysqlres = $this->fetchTenantFromMySqlByCode($id);
+                $resource = $this->translateTenantMySqlToRdf($mysqlres);
+                return $resource;
+            };
+            if (TENANTS_AND_SETS_IN_MYSQL && $resourceType === Dcmi::DATASET) {
+                $mysqlres = $this->fetchSetFromMySqlByCode($id);
+                $resource = $this->translateMySqlCollectionToRdfSet($mysqlres);
+                return $resource;
+            };
+            
+            $resources = $this->fetch([RdfNamespace::TYPE => new Uri($resourceType), OpenSkosNamespace::UUID => new Literal($id)]);
+            if (count($resources)<1) { // the id might happen to be not an uuid but the code
+                $resources = $this->fetch([RdfNamespace::TYPE => new Uri($resourceType), OpenSkosNamespace::CODE => new Literal($id)]);
+                if (count($resources)>0) { 
+                    return $resources[0];
+                } else {
+                    return null;
+                }
+            } else {
+               return $resources[0]; 
+            }
+        } else {
+            throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');
+        }
     }
 }
