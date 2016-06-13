@@ -38,7 +38,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `uri` TEXT,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
-  UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) ,
+  UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) )
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8;
