@@ -16,8 +16,8 @@ class UriGeneration {
     
     public static function generateURI($plainUUID, $tenantcode, $type) {
         // tmp while EPIC service does not work
-        $tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
-        return $tmpRetVal;
+        //$tmpRetVal = "http://tmp-bypass-epic/CCR_" .$type . "_" . $plainUUID;
+        //return $tmpRetVal;
         /// END TMP
         
         if (EPICHandleProxy::enabled()) {
@@ -36,6 +36,7 @@ class UriGeneration {
                 throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object: ' . $ex->getMessage(), 400);
             }
         } else {
+            
             throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object because EPIC is not enabled', 400);
         }
     }
