@@ -98,11 +98,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 		$this->_requireAccess('editor.collections', 'manage');
 		
 		$collection = $this->_getCollection();
-		if ($collection->OAI_baseURL) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Since this collection has an OAI Server as source, you can not upload files for import.'));
-			$this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
-			return;
-		}
+		
 		$form = $collection->getUploadForm();
 		$formData = $this->_request->getPost();
 		if ($form->isValid($formData)) {
