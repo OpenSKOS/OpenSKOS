@@ -309,8 +309,10 @@ public function deleteSolrIntact(Uri $resource)
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
-        $resource = new Uri($uri);
-        $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
+        //$resource = new Uri($uri);
+        //$result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
+        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject ?object  WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .} }';
+        $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
         // @TODO Add resourceType check.
         
@@ -337,7 +339,7 @@ public function deleteSolrIntact(Uri $resource)
      * @return ResourceCollection
      * @throws ResourceNotFoundException
      */
-    public function fetchByUris($uris)
+    public function fetchByUris($uris, $resType=null)
     {
         /*
         DESCRIBE ?subject
@@ -350,7 +352,11 @@ public function deleteSolrIntact(Uri $resource)
         }
         */
         
-        $resources = EasyRdf::createResourceCollection($this->resourceType);
+        if ($resType === null) {
+            $resType = $this->getResourceType();
+        }
+        
+        $resources = EasyRdf::createResourceCollection($resType);
         if (!empty($uris)) {
             foreach (array_chunk($uris, 50) as $urisChunk) {
                 $filters = [];
@@ -363,8 +369,8 @@ public function deleteSolrIntact(Uri $resource)
                     ->where('?subject', '?predicate', '?object')
                     ->filter(implode(' || ', $filters));
 
-                if (!empty($this->resourceType)) {
-                    $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
+                if (!empty($resType)) {
+                    $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $resType . '>');
                 }
                 
                 foreach ($this->fetchQuery($query) as $resource) {

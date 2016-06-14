@@ -45,7 +45,8 @@ $opts = array(
     'disableSearchInOtherTenants=s' => 'disable Search In Other Tenants', 
     'enableStatussesSystem=s' => 'enable Statusses System',
     'email=s' => 'Admin email (required when creating a tenant)',
-    'password=s' => 'Password for the Admin account'
+    'password=s' => 'Password for the Admin account',
+    'apikey=s' => 'Api key for the Admin account'
 );
 $OPTS = new Zend_Console_Getopt($opts);
 
@@ -67,6 +68,11 @@ $query = $OPTS->query;
 
 if (null === $OPTS->code) {
     fwrite(STDERR, "missing required `code` argument\n");
+    exit(1);
+}
+
+if (null === $OPTS->apikey) {
+    fwrite(STDERR, "missing required `apikey` argument\n");
     exit(1);
 }
 
@@ -172,6 +178,7 @@ switch ($action) {
             'name' => $OPTS->name,
             'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
             'tenant' => $OPTS->code,
+            'apikey' => $OPTS->apikey,
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
@@ -179,6 +186,7 @@ switch ($action) {
         fwrite(STDOUT, "  - code: {$OPTS->code}\n");
         fwrite(STDOUT, "  - login: {$OPTS->email}\n");
         fwrite(STDOUT, "  - password: {$OPTS->password}\n");
+        fwrite(STDOUT, "  - apikey: {$OPTS->apikey}\n");
         break;
     default:
         fwrite(STDERR, "unkown action `{$action}`\n");
