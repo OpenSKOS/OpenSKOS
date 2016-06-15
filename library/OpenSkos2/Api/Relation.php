@@ -46,7 +46,10 @@ class Relation extends AbstractTripleStoreResource {
         $this->deletionManager = new Deletion($manager);
     }
     
-    
+    public function mapNameSearchID() {
+        $index =  $this->manager->fetchConceptConceptRelationsNameUri();
+        return $index;
+    }
     
     public function findAllPairsForRelation($request) {
         //public function findAllPairsForType(ServerRequestInterface $request)
