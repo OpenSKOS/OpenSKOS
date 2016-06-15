@@ -32,6 +32,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
+use Rhumsaa\Uuid\Uuid;
 
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
@@ -143,15 +144,15 @@ function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = 
 
 function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
     $tenantResource = new \OpenSkos2\Tenant();
-    $uri = $tenantResource -> selfGenerateUri($code, $resourceManager);
+    $uri = $tenantResource -> selfGenerateUri($resourceManager, ['type'=>Org::FORMALORG,'tenantcode' => $code]);
     set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
-    $organisation = new \OpenSkos2\Rdf\Resource();
+    $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX. '/node-org-'.Uuid::uuid4());
     set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
     set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit'], false);
     $tenantResource->setProperty(vCard::ORG, $organisation);
     set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
     set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email'], false);
-    $adress = new \OpenSkos2\Rdf\Resource();
+    $adress = new \OpenSkos2\Rdf\Resource(URI_PREFIX. 'node-adr-'.Uuid::uuid4());
     set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress'], false);
     set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality'], false);
     set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode'], false);
@@ -169,7 +170,7 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
 
 function insert_set($code, $collectionMySQL, $resourceManager) {
     $setResource = new \OpenSkos2\Set();
-    $uri = $setResource->selfGenerateUri($code, $resourceManager);
+    $uri = $setResource->selfGenerateUri($resourceManager, ['type'=>Dcmi::DATASET,'setcode' => $code]);
     set_property_with_check($setResource, OpenSkos::CODE, $code, false);
     $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
     if (count($tenants) < 1) {
@@ -196,8 +197,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
     }
     
     if (TENANTS_AND_SETS_IN_MYSQL) {
-    $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
-        
+        $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
         if (!$tenantMySQL) {
             echo "Could not find tenant  with code: {$code}\n";
             return null;
@@ -205,6 +205,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
             return new \OpenSkos2\Rdf\Literal($code);
         }
     }   
+    
     $tripleStoreTenant = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Org::FORMALORG);
     if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
         // look up MySQL
@@ -234,33 +235,31 @@ function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager
         return null;
     }
     
-   
-    $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($id)
+    /**
+         * @var $collection OpenSKOS_Db_Table_Row_Collection
+         */
+    $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'code = ' . $collectionModel->getAdapter()->quote($id)
     );
 
     if (!$collectionMySQL) {
-        echo "Could not find a set (aka tenant collection) with id: {$id}\n";
-        return null;
+        $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($id)
+        );
+        if (!$collectionMySQL) {
+            echo "Could not find a set (aka tenant collection) with id or code: {$id}\n";
+            return null;
+        } else {
+            $code = $collectionMySQL['code'];
+        }
+    } else {
+        $code = $id;
     }
 
     if (TENANTS_AND_SETS_IN_MYSQL) {
         return new \OpenSkos2\Rdf\Literal($collectionMySQL['code']);
     }
 
-    $code = $collectionMySQL['code'];
-
     $tripleStoreSet = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Dcmi::DATASET);
-    if (count($tripleStoreSet) < 1) { // this tenant is not yet in the triple store
-        /**
-         * @var $collection OpenSKOS_Db_Table_Row_Collection
-         */
-        $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'id = ' . $collectionModel->getAdapter()->quote($code)
-        );
-
-        if (!$collectionMySQL) {
-            echo "Could not find a set (aka tenant collection) with id: {$code}\n";
-            return null;
-        }
+    if (count($tripleStoreSet) < 1) { // this set is not yet in the triple store
         $uri = insert_set($code, $collectionMySQL, $resourceManager);
         var_dump("The set's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
         return new \OpenSkos2\Rdf\Uri($uri);

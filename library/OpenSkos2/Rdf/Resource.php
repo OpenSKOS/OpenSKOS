@@ -390,7 +390,8 @@ class Resource extends Uri implements ResourceIdentifier
        
     }
     
-    public function selfGenerateUri($tenantcode, ResourceManager $manager) {
+    // for example, parameters can include tenantcode, seturi
+    public function selfGenerateUri(ResourceManager $manager, array $parameters) {
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
             'The resource has an uri already. Can not generate a new one.'
@@ -398,9 +399,9 @@ class Resource extends Uri implements ResourceIdentifier
         }
 
         
-        $type = $this ->getResourceType();
-        $uuid= UriGeneration::generateUUID($tenantcode, $type);
-        $uri = UriGeneration::generateURI($uuid, $tenantcode, $type);
+        $uuid= UriGeneration::generateUUID($parameters);
+        $parameters['uuid'] = $uuid;
+        $uri = UriGeneration::generateURI($parameters);
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
@@ -414,16 +415,6 @@ class Resource extends Uri implements ResourceIdentifier
         return $uri;
     }
 
-    protected function getResourceType(){
-        $rdfType = $this->getProperty(Rdf::TYPE);
-        if (count($rdfType)>0) {
-            $index = strrpos($rdfType[0], "#");
-            $type = substr($rdfType[0], $index + 1);
-            return strtolower($type);
-        } else {
-            return "untyped";
-        }
-    }
     
    
 }

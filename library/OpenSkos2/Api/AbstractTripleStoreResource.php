@@ -11,6 +11,7 @@ use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Org;
@@ -175,7 +176,25 @@ abstract class AbstractTripleStoreResource {
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
             $resourceObject->addMetadata($user, $params, array());
             if ($autoGenerateUri) {
-                $resourceObject -> selfGenerateUri($this->tenant['code'], $this->manager);
+                $type=$this->manager->getResourceType();
+                $parameters['type']=$type;
+                $parameters['tenantcode']=$this->tenant['code'];
+                if ($type === Skos::CONCEPT || $type === Skos::CONCEPTSCHEME || $type === Skos::SKOSCOLLECTION){
+                    $seturis = $parameters['seturi']=$resourceObject->getProperty(OpenSkos::SET);
+                    if (count($seturis)===0) {
+                        throw new Exception('openskos:set uri is absent.');
+                    }
+                    $parameters['seturi']=$seturis[0]->getUri();
+                    if ($type === Skos::CONCEPT) {
+                        $notations = $resourceObject->getProperty(Skos::CONCEPT);
+                        if (count($notations) === 0) {
+                            $parameters['notation']=null;
+                        } else {
+                        $parameters['notation']=$notations[0];
+                        }
+                    }
+                } 
+                $resourceObject -> selfGenerateUri($this->manager, $parameters);
             };
             $this->validate($resourceObject, $this->tenant);
             $this->manager->insert($resourceObject);

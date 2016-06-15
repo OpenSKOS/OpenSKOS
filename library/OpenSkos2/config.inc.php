@@ -16,4 +16,6 @@ define('MAXIMAL_ROWS', 5000);
 define('TENANTS_AND_SETS_IN_MYSQL', false);
 define('ENABLE_STATUSSES_SYSTEM', true);
 define('OMIT_JSON_REFICES', true);
+define('EPIC_IS_ON', false);
+define('URI_PREFIX', 'http://mertens/knaw/s');
 define('UNKNOWN', "Unknown");
