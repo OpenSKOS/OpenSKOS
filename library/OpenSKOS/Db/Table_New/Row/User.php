@@ -433,6 +433,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     public function getFoafPerson()
     {
         $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        
         /**
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
@@ -448,6 +449,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+            $tenantcode=$this['tenant'];
+            $tenanturi = $resourceManager->fetchInstitutionUriByCode($tenantcode);
+            $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
+            
             $resourceManager->insert($person);
 
             return $person;

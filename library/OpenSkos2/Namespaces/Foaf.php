@@ -24,4 +24,5 @@ class Foaf
     
     const NAME = 'http://xmlns.com/foaf/0.1/name';
     const PERSON = 'http://xmlns.com/foaf/0.1/Person';
+    const ORGANISATION = 'http://xmlns.com/foaf/0.1/workplaceHomepage';
 }

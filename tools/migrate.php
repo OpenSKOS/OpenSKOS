@@ -210,7 +210,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
     if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
         // look up MySQL
         /**
-         * @var $collection OpenSKOS_Db_Table_Row_Tenant
+         * @var $tenant OpenSKOS_Db_Table_Row_Tenant
          */
         // name can be relaced with id
         $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));

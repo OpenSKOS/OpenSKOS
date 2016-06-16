@@ -112,6 +112,9 @@ function setID(&$resource, $uri, $uuid, $resourceManager){
     } 
 }
 
+
+
+
 function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager) {
 
     $resources = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$code.'"', Org::FORMALORG);
@@ -182,11 +185,21 @@ switch ($action) {
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
+        
+        // add  user-info to triple store
+        //firsts get it from MySql 
+        $user = $resourceManager->fetchRowWithRetries($model, 'apikey = ' . $model->getAdapter()->quote($OPTS->apikey) . ' '
+                            . 'AND tenant = ' . $model->getAdapter()->quote($OPTS->code)
+                    );
+        // second, getFoafPersonMethod adds a user automatically to the triple tore
+        $useruri = $user->getFoafPerson()->getUri();
+        
         fwrite(STDOUT, 'A tenant has been created with this user account:' . "\n");
         fwrite(STDOUT, "  - code: {$OPTS->code}\n");
         fwrite(STDOUT, "  - login: {$OPTS->email}\n");
         fwrite(STDOUT, "  - password: {$OPTS->password}\n");
         fwrite(STDOUT, "  - apikey: {$OPTS->apikey}\n");
+        fwrite(STDOUT, "  - user uri: {$useruri}\n");
         break;
     default:
         fwrite(STDERR, "unkown action `{$action}`\n");

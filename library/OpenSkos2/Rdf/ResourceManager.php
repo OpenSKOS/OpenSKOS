@@ -33,6 +33,7 @@ use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
@@ -323,12 +324,14 @@ public function deleteSolrIntact(Uri $resource)
         }
        
        
-        if (count($resources) > 1) {
+        /*  fix it for this more extended case
+         * work only describe subject, without object subresource
+         * if (count($resources) > 1) {
             throw new RuntimeException(
                 'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
             );
              
-        }
+        }*/
  
         return $resources[0];
     }
@@ -568,6 +571,16 @@ public function deleteSolrIntact(Uri $resource)
         return $retVal;
     }
     
+    public function fetchUsersInstitution($userUri) {
+        $query = 'SELECT DISTINCT ?object WHERE { <' .$userUri.'>  <' . Foaf::ORGANISATION . '> ?object . }';
+        $result = $this->query($query);
+        if (count($result)>0){
+            $retVal = $result[0]->object->getUri();
+        } else {
+            $retVal=null;
+        }
+        return $retVal;
+    }
    
 
     private function makeListOfPrimitiveResults($sparqlQueryResult, $triplePart) {

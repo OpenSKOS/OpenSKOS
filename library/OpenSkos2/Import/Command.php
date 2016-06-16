@@ -26,11 +26,13 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Rhumsaa\Uuid\Uuid;
 
 class Command implements LoggerAwareInterface
 {
@@ -81,17 +83,35 @@ class Command implements LoggerAwareInterface
             // Concept only logic
             // Generate uri if none or blank (_:genid<n>) is given.
             if ($resourceToInsert instanceof Concept) {
-                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $message->getSetUri());
+                $setUri = $message->getSetUri();
+                
+                
+                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $setUri);
                 
                 if ($resourceToInsert->isBlankNode()) {
-                    $resourceToInsert->selfGenerateUri($this->tenant, $this->conceptManager);
+                    $params['seturi']=$setUri->getURi();
+                    $params['type']=Skos::CONCEPT;
+                    $notations = $resourceToInsert ->getProperty(Skos::NOTATION);
+                    if (count($notations)<0) {
+                       $params['notation'] = null; 
+                    } else {
+                       $params['notation'] = $notations[0];
+                    }
+                    $resourceToInsert->selfGenerateUri($this->conceptManager, $params);
                 }
+                
+                $uuids = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+                if (count($uuids) < 1) {
+                    $uuid = Uuid::uuid4();
+                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($uuid));
+                };
             }
         }
         
         $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
         if (!$validator->validate($resourceCollection, $this->logger)) {
-            throw new \Exception('Failed validation');
+            var_dump($validator->getErrorMessages());
+            throw new \Exception("\n Failed validation \n");
         }
 
         if ($message->getClearSet()) {
@@ -176,11 +196,13 @@ class Command implements LoggerAwareInterface
                         }
                     }
                 }
-                
-                $resourceToInsert->ensureMetadata(
-                    $this->tenant->getCode(),
-                    $message->getSetUri(),
-                    $message->getUser(),
+                $userUri = $message->getUser(); 
+                $tenantUri = $this->resourceManager->fetchUsersInstitution($userUri);
+                $this->ensureMetadata(
+                    $resourceToInsert,
+                    new Uri($tenantUri),
+                    new Uri($message->getSetUri()),
+                    new Uri($userUri),
                     $currentVersion ? $currentVersion->getStatus(): null
                 );
             }
@@ -189,6 +211,51 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
             }
             $this->resourceManager->insert($resourceToInsert);
+        }
+    }
+    
+ private function ensureMetadata(&$concept, Uri $tenantUri, Uri $set, Uri $person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::TENANT => $tenantUri,
+            OpenSkos::SET => $set,
+            DcTerms::CREATOR => $person,
+            DcTerms::DATESUBMITTED => $nowLiteral(),
+        ];
+        
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$concept->hasProperty($property)) {
+                $concept->setProperty($property, $defaultValue);
+            }
+        }
+        
+        // @TODO Should we add modified instead of replace it.
+        $concept->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
+        
+        // Status is updated
+        
+        if ($oldStatus != $concept->getStatus()) {
+            $concept->unsetProperty(DcTerms::DATEACCEPTED);
+            $concept->unsetProperty(OpenSkos::ACCEPTEDBY);
+            $concept->unsetProperty(OpenSkos::DATE_DELETED);
+            $concept->unsetProperty(OpenSkos::DELETEDBY);
+
+            switch ($concept->getStatus()) {
+                case \OpenSkos2\Concept::STATUS_APPROVED:
+                    $concept->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
+                    $concept->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    break;
+                case \OpenSkos2\Concept::STATUS_DELETED:
+                    $concept->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
+                    $concept->addProperty(OpenSkos::DELETEDBY, $person);
+                    break;
+            }
         }
     }
 }
