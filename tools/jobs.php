@@ -167,140 +167,142 @@ switch ($action) {
             if (count($busyJobs)) {
                 exit(0);
             }
-            foreach ($jobs as $job) {
-                /** @var OpenSKOS_Db_Table_Row_Job $job */
-                $set = $job->getCollection();
-                switch ($job->task) {
-                    case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
-                        //init importer
+            
+            // We want only one job at a time.
+            $job = $jobs[0];
+            
+            /** @var OpenSKOS_Db_Table_Row_Job $job */
+            $set = $job->getCollection();
+            switch ($job->task) {
+                case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
+                    //init importer
 
-                        $userModel = new OpenSKOS_Db_Table_Users();
-                        /**
-                         * @var $user OpenSKOS_Db_Table_Row_User
-                         */
-                        $user = $userModel->find($job['user'])[0];
-                        $foaf = $user->getFoafPerson();
+                    $userModel = new OpenSKOS_Db_Table_Users();
+                    /**
+                     * @var $user OpenSKOS_Db_Table_Row_User
+                     */
+                    $user = $userModel->find($job['user'])[0];
+                    $foaf = $user->getFoafPerson();
 
-                        $importer = new \OpenSkos2\Import\Command(
-                            $resourceManager,
-                            $diContainer->get('OpenSkos2\ConceptManager'),
-                            new \OpenSkos2\Tenant(
-                                $job->getCollection()->getTenant()['code']
-                            )
+                    $importer = new \OpenSkos2\Import\Command(
+                        $resourceManager,
+                        $diContainer->get('OpenSkos2\ConceptManager'),
+                        new \OpenSkos2\Tenant(
+                            $job->getCollection()->getTenant()['code']
+                        )
+                    );
+
+                    $jobLogger = $job->getLogger();
+                    $importer->setLogger($jobLogger);
+
+                    $job->start()->save();
+
+                    $importFiles = $job->getFilesList();
+
+                    foreach ($importFiles as $filePath) {
+                        $message = new \OpenSkos2\Import\Message(
+                            $foaf,
+                            $filePath,
+                            $set->getUri(),
+                            (bool) $job->getParam('ignoreIncomingStatus'),
+                            $job->getParam('status'),
+                            $job->getParam('onlyNewConcepts'),
+                            (bool) $job->getParam('toBeChecked'),
+                            $job->getParam('lang'),
+                            (bool) $job->getParam('deletebeforeimport'),
+                            (bool) $job->getParam('purge')
                         );
-                    
-                        $jobLogger = $job->getLogger();
-                        $importer->setLogger($jobLogger);
 
-                        $job->start()->save();
-
-                        $importFiles = $job->getFilesList();
-
-                        foreach ($importFiles as $filePath) {
-                            $message = new \OpenSkos2\Import\Message(
-                                $foaf,
-                                $filePath,
-                                $set->getUri(),
-                                (bool) $job->getParam('ignoreIncomingStatus'),
-                                $job->getParam('status'),
-                                $job->getParam('onlyNewConcepts'),
-                                (bool) $job->getParam('toBeChecked'),
-                                $job->getParam('lang'),
-                                (bool) $job->getParam('deletebeforeimport'),
-                                (bool) $job->getParam('purge')
-                            );
-
-                            try {
-                                $importer->handle($message);
+                        try {
+                            $importer->handle($message);
 //								$parser->process($job['user']);
 
-                            } catch (Exception $e) {
+                        } catch (Exception $e) {
 
-                                $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
-                                exit($e->getCode());
+                            $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
+                            exit($e->getCode());
+                        }
+                    }
+
+                    $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+                    $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+
+                    $job->finish()->save();
+
+                    break;
+                case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
+                    $job->start()->save();
+                    $harvester = OpenSKOS_Oai_Pmh_Harvester::factory($set)
+                            ->setFrom($job->getParam('from'))
+                            ->setUntil($job->getParam('until'))
+                            ->setOption('set', $job->getParam('set'));
+                    try {
+                        foreach ($harvester as $page => $records) {
+                            echo "page " . ($page + 1) . ":\n";
+                            foreach ($records as $r => $record) {
+                                echo "  record " . ($r + 1) . ": {$record->identifier}\n";
                             }
                         }
+                        $job->finish()->save();
+                    } catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
+                        fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
+                        $job->error($e->getMessage())->finish()->save();
+                    }
+                    break;
+                case OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT:
+                    $job->start()->save();
+
+                    $export = new Editor_Models_Export();
+                    $export->setSettings($job->getParams());
+                    try {
+                        $resultFilePath = $export->exportToFile();
+
+                        $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+                        $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+
+                        $job->setInfo($resultFilePath);
+                        $job->finish()->save();
+                    } catch (Zend_Exception $e) {
+                        $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+                        $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+
+                        fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
+                        $job->error($e->getMessage())->finish()->save();
+                    }
+                    break;
+                case OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME:
+                    $job->start()->save();
+
+                    try {
+                        $schemesManager = $diContainer->get('\OpenSkos2\ConceptSchemeManager');
+                        $scheme = $schemesManager->fetchByUri($job->getParam('uri'));
+                        $schemesManager->deleteSoft($scheme);
+
+                        $userModel = new OpenSKOS_Db_Table_Users();
+                        $user = $userModel->find($job['user'])[0];
+
+                        $conceptsManager = $diContainer->get('\OpenSkos2\ConceptManager');
+                        $conceptsManager->deleteSoftInScheme($scheme, $user->getFoafPerson());
+
+                        // Clears the schemes cache after an icon is assigned.
+                        $diContainer->get('Editor_Models_ConceptSchemesCache')->clearCache();
 
                         $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
                         $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 
                         $job->finish()->save();
+                    } catch (Zend_Exception $e) {
+                        $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
+                        $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 
-                        break;
-                    case OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST:
-                        $job->start()->save();
-                        $harvester = OpenSKOS_Oai_Pmh_Harvester::factory($set)
-                                ->setFrom($job->getParam('from'))
-                                ->setUntil($job->getParam('until'))
-                                ->setOption('set', $job->getParam('set'));
-                        try {
-                            foreach ($harvester as $page => $records) {
-                                echo "page " . ($page + 1) . ":\n";
-                                foreach ($records as $r => $record) {
-                                    echo "  record " . ($r + 1) . ": {$record->identifier}\n";
-                                }
-                            }
-                            $job->finish()->save();
-                        } catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
-                            fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
-                            $job->error($e->getMessage())->finish()->save();
-                        }
-                        break;
-                    case OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT:
-                        $job->start()->save();
-
-                        $export = new Editor_Models_Export();
-                        $export->setSettings($job->getParams());
-                        try {
-                            $resultFilePath = $export->exportToFile();
-
-                            $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                            $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-
-                            $job->setInfo($resultFilePath);
-                            $job->finish()->save();
-                        } catch (Zend_Exception $e) {
-                            $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                            $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-
-                            fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
-                            $job->error($e->getMessage())->finish()->save();
-                        }
-                        break;
-                    case OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME:
-                        $job->start()->save();
-
-                        try {
-                            $schemesManager = $diContainer->get('\OpenSkos2\ConceptSchemeManager');
-                            $scheme = $schemesManager->fetchByUri($job->getParam('uri'));
-                            $schemesManager->deleteSoft($scheme);
-                            
-                            $userModel = new OpenSKOS_Db_Table_Users();
-                            $user = $userModel->find($job['user'])[0];
-                            
-                            $conceptsManager = $diContainer->get('\OpenSkos2\ConceptManager');
-                            $conceptsManager->deleteSoftInScheme($scheme, $user->getFoafPerson());
-                            
-                            // Clears the schemes cache after an icon is assigned.
-                            $diContainer->get('Editor_Models_ConceptSchemesCache')->clearCache();
-
-                            $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                            $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-
-                            $job->finish()->save();
-                        } catch (Zend_Exception $e) {
-                            $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                            $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
-
-                            fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
-                            $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
-                        }
-                        break;
-                    default:
-                        fwrite(STDERR, '@TODO: write handler for task=' . $job->task . "\n");
-                        $job->error('No handler for this task')->finish()->save();
-                        break;
-                }
+                        fwrite(STDERR, $job->id . ': ' . $e->getMessage() . "\n");
+                        $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
+                    }
+                    break;
+                default:
+                    fwrite(STDERR, '@TODO: write handler for task=' . $job->task . "\n");
+                    $job->error('No handler for this task')->finish()->save();
+                    break;
             }
         }
         break;
