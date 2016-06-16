@@ -79,7 +79,9 @@ class Collection
             $validator = $this->getResourceValidator();
             if (!$validator->validate($resource)) {
                 $errorsFound = true;
-                $this->errorMessages = array_merge($this->errorMessages, $validator->getErrorMessages());
+                
+                $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
+                    . implode(', ', $validator->getErrorMessages());
             }
         }
 
