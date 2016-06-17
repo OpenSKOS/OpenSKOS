@@ -11,7 +11,7 @@ class UniqueOptionalProperty
         $val = $resource->getProperty($type);
         $retval = array();
         if (count(array_filter($val)) > 1) {
-            $retval[] = 'There must be exactly 1 ' . $type . ' per resource. You have submitted a few of them';
+            $retval[] = 'There must be not more than 1 ' . $type . ' per resource. You have submitted a few of them';
         }
 
         if ($isBoolean && count(array_filter($val)) > 0) {

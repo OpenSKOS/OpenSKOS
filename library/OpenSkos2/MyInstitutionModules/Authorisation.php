@@ -84,7 +84,7 @@ class Authorisation {
         if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-        return ($user->role === ADMINISRATOR || $user->role === ROOT  || $user->role === EDITOR);
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT  || $user->role === EDITOR);
     }
 
     private function resourceCreationAllowedBasic(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $tenantUri, $resource) {

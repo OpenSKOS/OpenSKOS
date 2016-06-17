@@ -109,8 +109,9 @@ class EasyRdf {
                         $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue);
                         $myResource->addProperty($propertyUri, $mySubResource);
-                    }
+                    } else {
                     $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
+                    }
                 }
             }
         }
