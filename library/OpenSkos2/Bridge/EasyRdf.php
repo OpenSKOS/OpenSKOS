@@ -105,11 +105,12 @@ class EasyRdf {
                     );
                 } elseif ($propertyValue instanceof Resource2) {
                     // recursion
-                    $mySubResource = self::createResource($propertyValue->getUri(), null);
                     if ($propertyValue->get('rdf:type') === null) { //a proper subresource, we must/can iterate on it, it does not have a proper references
+                        $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue);
+                        $myResource->addProperty($propertyUri, $mySubResource);
                     }
-                    $myResource->addProperty($propertyUri, $mySubResource);
+                    $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                 }
             }
         }

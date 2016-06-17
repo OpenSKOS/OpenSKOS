@@ -312,26 +312,26 @@ public function deleteSolrIntact(Uri $resource)
         }
         //$resource = new Uri($uri);
         //$result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject ?object  WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .} }';
+        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .} }';
         $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
         // @TODO Add resourceType check.
         
-        if (count($resources) == 0) {
+        if (count($resources) === 0) {
             throw new ResourceNotFoundException(
                 'The requested resource <' . $uri . '> was not found.'
             );
         }
+        //var_dump($resources[0]);
        
-       
-        /*  fix it for this more extended case
-         * work only describe subject, without object subresource
-         * if (count($resources) > 1) {
+        if (count($resources) > 1) {
+             
+        //var_dump($resources[1]);
             throw new RuntimeException(
                 'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
             );
              
-        }*/
+        }
  
         return $resources[0];
     }

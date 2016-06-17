@@ -78,7 +78,7 @@ class Command implements LoggerAwareInterface
         // so has to be moved to a shared place.
         
         
-        // Srtuff needed before validation.
+        // Stuff needed before validation.
         foreach ($resourceCollection as $resourceToInsert) {
             // Concept only logic
             // Generate uri if none or blank (_:genid<n>) is given.
@@ -196,9 +196,9 @@ class Command implements LoggerAwareInterface
                         }
                     }
                 }
-                $userUri = $message->getUser(); 
+                $userUri = $message->getUser()->getUri(); 
                 $tenantUri = $this->resourceManager->fetchUsersInstitution($userUri);
-                $this->ensureMetadata(
+                $resourceToInsert = $this->ensureMetadata(
                     $resourceToInsert,
                     new Uri($tenantUri),
                     new Uri($message->getSetUri()),
@@ -214,7 +214,7 @@ class Command implements LoggerAwareInterface
         }
     }
     
- private function ensureMetadata(&$concept, Uri $tenantUri, Uri $set, Uri $person, $oldStatus = null)
+ private function ensureMetadata($concept, Uri $tenantUri, Uri $set, Uri $person, $oldStatus = null)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
@@ -257,5 +257,6 @@ class Command implements LoggerAwareInterface
                     break;
             }
         }
+        return $concept;
     }
 }
