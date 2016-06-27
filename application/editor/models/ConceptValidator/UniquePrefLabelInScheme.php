@@ -52,7 +52,7 @@ class Editor_Models_ConceptValidator_UniquePrefLabelInScheme extends Editor_Mode
             } elseif (null !== ($tenant = OpenSKOS_Db_Table_Tenants::fromIdentity())) {
                 $query .= ' tenant:' . $tenant->code;
             }
-            $query .= ' collection:' . $concept['collection'];
+            $query .= ' collection:"' . $concept['collection'] . '"';
             $query .= ' -uuid:"' . $concept['uuid'] . '"';
 
             $response = Api_Models_Concepts::factory()->setQueryParams(array('rows' => 0))->getConcepts($query);
