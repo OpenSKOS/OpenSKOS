@@ -464,11 +464,33 @@ abstract class AbstractTripleStoreResource {
     }
 
    
-    protected function validateTenant($resourceObject, $tenantProperty) {
+    protected function validateTenant(&$resourceObject, $tenantProperty) {
+        $val = $resourceObject->getProperty($tenantProperty);
+        if ($val === null) {
+            $resourceObject->setProperty($tenantProperty, new Uri($this->tenant['uri']));
+        } else {
+            if (count($val) === 0) {
+                $resourceObject->setProperty($tenantProperty, new Uri($this->tenant['uri']));
+            }
+        }
         try {
-            return $this->validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
+            // also the validation below replaces institution codes with uri's when necessary
+            $referenceExists = $this->validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
+            if ($referenceExists) {
+                $val = $resourceObject->getProperty($tenantProperty);
+                foreach ($val as $uri) {
+                    if ($uri->getUri() !== $this->tenant['uri']) {
+                        throw new ApiException('The resource,  the logged-in user tries to submit, has tenant referred by  ' . $uri . ' to which the logged-in user does not belong. The user tenant is ' . $this ->tenant['uri'], 400);
+                    } 
+                }
+            }
         } catch (Exception $ex) {
-            throw new ApiException($ex->getMessage(), 500);
+            if ($ex instanceof ApiException) {
+                $code = $ex->getCode();
+            } else {
+                $code = 500;
+            }
+            throw new ApiException($ex->getMessage(), $code);
         }
     }
 
@@ -480,7 +502,7 @@ abstract class AbstractTripleStoreResource {
         }
     }
     
-    private function validateByID($resourceObject, $property, $resourceType) {
+    private function validateByID(&$resourceObject, $property, $resourceType) {
         $val = $resourceObject->getProperty($property);
         if ($val === null) {
             return true;
@@ -497,7 +519,7 @@ abstract class AbstractTripleStoreResource {
             }
             $referredResource = $this->manager->findResourceById($flatid, $resourceType);
             if ($referredResource === null) {
-                throw new ApiException('The resource of type ' . $resourceType . ' referred by code/uuid ' . $flatid . ' is not found.', 404);
+                throw new ApiException('The resource of type ' . $resourceType . ' referred by uri/code/uuid ' . $flatid . ' is not found.', 404);
             } else {
                 $resourceObject->setProperty($property, new Uri($referredResource->getUri()));
             }
