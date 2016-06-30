@@ -62,7 +62,7 @@ class EasyRdf {
              $expectedTypeUri=$expectedType->getUri();
          }   else {
              $expectedTypeUri = $expectedType;
-         }
+        }
         foreach ($graph->resources() as $resource) {
                 $type = $resource->get('rdf:type');
                 if ($type !== null) {
@@ -78,12 +78,10 @@ class EasyRdf {
         $myResource = null;
         foreach ($mainResources as $resource) {
             $type = $resource->get('rdf:type');
-            $myResource = self::createResource(
-                            $resource->getUri(), $type
-            );
+            if ($type !== null) { // the resource is main
+            $myResource = self::createResource($resource->getUri(), $type);
             self::makeNode($myResource, $resource);
-            if ($myResource !== null) {
-                $collection[] = $myResource;
+            $collection[] = $myResource;
             }
         }
         return $collection;
@@ -105,7 +103,7 @@ class EasyRdf {
                     );
                 } elseif ($propertyValue instanceof Resource2) {
                     // recursion
-                    if ($propertyValue->get('rdf:type') === null) { //a proper subresource, we must/can iterate on it, it does not have a proper references
+                    if ($propertyValue->get('rdf:type') === null) { //a proper subresource, we must/can iterate on it, it does not have proper handles
                         $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue);
                         $myResource->addProperty($propertyUri, $mySubResource);

@@ -322,13 +322,16 @@ public function deleteSolrIntact(Uri $resource)
                 'The requested resource <' . $uri . '> was not found.'
             );
         }
-        //var_dump($resources[0]);
-       
         if (count($resources) > 1) {
-             
-        //var_dump($resources[1]);
+        
+        echo '***';   
+        var_dump($resources[0]);
+        echo '***';   
+        var_dump($resources[1]);
+        
+        echo '***';   
             throw new RuntimeException(
-                'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
+                'Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.'
             );
              
         }
