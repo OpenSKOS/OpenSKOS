@@ -14,7 +14,8 @@ abstract class AbstractSkosCollectionValidator extends AbstractResourceValidator
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof SkosCollection) {
-            return $this->validateSkosCollection($resource);
+            $this->errorMessages = array_merge($this->errorMessages, $this->validateSkosCollection($resource));
+            return (count($this->errorMessages) ===0);
         }
         return false;
     }

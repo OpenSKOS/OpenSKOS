@@ -50,12 +50,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $newErrors = call_user_func(__NAMESPACE__ . $callback, $arg1, $arg2, $arg3, $arg4);
         //var_dump($callback);
         //var_dump($newErrors);
-        if (count($newErrors) > 0) {
-            $this -> errorMessages = array_merge($this -> errorMessages, $newErrors);
-            return false;
-        } else {
-            return true;
-        }
+        return  array_merge($this -> errorMessages, $newErrors);
     }
     
 }

@@ -54,8 +54,8 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
-    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://hdl.handle.net/11148/CCR_dataset_475cb792-f0b8-4f32-add3-f2a5a848e702'), true, OpenSKOS_Concept_Status::CANDIDATE,
-    false, false, 'en', true, false
+    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://hdl.handle.net/11148/CCR_dataset_f7209fb7-9c2c-47f0-b109-bf9b95675d36'), true, OpenSKOS_Concept_Status::CANDIDATE,
+    true, false, 'en', false, false
 );
 
 $importer->handle($message);

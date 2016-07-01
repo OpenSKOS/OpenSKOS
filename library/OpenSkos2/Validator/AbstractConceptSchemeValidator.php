@@ -14,7 +14,8 @@ abstract class AbstractConceptSchemeValidator extends AbstractResourceValidator
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof ConceptScheme) {
-            return $this->validateSchema($resource);
+            $this->errorMessages = array_merge($this->errorMessages, $this->validateSchema($resource));
+            return (count($this->errorMessages) ===0);
         }
         return false;
     }

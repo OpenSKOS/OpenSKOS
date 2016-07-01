@@ -14,6 +14,7 @@ class Checks {
         if (!($testVal === "true" || $testVal === "false")) {
             $retVal[] = 'The value of ' . $type . ' must be set to true or false. ';
         }
+        return $retVal;
     }
 
 }

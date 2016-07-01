@@ -20,11 +20,13 @@
 namespace OpenSkos2\Import;
 
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
@@ -79,9 +81,12 @@ class Command implements LoggerAwareInterface
         
         
         // Stuff needed before validation.
+        //var_dump(count($resourceCollection));
         foreach ($resourceCollection as $resourceToInsert) {
             // Concept only logic
             // Generate uri if none or blank (_:genid<n>) is given.
+            
+        // concepts
             if ($resourceToInsert instanceof Concept) {
                 $setUri = $message->getSetUri();
                 
@@ -106,6 +111,34 @@ class Command implements LoggerAwareInterface
                     $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($uuid));
                 };
             }
+            
+            // schemata
+            if ($resourceToInsert instanceof ConceptScheme) {
+                var_dump("Schema");
+                $setUri = $message->getSetUri();
+                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $setUri);
+                
+                $uuids = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
+                if (count($uuids) < 1) {
+                    $uuid = Uuid::uuid4();
+                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($uuid));
+                };
+                
+                $creators = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\DcTerms::CREATOR);
+                if (count($creators) < 1) {
+                    $creator = $message->getUser();
+                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\DcTerms::CREATOR, $creator);
+                };
+                
+                if ($resourceToInsert->isBlankNode()) {
+                    $params['seturi']=$setUri->getUri();
+                    $params['type']=Skos::CONCEPTSCHEME;
+                    $params['uuid']=$uuids[0];
+                    $resourceToInsert->selfGenerateUri($this->resourceManager, $params);
+                } 
+               
+            }
+            
         }
         
         $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
@@ -113,11 +146,11 @@ class Command implements LoggerAwareInterface
             var_dump($validator->getErrorMessages());
             throw new \Exception("\n Failed validation \n");
         }
-
+       
         if ($message->getClearSet()) {
             $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
         }
-
+        
         if ($message->getDeleteSchemes()) {
             $conceptSchemes = [];
             foreach ($resourceCollection as $resourceToInsert) {
@@ -131,15 +164,15 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($scheme);
             }
         }
-
         $currentVersions = [];
+        
         foreach ($resourceCollection as $resourceToInsert) {
             try {
                 $uri = $resourceToInsert->getUri();
-                $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri);
-
+                $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri, $resourceToInsert->getPropertySingleValue(Rdf::TYPE));
                 if ($message->getNoUpdates()) {
-                    $this->logger->warning("Skipping concept {$uri}, because it already exists");
+                    var_dump("Skipping resource {$uri}, because it already exists");
+                    $this->logger->warning("Skipping resource {$uri}, because it already exists");
                     continue;
                 }
             } catch (ResourceNotFoundException $e) {

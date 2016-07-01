@@ -160,15 +160,15 @@ class Resource
         /** @var ValidatorInterface $validator */
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
-            //var_dump(get_class($validator));
-            //var_dump($valid);
             if ($valid) {
                 continue;
             } 
 
+            //var_dump( $this->errorMessages);
             foreach ($validator->getErrorMessages() as $message) {
                 $this->errorMessages[] = $message;
             }
+            //var_dump($this->errorMessages);
             
             $this->logger->error('Errors founds while validating resource ' . $resource->getUri());
             $this->logger->error($validator->getErrorMessages());

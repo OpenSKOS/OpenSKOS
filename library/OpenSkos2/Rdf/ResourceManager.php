@@ -323,7 +323,8 @@ public function deleteSolrIntact(Uri $resource)
             );
         }
         if (count($resources) > 1) {
-        
+        echo '***';   
+        var_dump($resType);
         echo '***';   
         var_dump($resources[0]);
         echo '***';   

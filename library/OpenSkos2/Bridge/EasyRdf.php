@@ -56,6 +56,7 @@ class EasyRdf {
         $collection = self::createResourceCollection($expectedType);
         // make two lists: the types resources which are main resources (roots)
         // and typeless resources which are to be used as subresources (elements of complex types in xml)
+       
         $mainResources = array();
         if ($expectedType !== null) {
          if ($expectedType instanceof Uri) {
@@ -76,12 +77,13 @@ class EasyRdf {
         }
         // now compose main resources;
         $myResource = null;
+        
         foreach ($mainResources as $resource) {
             $type = $resource->get('rdf:type');
             if ($type !== null) { // the resource is main
-            $myResource = self::createResource($resource->getUri(), $type);
-            self::makeNode($myResource, $resource);
-            $collection[] = $myResource;
+                $myResource = self::createResource($resource->getUri(), $type);
+                self::makeNode($myResource, $resource);
+                $collection[] = $myResource;
             }
         }
         return $collection;

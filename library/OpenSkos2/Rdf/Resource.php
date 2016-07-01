@@ -398,10 +398,11 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        
-        $uuid= UriGeneration::generateUUID($parameters);
-        $parameters['uuid'] = $uuid;
-        $uri = UriGeneration::generateURI($parameters);
+        if (!isset($parameters['uuid']) || $parameters['uuid'] === null) {
+            $uuid = UriGeneration::generateUUID($parameters);
+            $parameters['uuid'] = $uuid;
+            $uri = UriGeneration::generateURI($parameters);
+        }
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
