@@ -50,8 +50,8 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 				}
 			}
 		</script>
-                
-		<?php $scriptsVersion = 5; // Change that if the scripts are changed.?>
+        
+		<?php $scriptsVersion = 7; // Change that if the scripts are changed.?>
                 
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
@@ -68,6 +68,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/tabs.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/url.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/shortcuts.js?v=<?php echo $scriptsVersion;?>"></script>
+            <script src="<?php echo $baseUrl?>assets/scripts/editor/conceptStatus.js?v=<?php echo $scriptsVersion;?>"></script>
 		<?php else:?>
 			<script src="<?php echo $baseUrl?>assets/scripts/openskos.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/forms.js?v=<?php echo $scriptsVersion;?>"></script>
@@ -86,7 +87,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 	    ?>
 	</head>
 	<body>
-		<div id="wrapper">
+		<div id="wrapper" class="<?= $controller?>">
 		    <div id="header">
 		        <?php echo $this->render('editor_breadcrumbs.phtml');?>
 		        <div id="login_data">

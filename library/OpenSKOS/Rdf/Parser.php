@@ -35,14 +35,12 @@ class OpenSKOS_Rdf_Parser implements Countable
 		'lang|l=s' => 'The default language to use if no "xml:lang" attribute is found',
 		'env|e=s' => 'The environment to use (defaults to "production")',
 		'commit' => 'Commit to Solr (default: print to STDOUT)',
-		'status=s' => 'The status to use for concepts (candidate|approved|expired)',
+		'status=s' => 'The status to use for concepts (candidate,approved,redirected,not_compliant,rejected,obsolete,deleted)',
 		'ignoreIncomingStatus' => 'To ignore or not the concept status which comes from the import file',
 		'toBeChecked' => 'Sets the toBeCheked status to TRUE',
-		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation.',
+		'onlyNewConcepts' => 'Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).',
+		'useUriAsIdentifier' => 'Use uri as identifier if concept notation does not exist in the importing concept.',
 	);
-	
-	//@TODO move this to a Concept Class
-	static $statuses = array('candidate', 'approved', 'expired');
 	
 	static $namespaces = array(
 		'rdf'      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -183,13 +181,17 @@ class OpenSKOS_Rdf_Parser implements Countable
 	 * @param array $extradata
 	 * @param DOMXPath $xpath
 	 * @param string $fallbackStatus The status which will be used if no other status is detected.
+     * @param bool $autoGenerateUri If the script should auto generate uri and notation
+     * @param OpenSKOS_Db_Table_Row_Collection $collection
 	 * @return OpenSKOS_Solr_Document
 	 */
 	public static function DomNode2SolrDocument(
 		DOMNode $Description, 
 		Array $extradata = array(), 
 		DOMXPath $xpath = null,
-		$fallbackStatus = '')
+		$fallbackStatus = '',
+        $autoGenerateUri = false,
+        $collection = null)
 	{
 		if ($Description->nodeName != 'rdf:Description') {
 			throw new OpenSKOS_Rdf_Parser_Exception('wrong nodeName, expected `rdf:Description`, got `'.$Description->nodeName.'`');
@@ -219,24 +221,41 @@ class OpenSKOS_Rdf_Parser implements Countable
 		if ($dateAcceptedNodes->length > 0) {
 			$autoExtraData['approved_timestamp'] = date(self::SOLR_DATETIME_FORMAT, strtotime($dateAcceptedNodes->item(0)->nodeValue));
 		}
-		
+
 		// Sets status. If we have info for date submited the status is candidate, if we have info for date accepted the status is approved.
-		if ($dateAcceptedNodes->length > 0) {
-			$autoExtraData['status'] = 'approved';
-		} else if ($dateSubmittedNodes->length > 0) {
-			$autoExtraData['status'] = 'candidate';
-		} else if ( ! empty($fallbackStatus)) {
+        $openskosStatusNodes = $xpath->query('openskos:status', $Description);
+		if ($openskosStatusNodes->length > 0) {
+            $autoExtraData['status'] = $openskosStatusNodes->item(0)->nodeValue;
+        } elseif (!empty($fallbackStatus)) {
 			$autoExtraData['status'] = $fallbackStatus;
-		}
+		} elseif ($collection !== null && !$collection->getTenant()['enableStatusesSystem']) {
+            $autoExtraData['status'] = OpenSKOS_Concept_Status::APPROVED;
+        } else {
+            $autoExtraData['status'] = OpenSKOS_Concept_Status::CANDIDATE;
+        }
 		
 		// Merges the incoming extra data with the auto detected extra data.
 		$extradata = array_merge($autoExtraData, $extradata);
 		
-		// Set deleted timestamp if status is expired and deleted timestamp is not already set.
-		if (! isset($extradata['deleted_timestamp']) 
-				&& ((isset($extradata['status']) && $extradata['status'] == 'expired')
+        // Validates status
+        if (!empty($extradata['status']) && !in_array($extradata['status'], OpenSKOS_Concept_Status::getStatuses())) {
+            throw new OpenSKOS_Rdf_Parser_Exception(
+                'Status "' . $extradata['status'] . '" not recognized.'
+            );
+        }
+
+        // Status deleted equals soft deletion and soft deleting equals status deleted.
+        if (isset($extradata['status']) && $extradata['status'] == OpenSKOS_Concept_Status::DELETED) {
+            $extradata['deleted'] = true;
+        } elseif (isset($extradata['deleted']) && $extradata['deleted']) {
+            $extradata['status'] = OpenSKOS_Concept_Status::DELETED;
+        }
+
+		// Set deleted timestamp if status is OBSOLETE(expired) and deleted timestamp is not already set.
+        if (empty($extradata['deleted_timestamp'])
+				&& ((isset($extradata['status']) && OpenSKOS_Concept_Status::isStatusLikeDeleted($extradata['status']))
 					|| (isset($extradata['deleted']) && $extradata['deleted']))) {
-			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);		
+			$extradata['deleted_timestamp'] = date(self::SOLR_DATETIME_FORMAT);
 		}
 		
 		// Fix empty values
@@ -258,17 +277,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 		foreach ($extradata as $key => $var) {
 			$document->$key = is_bool($var) ? (true === $var ? 'true' : 'false'): $var;
 		}
-		
-		if (!isset($extradata['uri'])) {
-			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
-			if (!$uri) {
-				throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
-			}
-			$document->uri = $uri;
-		} else {
-			$uri = $extradata['uri'];
-		}
-		
 
 		if (!isset($extradata['uuid'])) {
 			$document->uuid = OpenSKOS_Utils::uuid();
@@ -286,7 +294,6 @@ class OpenSKOS_Rdf_Parser implements Countable
 		    return;
 		}
 
-		
 		$skosElements = $xpath->query('./skos:*', $Description);
 		foreach ($skosElements as $skosElement) {
 			$fieldname = str_replace('skos:', '', $skosElement->nodeName);
@@ -318,7 +325,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 				}
 			}
 		}
-		
+
 		foreach (array('dc', 'dcterms') as $ns) {
 			foreach ($xpath->query('./'.$ns.':*', $Description) as $element) {
 				$fieldname = str_replace($ns.':', 'dcterms_', $element->nodeName);
@@ -336,7 +343,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 			);
 			$document->$fieldname = trim($element->nodeValue);
 		}
-		
+
 		//infer dcterms:title from skos:prefLabel if not already present, using the first
 		// prefLabel found matching one of the following criteria, checked in this order:
 		// 1. with xml:lang=XY where XY is lang option (if set)
@@ -358,9 +365,26 @@ class OpenSKOS_Rdf_Parser implements Countable
 				}
 			}
 		}
-		
+
 		$document->xml = $Description->ownerDocument->saveXML($Description);
-		
+
+		// Checks or generate uri
+		if (!$document->offsetExists('uri')) {
+			$uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+			if ($uri) {
+				$document->uri = $uri;
+			} else {
+				if ($autoGenerateUri) {
+					$document->autoGenerateUri($collection);
+				} else {
+					throw new OpenSKOS_Rdf_Parser_Exception('missing required attribute rdf:about');
+				}
+			}
+		}
+
+		// Puts status in the Document
+		$document->updateStatusInGeneratedXml();
+
 		//store namespaces:
 		$availableNamespaces = array();
 		foreach ($Description->childNodes as $childNode) {
@@ -378,7 +402,7 @@ class OpenSKOS_Rdf_Parser implements Countable
 		
 		return $document;
 	}
-	
+
     /**
      * Processes an import file.
      * @param int $byUserId, optional If specified some actions inside the processing will be linked to that user
@@ -487,7 +511,15 @@ class OpenSKOS_Rdf_Parser implements Countable
             
 			// Check if document with same notation already exists.
 			$notationNodes = $xpath->query('skos:notation', $Description);
-			if (!$this->handleUniqueNotation($data, $notationNodes, $notationsCheck)) {
+            $notation = null;
+            if ($notationNodes->length > 0) {
+                $notation = $notationNodes->item(0)->nodeValue;
+            } elseif ($this->getOpt('useUriAsIdentifier')) {
+                $uri = $Description->getAttributeNS(self::$namespaces['rdf'], 'about');
+                $this->handleUriAsIdentifier($data, $notation, $uri, $notationsCheck);
+            }
+
+			if (!$this->handleUniqueNotation($data, $notation, $notationsCheck)) {
                 continue;
             }
 			
@@ -500,7 +532,14 @@ class OpenSKOS_Rdf_Parser implements Countable
 				$data['status'] = (string)$this->getOpt('status');
 			}
 			
-			$document = self::DomNode2SolrDocument($Description, $data, $xpath, (string)$this->getOpt('status'));
+			$document = self::DomNode2SolrDocument(
+                $Description,
+                $data,
+                $xpath,
+                (string)$this->getOpt('status'),
+                false,
+                $this->_collection
+            );
 			
 			if ($document) {                
 				$class = $document->offsetGet('class');
@@ -613,8 +652,9 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		
 		if ($opts->status) {
-			if (!in_array($opts->status, self::$statuses)) {
-				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', self::$statuses).'`', 0);
+            $statuses = OpenSKOS_Concept_Status::getStatuses();
+			if (!in_array($opts->status, $statuses)) {
+				throw new OpenSKOS_Rdf_Parser_Exception('Illegal `status` value, must be one of `'.implode('|', $statuses).'`', 0);
 			}
 		}
 		
@@ -813,7 +853,31 @@ class OpenSKOS_Rdf_Parser implements Countable
 		}
 		return $nodes;
 	}
-	
+
+    /**
+	 * Creates simple openskos xml element for the field
+	 * If $fieldValues is array - create an element for each of them
+	 *
+	 * @param string $fieldName
+	 * @param array|string $fieldValues
+	 */
+	public static function createSimpleOpenskosField($fieldName, $fieldValues)
+	{
+		$nodes = array();
+		$doc = new DOMDocument('1.0', 'utf-8');
+
+		if (!is_array($fieldValues)) {
+			$fieldValues = array($fieldValues);
+		}
+
+		foreach ($fieldValues as $fieldValue) {
+			$node = $doc->createElement('openskos:' . $fieldName);
+			$node->appendChild($doc->createTextNode($fieldValue));
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+
 	/**
 	 * Creates dcterm xml element for the field
 	 * If $fieldValues is array - create an element for each of them
@@ -931,41 +995,61 @@ class OpenSKOS_Rdf_Parser implements Countable
         
 		return $canInsertDocument;
 	}
-	
+
     /**
 	 * Validate if the concept has unique notation.
      * If not - checks if it should be perged. If not adds it to the _notImportedNotations and return false.
 	 * 
-     * @param array $data
-     * @param DOMNodeList $notationNodes
+     * @param array &$data
+     * @param string $notation
      * @param array $notationsCheck
      * @return boolean If the document can be inserted
      */
-	protected function handleUniqueNotation(array &$data, DOMNodeList $notationNodes, array $notationsCheck)
+	protected function handleUniqueNotation(array &$data, $notation, array $notationsCheck)
 	{
         $canInsertDocument = true;
         
-		if ($notationNodes->length > 0) {
-            $notation = $notationNodes->item(0)->nodeValue;
-            if (isset($notationsCheck[$notation])) {
-                if ($this->getOpt('onlyNewConcepts')) {
-                    $this->_notImportedNotations[] = $notation;
-                    $canInsertDocument = false;
-                } else {
-                    $existingConcept = Api_Models_Concepts::factory()->getConcept(
-                        $notationsCheck[$notation]
-                    );
+        if (isset($notationsCheck[$notation])) {
+            if ($this->getOpt('onlyNewConcepts')) {
+                $this->_notImportedNotations[] = $notation;
+                $canInsertDocument = false;
+            } else {
+                $existingConcept = Api_Models_Concepts::factory()->getConcept(
+                    $notationsCheck[$notation]['uuid']
+                );
 
-                    $existingConcept->purge();
+                $existingConcept->purge();
 
-                    $data['uuid'] = $existingConcept['uuid'];
-                }
+                $data['uuid'] = $existingConcept['uuid'];
             }
         }
         
         return $canInsertDocument;
 	}
-    
+
+    /**
+	 * Uses concept uri as identifier
+     *
+     * @param array &$data
+     * @param string &$notationOutput
+     * @param string $uri
+     * @param array $notationsCheck
+     * @return boolean If the document can be inserted
+     */
+	protected function handleUriAsIdentifier(array &$data, &$notationOutput, $uri, array $notationsCheck)
+	{
+        if (!empty($uri)) {
+            foreach ($notationsCheck as $notation => $existingConcept) {
+                if (strcasecmp($uri, $existingConcept['uri']) === 0) {
+                    $data['notation'] = $notation;
+                    $notationOutput = $notation;
+                    $data['uuid'] = $existingConcept['uuid'];
+                    break;
+                }
+            }
+        }
+	}
+
     /**
      * Fetch existing notations and the uuid of the concepts having them.
      * @return array
@@ -979,9 +1063,15 @@ class OpenSKOS_Rdf_Parser implements Countable
             . 'AND collection:' . $this->getCollection()->id;
         
 		$notationsCount = $this->_solr()->limit(0)->search($notationsCheckQuery);
-		$existingNotations = $this->_solr()->limit($notationsCount['response']['numFound'])->search($notationsCheckQuery, array('fl' => 'notation, uuid'));
+		$existingNotations = $this->_solr()
+            ->limit($notationsCount['response']['numFound'])
+            ->search($notationsCheckQuery, array('fl' => 'notation, uuid, uri'));
+
 		foreach ($existingNotations['response']['docs'] as $doc) {
-			$notationsCheck[$doc['notation'][0]] = $doc['uuid'];
+			$notationsCheck[$doc['notation'][0]] = [
+                'uuid' => $doc['uuid'],
+                'uri' => (isset($doc['uri']) ? $doc['uri'] : null)
+            ];
 		}
         
         return $notationsCheck;

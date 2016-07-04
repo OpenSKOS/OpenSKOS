@@ -44,7 +44,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				'notation' => array($notation)
 		)));
 		
-		$form = Editor_Forms_Concept::getInstance(true);
+		$form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
 		$formData = $concept->toForm();
 		$form->getElement('conceptSchemeSelect')-> setMultiOptions($formData['conceptSchemeSelect']);
 		$form->populate($formData);
@@ -56,7 +56,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		$this->_helper->_layout->setLayout('editor_central_content');
 		
 		$concept = $this->_getConcept();
-		
+        
 		if (null === $concept) {
 			$this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
 		} else {
@@ -64,8 +64,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		}
 		
 		$this->_checkConceptTenantForEdit($concept);
-		
-		$form = Editor_Forms_Concept::getInstance(null === $concept);
+        
+		$form = Editor_Forms_Concept::getInstance($concept);
 		
 		if ( ! $this->getRequest()->isPost()) {
 			$formData = $concept->toForm();
@@ -90,8 +90,6 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				$formData['baseUri'] = $this->getRequest()->getPost('baseUri');
 			}
 		}
-		
-		
 		
 		$form->reset();
 		$form->populate($formData);
@@ -126,7 +124,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 	{
 		$concept = $this->_getConcept();
 		
-		$form = Editor_Forms_Concept::getInstance(null === $concept);
+		$form = Editor_Forms_Concept::getInstance($concept);
 		
 		$formData = $this->getRequest()->getParams();
 
@@ -171,7 +169,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 						'modified_timestamp' =>  date("Y-m-d\TH:i:s\Z"),
 						'toBeChecked' => (isset($extraData['toBeChecked']) ? (bool)$extraData['toBeChecked'] : false))
 				);
-				
+                
 				if ( ! isset($extraData['uuid']) || empty($extraData['uuid'])) {					
 					$extraData['uuid'] = $concept['uuid'];
 					$extraData['created_by'] = $extraData['modified_by'];
@@ -200,19 +198,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 					}
 				}
 				
-				if ($extraData['status'] === 'approved' && $oldData['status'] !== 'approved') {
+				if ($extraData['status'] === OpenSKOS_Concept_Status::APPROVED
+                        && (!isset($oldData['status']) || $oldData['status'] !== OpenSKOS_Concept_Status::APPROVED)) {
 					$extraData['approved_timestamp'] = $extraData['modified_timestamp'];
 					$extraData['approved_by'] = $extraData['modified_by'];
 				}
 				
-				if ($extraData['status'] !== 'approved') {
+				if ($extraData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
 					$formData['approved_by'] = '';
 					$formData['approved_timestamp'] = '';
 					$extraData['approved_by'] = '';
 					$extraData['approved_timestamp'] = '';
 				}
 				
-				if ($extraData['status'] !== 'expired') {
+				if (OpenSKOS_Concept_Status::isStatusLikeDeleted($extraData['status'])) {
 					$formData['deleted_by'] = '';
 					$formData['deleted_timestamp'] = '';
 					$extraData['deleted_by'] = '';
@@ -228,7 +227,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 						}
 					}
 				}
-				
+                
+                $this->_handleStatusAutomatedActions($concept, $formData, $extraData);
+                
 				$concept->setConceptData($formData, $extraData);
 
 				if ($concept->save($extraData)) {
@@ -408,16 +409,17 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 				$updateExtraData['modified_by'] = $user->id;
 				$updateExtraData['modified_timestamp'] = date("Y-m-d\TH:i:s\Z");
 				
-				if ($oldData['status'] != 'approved' && $status == 'approved') {
+				if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED
+                        && $status == OpenSKOS_Concept_Status::APPROVED) {
 					$updateExtraData['approved_by'] = $user->id;
 					$updateExtraData['approved_timestamp'] = date("Y-m-d\TH:i:s\Z");
 				}
 				
 				// The actual update...
 				$doCommit = ($key == (count($concepts) - 1)); // Commit only on the last concept.
-						
-				$concept = new Editor_Models_Concept($concept);				
-				$concept->update(array(), $updateExtraData, $doCommit);
+
+				$concept = new Editor_Models_Concept($concept);
+				$concept->update(array(), $updateExtraData, $doCommit, true);
 			}
 		}
 		
@@ -425,7 +427,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 	}
 	
 	/**
-	 * @return Api_Models_Concept
+	 * @return Editor_Models_Concept
 	 */
 	protected function _getConcept()
 	{
@@ -436,7 +438,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		
 		$response  = Api_Models_Concepts::factory()->getConcepts('uuid:'.$uuid);
 		if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {			
-			throw new Zend_Exception('The requested concept was not found');
+			throw new Zend_Exception('The requested concept was deleted or not found');
 		} else {
 			return new Editor_Models_Concept(new Api_Models_Concept(array_shift($response['response']['docs'])));
 		}
@@ -517,4 +519,67 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 		}
 		return $data;
 	}
+    
+    /**
+     * Handles tsome automated actions for when status is changed.
+     * @param Editor_Models_Concept $concept
+     * @param array $formData
+     * @param array $extraData
+     */
+    protected function _handleStatusAutomatedActions(Editor_Models_Concept $concept, &$formData, $extraData)
+    {
+        if (isset($extraData['statusOtherConcept']) && !empty($extraData['statusOtherConcept'])) {
+            $otherConcept = null;
+            $otherConceptResponse = Api_Models_Concepts::factory()->getConcepts('uuid:' . $extraData['statusOtherConcept']);
+            if (isset($otherConceptResponse['response']['docs']) || (1 === count($otherConceptResponse['response']['docs']))) {
+                $otherConcept = new Editor_Models_Concept(new Api_Models_Concept(array_shift($otherConceptResponse['response']['docs'])));
+            }
+
+            if ($otherConcept !== null) {
+                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED
+                        || $extraData['status'] == OpenSKOS_Concept_Status::OBSOLETE) {
+                    
+                    foreach ($concept->getConceptLanguages() as $lang) {
+                        $existingChangeNotes = [];
+                        if (isset($formData['changeNote@' . $lang])) {
+                            $existingChangeNotes = $formData['changeNote@' . $lang];
+                        }
+
+                        $newChangeNotes = [_('Forward') . ': ' . $otherConcept['uri']];
+
+                        $formData['changeNote@' . $lang] = array_unique(array_merge($existingChangeNotes, $newChangeNotes));
+                    }
+                }
+                
+                if ($extraData['status'] == OpenSKOS_Concept_Status::REDIRECTED) {
+                    $otherConceptUpdateData = [];
+                    foreach ($concept->getConceptLanguages() as $lang) {
+                        $labelToFill = $extraData['statusOtherConceptLabelToFill'];
+                        
+                        $existingLabels = $otherConcept[$labelToFill . '@' . $lang];
+                        if (empty($existingLabels)) {
+                            $existingLabels = [];
+                        }
+                        
+                        $newLabels = [];
+                        if (isset($formData['prefLabel@' . $lang])) {
+                            $newLabels = $formData['prefLabel@' . $lang];
+                        }
+                        
+                        $otherConceptUpdateData[$labelToFill . '@' . $lang] = array_unique(array_merge($existingLabels, $newLabels));
+                    }
+                    
+                    $otherConcept->update(
+                        $otherConceptUpdateData,
+                        [
+                            'modified_by' => $this->getCurrentUser()->id,
+                            'modified_timestamp' => date("Y-m-d\TH:i:s\Z")
+                        ],
+                        true,
+                        true
+                    );
+                }
+            }
+        }
+    }
 }

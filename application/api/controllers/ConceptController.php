@@ -61,13 +61,24 @@ class Api_ConceptController extends Api_FindConceptsController {
 		$collection = $this->_getCollection();
 		$user = $this->_getUser();
 		
+        $conceptXml = $Descriptions->item(0);
+        
 		$data = array(
 			'tenant' => $tenant->code,
 			'collection' => $collection->id
 		);
+        
+        $autoGenerateUri = $this->checkConceptIdentifiers($conceptXml, $doc);
 		
 		try {
-			$solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument($Descriptions->item(0), $data);
+			$solrDocument = OpenSKOS_Rdf_Parser::DomNode2SolrDocument(
+                $conceptXml,
+                $data,
+                null,
+                '',
+                $autoGenerateUri,
+                $collection
+            );
 		} catch (OpenSKOS_Rdf_Parser_Exception $e) {
 			throw new Zend_Controller_Action_Exception($e->getMessage(), 400);
 		}
@@ -97,7 +108,9 @@ class Api_ConceptController extends Api_FindConceptsController {
 				$solrDocument->offsetSet('toBeChecked', $concept['toBeChecked']);
 			}
 		}
-                
+        
+        $this->validatePrefLabel($solrDocument);
+        
 		if($this->getRequest()->getActionName() == 'put') {
 			if (!$concept) {
 				throw new Zend_Controller_Action_Exception('Concept `'.$solrDocument['uri'][0].'` does not exists, try POST-ing it to create it as a new concept.', 404);
@@ -114,19 +127,30 @@ class Api_ConceptController extends Api_FindConceptsController {
 			throw new Zend_Controller_Action_Exception('Failed to save Concept `'.$solrDocument['uri'][0].'`: '.$e->getMessage(), 400);
 		}
 		
-		$location = $this->view->serverUrl() . $this->view->url(array(
-			'controller' => 'concept',
-			'action' => 'get',
-			'module' => 'api',
-			'id' => $solrDocument['uuid'][0]
-		), 'rest', true);
+		$this->getResponse()->setHeader('Content-Type', 'text/xml; charset="utf-8"', true);
+        
+        if ($this->getRequest()->getActionName() == 'post') {
+            $location = $this->view->serverUrl() . $this->view->url(array(
+                'controller' => 'concept',
+                'action' => 'get',
+                'module' => 'api',
+                'id' => $solrDocument['uuid'][0]
+            ), 'rest', true);
+            
+            $this->getResponse()
+                ->setHeader('Location', $location)
+                ->setHttpResponseCode(201);
+        } else {
+            $this->getResponse()->setHttpResponseCode(200);
+        }
+        
+        $savedConcept = $this->model->getConcept($solrDocument['uuid'][0]);
 		
-		
-		$this->getResponse()
-			->setHeader('Content-Type', 'text/xml; charset="utf-8"', true)
-			->setHeader('Location', $location)
-			->setHttpResponseCode(201);
-		echo $doc->saveXml($Descriptions->item(0));
+        // We validate the pref label after commit as well.
+        // To prevent duplicates when simultaneously commits happen.
+        $this->validatePrefLabel($savedConcept, true, $concept);
+        
+		echo $savedConcept->toRDF()->saveXml();
 	}
 
 	public function putAction() {
@@ -215,5 +239,131 @@ class Api_ConceptController extends Api_FindConceptsController {
 		
 		return $user;
 	}
+    
+    /**
+     * Validates pref label for saving concept.
+     * @param OpenSKOS_Solr_Document|Api_Models_Concept $concept
+     * @param bool $isAfterCommit
+     * @param null|Api_Models_Concept $previousState
+     * @throws Zend_Controller_Action_Exception
+     */
+    protected function validatePrefLabel($concept, $isAfterCommit = false, $previousState = null)
+    {
+        if ($concept instanceof Api_Models_Concept) {
+            $editorConcept = new Editor_Models_Concept($concept);
+        } elseif ($concept instanceof OpenSKOS_Solr_Document) {
+            $editorConcept = $this->docToEditorConcept($concept);
+        } else {
+            throw new \RuntimeException(
+                '$concept is not instace of Api_Models_Concept or OpenSKOS_Solr_Document.'
+            );
+        }
+         
+        $prefLabelValidator = Editor_Models_ConceptValidator_UniquePrefLabelInScheme::factory();
+        $isUniquePrefLabel = $prefLabelValidator->isValid($editorConcept, []);
+        
+        if (!$isUniquePrefLabel) {
+            if ($isAfterCommit) {
+                $this->rollbackConcept($concept, $previousState);
+            }
+            
+            throw new Zend_Controller_Action_Exception($prefLabelValidator->getError()->getMessage(), 409);
+        }
+    }
+    
+    /**
+     * Transforms sold doc to the editor model concept.
+     * May be used to refactor all the code. But may miss some things.
+     * @param OpenSKOS_Solr_Document $solrDocument
+     * @return \Editor_Models_Concept\
+     */
+    protected function docToEditorConcept(OpenSKOS_Solr_Document $solrDocument)
+    {
+        $data = $solrDocument->toArray();
+        if (!empty($data['tenant']) && is_array($data['tenant'])) {
+            $data['tenant'] = $data['tenant'][0];
+        }
+        
+        if (!empty($data['uuid']) && is_array($data['uuid'])) {
+            $data['uuid'] = $data['uuid'][0];
+        }
+        
+        return new Editor_Models_Concept(new Api_Models_Concept($data));
+    }
+    
+    /**
+     * Rollback a concept to a previous state. If no previous state - purge the concept.
+     * @param Api_Models_Concept $concept
+     * @param null|Api_Models_Concept $oldState
+     */
+    protected function rollbackConcept(Api_Models_Concept $concept, $previousState)
+    {
+        if ($previousState !== null) {
+            // Save the previous state with all its extra data.
+            (new Editor_Models_Concept($previousState))->update([], [], true, true);
+        } else {
+            $concept->purge(true);
+        }
+    }
+    
+    /**
+     * Check if we need to generate or not concept identifiers (notation and uri).
+     * Validates any existing identifiers.
+     * @param DOMNode $Description
+     * @param DOMDocument $doc
+     * @return boolean If an uri must be autogenerated
+     */
+    protected function checkConceptIdentifiers(DOMNode $Description, DOMDocument $doc)
+    {
+        // We return if an uri must be autogenerated
+        $autoGenerateUri = false;
+        
+        $autoGenerateIdentifiers = filter_var(
+            $this->getRequest()->getParam('autoGenerateIdentifiers', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
+        
+        $xpath = new DOMXPath($doc);
+        $notationNodes = $xpath->query('skos:notation', $Description);
+        $uri = $Description->getAttributeNS(OpenSKOS_Rdf_Parser::$namespaces['rdf'], 'about');        
+        
+        if ($autoGenerateIdentifiers) {
+            if ($uri || $notationNodes->length > 0) {
+                throw new Zend_Controller_Action_Exception(
+                    'Parameter autoGenerateIdentifiers is set to true, but the xml already contains notation (skos:notation) and/or uri (rdf:about).',
+                    400
+                );
+            }
+            $autoGenerateUri = true;
+        } else {
+            // Is uri missing
+            if (!$uri) {
+                throw new Zend_Controller_Action_Exception(
+                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
+                    400
+                );
+            }
+            
+            // Is notation missing
+            if ($notationNodes->length == 0) {
+                throw new Zend_Controller_Action_Exception(
+                    'Notation (skos:notation) is missing from the xml. You may consider using autoGenerateIdentifiers.',
+                    400
+                );
+            }
+            
+            // Is uri based on notation
+            if (!OpenSKOS_Db_Table_Notations::isContainedInUri($uri, $notationNodes->item(0)->nodeValue)) {
+                throw new Zend_Controller_Action_Exception(
+                    'The concept uri (rdf:about) must be based on notation (must contain the notation)',
+                    400
+                );
+            }
+            
+            $autoGenerateUri = false;
+        }
+        
+        return $autoGenerateUri;
+    }
 }
 

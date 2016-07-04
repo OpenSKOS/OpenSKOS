@@ -26,10 +26,12 @@
 			<?php echo $this->currentConcept->getMlField('prefLabel'); ?>
 		</h2>
 		<div id="concept-header">
-			<div id="concept-status">
-				<span><?php echo $this->translate('Status:'); ?> </span>
-				<?php echo (isset($this->currentConcept['status']) && ! empty($this->currentConcept['status']) ? $this->currentConcept['status'] : $this->translate('undefined')); ?>
-			</div>
+            <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']):?>
+                <div id="concept-status">
+                    <span><?php echo $this->translate('Status:'); ?> </span>
+                    <?php echo (isset($this->currentConcept['status']) && ! empty($this->currentConcept['status']) ? $this->translate($this->currentConcept['status']) : $this->translate('undefined')); ?>
+                </div>
+            <?php endif?>
 			<div id="concept-checked">
 				<span><?php echo $this->translate('To be checked:'); ?> </span>
 				<?php echo $this->currentConcept['toBeChecked'] ? $this->translate('Yes') : $this->translate('No'); ?>

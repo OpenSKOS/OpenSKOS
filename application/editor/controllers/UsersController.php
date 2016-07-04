@@ -87,7 +87,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
 		if (!$form->isValid($this->getRequest()->getParams())) {
 			return $this->_forward('edit');
 		} else {
-			
+                    
 			if ($userFromIdentity->isAllowed('editor.users', 'manage')) {
 				$formData = $form->getValues();
                                 
@@ -118,7 +118,12 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
 				$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('The combination of role/usertype will block you from using the Editor.');
 				return $this->_helper->redirector('edit', null, null, array('user' => $user->id));
 			}
-			
+                        
+                        // For the unique tenant/eppn validator to work.
+                        if ($user->eppn == '') {
+                            $user->eppn = null;
+                        }
+                        
 			try {
 				$user->save();
 				$user->applyDefaultSearchProfile();

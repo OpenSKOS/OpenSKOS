@@ -378,7 +378,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 	
 		$response  = Api_Models_Concepts::factory()->getConcepts('uuid:'.$uuid);
 		if (!isset($response['response']['docs']) || (1 !== count($response['response']['docs']))) {
-			throw new Zend_Exception('The requested concept was not found');
+			throw new Zend_Exception('The requested concept was deleted or not found');
 		}
 			
 		return new Editor_Models_ConceptScheme(new Api_Models_Concept(array_shift($response['response']['docs'])));

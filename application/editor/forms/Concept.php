@@ -27,6 +27,20 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	 * @var bool
 	 */
 	protected $_isCreate = false;
+    
+    /**
+	 * What is the current status of the concept if any.
+	 * 
+	 * @var string
+	 */
+	protected $_currentStatus = null;
+    
+    /**
+	 * Is the statuses system enabled.
+	 * 
+	 * @var bool
+	 */
+	protected $_enableStatusesSystem = false;
 	
 	/**
 	 * A flag indicating that the form is for proposal only.
@@ -66,6 +80,49 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	public function getIsCreate()
 	{
 		return $this->_isCreate;
+        
+	}
+    
+	/**
+	 * Sets the current status of the concept. Before save or anything.
+	 * 
+	 * @param string $currentStatus
+	 */
+	public function setCurrentStatus($currentStatus)
+	{
+		$this->_currentStatus = $currentStatus;
+	}
+	
+	/**
+	 * Gets is the statuses system enabled.
+	 *
+	 * @return bool $currentStatus
+	 */
+	public function getEnableStatusesSystem()
+	{
+		return $this->_enableStatusesSystem;
+        
+	}
+    
+    /**
+	 * Sets is the statuses system enabled.
+	 * 
+	 * @param bool $enableStatusesSystem
+	 */
+	public function setEnableStatusesSystem($enableStatusesSystem)
+	{
+		$this->_enableStatusesSystem = $enableStatusesSystem;
+	}
+	
+	/**
+	 * Gets the current status of the concept. Before save or anything.
+	 *
+	 * @return string $currentStatus
+	 */
+	public function getCurrentStatus()
+	{
+		return $this->_currentStatus;
+        
 	}
 	
 	/**
@@ -79,31 +136,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		$this->addElement('hidden', 'uuid', array(
 			'decorators' => array()
 		));
-
-		$availableStatuses = array();
-		$availableStatuses[] = 'candidate';		
-		
-		if ( ! $this->_isProposalOnly) {			
-			$availableStatuses[] = 'approved';
-			$availableStatuses[] = 'expired';
-			
-			$this->addElement('checkbox', 'toBeChecked', array(
-					'label' => 'To be checked:',
-					'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
-			));
-		}
-		
-		$this->addElement('radio', 'status', array(
-				'label' => 'Status:',
-				'separator' => '',
-				'multiOptions' => array_combine($availableStatuses, $availableStatuses),
-				'value' => 'candidate',
-				'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
-		));
-		
-		if ($this->_isProposalOnly) {
-			$this->getElement('status')->setValue('candidate');
-		}
+        
+        $this->buildStatuses();
+        
+        if (!$this->_isProposalOnly) {
+            $this->addElement('checkbox', 'toBeChecked', array(
+                'label' => 'To be checked:',
+                'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-checked')))
+            ));
+        }
 		
 		if ( ! $this->_isCreate) {
 			
@@ -125,11 +166,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 					'decorators' => array('ViewHelper')
 			));
 			
-			$this->addElement('button', 'conceptDelete', array(
-					'label' => _('Delete'),
-					'class' => 'delete-concept',
-					'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
-			));
+            if (!$this->getEnableStatusesSystem()) {
+                $this->addElement('button', 'conceptDelete', array(
+                        'label' => _('Delete'),
+                        'class' => 'delete-concept',
+                        'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'span','closeOnly' => true)))
+                ));
+            }
 		} else {
 			$this->addElement('submit', 'conceptSave', array(
 					'label' => _('Ok'),
@@ -139,7 +182,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 		}
 		
 		$this->addDisplayGroup(
-				array('status', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 
+				array('status', 'statusOtherConceptCancel', 'statusOtherConceptOk', 'toBeChecked', 'conceptSave', 'conceptSwitch', 'conceptExport', 'conceptDelete'), 
 				'concept-header', 
 				array(
 					'legend' => 'header',
@@ -147,6 +190,56 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 					'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-header')))));
 		return $this;
 	}
+    
+    /**
+     * Build the statuses dropdown.
+     */
+    protected function buildStatuses()
+    {
+        if ($this->getEnableStatusesSystem()) {
+            if ($this->_isProposalOnly) {
+                $availableStatuses = [OpenSKOS_Concept_Status::CANDIDATE];
+            } else {
+                $availableStatuses = OpenSKOS_Concept_Status::getAvailableStatuses($this->getCurrentStatus());
+            }
+
+            // Fallback for expired status for beg
+            //!TODO Can be removed when conversion ready
+            if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
+                $availableStatuses[] = OpenSKOS_Concept_Status::OBSOLETE;
+            }
+
+            $this->addElement('select', 'status', array(
+                'label' => 'Status:',
+                'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions($availableStatuses),
+                'value' => 'candidate',
+                'decorators' => array('ViewHelper', 'Label', array('HtmlTag', array('tag' => 'span', 'id' => 'concept-edit-status')))
+            ));
+
+            if ($this->_isProposalOnly) {
+                $this->getElement('status')->setValue(OpenSKOS_Concept_Status::CANDIDATE);
+            }
+            
+            // Fallback for expired status for beg
+            //!TODO Can be removed when conversion ready
+            if ($this->getCurrentStatus() == OpenSKOS_Concept_Status::_EXPIRED) {
+                $this->getElement('status')->setValue(OpenSKOS_Concept_Status::OBSOLETE);
+            }
+        } else {
+            $this->addElement('hidden', 'status', array(
+                'decorators' => array('ViewHelper'),
+                'value' => OpenSKOS_Concept_Status::APPROVED,
+            ));
+        }
+        
+        $this->addElement('hidden', 'statusOtherConcept', array(
+            'decorators' => array('ViewHelper')
+        ));
+        
+        $this->addElement('hidden', 'statusOtherConceptLabelToFill', array(
+            'decorators' => array('ViewHelper')
+        ));
+    }
 	
 	/**
 	 * This builds the tabs control and the modals content for adding a language layer or a concept scheme layer.
@@ -385,14 +478,28 @@ class Editor_Forms_Concept extends OpenSKOS_Form
 	}
 
 	/**
+     * @param Editor_Models_Concept Pass the edited concept for some checks.
+     * @param OpenSKOS_Db_Table_Row_Tenant Passes tenant. If not gets it from concept.
 	 * @return Editor_Forms_Concept
 	 */
-	public static function getInstance($isCreate = false)
+	public static function getInstance($concept = null, $tenant = null)
 	{
 		static $instance;
-	
+        
 		if (null === $instance) {
-			$instance = new Editor_Forms_Concept(array('isCreate' => $isCreate));
+            $enableStatusesSystem = false;
+            if ($tenant === null && $concept !== null) {
+                $tenant = $concept->getInstitution();
+            }
+            if ($tenant !== null) {
+                $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
+            }
+            
+			$instance = new Editor_Forms_Concept([
+                'isCreate' => (null === $concept),
+                'currentStatus' => (null !== $concept ? $concept['status'] : null),
+                'enableStatusesSystem' => $enableStatusesSystem,
+            ]);
 		}
 	
 		return $instance;

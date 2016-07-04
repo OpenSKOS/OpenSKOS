@@ -100,6 +100,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 		// Check for other validators.
 		$validators = array();
         $validators[] = Editor_Models_ConceptValidator_UniqueNotation::factory();
+        $validators[] = Editor_Models_ConceptValidator_StatusesTransition::factory();
 		$validators[] = Editor_Models_ConceptValidator_RelatedToItself::factory();
 		$validators[] = Editor_Models_ConceptValidator_IsAtLeastInOneScheme::factory();
 		$validators[] = Editor_Models_ConceptValidator_DuplicateBroaders::factory();
@@ -339,7 +340,7 @@ class Editor_Models_Concept extends Api_Models_Concept
 	 * @param bool $ignoreValidation, optional, Default: false If set to true the validation on save will not be performed.
 	 * @return bool True if the save is successfull. False otherwise. You can see errors by calling getErrors();
 	 */
-	public function update($updateData, $updateExtraData, $commit, $ignoreValidation = false)
+	public function update($updateData, $updateExtraData = [], $commit = true, $ignoreValidation = false)
 	{
 		$data = $this->getData();
 		$extraData = $this->getCurrentRequiredData();
@@ -349,6 +350,9 @@ class Editor_Models_Concept extends Api_Models_Concept
 
 		//!TODO The fallowing should be added to required data or all the process of editing concept should be refactored so that old data is not lost.
 		// Data which will be lost on update if not remembered...
+        if (isset($data['deleted'])) {
+			$extraData['deleted'] = $data['deleted'];
+		}
 		if (isset($data['toBeChecked'])) {
 			$extraData['toBeChecked'] = $data['toBeChecked'];
 		}
@@ -384,14 +388,14 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$extraData = array_merge($extraData, $updateExtraData);
 
 		if (isset($extraData['status'])) {
-			if ($extraData['status'] !== 'approved') {
+			if ($extraData['status'] !== OpenSKOS_Concept_Status::APPROVED) {
 				$data['approved_by'] = '';
 				$data['approved_timestamp'] = '';
 				$extraData['approved_by'] = '';
 				$extraData['approved_timestamp'] = '';
 			}
 
-			if ($extraData['status'] !== 'expired') {
+			if ($extraData['status'] !== OpenSKOS_Concept_Status::isStatusLikeDeleted($extraData['status'])) {
 				$data['deleted_by'] = '';
 				$data['deleted_timestamp'] = '';
 				$extraData['deleted_by'] = '';
@@ -511,6 +515,8 @@ class Editor_Models_Concept extends Api_Models_Concept
 		$mapping['extraFields'] = array(
 				'uuid',
 				'status',
+                'statusOtherConcept',
+                'statusOtherConceptLabelToFill',
 				'toBeChecked',
 				'uri'
 		);
@@ -527,7 +533,6 @@ class Editor_Models_Concept extends Api_Models_Concept
 	 * @param string $languageCode
 	 * @return array
 	 */
-
 	protected function _getParsedMlProperties($class, $languageCode)
 	{
 		$data = $this->getMlProperties($class, $languageCode);

@@ -84,6 +84,13 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 				->addValidator($validator)
 				->addValidator(new Zend_Validate_EmailAddress());
 			
+                        
+			$validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEppn'));
+			$validator
+				->setMessage(_("there is already a user with eduPersonPrincipalName '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
+
+			$form->getElement('eppn')
+				->addValidator($validator);
 			
 			$validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
 			$validator

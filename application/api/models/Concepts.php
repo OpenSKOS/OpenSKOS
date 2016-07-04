@@ -55,7 +55,7 @@ class Api_Models_Concepts
 		return new Api_Models_Concepts();
 	}
 	
-	public function getConcepts($q, $includeDeleted = false, $forAutocomplete = false)
+	public function getConcepts($q, $includeDeleted = false, $forAutocomplete = false, $sort = null)
 	{	
 		$solr = $this->solr();
 		if(true === (bool)ini_get('magic_quotes_gpc')) {
@@ -75,6 +75,10 @@ class Api_Models_Concepts
 		if (isset($this->_queryParameters['lang'])) {
 			$q='LexicalLabelsText@'.$lang.':('.$q.')';
 		}
+        
+        if (!empty($sort)) {
+            $this->_queryParameters['sort'] = $sort;
+        }
 		
 		//only return non-deleted items:
 		if (false === $includeDeleted) {
@@ -107,7 +111,7 @@ class Api_Models_Concepts
 	protected function _getLabelReturnField()
 	{
 		$labelReturnField = 'LexicalLabels';
-		if (null !== ($labelField = $this->getQueryParam('returnLabel'))) {
+		if (null !== ($labelField = $this->getQueryParam('returnLabel', 'prefLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
 				$labelReturnField = $labelField;
 			}
@@ -117,28 +121,40 @@ class Api_Models_Concepts
 		return $labelReturnField;
 	}
 	
-	public function autocomplete($label, $includeDeleted = false)
+	public function autocomplete($label, $includeDeleted = false, $autoStatus = true)
 	{
 		$lang = $this->lang;
 		$label = strtolower($label);
-		$labelSearchField = 'LexicalLabelsText';
+		$labelSearchField = 'LexicalLabels';
 		$labelReturnField = $this->_getLabelReturnField();
 		
-		if (null !== ($labelField = $this->getQueryParam('searchLabel'))) {
+		if (null !== ($labelField = $this->getQueryParam('searchLabel', 'prefLabel'))) {
 			if (preg_match('/^(pref|alt|hidden)Label$/', $labelField)) {
-				$labelSearchField = $labelField.'Text';
+				$labelSearchField = $labelField;
 			}
 		}
 		
-		$labelSearchField .= null===$lang?'':'@'.$lang;
+		$labelSearchFieldAutocomplete = $labelSearchField . 'Autocomplete';
+        $labelSearchFieldAutocomplete .= null === $lang ? '' : '@' . $lang;
+        
+        $labelSearchFieldText = $labelSearchField . 'Text';
+        $labelSearchFieldText .= null === $lang ? '' : '@' . $lang;
 		
-		$q = "{$labelSearchField}:{$label}*";
+        // Quotes or spaces not working if the search is not escaped.
+        // We do not escape * and ? because they sometimes are used for searching.
+        $labelEscaped = OpenSKOS_Solr_Queryparser_Editor_ParseSearchText::escapeSpecialChars($label);
+        
+		$q = "({$labelSearchFieldAutocomplete}:{$labelEscaped} OR {$labelSearchFieldText}:{$labelEscaped}*)";
 		
 		//only return non-deleted items:
 		if (false === $includeDeleted) {
 		    $q = "($q) AND deleted:false";
 		}
-				
+        
+        if ($autoStatus) {
+            $q = Api_Models_Utils::addStatusToQuery($q);
+        }
+        
 		$params = array(
 			'facet' => 'true',
 			'facet.field' => $labelReturnField,

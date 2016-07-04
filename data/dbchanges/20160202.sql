@@ -1,0 +1,2 @@
+ALTER TABLE user
+MODIFY COLUMN eppn varchar(100) NULL;

@@ -21,10 +21,12 @@
 var EditorControl = new Class({
 	Binds: ['clearHistory', 
 	        'loadHistory',
-	        'loadConcept'],
+	        'loadConcept',
+            'clickConcept'],
     loadedConcept: '',
 	loadingTimeoutHandle: null,
 	_statusSuccess: 'ok',
+    clickConceptCallback: null,
 	initialize: function () {
 		
 		// Bind History actions
@@ -46,8 +48,8 @@ var EditorControl = new Class({
 		// Bind Single concept actions
 		$(document.body).addEvent('click:relay(.concept-link-content>a)', function (e){
 			e.stop();
-			Editor.Control.loadConcept(this.get('class'));
-		});		
+			Editor.Control.clickConcept(this.get('class'));
+		});
 		$(document.body).addEvent('click:relay(#concept-edit)', function (e){
 			Editor.Control.editConcept(this.get('class').split(' ')[0]);
 		});
@@ -85,6 +87,13 @@ var EditorControl = new Class({
 		// Initially loads the history
 		this.loadHistory($('history-list'));
 	},
+    clickConcept: function (uuid) {
+        if (Editor.Control.clickConceptCallback === null) {
+            Editor.Control.loadConcept(uuid);
+        } else {
+            Editor.Control.clickConceptCallback.attempt(uuid);
+        }
+    },
 	loadConcept: function (uuid) {
 		
 		Editor.Url.setParam('concept', uuid);

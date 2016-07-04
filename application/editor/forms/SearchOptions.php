@@ -143,21 +143,23 @@ class Editor_Forms_SearchOptions extends Zend_Form
 	 */
 	protected function buildStatuses()
 	{
-		$statuses = array();
-		if (isset($this->_searchOptions['statuses'])) {
-			$statuses = $this->_searchOptions['statuses'];
-		}
-		
-		$this->addElement('multiCheckbox', 'status', array(
-				'label' => _('Status'),
-				'multiOptions' => $statuses
-		));
-		
-		if ( ! empty($statuses)) {
-			$checkedOptions = array_keys($statuses);
-			$this->getElement('status')->setValue($checkedOptions);
-		}
-		
+        if ($this->_getCurrentTenant()['enableStatusesSystem']) {
+            $statuses = array();
+            if (isset($this->_searchOptions['statuses'])) {
+                $statuses = $this->_searchOptions['statuses'];
+            }
+
+            $this->addElement('multiCheckbox', 'status', array(
+                    'label' => _('Status'),
+                    'multiOptions' => $statuses
+            ));
+
+            if ( ! empty($statuses)) {
+                $checkedOptions = array_keys($statuses);
+                $this->getElement('status')->setValue($checkedOptions);
+            }
+        }
+        
 		$this->addElement('checkbox', 'toBeChecked', array(
 			'label' => _('To be checked'),
 		));
@@ -524,10 +526,17 @@ class Editor_Forms_SearchOptions extends Zend_Form
 		$options['labels']['hiddenLabel'] = _('hidden');
 	
 		$options['statuses']['none'] = _('none');
-		$options['statuses']['approved'] = _('approved');
-		$options['statuses']['candidate'] = _('candidate');
-		$options['statuses']['expired'] = _('expired');
-	
+        
+        // We can not filter by status deleted. Those concepts are not shown.
+        $statuses = array_diff(
+            OpenSKOS_Concept_Status::getStatuses(),
+            [OpenSKOS_Concept_Status::DELETED]
+        );
+        
+        foreach ($statuses as $status) {
+            $options['statuses'][$status] = _($status);
+        }
+        
 		$options['docproperties']['definition'] = _('definition');
 		$options['docproperties']['example'] = _('example');
 		$options['docproperties']['changeNote'] = _('change note');

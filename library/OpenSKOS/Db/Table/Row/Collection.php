@@ -81,11 +81,18 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 				->setAttrib('enctype', 'multipart/form-data')
 				->addElement('file', 'xml', array('label'=>_('File'), 'required' => true, 'validators' => array('NotEmpty'=>array())));
 			
-			$availableStatuses = array();
-			$availableStatuses[] = 'candidate';
-			$availableStatuses[] = 'approved';
-			$availableStatuses[] = 'expired';
-			$form->addElement('select', 'status', array('label' => 'Status for imported concepts', 'multiOptions' => array_combine($availableStatuses, $availableStatuses)));
+            $statusOptions = [
+                'label' => 'Status for imported concepts',
+            ];
+            
+            if ($this->getTenant()['enableStatusesSystem']) {
+                $statusOptions['multiOptions'] = OpenSKOS_Concept_Status::statusesToOptions();
+            } else {
+                $statusOptions['multiOptions'] = [OpenSKOS_Concept_Status::APPROVED];
+                $statusOptions['disabled'] = true;
+            }
+            
+			$form->addElement('select', 'status', $statusOptions);
 			$form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
 			
 			$editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');			
@@ -94,10 +101,12 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 			$form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeCheked status of imported concepts'));			
 			$form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
 			$form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));            
-			$form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation.')));
+			$form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));
+			$form->addElement('checkbox', 'useUriAsIdentifier', array('label' => _('Use uri as identifier if concept notation does not exist in the importing concept.')));
 			
 			$form->addElement('submit', 'submit', array('label'=>'Submit'));
 		}
+        
 		return $form;
 	}
 	
@@ -309,7 +318,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
 	public function toRdf($withCreator = true)
 	{
 		$helper = new Zend_View_Helper_ServerUrl();
-		$about = $helper->serverUrl('/api/collection/'.$this->getId());
+		$about = $helper->serverUrl('/api/collections/'.$this->getId());
 		$data = array();
 		foreach ($this as $key => $val) {
 			$data[$key] = htmlspecialchars($val);

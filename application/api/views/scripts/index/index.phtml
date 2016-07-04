@@ -21,6 +21,7 @@
 ?>
 <?php
 $exampleWordAutocomplete = 'dood';
+$exampleConceptStatus = OpenSKOS_Concept_Status::APPROVED;
 $exampleWordFindConcepts = $exampleWordAutocomplete;
 $exampleWordFindConceptsAltLabel = 'kruisigingen';
 $exampleWordFindConceptsAltLabelTruncated = 'kr*';
@@ -141,6 +142,23 @@ You can do this by querying the find API with the selected label, for example if
 	<li>
 		<p>Advanced queries:</p>
 		<ul>
+            <li>
+				Search for concepts with specific status "<em><?php echo $exampleConceptStatus?></em>":
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>
+					</a>
+                <br />
+                All possible statuses are: 
+                <table>
+                    <tr><td>candidate</td><td>A newly added concept</td></tr>
+                    <tr><td>approved</td><td>Candidate that was inspected and approved</td></tr>
+                    <tr><td>redirected</td><td>Proposed concept was found to be better represented by another concept. The redirected concept will be maintained for convenience and will contain a forward note to the target concept.</td></tr>
+                    <tr><td>not_compliant</td><td>Concept is not compliant with the GTAA standard, but is maintained for convenience of the creator. It can become obsolete when no longer necessary.</td></tr>
+                    <tr><td>rejected</td><td>Substandard quality</td></tr>
+                    <tr><td>obsolete</td><td>This concept is no longer necessary, may be succeeded by another concept.</td></tr>
+                    <tr><td>deleted</td><td>All concept metadata is deleted.</td></tr>
+                </table>
+			</li>
 			<li>
 				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
 					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
@@ -176,6 +194,19 @@ You can do this by querying the find API with the selected label, for example if
 					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0">
 						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0
 					</a>
+			</li>
+            <li>
+				Sort results on particular field "<em>prefLabelSort asc</em>":
+					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0&sort=prefLabelSort asc">
+						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0&amp;sort=prefLabelSort asc
+					</a>
+                <br />
+                All possible sort fields: 
+                <table>
+                    <tr><td>prefLabelSort</td></tr>
+                    <tr><td>prefLabelSort@{lang}</td></tr>
+                    <tr><td>notationSort</td></tr>
+                </table>
 			</li>
 		</ul>
 		<div class="note">
@@ -217,6 +248,15 @@ All actions except the Retrieve action require a valid API key.</p>
 	<li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
 	<li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
 	<li><strong>key</strong> A valid API key</li>
+	<li>
+        <strong>autoGenerateIdentifiers</strong>
+        <br />
+        If set to <strong>true</strong> (any of "1", "true", "on" and "yes") the concept notation and uri (rdf:about) will be automatically generated.
+        <br />
+        If notation and/or uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+        <br />
+        If set to <strong>false</strong> - the xml must contain both notation and uri (rdf:about). The uri must be based on notation (must contain the notation).
+    </li>
 </ul>
 
 <p>For your convenience, it is also possible to send the tenant, collection and key in the XML document, by setting the appropriate attributes in the openskos namespace.</p>
@@ -259,6 +299,7 @@ $response = $client
     ->setParameterGet('tenant', 'beg')
     ->setParameterGet('collection', 'gtaa')
     ->setParameterGet('key', 'your-valid-api-key')
+    ->setParameterGet('autoGenerateIdentifiers', true)
     ->request('POST');
 if ($response->isSuccessful()) {
     echo 'Concept created';
@@ -433,4 +474,4 @@ if ($response->isSuccessful()) {
 		</ul>
 	 </li>
 </ul>
-
+ 

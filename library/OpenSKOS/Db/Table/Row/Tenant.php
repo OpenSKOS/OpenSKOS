@@ -38,16 +38,15 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 				->addElement('text', 'locality', array('label' => _('Locality')))
 				->addElement('text', 'postalCode', array('label' => _('Postal Code')))
 				->addElement('text', 'countryName', array('label' => _('Country Name')))
+                ->addElement('checkbox', 'enableStatusesSystem', array(
+                    'label' => _('Enable the statuses system for concepts. (check help below *)'),
+                    'required' => false
+                ))
 				->addElement('submit', 'submit', array('label'=>_('Submit')))
 				;
 			
 			$form->getElement('email')->addValidator(new Zend_Validate_EmailAddress());
-			try {
-    			$form->getElement('postalCode')->addValidator(new Zend_Validate_PostCode());
-			} catch (Zend_Validate_Exception $e) {
-			    //no valid locale found, so be it...
-			}
-			
+						
 			$form->setDefaults($this->toArray());
 		}
 		return $form;
