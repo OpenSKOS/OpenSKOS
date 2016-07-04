@@ -1,0 +1,37 @@
+<span id="concept-mulit-<?= $this->inputName; ?>" class="multi-field-no-lang <?= $this->inputClasses; ?>">
+    <label class="concept-multi-label"><?= $this->inputLabel; ?></label>
+    <span class="concept-multi-template template">
+        <input type="text" name="<?= $this->inputName; ?>[]" value="" class="concept-multi-input"<?= $this->readonly ? ' readonly="readonly"' : ''?>/>
+        <span class="concept-multi-remove"></span>
+        <span class="concept-multi-add"></span>
+    </span>
+    <?php if (!empty($this->inputValues)):?>
+        <?php foreach ($this->inputValues as $value): ?>
+            <span class="concept-multi-template">
+                <input 
+                    type="text"
+                    name="<?= $this->inputName; ?>[]"
+                    value="<?= $this->escape($value); ?>"
+                    class="concept-multi-input"
+                    <?= $this->readonly ? ' readonly="readonly"' : ''?>/>
+                <?php if (!$this->readonly):?>
+                    <span class="concept-multi-remove"></span>
+                    <span class="concept-multi-add"></span>
+                <?php endif;?>
+            </span>
+        <?php endforeach ?>
+    <?php else:?>
+        <span class="concept-multi-template">
+            <input
+                type="text"
+                name="<?= $this->inputName; ?>[]"
+                value=""
+                class="concept-multi-input"
+                <?= $this->readonly ? ' readonly="readonly"' : ''?>/>
+            <?php if (!$this->readonly):?>
+                <span class="concept-multi-remove"></span>
+                <span class="concept-multi-add"></span>
+            <?php endif;?>
+        </span>
+    <?php endif?>
+</span>

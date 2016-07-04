@@ -19,22 +19,26 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Api_IndexController extends OpenSKOS_Rest_Controller {
+class Api_IndexController extends OpenSKOS_Rest_Controller
+{
 
-	public function indexAction() {
-	}
+    public function indexAction()
+    {
+    }
 
-	public function getAction() {
-	}
+    public function getAction()
+    {
+    }
 
-	public function postAction() {
-	}
+    public function postAction()
+    {
+    }
 
-	public function putAction() {
-	}
+    public function putAction()
+    {
+    }
 
-	public function deleteAction() {
-	}
-
+    public function deleteAction()
+    {
+    }
 }
-

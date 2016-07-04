@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_Forms_Search extends Zend_Form
+class Editor_Forms_Search extends OpenSKOS_Form
 {
     /**
      * @var int
@@ -40,7 +40,7 @@ class Editor_Forms_Search extends Zend_Form
      */
     protected $_userForSearch;
 
-    public function init() 
+    public function init()
     {
         $this->setName('searchform')
         ->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller'=>'search', 'action' => 'index')))
@@ -55,7 +55,7 @@ class Editor_Forms_Search extends Zend_Form
         if ($user->disableSearchProfileChanging) {
             $this->buildAllowedConceptScheme();
         } else {
-            $this->buildConceptScheme();			
+            $this->buildConceptScheme();
         }
 
         $this->buildSearchProfiles();
@@ -103,7 +103,7 @@ class Editor_Forms_Search extends Zend_Form
     }
 
     protected function buildConceptScheme()
-    {	
+    {
         $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
         $userForSearch = $this->getUserForSearch();
         $userOptions = $userForSearch->getSearchOptions($loggedUser['id'] != $userForSearch['id']);
@@ -113,8 +113,8 @@ class Editor_Forms_Search extends Zend_Form
             $inCollections = $userOptions['collections'];
         }
 
-        $apiClient = new Editor_Models_ApiClient();
-        $conceptSchemes = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+        $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
+            ->fetchUrisCaptionsMap($inCollections);
 
         $selectedConceptSchemes = array();
         if (isset($userOptions['conceptScheme'])) {
@@ -143,14 +143,13 @@ class Editor_Forms_Search extends Zend_Form
             if (null !== $profile) {
                 $profileOptions = $profile->getSearchOptions();
 
-                $apiClient = new Editor_Models_ApiClient();
-
                 $inCollections = array();
                 if (isset($profileOptions['collections'])) {
                     $inCollections = $profileOptions['collections'];
                 }
 
-                $conceptSchemesInCollections = $apiClient->getAllConceptSchemeUriTitlesMap(null, $inCollections);
+                $conceptSchemesInCollections = $this->getDI()->get('Editor_Models_ConceptSchemesCache')
+                    ->fetchUrisCaptionsMap($inCollections);
 
                 if (!empty($profileOptions['conceptScheme'])) {
                     foreach ($profileOptions['conceptScheme'] as $allowedConceptSchemeUri) {
@@ -216,17 +215,19 @@ class Editor_Forms_Search extends Zend_Form
             }
         }
 
-        $userOptions = $user->getSearchOptions();	
+        $userOptions = $user->getSearchOptions();
         $this->addElement('select', 'searchProfileId', array(
             'label' => _('Search Profile'),
             'multiOptions' => $profilesOptions,
             'value' => (isset($userOptions['searchProfileId']) ? $userOptions['searchProfileId'] : '')
         ));
 
-        $this->addDisplayGroup(array('searchProfileId'), 
-            'search-profile-selector', 
-            array('disableDefaultDecorators'=> true, 
-                'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'span', 'id' => 'search-profile-selector', 'class' => ($profiles->count() < 2 ? 'do-not-show' : ''))))));
+        $this->addDisplayGroup(
+            array('searchProfileId'),
+            'search-profile-selector',
+            array('disableDefaultDecorators'=> true,
+                'decorators'=> array('FormElements', array('HtmlTag', array('tag' => 'span', 'id' => 'search-profile-selector', 'class' => ($profiles->count() < 2 ? 'do-not-show' : '')))))
+        );
 
         return $this;
     }
@@ -248,7 +249,7 @@ class Editor_Forms_Search extends Zend_Form
      */
     protected function _getSearchUser()
     {
-        if ( ! $this->_currentTenant) {
+        if (! $this->_currentTenant) {
             $this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
             if (null === $this->_currentTenant) {
                 throw new Zend_Exception('Tenant not found. Needed for request to the api.');
@@ -265,7 +266,7 @@ class Editor_Forms_Search extends Zend_Form
      */
     protected function _getCurrentTenant()
     {
-        if ( ! $this->_currentTenant) {
+        if (! $this->_currentTenant) {
             $this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
             if (null === $this->_currentTenant) {
                 throw new Zend_Exception('Tenant not found. Needed for request to the api.');

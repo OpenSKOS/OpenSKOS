@@ -1,5 +1,6 @@
 <?php
-/**
+
+/*
  * OpenSKOS
  *
  * LICENSE
@@ -8,69 +9,118 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Api_AutocompleteController extends OpenSKOS_Rest_Controller {
+use OpenSkos2\FieldsMaps;
 
-	/**
-	 * 
-	 * @var Concepts
-	 */
-	protected $model;
-	
-	public function init()
-	{
-		$this->model = Api_Models_Concepts::factory()->setQueryParams(
-			$this->getRequest()->getParams()
-		);
-		parent::init();
-		$this->_helper->contextSwitch()
-			->initContext($this->getRequest()->getParam('format', 'json'));
-		$this->view->setEncoding('UTF-8');
-	}
-	
-	public function indexAction() {
-		if (null === ($q = $this->getRequest()->getParam('q'))) {
-			$this->getResponse()
-				->setHeader('X-Error-Msg', 'Missing required parameter `q`');
-			throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
-		}
+class Api_AutocompleteController extends OpenSKOS_Rest_Controller
+{
+    public function init()
+    {
+        parent::init();
         
-        $q = Api_Models_Utils::addStatusToQuery($q);
+        if ($this->getRequest()->getParam('format', 'json') == 'html') {
+            throw new Exception('Html format is not supported for autocomplete', 400);
+        }
         
-		$this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-		$this->getResponse()->setBody(
-            json_encode($this->model->getConcepts($q, null, true))
+        $this->_helper->contextSwitch()
+            ->initContext($this->getRequest()->getParam('format', 'json'));
+        $this->view->setEncoding('UTF-8');
+    }
+    
+    /**
+     * Returns a json response of pref / alt labels
+     * 
+     * Must have a q query parameter in the request example:
+     * /api/autocomplete?q=something
+     * 
+     * Can use parameters searchLabel, returnLabel and lang
+     * 
+     * Returns
+     * 
+     * [
+     *  'something'
+     *  'somethingelse'
+     * ]
+     * 
+     * @throws Zend_Controller_Exception
+     */
+    public function indexAction()
+    {
+        $request = $this->getRequest();
+        
+        if (null === ($q = $request->getParam('q'))) {
+            $this->getResponse()
+                ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+            throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
+        }
+        
+        $result = $this->getConceptManager()->autoComplete(
+            $q,
+            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
+            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $request->getParam('lang')
         );
-	}
-
-	public function getAction() {
-		$this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
-            json_encode($this->model->autocomplete($this->getRequest()->getParam('id')))
+            json_encode($result)
         );
-	}
+    }
 
-	public function postAction() {
-		$this->_501('POST');
-	}
+    /**
+     * Returns a json response of pref / alt labels
+     * 
+     * Must have a term in the path from the request:
+     * /api/autocomplete/something
+     * 
+     * Can use parameters searchLabel, returnLabel and lang
+     * 
+     * Returns
+     * 
+     * [
+     *  'something'
+     *  'somethingelse'
+     * ]
+     * 
+     * @throws Zend_Controller_Exception
+     */
+    public function getAction()
+    {
+        $request = $this->getRequest();
+        
+        $q = $request->getParam('id');
+        $result = $this->getConceptManager()->autoComplete(
+            $q,
+            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
+            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $request->getParam('lang')
+        );
+        
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        $this->getResponse()->setBody(
+            json_encode($result)
+        );
+    }
 
-	public function putAction() {
-		$this->_501('POST');
-	}
+    public function postAction()
+    {
+        $this->_501('POST');
+    }
 
-	public function deleteAction() {
-		$this->_501('DELETE');
-	}
+    public function putAction()
+    {
+        $this->_501('POST');
+    }
 
+    public function deleteAction()
+    {
+        $this->_501('DELETE');
+    }
 }
-

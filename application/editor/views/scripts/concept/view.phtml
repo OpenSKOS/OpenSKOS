@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * OpenSKOS
  *
@@ -18,289 +19,29 @@
  * @author     Boyan Bonev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 ?>
 
-<?php if (isset($this->currentConcept)):?>
-	<div id="concept-view">
-		<h2>
-			<?php echo $this->currentConcept->getMlField('prefLabel'); ?>
-		</h2>
-		<div id="concept-header">
-            <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']):?>
-                <div id="concept-status">
-                    <span><?php echo $this->translate('Status:'); ?> </span>
-                    <?php echo (isset($this->currentConcept['status']) && ! empty($this->currentConcept['status']) ? $this->translate($this->currentConcept['status']) : $this->translate('undefined')); ?>
-                </div>
-            <?php endif?>
-			<div id="concept-checked">
-				<span><?php echo $this->translate('To be checked:'); ?> </span>
-				<?php echo $this->currentConcept['toBeChecked'] ? $this->translate('Yes') : $this->translate('No'); ?>
-			</div>
-			<div id="concept-action">
-				<input id="uuid" type="hidden"
-					value="<?php echo $this->currentConcept['uuid']; ?>" />
-				<?php if (OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')): ?>
-					<?php if ($this->currentConcept['tenant'] == OpenSKOS_Db_Table_Users::fromIdentity()->tenant):?>
-						<button id="concept-edit"
-							class="<?php echo $this->currentConcept['uuid']; ?>">
-							<?php echo $this->translate('Switch to edit mode'); ?>
-						</button>
-					<?php else:?>
-						<?php echo $this->translate('Tenant:') . ' "' . $this->currentConcept['tenant'] . '"'?>
-					<?php endif?>
-				<?php endif?>
-				<button class="export-concept export">
-					<?php echo $this->translate('Export'); ?>
-				</button>
-			</div>
-			<p>&nbsp;</p>
-		</div>
-		<div class="wrapper">
-			<div id="concept-content-left">
-				<div id="concept-language-tab-container" class="concept-language-tab-container">
-					<div id="concept-view-language-tabs">
-						<ul id="tab-links-language">
-							<?php $isFirst = true; ?>
-							<?php foreach ($this->conceptLanguages as $languageCode): ?>
-							<li id="tab_<?php echo $languageCode;?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false?> active<?php endif?>">
-								<a href="#" id="language_<?php echo $languageCode; ?>"><?php echo strtoupper($languageCode); ?></a>
-							</li>
-							<?php endforeach?>
-						</ul>
-					</div>
-					
-					<?php $labelNames = array(
-							'prefLabel' => _('Preferred label'),
-							'altLabel'  => _('Alternative label'),
-							'hiddenLabel' => _('Hidden label')
-					);
-					$propertyNames = array(
-							'scopeNote' => _('Scope Note'),
-							'note' => _('Note'),
-							'example' => _('Example'),
-							'definition' => _('Definition'),
-							'changeNote' => _('Change note'),
-							'editorialNote' => _('Editorial note'),
-							'historyNote' => _('History note')
-					);
-					?>
-					<?php foreach ($this->conceptLanguages as $languageCode): ?>
-					<div id="tab_language_<?php echo $languageCode; ?>" class="tab-content">
-						<div class="concept-left" id="concept-lexical">
-							<div class="concept-left-content">
-								<ul id="concept-lexical-list">
-									<?php foreach ($labelNames as $labelKey => $labelName): ?>
-									<?php $lexicalLabels = $this->currentConcept->getMlProperties('LexicalLabels', $languageCode); ?>
-									<?php if (isset($lexicalLabels[$labelKey.'@'.$languageCode])) : ?>
-									<li>
-										<div class="concept-lexical-field"><?php echo $labelName; ?></div> 
-										<div class="concept-lexical-values">
-											<ul>
-												<?php foreach ($lexicalLabels[$labelKey.'@'.$languageCode] as $label): ?>
-												<li id="pref_Label"><?php echo $label; ?>
-												</li>
-												<?php endforeach?>
-											</ul>
-										</div>
-										<div class="clear"></div>
-									</li>
-									<?php endif?>
-									<?php endforeach ?>
-								</ul>
-							</div>
-						</div>
-	
-						<div class="concept-left" id="concept-document">
-							<div class="concept-right-content">
-								<ul id="concept-document-list">
-									<?php $documentProperties = $this->currentConcept->getMlProperties('DocumentationProperties', $languageCode);?>
-									<?php foreach ($propertyNames as $docKey => $docValue): ?>
-									<?php if (isset($documentProperties[$docKey.'@'.$languageCode])) :?>
-									<li>
-										<div class="concept-document-field"><?php echo $docValue; ?></div> 
-										<div class="concept-document-values">
-											<ul>
-												<?php foreach ($documentProperties[$docKey.'@'.$languageCode] as $property): ?>
-												<li id="pref_Label"><?php echo $property; ?>
-												</li>
-												<?php endforeach?>
-											</ul>
-										</div>
-										<div class="clear"></div>
-									</li>
-									<?php endif?>
-									<?php endforeach ?>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<?php endforeach?>
-				</div>
-			</div>
-			<div id="concept-content-right">
-				<div id="concept-scheme-tab-container" class="concept-scheme-tab-container">
-					<div id="concept-view-scheme-tabs">
-						<ul id="tab-links-scheme">
-							<?php if(is_array($this->schemeUris)):?>
-							<?php $isFirst = true; ?>
-							<?php foreach ($this->schemeUris as $key=>$conceptScheme) :?>
-							<?php $conceptSchemeTitle = isset($this->conceptSchemes[$conceptScheme]['dcterms_title'][0])  ? $this->conceptSchemes[$conceptScheme]['dcterms_title'][0] : 'NA'; ?>
-							<?php $conceptSchemeId = isset($this->conceptSchemes[$conceptScheme]['uuid']) ? $this->conceptSchemes[$conceptScheme]['uuid'] : ''; ?>
-							<li id="tab_<?php echo $conceptSchemeId ?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false?> active<?php endif?>">
-								<a <?php if ($isFirst): $isFirst = false?> class="active"<?php endif?> href="#" id="scheme_<?php echo $conceptSchemeId; ?>"><?php echo $conceptSchemeTitle; ?></a>
-							</li>
-							<?php endforeach?>
-							<?php endif?>
-						</ul>
-					</div>
-					
-					<div class="concept-scheme-uri">
-						<span><?php echo $this->translate('URI:'); ?> </span>
-						<?php echo $this->currentConcept['uri']; ?>
-					</div>
-					<div class="concept-scheme-notation">
-						<span><?php echo $this->translate('Notation:'); ?> </span>
-						<?php echo $this->currentConcept->getMlField('notation'); ?>
-					</div>
-					<?php if (isset($this->currentConcept['dcterms_contributor'])): ?>
-						<div class="concept-contributor">
-							<span><?php echo $this->translate('Contributor:'); ?> </span>
-							<?php echo implode(', ', $this->currentConcept['dcterms_contributor'])?>
-						</div>
-					<?php endif ?>
-					
-					<?php if (is_array($this->schemeUris)): ?>
-					<?php foreach($this->schemeUris as $key => $conceptScheme): ?>
-					<?php $conceptSchemeTitle = isset($this->conceptSchemes[$conceptScheme]['dcterms_title'][0])  ? $this->conceptSchemes[$conceptScheme] : 'NA'; ?>
-					<?php $conceptSchemeId = isset($this->conceptSchemes[$conceptScheme]['uuid']) ? $this->conceptSchemes[$conceptScheme]['uuid'] : ''; ?>
-						<div id="tab_scheme_<?php echo $conceptSchemeId; ?>" class="tab-content">
-							<div class="concept-scheme-istop">
-								<span><?php echo $this->translate('Is top concept:'); ?> </span>
-								<?php echo $this->currentConcept->isTopConceptOf($conceptScheme) ? $this->translate('Yes'): $this->translate('No'); ?>
-							</div>
-							
-							<div class="concept-scheme-relations">
-								<?php $relationNames = array(
-										'broader' => _('Has broader'),
-										'narrower' => _('Has narrower'),
-										'related' => _('Has related')
-								);
-								?>
-								<?php foreach ($relationNames as $relation => $relationTitle): 
-								$relations = $this->currentConcept->getRelationsByField($relation, $conceptScheme, array($this->currentConcept, 'getAllRelations'));
-								?>
-								<?php if (!empty($relations)) : ?>
-								<div class="concept-scheme-relation-grid <?php echo $relation?>">
-									<div class="concept-item-subtitle">
-										<?php echo $relationTitle; ?>
-										<span class="relations-count">( <?php echo count($relations); ?> )</span>
-									</div>
-									<ul class="concept-relation-list">
-										<?php foreach ($relations as $key => $concept): ?>
-										<li class="concept-link">
-											<span class="concept-link-header"> 
-												<?php if(isset($concept['inScheme'])) :?>
-													<?php foreach ($concept['inScheme'] as $rSchemeUri) :?> 
-														<?php $imgTitle = isset($this->conceptSchemes[$rSchemeUri]['dcterms_title'][0])  ? $this->conceptSchemes[$rSchemeUri]['dcterms_title'][0] : 'NA'?>
-														<?php if ( ! empty($this->conceptSchemes[$rSchemeUri]['iconPath'])):?>
-															<img alt="<?php echo $imgTitle?>" title="<?php echo $imgTitle?>" src="<?php echo $this->conceptSchemes[$rSchemeUri]['iconPath']?>" />
-														<?php else:?>
-															<span>(<?php echo substr($imgTitle, 0, 2)?>)</span>
-														<?php endif?>
-													<?php endforeach ?>
-												<?php endif ?>
-											</span>
-											<span class="concept-link-content">
-												<?php $scopeNote = $concept->getMlField('scopeNote', Zend_Registry::get('Zend_Locale')->getLanguage());?>
-												<a class="<?php echo $concept['uuid'];?>" href="#" title="<?php echo $concept->getPreviewLabel();?><?php echo (empty($scopeNote) ? '' : ' {' . $scopeNote . '}')?>"> <?php echo $concept->getPreviewLabel();?>
-													<?php if (!$this->currentConcept->isInternalRelation($concept['uri'], $relation)) :?>
-													<?php echo '*';?> <?php endif?>
-												</a>
-											</span>
-										</li>
-										<?php endforeach?>
-									</ul>
-								</div>
-								<?php endif?>
-								<?php endforeach?>
-							</div>
-						</div>
-					<?php endforeach ?>
-					<?php endif?>
-				</div>
-	
-				<div class="concept-scheme-mappings">
-					<?php $mappingNames = array(
-							'broadMatch' => _('Has broader match'),
-							'narrowMatch' => _('Has narrower match'),
-							'relatedMatch' => _('Has related match'),
-							'mappingRelation' => _('Has mapping relation'),
-							'closeMatch' => _('Has close match'),
-							'exactMatch' => _('Has exact match')
-					);
-					?>
-					<?php foreach ($mappingNames as $mapping => $mappingTitle): 
-					$mappings = $this->currentConcept->getRelationsByField($mapping, null, array($this->currentConcept, 'getAllMappings'));
-					?>
-					<?php if (!empty($mappings)) : ?>
-					<div class="concept-scheme-relation-grid <?php echo $mapping?>">
-						<div class="concept-item-subtitle">
-							<?php echo $mappingTitle; ?>
-							<span class="relations-count">( <?php echo count($mappings); ?> )</span>
-						</div>
-						<ul class="concept-relation-list">
-							<?php foreach ($mappings as $key => $concept): ?>
-							<li class="concept-link" id="<?php echo $concept['uuid']; ?>">
-								<span class="concept-link-header"> 
-									<?php if(isset($concept['inScheme'])) :?>
-										<?php foreach ($concept['inScheme'] as $rSchemeUri) :?> 
-											<?php $imgTitle = isset($this->conceptSchemes[$rSchemeUri]['dcterms_title'][0])  ? $this->conceptSchemes[$rSchemeUri]['dcterms_title'][0] : 'NA'?>
-											<?php if ( ! empty($this->conceptSchemes[$rSchemeUri]['iconPath'])):?>
-												<img alt="<?php echo $imgTitle?>" title="<?php echo $imgTitle?>" src="<?php echo $this->conceptSchemes[$rSchemeUri]['iconPath']?>" />
-											<?php else:?>
-												<span>(<?php echo substr($imgTitle, 0, 2)?>)</span>
-											<?php endif?>
-										<?php endforeach ?>
-									<?php endif?>
-								</span>
-								<span class="concept-link-content"> 
-									<?php $scopeNote = $concept->getMlField('scopeNote', Zend_Registry::get('Zend_Locale')->getLanguage());?>
-									<a class="<?php echo $concept['uuid'];?>" href="#" title="<?php echo $concept->getPreviewLabel();?><?php echo (empty($scopeNote) ? '' : ' {' . $scopeNote . '}')?>"> <?php echo $concept->getPreviewLabel();?>
-											<?php if (!$this->currentConcept->isInternalRelation($concept['uri'], $mapping)) :?>
-											<?php echo '*';?> <?php endif?>
-									</a>
-								</span>
-							</li>
-							<?php endforeach?>
-						</ul>
-					</div>
-					<?php endif?>
-					<?php endforeach?>
-				</div>
-	
-			</div>
-		</div>
-		<div class="clear">&nbsp;</div>
-		<div id="concept-footer">
-			<div id="created" class="section">
-				<?php echo $this->translate('Created')?><br />
-				<?php echo $this->footerData['created']['date']?><br />
-				<?php echo $this->footerData['created']['user']?>
-			</div>
-			<div id="modified" class="section">
-				<?php echo $this->translate('Modified')?><br />
-				<?php echo $this->footerData['modified']['date']?><br />
-				<?php echo $this->footerData['modified']['user']?>
-			</div>
-			<div id="approved" class="section">
-				<?php echo $this->translate('Approved')?><br />
-				<?php echo $this->footerData['approved']['date']?><br />
-				<?php echo $this->footerData['approved']['user']?>
-			</div>
-		</div>
-	</div>
-<?php else:?>
-	<div class="error">
-		<p><?php echo $this->errorMessage?></p>
-	</div>
+<?php if (isset($this->currentConcept)): ?>
+    <div id="concept-view">
+        <h2>
+            <?php echo $this->currentConcept->getCaption(); ?>
+        </h2>
+        <?= $this->render('concept/view/header.phtml') ?>
+        <div class="wrapper">
+            <div id="concept-content-left">
+                <?= $this->render('concept/view/left.phtml') ?>
+            </div>
+            
+            <div id="concept-content-right">
+                <?= $this->render('concept/view/right.phtml') ?>
+            </div>
+        </div>
+        <div class="clear">&nbsp;</div>
+        <?= $this->render('concept/view/footer.phtml') ?>
+    </div>
+<?php else: ?>
+    <div class="error">
+        <p><?php echo $this->errorMessage ?></p>
+    </div>
 <?php endif?>

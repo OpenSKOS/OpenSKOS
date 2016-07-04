@@ -25,7 +25,8 @@ window.addEvent('load', function() {
 	Editor.Control = new EditorControl();
 	Editor.View = new EditorView();
 	Editor.Concept = new EditorConcept();
-    Editor.ConceptStatus = new EditorConceptStatus();
+	Editor.Label = new EditorLabel();
+        Editor.ConceptStatus = new EditorConceptStatus();
 	Editor.ConceptScheme = new EditorConceptScheme();
 	Editor.Relations = new EditorRelations();
 	Editor.Search = new EditorSearch($('searchform'), $('search-results'));

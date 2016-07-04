@@ -19,64 +19,67 @@
  */
 
 var EditorConceptSchemesIcons = new Class({
-	Bind: ['deleteIcon'],
-	initialize: function () {
-		var self = this;
-		
-		if ($('manage-icons-list')) {
-			$('manage-icons-list').getElements('img').each(function (el) { 
-				el.addEvent('click', function(e) { e.stop(); self.deleteIcon(e.target.get('id'))});
-			});
-		}
-		
-		if ($('concept-schemes-list')) {
-			$('concept-schemes-list').getElements('.assign-icon').each(function (el) { 
-				el.addEvent('click', function(e) { 
-					e.stop(); 
-					self.showAssignIconBox(e.target.getParent('a').get('id'));
-				});
-			});
-		}
-		
-		if ($('assign-icons-box')) {
-			$(document.body).addEvent("click:relay(.assign-icons-box img)", function (e) {
-				e.stop(); 
-				self.assignIcon(e.target.getParent('.assign-icons-box').getElement('.schemeUuid').get('value'), e.target.get('class'));
-			});
-		}
-	}, 
-	deleteIcon: function (iconFile) {
-		if (confirm($('delete-confirmation-message').get('text'))) {
-			new Request.JSON({
-				url: BASE_URL + "/editor/concept-scheme/delete-icon", 
-				method: 'post',
-				data: {iconFile: iconFile},
-				onSuccess: function(result, text) {
-					$(iconFile).hide();
-				}
-			}).send();
-		}
-	},
-	showAssignIconBox: function (schemeUuid) {
-		var assignBox = $('assign-icons-box').clone().removeClass('do-not-show');
-		assignBox.getElement('.schemeUuid').set('value', schemeUuid);
-		SqueezeBox.open(assignBox, {size: {x: 550, y: 250}, handler: 'adopt'});
-	},
-	assignIcon: function (schemeUuid, iconFile) {
-		new Request.JSON({
-			url: BASE_URL + "/editor/concept-scheme/assign-icon", 
-			method: 'post',
-			data: {schemeUuid: schemeUuid, iconFile: iconFile},
-			onSuccess: function(result, text) {
-				SqueezeBox.close();
-				$(schemeUuid).empty();
-				var icon = new Element('img', {src: result.result.newIconPath + '?nocache=' + (new Date().getTime())});
-				icon.inject($(schemeUuid));
-			}
-		}).send();
-	}
+    Bind: ['deleteIcon'],
+    initialize: function () {
+        var self = this;
+
+        if ($('manage-icons-list')) {
+            $('manage-icons-list').getElements('img').each(function (el) {
+                el.addEvent('click', function (e) {
+                    e.stop();
+                    self.deleteIcon(e.target.get('id'))
+                });
+            });
+        }
+
+        if ($('concept-schemes-list')) {
+            $('concept-schemes-list').getElements('.assign-icon').each(function (el) {
+                el.addEvent('click', function (e) {
+                    e.stop();
+                    self.showAssignIconBox(e.target.getParent('a').get('id'));
+                });
+            });
+        }
+
+        if ($('assign-icons-box')) {
+            $(document.body).addEvent("click:relay(.assign-icons-box img)", function (e) {
+                e.stop();
+                self.assignIcon(e.target.getParent('.assign-icons-box').getElement('.schemeUri').get('value'), e.target.get('class'));
+            });
+        }
+    },
+    deleteIcon: function (iconFile) {
+        if (confirm($('delete-confirmation-message').get('text'))) {
+            new Request.JSON({
+                url: BASE_URL + "/editor/concept-scheme/delete-icon",
+                method: 'post',
+                data: {iconFile: iconFile},
+                onSuccess: function (result, text) {
+                    $(iconFile).hide();
+                }
+            }).send();
+        }
+    },
+    showAssignIconBox: function (schemeUri) {
+        var assignBox = $('assign-icons-box').clone().removeClass('do-not-show');
+        assignBox.getElement('.schemeUri').set('value', schemeUri);
+        SqueezeBox.open(assignBox, {size: {x: 550, y: 250}, handler: 'adopt'});
+    },
+    assignIcon: function (schemeUri, iconFile) {
+        new Request.JSON({
+            url: BASE_URL + "/editor/concept-scheme/assign-icon",
+            method: 'post',
+            data: {uri: schemeUri, iconFile: iconFile},
+            onSuccess: function (result, text) {
+                SqueezeBox.close();
+                $(schemeUri).empty();
+                var icon = new Element('img', {src: result.result.newIconPath + '?nocache=' + (new Date().getTime())});
+                icon.inject($(schemeUri));
+            }
+        }).send();
+    }
 });
 
-window.addEvent('load', function() {
-	new EditorConceptSchemesIcons();
+window.addEvent('load', function () {
+    new EditorConceptSchemesIcons();
 });

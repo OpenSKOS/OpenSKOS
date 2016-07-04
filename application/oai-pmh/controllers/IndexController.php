@@ -21,41 +21,61 @@
 
 class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
 {
-	public function init()
-	{
-		$this->getHelper('layout')->disableLayout();
-		$this->getResponse()->setHeader('Content-Type' , 'text/xml; charset=utf8');
-		
-	}
-	
-	public function indexAction() 
-	{
-		require_once APPLICATION_PATH . '/' . $this->getRequest()->getModuleName() .'/models/OaiPmh.php';
-		$this->view->responseDate = date(OaiPmh::XS_DATETIME_FORMAT); 
-			
-		$oai = new OaiPmh($this->getRequest()->getParams(), $this->view);
-		$oai->setBaseUrl('http:'.($_SERVER['SERVER_PORT']==443?'s':'') . '//'
-			.$_SERVER['HTTP_HOST']
-			. $this->getFrontController()->getRouter()->assemble(array())
-		);
-		$this->view->oai = $oai;
-		
-	}
-	
-	public function getAction() 
-	{
-		$this->_501('GET');
-	}
-	
-	public function postAction() {
-		$this->_501('POST');
-	}
+    public function init()
+    {
+        $this->getHelper('layout')->disableLayout();
+        $this->getResponse()->setHeader('Content-Type', 'text/xml; charset=utf8');
+    }
 
-	public function putAction() {
-		$this->_501('POST');
-	}
+    public function indexAction()
+    {
+        $this->_helper->viewRenderer->setNoRender(true);
 
-	public function deleteAction() {
-		$this->_501('DELETE');
-	}
+        $db = $this->getInvokeArg('bootstrap')->getResource('db');
+
+        $repository = new OpenSkos2\OaiPmh\Repository(
+            $this->getDI()->get('\OpenSkos2\ConceptManager'),
+            $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
+            $this->getDI()->get('\OpenSkos2\Search\Autocomplete'),
+            'OpenSKOS - OAI-PMH Service provider',
+            $this->getBaseUrl(),
+            ['oai-pmh@openskos.org'],
+            new \OpenSKOS_Db_Table_Collections(),
+            null
+        );
+
+        $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
+        $provider = new Picturae\OaiPmh\Provider($repository, $request);
+        $response = $provider->getResponse();
+        (new Zend\Diactoros\Response\SapiEmitter())->emit($response);
+    }
+
+    public function getAction()
+    {
+        $this->_501('GET');
+    }
+
+    public function postAction()
+    {
+        $this->_501('POST');
+    }
+
+    public function putAction()
+    {
+        $this->_501('POST');
+    }
+
+    public function deleteAction()
+    {
+        $this->_501('DELETE');
+    }
+
+    /**
+     * Get base url
+     * @return string
+     */
+    private function getBaseUrl()
+    {
+        return $this->view->serverUrl() . $this->view->url();
+    }
 }

@@ -1,0 +1,51 @@
+#!/usr/bin/env php
+<?php
+$output = [];
+$return = 0;
+exec('git rev-parse --verify HEAD', $output, $return);
+
+// Get GIT revision
+$against = $return == 0 ? 'HEAD' : '';
+
+// Get the list of files in this commit.
+exec("git diff-index --cached --name-only {$against}", $output);
+
+// Pattern to identify the files that need to be run with phpcs and php lint
+$filename_pattern = '/.*(OpenSkos2).*(.php)$/';
+$exit_status = 0;
+
+// Loop through files.
+foreach ($output as $file) {
+    if ( ! preg_match($filename_pattern, $file)) {
+        // don't check files that don't match the pattern
+        continue;
+    }
+
+    // If file is removed from git do not sniff.
+    if ( ! file_exists($file))
+    {
+        continue;
+    }
+
+    $lint_output = [];
+    // Run the sniff
+    exec("./vendor/bin/phpcs --standard=PSR2 --encoding=utf-8 " . escapeshellarg($file), $lint_output, $return_phpcs);
+    // Run php lint
+    exec("php -l " . escapeshellarg($file), $lint_output, $return_lint);
+
+    if (($return_phpcs === 0) && ($return_lint === 0)) {
+        continue;
+    }
+    echo implode("\n", $lint_output), "\n";
+    $exit_status = 1;
+}
+
+$phpunit_output = [];
+exec("./vendor/bin/phpunit", $phpunit_output, $return_phpunit);
+
+if ($return_phpunit !== 0) {
+    echo implode("\n", $phpunit_output), "\n";
+    $exit_status = 1;
+}
+
+exit($exit_status);

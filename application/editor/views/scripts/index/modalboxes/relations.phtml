@@ -23,7 +23,7 @@
 <div id="relation-box" class="relation-box">
 	<h2><?php  echo $this->translate('Relate to current concept'); ?> </h2>
 	<span class="relation-box-section">
-		<span class="uuids do-not-show"></span>
+		<span class="uris do-not-show"></span>
 	
 		<div class="relation-box-message not-consistant errors"><?php echo $this->translate('The collection of cocepts for the relation is not consistant. Some of them share a scheme with the current concept, some of them do not.'); ?></div>
 		<div class="relation-box-message semantic"><?php echo $this->translate('The two concepts share a concept scheme so only semantic relations can be created.'); ?></div>
@@ -48,7 +48,7 @@
 <div id="relation-box-for-scheme" class="relation-box">
 	<h2><?php  echo $this->translate('Relate to current concept scheme'); ?> </h2>
 	<span class="relation-box-section">
-		<span class="uuids do-not-show"></span>
+		<span class="uris do-not-show"></span>
 						
 		<ul class="relation-box-list">
 			<li class="hasTopConcept"><a href="#" class="relation-action-link"><?php echo $this->translate('Top Concept'); ?></a></li>

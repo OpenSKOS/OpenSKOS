@@ -1,0 +1,85 @@
+<?php 
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2012 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Alexandar Mitsev
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+?><?php if ($this->renderHeader):
+	// Its very important that the first symbol is the rtf opening.
+?>{\rtf1\ansi\deff0
+
+{\fonttbl{\f0 Arial;}}
+\f0\fs16
+
+{\info
+{\title <?php echo $this->translate('Openskos Exported Concepts')?>}
+{\creatim\yr<?php echo date('Y')?>\mo<?php echo date('n')?>\dy<?php echo date('j')?>\hr<?php echo date('G')?>\min<?php echo date('i')?>}
+}
+
+\paperh15840\paperw12240\margl500\margr500\margt500\margb800\cols3\colsx500
+
+<?php endif?>
+
+<?php if ($this->renderBody):?>
+<?php foreach ($this->data as $resourceData):?>
+
+{\pard\b <?php echo $resourceData['previewLabel']['value']?> \par}
+{\pard\li400\ri80\sb150\sa0
+<?php $isFirst = true;?>
+<?php foreach ($resourceData['fields'] as $field):?>
+<?php if ( ! $isFirst):?>
+\line
+<?php endif?>
+<?php $isFirst = false;?>
+<?php echo $field['fieldTitle']?> <?php echo $field['value']?><?php echo ( ! empty($field['language']) ? ' (' . $field['language'] . ')' : '')?>
+<?php endforeach?>
+\par}
+
+<?php if (isset($resourceData['narrowers'])):?>
+{\pard\li400\ri80\sb0\sa0
+<?php echo $this->translate('NARROWERS')?>
+\par}
+<?php echo rtfWriteNarrowers($resourceData)?>
+<?php endif?>
+
+{\pard\sb0\sa350\par}
+<?php endforeach ?>
+<?php endif?>
+
+
+<?php if ($this->renderFooter):?>
+\footery350
+{\footer\footery0\pard\qc\plain\f0\fs16\chpgn\par}
+}
+<?php endif?>
+
+<?php 
+	if ( ! function_exists('rtfWriteNarrowers')) {
+		function rtfWriteNarrowers($resourceData, $offset = 600) {
+			$result = '';
+			if (isset($resourceData['narrowers'])) {
+				foreach ($resourceData['narrowers'] as $narrower) {
+					$result .= "\n" . '{\pard\li' . $offset . '\ri80\sb0\sa0' . "\n";
+					$result .= $narrower['previewLabel']['value'];
+					$result .= "\n" . '\par}' . "\n";
+					$result .= rtfWriteNarrowers($narrower, $offset + 200);
+				}
+			}
+			return $result;
+		}
+	}
+?>

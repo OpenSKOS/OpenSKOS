@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -19,38 +19,42 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_Models_OAuthLogin extends Zend_Auth {
+class Editor_Models_OAuthLogin extends Zend_Auth
+{
 
-	protected $_authAdapter, $_auth_result = array();
+    protected $_authAdapter, $_auth_result = array();
 
-	public function __construct() {
-		$this->_authAdapter = new Zend_Auth_Adapter_DbTable();
-		$this->_authAdapter->setTableName('user')
-		->setIdentityColumn('email')
-		->setCredentialColumn('email');
-	}
+    public function __construct()
+    {
+        $this->_authAdapter = new Zend_Auth_Adapter_DbTable();
+        $this->_authAdapter->setTableName('user')
+        ->setIdentityColumn('email')
+        ->setCredentialColumn('email');
+    }
 
-	public function setData($email) {
-		$this->_authAdapter
-		->setIdentity($email)
-		->setCredential($email);
-	}
+    public function setData($email)
+    {
+        $this->_authAdapter
+        ->setIdentity($email)
+        ->setCredential($email);
+    }
 
-	public function getMessages()
-	{
-		return null === $this->_auth_result ? array() : $this->_auth_result->getMessages();
-	}
+    public function getMessages()
+    {
+        return null === $this->_auth_result ? array() : $this->_auth_result->getMessages();
+    }
 
-	/**
-	 * @return Zend_Auth_Result
-	 */
-	public function isValid() {
-		$this->_auth_result = $this->_authAdapter->authenticate();
-		if ($this->_auth_result->isValid()) {
-			$identify = $this->_authAdapter->getResultRowObject();
-			$storage = $this->getStorage();
-			$storage->write($identify);
-		}
-		return $this->_auth_result->isValid();
-	}
+    /**
+     * @return Zend_Auth_Result
+     */
+    public function isValid()
+    {
+        $this->_auth_result = $this->_authAdapter->authenticate();
+        if ($this->_auth_result->isValid()) {
+            $identify = $this->_authAdapter->getResultRowObject();
+            $storage = $this->getStorage();
+            $storage->write($identify);
+        }
+        return $this->_auth_result->isValid();
+    }
 }

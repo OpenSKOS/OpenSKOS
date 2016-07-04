@@ -1,0 +1,33 @@
+{
+  "name": "openskos",
+  "version": "1.0.0",
+  "description": "Openskos editor",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "doc": "./node_modules/apidoc/bin/apidoc -i ./application/api/controllers/ -o public/apidoc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/picturae/OpenSKOS.git"
+  },
+  "author": "Picturae",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/picturae/OpenSKOS/issues"
+  },
+  "homepage": "https://github.com/picturae/OpenSKOS#readme",
+  "devDependencies": {
+    "apidoc": "^0.13.1"
+  },
+  "apidoc": {
+    "title": "OpenSKOS Editor",
+    "url" : "https://github.com/picturae/OpenSKOS",
+    "version": "1.0.0",
+    "description": "OpenSKOS provides an API and editor for SKOS concepts: http://www.w3.org/2004/02/skos/"
+  }
+}

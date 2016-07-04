@@ -18,6 +18,9 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Namespaces\Skos;
+
 ?>
 
 <div id="status-confirmation" class="do-not-show">
@@ -40,8 +43,8 @@
         <div class="choose-label-to-fill">
             <?= $this->translate('Which label to fill in the chosen concept?')?>
             <select name="labelToFill" >
-                <option value="altLabel"><?= $this->translate('Alternative label')?></option>
-                <option value="hiddenLabel"><?= $this->translate('Hidden label')?></option>
+                <option value="<?= Skos::ALTLABEL?>"><?= $this->translate('Alternative label')?></option>
+                <option value="<?= Skos::HIDDENLABEL?>"><?= $this->translate('Hidden label')?></option>
             </select>
         </div>
     </div>

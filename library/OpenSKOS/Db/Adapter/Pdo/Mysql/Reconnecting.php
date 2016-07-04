@@ -27,12 +27,12 @@ class OpenSKOS_Db_Adapter_Pdo_Mysql_Reconnecting extends Zend_Db_Adapter_Pdo_Mys
     /**
      * How many attempts to do before throwing the exception.
      */
-    const ATTEMPTS = 5;
+    const ATTEMPTS = 3;
     
     /**
      * How many seconds to sleep between each attempt.
      */
-    const SLEEP_BETWEEN_ATTEMPTS = 30;
+    const SLEEP_BETWEEN_ATTEMPTS = 5;
     
     /** 
      * The server messages for which we try reconnecting.
@@ -62,8 +62,9 @@ class OpenSKOS_Db_Adapter_Pdo_Mysql_Reconnecting extends Zend_Db_Adapter_Pdo_Mys
         }
         
         throw new Exception(
-            'Query could not be executed in ' . self::ATTEMPTS . ' attempts. Each waiting for ' . self::SLEEP_BETWEEN_ATTEMPTS . ' seconds. '
-                . 'See the previous exception: "' . $ex->getMessage() . '"',
+            'Query could not be executed in ' . self::ATTEMPTS . ' attempts. '
+            . 'Each waiting for ' . self::SLEEP_BETWEEN_ATTEMPTS . ' seconds. '
+            . 'See the previous exception: "' . $ex->getMessage() . '"',
             0,
             $ex
         );

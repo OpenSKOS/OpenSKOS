@@ -501,23 +501,23 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
 
 #concept-edit-header,
 #concept-header {
-  padding: 10px 4px 4px 20px;
+  padding: 10px 20px 10px 20px;
   background-color: #ebebeb;
   margin-bottom: 22px;
 }
 
-#concept-checked, #concept-status {
-  width: 200px;
+#concept-header-items {
   float: left;
-  clear: both;
+}
+#concept-header-items .item {
+  line-height: 18px;
+}
+#concept-header-items .item span {
+  font-weight: bold;
 }
 
 #concept-action {
   float: right;
-}
-
-#concept-checked span, #concept-status span {
-  font-weight: bold;
 }
 
 #concept-view-scheme-tabs,
@@ -583,13 +583,10 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   top: 0px;
   left: 0px;
 }
-#concept-content-right .concept-scheme-uri, #concept-content-right .concept-scheme-notation, #concept-content-right .concept-scheme-istop {
+#concept-content-right .concept-scheme-istop {
   position: absolute;
   left: 0px;
   right: 0px;
-}
-#concept-content-right .concept-scheme-uri {
-  bottom: -30px;
 }
 #concept-content-right .concept-contributor {
   background-color: #F0F0F0;
@@ -598,33 +595,20 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   position: absolute;
   bottom: -178px;
 }
-#concept-content-right .concept-scheme-notation {
-  bottom: -48px;
-}
 #concept-content-right .concept-scheme-istop {
   bottom: -76px;
 }
 
-.concept-scheme-uri,
-.concept-scheme-notation,
 .concept-scheme-istop {
   background-color: #f0f0f0;
   padding-left: 14px;
   padding-right: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   line-height: 1.5em;
 }
-.concept-scheme-uri span,
-.concept-scheme-notation span,
 .concept-scheme-istop span {
   font-weight: 600;
-}
-
-.concept-scheme-uri {
-  padding-top: 10px;
-}
-
-.concept-scheme-istop {
-  padding-bottom: 10px;
 }
 
 .concept-scheme-mappings {
@@ -728,6 +712,10 @@ legend {
   background: url("../images/narrower-arrow.png") no-repeat;
 }
 
+.concept-link .uri {
+  display: none;
+}
+
 span.concept-link-header {
   display: inline-block;
 }
@@ -766,9 +754,6 @@ ul.concepts-list li.active > span, ul.concepts-list li.active a {
 div#search-results ul.concepts-list .concept-link {
   white-space: nowrap;
   float: left;
-}
-div#search-results ul.concepts-list .concept-link .uuid {
-  display: none;
 }
 div#search-results ul.concepts-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
@@ -1025,9 +1010,6 @@ ul#selection-list .concept-link {
   white-space: nowrap;
   float: left;
 }
-ul#selection-list .concept-link .uuid {
-  display: none;
-}
 ul#selection-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
 }
@@ -1282,9 +1264,6 @@ ul#selection-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > 
 ul#history-list .concept-link {
   white-space: nowrap;
   float: left;
-}
-ul#history-list .concept-link .uuid {
-  display: none;
 }
 ul#history-list .concept-link.status-candidate .concept-link-content a {
   color: blue;
@@ -1561,14 +1540,12 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #concept-edit-header {
   height: 62px;
 }
-#concept-edit-form #uuid-label,
-#concept-scheme-edit-form #uuid-label {
-  display: none;
-}
 #concept-edit-form #status-label,
 #concept-edit-form #concept-edit-checked > label,
+#concept-edit-form #concept-mulit-notation,
 #concept-scheme-edit-form #status-label,
-#concept-scheme-edit-form #concept-edit-checked > label {
+#concept-scheme-edit-form #concept-edit-checked > label,
+#concept-scheme-edit-form #concept-mulit-notation {
   font-weight: bold;
 }
 #concept-edit-form #status-label,
@@ -1576,6 +1553,10 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #status-label,
 #concept-scheme-edit-form #concept-edit-status {
   display: inline !important;
+}
+#concept-edit-form #concept-mulit-notation label,
+#concept-scheme-edit-form #concept-mulit-notation label {
+  font-weight: bold;
 }
 #concept-edit-form #concept-edit-checked,
 #concept-scheme-edit-form #concept-edit-checked {
@@ -1640,21 +1621,29 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #concept-edit-left {
   padding: 24px 0px;
 }
-#concept-edit-form .concept-multi-hidden-remove, #concept-edit-form .concept-multi-remove, #concept-edit-form .concept-link-remove-action,
+#concept-edit-form .concept-multi-hidden-remove, #concept-edit-form .concept-multi-remove, #concept-edit-form .concept-link-remove-action, #concept-edit-form .skos-xl-label-remove,
 #concept-scheme-edit-form .concept-multi-hidden-remove,
 #concept-scheme-edit-form .concept-multi-remove,
-#concept-scheme-edit-form .concept-link-remove-action {
+#concept-scheme-edit-form .concept-link-remove-action,
+#concept-scheme-edit-form .skos-xl-label-remove {
   background-image: url(../images/verwijder.gif);
   width: 16px;
   height: 16px;
   display: inline-block;
   cursor: pointer;
 }
-#concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add,
+#concept-edit-form .concept-multi-add, #concept-edit-form .concept-multi-hidden-add, #concept-edit-form .skos-xl-label-add,
 #concept-scheme-edit-form .concept-multi-add,
-#concept-scheme-edit-form .concept-multi-hidden-add {
+#concept-scheme-edit-form .concept-multi-hidden-add,
+#concept-scheme-edit-form .skos-xl-label-add {
   background-image: url(../images/nieuw.gif);
   width: 16px;
+  height: 16px;
+  display: inline-block;
+  cursor: pointer;
+}
+#concept-edit-form .skos-xl-label-edit,
+#concept-scheme-edit-form .skos-xl-label-edit {
   height: 16px;
   display: inline-block;
   cursor: pointer;
@@ -1908,8 +1897,11 @@ a:visited.disabled {
 
 /* Buttons */
 button,
+a.button,
 input[type=button],
 input[type=submit] {
+  text-decoration: none;
+  display: inline-block;
   height: 22px;
   cursor: pointer;
   color: #6B1750;
@@ -1925,36 +1917,50 @@ input[type=submit] {
   padding-right: 18px;
   padding-bottom: 1px;
 }
-button.hover,
+button.hover, button:hover,
+a.button.hover,
+a.button:hover,
 input[type=button].hover,
-input[type=submit].hover {
+input[type=button]:hover,
+input[type=submit].hover,
+input[type=submit]:hover {
   color: #bb1a88;
 }
 button.selection,
+a.button.selection,
 input[type=button].selection,
 input[type=submit].selection {
   padding-left: 20px;
   background: url("../images/button-background-selection.png") #fff no-repeat left bottom;
 }
 button.switch,
+a.button.switch,
 input[type=button].switch,
 input[type=submit].switch {
   background: url("../images/button-background-switch.png") #fff no-repeat left bottom;
 }
 button.export,
+a.button.export,
 input[type=button].export,
 input[type=submit].export {
   background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.delete,
+a.button.delete,
 input[type=button].delete,
 input[type=submit].delete {
   background: url("../images/button-background-export.png") #fff no-repeat left bottom;
 }
 button.relate,
+a.button.relate,
 input[type=button].relate,
 input[type=submit].relate {
   background: url("../images/button-background-relate.png") #fff no-repeat left bottom;
+}
+
+a.button {
+  line-height: 18px;
+  height: 18px;
 }
 
 #concept-edit,
@@ -2061,4 +2067,64 @@ form#uploadicon dd {
 
 .share-collection {
   float: left;
+}
+
+#concept-edit-property-action {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.multi-field-skos-xl-label {
+  padding-left: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+.multi-field-skos-xl-label .concept-multi-label {
+  font-weight: bold;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+.multi-field-skos-xl-label .skos-xl-label {
+  /*color: #6B1750;*/
+}
+.multi-field-skos-xl-label .skos-xl-label-remove, .multi-field-skos-xl-label .skos-xl-label-add {
+  position: relative;
+  top: 3px;
+}
+
+#label-edit-form #uri-label {
+  height: 0px;
+}
+#label-edit-form #literalForm-label, #label-edit-form #literalForm-element, #label-edit-form #language-label, #label-edit-form #language-element {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+#label-edit-form #literalForm-label, #label-edit-form #language-label {
+  width: 70px;
+}
+#label-edit-form #literalForm-element, #label-edit-form #language-element {
+  margin-left: 0px;
+}
+#label-edit-form #literalForm, #label-edit-form #language {
+  width: 270px;
+}
+#label-edit-form #language {
+  border: 0px;
+  font-weight: bold;
+}
+
+.choose-skos-xl-labels {
+  width: 300px;
+}
+.choose-skos-xl-labels .autocomplete {
+  width: 265px;
+}
+.choose-skos-xl-labels .list {
+  margin: 0;
+  padding: 6px 0px 4px 4px;
+  list-style: none;
 }

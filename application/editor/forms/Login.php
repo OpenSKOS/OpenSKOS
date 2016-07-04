@@ -21,7 +21,8 @@
 
 class Editor_Forms_Login extends Zend_Form
 {
-   public function init() {
+    public function init()
+    {
         $this->setName("sign");
         $this->setMethod('post');
         $this->addElement('text', 'tenant', array(
@@ -53,16 +54,16 @@ class Editor_Forms_Login extends Zend_Form
     }
     
     /**
-	 * @return Editor_Forms_Login
-	 */
-	public static function getInstance()
-	{
-		static $instance;
-		
-		if (null === $instance) {
-			$instance = new Editor_Forms_Login();
-		}
-		
-		return $instance;
-	}
+     * @return Editor_Forms_Login
+     */
+    public static function getInstance()
+    {
+        static $instance;
+        
+        if (null === $instance) {
+            $instance = new Editor_Forms_Login();
+        }
+        
+        return $instance;
+    }
 }

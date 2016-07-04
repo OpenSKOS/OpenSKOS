@@ -21,6 +21,8 @@
 
 abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
 {
+    use \OpenSkos2\Zf1\Psr7Trait;
+
     public $contexts = array(
         'index' => array('json', 'jsonp', 'xml', 'rdf'),
         'get' => array('json', 'jsonp', 'xml', 'rdf', 'html'),
@@ -34,13 +36,51 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         'text/rdf+xml' => 'rdf',
         'application/rdf+xml' => 'rdf',
         'rdf/xml' => 'rdf',
-        
         'text/xml' => 'rdf',
         'application/xml' => 'rdf',
-        
         'application/json' => 'json',
         'application/jsonp' => 'jsonp',
     );
+
+    /**
+     * Get dependency injection container
+     *
+     * @return \DI\Container
+     */
+    public function getDI()
+    {
+       return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+    }
+
+    /**
+     * Get resource manager
+     *
+     * @return \OpenSkos2\Rdf\ResourceManager
+     */
+    public function getResourceManager()
+    {
+        return $this->getDI()->get('OpenSkos2\Rdf\ResourceManager');
+    }
+
+    /**
+     * Get concept mananger
+     *
+     * @return \OpenSkos2\ConceptManager
+     */
+    public function getConceptManager()
+    {
+        return $this->getDI()->get('OpenSkos2\ConceptManager');
+    }
+
+    /**
+     * Get concept mananger
+     *
+     * @return \OpenSkos2\ConceptSchemeManager
+     */
+    public function getConceptSchemeManager()
+    {
+        return $this->getDI()->get('OpenSkos2\ConceptSchemeManager');
+    }
 
     protected function _501($method)
     {
@@ -73,6 +113,15 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
                     'suffix' => 'rdf',
                     'headers' => array(
                         'Content-Type' => 'text/xml; charset=UTF-8'
+                    )
+                )
+            )
+            ->addContext(
+                'jsonld',
+                array(
+                    'suffix' => 'jsonld',
+                    'headers' => array(
+                        'Content-Type' => 'application-json; charset=UTF-8'
                     )
                 )
             )
@@ -122,11 +171,6 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         return $format;
     }
     
-    public function headAction()
-    {
-        // Do nothing
-	}
-    
     protected function getAcceptedFormats()
     {
         $acceptedFormats = [];
@@ -144,7 +188,7 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
         
         return $acceptedFormats;
     }
-    
+
     public function headAction()
 	{
 		$this->_501('head');

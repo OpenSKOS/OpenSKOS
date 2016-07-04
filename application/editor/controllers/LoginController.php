@@ -19,45 +19,48 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_LoginController extends Zend_Controller_Action {
-	
-	public function init() {
-		if (Zend_Auth::getInstance ()->hasIdentity ()) {
-			$this->getHelper ( 'FlashMessenger' )->addMessage (_('You are already logged in'));
-			$this->_helper->redirector ( 'index', 'index' );
-		}
-	}
-	
-	public function indexAction() {
-		$this->view->form = Editor_Forms_Login::getInstance ()
-			->setAction ( $this->getFrontController ()->getRouter ()->assemble ( array ('module'=>'editor', 'controller'=>'login', 'action' => 'authenticate' ) ) );
-	}
-	
-	public function authenticateAction() {
-		$form = Editor_Forms_Login::getInstance ();
-		
-		$request = $this->getRequest ();
-		if (! $this->getRequest ()->isPost ()) {
-			$this->_helper->redirector ( 'index' );
-		}
-		
-		if (! $form->isValid ( $this->getRequest ()->getPost () )) {
-			return $this->_forward ( 'index' );
-		}
-		
-		$tenant = $form->getValue ( 'tenant' );
-		$username = $form->getValue ( 'username' );
-		$password = $form->getValue ( 'password' );
-		$login = new Editor_Models_Login ();
-		$login->setData($tenant, $username, $password );
-		if ($login->isValid ()) {
-			
-			$session = new Zend_Session_Namespace('Zend_Auth');
+class Editor_LoginController extends Zend_Controller_Action
+{
+    
+    public function init()
+    {
+        if (Zend_Auth::getInstance()->hasIdentity()) {
+            $this->getHelper('FlashMessenger')->addMessage(_('You are already logged in'));
+            $this->_helper->redirector('index', 'index');
+        }
+    }
+    
+    public function indexAction()
+    {
+        $this->view->form = Editor_Forms_Login::getInstance()
+            ->setAction($this->getFrontController()->getRouter()->assemble(array ('module'=>'editor', 'controller'=>'login', 'action' => 'authenticate' )));
+    }
+    
+    public function authenticateAction()
+    {
+        $form = Editor_Forms_Login::getInstance();
+        
+        $request = $this->getRequest();
+        if (! $this->getRequest()->isPost()) {
+            $this->_helper->redirector('index');
+        }
+        
+        if (! $form->isValid($this->getRequest()->getPost())) {
+            return $this->_forward('index');
+        }
+        
+        $tenant = $form->getValue('tenant');
+        $username = $form->getValue('username');
+        $password = $form->getValue('password');
+        $login = new Editor_Models_Login();
+        $login->setData($tenant, $username, $password);
+        if ($login->isValid()) {
+            $session = new Zend_Session_Namespace('Zend_Auth');
             // Set the time of user logged in
             $session->setExpirationSeconds(30*24*3600);
             
             // If "remember" was marked
-            if ((int)$form->getValue ('rememberme')) {
+            if ((int)$form->getValue('rememberme')) {
                 Zend_Session::rememberMe();
             }
             
@@ -65,25 +68,26 @@ class Editor_LoginController extends Zend_Controller_Action {
             $userOptions = new Zend_Session_Namespace('userOptions');
             $userOptions->unsetAll();
             
-            $this->getHelper ( 'FlashMessenger' )->addMessage (_('Succesfully logged in'));
-			$this->_helper->redirector ( 'index', 'index' );
-		} else {
-    		$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(array_pop($login->getMessages()));
-    		$this->_helper->redirector('index');
-		}
-	}
-	
-	/**
-	 * Starts an OAuth2 detection and login process.
-	 *
-	 */
-	public function oauth2LoginAction() {
-		$request = $this->getRequest();        
+            $this->getHelper('FlashMessenger')->addMessage(_('Succesfully logged in'));
+            $this->_helper->redirector('index', 'index');
+        } else {
+            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(array_pop($login->getMessages()));
+            $this->_helper->redirector('index');
+        }
+    }
+    
+    /**
+     * Starts an OAuth2 detection and login process.
+     *
+     */
+    public function oauth2LoginAction()
+    {
+        $request = $this->getRequest();
         
-		$form = Editor_Forms_OAuthLogin::getInstance();
-		if ( ! $form->isValid($request->getParams())) {
-			return $this->_forward('index');
-		}
+        $form = Editor_Forms_OAuthLogin::getInstance();
+        if (! $form->isValid($request->getParams())) {
+            return $this->_forward('index');
+        }
         
         $provider = $this->_getOAuth2Provider();
         
@@ -92,29 +96,27 @@ class Editor_LoginController extends Zend_Controller_Action {
         $oAuth2State = new Zend_Session_Namespace('oAuth2State');
         $oAuth2State->state = $provider->state;
         
-		$this->_redirect($authorizationUrl);
-	}
-	
-	/**
-	 * When the OAuth2 login is ready it redirects the user to this page.
-	 * Here happens the authentication of the user if he logs in with OAuth2.
-	 * 
-	 */
-	public function oauth2CallbackAction() {
+        $this->_redirect($authorizationUrl);
+    }
+    
+    /**
+     * When the OAuth2 login is ready it redirects the user to this page.
+     * Here happens the authentication of the user if he logs in with OAuth2.
+     *
+     */
+    public function oauth2CallbackAction()
+    {
         $request = $this->getRequest();
         
         $oAuth2State = new Zend_Session_Namespace('oAuth2State');
         
-		if ($oAuth2State->state == $request->getParam('state')) {
-			
+        if ($oAuth2State->state == $request->getParam('state')) {
             if (!$request->getParam('error')) {
-            
                 $provider = $this->_getOAuth2Provider();
                 $token = $provider->getAccessToken('authorization_code', ['code' => $request->getParam('code')]);
                 $userData = $provider->getUserDetails($token);
 
                 if (isset($userData->email) && ! empty($userData->email)) {
-
                     // Loads the user by its email retrieved from the OAuth2 provider.
                     $login = new Editor_Models_OAuthLogin();
                     $login->setData($userData->email);
@@ -153,19 +155,20 @@ class Editor_LoginController extends Zend_Controller_Action {
                 );
                 $this->_helper->redirector('index');
             }
-			
-		} else {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OAuth state.'));
-    		$this->_helper->redirector('index');
-		}
-	}
+            
+        } else {
+            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Unable to verify OAuth state.'));
+            $this->_helper->redirector('index');
+        }
+    }
     
     /**
      * Gets configured OAuth2 Client Provider.
      * @param string $provider
      * @return \League\OAuth2\Client\Provider\Google
      */
-    protected function _getOAuth2Provider() {
+    protected function _getOAuth2Provider()
+    {
         $request = $this->getRequest();
         $serverUrl = new Zend_View_Helper_ServerUrl();
         

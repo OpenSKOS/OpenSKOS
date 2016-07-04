@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
+
 1. Install the OpenSKOS code
 ===============================================================================
 Copy the code to a location of your choice. 
@@ -110,7 +112,24 @@ With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
 
 
-4. Apache Solr Setup
+4. Apache Jena Fuseki setup
+===============================================================================
+Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
+
+Installing Fuseki 2 for development purposes:
+
+1. Download Fuseki 2 from here [download](https://jena.apache.org/download/)
+2. Install stand alone fuseki server. The instructions are the same as on [getting started page](https://jena.apache.org/documentation/serving_data/#getting-started-with-fuseki)
+  1. Unpack the downloaded file with `unzip` or `tar zxfv` to a `<fuseki folder>` of your choice
+  2. `chmod +x fuseki-server`
+3. Symlink or copy the content of:
+`<openskos folder>/data/fuseki/configuration/` to `<fuseki folder>/run/configuration/`
+4. Go to `<fuseki folder>` and run the server with
+`./fuseki-server --update`
+  1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
+5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
+
+5. Apache Solr Setup
 ===============================================================================
 You have to have a java VM installed prior to installing Solr!
 Download a 3.4 release of Apache Solr and extract it somewhere on your server:
@@ -125,7 +144,7 @@ You can now start Solr (in this example with 1,024 MB memory assigned):
     java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
 
 
-5. Data Ingest
+6. Data Ingest
 ===============================================================================
 Once you have the application running you can start adding data,
 managed in `collections`.
@@ -134,7 +153,7 @@ You can create a collection in the dashboard.
 
 There are three ways to populate a collection:
 
-5.1 REST-interface
+6.1 REST-interface
 -------------------------------------------------------------------------------
 Send data via the REST-API, e.g. like this:
 
@@ -148,7 +167,7 @@ Also, you have to identify the tenant and provide the API key,
 which you assign to the user in the dashboard.
 
 
-5.2 Uploader
+6.2 Uploader
 -------------------------------------------------------------------------------
 Upload a dataset (a SKOS/RDF file) via a form in the dashboard:Manage collections.
 Here you can provide many concepts within one file (XPath: `/rdf:RDF/rdf:Description`)
@@ -160,7 +179,7 @@ The import job can be started with `./tools/jobs.php`,
 a CLI script intended to be run with a Cron like task runner. 
 
 
-5.3 OAI ???
+6.3 OAI ???
 -------------------------------------------------------------------------------
 Third possiblity is to replicate an existing dataset via OAI-PMH, 
 either from other OpenSKOS-instances or from an external source providing SKOS-data.
@@ -172,3 +191,22 @@ and let the source be harvested.
 The harvest job can be started with ./tools/harvest.php, 
 another CLI script meant to be run as a cron-task.
 ???
+
+6.4 Migrate from OpenSKOS v1
+-------------------------------------------------------------------------------
+It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 instance directly into a v2 instance
+
+`tools/migrate.php --endpoint http://<solr server>:8180/ciss/<core name>/select`
+
+Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
+
+5.5
+-------------------------------------------------------------------------------
+
+Generate API Documentation
+
+```
+npm install
+npm run doc
+```
+Visit: http://example.com/apidoc/

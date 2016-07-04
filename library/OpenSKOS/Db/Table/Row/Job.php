@@ -30,7 +30,12 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	const JOB_TASK_DELETE_CONCEPT_SCHEME = 'delete_concept_scheme';
 	
 	protected $parametersSerialized = null;
-	
+
+	/**
+	 * @var OpenSKOS_JobLogger
+	 */
+	private $logger;
+
 	public function getParam($key)
 	{
 		$params = $this->getParams();
@@ -93,7 +98,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	public function getFile()
 	{
 		$path = realpath($this->getParam('destination').DIRECTORY_SEPARATOR.$this->getParam('name'));
-		
+
 		return $path ? $path : null;
 	}
 	
@@ -231,7 +236,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	public function error($msg)
 	{
 		$this->status = self::STATUS_ERROR;
-		$this->info = $msg;
+		$this->getLogger()->error($msg);
 		return $this;
 	}
     
@@ -244,5 +249,16 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
     {
         return $this->getParam('destination') . '_' . substr($this->getParam('name'), 0, strrpos($this->getParam('name'), '.'));
     }
-	
+
+	/**
+	 * @return OpenSKOS_JobLogger
+	 */
+	public function getLogger()
+	{
+		if (!isset($this->logger)) {
+			$this->logger = new \OpenSKOS_JobLogger($this);
+		}
+		return $this->logger;
+	}
+
 }
