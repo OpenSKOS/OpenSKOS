@@ -20,6 +20,7 @@
  */
 ?>
 <?php if ($this->renderHeader):?>
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'?>
 	<rdf:RDF<?php foreach ($this->namespaces as $prefix => $uri):?> xmlns:<?php echo $prefix?>="<?php echo $uri?>"<?php endforeach ?>>
 <?php endif?>
 
