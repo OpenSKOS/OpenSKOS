@@ -196,7 +196,7 @@ abstract class AbstractTripleStoreResource {
                 } 
                 $resourceObject -> selfGenerateUri($this->manager, $parameters);
             };
-            $this->validate($resourceObject, $this->tenant);
+            $this->validate($resourceObject, false, $this->tenant);
             $this->manager->insert($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -244,7 +244,7 @@ abstract class AbstractTripleStoreResource {
 
             $resourceObject->addMetadata($user, $params, $oldParams);
             if ($this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource)) {
-                $this->validateForUpdate($resourceObject, $this->tenant, $existingResource);
+                $this->validate($resourceObject, true, $this->tenant);
                 $this->manager->replace($resourceObject);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
                 $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -390,154 +390,17 @@ abstract class AbstractTripleStoreResource {
    
    
     // override in concrete class when necessary
-    protected function validate($resourceObject, Array $tenant) {
-        $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));
+    protected function validate($resourceObject, $isForUpdate, Array $tenant) {
+        $validator = new ResourceValidator($this->manager, $isForUpdate, new Tenant($tenant['code']));
         if (!$validator->validate($resourceObject)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
-        }
-        //content validation, where you need to look up the triple store
-        $uuid = $resourceObject -> getProperty(OpenSkos::UUID);
-        $resType = $this->manager -> getResourceType();
-        $resources= $this -> manager -> fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"'.$uuid[0].'"' , $resType);
-        if (count($resources)>0) {
-           throw new ApiException('The resource with the uuid ' . $uuid[0] . ' has been already registered.', 400);
-       }
-    }
-    
-     // override in concrete class when necessary
-    protected function validateForUpdate($resourceObject, Array $tenant, $existingResourceObject) {
-        $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));
-        if (!$validator->validate($resourceObject)) {
-            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
-        }
-       
-    }
-    
-    // property-content validations, where you need to look up the triple store
-    
-    // a new property must be new (they are single valued ones like: uri, uuid, label, title, notation) 
-    protected function validatePropertyForCreate($resourceObject, $propertyUri, $rdfType) {
-        $vals = $resourceObject->getProperty($propertyUri);
-        foreach ($vals as $val) {
-            $atlang = $this->retrieveLanguagePrefix($val);
-            $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . trim($val) . '"' . $atlang, $rdfType);
-            if (count($resources) > 0) {
-                throw new ApiException('The resource ' . $this->manager->getResourceType() . '  with the property ' . $propertyUri . ' of value ' . $val . $atlang . ' has been already registered.', 400);
-            }
-        }
-    }
-
-    // a new property must be new (they are single valued ones like: uri, uuid, label, title, notation) 
-    protected function validatePropertyForUpdate($resourceObject, $existingResourceObject, $propertyUri, $rdfType) {
-        $values = $resourceObject->getProperty($propertyUri);
-        $oldValues = $existingResourceObject->getProperty($propertyUri);
-        foreach ($values as $value) {
-            $lan = $this->retrieveLanguagePrefix($value);
-            foreach ($oldValues as $oldValue) {
-                $oldLan = $this->retrieveLanguagePrefix($oldValue);
-                if ($value->getValue() !== $oldValue->getValue() || $lan !== $oldLan) { //  new title is given
-                    // new val should not occur amnogst existing old values of the same property
-                    $resources = $this->manager->fetchSubjectWithPropertyGiven($propertyUri, '"' . $value . '"' . $lan, $rdfType);
-                    if (count($resources) > 0) {
-                        throw new ApiException('The resource ' . $this->manager->getResourceType() . '  with the property ' . $propertyUri . ' of value ' . $value . $lan . ' has been already registered.', 400);
-                    }
-                }
-            }
-        }
-    }
-
-    // the resource referred by the uri must exist in the triple store, 
-    protected function validateURI($resourceObject, $property, $rdfType) {
-        $val = $resourceObject->getProperty($property);
-        if ($val === null) {
-            return true;
-        }
-        if (count($val) === 0) {
-            return true;
-        }
-        foreach ($val as $uri) {
-            $count = $this->manager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-            if ($count < 1) {
-                throw new ApiException('The resource referred by  uri ' . $uri . ' is not found in the triple store. ', 400);
-            }
-        }
-    }
-
-   
-    protected function validateTenant(&$resourceObject, $tenantProperty) {
-        $val = $resourceObject->getProperty($tenantProperty);
-        if ($val === null) {
-            $resourceObject->setProperty($tenantProperty, new Uri($this->tenant['uri']));
         } else {
-            if (count($val) === 0) {
-                $resourceObject->setProperty($tenantProperty, new Uri($this->tenant['uri']));
-            }
-        }
-        try {
-            // also the validation below replaces institution codes with uri's when necessary
-            $referenceExists = $this->validateByID($resourceObject, $tenantProperty, Org::FORMALORG);
-            if ($referenceExists) {
-                $val = $resourceObject->getProperty($tenantProperty);
-                foreach ($val as $uri) {
-                    if ($uri->getUri() !== $this->tenant['uri']) {
-                        throw new ApiException('The resource,  the logged-in user tries to submit, has tenant referred by  ' . $uri . ' to which the logged-in user does not belong. The user tenant is ' . $this ->tenant['uri'], 400);
-                    } 
-                }
-            }
-        } catch (Exception $ex) {
-            if ($ex instanceof ApiException) {
-                $code = $ex->getCode();
-            } else {
-                $code = 500;
-            }
-            throw new ApiException($ex->getMessage(), $code);
+            return true;
         }
     }
-
-    protected function validateSet($resourceObject) {
-        try {
-            return $this->validateByID($resourceObject, OpenSkos::SET, Dcmi::DATASET);
-        } catch (Exception $ex) {
-            throw new ApiException($ex->getMessage(), 500);
-        }
-    }
+ 
     
-    private function validateByID(&$resourceObject, $property, $resourceType) {
-        $val = $resourceObject->getProperty($property);
-        if ($val === null) {
-            return true;
-        }
-        if (count($val) === 0) {
-            return true;
-        }
-        $resourceObject->unsetProperty($property);
-        foreach ($val as $id) {
-            if ($id instanceof Literal) {
-                $flatid = $id->getValue();
-            } else {
-                $flatid = $id->getUri();
-            }
-            $referredResource = $this->manager->findResourceById($flatid, $resourceType);
-            if ($referredResource === null) {
-                throw new ApiException('The resource of type ' . $resourceType . ' referred by uri/code/uuid ' . $flatid . ' is not found.', 404);
-            } else {
-                $resourceObject->setProperty($property, new Uri($referredResource->getUri()));
-            }
-        }
-
-        return true;
-    }
-
-    private function retrieveLanguagePrefix($val){
-        if ($val instanceof Literal) {
-            $lang = $val->getLanguage();
-            if ($lang !== null && $lang !== "") {
-               return "@" . $lang;
-            }
-        }
-        return "";
-    }
-
+    
      /**
      * @params string $key
      * @return OpenSKOS_Db_Table_Row_User

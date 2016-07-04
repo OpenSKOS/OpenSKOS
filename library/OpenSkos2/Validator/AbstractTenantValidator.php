@@ -24,10 +24,10 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractTenantValidator extends AbstractResourceValidator
 {
-    /**
-     * @param RdfResource $resource
-     * @return bool
-     */
+   function __construct(){
+       $this -> resourceType = Tenant::TYPE;
+    }
+    
     public function validate(RdfResource $resource)
     {
         

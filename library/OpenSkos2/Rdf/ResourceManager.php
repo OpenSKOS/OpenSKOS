@@ -1048,4 +1048,11 @@ public function deleteSolrIntact(Uri $resource)
             throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');
         }
     }
+    
+    public function fetchTenantNameUri() {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
 }

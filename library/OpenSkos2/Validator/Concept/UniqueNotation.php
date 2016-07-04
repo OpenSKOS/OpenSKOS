@@ -22,16 +22,10 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-use OpenSkos2\Validator\DependencyAware\TenantAware;
-use OpenSkos2\Validator\DependencyAware\TenantAwareTrait;
 
-class UniqueNotation extends AbstractConceptValidator implements ResourceManagerAware, TenantAware
+class UniqueNotation extends AbstractConceptValidator
 {
-    use ResourceManagerAwareTrait;
-    use TenantAwareTrait;
-
+    
     /**
      * @param Concept $concept
      * @return bool
@@ -57,7 +51,7 @@ class UniqueNotation extends AbstractConceptValidator implements ResourceManager
             ];
         }
 
-        $hasOther = $this->getResourceManager()->askForMatch(
+        $hasOther = $this->resourceManager->askForMatch(
             $params,
             $concept->getUri()
         );

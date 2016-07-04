@@ -24,14 +24,11 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class CycleInBroader extends AbstractConceptValidator implements ResourceManagerAware
+class CycleInBroader extends AbstractConceptValidator
 {
 
-    use ResourceManagerAwareTrait;
-
+    
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
      * but was not supported in OpenSKOS this validator provides a way to restrict it in a similar way

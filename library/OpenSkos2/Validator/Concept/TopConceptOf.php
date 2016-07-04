@@ -17,20 +17,17 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator\DependencyAware;
+namespace OpenSkos2\Validator\Concept;
 
-use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
+use OpenSkos2\Validator\AbstractConceptValidator;
+use OpenSkos2\Validator\GenericProperties\TopConceptOf as GenericTopConceptOf;
 
-interface TenantAware
+class TopConceptOf extends AbstractConceptValidator 
 {
-    /**
-     * @param Tenant $tenant
-     * @return self
-     */
-    public function setTenant(Tenant $tenant);
-    
-    /**
-     * @return Tenant
-     */
-    public function getTenant();
+    protected function validateConcept(Concept $concept)
+    {
+      $this->errorMessages = GenericTopConceptOf::validate($concept);
+      return (count($this->errorMessages) === 0);
+    }
 }

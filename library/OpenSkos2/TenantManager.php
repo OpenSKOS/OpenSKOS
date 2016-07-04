@@ -35,9 +35,7 @@ class TenantManager extends ResourceManager
     protected $resourceType = Tenant::TYPE;
    
     public function fetchNameUri() {
-        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
-        $response = $this->query($query);
-        $result = $this->makeNameUriMap($response);
+        $result = $this->fetchTenantNameUri();
         return $result;
     }
     

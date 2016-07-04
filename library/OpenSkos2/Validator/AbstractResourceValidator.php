@@ -23,11 +23,30 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
+    protected $resourceManager;
+    protected $resurceType;
+    protected $forUpdate;
+    protected $tenantCode;
     /**
      * @var array
      */
     protected $errorMessages = [];
     
+    
+    public function setResourceManager($resourceManager) {
+        if ($resourceManager === null) {
+            throw new Exception("Passed resource manager is null in this validator. Proper content validation is not possible");
+        }
+        $this->resourceManager = $resourceManager;
+    }
+
+    public function setFlagIsForUpdate($isForUpdate) {
+        if ($isForUpdate === null) {
+            throw new Exception("Cannot validate the resource because isForUpdateFlag is set to null (cannot differ between create- and update- validation mode.");
+        }
+        $this->forUpdate = $isForUpdate;
+    }
+
     /**
      * @param $resource RdfResource
      * @return boolean
@@ -38,19 +57,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     /**
      * @return string
      */
-    public function getErrorMessages()
-    {
+    public function getErrorMessages() {
+       
         return $this->errorMessages;
     }
-    
-    
-    protected function genericValidate($callback, $arg1, $arg2=null, $arg3=null, $arg4=null)
-    {
-        //var_dump($this -> errorMessages);
-        $newErrors = call_user_func(__NAMESPACE__ . $callback, $arg1, $arg2, $arg3, $arg4);
-        //var_dump($callback);
-        //var_dump($newErrors);
-        return  array_merge($this -> errorMessages, $newErrors);
-    }
-    
+
 }

@@ -7,10 +7,10 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractSkosCollectionValidator extends AbstractResourceValidator
 {
-    /**
-     * @param RdfResource $resource
-     * @return bool
-     */
+    function __construct(){
+       $this -> resourceType = Set::TYPE;
+    }
+    
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof SkosCollection) {

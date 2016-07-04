@@ -22,15 +22,11 @@ namespace OpenSkos2\Api;
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\RelationManager;
-use OpenSkos2\Tenant;
-use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Owl;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
 
@@ -129,26 +125,5 @@ class Relation extends AbstractTripleStoreResource {
         // do not generate idenitifers
         return false;
     }
-    
-     // used when creating a user-defined relation
-     protected function validate($resourceObject, $tenant) {
-       $validator = new ResourceValidator($this->manager, new Tenant($tenant['code']));
-       if (!$validator->validate($resourceObject)) {
-            throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
-        }
-       //must have new title
-       $this->validatePropertyForCreate($resourceObject, DcTerms::TITLE, Owl::OBJECT_PROPERTY);
-       
-       return true;
-    }
-    
-    
-    // used when updating a user-defined relation
-    protected function validateForUpdate($resourceObject, $tenant,  $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
-       // must not occur as another collection's name if different from the old one 
-        $this->validatePropertyForUpdate($resourceObject, $existingResourceObject, DcTerms::TITLE, Owl::OBJECT_PROPERTY);
-    
-    }
-    
+   
 }

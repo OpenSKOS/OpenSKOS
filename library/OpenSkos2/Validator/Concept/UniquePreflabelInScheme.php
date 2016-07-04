@@ -22,15 +22,9 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-use OpenSkos2\Validator\DependencyAware\TenantAware;
-use OpenSkos2\Validator\DependencyAware\TenantAwareTrait;
 
-class UniquePreflabelInScheme extends AbstractConceptValidator implements ResourceManagerAware, TenantAware
+class UniquePreflabelInScheme extends AbstractConceptValidator
 {
-    use ResourceManagerAwareTrait;
-    use TenantAwareTrait;
     
     /**
      * Ensure the preflabel does not already exists in the scheme

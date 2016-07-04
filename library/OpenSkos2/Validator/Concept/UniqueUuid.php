@@ -20,47 +20,19 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Sparql\Operator;
-use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Validator\GenericProperties\Uuid;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class UniqueUuid extends AbstractConceptValidator implements ResourceManagerAware
+class UniqueUuid extends AbstractConceptValidator
 {
-    use ResourceManagerAwareTrait;
-
+    
     /**
      * @param Concept $concept
      * @return bool
      */
     protected function validateConcept(Concept $concept)
     {
-        $uuids=$concept->getProperty(OpenSkos::UUID);
-        if (count($uuids)<1) {
-            $this->errorMessages[] = 'Uuid is not given';
-            return false;
-        } ;
-        
-     
-        
-        $params = [];
-        $params[] = [
-            'operator' => Operator::EQUAL,
-            'predicate' => OpenSkos::UUID,
-            'value' => $uuids[0],
-        ];
-        
-        $hasOther = $this->getResourceManager()->askForMatch(
-            $params,
-            $concept->getUri()
-        );
-
-        if ($hasOther) {
-            $this->errorMessages[] = 'Uuid (openskos:uuid) must be unique. There is other concept with same uuid.';
-            return false;
-        } else {
-            return true;
-        }
+       $this->errorMessages = Uuid::validate($concept, $this->forUpdate);
+       return (count($this->errorMessages) === 0);
     }
 }

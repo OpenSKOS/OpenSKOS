@@ -24,9 +24,6 @@ use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\RelationManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
-use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\NamespaceAdmin;
@@ -294,30 +291,13 @@ class Concept extends AbstractTripleStoreResource {
     }
 
     // specific content validation
-    protected function validate($resourceObject, $tenant) {
-        parent::validate($resourceObject, $tenant);
-        // resources referred by uri's 
-        $this->checkIfReferredResourcesExist($resourceObject);
+    protected function validate($resourceObject, $isForUpdate, $tenant) {
+        parent::validate($resourceObject, $isForUpdate, $tenant);
         $this->checkRelationsInConcept($resourceObject);
     }
 
-    // specific content validation
-    protected function validateForUpdate($resourceObject, $tenant, $existingResourceObject) {
-        parent::validateForUpdate($resourceObject, $tenant, $existingResourceObject);
+   
 
-        // resources referred by uri's
-        $this->checkIfReferredResourcesExist($resourceObject);
-        $this->checkRelationsInConcept($resourceObject);
-    }
-
-    
-    private function checkIfReferredResourcesExist($resourceObject) {
-        $this -> validateTenant($resourceObject, OpenSkos::TENANT);
-        $this -> validateSet($resourceObject);
-        $this->validateURI($resourceObject, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
-        $this->validateURI($resourceObject, Skos::INSCHEME, Skos::CONCEPTSCHEME);
-        $this->validateURI($resourceObject, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
-    }
 
     // also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
     private function checkRelationsInConcept(ConceptResource $concept) {

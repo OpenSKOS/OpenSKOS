@@ -25,6 +25,10 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 abstract class AbstractRelationValidator extends AbstractResourceValidator
 {
    
+    function __construct(){
+       $this -> resourceType = Relation::TYPE;
+    }
+    
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof Relation) {

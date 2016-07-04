@@ -26,7 +26,6 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
-use OpenSkos2\UserRelation;
 
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
@@ -42,8 +41,7 @@ use OpenSkos2\Validator\Concept\RequriedPrefLabel;
 use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\TenantAware;
+use OpenSkos2\Validator\Concept\TopConceptOf;
 
 use OpenSkos2\Validator\Set\OpenskosAllowOAI;
 use OpenSkos2\Validator\Set\OpenskosConceptBaseUri;
@@ -61,6 +59,7 @@ use OpenSkos2\Validator\SkosCollection\InSet as SkosCollInSet;
 use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
 use OpenSkos2\Validator\SkosCollection\Description as SkosCollDescription;
 use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
+use OpenSkos2\Validator\SkosCollection\Member as SkosCollMember;
 
 use OpenSkos2\Validator\Relation\Creator as RelationCreator;
 use OpenSkos2\Validator\Relation\Title as RelationTitle;
@@ -71,6 +70,7 @@ use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
 use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
 use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
 use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
+use OpenSkos2\Validator\ConceptScheme\HasTopConcept as SchemaHasTopConcept;
 
 use OpenSkos2\Validator\Tenant\OpenskosCode;
 use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
@@ -91,6 +91,11 @@ class Resource
      * @var ResourceManager
      */
     protected $resourceManager;
+    
+    /**
+     * @var boolean
+     */
+    protected $isForUpdate;
 
     /**
      * @var Tenant
@@ -116,7 +121,7 @@ class Resource
      * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
      * @param LoggerInterface $logger
      */
-    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, Tenant $tenant = null, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $this->logger = new NullLogger();
@@ -125,6 +130,7 @@ class Resource
         }
         
         $this->resourceManager = $resourceManager;
+        $this -> isForUpdate = $isForUpdate;
         $this->tenant = $tenant;
     }
 
@@ -221,8 +227,8 @@ class Resource
             new SchemaDescription(),
             new SchemaCreator(),
             new SchemaUuid(),
+            new SchemaHasTopConcept()
         ];
-        //var_dump($validators);
         $validators = $this -> refineValidators($validators);
         return $validators;
     }
@@ -235,6 +241,7 @@ class Resource
             new SkosCollDescription(),
             new SkosCollCreator(),
             new SkosCollUuid(),
+            new SkosCollMember()
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -247,7 +254,6 @@ class Resource
             new RelationDescription(),
             new RelationCreator()
         ];
-       
         $validators = $this -> refineValidators($validators);
         return $validators;
     }
@@ -304,22 +310,17 @@ class Resource
             new CycleInBroader(),
             new CycleInNarrower(),
             new RelatedToSelf(),
+            new TopConceptOf()
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
     }
-    
-    private function refineValidators($validators){
-        
+  
+    private function refineValidators($validators) {
         foreach ($validators as $validator) {
-            if ($validator instanceof ResourceManagerAware) {
-                $validator->setResourceManager($this->resourceManager);
-            }
-            if ($validator instanceof TenantAware && $this->tenant !== null) {
-                $validator->setTenant($this->tenant);
-            }
+            $validator -> setResourceManager($this->ResourceManager);
+            $validator -> setFlagIsForUpdate($this->isForUpdate);
         }
-        
         return $validators;
     }
 }

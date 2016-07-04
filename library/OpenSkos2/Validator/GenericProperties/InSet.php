@@ -17,18 +17,20 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Validator\CommonProperties;
+namespace OpenSkos2\Validator\GenericProperties;
 
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Validator\CommonProperties\NonUniqueObligatoryProperty;
+use OpenSkos2\Validator\GenericProperties\AbstractProperty;
 
-class InSet implements CommonPropertyInterface
+class InSet extends AbstractProperty
 {
+     // parent::validate(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type, $isForUpdate)
     
     public static function validate(RdfResource $resource)
     {
-        $retVal = NonUniqueObligatoryProperty::validate($resource, OpenSkos::SET, false);
+        $retVal = parent::validate($resource, OpenSkos::SET, false, true, true, false, false, Dcmi::DATASET);
         return $retVal;
     }
 }
