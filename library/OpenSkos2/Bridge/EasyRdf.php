@@ -26,6 +26,8 @@ use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\ConceptSchemeCollection;
 use OpenSkos2\Person;
 use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
@@ -47,7 +49,7 @@ class EasyRdf
         foreach ($graph->resources() as $resource) {
             /** @var $resource \EasyRdf\Resource */
             $type = $resource->get('rdf:type');
-
+            
             // Filter out resources which are not fully described.
             if (!$type) {
                 continue;
@@ -120,8 +122,8 @@ class EasyRdf
             switch ($type->getUri()) {
                 case Concept::TYPE:
                     return new Concept($uri);
-                case \OpenSkos2\ConceptScheme::TYPE:
-                    return new \OpenSkos2\ConceptScheme($uri);
+                case ConceptScheme::TYPE:
+                    return new ConceptScheme($uri);
                 case Collection::TYPE:
                     return new Collection($uri);
                 case Person::TYPE:
@@ -147,8 +149,8 @@ class EasyRdf
         switch ($type) {
             case Concept::TYPE:
                 return new ConceptCollection();
-            case \OpenSkos2\ConceptScheme::TYPE:
-                return new \OpenSkos2\ConceptSchemeCollection();
+            case ConceptScheme::TYPE:
+                return new ConceptSchemeCollection();
             case Collection::TYPE:
                 return new CollectionCollection();
             case Label::TYPE:

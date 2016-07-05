@@ -20,6 +20,7 @@
 namespace OpenSkos2\Import;
 
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\DcTerms;
@@ -72,10 +73,6 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
 
-        // @TODO Most of the code below has to be applied for the api and for the api,
-        // so has to be moved to a shared place.
-        
-        
         // Srtuff needed before validation.
         foreach ($resourceCollection as $resourceToInsert) {
             // Concept only logic
@@ -125,9 +122,11 @@ class Command implements LoggerAwareInterface
             } catch (ResourceNotFoundException $e) {
                 //do nothing
             }
-
+            
             //special import logic
             if ($resourceToInsert instanceof Concept) {
+                
+                // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
                 $currentVersion = null;
                 if (isset($currentVersions[$resourceToInsert->getUri()])) {
                     /**
@@ -182,6 +181,12 @@ class Command implements LoggerAwareInterface
                     $message->getSetUri(),
                     $message->getUser(),
                     $currentVersion ? $currentVersion->getStatus(): null
+                );
+            } elseif ($resourceToInsert instanceof ConceptScheme) {
+                $resourceToInsert->ensureMetadata(
+                    $this->tenant->getCode(),
+                    $message->getSetUri(),
+                    $message->getUser()
                 );
             }
             
