@@ -564,7 +564,7 @@ public function deleteSolrIntact(Uri $resource)
     
     
    
-    public function fetchObjectsWithProperty($propertyUri, $rdfType=null) {
+    public function fetchObjectsWtithProperty($propertyUri, $rdfType=null) {
         $typeFilter = "";
         if (isset($rdfType)) {
             $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';

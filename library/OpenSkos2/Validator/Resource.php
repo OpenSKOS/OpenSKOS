@@ -97,10 +97,8 @@ class Resource
      */
     protected $isForUpdate;
 
-    /**
-     * @var Tenant
-     */
-    protected $tenant;
+  
+    protected $tenantUri;
 
     /**
      * Holds all error messages
@@ -121,7 +119,7 @@ class Resource
      * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
      * @param LoggerInterface $logger
      */
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, Tenant $tenant = null, LoggerInterface $logger = null)
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $this->logger = new NullLogger();
@@ -131,7 +129,7 @@ class Resource
         
         $this->resourceManager = $resourceManager;
         $this -> isForUpdate = $isForUpdate;
-        $this->tenant = $tenant;
+        $this->tenantUri = $tenantUri;
     }
 
     /**
@@ -322,6 +320,7 @@ class Resource
         foreach ($validators as $validator) {
             $validator -> setResourceManager($this->resourceManager);
             $validator -> setFlagIsForUpdate($this->isForUpdate);
+            $validator -> setTenant($this->tenantUri);
         }
         return $validators;
     }

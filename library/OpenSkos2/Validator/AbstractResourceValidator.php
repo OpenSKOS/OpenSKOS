@@ -29,13 +29,12 @@ use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 
-
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
     protected $resourceManager;
     protected $resurceType;
     protected $isForUpdate;
-    protected $tenantCode;
+    protected $tenantUri;
     /**
      * @var array
      */
@@ -54,6 +53,13 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             throw new Exception("Cannot validate the resource because isForUpdateFlag is set to null (cannot differ between create- and update- validation mode.");
         }
         $this->isForUpdate = $isForUpdate;
+    }
+    
+    public function setTenant($tenantUri) {
+        if ($tenantUri === null) {
+            throw new Exception("Passed tenant uri is null in this validator. Proper content validation is not possible");
+        }
+        $this->tenantUri = $tenantUri;
     }
 
     /**
@@ -214,7 +220,21 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
     
     protected function validateInSet(RdfResource $resource){
-        return $this->validateProperty( $resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
+        $firstRound= $this->validateProperty( $resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
+        $setUris = $resource->getProperty(OpenSkos::SET);
+        if (count($setUris)>0) {
+            $setUri=$setUris[0]->getUri();
+            $set = $this->resourceManager->fetchByUri($setUri, Dcmi::DATASET);
+            $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+            $tenantUri=$tenantUris[0]->getUri();
+            if ($tenantUri!==$this->tenantUri){
+                $this->errorMessages[]="Attempt to access the set  ". $setUri . ", which does not belong to the user's tenant ". $this->tenantUri. ", but to the tenant ". $tenantUri. ".";
+                return false;
+            }
+        } else {
+            return false; // the error message has been already generated on the previous round.
+        }
+        return $firstRound;
     }
     
     protected function validateInScheme(RdfResource $resource){

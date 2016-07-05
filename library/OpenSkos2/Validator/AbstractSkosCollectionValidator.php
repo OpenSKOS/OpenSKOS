@@ -8,7 +8,7 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 abstract class AbstractSkosCollectionValidator extends AbstractResourceValidator
 {
     function __construct(){
-       $this -> resourceType = Set::TYPE;
+       $this -> resourceType = SkosCollection::TYPE;
     }
     
     public function validate(RdfResource $resource)

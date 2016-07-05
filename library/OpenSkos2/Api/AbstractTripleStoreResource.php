@@ -54,17 +54,9 @@ abstract class AbstractTripleStoreResource {
         if (empty($params['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
         };
-        if (!TENANTS_AND_SETS_IN_MYSQL) {
-            $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
-            if ($tenantUri === null) {
-                throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
-            }
-        } else {
-            $institution = $this->manager->fetchTenantFromMySqlByCode($params['tenant']);
-            if ($institution === null) {
-                throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' is not found either in the triple store or in the mysql.', 400);
-            };
-            $tenantUri = null; // in the old setting institution must be is referred by code
+        $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
+        if ($tenantUri === null) {
+            throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
         }
         $params['tenanturi'] = $tenantUri;
         $this->tenant['uri'] = $tenantUri;
@@ -180,11 +172,11 @@ abstract class AbstractTripleStoreResource {
                 $parameters['type']=$type;
                 $parameters['tenantcode']=$this->tenant['code'];
                 if ($type === Skos::CONCEPT || $type === Skos::CONCEPTSCHEME || $type === Skos::SKOSCOLLECTION){
-                    $seturis = $parameters['seturi']=$resourceObject->getProperty(OpenSkos::SET);
-                    if (count($seturis)===0) {
-                        throw new Exception('openskos:set uri is absent.');
+                    $setUris=$resourceObject->getProperty(OpenSkos::SET);
+                    if (count($setUris)===0) {
+                        throw new ApiException('openskos:set uri is absent.', 400);
                     }
-                    $parameters['seturi']=$seturis[0]->getUri();
+                    $parameters['seturi']=$setUris[0]->getUri();
                     if ($type === Skos::CONCEPT) {
                         $notations = $resourceObject->getProperty(Skos::CONCEPT);
                         if (count($notations) === 0) {
@@ -196,13 +188,17 @@ abstract class AbstractTripleStoreResource {
                 } 
                 $resourceObject -> selfGenerateUri($this->manager, $parameters);
             };
-            $this->validate($resourceObject, false, $this->tenant);
+            $this->validate($resourceObject, false);
             $this->manager->insert($resourceObject);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (Exception $e) {
-            return $this->getErrorResponse($e->getCode(), $e->getMessage());
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
     
@@ -244,7 +240,7 @@ abstract class AbstractTripleStoreResource {
 
             $resourceObject->addMetadata($user, $params, $oldParams);
             if ($this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource)) {
-                $this->validate($resourceObject, true, $this->tenant);
+                $this->validate($resourceObject, true);
                 $this->manager->replace($resourceObject);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
                 $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -390,8 +386,8 @@ abstract class AbstractTripleStoreResource {
    
    
     // override in concrete class when necessary
-    protected function validate($resourceObject, $isForUpdate, Array $tenant) {
-        $validator = new ResourceValidator($this->manager, $isForUpdate, new Tenant($tenant['code']));
+    protected function validate($resourceObject, $isForUpdate) {
+        $validator = new ResourceValidator($this->manager, $isForUpdate, $this->tenant['uri']);
         if (!$validator->validate($resourceObject)) {
             throw new InvalidArgumentException(implode(' ' , $validator->getErrorMessages()), 400);
         } else {
