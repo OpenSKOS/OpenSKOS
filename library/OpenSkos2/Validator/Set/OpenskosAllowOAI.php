@@ -10,6 +10,6 @@ class OpenskosAllowOAI extends AbstractSetValidator
 {
     protected function validateSet(Set $resource)
     {
-      return $this->validateProperty($resource, OpenSkos::ALLOW_OAI, true, true, false, true, false);
+      return $this->validateProperty($resource, OpenSkos::ALLOW_OAI, true, true, true, false);
     }
 }

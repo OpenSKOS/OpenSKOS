@@ -13,6 +13,6 @@ class Publisher extends AbstractSetValidator
     
      //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
     protected function validateSet(Set $resource){
-        return $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, true, false, false, Org::FORMALORG);
+        return $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, Org::FORMALORG);
     }
 }

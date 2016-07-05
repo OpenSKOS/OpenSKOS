@@ -11,6 +11,6 @@ class vCardEmail extends AbstractTenantValidator
     
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateProperty($resource, vCard::EMAIL, true, true, true, false, true);
+       return $this->validateProperty($resource, vCard::EMAIL, true, true, false, true);
     }
 }

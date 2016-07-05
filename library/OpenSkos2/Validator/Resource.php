@@ -166,6 +166,8 @@ class Resource
         /** @var ValidatorInterface $validator */
         foreach ($this->getValidators($resource) as $validator) {
             $valid = $validator->validate($resource);
+            //var_dump(get_class($validator));
+            //var_dump($valid);
             if ($valid) {
                 continue;
             } 

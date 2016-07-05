@@ -70,15 +70,15 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $this->errorMessages;
     }
 
-    protected function validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique, $type=null) {
-        $this->errorMessages = array();
+    protected function validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique, $type=null) {
+        $this->errorMessages = [];
         $val = $resource->getProperty($propertyUri);
         
        if (count($val)<1) {
             if ($isRequired) {
-              $this->errorMessages[] = $propertyUri . ' is required for all resources of this type';
+              $this->errorMessages[] = $propertyUri . ' is required for all resources of this type.';
             } else {
-               return []; 
+               return true; 
             }
         }
         if (count($val) > 1) {
@@ -110,7 +110,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             }
         }
 
-        if ($type !== null) { // check is the referred resoource of the given type exists in the triple store
+        if ($type !== null) { // check is the referred resource of the given type exists in the triple store
             foreach ($val as $value) {
                 if ($value instanceof Uri)
                     $this->errorMessages = array_merge($this->errorMessages, $this->existenceCheck($value->getUri(), $type));
@@ -161,43 +161,45 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     // some common for different types of resources properties
-    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
       
     protected function validateUUID(RdfResource $resource){
-        return $this->validateProperty($resource, OpenSkos::UUID, true, true, false, false, true);
+        return $this->validateProperty($resource, OpenSkos::UUID, true, true, false, true);
     }
     
     protected function validateOpenskosCode(RdfResource $resource){
-        return $this->validateProperty($resource, OpenSkos::CODE, true, true, false, false, true);
+        return $this->validateProperty($resource, OpenSkos::CODE, true, true, false, true);
     }
     
     protected function validateTitle(RdfResource $resource){
-        return $this->validateProperty($resource, DcTerms::TITLE, true, false, false, false, true);
+        return $this->validateProperty($resource, DcTerms::TITLE, true, false, false, true);
     }
     
     protected function validateDescription(RdfResource $resource){
-        return $this->validateProperty($resource, DcTerms::DESCRIPTION, false, true, false, false, false);
+        return $this->validateProperty($resource, DcTerms::DESCRIPTION, false, true, false, false);
     }
     
     protected function validateType(RdfResource $resource){
-        return $this->validateProperty( $resource, Rdf::TYPE, true, true, true, false, false);
+        return $this->validateProperty( $resource, Rdf::TYPE, true, true, false, false);
     }
     
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
+    
     protected function validateInSet(RdfResource $resource){
-        return $this->validateProperty( $resource, OpenSkos::SET, false, true, true, false, false, Dcmi::DATASET);
+        return $this->validateProperty( $resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
     }
     
     protected function validateInScheme(RdfResource $resource){
-        return $this->validateProperty( $resource, Skos::INSCHEME, true, false, true, false, false, Skos::CONCEPTSCHEME);
+        return $this->validateProperty( $resource, Skos::INSCHEME, true, false, false, false, Skos::CONCEPTSCHEME);
     }
     
     protected function validateInSkosCollection(RdfResource $resource){
-        return $this->validateProperty( $resource, Skos::SKOSCOLLECTION, false, false, true, false, false, Skos::SKOSCOLLECTION);
+        return $this->validateProperty( $resource, Skos::SKOSCOLLECTION, false, false, false, false, Skos::SKOSCOLLECTION);
     }
     
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
     protected function validateCreator(RdfResource $resource){
-        return $this->validateProperty($resource, DcTerms::CREATOR, true, true, true, false, false, Foaf::PERSON);
+        return $this->validateProperty($resource, DcTerms::CREATOR, true, true, false, false, Foaf::PERSON);
     }
     
 }

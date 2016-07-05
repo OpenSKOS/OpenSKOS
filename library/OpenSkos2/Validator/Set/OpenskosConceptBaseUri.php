@@ -10,6 +10,6 @@ class OpenskosConceptBaseUri extends AbstractSetValidator
 {
     protected function validateSet(Set $resource)
     {
-      return $this->validateProperty($resource, OpenSkos::CONCEPTBASEURI, false, true, true, false, false);
+      return $this->validateProperty($resource, OpenSkos::CONCEPTBASEURI, false, true, false, false);
     }
 }

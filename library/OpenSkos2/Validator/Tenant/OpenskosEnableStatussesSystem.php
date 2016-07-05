@@ -10,6 +10,6 @@ class OpenskosEnableStatussesSystem extends AbstractTenantValidator
 {
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateProperty($resource, OpenSkos::ENABLESTATUSSESSYSTEMS, true, true, false, true, false);
+       return $this->validateProperty($resource, OpenSkos::ENABLESTATUSSESSYSTEMS, true, true, true, false);
     }
 }

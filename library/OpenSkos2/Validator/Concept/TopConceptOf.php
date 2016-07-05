@@ -27,6 +27,6 @@ class TopConceptOf extends AbstractConceptValidator
 {
     protected function validateConcept(Concept $concept)
     {
-      return $this->validateProperty($concept, Skos::TOPCONCEPTOF, false, false, true, false, false, Skos::CONCEPTSCHEME);
+      return $this->validateProperty($concept, Skos::TOPCONCEPTOF, false, false, false, false, Skos::CONCEPTSCHEME);
     }
 }

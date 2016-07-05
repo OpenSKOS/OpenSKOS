@@ -10,6 +10,6 @@ class OpenskosDisableSearchInOtherTenants extends AbstractTenantValidator
 {
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateProperty($resource, OpenSkos::DISABLESEARCHINOTERTENANTS, true, true, false, true, false);
+       return $this->validateProperty($resource, OpenSkos::DISABLESEARCHINOTERTENANTS, true, true, true, false);
     }
 }

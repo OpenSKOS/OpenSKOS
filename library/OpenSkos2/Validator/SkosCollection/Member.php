@@ -11,6 +11,6 @@ class Member extends AbstractSkosCollectionValidator
   
     protected function validateSkosCollection(SkosCollection $resource)
     {
-       return $this-validateProperty($resource, Skos::MEMBER, false, false, true, false, false, Skos::CONCEPT);
+       return $this-validateProperty($resource, Skos::MEMBER, false, false, false, false, Skos::CONCEPT);
     }
 }
