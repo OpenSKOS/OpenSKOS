@@ -20,6 +20,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
@@ -49,13 +50,15 @@ class Set extends Resource
     
     
     public function addMetadata($user, $params, $oldParams) {
-        $metadata = [];
-       if (count($oldParams)>0){ 
+        $metadata = [DcTerms::PUBLISHER => new Uri($params['tenanturi'])];
+        if (count($oldParams) > 0) {
             $metadata = [
-            OpenSkos::UUID => new Literal($oldParams['uuid'])];
+                OpenSkos::UUID => new Literal($oldParams['uuid'])];
         }
         foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
+            if (count($this->getProperty($property)) < 1) {
+                $this->setProperty($property, $defaultValue);
+            }
         }
     }
 }
