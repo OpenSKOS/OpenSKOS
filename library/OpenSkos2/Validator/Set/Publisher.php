@@ -13,6 +13,15 @@ class Publisher extends AbstractSetValidator
     
      //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
     protected function validateSet(Set $resource){
-       return $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, Org::FORMALORG);
+       $firstRound = $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, Org::FORMALORG);
+       $tenantUris = $resource ->getProperty(DcTerms::PUBLISHER);
+       $errorsBeforeSecondRound = count($this->errorMessages);
+       foreach ($tenantUris as $tenantUri) {
+           if ($tenantUri->getUri() !== $this->tenantUri) {
+              $this->errorMessages[]="The given publisher " . $tenantUri->getUri()."  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri ". $this->tenantUri . "." ;
+           }
+       }
+       $errorsAfterSecondRound = count($this->errorMessages);
+       return $firstRound && ($errorsBeforeSecondRound === $errorsAfterSecondRound);
     }
 }
