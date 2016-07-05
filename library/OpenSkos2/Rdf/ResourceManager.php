@@ -556,6 +556,7 @@ public function deleteSolrIntact(Uri $resource)
             $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
         $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
+        //var_dump($query);
         $result = $this->query($query);
         $retVal = $this -> makeListOfPrimitiveResults($result, 'subject');
         return $retVal;

@@ -23,6 +23,7 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Uri;
@@ -101,8 +102,14 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                     $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $value->getUri()));
                 } else { // a literal
                     if ($value instanceof Literal) {
-                        $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, '"' . $value->getValue() . '"', $this->resourceType);
-                        $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $value->getValue()));
+                        $language=$value->getLanguage();
+                        if ($language !== null && $language !==''){
+                           $completeValue = '"'.$value->getValue().'"@'.$language; 
+                        } else {
+                           $completeValue = '"'.$value->getValue().'"'; 
+                         }
+                        $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, $completeValue, $this->resourceType);
+                        $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $completeValue));
                     } else {
                         $this->errorMessages = array_merge($this->errorMessages, 'Not correct rdf type for value ' . (string) $value);
                     }
@@ -172,7 +179,28 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     protected function validateTitle(RdfResource $resource){
-        return $this->validateProperty($resource, DcTerms::TITLE, true, false, false, true);
+        $firstRound = $this->validateProperty($resource, DcTerms::TITLE, true, false, false, true);
+        $titles=$resource->getProperty(DcTerms::TITLE);
+        $pairs=[];
+        $errorsBeforeSecondRound=count($this->errorMessages);
+        foreach ($titles as $title) {
+           $lang = $title->getLanguage();
+           $val= $title->getValue();
+           if ($lang === null || $lang===''){ // every title must have a language
+              $this->errorMessages[]="Title ". $val . " is given without language. ";
+           } else {
+               if (array_key_exists($lang, $pairs)){
+                   if ($pairs[$lang] !== $val) {
+                      $this->errorMessages[]="More than 1 disticht title is given for the language tag ".$lang. " .";
+                   }
+               } else {
+                  $pairs[$lang]=$val; 
+               }
+           }
+        }
+        $errorsBeforeAfterSecondRound=count($this->errorMessages);
+        $secondRound = ($errorsBeforeSecondRound === $errorsBeforeAfterSecondRound);
+        return ($firstRound && $secondRound);   
     }
     
     protected function validateDescription(RdfResource $resource){

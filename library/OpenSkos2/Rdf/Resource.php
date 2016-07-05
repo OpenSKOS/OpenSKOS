@@ -289,7 +289,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $values = [];
         foreach ($this->getProperty($predicate) as $value) {
-            if ($value instanceof Literal && $value->getLanguage() == $language) {
+            if ($value instanceof Literal && $value->getLanguage() === $language) {
                 $values[] = $value;
             }
         }
