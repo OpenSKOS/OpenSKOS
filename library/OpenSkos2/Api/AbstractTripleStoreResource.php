@@ -393,7 +393,7 @@ abstract class AbstractTripleStoreResource {
     protected function validate($resourceObject, $isForUpdate, Array $tenant) {
         $validator = new ResourceValidator($this->manager, $isForUpdate, new Tenant($tenant['code']));
         if (!$validator->validate($resourceObject)) {
-            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
+            throw new InvalidArgumentException(implode(' ' , $validator->getErrorMessages()), 400);
         } else {
             return true;
         }

@@ -2,16 +2,17 @@
 
 namespace OpenSkos2\Validator\Set;
 
-use OpenSkos2\Validator\GenericProperties\Publisher as GenericPublisher;
+
 use OpenSkos2\Set;
 use OpenSkos2\Validator\AbstractSetValidator;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Org;
 
 class Publisher extends AbstractSetValidator
 {
     
-    protected function validateSet(Set $resource)
-    {
-       $this->errorMessages = GenericPublisher::validate($resource);
-       return (count($this->errorMessages) === 0);
+     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
+    protected function validateSet(Set $resource){
+        return $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, true, false, false, Org::FORMALORG);
     }
 }

@@ -32,8 +32,7 @@ abstract class AbstractTenantValidator extends AbstractResourceValidator
     {
         
         if ($resource instanceof Tenant) {
-             $this->errorMessages = array_merge($this->errorMessages, $this->validateTenant($resource));
-            return (count($this->errorMessages) ===0);
+            return $this->validateTenant($resource);
         }
         return false;
     }

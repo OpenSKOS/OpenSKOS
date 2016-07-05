@@ -21,13 +21,12 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\GenericProperties\TopConceptOf as GenericTopConceptOf;
+use OpenSkos2\Namespaces\Skos;
 
 class TopConceptOf extends AbstractConceptValidator 
 {
     protected function validateConcept(Concept $concept)
     {
-      $this->errorMessages = GenericTopConceptOf::validate($concept);
-      return (count($this->errorMessages) === 0);
+      return $this->validateProperty($concept, Skos::TOPCONCEPTOF, false, false, true, false, false, Skos::CONCEPTSCHEME);
     }
 }

@@ -21,14 +21,12 @@ namespace OpenSkos2\Validator\SkosCollection;
 
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Validator\AbstractSkosCollectionValidator;
-use OpenSkos2\Validator\GenericProperties\InSet as GenericInSet;
 
 class InSet extends AbstractSkosCollectionValidator 
 {
     
     protected function validateSkosCollection(SkosCollection $resource)
     {
-      $this->errorMessages = GenericInSet::validate($resource);
-      return (count($this->errorMessages) === 0);
+      return $this->validateInSet($resource);
     }
 }

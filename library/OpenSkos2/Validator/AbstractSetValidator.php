@@ -32,8 +32,7 @@ abstract class AbstractSetValidator extends AbstractResourceValidator
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof Set) {
-            $this->errorMessages = array_merge($this->errorMessages, $this->validateSet($resource));
-            return (count($this->errorMessages) ===0);
+            return $this->validateSet($resource);
         }
         return false;
     }

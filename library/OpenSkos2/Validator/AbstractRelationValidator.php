@@ -32,11 +32,12 @@ abstract class AbstractRelationValidator extends AbstractResourceValidator
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof Relation) {
-            $this->errorMessages = array_merge($this->errorMessages,$this->validateRelation($resource));
-            return (count($this->errorMessages) ===0);
+            return $this->validateRelation($resource);
         }
         return false;
     }
 
     abstract protected function validateRelation(UserRelation $ur);
+    
+    
 }

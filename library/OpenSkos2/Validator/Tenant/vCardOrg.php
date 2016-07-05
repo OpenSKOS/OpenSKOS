@@ -18,18 +18,27 @@ class vCardOrg extends AbstractTenantValidator
             if (count($orgCheck) === 0) {
                 $this->errorMessages[] = 'Wrong xml: there is empty element of type  ' . vCard::ORG . ' that has to contain at least institution name.';
             } else {
-                if (count($orgCheck > 1)) {
+                if (count($orgCheck) > 1) {
                     $this->errorMessages[] = 'Wrong xml: there are too many elements of type  ' . vCard::ORG . '. There must be only one.';
                 } else {
-                    $name = trim($orgCheck[0]->getProperty(vCard::ORGNAME));
-                    $insts = $this->resourceManager->fetchTenantNameUri();
-                    if (array_key_exists()) {
-                        if ($this->forUpdate) {
-                            if ($isnsts[$name] !== $resource->getUri()) {
-                                $this->errorMessages[] = 'the institution with the name ' . $name . ' is already registered in the database. ';
+                    $names = $orgCheck[0]->getProperty(vCard::ORGNAME);
+                    if (count($names) === 0) {
+                        $this->errorMessages[] = "The institution's name is not given. ";
+                    } else {
+                        if (count($names) > 1) {
+                            $this->errorMessages[] = "Multiple institution names are given. There must be only one. I will validate the first one.";
+                        }
+
+                        $name = $names[0]->getValue();
+                        $insts = $this->resourceManager->fetchTenantNameUri();
+                        if (array_key_exists($name, $insts)) {
+                            if ($this->isForUpdate) {
+                                if ($insts[$name] !== $resource->getUri()) {
+                                    $this->errorMessages[] = 'The institution with the name ' . $name . ' is already registered in the database. ';
+                                }
+                            } else { //creation, no duplication of names is admissible
+                                $this->errorMessages[] = 'The institution with the name ' . $name . ' is already registered in the database. ';
                             }
-                        } else { //creation, no duplication of names is admissible
-                            $this->errorMessages[] = 'the institution with the name ' . $name . ' is already registered in the database. ';
                         }
                     }
                 }

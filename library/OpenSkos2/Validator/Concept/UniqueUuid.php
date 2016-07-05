@@ -20,7 +20,6 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Validator\GenericProperties\Uuid;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
 class UniqueUuid extends AbstractConceptValidator
@@ -32,7 +31,7 @@ class UniqueUuid extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-       $this->errorMessages = Uuid::validate($concept, $this->forUpdate);
-       return (count($this->errorMessages) === 0);
+       return $this->validateUUID($concept);
+               
     }
 }

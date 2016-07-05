@@ -21,13 +21,11 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\GenericProperties\InScheme as GenericInScheme;
 
 class InScheme extends AbstractConceptValidator 
 {
     protected function validateConcept(Concept $concept)
     {
-      $this->errorMessages = GenericInScheme::validate($concept);
-      return (count($this->errorMessages) === 0);
+        return $this->validateInScheme($concept);
     }
 }

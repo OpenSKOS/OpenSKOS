@@ -20,12 +20,20 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Rdf\Resource as RdfResource;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Foaf;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
+
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
     protected $resourceManager;
     protected $resurceType;
-    protected $forUpdate;
+    protected $isForUpdate;
     protected $tenantCode;
     /**
      * @var array
@@ -44,7 +52,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         if ($isForUpdate === null) {
             throw new Exception("Cannot validate the resource because isForUpdateFlag is set to null (cannot differ between create- and update- validation mode.");
         }
-        $this->forUpdate = $isForUpdate;
+        $this->isForUpdate = $isForUpdate;
     }
 
     /**
@@ -62,4 +70,134 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $this->errorMessages;
     }
 
+    protected function validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique, $type=null) {
+        $this->errorMessages = array();
+        $val = $resource->getProperty($propertyUri);
+        
+       if (count($val)<1) {
+            if ($isRequired) {
+              $this->errorMessages[] = $propertyUri . ' is required for all resources of this type';
+            } else {
+               return []; 
+            }
+        }
+        if (count($val) > 1) {
+            if ($isSingle) {
+            $this->errorMessages[]='There must be exactly 1 ' . $propertyUri . ' per resource. A few of them are given.';
+            }
+        }
+
+       
+        if ($isBoolean) {
+            foreach ($val as $value) {
+                $this->errorMessages = array_merge($this->errorMessages, $this-> checkBoolean($value, $propertyUri));
+            }
+        }
+
+        if ($isUnique) {
+            foreach ($val as $value) {
+                if ($value instanceof Uri) {
+                    $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, '<' . $value->getUri() . '>', $this->resourceType);
+                    $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $value->getUri()));
+                } else { // a literal
+                    if ($value instanceof Literal) {
+                        $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, '"' . $value->getValue() . '"', $this->resourceType);
+                        $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $value->getValue()));
+                    } else {
+                        $this->errorMessages = array_merge($this->errorMessages, 'Not correct rdf type for value ' . (string) $value);
+                    }
+                }
+            }
+        }
+
+        if ($type !== null) { // check is the referred resoource of the given type exists in the triple store
+            foreach ($val as $value) {
+                if ($value instanceof Uri)
+                    $this->errorMessages = array_merge($this->errorMessages, $this->existenceCheck($value->getUri(), $type));
+            }
+        }
+
+        return (count($this->errorMessages)===0);
+    }
+    
+   private function uniquenessCheck($resource, $otherResources, $propertyUri, $value) {
+       $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered in the triple store.'];
+       if (count($otherResources)>0){ 
+           if ($this->isForUpdate) {
+               if (count($otherResources)>1) { 
+                  return $errorMessages; 
+               } else { // a signle other resource is found but it may be the given resource and duplication is not a problem
+                  if ($resource ->getUri() !== $otherResources[0]->getUri()){ // the same resource
+                      return $errorMessages;
+                  } else {
+                      return [];
+                  }
+               }
+           } else { // for create
+              return $errorMessages;
+           }
+       } else { // no duplications found
+           return [];
+       }
+   }
+   
+    private function checkBoolean($val, $propertyUri) {
+        $testVal = trim($val);
+        if (!($testVal === "true" || $testVal === "false")) {
+            return ['The value of ' . $propertyUri . ' must be set to true or false. '];
+        } else {
+            return [];
+        }
+    }
+    
+     // the resource referred by the uri must exist in the triple store, 
+    private function existenceCheck($uri, $rdfType) {
+            $count = $this->resourceManager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
+            if ($count < 1) {
+                return ['The resource referred by  uri ' . $uri . ' is not found in the triple store. '];
+            } else {
+                return [];
+            }
+    }
+    
+    // some common for different types of resources properties
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
+      
+    protected function validateUUID(RdfResource $resource){
+        return $this->validateProperty($resource, OpenSkos::UUID, true, true, false, false, true);
+    }
+    
+    protected function validateOpenskosCode(RdfResource $resource){
+        return $this->validateProperty($resource, OpenSkos::CODE, true, true, false, false, true);
+    }
+    
+    protected function validateTitle(RdfResource $resource){
+        return $this->validateProperty($resource, DcTerms::TITLE, true, false, false, false, true);
+    }
+    
+    protected function validateDescription(RdfResource $resource){
+        return $this->validateProperty($resource, DcTerms::DESCRIPTION, false, true, false, false, false);
+    }
+    
+    protected function validateType(RdfResource $resource){
+        return $this->validateProperty( $resource, Rdf::TYPE, true, true, true, false, false);
+    }
+    
+    protected function validateInSet(RdfResource $resource){
+        return $this->validateProperty( $resource, OpenSkos::SET, false, true, true, false, false, Dcmi::DATASET);
+    }
+    
+    protected function validateInScheme(RdfResource $resource){
+        return $this->validateProperty( $resource, Skos::INSCHEME, true, false, true, false, false, Skos::CONCEPTSCHEME);
+    }
+    
+    protected function validateInSkosCollection(RdfResource $resource){
+        return $this->validateProperty( $resource, Skos::SKOSCOLLECTION, false, false, true, false, false, Skos::SKOSCOLLECTION);
+    }
+    
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
+    protected function validateCreator(RdfResource $resource){
+        return $this->validateProperty($resource, DcTerms::CREATOR, true, true, true, false, false, Foaf::PERSON);
+    }
+    
 }

@@ -318,7 +318,7 @@ class Resource
   
     private function refineValidators($validators) {
         foreach ($validators as $validator) {
-            $validator -> setResourceManager($this->ResourceManager);
+            $validator -> setResourceManager($this->resourceManager);
             $validator -> setFlagIsForUpdate($this->isForUpdate);
         }
         return $validators;
