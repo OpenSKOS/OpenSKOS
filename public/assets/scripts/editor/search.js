@@ -62,7 +62,7 @@ EditorSearch = new Class({
         // Handle button clicking or other form submit.
         this.searchForm.addEvent('submit', function (ev) {
             ev.stop();
-            self.search();
+            self.delayedSearch();
         });
 
         this.initAdvancedOptionsBox();

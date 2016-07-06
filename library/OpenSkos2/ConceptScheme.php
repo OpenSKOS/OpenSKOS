@@ -24,13 +24,14 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
 
 class ConceptScheme extends Resource
 {
-    const TYPE = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
+    const TYPE = 'http://www.w3.org/2004/02/skos/core#ConceptScheme';
     
     /**
      * Resource constructor.

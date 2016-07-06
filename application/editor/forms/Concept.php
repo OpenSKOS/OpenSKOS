@@ -150,17 +150,19 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         //@TODO Add a param for this and for languages.
         //Don't access the config directly
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-        $allowNotationEdit = $this->getIsCreate() || (bool)$editorOptions['allowNotationEdit'];
+        $allowNotationEdit = (bool)$editorOptions['allowNotationEdit'];
         
-        $this->buildMultiElements(
-            [
-                'notation' => [
-                    'label' => _('Notations:'),
-                    'readonly' => !$allowNotationEdit,
+        if (!$this->getIsCreate()) {
+            $this->buildMultiElements(
+                [
+                    'notation' => [
+                        'label' => _('Notations:'),
+                        'readonly' => !$allowNotationEdit,
+                    ],
                 ],
-            ],
-            'OpenSKOS_Form_Element_Multitextnolang'
-        );
+                'OpenSKOS_Form_Element_Multitextnolang'
+            );
+        }
         
         if (!$this->_isCreate) {
             $this->addElement('submit', 'conceptSave', array(
