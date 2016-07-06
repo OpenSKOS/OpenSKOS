@@ -174,11 +174,13 @@ abstract class AbstractTripleStoreResource {
                 if ($type === Skos::CONCEPT || $type === Skos::CONCEPTSCHEME || $type === Skos::SKOSCOLLECTION){
                     $setUris=$resourceObject->getProperty(OpenSkos::SET);
                     if (count($setUris)===0) {
+                        // set uri may be needed to generate a handle,
+                        // that's why it is checked here, before validation
                         throw new ApiException('openskos:set uri is absent.', 400);
                     }
                     $parameters['seturi']=$setUris[0]->getUri();
                     if ($type === Skos::CONCEPT) {
-                        $notations = $resourceObject->getProperty(Skos::CONCEPT);
+                        $notations = $resourceObject->getProperty(Skos::NOTATION);
                         if (count($notations) === 0) {
                             $parameters['notation']=null;
                         } else {

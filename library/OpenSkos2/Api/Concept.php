@@ -290,8 +290,8 @@ class Concept extends AbstractTripleStoreResource {
         return $this->getSuccessResponse($xml, 202);
     }
 
-    // specific content validation
-    private function validate($resourceObject, $isForUpdate) {
+    
+    protected function validate($resourceObject, $isForUpdate) {
         parent::validate($resourceObject, $isForUpdate);
         $this->checkRelationsInConcept($resourceObject);
     }

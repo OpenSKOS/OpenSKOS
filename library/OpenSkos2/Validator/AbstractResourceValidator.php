@@ -219,32 +219,60 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
     
-    protected function validateInSet(RdfResource $resource){
-        $firstRound= $this->validateProperty( $resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
+    protected function validateInSet(RdfResource $resource) {
+        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
+        if ($firstRound) {
+            return $this->isSetOfCurrentTenant($resource);
+        } else {
+            return false;
+        }
+    }
+
+    private function isSetOfCurrentTenant(RdfResource $resource) {
         $setUris = $resource->getProperty(OpenSkos::SET);
-        if (count($setUris)>0) {
-            $setUri=$setUris[0]->getUri();
-            $set = $this->resourceManager->fetchByUri($setUri, Dcmi::DATASET);
+        $errorsBeforeCheck = count($this->errorMessages);
+        foreach ($setUris as $setURI) {
+            $set = $this->resourceManager->fetchByUri($setURI, Dcmi::DATASET);
             $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-            $tenantUri=$tenantUris[0]->getUri();
-            if ($tenantUri!==$this->tenantUri){
-                $this->errorMessages[]="Attempt to access the set  ". $setUri . ", which does not belong to the user's tenant ". $this->tenantUri. ", but to the tenant ". $tenantUri. ".";
-                return false;
+            $tenantUri = $tenantUris[0]->getUri();
+            if ($tenantUri !== $this->tenantUri) {
+                $this->errorMessages[] = "The resource " .$resource->getUri() . " attempts to access the set  " . $setURI . ", which does not belong to the user's tenant " . $this->tenantUri . ", but to the tenant " . $tenantUri . ".";
+            }
+        }
+        $errorsAfterCheck = count($this->errorMessages);
+        return ($errorsBeforeCheck===$errorsAfterCheck);
+    }
+    
+    private function refersToSetOfCurrentTenant(RdfResource $resource, $referenceName, $referenceType) {
+        $referenceUris = $resource->getProperty($referenceName);
+        $errorsBeforeCheck = count($this->errorMessages);
+        foreach ($referenceUris as $uri) {
+            $refResource = $this->resourceManager->fetchByUri($uri->getUri(), $referenceType); //throws an exception if something is wrong
+            $this->isSetOfCurrentTenant($refResource);
+        }
+        $errorsAfterCheck = count($this->errorMessages);
+        return ($errorsBeforeCheck===$errorsAfterCheck);
+    }
+
+    protected function validateInScheme(RdfResource $resource) {
+        $firstRound = $this->validateProperty($resource, Skos::INSCHEME, true, false, false, false, Skos::CONCEPTSCHEME);
+        if ($firstRound) {
+            if (ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
+                return true;
+            } else {
+                return $this->refersToSetOfCurrentTenant($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
             }
         } else {
-            return false; // the error message has been already generated on the previous round.
+            return false;
         }
         return $firstRound;
     }
-    
-    protected function validateInScheme(RdfResource $resource){
-        return $this->validateProperty( $resource, Skos::INSCHEME, true, false, false, false, Skos::CONCEPTSCHEME);
+
+    protected function validateInSkosCollection(RdfResource $resource) {
+        $firstRound= $this->validateProperty($resource, OpenSkos::INSKOSCOLLECTION, false, false, false, false, Skos::SKOSCOLLECTION);
+        return $firstRound;
     }
-    
-    protected function validateInSkosCollection(RdfResource $resource){
-        return $this->validateProperty( $resource, Skos::SKOSCOLLECTION, false, false, false, false, Skos::SKOSCOLLECTION);
-    }
-    
+
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isUri, $isBoolean, $isUnique,  $type)
     protected function validateCreator(RdfResource $resource){
         return $this->validateProperty($resource, DcTerms::CREATOR, true, true, false, false, Foaf::PERSON);
