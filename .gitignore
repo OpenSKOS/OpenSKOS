@@ -7,3 +7,6 @@ public/data/export/*
 /data/uploads/
 /public/data/icons/
 /vendor/
+/nbproject/
+/node_modules/
+/public/apidoc/

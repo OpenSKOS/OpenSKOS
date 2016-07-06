@@ -21,62 +21,66 @@
 
 class Editor_ConceptsSelectionController extends OpenSKOS_Controller_Editor
 {
-	public function addAction()
-	{
-		$user = OpenSKOS_Db_Table_Users::fromIdentity();
-		if (null === $user) {
-			throw new Zend_Controller_Action_Exception('User not found', 404);
-		}
-		
-		$addingResult = $user->addConceptsToSelection($this->getRequest()->getPost('uuids'));
-		
-		if ($addingResult) {
-			$selection = $user->getConceptsSelection();
-			$this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
-		} else {
-			$this->getHelper('json')->sendJson(array('status' => 'limitReached', 'limit' => OpenSKOS_Db_Table_Row_User::USER_SELECTION_SIZE));
-		}
-	}
-	
-	public function getAllAction()
-	{
-		$user = OpenSKOS_Db_Table_Users::fromIdentity();
-		if (null === $user) {
-			throw new Zend_Controller_Action_Exception('User not found', 404);
-		}
-		
-		$selection = $user->getConceptsSelection();
-		$this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
-	}
-	
-	public function clearAction()
-	{
-		$user = OpenSKOS_Db_Table_Users::fromIdentity();
-		if (null === $user) {
-			throw new Zend_Controller_Action_Exception('User not found', 404);
-		}
-		$user->clearConceptsSelection();
-		$this->getHelper('json')->sendJson(array('status' => 'ok'));
-	}
-	
-	public function removeAction()
-	{
-		$user = OpenSKOS_Db_Table_Users::fromIdentity();
-		if (null === $user) {
-			throw new Zend_Controller_Action_Exception('User not found', 404);
-		}
-		$user->removeConceptFromSelection($this->getRequest()->getPost('uuid'));
-		
-		$selection = $user->getConceptsSelection();
-		$this->getHelper('json')->sendJson(array('status' => 'ok', 'result' => $this->_prepareSelectionData($selection)));
-	}
-	
-	protected function _prepareSelectionData($selection)
-	{
-		$data = array();
-		foreach ($selection as $concept) {
-			$data[] = $concept->toArray(array('uuid', 'uri', 'status', 'schemes', 'previewLabel', 'previewScopeNote'));
-		}
-		return $data;
-	}
+    public function addAction()
+    {
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (null === $user) {
+            throw new Zend_Controller_Action_Exception('User not found', 404);
+        }
+        
+        $addingResult = $user->addConceptsToSelection($this->getRequest()->getPost('uris'));
+        
+        if ($addingResult) {
+            $selection = $user->getConceptsSelection();
+            $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
+        } else {
+            $this->getHelper('json')->sendJson([
+                'status' => 'limitReached',
+                'limit' => OpenSKOS_Db_Table_Row_User::USER_SELECTION_SIZE
+            ]);
+        }
+    }
+    
+    public function getAllAction()
+    {
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (null === $user) {
+            throw new Zend_Controller_Action_Exception('User not found', 404);
+        }
+        
+        $selection = $user->getConceptsSelection();
+        $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
+    }
+    
+    public function clearAction()
+    {
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (null === $user) {
+            throw new Zend_Controller_Action_Exception('User not found', 404);
+        }
+        $user->clearConceptsSelection();
+        $this->getHelper('json')->sendJson(array('status' => 'ok'));
+    }
+    
+    public function removeAction()
+    {
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (null === $user) {
+            throw new Zend_Controller_Action_Exception('User not found', 404);
+        }
+        $user->removeConceptFromSelection($this->getRequest()->getPost('uri'));
+        
+        $selection = $user->getConceptsSelection();
+        $this->getHelper('json')->sendJson(['status' => 'ok', 'result' => $this->prepareSelectionData($selection)]);
+    }
+    
+    /**
+     * @param ConceptCollection $selection
+     * @return array
+     */
+    protected function prepareSelectionData($selection)
+    {
+        $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
+        return $preview->convertToLinksData($selection);
+    }
 }

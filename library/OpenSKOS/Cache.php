@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * OpenSKOS
  *
@@ -25,28 +26,29 @@
  */
 class OpenSKOS_Cache
 {
-	/**
-	 * Constant holding reserved name for the general cache.
-	 * 
-	 * @var string
-	 */
-	const GENERAL_CACHE = 'general';
-	
-	/**
-	 * Returns instance of the Zend_Cache_Core configured with the options from the application configuration.
-	 * 
-	 * @param string $name, optional The name of the cache - general by default. This name is used in the configuration.
-	 * @return Zend_Cache_Core
-	 */
-	public static function getCache($name = self::GENERAL_CACHE)
-	{
-		static $instances = array();
-	
-		if ( ! isset($instances[$name])) {
-			$manager = OpenSKOS_Application_BootstrapAccess::getBootstrap()->getPluginResource('cachemanager')->getCacheManager();
-			$instances[$name] = $manager->getCache($name);
-		}
-	
-		return $instances[$name];
-	}
+
+    /**
+     * Constant holding reserved name for the general cache.
+     * 
+     * @var string
+     */
+    const GENERAL_CACHE = 'general';
+
+    /**
+     * Returns instance of the Zend_Cache_Core configured with the options from the application configuration.
+     * 
+     * @param string $name, optional The name of the cache - general by default. This name is used in the configuration.
+     * @return Zend_Cache_Core
+     */
+    public static function getCache($name = self::GENERAL_CACHE)
+    {
+        static $instances = array();
+
+        if (!isset($instances[$name])) {
+            $manager = OpenSKOS_Application_BootstrapAccess::getBootstrap()->getPluginResource('cachemanager')->getCacheManager();
+            $instances[$name] = $manager->getCache($name);
+        }
+
+        return $instances[$name];
+    }
 }

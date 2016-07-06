@@ -21,30 +21,28 @@
 
 class Editor_InstitutionController extends OpenSKOS_Controller_Editor
 {
-	public function indexAction()
-	{
-		$this->_requireAccess('editor.institution');
-		
-		$this->view->assign('tenant', $this->_tenant);
-	}
-	
-	public function saveAction()
-	{
-		$this->_requireAccess('editor.institution');
-		
-		if (!$this->getRequest()->isPost()) {
-			$this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
-			$this->_helper->redirector('index');
-		}
-		$form = $this->_tenant->getForm();
-		if (!$form->isValid($this->getRequest()->getParams())) {
-			return $this->_forward('index');
-		} else {
-			$this->_tenant->setFromArray($form->getValues())->save();
-			$this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
-			$this->_helper->redirector('index');
-		}
-	}
-	
+    public function indexAction()
+    {
+        $this->_requireAccess('editor.institution');
+        
+        $this->view->assign('tenant', $this->_tenant);
+    }
+    
+    public function saveAction()
+    {
+        $this->_requireAccess('editor.institution');
+        
+        if (!$this->getRequest()->isPost()) {
+            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
+            $this->_helper->redirector('index');
+        }
+        $form = $this->_tenant->getForm();
+        if (!$form->isValid($this->getRequest()->getParams())) {
+            return $this->_forward('index');
+        } else {
+            $this->_tenant->setFromArray($form->getValues())->save();
+            $this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
+            $this->_helper->redirector('index');
+        }
+    }
 }
-

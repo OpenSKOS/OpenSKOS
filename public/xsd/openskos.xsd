@@ -1,22 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-OpenSKOS
-
-LICENSE
-
-This source file is subject to the GPLv3 license that is bundled
-with this package in the file LICENSE.txt.
-It is also available through the world-wide-web at this URL:
-http://www.gnu.org/licenses/gpl-3.0.txt
-If you did not receive a copy of the license and are unable to
-obtain it through the world-wide-web, please send an email
-to license@zend.com so we can send you a copy immediately.
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
 -->
 
-<xs:schema version="1.0"
+<xs:schema version="1.1"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:attribute name="numFound" type="xs:integer"/>
+    <xs:attribute name="rows" type="xs:integer"/>
     <xs:attribute name="start" type="xs:integer"/>
     <xs:attribute name="maxScore" type="xs:decimal"/>
-    <xs:element name="status" type="xs:string"/>
+    <xs:element name="status">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="candidate"/>
+                <xs:enumeration value="approved"/>
+                <xs:enumeration value="redirected"/>
+                <xs:enumeration value="not_compliant"/>
+                <xs:enumeration value="rejected"/>
+                <xs:enumeration value="obsolete"/>
+                <xs:enumeration value="deleted"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="toBeChecked" type="xs:boolean"/>
+        
+    <xs:element name="collection"/>
+    <xs:element name="uuid"/>
+    <xs:element name="dateDeleted" />
+    <xs:element name="deletedBy" />
+    <xs:element name="acceptedBy" />
+    <xs:element name="modifiedBy" />
 </xs:schema>

@@ -2,8 +2,9 @@
 [production]
 
 ; general settings:
-phpSettings.display_startup_errors = 0
-phpSettings.display_errors = 0
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.frontController.params.displayExceptions = 1
 includePaths.openskos = APPLICATION_PATH "/../library/openSKOS"
 bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
 bootstrap.class = "Bootstrap"
@@ -22,9 +23,6 @@ editor.languages.nl="Dutch"
 editor.languages.en="English"
 editor.languages.fr="French"
 
-; Concepts and Concept schemes uri configuration
-editor.conceptSchemesDefaultBaseUri="http://data.beeldengeluid.nl/gtaa/"
-
 ; Concept scheme icons configuration
 editor.schemeIcons.uploadPath="/../public/data/icons/uploads"
 editor.schemeIcons.uploadHttpPath="/data/icons/uploads"
@@ -38,8 +36,8 @@ editor.schemeIcons.extension="png"
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
 editor.export.filesHttpPath = "/data/export/"
 
-; Api client configuration
-editor.apiclient.apiurl=http://openskos/api/
+; Editor behaviour
+editor.allowNotationEdit = "@editor-allow-notation-edit@"
 
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
@@ -74,14 +72,9 @@ resources.translate.options.disableNotices=true
 resources.acl.foo=bar
 
 ; Solr configuration:
-resources.solr.host = localhost
-resources.solr.port = 8983
-resources.solr.context = solr
-; If you are using a dedicate write solr host uncomment the following lines
-; and configure to point to this solr instance
-;resources.solr.writeHost = localhost
-;resources.solr.writePort = 8983
-;resources.solr.writeContext = solr
+solr.host = localhost
+solr.port = 8983
+solr.context = /solr
 
 ; Database configuration:
 resources.db.adapter=pdo_mysql
@@ -109,20 +102,24 @@ resources.frontController.plugins.locale="OpenSKOS_Controller_Plugin_Locale"
 ;resources.frontController.plugins.apiclient="OpenSKOS_Controller_Plugin_ApiClient"
 resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
-
 ; @extra routes here@
 
-resources.frontController.params.displayExceptions = 0
+resources.frontController.params.displayExceptions = 1
 resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
 resources.view.options.doctype=XHTML1_STRICT
+
+; Apache Jena Fuseki configuration:
+sparql.queryUri = http://localhost:3030/openskos/query
+sparql.updateUri = http://localhost:3030/openskos/update
 
 ; Client id and client secret configured in https://console.developers.google.com
 oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
 ; Api configuration
+api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
 [staging : production]

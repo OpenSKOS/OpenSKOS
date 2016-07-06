@@ -1,0 +1,15 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:openskos="http://openskos.org/xmlns#">
+  <rdf:Description rdf:about="http://data.cultureelerfgoed.nl/semnet/kostuumthesaurus">
+    <dc:description></dc:description>
+    <dc:title>kostuumthesaurus</dc:title>
+    <dc:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime"
+    >2015-02-04T12:54:17Z</dc:modified>
+    <openskos:uuid>acafa2af-38c8-5990-4b92-35121cc37df2</openskos:uuid>
+    <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime"
+    >2015-02-04T12:54:17Z</dc:dateSubmitted>
+  </rdf:Description>
+</rdf:RDF>

@@ -1,27 +1,24 @@
 <?php
-/**
+/* 
  * OpenSKOS
- *
+ * 
  * LICENSE
- *
+ * 
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
+ * 
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
- * @author     Mark Lindeman
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
 <?php
 $exampleWordAutocomplete = 'dood';
-$exampleConceptStatus = OpenSKOS_Concept_Status::APPROVED;
+$exampleConceptStatus = OpenSkos2\Concept::STATUS_APPROVED;
 $exampleWordFindConcepts = $exampleWordAutocomplete;
 $exampleWordFindConceptsAltLabel = 'kruisigingen';
 $exampleWordFindConceptsAltLabelTruncated = 'kr*';
@@ -35,118 +32,117 @@ $exampleURI = 'http://data.beeldengeluid.nl/gtaa/215866';
 $exampleUUID = '0a39cbfc-a491-75f8-60b2-6b50418e299d';
 
 $this->headTitle('Welcome to the OpenSKOS API');
-
 ?>
-<h2><?php echo $this->escape('Welcome to the OpenSKOS API')?></h2>
+<h2><?php echo $this->escape('Welcome to the OpenSKOS API') ?></h2>
 <ul>
-	<li><a href="#about-the-openskos-api">About the OpenSKOS API</a></li>
-	<li>
-		<a href="#examples">Examples</a>
-		<ul>
-			<li><a href="#autocomlete">Autocomplete</a></li>
-			<li><a href="#find-concepts">Find concepts</a></li>
-			<li>
-				<a href="#concept-crud">Create/Retrieve/Update/Delete Concepts</a>
-				<ul>
-					<li><a href="#concept-create">Create Concepts</a></li>
-					<li><a href="#concept-retrieve">Retrieve Concepts</a></li>
-					<li><a href="#concept-update">Update Concepts</a></li>
-					<li><a href="#concept-delete">Delete Concepts</a></li>
-				</ul>
-			</li>
-			<li><a href="#institutions">Institutions</a></li>
-			<li><a href="#collections">Collections</a></li>
-		</ul>
-	</li>
+    <li><a href="#about-the-openskos-api">About the OpenSKOS API</a></li>
+    <li>
+        <a href="#examples">Examples</a>
+        <ul>
+            <li><a href="#autocomlete">Autocomplete</a></li>
+            <li><a href="#find-concepts">Find concepts</a></li>
+            <li>
+                <a href="#concept-crud">Create/Retrieve/Update/Delete Concepts</a>
+                <ul>
+                    <li><a href="#concept-create">Create Concepts</a></li>
+                    <li><a href="#concept-retrieve">Retrieve Concepts</a></li>
+                    <li><a href="#concept-update">Update Concepts</a></li>
+                    <li><a href="#concept-delete">Delete Concepts</a></li>
+                </ul>
+            </li>
+            <li><a href="#institutions">Institutions</a></li>
+            <li><a href="#collections">Collections</a></li>
+        </ul>
+    </li>
 </ul>
 <h3 id="about-the-openskos-api">About the OpenSKOS API</h3>
 <p>The OpenSKOS API is a RESTful webservice.</p>
 <h3 id="examples">Examples</h3>
 <h4 id="autocomlete">Autocomplete</h4>
 <p>The autocomplete API is a simplified version of the <a href="#find-concepts"><em>Find concepts</em></a> API.
-You can use the autocomplete API in your projects, 
-for example with as Javascript based autocompete field.</p>
+    You can use the autocomplete API in your projects, 
+    for example with as Javascript based autocompete field.</p>
 <ul class="api-examples">
-	<li>
-		<p>Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
-			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>">
-				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>
-			</a>
-		</p>
-		<div class="note">
-			<p>This method returns all labels, including hiddenLabels and altLabels. This means it is possible that the service returns labels that do not match your pattern.</p>
-		</div>
-	</li>
-	<li>
-		<p>Get only lexical labels with languagecode "<em>nl</em>" in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
-			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>">?lang=nl
-				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?lang=nl
-			</a>
-		</p>
-	</li>
-	<li>
-		<p>Get all lexical labels in JSON format, with a word in one in the prefLabels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
-			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?searchLabel=prefLabel">
-				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?searchLabel=prefLabel
-			</a>
-		</p>
-	</li>
-	<li>
-		<p>Get only prefLabels in JSON format, with a word in one in the labels starting with "<em><?php echo $exampleWordAutocomplete?></em>":
-			<a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?returnLabel=prefLabel">
-				<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest')?>?returnLabel=prefLabel
-			</a>
-		</p>
-	</li>
+    <li>
+        <p>Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete ?></em>":
+            <a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>">
+                <?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>
+            </a>
+        </p>
+        <div class="note">
+            <p>This method returns all labels, including hiddenLabels and altLabels. This means it is possible that the service returns labels that do not match your pattern.</p>
+        </div>
+    </li>
+    <li>
+        <p>Get only lexical labels with languagecode "<em>nl</em>" in JSON format, with a word in one of the lexical labels starting with "<em><?php echo $exampleWordAutocomplete ?></em>":
+            <a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>">?lang=nl
+                <?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>?lang=nl
+            </a>
+        </p>
+    </li>
+    <li>
+        <p>Get all lexical labels in JSON format, with a word in one in the prefLabels starting with "<em><?php echo $exampleWordAutocomplete ?></em>":
+            <a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>?searchLabel=prefLabel">
+                <?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>?searchLabel=prefLabel
+            </a>
+        </p>
+    </li>
+    <li>
+        <p>Get only prefLabels in JSON format, with a word in one in the labels starting with "<em><?php echo $exampleWordAutocomplete ?></em>":
+            <a rel="external" href="<?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>?returnLabel=prefLabel">
+                <?php echo $this->url(array('controller' => 'autocomplete', 'id' => $exampleWordAutocomplete), 'rest') ?>?returnLabel=prefLabel
+            </a>
+        </p>
+    </li>
 </ul>
 <p>Once the user selects a label from the autocomplete list, you have to lookup the matching Concept. 
-You can do this by querying the find API with the selected label, for example if the user selects the label "Dantons Dood":<br/>
-	<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:%22Dood%20Paard%22&fl=uri">
-		<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabel:"Dood Paard"&amp;fl=uri
-	</a>
+    You can do this by querying the find API with the selected label, for example if the user selects the label "Dantons Dood":<br/>
+    <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=prefLabel:%22Dood%20Paard%22&fl=uri">
+        <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=prefLabel:"Dood Paard"&amp;fl=uri
+    </a>
 </p>
 <div class="note">
-	<p>Please note: in the second call to the find API, it's possible the API returns multiple concepts.
-	You should implement methods to handle this!</p>
+    <p>Please note: in the second call to the find API, it's possible the API returns multiple concepts.
+        You should implement methods to handle this!</p>
 </div>
 <h4 id="find-concepts">Find concepts</h4>
 <ul class="api-examples">
-	<li>
-		<p>Find concepts that have a lexical label that matches the word "<em><?php echo $exampleWordFindConcepts?></em>":</p>
-		<ul>
-			<li>
-				in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?></a>
-			</li>
-			<li>
-				in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=json"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=json</a>
-			</li>
-                        <li>
-				in JSONP format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
-			</li>
-			<!-- 
-			<li>
-				in (internal) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts'))?>?q=<?php echo $exampleWordFindConcepts?>&amp;format=xml</a>
-			</li>
-			 -->
-		</ul>
-	</li>
-	<li>
-		<p>Fetch a single concept:</p>
-		<ul>
-			<li>by URI: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleURI), 'rest')?>?id=<?php echo $exampleURI?>"><?php echo $this->url(array('controller' => 'find-concepts'), 'rest')?>?id=<?php echo $exampleURI?></a></li>
-			<li>by UUID: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?></a></li>
-<!--			<li>by UUID in (native) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.xml</a></li>-->
-			<li>by UUID in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.rdf"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest')?>.rdf</a></li>
-		</ul>
-	</li>
-	<li>
-		<p>Advanced queries:</p>
-		<ul>
+    <li>
+        <p>Find concepts that have a lexical label that matches the word "<em><?php echo $exampleWordFindConcepts ?></em>":</p>
+        <ul>
             <li>
-				Search for concepts with specific status "<em><?php echo $exampleConceptStatus?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=status:<?php echo $exampleConceptStatus?>
-					</a>
+                in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>"><?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?></a>
+            </li>
+            <li>
+                in JSON format: <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&format=json"><?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&amp;format=json</a>
+            </li>
+            <li>
+                in JSONP format: <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
+            </li>
+            <!-- 
+            <li>
+                    in (internal) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&format=xml"><?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=<?php echo $exampleWordFindConcepts ?>&amp;format=xml</a>
+            </li>
+            -->
+        </ul>
+    </li>
+    <li>
+        <p>Fetch a single concept:</p>
+        <ul>
+            <li>by URI: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleURI), 'rest') ?>?id=<?php echo $exampleURI ?>"><?php echo $this->url(array('controller' => 'find-concepts'), 'rest') ?>?id=<?php echo $exampleURI ?></a></li>
+            <li>by UUID: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?>"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?></a></li>
+<!--			<li>by UUID in (native) XML format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?>.xml"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?>.xml</a></li>-->
+            <li>by UUID in XML-RDF format: <a href="<?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?>.rdf"><?php echo $this->url(array('controller' => 'find-concepts', 'id' => $exampleUUID), 'rest') ?>.rdf</a></li>
+        </ul>
+    </li>
+    <li>
+        <p>Advanced queries:</p>
+        <ul>
+            <li>
+                Search for concepts with specific status "<em><?php echo $exampleConceptStatus ?></em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=status:<?php echo $exampleConceptStatus ?>">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=status:<?php echo $exampleConceptStatus ?>
+                </a>
                 <br />
                 All possible statuses are: 
                 <table>
@@ -158,48 +154,48 @@ You can do this by querying the find API with the selected label, for example if
                     <tr><td>obsolete</td><td>This concept is no longer necessary, may be succeeded by another concept.</td></tr>
                     <tr><td>deleted</td><td>All concept metadata is deleted.</td></tr>
                 </table>
-			</li>
-			<li>
-				Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel?>
-					</a>
-			</li>
-			<li>
-				Search for concepts in prefLabels in Dutch, in a case-insensitive way, matching the word "<em><?php echo $exampleWordFindConceptsPrefLabelDutch?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch?>
-					</a>
-			</li>
-			<li>
-				Search for concepts in altLabels, in a case-insensitive way, matching a word starting with "<em><?php echo $exampleWordFindConceptsAltLabelTruncated?></em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabelTruncated?>">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=altLabelText:<?php echo $exampleWordFindConceptsAltLabelTruncated?>
-					</a>
-			</li>
-			<li>
-				Search for concepts that have a <em>notation</em> value:
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=notation:[* TO *]
-					</a>
-			</li>
-			<li>
-				Search for concepts that have a <em>scopeNote</em> value, returning only the uri and prefLabels and scopeNotes in dutch:
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=scopeNote:[* TO *]&fl=uri,scopeNote@nl,prefLabel@nl">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
-					</a>
-			</li>
-			<li>
-				Count concepts that match the query "<em>washington</em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0
-					</a>
-			</li>
+            </li>
             <li>
-				Sort results on particular field "<em>prefLabelSort asc</em>":
-					<a href="<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&rows=0&sort=prefLabelSort asc">
-						<?php echo $this->url(array('controller' => 'find-concepts'))?>?q=washington&amp;rows=0&amp;sort=prefLabelSort asc
-					</a>
+                Search for concepts in altLabels, in a case-sensitive way, matching the word "<em><?php echo $exampleWordFindConceptsAltLabel ?></em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel ?>">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabel ?>
+                </a>
+            </li>
+            <li>
+                Search for concepts in prefLabels in Dutch, in a case-insensitive way, matching the word "<em><?php echo $exampleWordFindConceptsPrefLabelDutch ?></em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch ?>">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=prefLabelText@nl:<?php echo $exampleWordFindConceptsPrefLabelDutch ?>
+                </a>
+            </li>
+            <li>
+                Search for concepts in altLabels, in a case-insensitive way, matching a word starting with "<em><?php echo $exampleWordFindConceptsAltLabelTruncated ?></em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=altLabel:<?php echo $exampleWordFindConceptsAltLabelTruncated ?>">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=altLabelText:<?php echo $exampleWordFindConceptsAltLabelTruncated ?>
+                </a>
+            </li>
+            <li>
+                Search for concepts that have a <em>notation</em> value:
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=notation:[* TO *]">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=notation:[* TO *]
+                </a>
+            </li>
+            <li>
+                Search for concepts that have a <em>scopeNote</em> value, returning only the uri and prefLabels and scopeNotes in dutch:
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=scopeNote:[* TO *]&fl=uri,scopeNote@nl,prefLabel@nl">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=scopeNote:[* TO *]&amp;fl=uri,scopeNote@nl,prefLabel@nl
+                </a>
+            </li>
+            <li>
+                Count concepts that match the query "<em>washington</em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=washington&rows=0">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=washington&amp;rows=0
+                </a>
+            </li>
+            <li>
+                Sort results on particular field "<em>prefLabelSort asc</em>":
+                <a href="<?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=washington&rows=0&sort=prefLabelSort asc">
+                    <?php echo $this->url(array('controller' => 'find-concepts')) ?>?q=washington&amp;rows=0&amp;sort=prefLabelSort asc
+                </a>
                 <br />
                 All possible sort fields: 
                 <table>
@@ -207,271 +203,277 @@ You can do this by querying the find API with the selected label, for example if
                     <tr><td>prefLabelSort@{lang}</td></tr>
                     <tr><td>notationSort</td></tr>
                 </table>
-			</li>
-		</ul>
-		<div class="note">
-			<p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>
-			All classes of the SKOS vocabulary are supported. Classes can be search in a case-sensitive or case-insenitive way. Supported classes can be search limited to specific language codes.
-			If You're Familiar with <a rel="external" href="http://lucene.apache.org/solr/">Apache Solr</a> you can have lok at our <a href="<?php echo $this->url(array('controller' => 'solr-schema'))?>">Solr Schema</a>.
-			</p>
-		</div>
-	</li>
+            </li>
+        </ul>
+        <div class="note">
+            <p>You can query for concepts using a valid query according to the <a rel="external" href="http://lucene.apache.org/java/2_4_0/queryparsersyntax.html">Apache Lucene - Query Parser Syntax</a>
+                All classes of the SKOS vocabulary are supported. Classes can be search in a case-sensitive or case-insenitive way. Supported classes can be search limited to specific language codes.
+                If You're Familiar with <a rel="external" href="http://lucene.apache.org/solr/">Apache Solr</a> you can have lok at our <a href="<?php echo $this->url(array('controller' => 'solr-schema')) ?>">Solr Schema</a>.
+            </p>
+        </div>
+    </li>
 </ul>
 
 <h4 id="concept-crud">Create/Retrieve/Update/Delete Concepts</h4>
 <p>The OpenSKOS API provides a complete <abbr title="Create/Retrieve/Update/Delete">CRUD</abbr> API through RESTful HTTP calls. 
-All actions except the Retrieve action require a valid API key.</p>
-<?php $this
-	->highlight('xml')
-	->setTitle('Example Concept in RDF-XML')
-	->captureStart()?>
+    All actions except the Retrieve action require a valid API key.</p>
+<?php
+$this
+        ->highlight('xml')
+        ->setTitle('Example Concept in RDF-XML')
+        ->captureStart()
+?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
-  <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
-    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-    <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
-    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
-    <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
-    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
-    <skos:notation>28586</skos:notation>
-  </rdf:Description>
+    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+        <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+        <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+        <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+        <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+        <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+        <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+        <skos:notation>28586</skos:notation>
+    </rdf:Description>
 </rdf:RDF>
 <?php echo $this->highlight('xml')->captureEnd() ?>
 
 <h5 id="concept-create">Create Concepts</h5>
 <p>You can create a Concept by sending a POST request with a valid RDF XML document and some extra required parameters:</p>
 <ul>
-	<li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
-	<li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
-	<li><strong>key</strong> A valid API key</li>
-	<li>
+    <li><strong>tenant</strong> The institute code for your institute in the OpenSKOS portal</li>
+    <li><strong>collection</strong> The collection code for the collection the concept must be put in</li>
+    <li><strong>key</strong> A valid API key</li>
+    <li>
         <strong>autoGenerateIdentifiers</strong>
         <br />
-        If set to <strong>true</strong> (any of "1", "true", "on" and "yes") the concept notation and uri (rdf:about) will be automatically generated.
+        If set to <strong>true</strong> (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
         <br />
-        If notation and/or uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+        If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
         <br />
-        If set to <strong>false</strong> - the xml must contain both notation and uri (rdf:about). The uri must be based on notation (must contain the notation).
+        If set to <strong>false</strong> - the xml must contain uri (rdf:about).
     </li>
 </ul>
 
 <p>For your convenience, it is also possible to send the tenant, collection and key in the XML document, by setting the appropriate attributes in the openskos namespace.</p>
-<?php $this
-	->highlight('xml')
-	->setTitle('Example Concept in RDF-XML, with tenant, collection and key embeded')
-	->captureStart()?>
+<?php
+$this
+        ->highlight('xml')
+        ->setTitle('Example Concept in RDF-XML, with tenant, collection and key embeded')
+        ->captureStart()
+?>
 <rdf:RDF 
-  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-  xmlns:openskos="http://openskos.org/xmlns#"
-  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-  openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
-  <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
-    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-    <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
-    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
-    <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
-    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
-    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
-    <skos:notation>28586</skos:notation>
-  </rdf:Description>
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+    xmlns:openskos="http://openskos.org/xmlns#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
+    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+        <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+        <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+        <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+        <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+        <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+        <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+        <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+        <skos:notation>28586</skos:notation>
+    </rdf:Description>
 </rdf:RDF>
 <?php echo $this->highlight('xml')->captureEnd() ?>
 
-<?php $this
-	->highlight('php')
-	->setTitle('Example: create a new SKOS concept with <a href="http://framework.zend.com/manual/en/zend.http.client.html" rel="external">Zend Framework\'s HTTP Client</a>')
-	->captureStart()
+<?php
+$this
+        ->highlight('php')
+        ->setTitle('Example: create a new SKOS concept with <a href="http://framework.zend.com/manual/en/zend.http.client.html" rel="external">Zend Framework\'s HTTP Client</a>')
+        ->captureStart()
 ?>
-$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
-    'maxredirects' => 0,
-    'timeout'      => 30));
+$client = new Zend_Http_Client('<?php echo $this->serverUrl() ?>/api/concept', array(
+'maxredirects' => 0,
+'timeout'      => 30));
 $response = $client
-    ->setEncType('text/xml')
-    ->setRawData($xml)
-    ->setParameterGet('tenant', 'beg')
-    ->setParameterGet('collection', 'gtaa')
-    ->setParameterGet('key', 'your-valid-api-key')
-    ->setParameterGet('autoGenerateIdentifiers', true)
-    ->request('POST');
+->setEncType('text/xml')
+->setRawData($xml)
+->setParameterGet('tenant', 'beg')
+->setParameterGet('collection', 'gtaa')
+->setParameterGet('key', 'your-valid-api-key')
+->setParameterGet('autoGenerateIdentifiers', true)
+->request('POST');
 if ($response->isSuccessful()) {
-    echo 'Concept created';
+echo 'Concept created';
 } else {
-	echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
+echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
 }
-<?php echo $this->highlight()->captureEnd()?>
+<?php echo $this->highlight()->captureEnd() ?>
 <p>You will get an error with the appropriate HTTP Status code. Errors will occur if a concept already exists, invalid XML or missing/non-existing collection/tenant and/or api-key</p>
 <h5 id="concept-retrieve">Retrieve Concepts</h5>
 <p>You can retrieve a concept by sending a GET request with a valid identifier.</p>
 <ul>
-	<li>
-		<p>Retrieve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's UUID</p>
-		<ul>
-			<li>
-			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.rdf</a>
-			</li>
-			<li>
-			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.html</a>
-			</li>
-			<li>
-			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.json</a>
-			</li>
-                        <li>
-			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.jsonp?callback=myCallback_1234</a>
-			</li>
-			<!-- 
-			<li>
-			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID))?>.xml</a>
-			</li>
-			 -->
-		</ul>
-		<p>Retrieve the concept "<em><?php echo $exampleResolveLabel?></em>" by it's URI</p>
-		<ul>
-			<li>
-			 in RDF: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?></a>
-			</li>
-			<li>
-			 in HTML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=html"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=html</a>
-			</li>
-			<li>
-			 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=json"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=json</a>
-			</li>
-                        <li>
-			 in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
-			</li>
-			<!-- 
-			<li>
-			 in XML: <a href="<?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&format=xml"><?php echo $this->url(array('controller' => 'concept'))?>?id=<?php echo $exampleResolveURI?>&amp;format=xml</a>
-			</li>
-			 -->
-		</ul>
-	</li>
+    <li>
+        <p>Retrieve the concept "<em><?php echo $exampleResolveLabel ?></em>" by it's UUID</p>
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.rdf"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.rdf</a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.html"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.html</a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.json"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.jsonp?callback=myCallback_1234</a>
+            </li>
+            <!-- 
+            <li>
+             in XML: <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.xml"><?php echo $this->url(array('controller' => 'concept', 'id' => $exampleResolveUUID)) ?>.xml</a>
+            </li>
+            -->
+        </ul>
+        <p>Retrieve the concept "<em><?php echo $exampleResolveLabel ?></em>" by it's URI</p>
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?></a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=html"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=html</a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=json"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
+            </li>
+            <!-- 
+            <li>
+             in XML: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=xml"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=xml</a>
+            </li>
+            -->
+        </ul>
+    </li>
 </ul>
 
 <h5 id="concept-update">Update Concepts</h5>
 <p>The <em>Update</em> action works almost the same as the <em><a href="#concept-create">Create</a></em> action, but by sending a <em>PUT</em> request with an existing Concept identifier.</p>
-<?php $this
-	->highlight('php')
-	->setTitle("Example: update an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
-	->captureStart()
+<?php
+$this
+        ->highlight('php')
+        ->setTitle("Example: update an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
+        ->captureStart()
 ?>
-$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
-    'maxredirects' => 0,
-    'timeout'      => 30));
+$client = new Zend_Http_Client('<?php echo $this->serverUrl() ?>/api/concept', array(
+'maxredirects' => 0,
+'timeout'      => 30));
 $response = $client
-    ->setEncType('text/xml')
-    ->setRawData($xml)
-    ->setParameterGet('tenant', 'beg')
-    ->setParameterGet('collection', 'gtaa')
-    ->setParameterGet('key', 'your-valid-api-key')
-    ->request('PUT');
+->setEncType('text/xml')
+->setRawData($xml)
+->setParameterGet('tenant', 'beg')
+->setParameterGet('collection', 'gtaa')
+->setParameterGet('key', 'your-valid-api-key')
+->request('PUT');
 if ($response->isSuccessful()) {
-    echo 'Concept created';
+echo 'Concept created';
 } else {
-    echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
+echo 'Failed to create concept: ' . $response->getHeader('X-Error-Msg');
 }
-<?php echo $this->highlight()->captureEnd()?>
+<?php echo $this->highlight()->captureEnd() ?>
 
 <h5 id="concept-delete">Delete Concepts</h5>
 <p>By sending a DELETE request to the API with a valid, existing identifier, a Concept will be deleteded from the system.</p>
-<?php $this
-	->highlight('php')
-	->setTitle("Example: deleting an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
-	->captureStart()
+<?php
+$this
+        ->highlight('php')
+        ->setTitle("Example: deleting an existing SKOS concept with <a href=\"http://framework.zend.com/manual/en/zend.http.client.html\" rel=\"external\">Zend Framework's HTTP Client</a>")
+        ->captureStart()
 ?>
-$client = new Zend_Http_Client('<?php echo $this->serverUrl()?>/api/concept', array(
-    'maxredirects' => 0,
-    'timeout'      => 30));
+$client = new Zend_Http_Client('<?php echo $this->serverUrl() ?>/api/concept', array(
+'maxredirects' => 0,
+'timeout'      => 30));
 $response = $client
-    ->setParameterGet('tenant', 'beg')
-    ->setParameterGet('collection', 'gtaa')
-    ->setParameterGet('key', 'your-valid-api-key')
-    ->setParameterGet('id', 'http://data.beeldengeluid.nl/gtaa/28586')
-    ->request('DELETE');
+->setParameterGet('tenant', 'beg')
+->setParameterGet('collection', 'gtaa')
+->setParameterGet('key', 'your-valid-api-key')
+->setParameterGet('id', 'http://data.beeldengeluid.nl/gtaa/28586')
+->request('DELETE');
 if ($response->isSuccessful()) {
-    echo 'Concept deleted';
+echo 'Concept deleted';
 } else {
-    echo 'Failed to delete concept: ' . $response->getHeader('X-Error-Msg');
+echo 'Failed to delete concept: ' . $response->getHeader('X-Error-Msg');
 }
-<?php echo $this->highlight()->captureEnd()?>
+<?php echo $this->highlight()->captureEnd() ?>
 
 
 <h4 id="institutions">Institutions</h4>
 <ul>
-	<li>Fetch all Institutions in this repository
-		<ul>
-			<li>
-				in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>"><?php echo $this->url(array('controller' => 'institutions'))?></a>
-			</li>
-			<li>
-				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=json"><?php echo $this->url(array('controller' => 'institutions'))?>?format=json</a>
-			</li>
-                        <li>
-				in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions'))?>?format=jsonp&amp;callback=myCallback_1234</a>
-			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions'))?>?format=html"><?php echo $this->url(array('controller' => 'institutions'))?>?format=html</a>
-			</li>
-		</ul>
-	 </li>
-	<li>Fetch a single Institute from this repository
-		<ul>
-			<li>
-				in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?></a>
-			</li>
-			<li>
-				in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.json</a>
-			</li>
-                        <li>
-				in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.jsonp?callback=myCallback_1234</a>
-			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest')?>.html</a>
-			</li>
-		</ul>
-	 </li>
+    <li>Fetch all Institutions in this repository
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions')) ?>"><?php echo $this->url(array('controller' => 'institutions')) ?></a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions')) ?>?format=json"><?php echo $this->url(array('controller' => 'institutions')) ?>?format=json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions')) ?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions')) ?>?format=jsonp&amp;callback=myCallback_1234</a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions')) ?>?format=html"><?php echo $this->url(array('controller' => 'institutions')) ?>?format=html</a>
+            </li>
+        </ul>
+    </li>
+    <li>Fetch a single Institute from this repository
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?></a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.json"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.jsonp?callback=myCallback_1234</a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.html"><?php echo $this->url(array('controller' => 'institutions', 'id' => 'beg'), 'rest') ?>.html</a>
+            </li>
+        </ul>
+    </li>
 </ul>
 
 <h4 id="collections">Collections</h4>
 <ul>
-	<li>Fetch all Collections in this repository
-		<ul>
-			<li>
-				in RDF: <a href="<?php echo $this->url(array('controller' => 'collections'))?>"><?php echo $this->url(array('controller' => 'collections'))?></a>
-			</li>
-			<li>
-				in JSON: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=json"><?php echo $this->url(array('controller' => 'collections'))?>?format=json</a>
-			</li>
-                        <li>
-				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections'))?>?format=jsonp&amp;callback=myCallback_1234</a>
-			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections'))?>?format=html"><?php echo $this->url(array('controller' => 'collections'))?>?format=html</a>
-			</li>
-		</ul>
-	 </li>
-	<li>Fetch a single Institute from this repository
-		<ul>
-			<li>
-				in RDF: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?></a>
-			</li>
-			<li>
-				in JSON: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.json"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.json</a>
-			</li>
-                        <li>
-				in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.jsonp?callback=myCallback_1234</a>
-			</li>
-			<li>
-				in HTML: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest')?>.html</a>
-			</li>
-		</ul>
-	 </li>
+    <li>Fetch all Collections in this repository
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'collections')) ?>"><?php echo $this->url(array('controller' => 'collections')) ?></a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'collections')) ?>?format=json"><?php echo $this->url(array('controller' => 'collections')) ?>?format=json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections')) ?>?format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections')) ?>?format=jsonp&amp;callback=myCallback_1234</a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'collections')) ?>?format=html"><?php echo $this->url(array('controller' => 'collections')) ?>?format=html</a>
+            </li>
+        </ul>
+    </li>
+    <li>Fetch a single Institute from this repository
+        <ul>
+            <li>
+                in RDF: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?></a>
+            </li>
+            <li>
+                in JSON: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.json"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.json</a>
+            </li>
+            <li>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.jsonp?callback=myCallback_1234</a>
+            </li>
+            <li>
+                in HTML: <a href="<?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.html"><?php echo $this->url(array('controller' => 'collections', 'id' => 'beg:gtaa'), 'rest') ?>.html</a>
+            </li>
+        </ul>
+    </li>
 </ul>
- 

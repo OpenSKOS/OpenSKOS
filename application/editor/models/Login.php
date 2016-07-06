@@ -19,35 +19,39 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_Models_Login extends Zend_Auth {
+class Editor_Models_Login extends Zend_Auth
+{
 
     protected $_authAdapter, $_auth_result = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->_authAdapter = new Editor_Models_Login_AuthAdapter();
         $this->_authAdapter->setTableName('user')
-        	->setTenantColumn('tenant')
-        	->setIdentityColumn('email')
-        	->setCredentialColumn('password');
+            ->setTenantColumn('tenant')
+            ->setIdentityColumn('email')
+            ->setCredentialColumn('password');
     }
 
-    public function setData($tenant, $username, $password) {
+    public function setData($tenant, $username, $password)
+    {
         $this->_authAdapter
-        	->setTenant($tenant)
-        	->setIdentity($username)
-        	->setCredential(md5($password));
+            ->setTenant($tenant)
+            ->setIdentity($username)
+            ->setCredential(md5($password));
     }
     
     public function getMessages()
     {
-    	return null === $this->_auth_result ? array() : $this->_auth_result->getMessages();
+        return null === $this->_auth_result ? array() : $this->_auth_result->getMessages();
     }
 
     /**
      * @return Zend_Auth_Result
      */
-    public function isValid() {
-    	$this->_auth_result = $this->_authAdapter->authenticate();
+    public function isValid()
+    {
+        $this->_auth_result = $this->_authAdapter->authenticate();
         if ($this->_auth_result->isValid()) {
             $identify = $this->_authAdapter->getResultRowObject();
             $storage = $this->getStorage();
@@ -55,7 +59,6 @@ class Editor_Models_Login extends Zend_Auth {
         }
         return $this->_auth_result->isValid();
     }
-
 }
 
 class Editor_Models_Login_AuthAdapter extends Zend_Auth_Adapter_DbTable
@@ -75,10 +78,10 @@ class Editor_Models_Login_AuthAdapter extends Zend_Auth_Adapter_DbTable
     protected $_tenant = null;
 
     public function __construct()
-	{
-		parent::__construct(Zend_Db_Table::getDefaultAdapter());
-	}
-	
+    {
+        parent::__construct(Zend_Db_Table::getDefaultAdapter());
+    }
+    
     /**
      * setTenantColumn() - set the column name to be used as the identity column
      *
@@ -111,8 +114,8 @@ class Editor_Models_Login_AuthAdapter extends Zend_Auth_Adapter_DbTable
      */
     protected function _authenticateCreateSelect()
     {
-    	$select = parent::_authenticateCreateSelect()
-    		->where($this->_zendDb->quoteIdentifier($this->_tenantColumn, true) . ' = ?', $this->_tenant);
-    	return $select;
+        $select = parent::_authenticateCreateSelect()
+            ->where($this->_zendDb->quoteIdentifier($this->_tenantColumn, true) . ' = ?', $this->_tenant);
+        return $select;
     }
 }

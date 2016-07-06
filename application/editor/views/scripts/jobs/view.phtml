@@ -56,7 +56,7 @@
 		<?php if ($this->job->task == OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT):?>
 			<a href="<?php echo $this->url(array('controller' => 'jobs', 'action' => 'download-export'))?>" title="<?php echo $this->translate('Download the export file')?>"><?php echo $this->translate('Download the export file')?></a>
 		<?php else:?>
-			<?php echo $this->job->info?>
+			<?php echo nl2br($this->job->info)?>
 		<?php endif?>
 	</li>
 	<?php endif?>

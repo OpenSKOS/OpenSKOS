@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\Namespaces\Dc;
+use OpenSkos2\Namespaces\DcTerms;
+?>
+
+<?php if (!$this->currentConcept->isPropertyEmpty(DcTerms::CONTRIBUTOR)
+            || !$this->currentConcept->isPropertyEmpty(Dc::CONTRIBUTOR)): ?>
+    <div class="concept-contributor">
+        <span><?php echo $this->translate('Contributor:'); ?> </span>
+        <br />
+        <?php foreach ($this->currentConcept->getProperty(DcTerms::CONTRIBUTOR) as $contributor):?>
+            <?php if (filter_var($contributor, FILTER_VALIDATE_URL) !== false && $this->personManager->askForUri($contributor)):?>
+                <?= $this->personManager->fetchByUri($contributor)->getCaption()?>
+            <?php else:?>
+                <?= $contributor?>
+            <?php endif;?>
+            <br />
+        <?php endforeach;?>
+        <?php foreach ($this->currentConcept->getProperty(Dc::CONTRIBUTOR) as $contributor):?>
+            <?= $contributor?>
+            <br />
+        <?php endforeach;?>
+    </div>
+<?php endif ?>

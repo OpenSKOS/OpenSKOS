@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,49 +21,49 @@
 
 class Editor_Forms_OAuthLogin extends Zend_Form
 {
-	public function init()
-	{
-		$this->setName('oauth2login')
-		->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller' => 'login', 'action' => 'oauth2-login')))
-		->setMethod('get');
+    public function init()
+    {
+        $this->setName('oauth2login')
+        ->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller' => 'login', 'action' => 'oauth2-login')))
+        ->setMethod('get');
 
-		$this->buildProvider()
-		->buildRememberMe()
-		->buildButtons();
-	}
-	
-	protected function buildProvider()
-	{
-		$this->addElement('text', 'provider', array('label' => 'Provider', 'required' => true));
-		return $this;
-	}
-	
-	protected function buildRememberMe()
-	{
-		$this->addElement('checkbox', 'rememberme', array('label' => _('Remember me')));
-		return $this;
-	}
-	
-	protected function buildButtons()
-	{
-		$this->addElement('submit', 'OAuth2LoginButton', array(
-				'label' => 'Log in with OAuth2',
-				'decorators' => array(),
-		));
-		return $this;
-	}
-	
-	/**
-	 * @return Editor_Forms_OAuthLogin
-	 */
-	public static function getInstance()
-	{
-		static $instance;
-	
-		if (null === $instance) {
-			$instance = new Editor_Forms_OAuthLogin();
-		}
-	
-		return $instance;
-	}
+        $this->buildProvider()
+        ->buildRememberMe()
+        ->buildButtons();
+    }
+    
+    protected function buildProvider()
+    {
+        $this->addElement('text', 'provider', array('label' => 'Provider', 'required' => true));
+        return $this;
+    }
+    
+    protected function buildRememberMe()
+    {
+        $this->addElement('checkbox', 'rememberme', array('label' => _('Remember me')));
+        return $this;
+    }
+    
+    protected function buildButtons()
+    {
+        $this->addElement('submit', 'OAuth2LoginButton', array(
+                'label' => 'Log in with OAuth2',
+                'decorators' => array(),
+        ));
+        return $this;
+    }
+    
+    /**
+     * @return Editor_Forms_OAuthLogin
+     */
+    public static function getInstance()
+    {
+        static $instance;
+    
+        if (null === $instance) {
+            $instance = new Editor_Forms_OAuthLogin();
+        }
+    
+        return $instance;
+    }
 }

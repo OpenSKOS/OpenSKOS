@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\Namespaces\Skos;
+?>
+
+<div id="concept-scheme-tab-container" class="concept-scheme-tab-container">
+    <div id="concept-view-scheme-tabs">
+        <ul id="tab-links-scheme">
+            <?php if (!$this->currentConcept->isPropertyEmpty(Skos::INSCHEME)): ?>
+                <?php $isFirst = true; ?>
+                <?php foreach ($this->currentConcept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
+                    <li id="tab_<?php echo $schemeUri ?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false ?> active<?php endif ?>">
+                        <a <?php if ($isFirst): $isFirst = false ?> class="active"<?php endif ?> href="#" id="scheme_<?php echo $schemeUri; ?>">
+                            <?php $conceptScheme = $this->conceptSchemes->findByUri($schemeUri);?>
+                            <?php echo $conceptScheme ? $conceptScheme->getCaption() : $schemeUri; ?>
+                        </a>
+                    </li>
+                <?php endforeach ?>
+            <?php endif ?>
+        </ul>
+    </div>
+
+    <?= $this->render('concept/view/contributor.phtml');?>
+    
+    <?php if (!$this->currentConcept->isPropertyEmpty(Skos::INSCHEME)): ?>
+        <?php foreach ($this->currentConcept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>
+            <div id="tab_scheme_<?php echo $schemeUri; ?>" class="tab-content">
+                <div class="concept-scheme-istop">
+                    <span><?php echo $this->translate('Is top concept:'); ?> </span>
+                    <?php echo $this->currentConcept->isTopConceptOf($schemeUri) ? $this->translate('Yes') : $this->translate('No'); ?>
+                </div>
+                
+                <div class="concept-scheme-relations">
+                    <?php
+                    $relationNames = array(
+                        Skos::BROADER => _('Has broader'),
+                        Skos::NARROWER => _('Has narrower'),
+                        Skos::RELATED => _('Has related')
+                    );
+                    ?>
+                    <?php foreach ($relationNames as $relationKey => $relationTitle):
+                        $relations = $this->conceptManager->fetchRelations(
+                            $this->currentConcept->getUri(),
+                            $relationKey,
+                            $schemeUri
+                        );
+                        ?>
+                        <?php if ($relations->count()) : ?>
+                            <?= $this->partial(
+                                'concept/view/relations.phtml',
+                                [
+                                    'key' => $relationKey,
+                                    'title' => $relationTitle,
+                                    'relations' => $relations,
+                                    'conceptSchemes' => $this->conceptSchemes,
+                                ]
+                            );?>
+                        <?php endif ?>
+                    <?php endforeach ?>
+                </div>
+            </div>
+        <?php endforeach ?>
+    <?php endif ?>
+</div>
+
+<div class="concept-scheme-mappings">
+    <?php
+    $mappingNames = array(
+        Skos::BROADMATCH => _('Has broader match'),
+        Skos::NARROWMATCH => _('Has narrower match'),
+        Skos::RELATEDMATCH => _('Has related match'),
+        Skos::MAPPINGRELATION => _('Has mapping relation'),
+        Skos::CLOSEMATCH => _('Has close match'),
+        Skos::EXACTMATCH => _('Has exact match')
+    );
+    ?>
+    <?php foreach ($mappingNames as $mappingKey => $mappingTitle):
+        $mappings = $this->conceptManager->fetchRelations(
+            $this->currentConcept->getUri(),
+            $mappingKey
+        );
+        ?>
+        <?php if ($mappings->count()) : ?>
+            <?= $this->partial(
+                'concept/view/relations.phtml',
+                [
+                    'key' => $mappingKey,
+                    'title' => $mappingTitle,
+                    'relations' => $mappings,
+                    'conceptSchemes' => $this->conceptSchemes,
+                ]
+            );?>
+        <?php endif ?>
+    <?php endforeach ?>
+</div>

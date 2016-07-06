@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -21,47 +21,47 @@
 
 class Editor_Forms_ChangeStatus extends Zend_Form
 {
-	public function init() 
-	{
-		$this->setName('changeStatus')
-		->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller'=>'concept', 'action' => 'change-selection-status')))
-		->setMethod('post');
+    public function init()
+    {
+        $this->setName('changeStatus')
+        ->setAction(Zend_Controller_Front::getInstance()->getRouter()->assemble(array('controller'=>'concept', 'action' => 'change-selection-status')))
+        ->setMethod('post');
 
-		$this->buildStatus()
-		->buildButtons();
-	}
-	
-	protected function buildStatus()
-	{
-		$this->addElement('select', 'status', array(
-				'label' => 'Status:',
-				'separator' => '',
-				'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions(),
-				'decorators' => array('ViewHelper', 'Label')
-		));
-		return $this;
-	}
-		
-	protected function buildButtons()
-	{
-		$this->addElement('submit', 'changeButton', array(
-				'label' => 'Change',
-				'decorators' => array(),
-		));
-		return $this;
-	}
-	
-	/**
-	 * @return Editor_Forms_ChangeStatus
-	 */
-	public static function getInstance()
-	{
-		static $instance;
-		
-		if (null === $instance) {
-			$instance = new Editor_Forms_ChangeStatus();
-		}
-		
-		return $instance;
-	}
+        $this->buildStatus()
+        ->buildButtons();
+    }
+    
+    protected function buildStatus()
+    {
+        $this->addElement('select', 'status', array(
+                'label' => 'Status:',
+                'separator' => '',
+                'multiOptions' => OpenSKOS_Concept_Status::statusesToOptions(),
+                'decorators' => array('ViewHelper', 'Label')
+        ));
+        return $this;
+    }
+        
+    protected function buildButtons()
+    {
+        $this->addElement('submit', 'changeButton', array(
+                'label' => 'Change',
+                'decorators' => array(),
+        ));
+        return $this;
+    }
+    
+    /**
+     * @return Editor_Forms_ChangeStatus
+     */
+    public static function getInstance()
+    {
+        static $instance;
+        
+        if (null === $instance) {
+            $instance = new Editor_Forms_ChangeStatus();
+        }
+        
+        return $instance;
+    }
 }

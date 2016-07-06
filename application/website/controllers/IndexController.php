@@ -29,16 +29,13 @@ class IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
-		$homepagescript = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('homepagescript');
-		if (null !== $homepagescript) {
-		    if (!file_exists($homepagescript) || !is_readable($homepagescript)) {
-		        throw new Zend_Controller_Action_Exception('Custom homepage script not found');
-		    }
-		    $this->view->setLfiProtection(false);
-		}
-		$this->view->homepagescript = $homepagescript;
+        $homepagescript = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('homepagescript');
+        if (null !== $homepagescript) {
+            if (!file_exists($homepagescript) || !is_readable($homepagescript)) {
+                throw new Zend_Controller_Action_Exception('Custom homepage script not found');
+            }
+            $this->view->setLfiProtection(false);
+        }
+        $this->view->homepagescript = $homepagescript;
     }
-
-
 }
-

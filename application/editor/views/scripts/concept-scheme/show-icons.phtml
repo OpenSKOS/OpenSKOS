@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * OpenSKOS
  *
@@ -19,22 +19,23 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 ?>
-<?php $this->headTitle($this->translate('Manage icons'))?>
+<?php $this->headTitle($this->translate('Manage icons')) ?>
 
 <div id="manage-icons-list" class="manage-icons-list">
-	<?php foreach ($this->uploadedIcons as $icon) :?>
-		<img id="<?php echo $icon['iconFile']?>" src="<?php echo $icon['httpPath']?>" title="<?php echo $this->translate('Delete')?>" />
-	<?php endforeach?>
+    <?php foreach ($this->uploadedIcons as $icon) : ?>
+        <img id="<?php echo $icon['iconFile'] ?>" src="<?php echo $icon['httpPath'] ?>" title="<?php echo $this->translate('Delete') ?>" />
+    <?php endforeach ?>
 </div>
 
 <div id="delete-confirmation-message" class="do-not-show">
-	<?php echo $this->translate('Are you sure you want to delete this icon?')?>
+    <?php echo $this->translate('Are you sure you want to delete this icon?') ?>
 </div>
 
-<?php echo $this->uploadIconForm;?>
+<?php echo $this->uploadIconForm; ?>
 
 <?php
-	$baseUrl = $this->url(array(), 'default', true);
-	if ($baseUrl) $baseUrl = rtrim($baseUrl, '/').'/';
-	$this->headScript(Zend_View_Helper_HeadScript::FILE, $baseUrl . 'assets/scripts/editor/conceptSchemesIcons.js');
+$baseUrl = $this->url(array(), 'default', true);
+if ($baseUrl)
+    $baseUrl = rtrim($baseUrl, '/') . '/';
+$this->headScript(Zend_View_Helper_HeadScript::FILE, $baseUrl . 'assets/scripts/editor/conceptSchemesIcons.js');
 ?>

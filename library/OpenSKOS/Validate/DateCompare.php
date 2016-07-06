@@ -152,7 +152,7 @@ class OpenSKOS_Validate_DateCompare extends Zend_Validate_Abstract
         	//we verify the token as validator order execution means that we could get here before the
         	//date validation call for the corresponding field is made
         	$token = $context[$token];
-        	$validator = new Zend_Validate_Date(OpenSKOS_Solr_Queryparser_Editor::OPTIONS_DATE_FORMAT);
+        	$validator = new Zend_Validate_Date(Editor_Forms_SearchOptions::OPTIONS_DATE_FORMAT);
         	if (!$validator->isValid($token)) {
         		$this->_error(self::INVALID_TOKEN_FIELD);
         		return false;
