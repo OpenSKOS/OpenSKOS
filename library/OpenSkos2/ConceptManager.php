@@ -261,35 +261,32 @@ class ConceptManager extends ResourceManager
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
-        $select = $this->solr->createSelect();
-        $select->setStart($start)
-                ->setRows($rows)
-                ->setFields(['uri'])
-                ->setQuery($query);
-        
-        if (!empty($sorts)) {
-            $select->setSorts($sorts);
-        }
-        
-        $solrResult = $this->solr->select($select);
-        
-        $numFound = $solrResult->getNumFound();
-        
-        $uris = [];
-        foreach ($solrResult as $doc) {
-            $uris[] = $doc->uri;
-        }
-        
-        return $this->fetchByUris($uris);
+        return $this->fetchByUris(
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+        );
+    }
+    
+    /**
+     * Gets the current max numeric notation for all concepts. Fast.
+     * @param \OpenSkos2\Tenant $tenant
+     * @return int|null
+     */
+    public function fetchMaxNumericNotationFromSolr(Tenant $tenant)
+    {
+        // Gets the maximum of all max_numeric_notation fields
+        return $maxNotation;
     }
     
     /**
      * Gets the current max numeric notation.
+     * This method is extremely slow...
+     * @see self::fetchMaxNumericNotationFromIndex
      * @param \OpenSkos2\Tenant $tenant
      * @return int|null
      */
     public function fetchMaxNumericNotation(Tenant $tenant)
     {
+        // This method is slow - use fetchMaxNumericNotationFromIndex where possible.
         $maxNotationQuery = (new QueryBuilder())
             ->select('(MAX(<' . Xsd::NONNEGATIVEINTEGER . '>(?notation)) AS ?maxNotation)')
             ->where('?subject', '<' . Skos::NOTATION . '>', '?notation')
