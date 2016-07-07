@@ -202,7 +202,7 @@ class Document
         // Gets one of the numeric notations of the concept.
         // Should be the highest one.
         
-        $max = -1;
+        $max = 0;
         foreach ($this->resource->getProperty(Skos::NOTATION) as $notation) {
             $value = $notation->getValue();
             if (is_numeric($value) && $value > $max) {
