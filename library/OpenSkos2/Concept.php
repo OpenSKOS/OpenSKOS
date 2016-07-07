@@ -232,7 +232,7 @@ class Concept extends Resource
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         
-        $setUri = $this->deriveSetUri($params, $existingResource);
+        $setUri = $this->deriveSetUri($params, $existingConcept);
         if ($setUri !== null) { // othewrise it is either set in this or not derivable
            $metadata[OpenSkos::SET] = $setUri;
         }

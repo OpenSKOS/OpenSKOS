@@ -547,6 +547,7 @@ public function deleteSolrIntact(Uri $resource)
     public function countTriples($subject, $prop, $object) {
         
         $query = 'SELECT (COUNT(*) as ?COUNT) WHERE { ' . $subject.  '  '. $prop.  '  '. $object. ' . }';
+        //var_dump($query);
         $result = $this->query($query);
         $retVal = $result[0]->COUNT->getValue();
         return $retVal;

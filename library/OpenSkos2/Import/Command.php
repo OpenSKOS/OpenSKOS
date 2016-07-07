@@ -133,21 +133,22 @@ class Command implements LoggerAwareInterface
             $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri);
             $valid = $validator->validate($preprocessedResource);
             if (!$valid) {
-                foreach($validator->getErrorMessages() as $message) {
-                    var_dump($message);
+                foreach ($validator->getErrorMessages() as $errorMessage) {
+                    var_dump($errorMessage);
                 }
-                throw new \Exception("\n Failed validation \n");
-            } 
+                var_dump($preprocessedResource->getUri() . " has not been inserted due to the validation error(s) above.");
+                continue;
+            }
 
             if ($preprocessedResource instanceof Concept) {
-                $preprocessedResource = $this->specialConceptImportLogic($preprocessedResource, $currentVersion);
+                $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
             }
 
             if ($currentVersion !== null) {
                 $this->resourceManager->delete($currentVersion);
             }
             $this->resourceManager->insert($preprocessedResource);
-            
+            var_dump($preprocessedResource->getUri() . " has been inserted.");
         }
     }
 
