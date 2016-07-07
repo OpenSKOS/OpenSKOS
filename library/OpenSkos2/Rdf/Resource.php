@@ -390,11 +390,18 @@ class Resource extends Uri implements ResourceIdentifier
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
+        
+        $setUri = $this->deriveSetUri($params, $existingResource);
+        if ($setUri !== null) { // othewrise it is either set in *this* or not derivable
+           $metadata[OpenSkos::SET] = $setUri;
+        }
 
         if ($existingResource === null) { // a completely new resource under creation
             $metadata[DcTerms::CREATOR] = new Uri($userUri);
             $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
+            
         } else {
+            
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
             $metadata[OpenSkos::UUID] = new Literal($existingResource->getUUID());
@@ -439,6 +446,26 @@ class Resource extends Uri implements ResourceIdentifier
         } else {
             return $this->getUri();
         }
+    }
+    
+    protected function deriveSetUri($params, $existingResource) {
+        if (count($this->getProperty(OpenSkos::SET)) < 1) {
+            if ($existingResource != null) {
+                $sets = $existingResource->getProperty(OpenSkos::SET);
+                if (count($sets) < 1) {
+                    if ($params['seturi'] !== null) {
+                        return new Uri($params['seturi']);
+                    }
+                } else {
+                    return $sets[0];
+                }
+            } else {
+                if ($params['seturi'] !== null) {
+                    return new Uri($params['seturi']);
+                }
+            }
+        }
+        return null;
     }
 
 }

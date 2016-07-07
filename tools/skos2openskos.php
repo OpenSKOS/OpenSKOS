@@ -48,14 +48,13 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 $conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
 $user = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
-
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager);
+$importer = new \OpenSkos2\Import\Command($resourceManager);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
-    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->userUri), true, OpenSKOS_Concept_Status::CANDIDATE,
+    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE,
     true, false, 'en', false, false
 );
 

@@ -231,12 +231,14 @@ class Concept extends Resource
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
+        
+        $setUri = $this->deriveSetUri($params, $existingResource);
+        if ($setUri !== null) { // othewrise it is either set in this or not derivable
+           $metadata[OpenSkos::SET] = $setUri;
+        }
+        
         if ($existingConcept === null) { // a completely new concept under creation
-            if (count($this->getProperty(OpenSkos::SET)) < 1) {
-                if ($params['seturi'] !== null) {
-                    $metadata[OpenSkos::SET] = new Uri($params['seturi']);
-                }
-            }
+            
             $metadata[DcTerms::CREATOR] = new Uri($userUri);
             $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
             $this->unsetProperty(DcTerms::DATEACCEPTED);
@@ -246,14 +248,7 @@ class Concept extends Resource
             $this->unsetProperty(OpenSkos::STATUS);
             $this->addProperty(OpenSkos::STATUS, new Literal(Concept::STATUS_CANDIDATE));
         } else {
-            $sets = $existingConcept->getProperty(OpenSkos::SET);
-            if (count($sets) < 1) {
-                if ($params['seturi'] !== null) {
-                    $metadata[OpenSkos::SET] = new Uri($params['seturi']);
-                }
-            } else {
-                $metadata[OpenSkos::SET] = $sets[0];
-            }
+            
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
             

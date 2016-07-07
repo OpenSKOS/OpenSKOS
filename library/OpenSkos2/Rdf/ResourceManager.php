@@ -318,8 +318,11 @@ public function deleteSolrIntact(Uri $resource)
         // @TODO Add resourceType check.
         
         if (count($resources) === 0) {
-            throw new ResourceNotFoundException(
-                'The requested resource <' . $uri . '> was not found.'
+            //echo '***';
+            //var_dump($resType);
+            //echo '***';
+            throw new RuntimeException(
+            'The requested resource <' . $uri . '> was not found.'
             );
         }
         if (count($resources) > 1) {

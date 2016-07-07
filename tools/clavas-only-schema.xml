@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#">
-<rdf:Description rdf:about="http://openskos.meertens.knaw.nl/iso-639-3-4">
+<rdf:Description rdf:about="http://openskos.meertens.knaw.nl/iso-639-3-4a">
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#conceptScheme"/>
-        <dcterms:title xml:lang="en">ISO 639-3-4</dcterms:title>
+        <dcterms:title xml:lang="en">ISO 639-3-4a</dcterms:title>
         <dcterms:description xml:lang="en">Codes for the representation of names of languages — Part 3: Alpha-3 code for comprehensive coverage of languages. ISO 639-3 attempts to provide as complete an enumeration of languages as possible, including living, extinct, ancient, and constructed languages, whether major or minor, written or unwritten.</dcterms:description>
-        <openskos:uuid>iso-639-3-4</openskos:uuid>
+        <openskos:uuid>iso-639-3-4a</openskos:uuid>
 </rdf:Description>
 </rdf:RDF>

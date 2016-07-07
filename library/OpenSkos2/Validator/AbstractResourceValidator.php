@@ -232,11 +232,11 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $setUris = $resource->getProperty(OpenSkos::SET);
         $errorsBeforeCheck = count($this->errorMessages);
         foreach ($setUris as $setURI) {
-            $set = $this->resourceManager->fetchByUri($setURI, Dcmi::DATASET);
+            $set = $this->resourceManager->fetchByUri($setURI->getUri(), Dcmi::DATASET);
             $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
             $tenantUri = $tenantUris[0]->getUri();
             if ($tenantUri !== $this->tenantUri) {
-                $this->errorMessages[] = "The resource " .$resource->getUri() . " attempts to access the set  " . $setURI . ", which does not belong to the user's tenant " . $this->tenantUri . ", but to the tenant " . $tenantUri . ".";
+                $this->errorMessages[] = "The resource " .$resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not belong to the user's tenant " . $this->tenantUri . ", but to the tenant " . $tenantUri . ".";
             }
         }
         $errorsAfterCheck = count($this->errorMessages);

@@ -20,23 +20,20 @@
 namespace OpenSkos2\Import;
 
 use OpenSkos2\Concept;
-use OpenSkos2\ConceptScheme;
-use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
+use RuntimeException;
 
 class Command implements LoggerAwareInterface
 {
@@ -47,11 +44,7 @@ class Command implements LoggerAwareInterface
      */
     private $resourceManager;
     
-    /**
-     * @var ConceptManager
-     */
-    private $conceptManager;
-    
+   
     /**
      * @var Tenant
      */
@@ -64,11 +57,9 @@ class Command implements LoggerAwareInterface
      */
     public function __construct(
         ResourceManager $resourceManager,
-        ConceptManager $conceptManager,
         Tenant $tenant = null
     ) {
         $this->resourceManager = $resourceManager;
-        $this->conceptManager = $conceptManager;
         $this->tenant = $tenant;
     }
 
@@ -78,12 +69,12 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
         
-        $set = $this->resourceManager->fetchByUri($message->getSetUri());
+        $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
         $tenantUris = $set ->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris)<1) {
             throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
         };       
-        $tenantUri = $tenantUris[0];
+        $tenantUri = $tenantUris[0]->getUri();
         
         //** Some purging stuff from the original picturae code,
         if ($message->getClearSet()) {
@@ -108,10 +99,17 @@ class Command implements LoggerAwareInterface
         foreach ($resourceCollection as $resourceToInsert) {
             $params['seturi'] = $message->getSetUri();
             $uri = $resourceToInsert->getUri();
-            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $message->getUser()->getUri());
+            
+            $types = $resourceToInsert->getProperty(Rdf::TYPE);
+            if (count($types)<1) {
+               throw new \Exception("The resource " . $uri . " does not have rdf-type. "); 
+            }
+            $type=$types[0]->getUri();
+            $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser()->getUri());
 
+           
             try {
-                $currentVersion = $this->resourceManager->fetchByUri($uri, $resourceToInsert->getPropertySingleValue(Rdf::TYPE));
+                $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
                 if ($message->getNoUpdates()) {
                     var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
                     $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
@@ -125,21 +123,21 @@ class Command implements LoggerAwareInterface
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
-            } catch (OpenSkos2\Exception\ResourceNotFoundException $ex) { // adding a new resource
+            } catch (RuntimeException $ex) { // adding a new resource
                 $autoGenerateIdentifiers = true;
                 $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
                 $isForUpdates = false;
                 $currentVersion = null;
             }
 
-            $validator = new ResourceValidator($this->manager, $isForUpdates, $tenantUri);
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri);
             $valid = $validator->validate($preprocessedResource);
             if (!$valid) {
-                var_dump($validator->getErrorMessages());
+                foreach($validator->getErrorMessages() as $message) {
+                    var_dump($message);
+                }
                 throw new \Exception("\n Failed validation \n");
-            } else {
-                return true;
-            }
+            } 
 
             if ($preprocessedResource instanceof Concept) {
                 $preprocessedResource = $this->specialConceptImportLogic($preprocessedResource, $currentVersion);
@@ -149,6 +147,7 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($currentVersion);
             }
             $this->resourceManager->insert($preprocessedResource);
+            
         }
     }
 
@@ -181,5 +180,7 @@ class Command implements LoggerAwareInterface
         }
         return $concept;
     }
+    
+  
 
 }
