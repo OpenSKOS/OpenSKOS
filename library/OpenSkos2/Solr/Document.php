@@ -210,7 +210,9 @@ class Document
             }
         }
         
-        $this->document->max_numeric_notation = $max;
+        if (!empty($max)) {
+            $this->document->max_numeric_notation = $max;
+        }
     }
 
     /**
