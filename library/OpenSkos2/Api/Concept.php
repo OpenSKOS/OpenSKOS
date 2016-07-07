@@ -279,7 +279,7 @@ class Concept extends AbstractTripleStoreResource {
 
             $user = $this->getUserFromParams($params);
 
-            $this->authorisationManager->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept);
+            $this->authorisationManager->resourceDeleteAllowed($user, $params['tenantcode'], $concept);
 
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
@@ -291,8 +291,8 @@ class Concept extends AbstractTripleStoreResource {
     }
 
     
-    protected function validate($resourceObject, $isForUpdate) {
-        parent::validate($resourceObject, $isForUpdate);
+    protected function validate($resourceObject, $isForUpdate, $tenanturi) {
+        parent::validate($resourceObject, $isForUpdate, $tenanturi);
         $this->checkRelationsInConcept($resourceObject);
     }
 
@@ -383,7 +383,7 @@ class Concept extends AbstractTripleStoreResource {
     public function addRelationTriple(PsrServerRequestInterface $request) {
         $params = $this->getAndAdaptQueryParams($request);
         try {
-            $body = $this->preEditChecksRels($request);
+            $body = $this->preEditChecksRels($request, $params);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
@@ -403,7 +403,7 @@ class Concept extends AbstractTripleStoreResource {
     public function deleteRelationTriple(PsrServerRequestInterface $request) {
         try {
             $params = $this->getAndAdaptQueryParams($request); // sets tenant info
-            $body = $this->preEditChecksRels($request);
+            $body = $this->preEditChecksRels($request, $params);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
@@ -416,7 +416,7 @@ class Concept extends AbstractTripleStoreResource {
         return $response;
     }
 
-    private function preEditChecksRels(PsrServerRequestInterface $request) {
+    private function preEditChecksRels(PsrServerRequestInterface $request, $params) {
 
         $body = $request->getParsedBody();
 
@@ -463,9 +463,9 @@ class Concept extends AbstractTripleStoreResource {
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $concept); // throws an exception if not allowed
+        $this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $concept); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $relatedConcept); // throws an exception if not allowed
+        $this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
 
         return $body;
     }

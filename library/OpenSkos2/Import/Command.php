@@ -35,6 +35,8 @@ use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\Preprocessor;
 
 class Command implements LoggerAwareInterface
 {
@@ -75,81 +77,18 @@ class Command implements LoggerAwareInterface
     {
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
-
-        // @TODO Most of the code below has to be applied for the api and for the api,
-        // so has to be moved to a shared place.
         
+        $set = $this->resourceManager->fetchByUri($message->getSetUri());
+        $tenantUris = $set ->getProperty(DcTerms::PUBLISHER);
+        if (count($tenantUris)<1) {
+            throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
+        };       
+        $tenantUri = $tenantUris[0];
         
-        // Stuff needed before validation.
-        //var_dump(count($resourceCollection));
-        foreach ($resourceCollection as $resourceToInsert) {
-            // Concept only logic
-            // Generate uri if none or blank (_:genid<n>) is given.
-            
-        // concepts
-            if ($resourceToInsert instanceof Concept) {
-                $setUri = $message->getSetUri();
-                
-                
-                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $setUri);
-                
-                if ($resourceToInsert->isBlankNode()) {
-                    $params['seturi']=$setUri->getURi();
-                    $params['type']=Skos::CONCEPT;
-                    $notations = $resourceToInsert ->getProperty(Skos::NOTATION);
-                    if (count($notations)<0) {
-                       $params['notation'] = null; 
-                    } else {
-                       $params['notation'] = $notations[0];
-                    }
-                    $resourceToInsert->selfGenerateUri($this->conceptManager, $params);
-                }
-                
-                $uuids = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
-                if (count($uuids) < 1) {
-                    $uuid = Uuid::uuid4();
-                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($uuid));
-                };
-            }
-            
-            // schemata
-            if ($resourceToInsert instanceof ConceptScheme) {
-                var_dump("Schema");
-                $setUri = $message->getSetUri();
-                $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $setUri);
-                
-                $uuids = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\OpenSkos::UUID);
-                if (count($uuids) < 1) {
-                    $uuid = Uuid::uuid4();
-                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($uuid));
-                };
-                
-                $creators = $resourceToInsert->getProperty(\OpenSkos2\Namespaces\DcTerms::CREATOR);
-                if (count($creators) < 1) {
-                    $creator = $message->getUser();
-                    $resourceToInsert->addProperty(\OpenSkos2\Namespaces\DcTerms::CREATOR, $creator);
-                };
-                
-                if ($resourceToInsert->isBlankNode()) {
-                    $params['seturi']=$setUri->getUri();
-                    $params['type']=Skos::CONCEPTSCHEME;
-                    $params['uuid']=$uuids[0];
-                    $resourceToInsert->selfGenerateUri($this->resourceManager, $params);
-                } 
-               
-            }
-            
-        }
-        
-        $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
-        if (!$validator->validate($resourceCollection, $this->logger)) {
-            var_dump($validator->getErrorMessages());
-            throw new \Exception("\n Failed validation \n");
-        }
-       
+        //** Some purging stuff from the original picturae code,
         if ($message->getClearSet()) {
-            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
-        }
+                $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
+            }
         
         if ($message->getDeleteSchemes()) {
             $conceptSchemes = [];
@@ -164,132 +103,83 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($scheme);
             }
         }
-        $currentVersions = [];
-        
+        // ***
+       
         foreach ($resourceCollection as $resourceToInsert) {
+            $params['seturi'] = $message->getSetUri();
+            $uri = $resourceToInsert->getUri();
+            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $message->getUser()->getUri());
+
             try {
-                $uri = $resourceToInsert->getUri();
-                $currentVersions[$resourceToInsert->getUri()] = $this->resourceManager->fetchByUri($uri, $resourceToInsert->getPropertySingleValue(Rdf::TYPE));
+                $currentVersion = $this->resourceManager->fetchByUri($uri, $resourceToInsert->getPropertySingleValue(Rdf::TYPE));
                 if ($message->getNoUpdates()) {
-                    var_dump("Skipping resource {$uri}, because it already exists");
-                    $this->logger->warning("Skipping resource {$uri}, because it already exists");
+                    var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
+                    $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
                     continue;
+                } else {
+                    $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
+                    $isForUpdates = true;
+                    if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
+                        $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
+                        $preprocessedResource->unsetProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
+                        $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
+                    }
                 }
-            } catch (ResourceNotFoundException $e) {
-                //do nothing
-            }
-
-            //special import logic
-            if ($resourceToInsert instanceof Concept) {
+            } catch (OpenSkos2\Exception\ResourceNotFoundException $ex) { // adding a new resource
+                $autoGenerateIdentifiers = true;
+                $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
+                $isForUpdates = false;
                 $currentVersion = null;
-                if (isset($currentVersions[$resourceToInsert->getUri()])) {
-                    /**
-                     * @var Resource $currentVersion
-                     */
-                    $currentVersion = $currentVersions[$resourceToInsert->getUri()];
-                    if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
-                    }
-                    if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
-                        $resourceToInsert->setProperty(
-                            DcTerms::DATESUBMITTED,
-                            $currentVersion->getProperty(DcTerms::DATESUBMITTED)[0]
-                        );
-                    }
-                }
-    
-
-                if ($message->getIgnoreIncomingStatus()) {
-                    $resourceToInsert->unsetProperty(OpenSkos::STATUS);
-                }
-
-                if ($message->getToBeChecked()) {
-                    $resourceToInsert->addProperty(OpenSkos::TOBECHECKED, new Literal(true, null, Literal::TYPE_BOOL));
-                }
-
-                if ($message->getImportedConceptStatus() &&
-                    (!$resourceToInsert->hasProperty(OpenSkos::STATUS))
-                ) {
-                    $resourceToInsert->addProperty(
-                        OpenSkos::STATUS,
-                        new Literal($message->getImportedConceptStatus())
-                    );
-                }
-                
-                // @TODO Those properties has to have types, rather then ignoring them from a list
-                $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS];
-                if ($message->getFallbackLanguage()) {
-                    foreach ($resourceToInsert->getProperties() as $predicate => $properties) {
-                        foreach ($properties as $property) {
-                            if (!in_array($predicate, $nonLangProperties)
-                                    && $property instanceof Literal
-                                    && $property->getType() === null
-                                    && $property->getLanguage() === null) {
-                                $property->setLanguage($message->getFallbackLanguage());
-                            }
-                        }
-                    }
-                }
-                $userUri = $message->getUser()->getUri(); 
-                $tenantUri = $this->resourceManager->fetchUsersInstitution($userUri);
-                $resourceToInsert = $this->ensureMetadata(
-                    $resourceToInsert,
-                    new Uri($tenantUri),
-                    new Uri($message->getSetUri()),
-                    new Uri($userUri),
-                    $currentVersion ? $currentVersion->getStatus(): null
-                );
             }
-            
-            if (isset($currentVersions[$resourceToInsert->getUri()])) {
-                $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
+
+            $validator = new ResourceValidator($this->manager, $isForUpdates, $tenantUri);
+            $valid = $validator->validate($preprocessedResource);
+            if (!$valid) {
+                var_dump($validator->getErrorMessages());
+                throw new \Exception("\n Failed validation \n");
+            } else {
+                return true;
             }
-            $this->resourceManager->insert($resourceToInsert);
+
+            if ($preprocessedResource instanceof Concept) {
+                $preprocessedResource = $this->specialConceptImportLogic($preprocessedResource, $currentVersion);
+            }
+
+            if ($currentVersion !== null) {
+                $this->resourceManager->delete($currentVersion);
+            }
+            $this->resourceManager->insert($preprocessedResource);
         }
     }
-    
- private function ensureMetadata($concept, Uri $tenantUri, Uri $set, Uri $person, $oldStatus = null)
-    {
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-        };
-        
-        $forFirstTimeInOpenSkos = [
-            OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => $tenantUri,
-            OpenSkos::SET => $set,
-            DcTerms::CREATOR => $person,
-            DcTerms::DATESUBMITTED => $nowLiteral(),
-        ];
-        
-        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
-            if (!$concept->hasProperty($property)) {
-                $concept->setProperty($property, $defaultValue);
-            }
-        }
-        
-        // @TODO Should we add modified instead of replace it.
-        $concept->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $concept->addUniqueProperty(DcTerms::CONTRIBUTOR, $person);
-        
-        // Status is updated
-        
-        if ($oldStatus != $concept->getStatus()) {
-            $concept->unsetProperty(DcTerms::DATEACCEPTED);
-            $concept->unsetProperty(OpenSkos::ACCEPTEDBY);
-            $concept->unsetProperty(OpenSkos::DATE_DELETED);
-            $concept->unsetProperty(OpenSkos::DELETEDBY);
 
-            switch ($concept->getStatus()) {
-                case \OpenSkos2\Concept::STATUS_APPROVED:
-                    $concept->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                    $concept->addProperty(OpenSkos::ACCEPTEDBY, $person);
-                    break;
-                case \OpenSkos2\Concept::STATUS_DELETED:
-                    $concept->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                    $concept->addProperty(OpenSkos::DELETEDBY, $person);
-                    break;
+    function specialConceptImportLogic($message, $concept, $currentVersion) {
+        if ($message->getIgnoreIncomingStatus()) {
+            $concept->unsetProperty(OpenSkos::STATUS);
+        }
+
+        if ($message->getToBeChecked()) {
+            $concept->addProperty(OpenSkos::TOBECHECKED, new Literal(true, null, Literal::TYPE_BOOL));
+        }
+
+        if ($message->getImportedConceptStatus() &&
+                (!$concept->hasProperty(OpenSkos::STATUS))
+        ) {
+            $concept->addProperty(OpenSkos::STATUS, new Literal($message->getImportedConceptStatus())
+            );
+        }
+
+        // @TODO Those properties has to have types, rather then ignoring them from a list
+        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS];
+        if ($message->getFallbackLanguage()) {
+            foreach ($concept->getProperties() as $predicate => $properties) {
+                foreach ($properties as $property) {
+                    if (!in_array($predicate, $nonLangProperties) && $property instanceof Literal && $property->getType() === null && $property->getLanguage() === null) {
+                        $property->setLanguage($message->getFallbackLanguage());
+                    }
+                }
             }
         }
         return $concept;
     }
+
 }

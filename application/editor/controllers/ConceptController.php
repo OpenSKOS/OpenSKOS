@@ -141,7 +141,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         
         if ($validator->validate($concept)) {
             if ($form->getIsCreate()) {
-                $concept->selfGenerateUri(
+                $concept->selfGenerateUuidAndUriWhenAbsent(
                     $this->getTenant(),
                     $this->getConceptManager()
                 );

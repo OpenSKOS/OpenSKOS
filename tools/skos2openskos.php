@@ -23,7 +23,8 @@ include dirname(__FILE__) . '/autoload.inc.php';
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'file|f=s' => 'File to import',
-    'userUri|u=s' => 'Uri of the user that is doing the import'
+    'userUri|u=s' => 'Uri of the user that is doing the import',
+    'setUri=s' => 'Set uri'
 );
 
 try {
@@ -54,7 +55,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
-    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://hdl.handle.net/11148/CCR_dataset_f7209fb7-9c2c-47f0-b109-bf9b95675d36'), true, OpenSKOS_Concept_Status::CANDIDATE,
+    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->userUri), true, OpenSKOS_Concept_Status::CANDIDATE,
     true, false, 'en', false, false
 );
 

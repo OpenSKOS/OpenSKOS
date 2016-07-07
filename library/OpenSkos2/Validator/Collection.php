@@ -32,11 +32,8 @@ class Collection
      * @var ResourceManager
      */
     protected $resourceManager;
-    
-    /**
-     * @var Tenant
-     */
-    protected $tenant;
+    protected $tenantUri;
+    protected $isForUpdate;
     
     /**
      * Holds all error messages
@@ -56,7 +53,9 @@ class Collection
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
+    //public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
+    
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $logger = new NullLogger();
@@ -64,7 +63,8 @@ class Collection
         
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
-        $this->tenant = $tenant;
+        $this->tenantUri = $tenantUri;
+        $this->isForUpdate = $isForUpdate;
     }
 
     /**
@@ -76,7 +76,10 @@ class Collection
     {
         $errorsFound = false;
         foreach ($resourceCollection as $resource) {
-            if (!$this->getResourceValidator()->validate($resource)) {
+            $currentValidator = $this->getResourceValidator();
+            $valid = $currentValidator->validate($resource);
+            if (!$valid) {
+                $this->errorMessages[] = array_merge($this->errorMessages[], $valid->getErrorMessages());
                 $errorsFound = true;
             }
             
@@ -106,6 +109,6 @@ class Collection
      */
     private function getResourceValidator()
     {
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->tenant, $this->logger);
+        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->logger);
     }
 }

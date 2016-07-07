@@ -49,16 +49,18 @@ class Set extends Resource
     
     
     
-    public function addMetadata($user, $params, $oldParams) {
-        $metadata = [DcTerms::PUBLISHER => new Uri($params['tenanturi'])];
-        if (count($oldParams) > 0) {
-            $metadata = [
-                OpenSkos::UUID => new Literal($oldParams['uuid'])];
+    public function addMetadata($userUri, $params, $existingSet) {
+        $metadata = [];
+        if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
+                $metadata = [DcTerms::PUBLISHER => new Uri($params['tenanturi'])];
+        }
+        if ($existingSet !== null) {
+            if (count($this->getProperty(OpenSkos::UUID)) < 1) {
+                $metadata = [OpenSkos::UUID => new Literal($existingSet->getUuid())];
+            }
         }
         foreach ($metadata as $property => $defaultValue) {
-            if (count($this->getProperty($property)) < 1) {
                 $this->setProperty($property, $defaultValue);
-            }
         }
     }
 }

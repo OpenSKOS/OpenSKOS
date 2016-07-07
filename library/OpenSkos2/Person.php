@@ -47,4 +47,8 @@ class Person extends Resource
     {
         return $this->getPropertyFlatValue(Foaf::NAME, $language);
     }
+    
+    // override for a concerete resources
+    public function addMetadata($userUri, $params, $existingResource) {
+    }
 }

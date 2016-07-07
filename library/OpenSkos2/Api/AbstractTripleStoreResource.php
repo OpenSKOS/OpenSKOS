@@ -4,20 +4,17 @@ namespace OpenSkos2\Api;
 
 use DOMDocument;
 use Exception;
-use OpenSkos2\Relation;
+use OpenSkos2\Preprocessor;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant as Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use OpenSKOS_Db_Table_Users;
@@ -41,7 +38,6 @@ abstract class AbstractTripleStoreResource {
     protected $manager;
     protected $authorisationManager;
     protected $deletionManager;
-    protected $tenant = array();
     
     public function getManager() {
         return $this->manager;
@@ -50,17 +46,17 @@ abstract class AbstractTripleStoreResource {
    
     
     protected function getAndAdaptQueryParams(ServerRequestInterface $request) {
-        $params = $request->getQueryParams();
-        if (empty($params['tenant'])) {
+        $queryparams = $request->getQueryParams();
+        if (empty($queryparams['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
         };
-        $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
+        $tenantUri = $this->manager->fetchInstitutionUriByCode($queryparams['tenant']);
         if ($tenantUri === null) {
-            throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
+            throw new ApiException('The tenant referred by code ' . $queryparams['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
         }
+        $params = $queryparams;
+        $params['tenantcode'] = $params['tenant']; 
         $params['tenanturi'] = $tenantUri;
-        $this->tenant['uri'] = $tenantUri;
-        $this->tenant['code'] = $params['tenant'];
         return $params;
     }
 
@@ -156,8 +152,8 @@ abstract class AbstractTripleStoreResource {
             $user = $this->getUserFromParams($params);
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
             
-            if (!$this->authorisationManager->resourceCreationAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
-                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $this->tenant['code'] . '. Your role is "' .  $user->role . '"', 403); 
+            if (!$this->authorisationManager->resourceCreationAllowed($user, $params['tenantcode'], $resourceObject)) {
+                throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' .  $user->role . '"', 403); 
             }
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
                 throw new InvalidArgumentException(
@@ -166,32 +162,10 @@ abstract class AbstractTripleStoreResource {
             }
 
             $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
-            $resourceObject->addMetadata($user, $params, array());
-            if ($autoGenerateUri) {
-                $type=$this->manager->getResourceType();
-                $parameters['type']=$type;
-                $parameters['tenantcode']=$this->tenant['code'];
-                if ($type === Skos::CONCEPT || $type === Skos::CONCEPTSCHEME || $type === Skos::SKOSCOLLECTION){
-                    $setUris=$resourceObject->getProperty(OpenSkos::SET);
-                    if (count($setUris)===0) {
-                        // set uri may be needed to generate a handle,
-                        // that's why it is checked here, before validation
-                        throw new ApiException('openskos:set uri is absent.', 400);
-                    }
-                    $parameters['seturi']=$setUris[0]->getUri();
-                    if ($type === Skos::CONCEPT) {
-                        $notations = $resourceObject->getProperty(Skos::NOTATION);
-                        if (count($notations) === 0) {
-                            $parameters['notation']=null;
-                        } else {
-                        $parameters['notation']=$notations[0];
-                        }
-                    }
-                } 
-                $resourceObject -> selfGenerateUri($this->manager, $parameters);
-            };
-            $this->validate($resourceObject, false);
-            $this->manager->insert($resourceObject);
+            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $user->getFoafPerson()->getUri());
+            $preprocessedResource = $preprocessor -> forCreation($resourceObject, $params, $autoGenerateUri);
+            $this->validate($preprocessedResource, false, $params['tenanturi']);
+            $this->manager->insert($preprocessedResource);
             $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
@@ -210,45 +184,20 @@ abstract class AbstractTripleStoreResource {
             if ($resourceObject->isBlankNode()) {
                 throw new ApiException("Missed uri (rdf:about)!", 400);
             }
-
-            $uri = $resourceObject->getUri();
-            $existingResource = $this->manager->fetchByUri((string) $uri);
             $params = $this->getAndAdaptQueryParams($request);
             $user = $this->getUserFromParams($params);
-            $oldUuid = $existingResource->getUuid();
-            if ($oldUuid instanceof Literal) {
-                $oldUuid = $oldUuid->getValue();
-            }
-            $oldParams = [
-                'uuid' => $oldUuid,
-                'creator' => $existingResource->getCreator(),
-                'dateSubmitted' => $existingResource->getDateSubmitted(),
-                'status' => $existingResource->getStatus() // so fat, not null only for concepts
-            ];
-
-            if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
-                // do not update uuid: it must be intact forever, connected to uri
-                $uuid = $resourceObject->getUuid();
-                if ($uuid instanceof Literal) {
-                    $uuid = $uuid->getValue();
-                }
-                if ($uuid !== false && $uuid !== null) {
-                    if ($uuid !== $oldParams['uuid']) {
-                        throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $oldParams['uuid'], 400);
-                    }
-                }
-            }
-
-
-            $resourceObject->addMetadata($user, $params, $oldParams);
-            if ($this->authorisationManager->resourceEditAllowed($user, $this->tenant['code'], $this->tenant['uri'], $existingResource)) {
-                $this->validate($resourceObject, true);
-                $this->manager->replace($resourceObject);
+            
+            $uri = $resourceObject->getUri();
+            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['tenantcode'], $user->getFoafPerson()->getUri());
+            $preprocessedResource = $preprocessor ->forUpdate($resourceObject, $params);
+            if ($this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $existingResource)) {
+                $this->validate($preprocessedResource, true, $params['tenanturi']);
+                $this->manager->replace($preprocessedResource);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
                 $rdf = (new DataRdf($savedResource, true, []))->transform();
                 return $this->getSuccessResponse($rdf, 201);
             } else {
-                throw new ApiException('You do not have rights to edit resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $this->tenant['code'], 403);
+                throw new ApiException('You do not have rights to edit resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $params['tenantcode'], 403);
             }
         } catch (Exception $e) {
             return $this->getErrorResponse($e->getCode(), $e->getMessage());
@@ -269,8 +218,8 @@ abstract class AbstractTripleStoreResource {
             }
 
             $user = $this->getUserFromParams($params);
-            if (!$this->authorisationManager->resourceDeleteAllowed($user, $this->tenant['code'], $this->tenant['uri'], $resourceObject)) {
-                 throw new ApiException('You do not have rights to delete resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $this->tenant['code'], 403);
+            if (!$this->authorisationManager->resourceDeleteAllowed($user, $params['tenantcode'], $resourceObject)) {
+                 throw new ApiException('You do not have rights to delete resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $params['tenantcode'], 403);
             }
 
             $canBeDeleted = $this->deletionManager->canBeDeleted($uri, $this->manager);
@@ -388,8 +337,8 @@ abstract class AbstractTripleStoreResource {
    
    
     // override in concrete class when necessary
-    protected function validate($resourceObject, $isForUpdate) {
-        $validator = new ResourceValidator($this->manager, $isForUpdate, $this->tenant['uri']);
+    protected function validate($resourceObject, $isForUpdate, $tenanturi) {
+        $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi);
         if (!$validator->validate($resourceObject)) {
             throw new InvalidArgumentException(implode(' ' , $validator->getErrorMessages()), 400);
         } else {

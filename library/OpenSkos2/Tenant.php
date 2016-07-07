@@ -40,11 +40,12 @@ class Tenant extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-   public function addMetadata($user, $params, $oldParams) {
-       $metadata = [];
-       if (count($oldParams)>0){ 
-            $metadata = [
-            OpenSkos::UUID => new Literal($oldParams['uuid'])];
+    public function addMetadata($userUri, $params, $existingTenant) {
+        $metadata = [];
+        if ($existingTenant !== null) {
+            if (count($this->getProperty(OpenSkos::UUID)) < 1) {
+                $metadata = [OpenSkos::UUID => new Literal($existingTenant->getUuid())];
+            }
         }
         foreach ($metadata as $property => $defaultValue) {
             $this->setProperty($property, $defaultValue);

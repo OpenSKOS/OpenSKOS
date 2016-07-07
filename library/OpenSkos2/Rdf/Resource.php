@@ -228,7 +228,7 @@ class Resource extends Uri implements ResourceIdentifier
         return current($this->getProperty(DcTerms::DATESUBMITTED));
     }
     
-    public function getUUID()
+    public function getUuid()
     {
         return current($this->getProperty(OpenSkos::UUID));
     }
@@ -385,37 +385,60 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
     // override for a concerete resources
-     public function addMetadata($user, $params, $oldParams)
-    {
-       
+    // so far the code below is reused by concept schemes, skos collections and relations
+    public function addMetadata($userUri, $params, $existingResource) {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+
+        if ($existingResource === null) { // a completely new resource under creation
+            $metadata[DcTerms::CREATOR] = new Uri($userUri);
+            $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
+        } else {
+            $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
+            $metadata[OpenSkos::UUID] = new Literal($existingResource->getUUID());
+            $creators = $existingResource->getProperty(DcTerms::CREATOR);
+            if (count($creators) === 0) {
+                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            } else {
+                $metadata[DcTerms::CREATOR] = $creators[0];
+            }
+            $dateSubmitted = $existingResource->getProperty(DcTerms::DATESUBMITTED);
+            if (count($dateSubmitted) !== 0) {
+                $metadata[DcTerms::DATESUBMITTED] = new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME);
+            }
+        }
+        foreach ($metadata as $property => $defaultValue) {
+            $this->setProperty($property, $defaultValue);
+        }
     }
     
-    // for example, parameters can include tenantcode, seturi
-    public function selfGenerateUri(ResourceManager $manager, array $parameters) {
-        if (!$this->isBlankNode()) {
-            throw new UriGenerationException(
-            'The resource has an uri already. Can not generate a new one.'
-            );
+    //parameters can include e.g. tenantcode, seturi
+    public function selfGenerateUuidAndUriWhenAbsent(ResourceManager $manager, array $parameters) {
+
+        $uuids = $this->getProperty(OpenSkos::UUID);
+        if (count($uuids) < 1) {
+            if (!isset($parameters['uuid'])) {
+                $parameters['uuid'] = UriGeneration::generateUUID($parameters);
+            }
+            $this->setProperty(OpenSkos::UUID, new Literal($parameters['uuid']));
+        } else {
+            $parameters['uuid'] = $uuids[0]->getValue();
         }
 
-        if (!isset($parameters['uuid']) || $parameters['uuid'] === null) {
-            $uuid = UriGeneration::generateUUID($parameters);
-            $parameters['uuid'] = $uuid;
+        if ($this->isBlankNode()) {
             $uri = UriGeneration::generateURI($parameters);
+            if ($manager->askForUri($uri, true)) {
+                throw new UriGenerationException(
+                'The generated uri "' . $uri . '" is already in use.'
+                );
+            }
+             $this->setUri($uri);
+            return $uri;
+        } else {
+            return $this->getUri();
         }
-
-        if ($manager->askForUri($uri, true)) {
-            throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use.'
-            );
-        }
-
-        $this->setUri($uri);
-        $this -> setProperty(OpenSkos::UUID, new Literal($uuid));
-        
-        return $uri;
     }
 
-    
-   
 }

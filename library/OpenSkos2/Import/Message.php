@@ -97,7 +97,7 @@ class Message
         $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
-        $this->noUpdates = $noUpdates;
+        $this->noUpdates = $noUpdates; // create mode
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
         $this->clearSet = $clearSet;

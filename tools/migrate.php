@@ -144,7 +144,7 @@ function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = 
 
 function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
     $tenantResource = new \OpenSkos2\Tenant();
-    $uri = $tenantResource -> selfGenerateUri($resourceManager, ['type'=>Org::FORMALORG,'tenantcode' => $code]);
+    $uri = $tenantResource -> selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type'=>Org::FORMALORG,'tenantcode' => $code]);
     set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
     $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX. '/node-org-'.Uuid::uuid4());
     set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
@@ -170,7 +170,7 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
 
 function insert_set($code, $collectionMySQL, $resourceManager) {
     $setResource = new \OpenSkos2\Set();
-    $uri = $setResource->selfGenerateUri($resourceManager, ['type'=>Dcmi::DATASET,'setcode' => $code]);
+    $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type'=>Dcmi::DATASET,'setcode' => $code]);
     set_property_with_check($setResource, OpenSkos::CODE, $code, false);
     $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
     if (count($tenants) < 1) {

@@ -202,34 +202,4 @@ class ConceptScheme extends Resource
         }
     }
     
-    public function addMetadata($user, $params, $oldParams) {
-        $metadata = [];
-
-        $userUri = $user->getFoafPerson()->getUri();
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-        };
-
-        if (count($oldParams) === 0) { // a completely new resource under creation
-            
-            $metadata = [
-                DcTerms::CREATOR => new Uri($userUri),
-                DcTerms::DATESUBMITTED => $nowLiteral(),
-            ];
-        } else {
-            if ($oldParams['creator'] === UNKNOWN) {
-                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
-            } else {
-                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
-            }
-            $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
-            $metadata[DcTerms::DATESUBMITTED] = new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME);
-            $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
-        }
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
-        }
-    }
-
 }

@@ -52,30 +52,4 @@ class SkosCollection extends Resource
         }
     }
 
-   public function addMetadata($user, $params, $oldParams) {
-        $metadata = [];
-
-        if (count($oldParams) === 0) { // a completely new resource under creation
-            $userUri = $user->getFoafPerson()->getUri();
-            $nowLiteral = function () {
-                return new Literal(date('c'), null, Literal::TYPE_DATETIME);
-            };
-
-            $metadata = [
-                DcTerms::CREATOR => new Uri($userUri),
-                DcTerms::DATESUBMITTED => $nowLiteral(),
-            ];
-        } else {
-            if ($oldParams['creator'] === UNKNOWN) {
-                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
-            } else {
-                $metadata[DcTerms::CREATOR] = new Uri($oldParams['creator']);
-            }
-            $metadata[OpenSkos::UUID] = new Literal($oldParams['uuid']);
-            $metadata[DcTerms::DATESUBMITTED] = new Literal($oldParams['dateSubmitted'], null, Literal::TYPE_DATETIME);
-        }
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
-        }
-    }
 }
