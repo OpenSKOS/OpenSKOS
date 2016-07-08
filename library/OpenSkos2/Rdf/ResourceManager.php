@@ -26,7 +26,6 @@ use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
-use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
@@ -44,7 +43,7 @@ use OpenSKOS_Db_Table_Collections;
 use RuntimeException;
 use Solarium\Client as Client2;
 use Solarium\Exception\HttpException;
-use Solarium\Exception\InvalidArgumentException;
+use OpenSkos2\Api\Exception\ApiException;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 require_once dirname(__FILE__) .'/../config.inc.php';
@@ -303,7 +302,6 @@ public function deleteSolrIntact(Uri $resource)
      * Fetches a single resource matching the uri.
      * @param string $uri
      * @return Resource
-     * @throws ResourceNotFoundException
      */
     public function fetchByUri($uri, $resType=null)
     {
@@ -321,9 +319,7 @@ public function deleteSolrIntact(Uri $resource)
             //echo '***';
             //var_dump($resType);
             //echo '***';
-            throw new RuntimeException(
-            'The requested resource <' . $uri . '> was not found.'
-            );
+            throw new ApiException('The requested resource <' . $uri . '> was not found.', 404);
         }
         if (count($resources) > 1) {
         echo '***';   
@@ -334,9 +330,7 @@ public function deleteSolrIntact(Uri $resource)
         var_dump($resources[1]);
         
         echo '***';   
-            throw new RuntimeException(
-                'Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.'
-            );
+            throw new ApiException('Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.', 500);
              
         }
  
@@ -347,7 +341,6 @@ public function deleteSolrIntact(Uri $resource)
      * Fetches multiple records by list of uris.
      * @param string[] $uris
      * @return ResourceCollection
-     * @throws ResourceNotFoundException
      */
     public function fetchByUris($uris, $resType=null)
     {
@@ -450,7 +443,7 @@ public function deleteSolrIntact(Uri $resource)
         } else {
             $simplePatterns[RdfNamespace::TYPE] = $resType;
         }
-
+        
         $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
 
         $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
@@ -883,9 +876,6 @@ public function deleteSolrIntact(Uri $resource)
    
    // used only for HTML output
     public function getResourceSearchID($resourceReference, $resourceType) {
-        if (TENANTS_AND_SETS_IN_MYSQL && ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET)) {
-            return $resourceReference;
-        }
         
         if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
             $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
@@ -902,7 +892,7 @@ public function deleteSolrIntact(Uri $resource)
         }
 
        
-        throw new ApiException("The resource with the reference " . $resourceReference . " does not exist in triple store (and mysql). ", 400);
+        throw new ApiException("The resource with the reference " . $resourceReference . " is not found. ");
     }
 
     // used only for HTML output
@@ -1023,41 +1013,49 @@ public function deleteSolrIntact(Uri $resource)
     public function findResourceById($id, $resourceType) {
         if ($id !== null && isset($id)) {
             if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                $resource = $this->fetchByUri($id,$resourceType);
-                return $resource;
-            }
-
-            if (TENANTS_AND_SETS_IN_MYSQL && $resourceType === Org::FORMALORG) {
-                $mysqlres = $this->fetchTenantFromMySqlByCode($id);
-                $resource = $this->translateTenantMySqlToRdf($mysqlres);
-                return $resource;
-            };
-            if (TENANTS_AND_SETS_IN_MYSQL && $resourceType === Dcmi::DATASET) {
-                $mysqlres = $this->fetchSetFromMySqlByCode($id);
-                $resource = $this->translateMySqlCollectionToRdfSet($mysqlres);
-                return $resource;
-            };
-            
-            $resources = $this->fetch([OpenSkosNamespace::UUID => new Literal($id)], null, null,  false, new Uri($resourceType));
-            if (count($resources)<1) { // the id might happen to be not an uuid but the code
-                $resources = $this->fetch([OpenSkosNamespace::CODE => new Literal($id)], null, null,  false, new Uri($resourceType));
-                if (count($resources)>0) { 
-                    return $resources[0];
-                } else {
-                    return null;
-                }
+                $resource= $this->fetchByUri($id, $resourceType);
             } else {
-               return $resources[0]; 
+                $resources = $this->fetch([OpenSkosNamespace::UUID => new Literal($id)], null, null, false, new Uri($resourceType));
+                if (count($resources) < 1) { // the id might happen to be not an uuid but the code
+                    $resources = $this->fetch([OpenSkosNamespace::CODE => new Literal($id)], null, null, false, new Uri($resourceType));
+                    if (count($resources) > 0) {
+                        $resource= $resources[0];
+                    } else {
+                        throw new ApiException('The resource of type '.$resourceType. ' with the id/uri/code '. $id.' is not found. ', 404);
+                       }
+                } else {
+                    $resource= $resources[0];
+                }
             }
+            
+        $resource = $this->augmentResourceWithTenant($resource);
+        return $resource;
         } else {
-            throw new InvalidArgumentException('No Id (URI or UUID, or Code for older settings) is given');
+            throw new ApiException('No Id (URI or UUID, or Code) is given', 400);
         }
     }
-    
+
     public function fetchTenantNameUri() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
         $response = $this->query($query);
         $result = $this->makeNameUriMap($response);
         return $result;
+    }
+    
+     public function augmentResourceWithTenant($resource){
+        if ($resource!==null) {
+            $tenants = $resource ->getProperty(OpenSkosNamespace::TENANT);
+            if (count($tenants)<1){
+                $setUris = $resource->getProperty(OpenSkosNamespace::SET);
+                if (count($setUris) >0) {
+                    $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
+                    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+                    if (count($tenantUris)>0){
+                        $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUris[0]);
+                    } 
+                }
+            }
+        }
+        return $resource;
     }
 }

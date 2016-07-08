@@ -12,9 +12,6 @@ use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\Api\Exception\NotFoundException;
-use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
-use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
-use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
@@ -27,7 +24,6 @@ use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\NamespaceAdmin;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -69,156 +65,104 @@ class Concept extends AbstractTripleStoreResource {
      * @return ResponseInterface
      */
     public function findConcepts(PsrServerRequestInterface $request, $context) {
-        set_time_limit(120);
+        try {
+            set_time_limit(120);
 
-        $params = $request->getQueryParams();
+            $params = $request->getQueryParams();
 
-        // offset
-        $start = 0;
-        if (!empty($params['start'])) {
-            $start = (int) $params['start'];
+            // offset
+            $start = 0;
+            if (!empty($params['start'])) {
+                $start = (int) $params['start'];
+            }
+
+            // limit
+            $limit = MAXIMAL_ROWS;
+            if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
+                $limit = (int) $params['rows'];
+            }
+
+            $options = [
+                'start' => $start,
+                'rows' => $limit,
+                'directQuery' => true,
+            ];
+
+
+            if (isset($params['tenant'])) {
+                $options['tenants'] = [$params['tenant']];
+            }
+
+            // search query
+            if (isset($params['q'])) {
+                $options['searchText'] = $params['q'];
+            }
+
+            // sorting
+            //Meertens was here
+            if (isset($params['sorts'])) {
+                $sortmap = $this->prepareSortsForSolr($params['sorts']);
+                $options['sorts'] = $sortmap;
+            }
+
+            if (isset($params['skosCollection'])) {
+                $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
+            }
+
+            //sets (former tenant collections)
+            // meertens was here
+            if (isset($params['sets'])) {
+                $options['sets'] = explode(' ', trim($params['sets']));
+            }
+
+
+            if (isset($params['tenants'])) {
+                $options['tenants'] = explode(' ', trim($params['tenants']));
+            }
+            //meertens was here
+            if (isset($params['conceptScheme'])) {
+                $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
+            }
+
+            if (isset($params['status'])) {
+                $options['status'] = explode(' ', trim($params['status']));
+            }
+
+            $concepts = $this->searchAutocomplete->search($options, $total);
+
+            foreach ($concepts as $concept) {
+                $concept = $this->manager->augmentResourceWithTenant($concept);
+            }
+
+            $result = new ResourceResultSet($concepts, $total, $start, $limit);
+
+            if (isset($params['fl'])) {
+                $propertiesList = $this->fieldsListToProperties($params['fl']);
+            } else {
+                $propertiesList = [];
+            }
+            switch ($context) {
+                case 'json':
+                    $response = (new JsonResponse($result, $propertiesList))->getResponse();
+                    break;
+                case 'jsonp':
+                    $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
+                    break;
+                case 'rdf':
+                    $response = (new RdfResponse($result, $propertiesList))->getResponse();
+                    break;
+                default:
+                    throw new InvalidArgumentException('Invalid context: ' . $context);
+            }
+            set_time_limit(30);
+            return $response;
+        } catch (Exception $ex) {
+            $code = $ex->getCode();
+            if ($code === 0 || $code === null) {
+                $code = 500;
+            }
+            return $this->getErrorResponse($code, $e->getMessage());
         }
-
-        // limit
-        $limit = MAXIMAL_ROWS;
-        if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
-            $limit = (int) $params['rows'];
-        }
-
-        $options = [
-            'start' => $start,
-            'rows' => $limit,
-            'directQuery' => true,
-        ];
-
-      
-        if (isset($params['tenant'])) {
-            $options['tenants'] = [$params['tenant']];
-        }
-
-        // search query
-        if (isset($params['q'])) {
-            $options['searchText'] = $params['q'];
-        }
-
-        // sorting
-        //Meertens was here
-        if (isset($params['sorts'])) {
-            $sortmap = $this->prepareSortsForSolr($params['sorts']);
-            $options['sorts'] = $sortmap;
-        }
-
-        if (isset($params['skosCollection'])) {
-            $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
-        }
-
-        //sets (former tenant collections)
-        // meertens was here
-        if (isset($params['sets'])) {
-            $options['sets'] = explode(' ', trim($params['sets']));
-        }
-
-
-        if (isset($params['tenants'])) {
-            $options['tenants'] = explode(' ', trim($params['tenants']));
-        }
-        //meertens was here
-        if (isset($params['conceptScheme'])) {
-            $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
-        }
-
-        if (isset($params['status'])) {
-            $options['status'] = explode(' ', trim($params['status']));
-        }
-
-        $concepts = $this->searchAutocomplete->search($options, $total);
-
-        $result = new ResourceResultSet($concepts, $total, $start, $limit);
-
-        if (isset($params['fl'])) {
-            $propertiesList = $this->fieldsListToProperties($params['fl']);
-        } else {
-            $propertiesList = [];
-        }
-
-        switch ($context) {
-            case 'json':
-                $response = (new JsonResponse($result, $propertiesList))->getResponse();
-                break;
-            case 'jsonp':
-                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
-                break;
-            case 'rdf':
-                $response = (new RdfResponse($result, $propertiesList))->getResponse();
-                break;
-            default:
-                throw new InvalidArgumentException('Invalid context: ' . $context);
-        }
-        set_time_limit(30);
-        return $response;
-    }
-
-    /**
-     * Get PSR-7 response for concept
-     *
-     * @param $request \Psr\Http\Message\ServerRequestInterface
-     * @param string $context
-     * @throws NotFoundException
-     * @throws InvalidArgumentException
-     * @return ResponseInterface
-     */
-    public function getConceptResponse(PsrServerRequestInterface $request, $uuid, $context) {
-        $concept = $this->getConcept($uuid);
-
-        $params = $request->getQueryParams();
-
-        if (isset($params['fl'])) {
-            $propertiesList = $this->fieldsListToProperties($params['fl']);
-        } else {
-            $propertiesList = [];
-        }
-        switch ($context) {
-            case 'json':
-                $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
-                break;
-            case 'jsonp':
-                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList))->getResponse();
-                break;
-            case 'rdf':
-                $response = (new DetailRdfResponse($concept, $propertiesList))->getResponse();
-                break;
-            default:
-                throw new InvalidArgumentException('Invalid context: ' . $context);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get openskos concept
-     *
-     * @param string|Uri $id
-     * @throws NotFoundException
-     * @throws Exception\DeletedException
-     * @return Concept
-     */
-    public function getConcept($id) {
-        /* @var $concept Concept */
-        if ($id instanceof Uri) {
-            $concept = $this->manager->fetchByUri($id);
-        } else {
-            $concept = $this->manager->fetchByUuid($id);
-        }
-
-        if (!$concept) {
-            throw new NotFoundException('Concept not found by id: ' . $id, 404);
-        }
-
-        if ($concept->isDeleted()) {
-            throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
-        }
-
-        return $concept;
     }
 
     /**
@@ -282,8 +226,12 @@ class Concept extends AbstractTripleStoreResource {
             $this->authorisationManager->resourceDeleteAllowed($user, $params['tenantcode'], $concept);
 
             $this->manager->deleteSoft($concept);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
 
         $xml = (new DataRdf($concept))->transform();
@@ -405,8 +353,12 @@ class Concept extends AbstractTripleStoreResource {
             $params = $this->getAndAdaptQueryParams($request); // sets tenant info
             $body = $this->preEditChecksRels($request, $params);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
-        } catch (ApiException $exc) {
-            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
 
         $stream = new Stream('php://memory', 'wb+');

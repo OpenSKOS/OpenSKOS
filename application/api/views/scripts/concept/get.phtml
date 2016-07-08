@@ -28,7 +28,7 @@ use OpenSkos2\Namespaces\Org;
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
 /* @var $concept \OpenSkos2\Concept */
-$concept = $this->concept;
+$concept = $this->resource;
 
 /* @var $conceptManager \OpenSkos2\ConceptManager */
 $conceptManager = $di->get('OpenSkos2\ConceptManager');

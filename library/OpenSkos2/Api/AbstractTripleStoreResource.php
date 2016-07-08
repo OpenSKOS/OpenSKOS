@@ -6,20 +6,17 @@ use DOMDocument;
 use Exception;
 use OpenSkos2\Preprocessor;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use OpenSKOS_Db_Table_Users;
 use Psr\Http\Message\ServerRequestInterface;
-use Solarium\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
@@ -48,7 +45,7 @@ abstract class AbstractTripleStoreResource {
     protected function getAndAdaptQueryParams(ServerRequestInterface $request) {
         $queryparams = $request->getQueryParams();
         if (empty($queryparams['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 412);
+            throw new ApiException('No tenant specified', 412);
         };
         $tenantUri = $this->manager->fetchInstitutionUriByCode($queryparams['tenant']);
         if ($tenantUri === null) {
@@ -61,17 +58,19 @@ abstract class AbstractTripleStoreResource {
     }
 
     public function mapNameSearchID() {
-        if (TENANTS_AND_SETS_IN_MYSQL && ($this->manager->getResourceType() === Org::FORMALORG || $this->manager->getResourceType() === Dcmi::DATASET)) {
-            $index = $this->manager->fetchNameCodeFromMySql();
-        } else {
         $index =  $this->manager->fetchNameUri();
-        }
         return $index;
     }
 
     
     public function fetchDeatiledListResponse($params) {
+        try {
         $index = $this ->fetchDetailedList($params);
+        
+        foreach ($index as $resource) {
+            $resource = $this->manager->augmentResourceWithTenant($resource);
+        }
+        
         $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
         switch ($params['context']) {
                 case 'json':
@@ -84,26 +83,29 @@ abstract class AbstractTripleStoreResource {
                     $response = (new RdfResponse($result, []))->getResponse();
                     break;
                 default:
-                    throw new InvalidArgumentException('Invalid context: ' . $params['context']);
+                    throw new ApiException('Invalid context: ' . $params['context'], 400);
         }
         return $response;
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            }
+            return $this->getErrorResponse($code, $e->getMessage());
+        }
     }
 
-    public function fetchDetailedList($params) {
+    private function fetchDetailedList($params) {
         $resType = $this->manager->getResourceType();
-        if (TENANTS_AND_SETS_IN_MYSQL && (($resType === Dcmi::DATASET || $resType == Org::FORMALORG))) {
-            $index = $this->manager->fetchFromMySQL($params);
-            return $index;
-        } 
-        if ($resType === Dcmi::DATASET && $params['allow_oai']!== null) {
-           $index =  $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]); 
+        if ($resType === Dcmi::DATASET && $params['allow_oai'] !== null) {
+            $index = $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]);
         } else {
-            $index =  $this->manager->fetch();
+            $index = $this->manager->fetch();
         }
         return $index;
     }
-    
-    // Id is either an URI or uuid
+
+// Id is either an URI or uuid
     public function findResourceByIdResponse(ServerRequestInterface $request, $id, $context) {
         try {
             $params = $request->getQueryParams();
@@ -131,18 +133,22 @@ abstract class AbstractTripleStoreResource {
                     $response = (new DetailRdfResponse($resource, []))->getResponse();
                     break;
                 default:
-                    throw new InvalidArgumentException('Invalid context: ' . $context);
+                    throw new ApiException('Invalid context: ' . $context, 400);
             }
 
             return $response;
-        } catch (Exception $ex) {
-            return $this->getErrorResponse(500, $ex->getMessage());
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
 
     // Id is either an URI or uuid
     public function findResourceById($id) {
-        return $this->manager->findResourceById($id, $this->manager->getResourceType());
+       return $this->manager->findResourceById($id, $this->manager->getResourceType());
     }
 
     public function create(ServerRequestInterface $request) {
@@ -156,7 +162,7 @@ abstract class AbstractTripleStoreResource {
                 throw new ApiException('You do not have rights to create resource of type '. $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' .  $user->role . '"', 403); 
             }
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
-                throw new InvalidArgumentException(
+                throw new ApiException(
                 'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.', 400
                 );
             }
@@ -200,7 +206,11 @@ abstract class AbstractTripleStoreResource {
                 throw new ApiException('You do not have rights to edit resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $params['tenantcode'], 403);
             }
         } catch (Exception $e) {
-            return $this->getErrorResponse($e->getCode(), $e->getMessage());
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
 
@@ -208,13 +218,13 @@ abstract class AbstractTripleStoreResource {
         try {
             $params = $this->getAndAdaptQueryParams($request);
             if (empty($params['uri'])) {
-                throw new InvalidArgumentException('Missing uri parameter');
+                throw new ApiException('Missing uri parameter', 400);
             }
 
             $uri = $params['uri'];
             $resourceObject = $this->manager->fetchByUri($uri);
             if (!$resourceObject) {
-                throw new NotFoundException('The resource is not found by uri :' . $uri, 404);
+                throw new ApiException('The resource is not found by uri :' . $uri, 404);
             }
 
             $user = $this->getUserFromParams($params);
@@ -230,8 +240,12 @@ abstract class AbstractTripleStoreResource {
 
             $xml = (new DataRdf($resourceObject))->transform();
             return $this->getSuccessResponse($xml, 202);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
 
@@ -239,7 +253,7 @@ abstract class AbstractTripleStoreResource {
         $doc = $this->getDomDocumentFromRequest($request);
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
-            throw new InvalidArgumentException(
+            throw new ApiException(
             'Expected exactly one '
             . '/rdf:RDF/rdf:Description, got ' . $descriptions->length, 412
             );
@@ -252,7 +266,7 @@ abstract class AbstractTripleStoreResource {
         $resource = $resources[0];
         $className = Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
         if (!isset($resource) || !$resource instanceof $className) {
-            throw new InvalidArgumentException('XML Could not be converted to a ' . $className . ' object', 400);
+            throw new ApiException('XML Could not be converted to a ' . $className . ' object', 400);
         }
 
         return $resource;
@@ -261,17 +275,17 @@ abstract class AbstractTripleStoreResource {
     private function getDomDocumentFromRequest(ServerRequestInterface $request) {
         $xml = $request->getBody();
         if (!$xml) {
-            throw new InvalidArgumentException('No RDF-XML recieved', 412);
+            throw new ApiException('No RDF-XML recieved', 412);
         }
 
         $doc = new DOMDocument();
         if (!@$doc->loadXML($xml)) {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
+            throw new ApiException('Recieved RDF-XML is not valid XML', 412);
         }
 
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
-            throw new InvalidArgumentException(
+            throw new ApiException(
             'Recieved RDF-XML is not valid: '
             . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 412
             );
@@ -293,13 +307,13 @@ abstract class AbstractTripleStoreResource {
         $uuid=$resourceObject->getProperty(OpenSkos::UUID);
         if ($autoGenerateIdentifiers) {
             if (!$resourceObject->isBlankNode()) {
-                throw new InvalidArgumentException(
+                throw new ApiException(
                 'Parameter autoGenerateIdentifiers is set to true, but the provided '
                 . 'xml already contains uri (rdf:about).', 400
                 );
             };
             if (count($uuid)>0) {
-                throw new InvalidArgumentException(
+                throw new ApiException(
                 'Parameter autoGenerateIdentifiers is set to true, but the provided '
                 . 'xml  already contains uuid.', 400
                 );
@@ -307,12 +321,12 @@ abstract class AbstractTripleStoreResource {
         } else {
             // Is uri missing
             if ($resourceObject->isBlankNode()) {
-                throw new InvalidArgumentException(
+                throw new ApiException(
                 'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             }
             if (count($uuid)===0) {
-                throw new InvalidArgumentException(
+                throw new ApiException(
                 'OpenSkos:uuid is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             };
@@ -324,7 +338,7 @@ abstract class AbstractTripleStoreResource {
     private function getParamValueFromParams($params, $paramname) {
         
         if (empty($params[$paramname])) {
-            throw new InvalidArgumentException('No ' . $paramname . ' specified', 412);
+            throw new ApiException('No ' . $paramname . ' specified', 412);
         }
         return $params[$paramname];
     }
@@ -340,7 +354,7 @@ abstract class AbstractTripleStoreResource {
     protected function validate($resourceObject, $isForUpdate, $tenanturi) {
         $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi);
         if (!$validator->validate($resourceObject)) {
-            throw new InvalidArgumentException(implode(' ' , $validator->getErrorMessages()), 400);
+            throw new ApiException(implode(' ' , $validator->getErrorMessages()), 400);
         } else {
             return true;
         }
@@ -351,21 +365,21 @@ abstract class AbstractTripleStoreResource {
      /**
      * @params string $key
      * @return OpenSKOS_Db_Table_Row_User
-     * @throws InvalidArgumentException
+     * @throws ApiException
      */
     protected function getUserByKey($key)
     {
         $user = OpenSKOS_Db_Table_Users::fetchByApiKey($key);
         if (null === $user) {
-            throw new InvalidArgumentException('No such API-key: `' . $key . '`', 401);
+            throw new ApiException('No such API-key: `' . $key . '`', 401);
         }
 
         if (!$user->isApiAllowed()) {
-            throw new InvalidArgumentException('Your user account is not allowed to use the API', 401);
+            throw new ApiException('Your user account is not allowed to use the API', 401);
         }
 
         if (strtolower($user->active) !== 'y') {
-            throw new InvalidArgumentException('Your user account is blocked', 401);
+            throw new ApiException('Your user account is blocked', 401);
         }
              
         return $user;

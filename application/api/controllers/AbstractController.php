@@ -12,6 +12,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     public function init()
     {
         parent::init();
+        $this->_helper->contextSwitch() ->initContext($this->getRequestedFormat());
         $this->getHelper('viewRenderer')->setNoRender(true);
         if ('html' === $this->_helper->contextSwitch()->getCurrentContext()) {
             //enable layout:

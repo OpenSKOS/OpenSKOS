@@ -169,7 +169,7 @@ class Command implements LoggerAwareInterface
         }
 
         // @TODO Those properties has to have types, rather then ignoring them from a list
-        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS];
+        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS, OpenSkos::UUID, OpenSkos::CODE];
         if ($message->getFallbackLanguage()) {
             foreach ($concept->getProperties() as $predicate => $properties) {
                 foreach ($properties as $property) {

@@ -64,12 +64,12 @@ class Relation extends AbstractTripleStoreResource {
             $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
     
@@ -98,12 +98,12 @@ class Relation extends AbstractTripleStoreResource {
                 throw new  ApiException('Invalid context: ' . $format, 400);
         }
               return $response;
-        } catch (Exception $exc) {
-            if ($exc instanceof ApiException) {
-                return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
-            } else {
-                return $this->getErrorResponse(500, $exc->getMessage());
-            }
+        } catch (Exception $e) {
+            $code = $e->getCode();
+            if ($code === 0 || $code=== null) {
+                $code = 500;
+            } 
+            return $this->getErrorResponse($code, $e->getMessage());
         }
     }
     

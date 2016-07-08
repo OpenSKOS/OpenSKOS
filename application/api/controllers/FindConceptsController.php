@@ -16,16 +16,17 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+require_once 'AbstractController.php';
 
-class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
+
+class Api_FindConceptsController extends AbstractController {
 
     public function init()
     {
-        parent::init();
-
-        $this->_helper->contextSwitch()
-                ->initContext($this->getRequestedFormat());
-
+       parent::init();
+       $this->fullNameResourceClass = 'OpenSkos2\Api\Concept';
+       $this ->viewpath="concept/";
+       
         if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
             //enable layout:
             $this->getHelper('layout')->enableLayout();
@@ -107,6 +108,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
             $this->_helper->viewRenderer->setNoRender(true);
 
             $concept = $this->getDI()->make('OpenSkos2\Api\Concept');
+           
             $context = $this->_helper->contextSwitch()->getCurrentContext();
             $request = $this->getPsrRequest();
             $response = $concept->findConcepts($request, $context);
@@ -175,22 +177,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      */
     public function getAction()
     {
-        $this->_helper->viewRenderer->setNoRender(true);
-
-        $id = $this->getId();
-
-        $apiConcept = $this->getDI()->make('OpenSkos2\Api\Concept');
-        $context = $this->_helper->contextSwitch()->getCurrentContext();
-
-        // Exception for html use ZF 1 easier with linking in the view
-        if ('html' === $context) {
-            $this->view->concept = $apiConcept->getConcept($id);
-            return $this->renderScript('concept/get.phtml');
-        }
-        
-        $request = $this->getPsrRequest();
-        $response = $apiConcept->getConceptResponse($request, $id, $context);
-        $this->emitResponse($response);
+         parent::getAction();
     }
 
     public function postAction()
@@ -208,44 +195,5 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $this->_501('DELETE');
     }
 
-    /**
-     * Get concept id
-     *
-     * @throws Zend_Controller_Exception
-     * @return string|\OpenSkos2\Rdf\Uri
-     */
-    private function getId()
-    {
-        $id = $this->getRequest()->getParam('id');
-        if (null === $id) {
-            throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
-        }
-        
-        if (strpos($id, 'http://') !== false || strpos($id, 'https://') !== false) {
-            return new OpenSkos2\Rdf\Uri($id);
-        }
-        
-        /*
-         * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
-         * with this we can create a route in the config ini like this:
-         *
-         * resources.router.routes.route_id.type = "Zend_Controller_Router_Route_Regex"
-         * resources.router.routes.route_id.route = "gtaa\/(\d+)"
-         * resources.router.routes.route_id.defaults.module = "api"
-         * resources.router.routes.route_id.defaults.controller = "concept"
-         * resources.router.routes.route_id.defaults.action = "get"
-         * resources.router.routes.route_id.defaults.id_prefix = "http://data.beeldengeluid.nl/gtaa/"
-         * resources.router.routes.route_id.defaults.format = "html"
-         * resources.router.routes.route_id.map.1 = "id"
-         * resources.router.routes.route_id.reverse = "gtaa/%d"
-         */
-
-        $id_prefix = $this->getRequest()->getParam('id_prefix');
-        if (null !== $id_prefix && \Rhumsaa\Uuid\Uuid::isValid($id)) {
-            $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
-            $id = $id_prefix . $id;
-        }
-
-        return $id;
-    }
+  
 }

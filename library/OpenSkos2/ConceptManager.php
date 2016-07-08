@@ -43,11 +43,25 @@ class ConceptManager extends ResourceManager
      */
     protected $resourceType = Concept::TYPE;
 
+    // uses and overrides the parent's method
+    public function findResourceById($id, $resourceType) {
+        $concept = parent::findResourceById($id, $resourceType);
+        if ($concept->isDeleted()) {
+            throw new ApiException('Concept ' . $id . ' is deleted', 410);
+        }
+        return $concept;
+    }
+    
+   
+    
     /**
      * Deletes and then inserts the resourse.
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
+    
+    
+    
     public function replaceAndCleanRelations(Concept $concept)
     {
         // @TODO Danger if one of the operations fail. Need transaction or something.
