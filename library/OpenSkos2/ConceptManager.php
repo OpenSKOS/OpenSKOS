@@ -261,6 +261,8 @@ class ConceptManager extends ResourceManager
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
+        // @TODO There is nowhere in solr check for class:Concept, but all resources are there
+        
         return $this->fetchByUris(
             $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
@@ -271,10 +273,15 @@ class ConceptManager extends ResourceManager
      * @param \OpenSkos2\Tenant $tenant
      * @return int|null
      */
-    public function fetchMaxNumericNotationFromSolr(Tenant $tenant)
+    public function fetchMaxNumericNotationFromIndex(Tenant $tenant)
     {
         // Gets the maximum of all max_numeric_notation fields
-        return $maxNotation;
+        $max = $this->solrResourceManager->getMaxFieldValue(
+            'tenant:' . $tenant->getCode(),
+            'max_numeric_notation'
+        );
+        
+        return intval($max);
     }
     
     /**

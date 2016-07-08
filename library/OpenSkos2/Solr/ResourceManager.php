@@ -169,4 +169,24 @@ class ResourceManager
         
         return $uris;
     }
+    
+    /**
+     * Get the max value of a single value field
+     * @param string $field Get the max value of a single value field
+     * @return string
+     */
+    public function getMaxFieldValue($query, $field)
+    {
+        // Solarium brakes stat results when we have long int, so we use ordering.
+        
+        $select = $this->solr->createSelect()
+            ->setQuery($query)
+            ->setRows(1)
+            ->addSort($field, 'desc')
+            ->addField($field);
+        
+        $solrResult = $this->solr->select($select);
+        
+        return $solrResult->getIterator()->current()->{$field};
+    }
 }
