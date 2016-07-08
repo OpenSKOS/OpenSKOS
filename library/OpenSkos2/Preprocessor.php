@@ -66,9 +66,11 @@ class Preprocessor {
         $preprocessed = $resourceObject;
         $uri = $resourceObject->getUri();
         $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
+        $preprocessed->addMetadata($this->userUri, $params, $existingResource);
         if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
-            // do not update uuid: it must be intact forever
-            if ($preprocessed->getUuid() !== $existingResource->getUuid()) {
+            //var_dump($preprocessed->getUuid());
+            //var_dump($existingResource->getUuid());
+            if ($preprocessed->getUuid() !== null && $preprocessed->getUuid() !== $existingResource->getUuid()) {
                 throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $existingResource->getUuid(), 400);
             }
         }

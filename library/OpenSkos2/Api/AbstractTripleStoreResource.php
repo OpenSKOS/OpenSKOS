@@ -87,11 +87,7 @@ abstract class AbstractTripleStoreResource {
         }
         return $response;
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            }
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
 
@@ -138,11 +134,7 @@ abstract class AbstractTripleStoreResource {
 
             return $response;
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
 
@@ -176,11 +168,7 @@ abstract class AbstractTripleStoreResource {
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
     
@@ -196,7 +184,7 @@ abstract class AbstractTripleStoreResource {
             $uri = $resourceObject->getUri();
             $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['tenantcode'], $user->getFoafPerson()->getUri());
             $preprocessedResource = $preprocessor ->forUpdate($resourceObject, $params);
-            if ($this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $existingResource)) {
+            if ($this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $preprocessedResource)) {
                 $this->validate($preprocessedResource, true, $params['tenanturi']);
                 $this->manager->replace($preprocessedResource);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -206,11 +194,7 @@ abstract class AbstractTripleStoreResource {
                 throw new ApiException('You do not have rights to edit resource ' . $uri  . '. Your role is "' . $user->role . '" in tenant ' . $params['tenantcode'], 403);
             }
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
 
@@ -241,11 +225,7 @@ abstract class AbstractTripleStoreResource {
             $xml = (new DataRdf($resourceObject))->transform();
             return $this->getSuccessResponse($xml, 202);
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
 
@@ -410,4 +390,13 @@ abstract class AbstractTripleStoreResource {
         return $response;
     }
     
+    protected function getErrorResponseFromException($e) {
+        $code = $e->getCode();
+        if ($code === 0 || $code === null) {
+            $code = 500;
+        }
+        $message = trim(preg_replace('/\s\s+/', ' ', $e->getMessage()));
+        return $this->getErrorResponse($code, $message);
+    }
+
 }

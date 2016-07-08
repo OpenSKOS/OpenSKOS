@@ -19,6 +19,7 @@
 
 namespace OpenSkos2\Rdf;
 
+
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\MyInstitutionModules\UriGeneration;
@@ -230,7 +231,7 @@ class Resource extends Uri implements ResourceIdentifier
     
     public function getUuid()
     {
-        return current($this->getProperty(OpenSkos::UUID));
+        return $this->getPropertyOneLiteralValue(OpenSkos::UUID);
     }
     /**
      * @return string
@@ -401,7 +402,6 @@ class Resource extends Uri implements ResourceIdentifier
             $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
             
         } else {
-            
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
             $metadata[OpenSkos::UUID] = new Literal($existingResource->getUUID());

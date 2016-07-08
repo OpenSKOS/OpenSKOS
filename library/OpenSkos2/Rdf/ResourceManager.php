@@ -1042,20 +1042,25 @@ public function deleteSolrIntact(Uri $resource)
         return $result;
     }
     
-     public function augmentResourceWithTenant($resource){
-        if ($resource!==null) {
-            $tenants = $resource ->getProperty(OpenSkosNamespace::TENANT);
-            if (count($tenants)<1){
+    public function augmentResourceWithTenant($resource) {
+        if ($resource !== null) {
+            $tenants = $resource->getProperty(OpenSkosNamespace::TENANT);
+            if (count($tenants) < 1) {
                 $setUris = $resource->getProperty(OpenSkosNamespace::SET);
-                if (count($setUris) >0) {
-                    $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
-                    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-                    if (count($tenantUris)>0){
-                        $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUris[0]);
-                    } 
+                if (count($setUris) > 0) {
+                    try {
+                        $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
+                        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+                        if (count($tenantUris) > 0) {
+                            $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUris[0]);
+                        }
+                    } catch (ApiException $ex) {
+                        
+                    }
                 }
             }
         }
         return $resource;
     }
+
 }

@@ -133,14 +133,14 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return (count($this->errorMessages)===0);
     }
     
-   private function uniquenessCheck($resource, $otherResources, $propertyUri, $value) {
+   private function uniquenessCheck($resource, $otherResourcesUris, $propertyUri, $value) {
        $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered in the triple store.'];
-       if (count($otherResources)>0){ 
+       if (count($otherResourcesUris)>0){ 
            if ($this->isForUpdate) {
-               if (count($otherResources)>1) { 
+               if (count($otherResourcesUris)>1) { 
                   return $errorMessages; 
                } else { // a signle other resource is found but it may be the given resource and duplication is not a problem
-                  if ($resource ->getUri() !== $otherResources[0]->getUri()){ // the same resource
+                   if ($resource ->getUri() !== $otherResourcesUris[0]){ // the same resource
                       return $errorMessages;
                   } else {
                       return [];

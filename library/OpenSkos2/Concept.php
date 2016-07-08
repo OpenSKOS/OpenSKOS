@@ -234,13 +234,13 @@ class Concept extends Resource
         
         $setUri = $this->deriveSetUri($params, $existingConcept);
         if ($setUri !== null) { // othewrise it is either set in this or not derivable
-           $metadata[OpenSkos::SET] = $setUri;
+           $this->setProperty(DcTerms::MODIFIED, $setUri);
         }
         
         if ($existingConcept === null) { // a completely new concept under creation
             
-            $metadata[DcTerms::CREATOR] = new Uri($userUri);
-            $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
+            $this->setProperty(DcTerms::CREATOR, new Uri($userUri));
+            $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
             $this->unsetProperty(DcTerms::DATEACCEPTED);
             $this->unsetProperty(OpenSkos::ACCEPTEDBY);
             $this->unsetProperty(OpenSkos::DATE_DELETED);
@@ -252,7 +252,7 @@ class Concept extends Resource
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
             
-            if ($existingConcept->getStatus !== $this->getStatus()) {
+            if ($existingConcept->getStatus() !== $this->getStatus()) {
                 $this->unsetProperty(DcTerms::DATEACCEPTED);
                 $this->unsetProperty(OpenSkos::ACCEPTEDBY);
                 $this->unsetProperty(OpenSkos::DATE_DELETED);
@@ -270,21 +270,19 @@ class Concept extends Resource
                 }
             }
             
-            $metadata[OpenSkos::UUID] = new Literal($existingConcept->getUUID());
+            $this->unsetProperty(OpenSkos::UUID);
+            $this->setProperty(OpenSkos::UUID, new Literal($existingConcept->getUuid()));
+            
             $creators = $existingConcept->getProperty(DcTerms::CREATOR);
-            if (count($creators) === 0) {
-                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+            if (count($creators) < 1) {
+                $this->setProperty(DcTerms::CREATOR, new Literal(UNKNOWN));
             } else {
-                $metadata[DcTerms::CREATOR] = $creators[0];
+                $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
             $dateSubmitted = $existingConcept->getProperty(DcTerms::DATESUBMITTED);
-            if (count($dateSubmitted) !== 0) {
-                $metadata[DcTerms::DATESUBMITTED] = new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME);
+            if (count($dateSubmitted) > 0) {
+                $this->setProperty(DcTerms::DATESUBMITTED, new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME));
             }
-        }
-        
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
         }
         
     }

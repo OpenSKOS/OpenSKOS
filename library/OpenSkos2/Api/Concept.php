@@ -157,11 +157,7 @@ class Concept extends AbstractTripleStoreResource {
             set_time_limit(30);
             return $response;
         } catch (Exception $ex) {
-            $code = $ex->getCode();
-            if ($code === 0 || $code === null) {
-                $code = 500;
-            }
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
     }
 
@@ -227,11 +223,7 @@ class Concept extends AbstractTripleStoreResource {
 
             $this->manager->deleteSoft($concept);
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
 
         $xml = (new DataRdf($concept))->transform();
@@ -354,11 +346,7 @@ class Concept extends AbstractTripleStoreResource {
             $body = $this->preEditChecksRels($request, $params);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (Exception $e) {
-            $code = $e->getCode();
-            if ($code === 0 || $code=== null) {
-                $code = 500;
-            } 
-            return $this->getErrorResponse($code, $e->getMessage());
+            return $this->getErrorResponseFromException($e);
         }
 
         $stream = new Stream('php://memory', 'wb+');

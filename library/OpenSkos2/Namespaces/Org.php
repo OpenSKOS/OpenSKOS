@@ -20,8 +20,8 @@ namespace OpenSkos2\Namespaces;
 
 class Org
 {
-    const NAME_SPACE = 'https://www.w3.org/ns/org#';
+    const NAME_SPACE = 'http://www.w3.org/ns/org#';
     
-    const FORMALORG = 'https://www.w3.org/ns/org#FormalOrganization';
+    const FORMALORG = 'http://www.w3.org/ns/org#FormalOrganization';
     
 }
