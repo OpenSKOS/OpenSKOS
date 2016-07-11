@@ -261,35 +261,39 @@ class ConceptManager extends ResourceManager
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
-        $select = $this->solr->createSelect();
-        $select->setStart($start)
-                ->setRows($rows)
-                ->setFields(['uri'])
-                ->setQuery($query);
+        // @TODO There is nowhere in solr check for class:Concept, but all resources are there
         
-        if (!empty($sorts)) {
-            $select->setSorts($sorts);
-        }
+        return $this->fetchByUris(
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+        );
+    }
+    
+    /**
+     * Gets the current max numeric notation for all concepts. Fast.
+     * @param \OpenSkos2\Tenant $tenant
+     * @return int|null
+     */
+    public function fetchMaxNumericNotationFromIndex(Tenant $tenant)
+    {
+        // Gets the maximum of all max_numeric_notation fields
+        $max = $this->solrResourceManager->getMaxFieldValue(
+            'tenant:' . $tenant->getCode(),
+            'max_numeric_notation'
+        );
         
-        $solrResult = $this->solr->select($select);
-        
-        $numFound = $solrResult->getNumFound();
-        
-        $uris = [];
-        foreach ($solrResult as $doc) {
-            $uris[] = $doc->uri;
-        }
-        
-        return $this->fetchByUris($uris);
+        return intval($max);
     }
     
     /**
      * Gets the current max numeric notation.
+     * This method is extremely slow...
+     * @see self::fetchMaxNumericNotationFromIndex
      * @param \OpenSkos2\Tenant $tenant
      * @return int|null
      */
     public function fetchMaxNumericNotation(Tenant $tenant)
     {
+        // This method is slow - use fetchMaxNumericNotationFromIndex where possible.
         $maxNotationQuery = (new QueryBuilder())
             ->select('(MAX(<' . Xsd::NONNEGATIVEINTEGER . '>(?notation)) AS ?maxNotation)')
             ->where('?subject', '<' . Skos::NOTATION . '>', '?notation')

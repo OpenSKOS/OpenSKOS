@@ -275,7 +275,7 @@ class Concept extends Resource
         
         $notation = 1;
         
-        $maxNumericNotation = $conceptManager->fetchMaxNumericNotation($tenant);
+        $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
         if (!empty($maxNumericNotation)) {
             $notation = $maxNumericNotation + 1;
         }
