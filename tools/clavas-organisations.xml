@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcr="http://www.isocat.org/ns/dcr.rdf#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:openskos="http://openskos.org/xmlns#">
-   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:openskos="http://openskos.org/xmlns#">
-    <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations">
+   <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations">
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
         <dcterms:title xml:lang="en">OpenSKOS-CLARIN Organizations</dcterms:title>
         <dcterms:description xml:lang="en">Organization Vocabulary, bootstrapped by manual curation from the list of VLO organization names (http://www.clarin.eu/vlo).</dcterms:description>
     </rdf:Description>
-</rdf:RDF> 
     <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/409dbccb-1240-4e39-944f-90f3d5e2d7f4">
 	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
 	     <skos:prefLabel xml:lang="fi">Yhtyneet Kuvalehdet</skos:prefLabel>
