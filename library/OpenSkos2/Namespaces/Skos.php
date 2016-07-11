@@ -24,7 +24,7 @@ class Skos
     
     const CONCEPT = 'http://www.w3.org/2004/02/skos/core#Concept';
     
-    const CONCEPTSCHEME = 'http://www.w3.org/2004/02/skos/core#conceptScheme';
+    const CONCEPTSCHEME = 'http://www.w3.org/2004/02/skos/core#ConceptScheme';
     const INSCHEME = 'http://www.w3.org/2004/02/skos/core#inScheme';
     const HASTOPCONCEPT = 'http://www.w3.org/2004/02/skos/core#hasTopConcept';
     const TOPCONCEPTOF = 'http://www.w3.org/2004/02/skos/core#topConceptOf';
