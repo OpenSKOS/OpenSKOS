@@ -86,6 +86,16 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addValidator(new Zend_Validate_EmailAddress());
 
 
+            $validator = new Zend_Validate_Callback([$this->getTable(), 'uniqueEppn']);
+            $validator
+                ->setMessage(
+                    _("there is already a user with eduPersonPrincipalName '%value%'"),
+                    Zend_Validate_Callback::INVALID_VALUE
+                );
+
+            $form->getElement('eppn')
+                 ->addValidator($validator);
+
             $validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
             $validator
                     ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
@@ -145,7 +155,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     }
 
     /**
-     * 
+     *
      * @param A Zend Resource identifier $resource
      * @param A Zend Privilege identifier $privilege
      * @return boolean
@@ -223,7 +233,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $conceptsManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($this->getUserHistoryUris());
     }
-    
+
     public function getUserHistoryUris()
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -243,7 +253,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             array_pop($userOptions->userHistory);
         }
     }
-    
+
     public function removeFromUserHistory($identifier)
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -263,7 +273,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     /**
      * Adds multiple concepts to the user's selection - both in session and in the db.
-     * 
+     *
      * @param array $uris The uris of the concepts
      * @return bool True if concept is added. False if size is reached and concept is not added.
      */
@@ -297,7 +307,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     /**
      * Gets the concepts from the selection
-     * 
+     *
      * @return array An array of Api_Models_Concept objects
      */
     public function getConceptsSelection()
@@ -342,7 +352,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     /**
      * Removes a single concept from user's selection.
-     * 
+     *
      * @param string $uri
      * @return OpenSKOS_Db_Table_Row_User
      */
@@ -362,7 +372,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     /**
      * Sets the user search options to his default profile options if they are not already set.
-     * 
+     *
      */
     public function applyDefaultSearchProfile()
     {
@@ -441,7 +451,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
         if (!$this->uri) {
             $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
-            
+
             if ($autoSave) {
                 $this->save();
             }
@@ -452,7 +462,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
-            
+
             if ($autoSave) {
                 $resourceManager->insert($person);
             }
@@ -460,17 +470,17 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             return $person;
         }
     }
-    
+
     /**
      * Get dependency injection container
-     * 
+     *
      * @return \DI\Container
      */
     protected function getDI()
     {
         return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
     }
-    
+
     /**
      * @TODO temp function for base api uri
      */

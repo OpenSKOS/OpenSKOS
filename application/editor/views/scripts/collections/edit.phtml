@@ -40,7 +40,6 @@
 			<?php endforeach?>
 		</ul>
                 */ ?>
-		<?php if ($this->collection->OAI_baseURL):?>
 		<?php if (false):?>
 		<h3><?php echo $this->translate('Schedule an OAI Harvest job')?></h3>
 		<?php 
@@ -59,7 +58,7 @@
 		<?php else:?>
 			<p>OAI LAST UPDATE</p>
 		<?php endif?>
-		<?php else:?>
+
 		<h3><?php echo $this->translate('Import new data')?></h3>
 		<p><?php echo $this->translate('Upload a file in (optionaly zipped) rdf-xml format (max. %s).', ini_get('upload_max_filesize'))?>
 		<br/>
@@ -88,7 +87,6 @@
 			<?php endforeach?>
 			</tbody>
 		</table>
-		<?php endif?>
 		<?php endif?>
 	</div>
 	<?php endif?>

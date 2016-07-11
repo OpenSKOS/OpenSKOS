@@ -26,33 +26,33 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.users', 'index');
         $this->view->users = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Users');
     }
-    
+
     public function viewAction()
     {
         $user = $this->_getUser();
         $userFromIdentity = OpenSKOS_Db_Table_Users::fromIdentity();
-    
+
         // You can view yourself
         if ($userFromIdentity->id != $user->id) {
             $this->_requireAccess('editor.users', 'manage');
         }
-    
+
         $this->view->assign('user', $user);
     }
-    
+
     public function editAction()
     {
         $user = $this->_getUser();
         $userFromIdentity = OpenSKOS_Db_Table_Users::fromIdentity();
-        
+
         // You can edit partially your own user.
         if ($userFromIdentity->id != $user->id) {
             $this->_requireAccess('editor.users', 'manage');
         }
-        
+
         $this->view->assign('user', $user);
     }
-    
+
     public function saveAction()
     {
         if (!$this->getRequest()->isPost()) {
@@ -61,28 +61,28 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
         }
         $user = $this->_getUser();
         $userFromIdentity = OpenSKOS_Db_Table_Users::fromIdentity();
-        
+
         // You can edit partially your own user.
         if ($userFromIdentity->id != $user->id) {
             $this->_requireAccess('editor.users', 'manage');
         }
-        
+
         if (null!==$this->getRequest()->getParam('delete')) {
             if (!$user->id) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty user.'));
                 $this->_helper->redirector('index');
             }
-            
+
             if ($user->id == $userFromIdentity->id) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete yourself.'));
                 $this->_helper->redirector('index');
             }
-            
+
             $user->delete();
             $this->getHelper('FlashMessenger')->addMessage(_('The user has been deleted.'));
             $this->_helper->redirector('index');
         }
-        
+
         $form = $user->getForm();
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('edit');
@@ -101,7 +101,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                 $user
                     ->setFromArray($formData)
                     ->setFromArray(array('tenant' => $this->_tenant->code));
-                
+
                 if ($pw =$form->getValue('pw1')) {
                     $user->setPassword($pw);
                 }
@@ -111,13 +111,18 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                     $user->setPassword($pw);
                 }
             }
-            
+
             // make sure that the current user still has access to the editor:
             if ($user->didIBlockMyselfFromTheEditor()) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage('The combination of role/usertype will block you from using the Editor.');
                 return $this->_helper->redirector('edit', null, null, array('user' => $user->id));
             }
-            
+
+            // For the unique tenant/eppn validator to work.
+            if ($user->eppn == '') {
+                $user->eppn = null;
+            }
+
             try {
                 $user->save();
                 $user->applyDefaultSearchProfile();
@@ -126,7 +131,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                 return $this->_forward('edit');
             }
             $this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
-            
+
             if ($userFromIdentity->isAllowed('editor.users', 'manage')) {
                 $this->_helper->redirector('index');
             } else {
@@ -134,7 +139,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
             }
         }
     }
-    
+
     /**
      * @return OpenSKOS_Db_Table_Row_User
      */
@@ -151,7 +156,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                 $this->_helper->redirector('index');
             }
         }
-        
+
         if ($user->tenant != $this->_tenant->code) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You are not allowed to edit this user.'));
             $this->_helper->redirector('index');

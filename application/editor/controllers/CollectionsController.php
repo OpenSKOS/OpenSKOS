@@ -24,32 +24,32 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     public function indexAction()
     {
         $this->_requireAccess('editor.collections', 'index');
-        
+
         $this->view->collections = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
-        
+
         $model = new OpenSKOS_Db_Table_Collections();
     }
-    
+
     public function editAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
-        
+
         $collection = $this->_getCollection();
-        
+
         if (! OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.delete-all-concepts-in-collection', null)) {
             $collection->getUploadForm()->removeElement('delete-before-import');
         }
-        
+
         $this->view->assign('collection', $collection);
         $this->view->assign('jobs', $collection->getJobs());
         $this->view->assign('harvestjobs', $collection->getJobs(OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST));
         $this->view->assign('max_upload_size', Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('max_upload_size'));
     }
-    
+
     public function harvestAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
-        
+
         $collection = $this->_getCollection();
         if (!$collection->OAI_baseURL) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('This collection does not appear to have a OAI Server as source.'));
@@ -67,7 +67,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             if (isset($parameters['until']) && $parameters['until']) {
                 $parameters['until'] = strtotime($parameters['until']);
             }
-            
+
             if (isset($parameters['set'])) {
                 foreach ($form->getElement('set')->getMultiOptions() as $setSpec => $setName) {
                     if ($setSpec == $parameters['set']) {
@@ -76,7 +76,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
                     }
                 }
             }
-            
+
             $parameters['deletebeforeimport'] = (int)$parameters['deletebeforeimport'] == 1;
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray(array(
@@ -92,17 +92,13 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
         $this->getHelper('FlashMessenger')->addMessage(_('An OAI Harvest job is scheduled'));
         $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
     }
-    
+
     public function importAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
-        
+
         $collection = $this->_getCollection();
-        if ($collection->OAI_baseURL) {
-            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Since this collection has an OAI Server as source, you can not upload files for import.'));
-            $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
-            return;
-        }
+
         $form = $collection->getUploadForm();
         $formData = $this->_request->getPost();
         if ($form->isValid($formData)) {
@@ -162,13 +158,13 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     public function saveAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
-        
+
         if (!$this->getRequest()->isPost()) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
             $this->_helper->redirector('index');
         }
         $collection = $this->_getCollection();
-        
+
         if (null!==$this->getRequest()->getParam('delete')) {
             if (!$collection->id) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty collection.'));
@@ -178,7 +174,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $this->getHelper('FlashMessenger')->addMessage(_('The collection has been deleted, it might take a while before changes are committed to our system.'));
             $this->_helper->redirector('index');
         }
-        
+
         $form = $collection->getForm();
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('edit');
@@ -196,7 +192,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $this->_helper->redirector('index');
         }
     }
-    
+
     /**
      * @return OpenSKOS_Db_Table_Row_Collection
      */
