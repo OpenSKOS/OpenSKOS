@@ -319,7 +319,10 @@ public function deleteSolrIntact(Uri $resource)
             //echo '***';
             //var_dump($resType);
             //echo '***';
-            throw new ApiException('The requested resource <' . $uri . '> was not found.', 404);
+            if ($resType===null) {
+                $resType = "not given. ";
+            }
+            throw new ApiException('The requested resource <' . $uri . '> of type ' . $resType . ' was not found.', 404);
         }
         if (count($resources) > 1) {
         echo '***';   

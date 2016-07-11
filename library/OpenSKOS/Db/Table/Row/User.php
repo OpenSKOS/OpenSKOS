@@ -19,10 +19,13 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Api\Exception\ApiException;
+
 class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 {
 
-    /**
+    /** 
      * @var int
      */
     const USER_HISTORY_SIZE = 100;
@@ -444,16 +447,20 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         
         try {
             return $resourceManager->fetchByUri($this->uri, \OpenSkos2\Namespaces\Foaf::PERSON);
-        } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
-            $person = new \OpenSkos2\Person($this->uri);
-            if ($this->name !== null && $this->name !== "") {
-                $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+        } catch (ApiException $e) {
+            if ($e->getCode() === 404) {
+                $person = new \OpenSkos2\Person($this->uri);
+                if ($this->name !== null && $this->name !== "") {
+                    $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+                }
+                $tenantcode = $this['tenant'];
+                $tenanturi = $resourceManager->fetchInstitutionUriByCode($tenantcode);
+                $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
+                $resourceManager->insert($person);
+                return $person;
+            } else {
+                var_dump($e->getCode());
             }
-            $tenantcode=$this['tenant'];
-            $tenanturi = $resourceManager->fetchInstitutionUriByCode($tenantcode);
-            $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
-             $resourceManager->insert($person);
-            return $person;
         }
     }
     
