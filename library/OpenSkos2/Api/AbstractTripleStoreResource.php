@@ -64,15 +64,15 @@ abstract class AbstractTripleStoreResource {
 
     
     public function fetchDeatiledListResponse($params) {
-        try {
-        $index = $this ->fetchDetailedList($params);
-        
-        foreach ($index as $resource) {
-            $resource = $this->manager->augmentResourceWithTenant($resource);
-        }
-        
-        $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
-        switch ($params['context']) {
+       
+        try { 
+            
+            $index = $this->fetchDetailedList($params);
+            foreach ($index as $resource) {
+                $resource = $this->manager->augmentResourceWithTenant($resource);
+            }
+            $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
+            switch ($params['context']) {
                 case 'json':
                     $response = (new JsonResponse($result, []))->getResponse();
                     break;
@@ -84,8 +84,9 @@ abstract class AbstractTripleStoreResource {
                     break;
                 default:
                     throw new ApiException('Invalid context: ' . $params['context'], 400);
-        }
-        return $response;
+            }
+            return $response;
+            
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
         }
@@ -395,7 +396,7 @@ abstract class AbstractTripleStoreResource {
         if ($code === 0 || $code === null) {
             $code = 500;
         }
-        $message = trim(preg_replace('/\s\s+/', ' ', $e->getMessage()));
+        $message = trim(preg_replace("/\r\n|\r|\n/", ' ', $e->getMessage()));
         return $this->getErrorResponse($code, $message);
     }
 

@@ -234,7 +234,7 @@ class Concept extends Resource
         
         $setUri = $this->deriveSetUri($params, $existingConcept);
         if ($setUri !== null) { // othewrise it is either set in this or not derivable
-           $this->setProperty(DcTerms::MODIFIED, $setUri);
+           $this->setProperty(OpenSkos::SET, $setUri);
         }
         
         if ($existingConcept === null) { // a completely new concept under creation

@@ -33,7 +33,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
-use RuntimeException;
+use OpenSkos2\Exception\Api\ApiException;
 
 class Command implements LoggerAwareInterface
 {
@@ -107,8 +107,8 @@ class Command implements LoggerAwareInterface
             $type=$types[0]->getUri();
             $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser()->getUri());
 
-           
-            try {
+            $exists = $this->resourceManager->countTriples("<".$uri.">","<".Rdf::TYPE.">", "<".$type.">");
+            if($exists>0) {
                 $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
                 if ($message->getNoUpdates()) {
                     var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
@@ -123,7 +123,7 @@ class Command implements LoggerAwareInterface
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
-            } catch (RuntimeException $ex) { // adding a new resource
+            } else { // adding a new resource
                 $autoGenerateIdentifiers = true;
                 $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
                 $isForUpdates = false;

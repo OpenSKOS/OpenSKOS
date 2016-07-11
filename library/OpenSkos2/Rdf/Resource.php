@@ -392,9 +392,14 @@ class Resource extends Uri implements ResourceIdentifier
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         
+        var_dump($params['seturi']);
         $setUri = $this->deriveSetUri($params, $existingResource);
+        var_dump("HERE!!");
+        var_dump($setUri);
+        var_dump("**");
+        
         if ($setUri !== null) { // othewrise it is either set in *this* or not derivable
-           $metadata[OpenSkos::SET] = $setUri;
+            $this->setProperty(OpenSkos::SET, $setUri);
         }
 
         if ($existingResource === null) { // a completely new resource under creation
