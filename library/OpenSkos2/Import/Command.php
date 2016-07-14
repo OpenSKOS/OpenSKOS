@@ -125,7 +125,6 @@ class Command implements LoggerAwareInterface
             
             //special import logic
             if ($resourceToInsert instanceof Concept) {
-                
                 // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
                 $currentVersion = null;
                 if (isset($currentVersions[$resourceToInsert->getUri()])) {
