@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,7 +19,6 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -31,77 +31,80 @@ $setManager = $di->get('OpenSkos2\SetManager');
 $code = $set->getCode();
 $uri = $set->getUri();
 $name = $setManager->getSetTitle($code);
-$this->headTitle($name)?>
+$this->headTitle($name)
+?>
 
 
-<h2><?php echo $this->escape($name)?></h2> 
+<h2><?php echo $this->escape($name) ?></h2> 
 <div class="clear">
-	<div id="collection-form">
-<dl>
-    <?php
-        foreach ($this->resProperties as $key => $val): ?>
-         <dt><?php echo  $key?>:</dt>
-         <?php if ($key==="publisher"):
-             $tenantCode = $setManager -> getResourceSearchID($val, Org::FORMALORG);
-             $tenantName = $setManager -> getTenantNameByCode($tenantCode);
-             ?>
-	 <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantCode))?>.html"><?php echo $tenantName?></a></dd>
-         <?php endif?>
-         <?php if ($key==="type"):?>
-	 <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
-         <?php endif?>
-         <?php if ($key==="description" ):?>
-	 <dd><?php echo nl2br($val, true)?></dd>
-	<?php endif?>
-         <?php if (($key==="uuid") || ($key==="code") || ($key==="title") || ($key==="allow_oai"  ||  $key==="license_name")):?>
-	 <dd><?php echo $val?></dd>
-	<?php endif?>
-        <?php if ($key==="webpage" || $key==="conceptBaseUri" ||  $key==="OAI_baseURL" ||  $key==="license_url"):?>
-	<dd><a rel="external" href="<?php echo $val?>"><?php echo $val?></a></dd>
-	<?php endif?>
-        <?php endforeach;?>
-</dl>
-    
+    <div id="collection-form">
+        <dl>
+            <?php foreach ($this->resProperties as $key => $val): ?>
+                <dt><?php echo $key ?>:</dt>
+                <?php
+                if ($key === "publisher"):
+                    $tenantCode = $setManager->getResourceSearchID($val, Org::FORMALORG);
+                    $tenantName = $setManager->getTenantNameByCode($tenantCode);
+                    ?>
+                    <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+                <?php endif ?>
+                <?php if ($key === "type"): ?>
+                    <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
+                <?php endif ?>
+                <?php if ($key === "description"): ?>
+                    <dd><?php echo nl2br($val, true) ?></dd>
+                <?php endif ?>
+                <?php if (($key === "uuid") || ($key === "code") || ($key === "title") || ($key === "allow_oai" || $key === "license_name")): ?>
+                    <dd><?php echo $val ?></dd>
+                <?php endif ?>
+                <?php if ($key === "webpage" || $key === "conceptBaseUri" || $key === "OAI_baseURL" || $key === "license_url"): ?>
+                    <dd><a rel="external" href="<?php echo $val ?>"><?php echo $val ?></a></dd>
+                <?php endif ?>
+<?php endforeach; ?>
+        </dl>
 
-<h3><?php echo $this->translate('Concept Schemes')?></h3>
-<ul>
-	<?php
-        $schemata = $setManager->fetchInhabitantsForSetViaCode($code, Skos::CONCEPTSCHEME) ;
-        foreach ($schemata as $key=>$value):?>
-	<li> 
-		<a href="<?php echo $this->url(array('controller' => 'conceptscheme', 'id' => $value), 'rest')?>.html">
-			<?php echo $key?>
-		</a>
-	</li>
-	<?php endforeach?>
-</ul>
+<?php $schemata = $setManager->fetchInhabitantsForSet($uri, Skos::CONCEPTSCHEME); ?>
+        <h3>Concept Schemes (<?php echo count($schemata); ?>)</h3>
+        <ul>
+            <?php foreach ($schemata as $key => $value): ?>
+                <li> 
+                    <a href="<?php echo $this->url(array('controller' => 'conceptscheme', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
 
-<h3><?php echo $this->translate('Skos collections')?></h3>
-<ul>
-	<?php 
-        $skoscollections = $setManager->fetchInhabitantsForSetViaCode($code, Skos::SKOSCOLLECTION) ;
-        foreach ($skoscollections as $key=>$value):?>
-	<li> 
-		<a href="<?php echo $this->url(array('controller' => 'skoscollection', 'id' => $value), 'rest')?>.html">
-			<?php echo $key?>
-		</a>
-	</li>
-	<?php endforeach?>
-</ul>
-<?php ?>
+<?php $skoscollections = $setManager->fetchInhabitantsForSet($uri, Skos::SKOSCOLLECTION); ?>
+        <h3>Skos collections (<?php echo count($skoscollections) ?>) </h3>
+        <ul>
+            <?php foreach ($skoscollections as $key => $value): ?>
+                <li> 
+                    <a href="<?php echo $this->url(array('controller' => 'skoscollection', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
+ <?php $concepts = $setManager->listConceptsForCluster($uri, OpenSkos::SET); ?>
+        <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this set:</h3>
+        <ul>
+            <?php foreach ($concepts as $key => $value): ?>
+                <li>
+                    <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
+    </div>
 
-	</div>
-	<div id="collection-stats" class="box">
-		<h3>SKOS Concepts in this set:</h3>
-		<ul>
-			<?php $count= $setManager->countConceptsForCluster($code, OpenSkos::SET);
-			echo number_format($count, 0)?>
-		</ul>
-	</div>
-</div>
-<h3>Alternative formats</h3>
-<ul>
-	<li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url())?>">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234'?>">JSONP</a></li>
-	<li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url())?>">RDF</a></li>
-</ul>
+    <h3>Alternative formats</h3>
+    <ul>
+        <li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url()) ?>">JSON</a></li>
+        <li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234' ?>">JSONP</a></li>
+        <li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url()) ?>">RDF</a></li>
+    </ul>
+
+   
+

@@ -196,15 +196,6 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
         return null;
     }
     
-    if (TENANTS_AND_SETS_IN_MYSQL) {
-        $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
-        if (!$tenantMySQL) {
-            echo "Could not find tenant  with code: {$code}\n";
-            return null;
-        } else {
-            return new \OpenSkos2\Rdf\Literal($code);
-        }
-    }   
     
     $tripleStoreTenant = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Org::FORMALORG);
     if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
@@ -252,10 +243,6 @@ function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager
         }
     } else {
         $code = $id;
-    }
-
-    if (TENANTS_AND_SETS_IN_MYSQL) {
-        return new \OpenSkos2\Rdf\Literal($collectionMySQL['code']);
     }
 
     $tripleStoreSet = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Dcmi::DATASET);

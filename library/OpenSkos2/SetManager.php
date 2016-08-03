@@ -54,35 +54,19 @@ class SetManager extends ResourceManager
    
   
      // used only for HTML representation
-    public function fetchInhabitantsForSetViaCode($setCode, $rdfType) {
-        if (TENANTS_AND_SETS_IN_MYSQL) {
-        $query = "SELECT ?uri ?uuid WHERE  {  ?uri  <" . OpenSkos::SET . "> '" . $setCode . "' ."
-                . ' ?uri  <' . Rdf::TYPE . '> <'. $rdfType.'> .'
-                . ' ?uri  <' . OpenSkos::UUID . '> ?uuid .}';
-        } else {
-            $query = "SELECT ?uri ?uuid WHERE  {  ?seturi  <" . OpenSkos::CODE . "> '" . $setCode . "' . "
-                 . "?uri  <" . OpenSkos::SET . "> ?seturi ."
-                . ' ?uri  <' . Rdf::TYPE . '> <'. $rdfType.'> .'
-                . ' ?uri  <' . OpenSkos::UUID . '> ?uuid .}';
-        }
-        $retVal = $this->fetchInhabitantsForSet($query);
-        return $retVal;
-    }
+     public function fetchInhabitantsForSet($setUri, $rdfType) {
 
-     // used only for HTML representation
-    private function fetchInhabitantsForSet($query) {
+        $query = "SELECT ?uri ?uuid WHERE  { ?uri  <" . OpenSkos::SET . "> <" . $setUri . "> ."
+                . ' ?uri  <' . Rdf::TYPE . '> <' . $rdfType . '> .'
+                . ' ?uri  <' . OpenSkos::UUID . '> ?uuid .}';
+
         $retVal = [];
         $response = $this->query($query);
-        if ($response !== null) {
-            if (count($response) > 0) {
-                foreach ($response as $tuple) {
-                    $uri = $tuple->uri->getUri();
-                    $uuid = $tuple->uuid->getValue();
-                    $retVal[$uri] = $uuid;
-                }
-            }
+        foreach ($response as $tuple) {
+            $uri = $tuple->uri->getUri();
+            $uuid = $tuple->uuid->getValue();
+            $retVal[$uri] = $uuid;
         }
-
         return $retVal;
     }
 

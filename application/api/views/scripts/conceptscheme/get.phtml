@@ -68,16 +68,25 @@ $this->headTitle($name)?>
 
 
 </div>
-	<div id="collection-stats" class="box">
-		<h3>SKOS Concepts in this scheme:</h3>
-		<ul>
-			<?php $count= $conceptSchemeManager->countConceptsForCluster($uri, Skos::INSCHEME);
-			echo number_format($count, 0)?>
-		</ul>
-	</div>
 <h3>Alternative formats</h3>
 <ul>
 	<li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url())?>">JSON</a></li>
 	<li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234'?>">JSONP</a></li>
 	<li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url())?>">RDF</a></li>
 </ul>
+
+<div>
+    <?php
+    $concepts = $conceptSchemeManager->listConceptsForCluster($uri, Skos::INSCHEME);?>
+    
+    <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this scheme:</h3>
+    <?php
+    foreach ($concepts as $key=>$value):
+        ?>
+        <li>
+            <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $value), 'rest') ?>.html">
+                <strong><?php echo $key ?></strong>
+            </a>
+        </li>
+<?php endforeach ?>
+</div>

@@ -202,4 +202,13 @@ class ConceptScheme extends Resource
         }
     }
     
+    
+    public function addMetadata($userUri, $params, $existingResource) {
+        parent::addMetadata($userUri, $params, $existingResource);
+        $setUri = $this->deriveSetUri($params, $existingResource);
+        if ($setUri !== null) { // othewrise it is either set in *this* or not derivable
+            $this->setProperty(OpenSkos::SET, $setUri);
+        }
+    }
+    
 }

@@ -385,40 +385,29 @@ class Resource extends Uri implements ResourceIdentifier
         return $result;
     }
     
-    // override for a concerete resources
-    // so far the code below is reused by concept schemes, skos collections and relations
+    // override for a concerete resources if necessary
     public function addMetadata($userUri, $params, $existingResource) {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         
-        $setUri = $this->deriveSetUri($params, $existingResource);
-        
-        if ($setUri !== null) { // othewrise it is either set in *this* or not derivable
-            $this->setProperty(OpenSkos::SET, $setUri);
-        }
-
         if ($existingResource === null) { // a completely new resource under creation
-            $metadata[DcTerms::CREATOR] = new Uri($userUri);
-            $metadata[DcTerms::DATESUBMITTED] = $nowLiteral();
-            
+            $this->setProperty(DcTerms::CREATOR, new Uri($userUri));
+            $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
         } else {
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
-            $metadata[OpenSkos::UUID] = new Literal($existingResource->getUUID());
+            $this->setProperty(OpenSkos::UUID, new Literal($existingResource->getUUID()));
             $creators = $existingResource->getProperty(DcTerms::CREATOR);
             if (count($creators) === 0) {
-                $metadata[DcTerms::CREATOR] = new Literal(UNKNOWN);
+                $this->setProperty(DcTerms::CREATOR, new Literal(UNKNOWN));
             } else {
-                $metadata[DcTerms::CREATOR] = $creators[0];
+                $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
             $dateSubmitted = $existingResource->getProperty(DcTerms::DATESUBMITTED);
             if (count($dateSubmitted) !== 0) {
-                $metadata[DcTerms::DATESUBMITTED] = new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME);
+                $this->setProperty(DcTerms::DATESUBMITTED, new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME));
             }
-        }
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
         }
     }
     
@@ -468,5 +457,4 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return null;
     }
-
 }

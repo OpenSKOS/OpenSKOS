@@ -932,28 +932,29 @@ public function deleteSolrIntact(Uri $resource)
         };
 
     }
-    // used only for HTML representation to count concepts withit a schema, a set or a skos-collection
-    public function countConceptsForCluster($clusterID, $clusterType) {
+    // used only for HTML representation to list concepts withit a schema, a set or a skos-collection
+    public function listConceptsForCluster($clusterID, $clusterType) {
         if ($clusterType === OpenSkosNamespace::SET) { // search on code
-            if (TENANTS_AND_SETS_IN_MYSQL) {
-                $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
-             . " WHERE  {  ?uri  <" . OpenSkosNamespace::SET . "> '" .$clusterID ."' . "
-             . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
-            } else {
-            $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
-             . " WHERE  {  ?seturi  <" . OpenSkosNamespace::CODE . "> '" . $clusterID . "' ."
-                 . ' ?uri  <' . OpenSkosNamespace::SET . '> ?seturi . '
-                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
-            }
-            
+            $query = 'SELECT DISTINCT ?uri ?uuid ' 
+             . ' WHERE  { ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> . '
+                . ' ?uri  <' . Skos::INSCHEME . '> ?x . '
+                . ' ?uri  <' . OpenSkosNamespace::UUID . '> ?uuid . '
+                . ' ?x  <' . OpenSkosNamespace::SET . '> <' . $clusterID . '> . }'
+; 
+       
         } else {
-           $query = 'SELECT (COUNT(DISTINCT ?uri) AS ?count) ' 
+           $query = 'SELECT ?uri ?uuid ' 
              . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterID . '> .'
-                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> .}'; 
+                . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> . '
+                . ' ?uri  <' . OpenSkosNamespace::UUID . '> ?uuid .}'
+                ; 
         }
         $result = $this->query($query);
-        $tmp = $result[0];
-        return $tmp->count->getValue();
+        $retval=[];
+        foreach ($result as $concept) {
+            $retval[$concept->uri->getUri()] = trim($concept->uuid->getValue());
+        }
+        return $retval;
     }
 
    // output is a list of related concepts, used in both managers: relation and concept.
