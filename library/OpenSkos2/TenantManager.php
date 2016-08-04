@@ -43,22 +43,17 @@ class TenantManager extends ResourceManager
     
     // used only for HTML representation
     public function fetchSetsForTenant($code) {
-        if (TENANTS_AND_SETS_IN_MYSQL) {
-            $response = $this->fetchMySQLSetsForCode($code);
-            $retVal = $this->arrangeMySqlSets($response);
-            return $retVal;
-        } else {
-            $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
-                    . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-                    . ' ?seturi  ?p ?o .}';
-            $response = $this->query($query);
-            if ($response !== null) {
-                if (count($response) > 0) {
-                    $retVal = $this->arrangeTripleStoreSets($response);
-                    return $retVal;
-                } 
+        $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
+                . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+                . ' ?seturi  ?p ?o .}';
+        $response = $this->query($query);
+        if ($response !== null) {
+            if (count($response) > 0) {
+                $retVal = $this->arrangeTripleStoreSets($response);
+                return $retVal;
             }
         }
+
         return [];
     }
 

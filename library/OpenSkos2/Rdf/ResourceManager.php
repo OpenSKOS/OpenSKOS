@@ -900,10 +900,6 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getSetTitle($reference) {
-        if (TENANTS_AND_SETS_IN_MYSQL) {
-            $mysqlSet = $this->fetchSetFromMySqlByCode($reference);
-            return $mysqlSet['dc_title'];
-        }
         $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" . RdfNamespace::TYPE . "> <" . Dcmi::DATASET . "> . }";
         $response = $this->query($query);
         if ($response !== null & count($response) > 0) {
@@ -920,10 +916,6 @@ public function deleteSolrIntact(Uri $resource)
 
     // used only for HTML output
     public function getTenantNameByCode($code) {
-        if (TENANTS_AND_SETS_IN_MYSQL) {
-            $mysqlTenant = $this->fetchTenantFromMySqlByCode($code);
-            return $mysqlTenant['name'];
-        } 
         
         $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $code . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
         $response2 = $this->query($query);

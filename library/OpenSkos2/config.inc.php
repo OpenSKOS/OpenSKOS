@@ -12,8 +12,7 @@ define('GUEST', 'guest');
 //
 define('MAXIMAL_ROWS', 5000);
 
-// should be true for BeG  and false for meertens
-define('TENANTS_AND_SETS_IN_MYSQL', false);
+
 define('ENABLE_STATUSSES_SYSTEM', true);
 define('OMIT_JSON_REFICES', true);
 define('EPIC_IS_ON', false);

@@ -106,17 +106,15 @@ if (!in_array('uri', $cols)) {
 }
 
 $fetchRowWithRetries = function ($resourceManager, $model, $query) {
-    return $resourceManager -> fetchRowWithRetries($model, $query);
+    return $resourceManager->fetchRowWithRetries($model, $query);
 };
 
-
-
 function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = false) {
-    
-    if ( ($val === null || !isset($val)) & $isBOOL) {
-       $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)); 
+
+    if (($val === null || !isset($val)) & $isBOOL) {
+        $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
     };
-    
+
     if (isset($val)) {
         if (!empty($val)) {
             if ($isURI) {
@@ -138,21 +136,21 @@ function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = 
     } else {
         var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
     }
-};
+}
 
-
+;
 
 function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
     $tenantResource = new \OpenSkos2\Tenant();
-    $uri = $tenantResource -> selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type'=>Org::FORMALORG,'tenantcode' => $code]);
+    $uri = $tenantResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Org::FORMALORG, 'tenantcode' => $code]);
     set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
-    $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX. '/node-org-'.Uuid::uuid4());
+    $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX . '/node-org-' . Uuid::uuid4());
     set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
     set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit'], false);
     $tenantResource->setProperty(vCard::ORG, $organisation);
     set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
     set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email'], false);
-    $adress = new \OpenSkos2\Rdf\Resource(URI_PREFIX. 'node-adr-'.Uuid::uuid4());
+    $adress = new \OpenSkos2\Rdf\Resource(URI_PREFIX . 'node-adr-' . Uuid::uuid4());
     set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress'], false);
     set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality'], false);
     set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode'], false);
@@ -166,11 +164,13 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
     }
     $resourceManager->insert($tenantResource);
     return $uri;
-};
+}
+
+;
 
 function insert_set($code, $collectionMySQL, $resourceManager) {
     $setResource = new \OpenSkos2\Set();
-    $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type'=>Dcmi::DATASET,'setcode' => $code]);
+    $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Dcmi::DATASET, 'setcode' => $code]);
     set_property_with_check($setResource, OpenSkos::CODE, $code, false);
     $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
     if (count($tenants) < 1) {
@@ -187,16 +187,16 @@ function insert_set($code, $collectionMySQL, $resourceManager) {
     set_property_with_check($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl'], true);
     $resourceManager->insert($setResource);
     return $uri;
-};
+}
 
-
+;
 
 function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem) {
     if (!$code) {
         return null;
     }
-    
-    
+
+
     $tripleStoreTenant = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Org::FORMALORG);
     if (count($tripleStoreTenant) < 1) { // this tenant is not yet in the triple store
         // look up MySQL
@@ -205,30 +205,30 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
          */
         // name can be relaced with id
         $tenantMySQL = $fetchRowWithRetries($resourceManager, $tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
-        
+
         if (!$tenantMySQL) {
             echo "Could not find tenant  with code: {$code}\n";
             return null;
         }
-        
+
         $uri = insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem);
         var_dump("The institution's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
         return new \OpenSkos2\Rdf\Uri($uri);
     } else {
         return new \OpenSkos2\Rdf\Uri($tripleStoreTenant[0]);
     }
-};
+}
 
-
+;
 
 function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager) {
     if (!$id) {
         return null;
     }
-    
+
     /**
-         * @var $collection OpenSKOS_Db_Table_Row_Collection
-         */
+     * @var $collection OpenSKOS_Db_Table_Row_Collection
+     */
     $collectionMySQL = $fetchRowWithRetries($resourceManager, $collectionModel, 'code = ' . $collectionModel->getAdapter()->quote($id)
     );
 
@@ -275,13 +275,11 @@ $mappings = [
                  * @var $user OpenSKOS_Db_Table_Row_User
                  */
                 if (is_numeric($value)) {
-                    $user = $fetchRowWithRetries($resourceManager,
-                            $userModel, 'id = ' . $userModel->getAdapter()->quote($value) . ' '
+                    $user = $fetchRowWithRetries($resourceManager, $userModel, 'id = ' . $userModel->getAdapter()->quote($value) . ' '
                             . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 } else {
-                    $user = $fetchRowWithRetries($resourceManager,
-                            $userModel, 'name = ' . $userModel->getAdapter()->quote($value) . ' '
+                    $user = $fetchRowWithRetries($resourceManager, $userModel, 'name = ' . $userModel->getAdapter()->quote($value) . ' '
                             . 'AND tenant = ' . $userModel->getAdapter()->quote($tenant)
                     );
                 }
@@ -293,7 +291,7 @@ $mappings = [
                     $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson()->getUri());
                 }
             }
-            
+
             return $users[$value];
         },
         'fields' => [
@@ -398,60 +396,60 @@ $mappings = [
     ]
 ];
 
-if (!TENANTS_AND_SETS_IN_MYSQL) {
-    var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
-    var_dump($total);
-    if (!empty($OPTS->start)) {
-        $counter = $OPTS->start;
-    } else {
-        $counter = 0;
-    }
-    do {
-        //$logger->info("fetching " . $endPoint . "&start=$counter");
-        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-        foreach ($data['response']['docs'] as $doc) {
-            $counter++;
-            try {
-                if (array_key_exists('tenant', $doc)) {
-                    $value = $doc['tenant'];
-                    foreach ((array) $value as $v) {
-                        $uri = fetch_tenant($v, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
-                    }
-                }
-            } catch (Exception $ex) {
-                var_dump($ex->getMessage());
-            }
-        }
-    } while ($counter < $total && isset($data['response']['docs']));
 
-
-
-
-    var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
-    var_dump($total);
-    if (!empty($OPTS->start)) {
-        $counter = $OPTS->start;
-    } else {
-        $counter = 0;
-    }
-    do {
-        //$logger->info("fetching " . $endPoint . "&start=$counter");
-        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-        foreach ($data['response']['docs'] as $doc) {
-            $counter++;
-            try {
-                if (array_key_exists('collection', $doc)) {
-                    $value = $doc['collection'];
-                    foreach ((array) $value as $v) {
-                        $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
-                    }
-                }
-            } catch (Exception $ex) {
-                var_dump($ex->getMessage());
-            }
-        }
-    } while ($counter < $total && isset($data['response']['docs']));
+var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
 }
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $counter++;
+        try {
+            if (array_key_exists('tenant', $doc)) {
+                $value = $doc['tenant'];
+                foreach ((array) $value as $v) {
+                    $uri = fetch_tenant($v, $tenantModel, $fetchRowWithRetries, $resourceManager, $enableStatussesSystem);
+                }
+            }
+        } catch (Exception $ex) {
+            var_dump($ex->getMessage());
+        }
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+
+
+
+
+var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $counter++;
+        try {
+            if (array_key_exists('collection', $doc)) {
+                $value = $doc['collection'];
+                foreach ((array) $value as $v) {
+                    $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
+                }
+            }
+        } catch (Exception $ex) {
+            var_dump($ex->getMessage());
+        }
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+
 
 echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
 echo $total;
@@ -467,12 +465,12 @@ do {
     foreach ($data['response']['docs'] as $doc) {
         var_dump($counter);
         $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
-        $counter ++; 
+        $counter ++;
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-            
+
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
@@ -548,12 +546,12 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                 }
 
 
-                
+
                 foreach ($mappings as $mapping) {
                     if (isset($mapping['fields'][$field])) {
-                        
+
                         foreach ((array) $value as $v) {
-                            
+
                             $insertValue = $mapping['callback']($v);
                             if ($insertValue !== null) {
                                 $resource->addProperty($mapping['fields'][$field], $insertValue);
@@ -609,7 +607,7 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                     $resource->unsetProperty(OpenSkos::DELETEDBY); // otherwise it is set to unknown which is misleading
                 }
             } else {
-               $resource->unsetProperty(OpenSkos::DELETEDBY);
+                $resource->unsetProperty(OpenSkos::DELETEDBY);
             }
 
             $resourceManager->insert($resource);
@@ -625,28 +623,26 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
     }
 }
 
-
-if (!TENANTS_AND_SETS_IN_MYSQL) {
-    var_dump("run Set (aka tenant collection) round, # documents to process: ");
-    var_dump($total);
-    if (!empty($OPTS->start)) {
-        $counter = $OPTS->start;
-    } else {
-        $counter = 0;
-    }
-    $added = 0;
-    do {
-        //$logger->info("fetching " . $endPoint . "&start=$counter");
-        $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-        foreach ($data['response']['docs'] as $doc) {
-            $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
-            $added = $added + $check;
-            $counter++;
-        }
-    } while ($counter < $total && isset($data['response']['docs']));
-    var_dump('Sets (aka tenant collections) added: ');
-    var_dump($added);
+var_dump("run Set (aka tenant collection) round, # documents to process: ");
+var_dump($total);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
 }
+$added = 0;
+do {
+    //$logger->info("fetching " . $endPoint . "&start=$counter");
+    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+    foreach ($data['response']['docs'] as $doc) {
+        $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
+        $added = $added + $check;
+        $counter++;
+    }
+} while ($counter < $total && isset($data['response']['docs']));
+var_dump('Sets (aka tenant collections) added: ');
+var_dump($added);
+
 
 var_dump('\n');
 var_dump("run ConceptScheme round, # documents to process: ");
@@ -656,7 +652,7 @@ if (!empty($OPTS->start)) {
 } else {
     $counter = 0;
 }
-$added=0;
+$added = 0;
 do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
@@ -677,15 +673,14 @@ if (!empty($OPTS->start)) {
 } else {
     $counter = 0;
 }
-$added=0;
+$added = 0;
 do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-       $check=run_round($doc, $resourceManager, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
-       $added = $added + $check;
-       $counter++;
-        
+        $check = run_round($doc, $resourceManager, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
+        $added = $added + $check;
+        $counter++;
     }
 } while ($counter < $total && isset($data['response']['docs']));
 var_dump('SkosCollections added: ');
@@ -703,7 +698,7 @@ do {
     $logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check=run_round($doc, $resourceManager, 'Concept', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, 'Concept', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -712,4 +707,3 @@ var_dump('Concepts added: ');
 var_dump($added);
 
 echo "done!\n";
-                
