@@ -115,16 +115,15 @@ class Authorisation {
     }
 
     private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $concept) {
-
         if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-
-        $tenantref = current($concept->getProperty(OpenSkos::TENANT));
-        $currenttenants = $this -> resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, Org::FORMALORG);
-        $tenantUri = $currenttenants[0]->getUri();
-        if ($tenantUri !== (string) $tenantref) {
-                throw new UnauthorizedException('The concept has tenant ' . (string) $tenantref . ' which does not correspond to the request-s tenant  ' . $tenantCode . ". You may want to set CHECK_MYSQL to true, if the triple store does not contain " . $tenantCode, 403);
+        
+        $tenantref = $this->resourceManager -> fetchTenantUriViaSet($concept) ->getUri();
+        $currenttenants = $this -> resourceManager -> fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'".$tenantCode."'", Org::FORMALORG);
+        $tenantUri = $currenttenants[0];
+        if ($tenantUri !== $tenantref) {
+                throw new UnauthorizedException('The concept has tenant ' . $tenantref . ' which does not correspond to the request-s tenant  ' . $tenantCode . ". You may want to set CHECK_MYSQL to true, if the triple store does not contain " . $tenantCode, 403);
             
         }
 

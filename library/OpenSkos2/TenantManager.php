@@ -20,14 +20,8 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\vCard;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
-use OpenSKOS_Db_Table_Tenants;
-use OpenSkos2\Api\Exception\ApiException;
 
 class TenantManager extends ResourceManager
 {
@@ -87,85 +81,5 @@ class TenantManager extends ResourceManager
         return $retVal;
         
     }
-    
-    // used only for html output
-    private function arrangeMySQLSets($mysqlresponse) {
-        $retVal = [];
-        foreach ($mysqlresponse as $row) {
-            if (isset($row['code'])) {
-                $id = $row['code'];
-            } else {
-                throw new ApiException("A set with no code in MySQL databse is detected", 400);
-            }
-
-            $retVal[$id] = [];
-
-            $retVal[$id]['dcterms_title'] = $row['dc_title'];
-            if (isset($row['dc_decription'])) {
-                $retVal[$id]['dcterms_description'] = $row['dc_decription'];
-            }
-            if (isset($row['website'])) {
-                $retVal[$id]['openskos_webpage'] = $row['website'];
-            }
-            $retVal[$id]['openskos_code'] = $row['code'];
-        }
-        return $retVal;
-    }
-
-    private function fetchMySQLSetsForCode($tenantCode){
-        $model = new OpenSKOS_Db_Table_Tenants();
-        $tenant = $model->find($tenantCode)->current();
-        if ($tenant===null) {
-           throw new ApiException("Tenant with the code '". $tenantCode . "' is not found in MySQL", 400);
-        }
-        $sets = $tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
-        return $sets;
-    }
-    
-    public function translateTenantMySqlToRdf($tenantMySQL) {
-        $tenantResource = new Tenant();
-        if (!isset($tenantMySQL['uri'])) {
-            $tenantResource->setUri('http://unset_uri_in_mysqldatabase');
-        } else {
-            $tenantResource->setUri($tenantMySQL['uri']);
-        }
-        $tenantResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($tenantMySQL['code']));
-        $organisation = new Resource("node-org");
-        $this->setLiteralWithEmptinessCheck($organisation, vCard::ORGNAME, $tenantMySQL['name']);
-        $this->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit']);
-        $tenantResource->setProperty(vCard::ORG, $organisation);
-        $this->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website']);
-        $this->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, $tenantMySQL['email']);
-
-        $adress = new Resource("node-adr");
-        $this->setLiteralWithEmptinessCheck($adress, vCard::STREET, $tenantMySQL['streetAddress']);
-        $this->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, $tenantMySQL['locality']);
-        $this->setLiteralWithEmptinessCheck($adress, vCard::PCODE, $tenantMySQL['postalCode']);
-        $this->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, $tenantMySQL['countryName']);
-        $tenantResource->setProperty(vCard::ADR, $adress);
-        
-        $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantMySQL['disableSearchInOtherTenants']);
-        if (array_key_exists('enableStatussesSystem', $tenantMySQL)){
-          $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $tenantMySQL['enableStatussesSystem']);
-        } else {
-            $this->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, ENABLE_STATUSSES_SYSTEM);
-        }
-
-        return $tenantResource;
-    }
-
-    
-    public function fetchFromMySQL($params) {
-        $model = new OpenSKOS_Db_Table_Tenants();
-        $select = $model->select();
-        $mysqlres = $model->fetchAll($select);
-        $index = new TenantCollection();
-        foreach ($mysqlres as $tenant) {
-            $rdfTenant = $this->translateTenantMySqlToRdf($tenant);
-            $index->append($rdfTenant);
-        }
-        return $index;
-    }
-
-    
+   
 }

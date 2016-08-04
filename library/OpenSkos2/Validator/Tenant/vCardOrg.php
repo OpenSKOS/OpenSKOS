@@ -34,10 +34,10 @@ class vCardOrg extends AbstractTenantValidator
                         if (array_key_exists($name, $insts)) {
                             if ($this->isForUpdate) {
                                 if ($insts[$name] !== $resource->getUri()) {
-                                    $this->errorMessages[] = 'The institution with the name ' . $name . ' is already registered in the database. ';
+                                    $this->errorMessages[] = 'The institution with the name ' . $name . ' has been already registered in the triple store. ';
                                 }
                             } else { //creation, no duplication of names is admissible
-                                $this->errorMessages[] = 'The institution with the name ' . $name . ' is already registered in the database. ';
+                                $this->errorMessages[] = 'The institution with the name ' . $name . ' has been already registered in the triple store. ';
                             }
                         }
                     }

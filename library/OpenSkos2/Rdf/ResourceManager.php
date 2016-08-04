@@ -843,18 +843,7 @@ public function deleteSolrIntact(Uri $resource)
         return $result;
     }
      
-    public function fetchTenantFromMySqlByCode($code) {
-       $tenantModel = new OpenSKOS_Db_Table_Tenants(); 
-       $tenantMySQL = $this -> fetchRowWithRetries($tenantModel, 'code = ' . $tenantModel->getAdapter()->quote($code));
-       return $tenantMySQL;
-    }
     
-    public function fetchSetFromMySqlByCode($code) {
-       $setModel = new OpenSKOS_Db_Table_Collections(); 
-       $setMySQL = $this -> fetchRowWithRetries($setModel, 'code = ' . $setModel->getAdapter()->quote($code));
-       return $setMySQL;
-    }
-   
    public function fetchRowWithRetries($model, $query) {
     $tries = 0;
     $maxTries = 3;
@@ -1042,21 +1031,31 @@ public function deleteSolrIntact(Uri $resource)
         if ($resource !== null) {
             $tenants = $resource->getProperty(OpenSkosNamespace::TENANT);
             if (count($tenants) < 1) {
-                $setUris = $resource->getProperty(OpenSkosNamespace::SET);
-                if (count($setUris) > 0) {
-                    try {
-                        $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
-                        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-                        if (count($tenantUris) > 0) {
-                            $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUris[0]);
-                        }
-                    } catch (ApiException $ex) {
-                        
-                    }
+                $tenantUri = $this->fetchTenantUriViaSet($resource);
+                if ($tenantUri !== null) {
+                    $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUri);
                 }
             }
         }
         return $resource;
+    }
+
+    public function fetchTenantUriViaSet($resource) {
+        if ($resource !== null) {
+            $setUris = $resource->getProperty(OpenSkosNamespace::SET);
+            if (count($setUris) > 0) {
+                try {
+                    $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
+                    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+                    if (count($tenantUris) > 0) {
+                        return $tenantUris[0];
+                    }
+                } catch (ApiException $ex) {
+                    
+                }
+            }
+        }
+        return null;
     }
 
 }
