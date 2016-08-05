@@ -40,6 +40,8 @@ $opts = array(
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
     'enablestatusses=s' => 'Enable status system (cnadidate, approved, etc) for the given tenant',
+    'license=s' => 'Default license',
+    'language=s' => 'Default language'
 );
 
 try {
@@ -70,6 +72,10 @@ $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 var_dump($endPoint);
 
 $enableStatussesSystem = $OPTS->enablestatusses;
+$language = $OPTS -> language;
+var_dump($language);
+$license = $OPTS->license;
+var_dump($license);
 
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
@@ -109,33 +115,38 @@ $fetchRowWithRetries = function ($resourceManager, $model, $query) {
     return $resourceManager->fetchRowWithRetries($model, $query);
 };
 
-function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = false) {
-
-    if (($val === null || !isset($val)) & $isBOOL) {
-        $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
-    };
-
-    if (isset($val)) {
-        if (!empty($val)) {
-            if ($isURI) {
+function set_property_with_check(&$resource, $property, $val, $isURI = false, $isBOOL = false, $lang=null) {
+    if ($isURI) {
+        if (isset($val)) {
+            if (trim($val) !== '') {
                 $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
-            } else {
-                if (!$isBOOL) {
-                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
-                } else {
-                    if (strtolower(strtolower($val)) === 'y' || strtolower($val) === "yes") {
-                        $val = 'true';
-                    }
-                    if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
-                        $val = 'false';
-                    }
-                    $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
-                }
             }
         }
-    } else {
-        var_dump('WARNING NON-COMPLETE DATA: the property ' . $property . ' is not set in Mysql Database for the resource with uri ' . $resource->getUri());
+        return;
+    };
+
+    if ($isBOOL) {
+        if (isset($val)) {
+            if (strtolower(strtolower($val)) === 'y' || strtolower($val) === "yes") {
+                $val = 'true';
+            }
+            if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
+                $val = 'false';
+            }
+            $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+        } else {
+            // default value is 'false'
+            $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
+        }
+        return;
     }
+
+    // the property must be a literal
+    if ($lang === null) {
+        $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
+    } else {
+        $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, $lang));
+    };
 }
 
 ;
@@ -143,18 +154,18 @@ function set_property_with_check(&$resource, $property, $val, $isURI, $isBOOL = 
 function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSystem) {
     $tenantResource = new \OpenSkos2\Tenant();
     $uri = $tenantResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Org::FORMALORG, 'tenantcode' => $code]);
-    set_property_with_check($tenantResource, OpenSkos::CODE, $code, false);
+    set_property_with_check($tenantResource, OpenSkos::CODE, $code);
     $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX . '/node-org-' . Uuid::uuid4());
-    set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name'], false);
-    set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit'], false);
+    set_property_with_check($organisation, vCard::ORGNAME, $tenantMySQL['name']);
+    set_property_with_check($organisation, vCard::ORGUNIT, $tenantMySQL['organisationUnit']);
     $tenantResource->setProperty(vCard::ORG, $organisation);
     set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
-    set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email'], false);
+    set_property_with_check($tenantResource, vCard::EMAIL, $tenantMySQL['email']);
     $adress = new \OpenSkos2\Rdf\Resource(URI_PREFIX . 'node-adr-' . Uuid::uuid4());
-    set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress'], false);
-    set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality'], false);
-    set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode'], false);
-    set_property_with_check($adress, vCard::COUNTRY, $tenantMySQL['countryName'], false);
+    set_property_with_check($adress, vCard::STREET, $tenantMySQL['streetAddress']);
+    set_property_with_check($adress, vCard::LOCALITY, $tenantMySQL['locality']);
+    set_property_with_check($adress, vCard::PCODE, $tenantMySQL['postalCode']);
+    set_property_with_check($adress, vCard::COUNTRY, $tenantMySQL['countryName']);
     $tenantResource->setProperty(vCard::ADR, $adress);
     set_property_with_check($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $tenantMySQL['disableSearchInOtherTenants'], false, true);
     try {
@@ -168,20 +179,34 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
 
 ;
 
-function insert_set($code, $collectionMySQL, $resourceManager) {
+function insert_set($code, $collectionMySQL, $resourceManager, $defaultLicense, $lang) {
     $setResource = new \OpenSkos2\Set();
     $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Dcmi::DATASET, 'setcode' => $code]);
-    set_property_with_check($setResource, OpenSkos::CODE, $code, false);
-    $tenants = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $collectionMySQL['tenant'] . "'", Org::FORMALORG);
-    if (count($tenants) < 1) {
-        throw new Exception("Something went terribly worng: the tenat with the code " . $collectionMySQL['tenant'] . " has not been inserted in the triple store before now.");
-    };
-    $publisherURI = $tenants[0];
+    set_property_with_check($setResource, OpenSkos::CODE, $code);
+    
+    $publisherURI = $resourceManager->fetchInstitutionUriByCode($collectionMySQL['tenant']);
+    if ($publisherURI === null) {
+        throw new Exception("Something went terribly worng: the tenant with the code " . $collectionMySQL['tenant'] . " has not been inserted in the triple store before now.");
+    } else {
+        var_dump("PublisherURI: " . $publisherURI . "\n");
+    }
     set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-    set_property_with_check($setResource, DcTerms::TITLE, $collectionMySQL['dc_title'], false);
-    set_property_with_check($setResource, DcTerms::DESCRIPTION, $collectionMySQL['dc_description'], false);
+    
+    
+    set_property_with_check($setResource, DcTerms::TITLE, $collectionMySQL['dc_title'], false, false, $lang);
+    
+    set_property_with_check($setResource, DcTerms::DESCRIPTION, $collectionMySQL['dc_description']);
     set_property_with_check($setResource, OpenSkos::WEBPAGE, $collectionMySQL['website'], true);
-    set_property_with_check($setResource, DcTerms::LICENSE, $collectionMySQL['license_url'], true);
+    
+    $licenseURL = $defaultLicense;
+    if (isset($collectionMySQL['license_url'])) {
+        if (trim($collectionMySQL['license_url']) !== '') {
+            $licenseURL = $collectionMySQL['license_url'];
+        }
+    }
+    
+    set_property_with_check($setResource, DcTerms::LICENSE, $licenseURL, true);
+
     set_property_with_check($setResource, OpenSkos::OAI_BASEURL, $collectionMySQL['OAI_baseURL'], true);
     set_property_with_check($setResource, OpenSkos::ALLOW_OAI, $collectionMySQL['allow_oai'], false, true);
     set_property_with_check($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl'], true);
@@ -221,7 +246,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
 
 ;
 
-function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager) {
+function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager, $defaultLicense, $lang) {
     if (!$id) {
         return null;
     }
@@ -247,7 +272,7 @@ function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager
 
     $tripleStoreSet = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, "'" . $code . "'", Dcmi::DATASET);
     if (count($tripleStoreSet) < 1) { // this set is not yet in the triple store
-        $uri = insert_set($code, $collectionMySQL, $resourceManager);
+        $uri = insert_set($code, $collectionMySQL, $resourceManager, $defaultLicense, $lang);
         var_dump("The set's  (" . $code . ") handle/uri " . $uri . " is generated on the fly. ");
         return new \OpenSkos2\Rdf\Uri($uri);
     } else {
@@ -303,8 +328,8 @@ $mappings = [
         ],
     ],
     'collection' => [
-        'callback' => function ($value) use ($collectionModel, $fetchRowWithRetries, $resourceManager) {
-            $retVal = fetch_set($value, $collectionModel, $fetchRowWithRetries, $resourceManager);
+        'callback' => function ($value) use ($collectionModel, $fetchRowWithRetries, $resourceManager, $license, $language) {
+            $retVal = fetch_set($value, $collectionModel, $fetchRowWithRetries, $resourceManager, $license, $language);
             return $retVal;
         },
         'fields' => [
@@ -441,7 +466,7 @@ do {
             if (array_key_exists('collection', $doc)) {
                 $value = $doc['collection'];
                 foreach ((array) $value as $v) {
-                    $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager);
+                    $uri = fetch_set($v, $collectionModel, $fetchRowWithRetries, $resourceManager, $license, $language);
                 }
             }
         } catch (Exception $ex) {

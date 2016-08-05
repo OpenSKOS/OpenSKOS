@@ -162,19 +162,7 @@ class Concept extends Resource
         }
     }
     
-    /**
-     * Get openskos:uuid if it exists
-     * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string|null
-     */
-    public function getUuid()
-    {
-        if ($this->hasProperty(OpenSkos::UUID)) {
-            return (string)$this->getPropertySingleValue(OpenSkos::UUID);
-        } else {
-            return null;
-        }
-    }
+   
 
     /**
      * Get tenant
@@ -271,7 +259,7 @@ class Concept extends Resource
             }
             
             $this->unsetProperty(OpenSkos::UUID);
-            $this->setProperty(OpenSkos::UUID, new Literal($existingConcept->getUuid()));
+            $this->setProperty(OpenSkos::UUID, $existingConcept->getUuid());
             
             $creators = $existingConcept->getProperty(DcTerms::CREATOR);
             if (count($creators) < 1) {

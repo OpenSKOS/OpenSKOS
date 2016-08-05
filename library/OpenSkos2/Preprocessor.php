@@ -74,8 +74,6 @@ class Preprocessor {
                 $uuidNew = null;
             }
             $uuidOld = $existingResource->getUuid()->getValue();
-            //var_dump($uuidNew);
-            //var_dump($uuidOld);
             if ($uuidNew !== null && $uuidNew !== $uuidOld) {
                 throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $uuidOld, 400);
             }

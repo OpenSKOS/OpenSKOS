@@ -21,7 +21,6 @@ namespace OpenSkos2;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Uri;
 /**
@@ -44,7 +43,7 @@ class Tenant extends Resource
         $metadata = [];
         if ($existingTenant !== null) {
             if (count($this->getProperty(OpenSkos::UUID)) < 1) {
-                $metadata = [OpenSkos::UUID => new Literal($existingTenant->getUuid())];
+                $metadata = [OpenSkos::UUID => $existingTenant->getUuid()];
             }
         }
         foreach ($metadata as $property => $defaultValue) {

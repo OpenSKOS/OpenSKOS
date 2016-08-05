@@ -245,12 +245,16 @@ class EasyRdf {
     
     private static function getRdfType($resource) {
         $rawType = $resource->get('rdf:type');
-        if ($rawType instanceof Resource2) {
-            return $rawType->getUri();
-        } else {
-            throw new InvalidArgumentException('Xml parsing error. Possible reason: complex elements must be augmented with rdf:parseType="Resource", e.g. <vcard:ORG rdf:parseType="Resource">
+        if ($rawType !== null) {
+            if ($rawType instanceof Resource2) {
+                return $rawType->getUri();
+            } else {
+                throw new InvalidArgumentException('Xml parsing error. Possible reason: complex elements must be augmented with rdf:parseType="Resource", e.g. <vcard:ORG rdf:parseType="Resource">
       <vcard:orgname>CLARIN</vcard:orgname>
-    </vcard:ORG>');
+            </vcard:ORG>');
+            }
+        } else {
+            return null;
         }
     }
 

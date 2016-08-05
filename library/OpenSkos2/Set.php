@@ -56,7 +56,7 @@ class Set extends Resource
         }
         if ($existingSet !== null) {
             if (count($this->getProperty(OpenSkos::UUID)) < 1) {
-                $metadata = [OpenSkos::UUID => new Literal($existingSet->getUuid())];
+                $metadata = [OpenSkos::UUID => $existingSet->getUuid()];
             }
         }
         foreach ($metadata as $property => $defaultValue) {
