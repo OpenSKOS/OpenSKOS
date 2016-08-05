@@ -43,10 +43,10 @@ class Text
     /**
      * @return ResourceCollection
      */
-    public function getResources()
+    public function getResources($type=null)
     {
         $graph = new Graph();
         $graph->parse($this->string);
-        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph);
+        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph, $type);
     }
 }

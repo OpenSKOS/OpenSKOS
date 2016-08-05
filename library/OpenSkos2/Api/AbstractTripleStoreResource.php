@@ -243,7 +243,7 @@ abstract class AbstractTripleStoreResource {
         $typeNode = $doc->createElement("rdf:type");
         $descriptions->item(0)->appendChild($typeNode);
         $typeNode ->setAttribute("rdf:resource", $this->manager->getResourceType());    
-        $resources = (new Text($doc->saveXML()))->getResources();
+        $resources = (new Text($doc->saveXML()))->getResources($this->manager->getResourceType());
         $resource = $resources[0];
         $className = Namespaces::mapRdfTypeToClassName($this->manager->getResourceType());
         if (!isset($resource) || !$resource instanceof $className) {

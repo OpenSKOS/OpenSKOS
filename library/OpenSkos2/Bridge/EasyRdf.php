@@ -53,64 +53,50 @@ class EasyRdf {
      * @return ResourceCollection
      */
     public static function graphToResourceCollection(Graph $graph, $expectedType = null) {
+        //var_dump($graph->index);
         $collection = self::createResourceCollection($expectedType);
-        // make two lists: the types resources which are main resources (roots)
-        // and typeless resources which are to be used as subresources (elements of complex types in xml)
-       
-        $mainResources = array();
         if ($expectedType !== null) {
-         if ($expectedType instanceof Uri) {
-             $expectedTypeUri=$expectedType->getUri();
-         }   else {
-             $expectedTypeUri = $expectedType;
-        }
-        foreach ($graph->resources() as $resource) {
-                $type = $resource->get('rdf:type');
-                if ($type !== null) {
-                    if ($type->getUri() === $expectedTypeUri) {
-                        $mainResources[] = $resource;
-                    }
-                }
+            if ($expectedType instanceof Uri) {
+                $expectedTypeUri = $expectedType->getUri();
+            } else {
+                $expectedTypeUri = $expectedType;
             }
         } else {
-            $mainResources = $graph->resources();
+            $expectedTypeUri = null;
         }
-        // now compose main resources;
-        $myResource = null;
-        
-        foreach ($mainResources as $resource) {
-            $type = $resource->get('rdf:type');
-            if ($type !== null) { // the resource is main
-                $myResource = self::createResource($resource->getUri(), $type);
-                self::makeNode($myResource, $resource);
-                $collection[] = $myResource;
+        foreach ($graph->resources() as $resource) {
+            $type = self::getRdfType($resource);
+            if ($type !== null) {
+                if ($expectedTypeUri === null || ($type === $expectedTypeUri)) {
+                    $myResource = self::createResource($resource->getUri(), $type);
+                    self::makeNode($myResource, $resource);
+                    $collection[] = $myResource;
+                }
             }
         }
         return $collection;
     }
 
-    private static function makeNode(&$myResource, Resource2 $resource) {
+    private static function makeNode(&$myResource, $resource) {
         $propertyUris = $resource->propertyUris();
         // type has been already identified and set in the resource constructor
         // we do no need to duplicate it 
         $propertyUris=array_diff($propertyUris, array(Rdf::TYPE));
-        
         foreach ($propertyUris as $propertyUri) {
             foreach ($resource->all(new Resource2($propertyUri)) as $propertyValue) {
                 if ($propertyValue instanceof Literal2) {
                     $myResource->addProperty(
-                            $propertyUri, new Literal(
-                            $propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri()
-                            )
+                            $propertyUri, new Literal($propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri())
                     );
                 } elseif ($propertyValue instanceof Resource2) {
                     // recursion
-                    if ($propertyValue->get('rdf:type') === null) { //a proper subresource, we must/can iterate on it, it does not have proper handles
+                    if ((self::getRdfType($propertyValue)) === null) { //a proper subresource, we must/can iterate on it, it does not have proper handles
                         $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue);
                         $myResource->addProperty($propertyUri, $mySubResource);
                     } else {
-                    $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
+                        //  it is an uri
+                        $myResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                     }
                 }
             }
@@ -151,10 +137,9 @@ class EasyRdf {
      */
     protected static function createResource($uri, $type)
     {
-        //var_dump($type->getUri());
-        //var_dump(Tenant::TYPE);
+        
         if ($type) {
-            switch ($type->getUri()) {
+            switch ($type) {
                 case Tenant::TYPE:
                     return new Tenant($uri);
                 case Concept::TYPE:
@@ -257,4 +242,16 @@ class EasyRdf {
             }
         }
     }
+    
+    private static function getRdfType($resource) {
+        $rawType = $resource->get('rdf:type');
+        if ($rawType instanceof Resource2) {
+            return $rawType->getUri();
+        } else {
+            throw new InvalidArgumentException('Xml parsing error. Possible reason: complex elements must be augmented with rdf:parseType="Resource", e.g. <vcard:ORG rdf:parseType="Resource">
+      <vcard:orgname>CLARIN</vcard:orgname>
+    </vcard:ORG>');
+        }
+    }
+
 }

@@ -68,10 +68,16 @@ class Preprocessor {
         $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
         $preprocessed->addMetadata($this->userUri, $params, $existingResource);
         if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
-            //var_dump($preprocessed->getUuid());
-            //var_dump($existingResource->getUuid());
-            if ($preprocessed->getUuid() !== null && $preprocessed->getUuid() !== $existingResource->getUuid()) {
-                throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $existingResource->getUuid(), 400);
+            if ($preprocessed->getUuid() !== null) {
+                $uuidNew = $preprocessed->getUuid()->getValue();
+            } else {
+                $uuidNew = null;
+            }
+            $uuidOld = $existingResource->getUuid()->getValue();
+            //var_dump($uuidNew);
+            //var_dump($uuidOld);
+            if ($uuidNew !== null && $uuidNew !== $uuidOld) {
+                throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $uuidOld, 400);
             }
         }
         $preprocessed->addMetadata($this->userUri, $params, $existingResource);
