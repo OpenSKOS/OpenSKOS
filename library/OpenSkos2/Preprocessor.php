@@ -63,13 +63,11 @@ class Preprocessor {
         if ($this->resourceType === Skos::CONCEPT && !isset($params['seturi'])) {
             $params['seturi'] = $this->deriveSetUriForConcepts($resourceObject);
         }
-        $preprocessed = $resourceObject;
         $uri = $resourceObject->getUri();
         $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
-        $preprocessed->addMetadata($this->userUri, $params, $existingResource);
         if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
-            if ($preprocessed->getUuid() !== null) {
-                $uuidNew = $preprocessed->getUuid()->getValue();
+            if ($resourceObject->getUuid() !== null) {
+                $uuidNew = $resourceObject->getUuid()->getValue();
             } else {
                 $uuidNew = null;
             }
@@ -78,6 +76,7 @@ class Preprocessor {
                 throw new ApiException('You cannot change UUID of the resouce. Keep it ' . $uuidOld, 400);
             }
         }
+        $preprocessed = $resourceObject;
         $preprocessed->addMetadata($this->userUri, $params, $existingResource);
         return $preprocessed;
     }
