@@ -26,6 +26,7 @@
  *  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -34,15 +35,14 @@ use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use Rhumsaa\Uuid\Uuid;
 
-$opts = array(
+$opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
-    'enablestatusses=s' => 'Enable status system (cnadidate, approved, etc) for the given tenant',
-    'license=s' => 'Default license',
-    'language=s' => 'Default language'
-);
+    'dryrun' => 'Only validate the data, do not migrate it.',
+    'debug' => 'Show debug info.',
+];
 
 try {
     $OPTS = new Zend_Console_Getopt($opts);
@@ -64,10 +64,17 @@ $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $resourceManager->setIsNoCommitMode(true);
 
 $logger = new \Monolog\Logger("Logger");
-$logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
+$logLevel = \Monolog\Logger::INFO;
+if ($OPTS->getOption('debug')) {
+    $logLevel = \Monolog\Logger::DEBUG;
+}
+$logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
+    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
+    $logLevel
+));
 
 $tenant = $OPTS->tenant;
-
+$isDryRun = $OPTS->getOption('dryrun');
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 var_dump($endPoint);
 
@@ -79,8 +86,6 @@ var_dump($license);
 
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
-
-
 
 
 $getFieldsInClass = function ($class) {
@@ -99,6 +104,7 @@ $getFieldsInClass = function ($class) {
 
 $labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClass('DocumentationProperties'));
 $notFoundUsers = [];
+$notFoundCollections = [];
 $collections = [];
 $userModel = new OpenSKOS_Db_Table_Users();
 $collectionModel = new OpenSKOS_Db_Table_Collections();
@@ -121,6 +127,7 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
             if (trim($val) !== '') {
                 $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
             }
+
         }
         return;
     };
@@ -309,18 +316,17 @@ $mappings = [
                     );
                 }
                 if (!$user) {
-                    echo "Could not find user with id/name: {$value}\n";
+                    $logger->notice("Could not find user with id/name: {$value}");
                     $notFoundUsers[] = $value;
                     $users[$value] = new \OpenSkos2\Rdf\Literal("Unknown");
-                } else {
-                    $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson()->getUri());
+                } else 
+                    $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson(!$isDryRun)->getUri());
                 }
-            }
-
+          
             return $users[$value];
         },
         'fields' => [
-            'modified_by' => DcTerms::CONTRIBUTOR,
+            'modified_by' => OpenSkos::MODIFIEDBY,
             'created_by' => DcTerms::CREATOR,
             'dcterms_creator' => DcTerms::CREATOR,
             'approved_by' => OpenSkos::ACCEPTEDBY,
@@ -349,7 +355,7 @@ $mappings = [
         'callback' => function ($value) use ($logger) {
             $value = trim($value);
             if (filter_var($value, FILTER_VALIDATE_URL) === false) {
-                $logger->info('found uri which is not valid "' . $value . '"');
+                $logger->notice('found uri which is not valid "' . $value . '"');
                 // We will keep it and urlencode it to be able to insert it in Jena
                 $value = urlencode($value);
             }
@@ -420,7 +426,6 @@ $mappings = [
         ]
     ]
 ];
-
 
 var_dump("Preprocessing round (MySql -- Triple Store) 1 : fetching institutions. # documents to process: ");
 var_dump($total);
@@ -495,8 +500,6 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-
-
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
 function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $mappings, $logger) {
@@ -542,7 +545,6 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                     continue;
                 }
 
-
                 if (array_key_exists($field, $synonym)) {
                     if ($isset_synonym[$field]) {
                         continue;
@@ -565,11 +567,11 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
                         foreach ((array) $value as $v) {
                             $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
                             $setLabels[$field][] = $v;
+
                         }
                         continue;
                     }
                 }
-
 
 
                 foreach ($mappings as $mapping) {
@@ -627,7 +629,7 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
 
             // Set status deleted
             if (!empty($doc['deleted'])) {
-                $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
+                $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Resource::STATUS_DELETED));
                 if ($doc['deleted'] === 'false') {
                     $resource->unsetProperty(OpenSkos::DELETEDBY); // otherwise it is set to unknown which is misleading
                 }
@@ -685,6 +687,7 @@ do {
         $check = run_round($doc, $resourceManager, 'ConceptScheme', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
+
     }
 } while ($counter < $total && isset($data['response']['docs']));
 var_dump('ConceptSchemes added: ');
@@ -731,4 +734,6 @@ do {
 var_dump('Concepts added: ');
 var_dump($added);
 
+
 echo "done!\n";
+$logger->info("Done!");

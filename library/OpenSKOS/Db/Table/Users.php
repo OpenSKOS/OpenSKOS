@@ -60,7 +60,7 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
     );
 
     /**
-     * 
+     *
      * @param string $apikey
      * @return OpenSKOS_Db_Table_Row_User
      */
@@ -73,7 +73,7 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
 
     /**
      * Finds a user by id in the db. If not found an error is thrown.
-     * 
+     *
      * @param int $id
      * @return OpenSKOS_Db_Table_Row_User
      * @throws Zend_Db_Select_Exception
@@ -157,23 +157,28 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
     {
         $select = $this->select()
             ->from($this->_name, ['uri']);
-        
+
         if (!empty($tenants)) {
             $select->where('tenant IN (?)', $tenants);
         }
         if (!empty($roles)) {
             $select->where('role IN (?)', $roles);
         };
-        
+
         $rows = $this->fetchAll($select);
-        
+
         $result = [];
         foreach ($rows as $row) {
             $result[] = $row['uri'];
         }
         return $result;
     }
-    
+
+    public function uniqueEppn($eppn, Array $data)
+    {
+        return $this->_uniqueFieldValue('eppn', $eppn, $data);
+    }
+
     public static function pwgen($length)
     {
         return substr(md5(rand() . rand()), 0, $length);

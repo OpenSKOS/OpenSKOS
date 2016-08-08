@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Rdf;
 
-
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\MyInstitutionModules\UriGeneration;
@@ -34,6 +33,7 @@ use OpenSkos2\Rdf\Uri;
 class Resource extends Uri implements ResourceIdentifier
 {
     /**
+     * @TODO Separate in StatusAwareResource class or something like that
      * openskos:status value which marks a resource as deleted.
      */
     const STATUS_DELETED = 'deleted';
@@ -88,7 +88,21 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function addProperty($predicate, RdfObject $value)
     {
+        $this->handleSpecialProperties($predicate, $value);
         $this->properties[$predicate][] = $value;
+        return $this;
+    }
+    
+    /**
+     * Add multiple values at once, keeps the existing values
+     * @param string $predicate
+     * @param RdfObject[] $values
+     */
+    public function addProperties($predicate, array $values)
+    {
+        foreach ($values as $value) {
+            $this->addProperty($predicate, $value);
+        }
         return $this;
     }
     
@@ -102,7 +116,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function addUniqueProperty($predicate, RdfObject $value)
     {
         if (!isset($this->properties[$predicate])) {
-            $this->properties[$predicate][] = $value;
+            $this->addProperty($predicate, $value);
             return $this;
         }
         foreach ($this->properties[$predicate] as $obj) {
@@ -116,30 +130,33 @@ class Resource extends Uri implements ResourceIdentifier
                 }
             }
         }
-        $this->properties[$predicate][] = $value;
+        $this->addProperty($predicate, $value);
         return $this;
     }
 
     /**
+     * Set property, overwrite existing values.
      * @param string $predicate
      * @param RdfObject $value
      * @return $this
      */
     public function setProperty($predicate, RdfObject $value)
     {
-        $this->properties[$predicate] = [$value];
+        $this->unsetProperty($predicate)
+            ->addProperty($predicate, $value);
         return $this;
     }
     
     /**
      * Set multiple values at once, override existing values
-     *
      * @param string $predicate
      * @param RdfObject[] $values
      */
     public function setProperties($predicate, array $values)
     {
-        $this->properties[$predicate] = $values;
+        $this->unsetProperty($predicate)
+            ->addProperties($predicate, $values);
+        return $this;
     }
 
     /**
@@ -178,6 +195,32 @@ class Resource extends Uri implements ResourceIdentifier
         if (!$this->isPropertyEmpty($predicate)) {
             $values = $this->getProperty($predicate);
             return (bool) $values[0]->getValue();
+        }
+        return false;
+    }
+    
+    /**
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        if (!$this->hasProperty(OpenSkos::STATUS)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
+        }
+    }
+    
+    /**
+     * Check if the concept is deleted
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
         }
         return false;
     }
@@ -385,7 +428,8 @@ class Resource extends Uri implements ResourceIdentifier
         return $result;
     }
     
-    // override for a concerete resources if necessary
+
+    // override for a concerete resources when necessary
     public function addMetadata($userUri, $params, $existingResource) {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);

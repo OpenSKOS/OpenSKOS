@@ -24,6 +24,7 @@ use OpenSkos2\Export\Message;
 use OpenSkos2\Export\Serialiser\FormatFactory;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Concept;
 
 class Editor_Models_Export
@@ -298,10 +299,14 @@ class Editor_Models_Export
         
         $result[] = DcTerms::CREATED;
         $result[] = DcTerms::CREATOR;
+        $result[] = Dc::CREATOR;
         $result[] = DcTerms::DATEACCEPTED;
         $result[] = OpenSkos::ACCEPTEDBY;
         $result[] = DcTerms::MODIFIED;
-        $result[] = DcTerms::MEDIATOR;
+        $result[] = OpenSkos::MODIFIEDBY;
+        
+        $result[] = DcTerms::CONTRIBUTOR;
+        $result[] = Dc::CONTRIBUTOR;
         
         return $result;
     }

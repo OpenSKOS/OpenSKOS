@@ -41,13 +41,15 @@ use OpenSkos2\Solr\Document;
 use OpenSKOS_Db_Table_Tenants;
 use OpenSKOS_Db_Table_Collections;
 use RuntimeException;
-use Solarium\Client as Client2;
-use Solarium\Exception\HttpException;
 use OpenSkos2\Api\Exception\ApiException;
+use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
+use Asparagus\QueryBuilder;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 require_once dirname(__FILE__) .'/../config.inc.php';
 //
+use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
+use Asparagus\QueryBuilder;
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 
@@ -59,28 +61,19 @@ class ResourceManager
     protected $client;
 
     /**
-     * @var string
-     */
-    protected $graph;
-
-    /**
      * What is the basic resource for this manager.
      * Made to be extended and overwrited.
      * @var string NULL means any resource.
      */
     protected $resourceType = null;
 
-    /**
-     * @var Client2
-     */
-    protected $solr;
+
+     /** 
+      * @var \OpenSkos2\Solr\ResourceManager
+      */
+    protected $solrResourceManager;
     
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @var bool
-     */
-    protected $isNoCommitMode = false;
+ 
     
     public function getResourceType()
     {
@@ -95,7 +88,7 @@ class ResourceManager
      */
     public function getIsNoCommitMode()
     {
-        return $this->isNoCommitMode;
+        return $this->solrResourceManager->getIsNoCommitMode();
     }
 
     /**
@@ -105,19 +98,17 @@ class ResourceManager
      */
     public function setIsNoCommitMode($isNoCommitMode)
     {
-        $this->isNoCommitMode = $isNoCommitMode;
+        $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
     }
     
     /**
-     * ResourceManager constructor.
      * @param Client $client
-     * @param string $graph
+     * @param SolrResourceManager $solrResourceManager
      */
-    public function __construct(Client $client, Client2 $solr, $graph = null)
+    public function __construct(Client $client, SolrResourceManager $solrResourceManager)
     {
         $this->client = $client;
-        $this->graph = $graph;
-        $this->solr = $solr;
+        $this->solrResourceManager = $solrResourceManager;
     }
 
     /**
@@ -130,36 +121,10 @@ class ResourceManager
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
-        $this->client->insert(EasyRdf::resourceToGraph($resource));
-      
-// Add resource to solr
-        $update = $this->solr->createUpdate();
-        $doc = $update->createDocument();
-        $convert = new Document($resource, $doc); 
-        $resourceDoc = $convert->getDocument(); 
-        $update->addDocument($resourceDoc);
-        if (!$this->getIsNoCommitMode()) {
-            $update->addCommit(true);
-        }
-        
-        // Sometimes solr update fails with timeout.
-        $exception = null;
-        $tries = 0;
-        $maxTries = 3;
-        do {
-            try {
-                $exception = null;
-                $result = $this->solr->update($update);
-            } catch (HttpException $exception) {
-                $tries ++;
-            }
-        } while ($exception !== null && $tries < $maxTries);
-        
-        if ($exception !== null) {
-            throw $exception;
-        }
+        $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
+        $this->solrResourceManager->insert($resource);
     }
-        
+    
     /**
      * Deletes and then inserts the resourse.
      * @param Resource $resource
@@ -183,9 +148,8 @@ class ResourceManager
      */
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
-        $uri = $resource->getUri();
         $resource->unsetProperty(OpenSkosNamespace::STATUS);
-        $status = new Literal(Concept::STATUS_DELETED);
+        $status = new Literal(Resource::STATUS_DELETED);
         $resource->addProperty(OpenSkosNamespace::STATUS, $status);
 
         $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
@@ -196,18 +160,7 @@ class ResourceManager
         }
 
         $this->replace($resource);
-        
-        // Update solr
-        $update = $this->solr->createUpdate();
-        $doc = $update->createDocument();
-        $doc->setKey('uri', $uri);
-        $doc->addField('s_status', Concept::STATUS_DELETED);
-        $doc->setFieldModifier('s_status', 'set');
-        $update->addDocument($doc);
-        if (!$this->getIsNoCommitMode()) {
-            $update->addCommit(true);
-        }
-        $result = $this->solr->update($update);
+        $this->solrResourceManager->deleteSoft($resource);
     }
 
     /**
@@ -215,13 +168,8 @@ class ResourceManager
      */
     public function delete(Uri $resource)
     {
-        $uri = $this -> deleteSolrIntact($resource);
-       
-        // delete resource in solr
-        $update = $this->solr->createUpdate();
-        $update->addDeleteById($uri);
-        $this->solr->update($update);
-        // what to do with blank nodes in SOLR ??
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+        $this->solrResourceManager->delete($resource);
     }
    
 public function deleteSolrIntact(Uri $resource)
@@ -454,8 +402,8 @@ public function deleteSolrIntact(Uri $resource)
         $where .= '?subject ?property ?object . ';
         
         if ($ignoreDeleted) {
-            $where .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status . ';
-            $where .= 'FILTER (?status != \'' . Resource::STATUS_DELETED . '\')';
+            $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
+            $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
         }
         
         $query .= 'WHERE { ' . $where . '}';
@@ -761,6 +709,34 @@ public function deleteSolrIntact(Uri $resource)
                     throw $ex;
                 }
             }
+            sleep(1);
+            $tries ++;
+        } while ($tries < $maxTries && $ex !== null);
+
+        if ($ex !== null) {
+            throw $ex;
+        }
+    }
+    
+    /**
+     * Performs client->insert. Retry on timeout.
+     * @param Graph $data
+     * @throws \EasyRdf\Exception
+     */
+    protected function insertWithRetry($data)
+    {
+        $maxTries = 3;
+        $tries = 0;
+        $ex = null;
+        do {
+            try {
+                return $this->client->insert($data);
+            } catch (\EasyRdf\Exception $ex) {
+                if (strpos($ex->getMessage(), 'timed out') === false) {
+                    throw $ex;
+                }
+            }
+            sleep(1);
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
 

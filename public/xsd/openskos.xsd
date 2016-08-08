@@ -39,10 +39,11 @@
     </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
         
-    <xs:element name="collection"/>
+    <xs:element name="set"/>
     <xs:element name="uuid"/>
     <xs:element name="dateDeleted" />
     <xs:element name="deletedBy" />
     <xs:element name="acceptedBy" />
     <xs:element name="timestamp" />
+    <xs:element name="modifiedBy" />
 </xs:schema>

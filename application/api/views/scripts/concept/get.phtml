@@ -60,6 +60,7 @@ $this->headTitle($title);
     <?php foreach ($concept->getProperty(OpenSkos::SET) as $setReference):?>
         <dt><?=$this->translate('Set')?>:</dt>
         <dd>
+        <?php if ($set):?>
             <a href="<?=$this->url(array(
                                 'module' => 'api',
                                 'controller' => 'set',
@@ -68,6 +69,9 @@ $this->headTitle($title);
             )?>.html">
                 <?= $conceptManager ->getSetTitle($setReference)?>
             </a>
+        <?php else:?>
+            <?= $setUri->getUri()?>
+        <?php endif;?>
         </dd>
     <?php endforeach;?>
     <dt>URI:</dt>

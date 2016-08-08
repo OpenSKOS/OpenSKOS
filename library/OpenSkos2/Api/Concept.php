@@ -67,9 +67,7 @@ class Concept extends AbstractTripleStoreResource {
     public function findConcepts(PsrServerRequestInterface $request, $context) {
         try {
             set_time_limit(120);
-
             $params = $request->getQueryParams();
-
             // offset
             $start = 0;
             if (!empty($params['start'])) {
@@ -109,8 +107,7 @@ class Concept extends AbstractTripleStoreResource {
                 $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
             }
 
-            //sets (former tenant collections)
-            // meertens was here
+           
             if (isset($params['sets'])) {
                 $options['sets'] = explode(' ', trim($params['sets']));
             }
@@ -158,6 +155,7 @@ class Concept extends AbstractTripleStoreResource {
             return $response;
         } catch (Exception $ex) {
             return $this->getErrorResponseFromException($e);
+
         }
     }
 

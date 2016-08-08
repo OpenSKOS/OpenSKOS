@@ -144,20 +144,20 @@ class Autocomplete
             $solrQuery .= ')';
         }
 
-        if (!empty($solrQuery)) {
-            $solrQuery .= ' AND ';
-        }
+        $optionsQuery = '';
         
         //status
-        if (!empty($options['status'])) {
-            $solrQuery .= ' (';
-            $solrQuery .= 's_status:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
-                . '))';
-        } else {
-            $solrQuery .= ' (-s_status:' . Resource::STATUS_DELETED . ')';
+        if (strpos($optionsQuery, 'status') === false) { // We dont add status query if it is in the query already.
+            if (!empty($options['status'])) {
+                $optionsQuery .= ' (';
+                $optionsQuery .= 's_status:('
+                    . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
+                    . '))';
+            } else {
+                $optionsQuery .= ' -s_status:' . Resource::STATUS_DELETED;
+            }
         }
-        
+   
         // sets (former tenant collections)
         if (!empty($options['sets'])) {
             $solrQuery .= ' AND (';
@@ -176,16 +176,16 @@ class Autocomplete
 
         // schemes
         if (!empty($options['conceptScheme'])) {
-            $solrQuery .= ' AND (';
-            $solrQuery .= 's_inScheme:('
+            $optionsQuery .= ' AND (';
+            $optionsQuery .= 's_inScheme:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
                 . '))';
         }
         
         // tenants
         if (!empty($options['tenants'])) {
-            $solrQuery .= ' AND (';
-            $solrQuery .= 's_tenant:('
+            $optionsQuery .= ' AND (';
+            $optionsQuery .= 's_tenant:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
                 . '))';
         }
@@ -194,25 +194,34 @@ class Autocomplete
         
         // to be checked
         if (!empty($options['toBeChecked'])) {
-            $solrQuery .= ' AND (b_toBeChecked:true) ';
+            $optionsQuery .= ' AND (b_toBeChecked:true) ';
         }
         
         // topconcepts
         if (!empty($options['topConcepts'])) {
-            $solrQuery .= ' AND (b_isTopConcept:true) ';
+            $optionsQuery .= ' AND (b_isTopConcept:true) ';
         }
 
         // orphaned concepts
         if (!empty($options['orphanedConcepts'])) {
-            $solrQuery .= ' AND (b_isOrphan:true) ';
+            $optionsQuery .= ' AND (b_isOrphan:true) ';
         }
         
+        // combine
+        if (!empty($optionsQuery)) {
+            if (empty($solrQuery)) {
+                $solrQuery = $optionsQuery;
+            } else {
+                $solrQuery .= ' AND (' . $optionsQuery . ')';
+            }
+        }
         
         
         $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
+        
         
         if (!empty($options['sorts'])) {
             $sorts = $options['sorts'];
@@ -240,7 +249,7 @@ class Autocomplete
                 'd_dateSubmited',
             ],
             'modified' => [
-                's_contributor',
+                's_modifiedBy',
                 'd_modified',
             ],
             'approved' => [

@@ -19,6 +19,7 @@
 
 namespace OpenSkos2\Solr;
 
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -140,6 +141,8 @@ class Document
             $this->addConceptClasses($this->resource, $this->document);
             $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
             $this->document->b_isOrphan = $this->isOrphan();
+            
+            $this->addMaxNumericNotation();
         }
         
         return $this->document;
@@ -189,6 +192,27 @@ class Document
                 }
             }
             $this->mapValuesToField($propertiesClass, $values, $document);
+        }
+    }
+    
+    /**
+     * Add the special single numeric notation. Only used for get max notation of all concepts later.
+     */
+    protected function addMaxNumericNotation()
+    {
+        // Gets one of the numeric notations of the concept.
+        // Should be the highest one.
+        
+        $max = 0;
+        foreach ($this->resource->getProperty(Skos::NOTATION) as $notation) {
+            $value = $notation->getValue();
+            if (is_numeric($value) && $value > $max) {
+                $max = $value;
+            }
+        }
+        
+        if (!empty($max)) {
+            $this->document->max_numeric_notation = $max;
         }
     }
 

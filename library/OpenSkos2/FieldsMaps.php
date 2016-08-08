@@ -23,23 +23,11 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 
 class FieldsMaps {
-    
-    /* The field mapping: copied from migration script, thsi part differs getOldToProperties and getNamesToProperties method
-     * 
-     * 
-     *  'modified_by' => DcTerms::CONTRIBUTOR,
-        'created_by' => DcTerms::CREATOR,
-        'dcterms_creator' => DcTerms::CREATOR, ?? not in the old openskos anyway
-        'approved_by' => OpenSkos::ACCEPTEDBY,
-        'deleted_by' => OpenSkos::DELETEDBY,
-       // Olha: the next two filed are added because no timestam and modified_timestamp in jena's output
-        'timestamp' => DcTerms::DATESUBMITTED,
-        'modified_timestamp' => DcTerms::MODIFIED,
-     */
-
-private static function getNamesToPropertiesCommon() {
+  
+private static function getNamesToProperties() {
     return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
@@ -79,6 +67,12 @@ private static function getNamesToPropertiesCommon() {
             'topConceptOf' => Skos::TOPCONCEPTOF,
             
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'dcterms_creator' => DcTerms::CREATOR,
+            'dc_creator' => Dc::CREATOR,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+            'dc_contributor' => Dc::CONTRIBUTOR,
             'dcterms_title' => DcTerms::TITLE,
             
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
@@ -87,44 +81,7 @@ private static function getNamesToPropertiesCommon() {
         
             'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
             'member' => Skos::MEMBER,
-        ];
-}
-
-    // @TODO Move to correct namespace/context
-    
-    /**
-     * Gets map of fields to property uris.
-     * @return array
-     */
-    // Olha: should not be necessary after migration.
-    public static function getOldToProperties()
-    {
-        $common = self::getNamesToPropertiesCommon();
-        $add = [ // there is also some crap from the previous code: some fields are apparently duplicated
-            'collection' => OpenSkos::SET,
-            'created_by' => DcTerms::CREATOR,
-            'dcterms_creator' => DcTerms::CREATOR,
-            'timestamp' => DcTerms::DATESUBMITTED,
-            'created_timestamp' => DcTerms::CREATED,
-            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-            'modified_by' => DcTerms::CONTRIBUTOR,
-            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
-            'modified_timestamp' => DcTerms::MODIFIED,
-            'dcterms_modified' => DcTerms::MODIFIED,
-            'approved_by' => OpenSkos::ACCEPTEDBY,
-            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-            'deleted_by' => OpenSkos::DELETEDBY,
-        ];
-        return array_merge($common, $add);
-    }
-    
-    // some old openskos-fields are replaced with eqivalent dcterms or to be in-line with dcterms
-    
-    public static function getNamesToProperties()
-    {
-        $common = self::getNamesToPropertiesCommon();
-        $add = [
-            // compare with Solr's document.php
+        
             'set' => OpenSkos::SET,
             'creator' => DcTerms::CREATOR,
             'dateSubmitted' => DcTerms::DATESUBMITTED,
@@ -135,24 +92,5 @@ private static function getNamesToPropertiesCommon() {
             'deletedBy' => OpenSkos::DELETEDBY,
             'dateDeleted' => OpenSkos::DATE_DELETED,
         ];
-        return array_merge($common, $add);
-    }
-    
-    
-     
-    /**
-     * Returns the corresposing property for the given field.
-     * If property not found - returns $field.
-     * @param string $field
-     * @return string
-     */
-    /*public static function resolveOldField($field)
-    {
-        $map = self::getOldToProperties();
-        if (isset($map[$field])) {
-            return $map[$field];
-        } else {
-            return $field;
-        }
-    }*/
+}
 }

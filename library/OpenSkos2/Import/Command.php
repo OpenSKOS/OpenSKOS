@@ -80,7 +80,7 @@ class Command implements LoggerAwareInterface
         if ($message->getClearSet()) {
                 $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
             }
-        
+
         if ($message->getDeleteSchemes()) {
             $conceptSchemes = [];
             foreach ($resourceCollection as $resourceToInsert) {
@@ -117,9 +117,10 @@ class Command implements LoggerAwareInterface
                 } else {
                     $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
                     $isForUpdates = true;
+
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                         $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
-                        $preprocessedResource->unsetProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
+                        $preprocessedResource->unsetProperty(DcTerms::DATESUBMITTED);
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
@@ -136,7 +137,7 @@ class Command implements LoggerAwareInterface
                 foreach ($validator->getErrorMessages() as $errorMessage) {
                     var_dump($errorMessage);
                 }
-                var_dump($preprocessedResource->getUri() . " has not been inserted due to the validation error(s) above.");
+                var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
                 continue;
             }
 
@@ -182,6 +183,4 @@ class Command implements LoggerAwareInterface
         return $concept;
     }
     
-  
-
 }

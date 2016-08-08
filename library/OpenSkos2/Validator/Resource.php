@@ -36,6 +36,8 @@ use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
 use OpenSkos2\Validator\Concept\InSet as ConceptInSet;
 use OpenSkos2\Validator\Concept\InSkosCollection;
+use OpenSkos2\Validator\Concept\SingleStatus;
+use OpenSkos2\Validator\Concept\SinglePrefLabel;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
 use OpenSkos2\Validator\Concept\UniqueNotation;
@@ -176,8 +178,8 @@ class Resource
             }
             //var_dump($this->errorMessages);
             
-            $this->logger->error('Errors founds while validating resource ' . $resource->getUri());
-            $this->logger->error($validator->getErrorMessages());
+            $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
+            $this->logger->error(implode(', ', $validator->getErrorMessages()));
             
             $errorsFound = true;
         }

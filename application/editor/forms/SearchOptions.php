@@ -358,7 +358,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
         }
 
         $this->addElement('multiselect', 'collections', array(
-            'label' => _('Collections'),
+            'label' => _('Sets'),
             'multiOptions' => $collectionsOptions
         ));
 

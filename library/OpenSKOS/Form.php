@@ -38,9 +38,23 @@ class OpenSKOS_Form extends Zend_Form
         $groupName = null,
         $wrapperId = null
     ) {
-        foreach ($elementData as $elementName => $elementLabel) {
+        foreach ($elementData as $elementName => $elementOptions) {
+            if (is_array($elementOptions)) {
+                if (!isset($elementOptions['label'])) {
+                    throw new \Exception('Item "label" is required in element config.');
+                }
+                $elementLabel = $elementOptions['label'];
+            } else {
+                $elementLabel = $elementOptions;
+            }
+            
             $element = new $elementClass($elementName, $elementLabel);
             $element->setCssClasses(array_merge($cssClasses, array($elementName)));
+            
+            if (is_array($elementOptions) && isset($elementOptions['readonly'])) {
+                $element->setReadonly($elementOptions['readonly']);
+            }
+            
             $this->addElement($element);
         }
         if (null !== $wrapperId) {

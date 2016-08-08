@@ -81,8 +81,10 @@ class Collection
             if (!$valid) {
                 $this->errorMessages[] = array_merge($this->errorMessages[], $valid->getErrorMessages());
                 $errorsFound = true;
+                
+                $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
+                    . implode(', ', $validator->getErrorMessages());
             }
-            
         }
 
         if ($errorsFound) {

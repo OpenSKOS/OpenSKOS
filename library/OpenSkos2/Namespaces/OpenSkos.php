@@ -34,6 +34,8 @@ class OpenSkos
     
     const ACCEPTEDBY = 'http://openskos.org/xmlns#acceptedBy';
     
+    const MODIFIEDBY = 'http://openskos.org/xmlns#modifiedBy';
+    
     const UUID = 'http://openskos.org/xmlns#uuid';
     
     const SET = 'http://openskos.org/xmlns#set';

@@ -73,6 +73,7 @@ class Relation extends AbstractTripleStoreResource {
         }
     }
     
+
     public function findRelatedConcepts($request, $uri, $format) {
         $params=$request->getQueryParams();
         $relType = $params['id'];
@@ -80,6 +81,7 @@ class Relation extends AbstractTripleStoreResource {
             $schema = $params['inSchema'];
         } else {
             $schema = null;
+
         }
         try {
             $concepts = $this->manager->fetchRelationsForConcept($uri, $relType, $schema);
@@ -108,14 +110,15 @@ class Relation extends AbstractTripleStoreResource {
     }
     
 
+
     // used when creating a user-defined relation
     protected function checkResourceIdentifiers(PsrServerRequestInterface $request, $resourceObject) {
         if ($resourceObject->isBlankNode()) {
             throw new ApiException(
             'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.', 400
             );
-        }
 
+        }
        $ttl = $resourceObject->getUri();
        $hakje = strrpos($ttl, "#");
        if (strpos($ttl, 'http://') !== 0 || !$hakje || ($hakje === strlen($ttl)-1)) {

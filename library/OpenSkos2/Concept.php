@@ -37,16 +37,7 @@ class Concept extends Resource
 {
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
-    /**
-     * All possible statuses
-     */
-    const STATUS_CANDIDATE = 'candidate';
-    const STATUS_APPROVED = 'approved';
-    const STATUS_REDIRECTED = 'redirected';
-    const STATUS_NOT_COMPLIANT = 'not_compliant';
-    const STATUS_REJECTED = 'rejected';
-    const STATUS_OBSOLETE = 'obsolete';
-    const STATUS_DELETED = 'deleted';
+   
     
     /**
      * Get list of all available concept statuses.
@@ -55,13 +46,13 @@ class Concept extends Resource
     public static function getAvailableStatuses()
     {
         return [
-            self::STATUS_CANDIDATE,
-            self::STATUS_APPROVED,
-            self::STATUS_REDIRECTED,
-            self::STATUS_NOT_COMPLIANT,
-            self::STATUS_REJECTED,
-            self::STATUS_OBSOLETE,
-            self::STATUS_DELETED,
+            Resource::STATUS_CANDIDATE,
+            Resource::STATUS_APPROVED,
+            Resource::STATUS_REDIRECTED,
+            Resource::STATUS_NOT_COMPLIANT,
+            Resource::STATUS_REJECTED,
+            Resource::STATUS_OBSOLETE,
+            Resource::STATUS_DELETED,
         ];
     }
     
@@ -124,7 +115,6 @@ class Concept extends Resource
     }
 
     
-    
      public function getSkosCollection()
     {
         if (!$this->hasProperty(OpenSkos::INSKOSCOLLECTION)) {
@@ -141,11 +131,12 @@ class Concept extends Resource
      */
     public function isDeleted()
     {
-        if ($this->getStatus() === self::STATUS_DELETED) {
+        if ($this->getStatus() === Resource::STATUS_DELETED) {
             return true;
         }
         return false;
     }
+
 
     /**
      * Gets preview title for the concept.
@@ -234,7 +225,7 @@ class Concept extends Resource
             $this->unsetProperty(OpenSkos::DATE_DELETED);
             $this->unsetProperty(OpenSkos::DELETEDBY);
             $this->unsetProperty(OpenSkos::STATUS);
-            $this->addProperty(OpenSkos::STATUS, new Literal(Concept::STATUS_CANDIDATE));
+            $this->addProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_CANDIDATE));
         } else {
             
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
@@ -247,11 +238,11 @@ class Concept extends Resource
                 $this->unsetProperty(OpenSkos::DELETEDBY);
 
                 switch ($this->getStatus()) {
-                    case Concept::STATUS_APPROVED:
+                    case Resource::STATUS_APPROVED:
                         $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
                         $this->addProperty(OpenSkos::ACCEPTEDBY, new Uri($userUri));
                         break;
-                    case Concept::STATUS_DELETED:
+                    case Resource::STATUS_DELETED:
                         $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
                         $this->addProperty(OpenSkos::DELETEDBY, new Uri($userUri));
                         break;
@@ -287,7 +278,7 @@ class Concept extends Resource
         
         $notation = 1;
         
-        $maxNumericNotation = $conceptManager->fetchMaxNumericNotation($tenant);
+        $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
         if (!empty($maxNumericNotation)) {
             $notation = $maxNumericNotation + 1;
         }

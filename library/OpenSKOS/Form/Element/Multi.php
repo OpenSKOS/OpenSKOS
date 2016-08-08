@@ -55,6 +55,11 @@ class OpenSKOS_Form_Element_Multi extends Zend_Form_Element_Multi
      * View path associated with the element
      */
     protected $_partialView;
+    
+    /**
+     * bool
+     */
+    protected $readonly;
 
     public function __construct($groupName, $groupLabel)
     {
@@ -62,6 +67,22 @@ class OpenSKOS_Form_Element_Multi extends Zend_Form_Element_Multi
         $this->setGroupLabel($groupLabel);
         $this->setCssClasses();
         parent::__construct($groupName);
+    }
+    
+    /**
+     * @return bool
+     */
+    public function getReadonly()
+    {
+        return $this->readonly;
+    }
+
+    /**
+     * @param bool $readonly
+     */
+    public function setReadonly($readonly)
+    {
+        $this->readonly = $readonly;
     }
 
     /**
@@ -148,6 +169,7 @@ class OpenSKOS_Form_Element_Multi extends Zend_Form_Element_Multi
                     'inputName' => $this->groupName,
                     'inputValues' => $this->groupValues,
                     'inputLabel' => $this->groupLabel,
-                    'inputClasses' => implode(' ', $this->cssClasses)));
+                    'inputClasses' => implode(' ', $this->cssClasses),
+                    'readonly' => $this->getReadonly()));
     }
 }

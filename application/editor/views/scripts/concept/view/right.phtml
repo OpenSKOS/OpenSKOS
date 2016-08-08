@@ -17,7 +17,6 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\DcTerms;
 ?>
 
 <div id="concept-scheme-tab-container" class="concept-scheme-tab-container">
@@ -37,13 +36,7 @@ use OpenSkos2\Namespaces\DcTerms;
         </ul>
     </div>
 
-    <?php if (!$this->currentConcept->isPropertyEmpty(DcTerms::CONTRIBUTOR)): ?>
-        <div class="concept-contributor">
-            <span><?php echo $this->translate('Contributor:'); ?> </span>
-            <?php echo $this->currentConcept->getPropertyFlatValue(DcTerms::CONTRIBUTOR); ?>
-        </div>
-    <?php endif ?>
-
+    <?= $this->render('concept/view/contributor.phtml');?>
     
     <?php if (!$this->currentConcept->isPropertyEmpty(Skos::INSCHEME)): ?>
         <?php foreach ($this->currentConcept->getProperty(Skos::INSCHEME) as $schemeUri) : ?>

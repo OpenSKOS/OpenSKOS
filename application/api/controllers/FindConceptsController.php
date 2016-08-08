@@ -142,6 +142,7 @@ class Api_FindConceptsController extends AbstractController {
      *  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *           xmlns:skos="http://www.w3.org/2004/02/skos/core#"
      *           xmlns:dc="http://purl.org/dc/terms/"
+     *           xmlns:dcterms="http://purl.org/dc/elements/1.1/"
      *           xmlns:openskos="http://openskos.org/xmlns#">
      *
      *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/218059">
@@ -157,7 +158,7 @@ class Api_FindConceptsController extends AbstractController {
      *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/215665"/>
      *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/216387"/>
      *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/217572"/>
-     *      <dc:creator rdf:resource="http://openskos.org/users/9f598c22-1fd4-4113-9447-7c71d0c7146f"/>
+     *      <dcterms:creator rdf:resource="http://openskos.org/users/9f598c22-1fd4-4113-9447-7c71d0c7146f"/>
      *      <skos:broadMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
      *      <openskos:collection rdf:resource="http://openskos.org/api/collections/beg:gtaa"/>
      *      <openskos:status>approved</openskos:status>
@@ -167,9 +168,9 @@ class Api_FindConceptsController extends AbstractController {
      *      <dc:contributor>RVD, SFW, NFM, GWA, TVA</dc:contributor>
      *      <skos:notation>218059</skos:notation>
      *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
-     *      <dc:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T17:30:51+00:00</dc:modified>
-     *      <dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateSubmitted>
-     *      <dc:dateAccepted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dc:dateAccepted>
+     *      <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T17:30:51+00:00</dcterms:modified>
+     *      <dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</dcterms:dateSubmitted>
+     *      <dcterms:dateAccepted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T15:03:48+00:00</ddcterms:dateAccepted>
      *      <openskos:uuid>03ae64e0-94ba-55d8-c01a-6f4259e95177</openskos:uuid>
      *    </rdf:Description>
      *  </rdf:RDF>

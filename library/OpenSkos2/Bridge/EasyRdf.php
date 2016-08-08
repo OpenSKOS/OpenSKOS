@@ -53,7 +53,6 @@ class EasyRdf {
      * @return ResourceCollection
      */
     public static function graphToResourceCollection(Graph $graph, $expectedType = null) {
-        //var_dump($graph->index);
         $collection = self::createResourceCollection($expectedType);
         if ($expectedType !== null) {
             if ($expectedType instanceof Uri) {
@@ -64,6 +63,7 @@ class EasyRdf {
         } else {
             $expectedTypeUri = null;
         }
+        /** @var $resource \EasyRdf\Resource */
         foreach ($graph->resources() as $resource) {
             $type = self::getRdfType($resource);
             if ($type !== null) {
