@@ -84,20 +84,15 @@ class Concept extends AbstractTripleStoreResource {
                 'start' => $start,
                 'rows' => $limit,
                 'directQuery' => true,
+                // upstream 'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
             ];
-
-
-            if (isset($params['tenant'])) {
-                $options['tenants'] = [$params['tenant']];
-            }
 
             // search query
             if (isset($params['q'])) {
                 $options['searchText'] = $params['q'];
             }
 
-            // sorting
-            //Meertens was here
+            
             if (isset($params['sorts'])) {
                 $sortmap = $this->prepareSortsForSolr($params['sorts']);
                 $options['sorts'] = $sortmap;
@@ -113,10 +108,23 @@ class Concept extends AbstractTripleStoreResource {
             }
 
 
-            if (isset($params['tenants'])) {
-                $options['tenants'] = explode(' ', trim($params['tenants']));
+            if (isset($params['tenant'])) {
+                $options['tenants'] = explode(' ', trim($params['tenant']));
+            } else { // synomym parameter
+                if (isset($params['tenants'])) {
+                    $options['tenants'] = explode(' ', trim($params['tenants']));
+                }
             }
-            //meertens was here
+            if (isset($options['tenants'])) {
+                foreach ($options['tenants'] as $tenantcode) {
+                    $tenantUri = $this->manager->fetchInstitutionUriByCode($tenantcode);
+                    if ($tenantUri === null) {
+                        throw new ApiException('The tenant referred by code ' . $tenantcode . ' does not exist in the triple store. ', 400);
+                    }
+                }
+            }
+
+
             if (isset($params['conceptScheme'])) {
                 $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
             }
@@ -154,7 +162,7 @@ class Concept extends AbstractTripleStoreResource {
             set_time_limit(30);
             return $response;
         } catch (Exception $ex) {
-            return $this->getErrorResponseFromException($e);
+            return $this->getErrorResponseFromException($ex);
 
         }
     }
@@ -214,6 +222,9 @@ class Concept extends AbstractTripleStoreResource {
             if (!$concept) {
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
+            if ($concept->isDeleted()) {
+                 throw new NotFoundException('Concept already deleted :' . $id, 410);
+             }
 
             $user = $this->getUserFromParams($params);
 

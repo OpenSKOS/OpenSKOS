@@ -301,6 +301,8 @@ class Resource
             new InScheme(),
             new InSkosCollection(),
             new ConceptInSet(),
+            new SingleStatus(),
+            new SinglePrefLabel(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
             new UniquePreflabelInScheme(),

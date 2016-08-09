@@ -89,6 +89,15 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addValidator(new Zend_Validate_EmailAddress());
 
 
+                       
+ 	    $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEppn'));
+            $validator
+                    ->setMessage(_("there is already a user with eduPersonPrincipalName '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
+
+            $form->getElement('eppn')
+                    ->addValidator($validator);
+
+
             $validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
             $validator
                     ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
@@ -431,10 +440,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     }
 
     /**
+     * @param $autoSave bool , default: true If uri is generated, should it be saved in the database
      * @return \OpenSkos2\Person
      */
-    public function getFoafPerson()
-    {
+    public function getFoafPerson($autoSave = true) {
         $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
         /**
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
@@ -442,9 +451,11 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $resourceManager = $diContainer->get('\OpenSkos2\PersonManager');
         if (!$this->uri) {
             $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
-            $this->save();
+            if ($autoSave) {
+                $this->save();
+            }
         }
-        
+
         try {
             return $resourceManager->fetchByUri($this->uri, \OpenSkos2\Namespaces\Foaf::PERSON);
         } catch (ApiException $e) {
@@ -456,14 +467,16 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 $tenantcode = $this['tenant'];
                 $tenanturi = $resourceManager->fetchInstitutionUriByCode($tenantcode);
                 $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
-                $resourceManager->insert($person);
+                if ($autoSave) {
+                    $resourceManager->insert($person);
+                }
                 return $person;
             } else {
                 var_dump($e->getCode());
             }
         }
     }
-    
+
     /**
      * Get dependency injection container
      * 

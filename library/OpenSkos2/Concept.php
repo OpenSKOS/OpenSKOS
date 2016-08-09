@@ -124,19 +124,7 @@ class Concept extends Resource
         }
     }
     
-    /**
-     * Check if the concept is deleted
-     *
-     * @return boolean
-     */
-    public function isDeleted()
-    {
-        if ($this->getStatus() === Resource::STATUS_DELETED) {
-            return true;
-        }
-        return false;
-    }
-
+   
 
     /**
      * Gets preview title for the concept.

@@ -21,6 +21,7 @@
  */
 
 use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dc;
@@ -487,8 +488,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             if ($this->getConceptManager()->askForUri($formData['statusOtherConcept'])) {
                 $otherConcept = $this->getConceptManager()->fetchByUri($formData['statusOtherConcept']);
                 
-                if ($concept->getStatus() == Concept::STATUS_REDIRECTED ||
-                        $concept->getStatus() == Concept::STATUS_OBSOLETE) {
+                if ($concept->getStatus() == Resource::STATUS_REDIRECTED ||
+                        $concept->getStatus() == Resource::STATUS_OBSOLETE) {
 
                     foreach ($concept->retrieveLanguages() as $lang) {
                         $concept->addUniqueProperty(
@@ -498,7 +499,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                     }
                 }
 
-                if ($concept->getStatus() == Concept::STATUS_REDIRECTED) {
+                if ($concept->getStatus() == Resource::STATUS_REDIRECTED) {
                     foreach ($concept->retrieveLanguages() as $lang) {
                         if ($concept->hasPropertyInLanguage(Skos::PREFLABEL, $lang)) {
                             $otherConcept->addUniqueProperty(

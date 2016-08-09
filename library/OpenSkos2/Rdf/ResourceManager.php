@@ -37,7 +37,6 @@ use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkos2\Solr\Document;
 use OpenSKOS_Db_Table_Tenants;
 use OpenSKOS_Db_Table_Collections;
 use RuntimeException;

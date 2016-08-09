@@ -196,7 +196,6 @@ class DataArray
             OpenSkos::ACCEPTEDBY,
             OpenSkos::DELETEDBY,
             OpenSkos::DATE_DELETED,
-            OpenSkos::MODIFIEDBY,
             OpenSkos::STATUS,
             OpenSkos::TENANT,
             OpenSkos::SET,

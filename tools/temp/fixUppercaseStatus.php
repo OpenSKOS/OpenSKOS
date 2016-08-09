@@ -57,7 +57,7 @@ use \OpenSkos2\Concept;
 $count = 0;
 foreach ($conceptManager->fetch([OpenSkos::STATUS => new Literal('NOT_COMPLIANT')]) as $concept) {
     echo $concept->getUri() . PHP_EOL;
-    $concept->setProperty(OpenSkos::STATUS, new Literal(Concept::STATUS_NOT_COMPLIANT));
+    $concept->setProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_NOT_COMPLIANT));
     $conceptManager->replace($concept);
     $count ++;
 }

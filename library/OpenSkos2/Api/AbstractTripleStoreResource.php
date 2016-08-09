@@ -44,12 +44,12 @@ abstract class AbstractTripleStoreResource {
     
     protected function getAndAdaptQueryParams(ServerRequestInterface $request) {
         $queryparams = $request->getQueryParams();
-        if (empty($queryparams['tenant'])) {
+        if (!isset($queryparams['tenant']) || empty($queryparams['tenant'])) {
             throw new ApiException('No tenant specified', 412);
         };
         $tenantUri = $this->manager->fetchInstitutionUriByCode($queryparams['tenant']);
         if ($tenantUri === null) {
-            throw new ApiException('The tenant referred by code ' . $queryparams['tenant'] . ' does not exist in the triple store. You may want to set CHECK_MYSQL to true and allow search in the mysql database.', 400);
+            throw new ApiException('The tenant referred by code ' . $queryparams['tenant'] . ' does not exist in the triple store. ', 400);
         }
         $params = $queryparams;
         $params['tenantcode'] = $params['tenant']; 

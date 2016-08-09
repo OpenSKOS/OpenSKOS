@@ -33,7 +33,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
-use OpenSkos2\Exception\Api\ApiException;
 
 class Command implements LoggerAwareInterface
 {

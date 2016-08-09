@@ -45,5 +45,4 @@
     <xs:element name="deletedBy" />
     <xs:element name="acceptedBy" />
     <xs:element name="timestamp" />
-    <xs:element name="modifiedBy" />
 </xs:schema>

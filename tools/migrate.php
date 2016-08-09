@@ -26,7 +26,6 @@
  *  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -326,7 +325,7 @@ $mappings = [
             return $users[$value];
         },
         'fields' => [
-            'modified_by' => OpenSkos::MODIFIEDBY,
+            'modified_by' => DcTerms::CONTRIBUTOR,
             'created_by' => DcTerms::CREATOR,
             'dcterms_creator' => DcTerms::CREATOR,
             'approved_by' => OpenSkos::ACCEPTEDBY,

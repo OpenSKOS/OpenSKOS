@@ -165,7 +165,7 @@ class Api_FindConceptsController extends AbstractController {
      *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
      *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
      *      <openskos:tenant>beg</openskos:tenant>
-     *      <dc:contributor>RVD, SFW, NFM, GWA, TVA</dc:contributor>
+     *      <dc:contributor>RVD, SFW, NFM, GWA, TVA</dcterms:contributor>
      *      <skos:notation>218059</skos:notation>
      *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
      *      <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T17:30:51+00:00</dcterms:modified>

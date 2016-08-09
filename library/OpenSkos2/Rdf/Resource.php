@@ -36,6 +36,15 @@ class Resource extends Uri implements ResourceIdentifier
      * @TODO Separate in StatusAwareResource class or something like that
      * openskos:status value which marks a resource as deleted.
      */
+     /**
+     * All possible statuses
+     */
+    const STATUS_CANDIDATE = 'candidate';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REDIRECTED = 'redirected';
+    const STATUS_NOT_COMPLIANT = 'not_compliant';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
     
     protected $properties = [];
@@ -212,19 +221,20 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
     
-    /**
-     * Check if the concept is deleted
-     * @TODO Separate in StatusAwareResource class or something like that
+     /**
+     * Check if the resource is deleted
+     *
      * @return boolean
      */
     public function isDeleted()
     {
-        if ($this->getStatus() === self::STATUS_DELETED) {
+        if ($this->getStatus() === Resource::STATUS_DELETED) {
             return true;
         }
         return false;
     }
 
+   
     /**
      * @return string
      */
@@ -284,17 +294,7 @@ class Resource extends Uri implements ResourceIdentifier
         return $this->uri;
     }
     
-    /**
-     * @return string|null
-     */
-    public function getStatus()
-    {
-        if (!$this->hasProperty(OpenSkos::STATUS)) {
-            return null;
-        } else {
-            return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
-        }
-    }
+   
     
     /**
      * Is the current resource a blank node.
@@ -306,6 +306,13 @@ class Resource extends Uri implements ResourceIdentifier
         return empty($this->uri) || preg_match('/^_:/', $this->uri);
     }
     
+     public function isDeleted() {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Go through the propery values and check if there is one in the specified language.
      * @param string $predicate

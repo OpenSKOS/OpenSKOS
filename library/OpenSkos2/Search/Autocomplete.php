@@ -249,7 +249,7 @@ class Autocomplete
                 'd_dateSubmited',
             ],
             'modified' => [
-                's_modifiedBy',
+                's_contributor',
                 'd_modified',
             ],
             'approved' => [

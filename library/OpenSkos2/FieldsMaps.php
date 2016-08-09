@@ -69,7 +69,6 @@ private static function getNamesToProperties() {
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
             'dcterms_modified' => DcTerms::MODIFIED,
             'dcterms_creator' => DcTerms::CREATOR,
-            'dc_creator' => Dc::CREATOR,
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
             'dcterms_contributor' => DcTerms::CONTRIBUTOR,
             'dc_contributor' => Dc::CONTRIBUTOR,
