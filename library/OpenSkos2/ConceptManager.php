@@ -368,5 +368,28 @@ class ConceptManager extends ResourceManager
         }
         return false;
     }
+    
+    // used in oai pmh
+    public function fetchTenantSpecData($concept){
+        $uri = $concept ->getUri();
+        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode WHERE { '
+                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkos::SET.'> ?seturi . ?seturi <'.OpenSkos::TENANT.'> ?tenanturi .'
+                .'?seturi <'.OpenSkos::CODE.'> ?setcode .'
+                . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkos::CODE . '> ?tenantcode .}';
+    
+        $response = $this->query($query);
+        $retVal = [];
+        foreach($response as $descr) {
+            $spec=[];
+            $spec['tenanturi']=$descr->tenanturi;
+            $spec['tenantname']=$descr->tenantname;
+            $spec['tenantcode']=$descr->tenantcode;
+            $spec['seturi'] = $descr ->seturi;
+            $spec['setcode'] = $descr->setcode;
+            $retVal[]=$spec;
+        }
+        return $retVal;  
+    }
+    
  
 }

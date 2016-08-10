@@ -24,22 +24,11 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Literal;
 
 class Set extends Resource
 {
     const TYPE = Dcmi::DATASET;
     
-   
-   public function getCode() {
-        $values = $this->getProperty(OpenSkos::CODE);
-        if (isset($values[0])) {
-            return $values[0];
-        }else{
-            return new Literal(UNKNOWN);
-        }
-    }
-   
    
      public function __construct($uri = null)
     {
@@ -47,7 +36,14 @@ class Set extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
     
-    
+    public function getTenantUri(){
+        $tenants = $this ->getProperty(OpenSkos::TENANT);
+        if (count($tenants) < 1) {
+            return null;
+        } else {
+            return $tenants[0];
+        }
+    }
     
     public function addMetadata($userUri, $params, $existingSet) {
         $metadata = [];

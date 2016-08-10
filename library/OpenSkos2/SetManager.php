@@ -39,9 +39,23 @@ class SetManager extends ResourceManager
         return parent::CanBeDeleted($uri);
     }
     
+    public function fetchAllSets($allowOAI){
+        return $this -> fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($allowOAI, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)]);        
+    }
+    
+    public function getUrisMap($tenantCode){
+        $query='DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE { ?subject ?predicate ?object . ?subject <'.OpenSkos::TENANT .'> ?tenantURI . ?tenantURI <'.OpenSkos::CODE.'> "'. $tenantCode. '".} }';
+        $result = $this->query($query);
+        $sets = EasyRdf::graphToResourceCollection($result, $this->getResourceType());
+        $retVal = [];
+        foreach ($sets as $set) {
+          $retVal[$set->getUri()] = $set;  
+        }
+        return $retVal;
+    }
       // used only for HTML output
     public function fetchInstitutionCodeByUri($uri) {
-        $query = 'SELECT ?code WHERE { <'.$uri.'>  <' . OpenSkos::CODE . '> ?name .  ?uri  <' . Rdf::TYPE . '> <'. Org::FORMALORG .'> .}';
+        $query = 'SELECT ?code WHERE { <'.$uri.'>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' . Rdf::TYPE . '> <'. Org::FORMALORG .'> .}';
         $codes = $this->query($query);
         if (count($codes) < 1) {
             return null;

@@ -21,22 +21,24 @@ namespace OpenSkos2\OaiPmh;
 
 use DateTime;
 use OpenSkos2\Concept;
+use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\SetManager;
 use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Search\ParserText;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
-use OpenSKOS_Db_Table_Row_Set;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
 use Picturae\OaiPmh\Implementation\Repository\Identity as ImplementationIdentity;
-use Picturae\OaiPmh\Implementation\Set;
-use Picturae\OaiPmh\Implementation\SetList;
+use Picturae\OaiPmh\Implementation\Set as OaiSet;
+use Picturae\OaiPmh\Implementation\SetList as OaiSetList;
 use Picturae\OaiPmh\Interfaces\MetadataFormatType;
 use Picturae\OaiPmh\Interfaces\Record;
 use Picturae\OaiPmh\Interfaces\RecordList;
@@ -105,9 +107,9 @@ class Repository implements InterfaceRepository
 
     /**
      *
-     * @var OpenSKOS_Db_Table_Collections
+     * @var SetManager
      */
-    private $setsModel;
+    private $setManager;
 
     /**
      *
@@ -128,7 +130,7 @@ class Repository implements InterfaceRepository
      * @param string $repositoryName
      * @param string $baseUrl
      * @param array $adminEmails
-     * @param \OpenSKOS_Db_Table_Sets $setsModel
+     * @param SetManager $setManager
      * @param type $description
      */
     public function __construct(
@@ -138,7 +140,7 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        \OpenSKOS_Db_Table_Sets $setsModel,
+        SetManager $setManager,
         $description = null
     ) {
         $this->conceptManager = $conceptManager;
@@ -147,7 +149,7 @@ class Repository implements InterfaceRepository
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
-        $this->setsModel = $setsModel;
+        $this->setManager = $setManager;
         $this->description = $description;
     }
     
@@ -186,27 +188,27 @@ class Repository implements InterfaceRepository
     }
 
     /**
-     * @return InterfaceSetList
+     * @return InterfaceSetList (sets in a sence of picturae oai
      */
     public function listSets()
     {
-        $collections = $this->getCollections();
+        $oaisets = $this->getOaiSets();
 
         $items = [];
 
         $tenantAdded = [];
 
-        foreach ($collections as $row) {
+        foreach ($oaisets as $row) {
             // Tenant spec
             $tenantCode = $row['tenant_code'];
             if (!isset($tenantAdded[$tenantCode])) {
-                $items[] = new Set($tenantCode, $row['tenant_title']);
+                $items[] = new OaiSet($tenantCode, $row['tenant_title']);
                 $tenantAdded[$tenantCode] = $tenantCode;
             }
 
-            // Collection spec
+            // set spec
             $spec = $row['tenant_code'] . ':' . $row['code'];
-            $items[] = new Set($spec, $row['dc_title']);
+            $items[] = new OaiSet($spec, $row['dcterms_title']);
 
             // Concept scheme spec
             $schemes = $this->schemeManager->getSchemeBySetUri($row['uri']);
@@ -218,11 +220,11 @@ class Repository implements InterfaceRepository
                 $title = $scheme->getProperty(DcTerms::TITLE);
                 $name = $title[0]->getValue();
 
-                $items[] = new Set($schemeSpec, $name);
+                $items[] = new OaiSet($schemeSpec, $name);
             }
         }
 
-        return new SetList($items);
+        return new OaiSetList($items);
     }
 
     /**
@@ -268,7 +270,7 @@ class Repository implements InterfaceRepository
             $from,
             $until,
             $pSet['tenant'],
-            $pSet['collection'],
+            $pSet['set'],
             $pSet['conceptScheme'],
             $numFound
         );
@@ -304,7 +306,7 @@ class Repository implements InterfaceRepository
             $params['from'],
             $params['until'],
             $pSet['tenant'],
-            $pSet['collection'],
+            $pSet['set'],
             $pSet['conceptScheme'],
             $numFound
         );
@@ -359,7 +361,7 @@ class Repository implements InterfaceRepository
     {
         // @TODO DI
         if ($this->setsMap === null) {
-            $this->setsMap = new SetsMap($this->schemeManager, $this->setsModel);
+            $this->setsMap = new SetsMap($this->schemeManager, $this->setManager);
         }
         return $this->setsMap;
     }
@@ -394,18 +396,17 @@ class Repository implements InterfaceRepository
 
         $return['tenant'] = $tenant;
 
-        $collection = null;
+        $set = null;
         if (!empty($arrSet[1])) {
-            $collections = new \OpenSKOS_Db_Table_Sets();
-            $collectionRow = $collections->findByCode($arrSet[1], $tenant);
-            if ($collectionRow && !empty($collectionRow->uri)) {
-                $collection = $collectionRow->uri;
+            $sets = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[1] . '"', $this->setManager->getResourceType());
+            if ($count($sets) > 0) {
+                $set = $sets[0];
             } else {
-                $collection = new Literal($arrSet[1]);
+                $set = new Literal($arrSet[1]);
             }
         }
 
-        $return['collection'] = $collection;
+        $return['set'] = $set;
         
         $conceptScheme = null;
         if (!empty($arrSet[2])) {
@@ -417,25 +418,52 @@ class Repository implements InterfaceRepository
     }
 
     /**
-     * Get all collections
+     * Get all oai sets
      *
-     * @return OpenSKOS_Db_Table_Row_Set[]
+     * @return OaiSet[]
      */
-    private function getCollections()
-    {
-        $sql = $this->setsModel->select(true)
-            ->join(
-                ['ten' => 'tenant'],
-                'tenant = ten.code',
-                [
-                    'tenant_title' => 'ten.name',
-                    'tenant_code' => 'ten.code',
-                ]
-            )
-            ->order('tenant ASC')
-            ->setIntegrityCheck(false);
+    private function getOaiSets() {
+        $sets = $this->setManager->fetchAllSets(true);
+        $retVal = [];
+        foreach ($sets as $set) {
+            $row = [];
+            $row['code'] = $set->getCode()->getValue();
+            $row['dcterms_title'] = $set->getTitle()->getValue();
+            $row['uri'] = $set->getUri();
 
-        return $this->setsModel->fetchAll($sql);
+            $tenantUri = $set->getTenantUri();
+            if ($tenantUri == null) {
+                $row['tenant_code'] = 'UNKNOWN';
+                $row['tenant_title'] = 'UNKNOWN';
+            } else {
+                $tenantData = $this->fetchTenantSpecDataViaUri($tenantUri, $this->setManager);
+                $row['tenant_code'] = $tenantData['tenant_code'];
+                $row['tenant_title'] = $tenantData['tenant_title'];
+            }
+
+            $retVal[] = $row;
+        }
+
+        return $retVal;
+    }
+
+    private function fetchTenantSpecDataViaUri($tenantUri, $resourceManager) {
+        $retVal = [];
+        $tenant = $resourceManager->findResourceById($tenantUri, Tenant::TYPE);
+        $retVal['tenant_code'] = $tenant->getCode()->getValue();
+        $orgElements = $tenant->getProperty(vCard::ORG);
+        if (count($orgElements) > 0) {
+            $orgElement = $orgElements[0];
+            $names = $orgElement->getProperty(vCard::ORGNAME);
+            if (count($names) > 0) {
+                $retVal['tenant_title'] = $names[0];
+            } else {
+                $retVal['tenant_title'] = 'UNKNOWN';
+            }
+        } else {
+            $retVal['tenant_title'] = 'UNKNOWN';
+        }
+        return $retVal;
     }
 
     /**
@@ -530,7 +558,7 @@ class Repository implements InterfaceRepository
         \DateTime $from = null,
         \DateTime $till = null,
         $tenant = null,
-        $collection = null,
+        $set = null,
         $scheme = null,
         &$numFound = null
     ) {
@@ -547,8 +575,8 @@ class Repository implements InterfaceRepository
             $searchOptions['tenants'] = [$tenant->getValue()];
         }
         
-        if (!empty($collection)) {
-            $searchOptions['collections'] = [$collection];
+        if (!empty($set)) {
+            $searchOptions['sets'] = [$set];
         }
 
         if (!empty($scheme)) {

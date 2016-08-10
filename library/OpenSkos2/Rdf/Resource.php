@@ -75,9 +75,6 @@ class Resource extends Uri implements ResourceIdentifier
         return $this ->getPropertyOneLiteralValue(OpenSkos::CODE);
     }
     
-    // used in Skos:collection and ConceptScheme 
-    // (For sets one may also need to check MySQL, 
-    // so that's why they are implemented separately)
     public function getTitle() {
         return $this ->getPropertyOneLiteralValue(DcTerms::TITLE);
     }

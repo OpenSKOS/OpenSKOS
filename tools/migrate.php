@@ -33,6 +33,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\Validator\Resource as ResourceValidator;
 
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
@@ -252,6 +253,7 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
 
 ;
 
+
 function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager, $defaultLicense, $lang) {
     if (!$id) {
         return null;
@@ -452,7 +454,10 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-
+/// fix tenant uri for the tenant from the command line
+$tenantUri = $resourceManager ->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$tenant.'"', Org::FORMALORG);
+var_dump('Tenant '. $tenant. ' has been assigned an uri '. $tenantUri);
+var_dump("\n");
 
 var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
 var_dump($total);
@@ -501,7 +506,7 @@ do {
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
-function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $mappings, $logger) {
+function run_round($doc, $resourceManager, $tenantUri, $class, $synonym, $labelMapping, $mappings, $logger) {
     if ($doc['class'] === $class) {
         try {
             $uri = $doc['uri'];
@@ -635,8 +640,19 @@ function run_round($doc, $resourceManager, $class, $synonym, $labelMapping, $map
             } else {
                 $resource->unsetProperty(OpenSkos::DELETEDBY);
             }
+            
+            $validator = new ResourceValidator($resourceManager, false, $tenantUri);
+            $valid = $validator->validate($resource);
+            if ($valid) {
+                $resourceManager->insert($resource);
+            } else {
+                foreach ($validator->getErrorMessages() as $errorMessage) {
+                    var_dump($errorMessage);
+                }
+                var_dump($resource->getUri() . " cannot not been inserted due to the validation error(s) above.");
+            }
 
-            $resourceManager->insert($resource);
+
             return 1;
         } catch (Exception $ex) {
             var_dump($ex->getMessage());
@@ -661,7 +677,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, 'Collection', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -683,7 +699,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, 'ConceptScheme', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
 
@@ -705,7 +721,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -725,7 +741,7 @@ do {
     $logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, 'Concept', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }

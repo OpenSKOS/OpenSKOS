@@ -69,14 +69,13 @@ class Concept implements Record
         }
         
         $setSpecs = [];
-        foreach ($concept->getProperty(OpenSkos::TENANT) as $tenant) {
-            $setSpecs[] = (string)$tenant;
-            foreach ($this->setsMap->getSets($tenant, $concept->getProperty(OpenSkos::SET)) as $set) {
-                $setSpecs[] = $tenant . ':' . $set->code;
-                $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
-                foreach ($schemes as $scheme) {
-                    $setSpecs[] = $tenant . ':' . $set->code . ':' . $scheme->getUuid();
-                }
+        $specs = $this->conceptManager->fetchTenantSpecData($concept);
+        foreach ($specs as $spec) {
+            $setSpecs[] = $spec['tenantcode'];
+            $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
+            $schemes = $this->setsMap->getSchemes($spec['tenantcode'], $spec['seturi'], $concept->getProperty(Skos::INSCHEME));
+            foreach ($schemes as $scheme) {
+                $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode']. ':' . $scheme->getUuid()->getValue();
             }
         }
         
