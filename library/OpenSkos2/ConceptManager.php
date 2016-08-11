@@ -369,6 +369,20 @@ class ConceptManager extends ResourceManager
         return false;
     }
     
+    // used in html presentation
+    public function fetchConceptSetCodeTitle($concept){
+        $uri = $concept ->getUri();
+        $query = 'SELECT DISTINCT ?schemauri ?seturi ?setcode ?settitle WHERE { '
+                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkos::SET.'> ?seturi . '
+                . '?seturi <'.OpenSkos::CODE.'> ?setcode . ?seturi <'.  DcTerms::TITLE.'> ?settitle . }';
+        $response = $this->query($query);
+        $retVal = array();
+        foreach($response as $descr) {
+            $retVal[$descr->setcode->getValue()] = $descr->settitle->getValue();
+        }
+        return $retVal;  
+    }
+    
     // used in oai pmh
     public function fetchTenantSpecData($concept){
         $uri = $concept ->getUri();

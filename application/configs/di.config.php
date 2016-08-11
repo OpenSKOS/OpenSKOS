@@ -36,6 +36,7 @@ return [
             $sparqlOptions['updateUri']
         );
     },
+            /*
     'Solarium\Client' => function (ContainerInterface $c) {
         
         $solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
@@ -50,7 +51,7 @@ return [
                 ]
             ]
         ]);
-    },
+    },*/
     'Editor_Models_ConceptSchemesCache' => function (ContainerInterface $c) {
         return new Editor_Models_ConceptSchemesCache(
             OpenSKOS_Db_Table_Tenants::fromIdentity()->code,

@@ -303,13 +303,7 @@ class Resource extends Uri implements ResourceIdentifier
         return empty($this->uri) || preg_match('/^_:/', $this->uri);
     }
     
-     public function isDeleted() {
-        if ($this->getStatus() === self::STATUS_DELETED) {
-            return true;
-        }
-        return false;
-    }
-
+    
     /**
      * Go through the propery values and check if there is one in the specified language.
      * @param string $predicate
@@ -504,5 +498,21 @@ class Resource extends Uri implements ResourceIdentifier
             }
         }
         return null;
+    }
+    
+    /**
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @param string &$predicate
+     * @param RdfObject &$value
+     */
+    protected function handleSpecialProperties(&$predicate, RdfObject &$value)
+    {
+        // Validation throws an error when not all letters are lowercase while 
+        // creating or updating an object
+        
+        // Status is always transformed to lowercase.
+        if ($predicate === OpenSkos::STATUS) {
+            $value->setValue(strtolower($value->getValue()));
+        }
     }
 }

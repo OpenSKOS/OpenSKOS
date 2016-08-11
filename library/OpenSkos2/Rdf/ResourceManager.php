@@ -37,18 +37,13 @@ use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSKOS_Db_Table_Tenants;
-use OpenSKOS_Db_Table_Collections;
 use RuntimeException;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
-use Asparagus\QueryBuilder;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 require_once dirname(__FILE__) .'/../config.inc.php';
-//
-use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
-use Asparagus\QueryBuilder;
+
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 
@@ -564,28 +559,6 @@ public function deleteSolrIntact(Uri $resource)
         $result = $this->makeNameUriMap($response);
         return $result;
     }
-
-    public function fetchNameCodeFromMySql() {
-        if ($this->getResourceType() === Org::FORMALORG) {
-            $model = new OpenSKOS_Db_Table_Tenants();
-            $name = 'name';
-        } else {
-            if ($this->getResourceType() === Dcmi::DATASET) {
-               $model = new OpenSKOS_Db_Table_Collections();
-               $name='dc_title';
-            } else {
-                return [];
-            }
-        }
-        $select = $model->select();
-        $mysqlres = $model->fetchAll($select);
-        $retVal = [];
-        foreach ($mysqlres as $row) {
-            $retVal[$row[$name]] = $row['code'];
-        }
-        return $retVal;
-    }
-    
 
     /**
      * Asks for if the properties map has a match.
