@@ -20,7 +20,7 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Rdf\Concept;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
 class RelatedToSelf extends AbstractConceptValidator
