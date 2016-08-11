@@ -25,7 +25,7 @@ use OpenSkos2\Export\Serialiser\FormatFactory;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
-use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource;
 
 class Editor_Models_Export
 {
@@ -293,7 +293,7 @@ class Editor_Models_Export
         $result[] = OpenSkos::STATUS;
         $result[] = OpenSkos::TOBECHECKED;
         
-        foreach (Concept::$classes as $fieldsInClass) {
+        foreach (Resource::$classes as $fieldsInClass) {
             $result = array_merge($result, $fieldsInClass);
         }
         

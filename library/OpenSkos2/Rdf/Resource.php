@@ -25,6 +25,7 @@ use OpenSkos2\MyInstitutionModules\UriGeneration;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
@@ -48,6 +49,73 @@ class Resource extends Uri implements ResourceIdentifier
     const STATUS_DELETED = 'deleted';
     
     protected $properties = [];
+    
+     
+    /**
+     * Get list of all available concept statuses.
+     * @return array
+     */
+    public static function getAvailableStatuses()
+    {
+        return [
+            self::STATUS_CANDIDATE,
+            self::STATUS_APPROVED,
+            self::STATUS_REDIRECTED,
+            self::STATUS_NOT_COMPLIANT,
+            self::STATUS_REJECTED,
+            self::STATUS_OBSOLETE,
+            self::STATUS_DELETED,
+        ];
+    }
+    
+    public static $classes = array(
+        'ConceptSchemes' => [
+            Skos::CONCEPTSCHEME,
+            Skos::INSCHEME,
+            Skos::HASTOPCONCEPT,
+            Skos::TOPCONCEPTOF,
+        ],
+        'LexicalLabels' => [
+            Skos::ALTLABEL,
+            Skos::HIDDENLABEL,
+            Skos::PREFLABEL,
+        ],
+        'Notations' => [
+            Skos::NOTATION,
+        ],
+        'DocumentationProperties' => [
+            Skos::CHANGENOTE,
+            Skos::DEFINITION,
+            Skos::EDITORIALNOTE,
+            Skos::EXAMPLE,
+            Skos::HISTORYNOTE,
+            Skos::NOTE,
+            Skos::SCOPENOTE,
+        ],
+        'SemanticRelations' => [
+            Skos::BROADER,
+            Skos::BROADERTRANSITIVE,
+            Skos::NARROWER,
+            Skos::NARROWERTRANSITIVE,
+            Skos::RELATED,
+            Skos::SEMANTICRELATION,
+        ],
+        'SkosCollections' =>  [ 
+            OpenSkos::INSKOSCOLLECTION, 
+            Skos::ORDEREDCOLLECTION, // ??
+            Skos::MEMBER, //??
+            Skos::MEMBERLIST, //? 
+        ],
+        'MappingProperties' => [
+            Skos::BROADMATCH,
+            Skos::CLOSEMATCH,
+            Skos::EXACTMATCH,
+            Skos::MAPPINGRELATION,
+            Skos::NARROWMATCH,
+            Skos::RELATEDMATCH,
+        ],
+    );
+
 
     /**
      * @return array of RdfObject[]

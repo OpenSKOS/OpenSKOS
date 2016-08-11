@@ -20,6 +20,7 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
 class RelatedToSelf extends AbstractConceptValidator
@@ -30,7 +31,7 @@ class RelatedToSelf extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $relationFields = array_merge(Concept::$classes['SemanticRelations'], Concept::$classes['MappingProperties']);
+        $relationFields = array_merge(Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']);
 
         $ownUri = $concept->getUri();
         foreach ($relationFields as $field) {

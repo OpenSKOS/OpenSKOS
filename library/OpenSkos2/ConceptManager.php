@@ -395,11 +395,11 @@ class ConceptManager extends ResourceManager
         $retVal = [];
         foreach($response as $descr) {
             $spec=[];
-            $spec['tenanturi']=$descr->tenanturi;
-            $spec['tenantname']=$descr->tenantname;
-            $spec['tenantcode']=$descr->tenantcode;
-            $spec['seturi'] = $descr ->seturi;
-            $spec['setcode'] = $descr->setcode;
+            $spec['tenanturi']=$descr->tenanturi->getUri();
+            $spec['tenantname']=$descr->tenantname->getValue();
+            $spec['tenantcode']=$descr->tenantcode->getValue();
+            $spec['seturi'] = $descr ->seturi->getUri();
+            $spec['setcode'] = $descr->setcode->getValue();
             $retVal[]=$spec;
         }
         return $retVal;  

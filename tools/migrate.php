@@ -90,7 +90,7 @@ $total = $init['response']['numFound'];
 
 $getFieldsInClass = function ($class) {
     $retVal = '';
-    foreach (\OpenSkos2\Concept::$classes[$class] as $field) {
+    foreach (\OpenSkos2\Rdf\Resource::$classes[$class] as $field) {
         $index = strrpos($field, "#");
         if (!$index) {
             $index = strrpos($field, "/");

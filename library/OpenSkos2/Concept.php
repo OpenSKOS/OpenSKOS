@@ -38,72 +38,7 @@ class Concept extends Resource
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
    
-    
-    /**
-     * Get list of all available concept statuses.
-     * @return array
-     */
-    public static function getAvailableStatuses()
-    {
-        return [
-            Resource::STATUS_CANDIDATE,
-            Resource::STATUS_APPROVED,
-            Resource::STATUS_REDIRECTED,
-            Resource::STATUS_NOT_COMPLIANT,
-            Resource::STATUS_REJECTED,
-            Resource::STATUS_OBSOLETE,
-            Resource::STATUS_DELETED,
-        ];
-    }
-    
-    public static $classes = array(
-        'ConceptSchemes' => [
-            Skos::CONCEPTSCHEME,
-            Skos::INSCHEME,
-            Skos::HASTOPCONCEPT,
-            Skos::TOPCONCEPTOF,
-        ],
-        'LexicalLabels' => [
-            Skos::ALTLABEL,
-            Skos::HIDDENLABEL,
-            Skos::PREFLABEL,
-        ],
-        'Notations' => [
-            Skos::NOTATION,
-        ],
-        'DocumentationProperties' => [
-            Skos::CHANGENOTE,
-            Skos::DEFINITION,
-            Skos::EDITORIALNOTE,
-            Skos::EXAMPLE,
-            Skos::HISTORYNOTE,
-            Skos::NOTE,
-            Skos::SCOPENOTE,
-        ],
-        'SemanticRelations' => [
-            Skos::BROADER,
-            Skos::BROADERTRANSITIVE,
-            Skos::NARROWER,
-            Skos::NARROWERTRANSITIVE,
-            Skos::RELATED,
-            Skos::SEMANTICRELATION,
-        ],
-        'SkosCollections' =>  [ 
-            OpenSkos::INSKOSCOLLECTION, 
-            Skos::ORDEREDCOLLECTION, // ??
-            Skos::MEMBER, //??
-            Skos::MEMBERLIST, //? 
-        ],
-        'MappingProperties' => [
-            Skos::BROADMATCH,
-            Skos::CLOSEMATCH,
-            Skos::EXACTMATCH,
-            Skos::MAPPINGRELATION,
-            Skos::NARROWMATCH,
-            Skos::RELATEDMATCH,
-        ],
-    );
-
+   
     /**
      * Resource constructor.
      * @param string $uri , optional
@@ -181,8 +116,8 @@ class Concept extends Resource
     public function hasAnyRelations()
     {
         $relationProperties = array_merge(
-            self::$classes['SemanticRelations'],
-            self::$classes['MappingProperties']
+            Resource::$classes['SemanticRelations'],
+            Resource::$classes['MappingProperties']
         );
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {

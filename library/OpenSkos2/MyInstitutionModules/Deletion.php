@@ -45,7 +45,10 @@ class Deletion {
     }
 
     private function conceptCanBeDeleted($uri) {
-        return $this->canBeDeletedBasic($uri);
+        // the lowerst-level resource, 
+        // can be always deleted if authorisation rights allow (checked in another place)
+        // but with taking crae that the corresponding relations are cleaned
+        return true;
     }
 
     private function conceptSchemeCanBeDeleted($uri) {

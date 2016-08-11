@@ -232,18 +232,18 @@ Getting the list of skos colections :
 
 Getting concepts sorted: 
 ```
-<server>/public/api/concept?q=prefLabel@en:*&sorts=prefLabel@en
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en
 ```
 ```
-<server>/public/api/concept?q=prefLabel@en:*&sorts=prefLabel@en%20desc
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20desc
 ```
 ```
-<server>/public/api/concept?q=prefLabel@en:*&sorts=prefLabel@en%20asc
+<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20asc
 ```
 
 Getting the list of all statuses 
 ```
-<server>/public/api/statuses?format=json
+<server>/public/api/status?format=json
 ```
 Throws an error on other formats (html and rdf/xml). 
 
@@ -251,8 +251,7 @@ Getting the list of all schemata
 
 ```
 <server>/public/api/conceptscheme?format=json
-```
-Throws an error on other formats (html and rdf/xml). 
+
 
 5.7. Check URI's (examples)
 ----------------------------------------------------------------------------------
@@ -266,7 +265,7 @@ http://192.168.99.100/public/api/concepts?q=prefLabel:*
 Getting concepts within given skos:collection(s)
 
 ```
-http://192.168.99.100/public/api/concepts?q=*:*&skosCollections=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
+http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollection=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
 ```
 
 Getting deleted concepts:

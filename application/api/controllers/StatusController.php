@@ -13,22 +13,17 @@ class Api_StatusController extends OpenSKOS_Rest_Controller
         $this->_helper->contextSwitch()
             ->initContext($this->getRequestedFormat());
         
-        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
-            $this->getHelper('layout')->enableLayout();
+        if ('json' != $this->_helper->contextSwitch()->getCurrentContext()) {
+            $this->_501('Use <host>/public/api/status?format=html. For other than json formats: ');
         }
         
     }
     
     public function indexAction()
     {
-        $resourceManager = $this -> getResourceManager();
-        $listFromJena = $resourceManager ->fetchObjectsWithProperty(OpenSkosNamespace::STATUS, 'Literal');
         $hardcodedList = Concept::getAvailableStatuses();
-        //var_dump($hardcodedList);
-        $result=array_values(array_unique(array_merge($listFromJena, $hardcodedList)));
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-        $this->getResponse()->setBody(json_encode($result));
+        $this->getResponse()->setBody(json_encode($hardcodedList));
     }
     
     public function getAction()

@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Solr;
 
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -27,7 +26,6 @@ use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Concept;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
 /**
@@ -186,7 +184,7 @@ class Document
     {
         foreach (['LexicalLabels', 'DocumentationProperties'] as $propertiesClass) {
             $values = [];
-            foreach (Concept::$classes[$propertiesClass] as $predicate) {
+            foreach (Resource::$classes[$propertiesClass] as $predicate) {
                 if ($concept->hasProperty($predicate)) {
                     $values = array_merge($values, $concept->getProperty($predicate));
                 }

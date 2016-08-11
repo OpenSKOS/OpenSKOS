@@ -92,14 +92,14 @@ class Authorisation {
            if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-        return ($user->role === ADMINISRATOR || $user->role === ROOT || $user->role === EDITOR);
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
     private function resourceEditAllowedBasic(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $resource) {
           if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-        return ($user->role === ADMINISRATOR || $user->role === ROOT || $user->role === EDITOR);
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
     
@@ -108,7 +108,7 @@ class Authorisation {
         if ($user->tenant !== $tenantCode) {
             throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
         }
-        if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT)) {
+        if (!($user->role === EDITOR || $user->role === ADMINISTRATOR || $user->role === ROOT)) {
             throw new UnauthorizedException('Your role ' . $user->role . ' does not give you permission to create concepts ', 403);
         }
         return true;
@@ -127,7 +127,7 @@ class Authorisation {
             
         }
 
-        if (!($user->role === EDITOR || $user->role === ADMINISRATOR || $user->role === ROOT)) {
+        if (!($user->role === EDITOR || $user->role === ADMINISTRATOR || $user->role === ROOT)) {
             throw new UnauthorizedException('Your role ' . $user->role . ' does not give you permission to edit or delete concepts ', 403);
         }
         return true;
