@@ -20,7 +20,7 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
 class SingleStatus extends AbstractConceptValidator
@@ -31,13 +31,9 @@ class SingleStatus extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        foreach ($concept->retrieveLanguages() as $language) {
-            $labels = $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $language);
-            if (count($labels) > 1) {
-                $this->errorMessages[] = 'Only single pref label per language is allowed. '
-                    . 'Found ' . count($labels) . ' for ' . $language;
-                return false;
-            }
+        if (count($concept->getProperty(OpenSkos::STATUS)) > 1) {
+            $this->errorMessages[] = 'Only single status is allowed.';
+            return false;
         }
         return true;
     }
