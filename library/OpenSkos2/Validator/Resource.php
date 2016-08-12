@@ -34,7 +34,6 @@ use OpenSkos2\Validator\Concept\DuplicateBroader;
 use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
-use OpenSkos2\Validator\Concept\InSet as ConceptInSet;
 use OpenSkos2\Validator\Concept\InSkosCollection;
 use OpenSkos2\Validator\Concept\SingleStatus;
 use OpenSkos2\Validator\Concept\SinglePrefLabel;
@@ -99,6 +98,7 @@ class Resource
      */
     protected $isForUpdate;
 
+    protected $referenceCheckOn;
   
     protected $tenantUri;
 
@@ -121,7 +121,7 @@ class Resource
      * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
      * @param LoggerInterface $logger
      */
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $referencecheckOn, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $this->logger = new NullLogger();
@@ -132,6 +132,7 @@ class Resource
         $this->resourceManager = $resourceManager;
         $this -> isForUpdate = $isForUpdate;
         $this->tenantUri = $tenantUri;
+        $this -> referenceCheckOn = $referencecheckOn;
     }
 
     /**
@@ -224,12 +225,12 @@ class Resource
     private function getSchemaValidators()
     {
         $validators = [
-            new SchemaInSet(),
+            new SchemaInSet($this -> referenceCheckOn),
             new SchemaTitle(),
             new SchemaDescription(),
-            new SchemaCreator(),
+            new SchemaCreator($this -> referenceCheckOn),
             new SchemaUuid(),
-            new SchemaHasTopConcept()
+            new SchemaHasTopConcept($this -> referenceCheckOn)
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -238,12 +239,12 @@ class Resource
     private function getSkosCollectionValidators()
     {
         $validators = [
-            new SkosCollInSet(),
+            new SkosCollInSet($this -> referenceCheckOn),
             new SkosCollTitle(),
             new SkosCollDescription(),
-            new SkosCollCreator(),
+            new SkosCollCreator($this -> referenceCheckOn),
             new SkosCollUuid(),
-            new SkosCollMember()
+            new SkosCollMember($this -> referenceCheckOn)
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -254,7 +255,7 @@ class Resource
         $validators = [
             new RelationTitle(),
             new RelationDescription(),
-            new RelationCreator()
+            new RelationCreator($this -> referenceCheckOn)
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;
@@ -270,7 +271,7 @@ class Resource
             new SetOpenskosUuid(),
             new OpenskosOAIBaseUri(),
             new OpenskosWebPage(),
-            new Publisher(),
+            new Publisher($this -> referenceCheckOn),
             new SetTitle(),
             new SetType()
         ];
@@ -298,9 +299,8 @@ class Resource
     private function getConceptValidators()
     {
         $validators = [
-            new InScheme(),
-            new InSkosCollection(),
-            new ConceptInSet(),
+            new InScheme($this -> referenceCheckOn),
+            new InSkosCollection($this -> referenceCheckOn),
             new SingleStatus(),
             new SinglePrefLabel(),
             new UniqueNotation(),
@@ -314,7 +314,7 @@ class Resource
             new CycleInBroader(),
             new CycleInNarrower(),
             new RelatedToSelf(),
-            new TopConceptOf()
+            new TopConceptOf($this -> referenceCheckOn)
         ];
         $validators = $this -> refineValidators($validators);
         return $validators;

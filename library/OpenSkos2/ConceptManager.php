@@ -179,10 +179,8 @@ class ConceptManager extends ResourceManager
     public function search($query, $rows=MAXIMAL_ROWS, $start = 0, &$numFound=0, $sorts = null)
     {
         // @TODO There is nowhere in solr check for class:Concept, but all resources are there
-    
-        return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
-        );
+        $solr_result = $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts);
+        return $this->fetchByUris($solr_result);
     }
     
     /**

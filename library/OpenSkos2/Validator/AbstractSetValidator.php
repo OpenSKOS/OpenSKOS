@@ -25,8 +25,9 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 abstract class AbstractSetValidator extends AbstractResourceValidator
 {
     
-    function __construct(){
+    function __construct($referencecheckOn=true){
        $this -> resourceType = Set::TYPE;
+       $this->referenceCheckOn=$referencecheckOn; 
     }
    
     public function validate(RdfResource $resource)

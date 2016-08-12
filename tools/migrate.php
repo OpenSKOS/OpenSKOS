@@ -32,14 +32,24 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Rdf;
+
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
+/**
+ * Script to migrate the data from SOLR to Jena run as following: 
+ * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
+ * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
+ *  */
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
+    'enablestatusses=s' => 'true/false, enables/disables statusses',
+    'language=s' => 'Default language',
+    'license=s' => 'Default license url',
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
 ];
@@ -61,7 +71,7 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
-$resourceManager->setIsNoCommitMode(true);
+$resourceManager->setIsNoCommitMode(false);
 
 $logger = new \Monolog\Logger("Logger");
 $logLevel = \Monolog\Logger::INFO;
@@ -69,8 +79,7 @@ if ($OPTS->getOption('debug')) {
     $logLevel = \Monolog\Logger::DEBUG;
 }
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
-    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
-    $logLevel
+        \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM, $logLevel
 ));
 
 $tenant = $OPTS->tenant;
@@ -79,7 +88,7 @@ $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 var_dump($endPoint);
 
 $enableStatussesSystem = $OPTS->enablestatusses;
-$language = $OPTS -> language;
+$language = $OPTS->language;
 var_dump($language);
 $license = $OPTS->license;
 var_dump($license);
@@ -87,6 +96,32 @@ var_dump($license);
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
+echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
+function remove_resources($manager, $resources) {
+    foreach ($resources as $resource) {
+        $manager->delete($resource);
+    }
+}
+
+$concURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
+$concs = $resourceManager->fetchByUris($concURIs, Skos::CONCEPT);
+remove_resources($resourceManager, $concs);
+
+$collURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::SKOSCOLLECTION . '>', null);
+$colls = $resourceManager->fetchByUris($collURIs, Skos::SKOSCOLLECTION);
+remove_resources($resourceManager, $colls);
+
+$schemURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPTSCHEME . '>', null);
+$schems = $resourceManager->fetchByUris($schemURIs, Skos::CONCEPTSCHEME);
+remove_resources($resourceManager, $schems);
+
+$setURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Dcmi::DATASET . '>', null);
+$sets = $resourceManager->fetchByUris($setURIs, Dcmi::DATASET);
+remove_resources($resourceManager, $sets);
+
+$instURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' .  Org::FORMALORG. '>', null);
+$insts = $resourceManager->fetchByUris($instURIs, Org::FORMALORG);
+remove_resources($resourceManager, $insts);
 
 $getFieldsInClass = function ($class) {
     $retVal = '';
@@ -102,7 +137,7 @@ $getFieldsInClass = function ($class) {
     return $retVal;
 };
 
-$labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClass('DocumentationProperties'));
+$labelMapping = array_merge($getFieldsInClass('LexicalLabels'), $getFieldsInClass('DocumentationProperties'), ['title'=>DcTerms::TITLE, 'dc_title'=>DcTerms::TITLE, 'dcterms_title'=>DcTerms::TITLE]);
 $notFoundUsers = [];
 $notFoundCollections = [];
 $collections = [];
@@ -121,13 +156,12 @@ $fetchRowWithRetries = function ($resourceManager, $model, $query) {
     return $resourceManager->fetchRowWithRetries($model, $query);
 };
 
-function set_property_with_check(&$resource, $property, $val, $isURI = false, $isBOOL = false, $lang=null) {
+function set_property_with_check(&$resource, $property, $val, $isURI = false, $isBOOL = false, $lang = null) {
     if ($isURI) {
         if (isset($val)) {
             if (trim($val) !== '') {
                 $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
             }
-
         }
         return;
     };
@@ -149,7 +183,7 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
     }
 
     // the property must be a literal
-    if ($lang === null) {
+    if ($lang == null) {
         $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
     } else {
         $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, $lang));
@@ -190,7 +224,7 @@ function insert_set($code, $collectionMySQL, $resourceManager, $defaultLicense, 
     $setResource = new \OpenSkos2\Set();
     $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Dcmi::DATASET, 'setcode' => $code]);
     set_property_with_check($setResource, OpenSkos::CODE, $code);
-    
+
     $publisherURI = $resourceManager->fetchInstitutionUriByCode($collectionMySQL['tenant']);
     if ($publisherURI === null) {
         throw new Exception("Something went terribly worng: the tenant with the code " . $collectionMySQL['tenant'] . " has not been inserted in the triple store before now.");
@@ -198,20 +232,20 @@ function insert_set($code, $collectionMySQL, $resourceManager, $defaultLicense, 
         var_dump("PublisherURI: " . $publisherURI . "\n");
     }
     set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-    
-    
+
+
     set_property_with_check($setResource, DcTerms::TITLE, $collectionMySQL['dc_title'], false, false, $lang);
-    
+
     set_property_with_check($setResource, DcTerms::DESCRIPTION, $collectionMySQL['dc_description']);
     set_property_with_check($setResource, OpenSkos::WEBPAGE, $collectionMySQL['website'], true);
-    
+
     $licenseURL = $defaultLicense;
     if (isset($collectionMySQL['license_url'])) {
         if (trim($collectionMySQL['license_url']) !== '') {
             $licenseURL = $collectionMySQL['license_url'];
         }
     }
-    
+
     set_property_with_check($setResource, DcTerms::LICENSE, $licenseURL, true);
 
     set_property_with_check($setResource, OpenSkos::OAI_BASEURL, $collectionMySQL['OAI_baseURL'], true);
@@ -252,7 +286,6 @@ function fetch_tenant($code, $tenantModel, $fetchRowWithRetries, $resourceManage
 }
 
 ;
-
 
 function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager, $defaultLicense, $lang) {
     if (!$id) {
@@ -320,10 +353,10 @@ $mappings = [
                     $logger->notice("Could not find user with id/name: {$value}");
                     $notFoundUsers[] = $value;
                     $users[$value] = new \OpenSkos2\Rdf\Literal("Unknown");
-                } else 
+                } else
                     $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson(!$isDryRun)->getUri());
-                }
-          
+            }
+
             return $users[$value];
         },
         'fields' => [
@@ -454,9 +487,11 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-/// fix tenant uri for the tenant from the command line
-$tenantUri = $resourceManager ->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$tenant.'"', Org::FORMALORG);
-var_dump('Tenant '. $tenant. ' has been assigned an uri '. $tenantUri);
+/// memorise tenant uri for the tenant from the command line
+$tenantUris = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $tenant . '"', Org::FORMALORG);
+$tenantUri = $tenantUris[0];
+
+var_dump('Tenant ' . $tenant . ' has been assigned an uri ' . $tenantUri);
 var_dump("\n");
 
 var_dump("Preprocessing round (MySql -- Triple Store) 2: turning collections into triple-store sets.  # documents to process: ");
@@ -485,28 +520,11 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
-echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
-echo $total;
-echo '\n';
-if (!empty($OPTS->start)) {
-    $counter = $OPTS->start;
-} else {
-    $counter = 0;
-}
-do {
-    //$logger->info("fetching " . $endPoint . "&start=$counter");
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
-    foreach ($data['response']['docs'] as $doc) {
-        var_dump($counter);
-        $resourceManager->deleteSolrIntact(new OpenSkos2\Rdf\Uri($doc['uri'])); // just in case if you run migrate for a couple of times, remove the old intance form the triple store  
-        $counter ++;
-    }
-} while ($counter < $total && isset($data['response']['docs']));
 
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
-function run_round($doc, $resourceManager, $tenantUri, $class, $synonym, $labelMapping, $mappings, $logger) {
+function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $synonym, $labelMapping, $mappings, $logger) {
     if ($doc['class'] === $class) {
         try {
             $uri = $doc['uri'];
@@ -541,77 +559,82 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $synonym, $labelM
             };
             $setLabels = [];
             foreach ($doc as $field => $value) {
-
-                // it is a copy field (label or docproperty) if the language attribute is present.
-                //  to avoid missing labels and docproperties without languages run
-                // another loop after exiting this one, to fix orfans  
-                if (isset($labelMapping[$field])) {
-                    continue;
-                }
-
-                if (array_key_exists($field, $synonym)) {
-                    if ($isset_synonym[$field]) {
-                        continue;
-                    }
-                }
-
-
-                $key_synonym = array_search($field, $synonym);
-                if ($key_synonym) {
-                    if ($isset_synonym[$key_synonym]) {
-                        continue;
-                    }
-                }
-
-                $lang = null;
-                if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
-                    $lang = $m2['lang'];
-                    $field = $m2['field'];
+                // do not insert tenant for all resources and set for concepts: they are derivable
+                // just skip them 
+                if (($field !== 'tenant') && !($class === 'Concept' && $field == 'collection')) {
+                    // it is a copy field (label or docproperty) if the language attribute is present.
+                    //  to avoid missing labels and docproperties without languages run
+                    // another loop after exiting this one, to fix orfans  
                     if (isset($labelMapping[$field])) {
-                        foreach ((array) $value as $v) {
-                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
-                            $setLabels[$field][] = $v;
-
-                        }
                         continue;
                     }
-                }
+
+                    if (array_key_exists($field, $synonym)) {
+                        if ($isset_synonym[$field]) {
+                            continue;
+                        }
+                    }
 
 
-                foreach ($mappings as $mapping) {
-                    if (isset($mapping['fields'][$field])) {
+                    $key_synonym = array_search($field, $synonym);
+                    if ($key_synonym) {
+                        if ($isset_synonym[$key_synonym]) {
+                            continue;
+                        }
+                    }
 
-                        foreach ((array) $value as $v) {
+                    $lang = null;
+                    if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
+                        $lang = $m2['lang'];
+                        $field = $m2['field'];
+                        if (isset($labelMapping[$field])) {
+                            foreach ((array) $value as $v) {
+                                $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
+                                $setLabels[$field][] = $v;
+                            }
+                            continue;
+                        }
+                    }
 
-                            $insertValue = $mapping['callback']($v);
-                            if ($insertValue !== null) {
-                                $resource->addProperty($mapping['fields'][$field], $insertValue);
-                                if (array_key_exists($field, $synonym)) {
-                                    $isset_synonym[$field] = true;
-                                } else {
-                                    if ($key_synonym) {
-                                        $isset_synonym[$key_synonym] = true;
+
+
+                    foreach ($mappings as $mapping) {
+                        if (isset($mapping['fields'][$field])) {
+
+                            foreach ((array) $value as $v) {
+
+                                $insertValue = $mapping['callback']($v);
+                                if ($insertValue !== null) {
+                                    $resource->addProperty($mapping['fields'][$field], $insertValue);
+                                    if (array_key_exists($field, $synonym)) {
+                                        $isset_synonym[$field] = true;
+                                    } else {
+                                        if ($key_synonym) {
+                                            $isset_synonym[$key_synonym] = true;
+                                        }
                                     }
                                 }
                             }
+
+
+                            continue 2;
                         }
-                        continue 2;
                     }
+
+
+                    if (preg_match('#dcterms_(.+)#', $field, $match)) {
+                        if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
+                            $logger->info("found dc field " . $field . " that is already filled (could be double data)");
+                        }
+
+                        foreach ($value as $v) {
+                            $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
+                        }
+                        continue;
+                    }
+
+                    throw new Exception("What to do with field {$field}");
                 }
-
-
-                if (preg_match('#dcterms_(.+)#', $field, $match)) {
-                    if ($resource->hasProperty('http://purl.org/dc/terms/' . $match[1])) {
-                        $logger->info("found dc field " . $field . " that is already filled (could be double data)");
-                    }
-
-                    foreach ($value as $v) {
-                        $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
-                    }
-                    continue;
-                }
-
-                throw new Exception("What to do with field {$field}");
             }
 
             // check if there are orfan (without language) labels and documentation properties
@@ -619,11 +642,11 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $synonym, $labelM
                 if (array_key_exists($field, $labelMapping)) {
                     foreach ((array) $value as $v) {
                         if (!array_key_exists($field, $setLabels)) {
-                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
+                            $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $default_lang));
                             $setLabels[$field][] = $v;
                         } else {
                             if (!in_array($v, $setLabels[$field])) {
-                                $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v));
+                                $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $default_lang));
                                 $setLabels[$field][] = $v;
                             }
                         }
@@ -640,8 +663,10 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $synonym, $labelM
             } else {
                 $resource->unsetProperty(OpenSkos::DELETEDBY);
             }
-            
-            $validator = new ResourceValidator($resourceManager, false, $tenantUri);
+
+            // this round of validation must skip reference controle (if the referred object exists or not)
+            // for this the last parameter $referenceCheckOn in resource validator is set to false
+            $validator = new ResourceValidator($resourceManager, false, $tenantUri, false);
             $valid = $validator->validate($resource);
             if ($valid) {
                 $resourceManager->insert($resource);
@@ -677,7 +702,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -699,10 +724,9 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
-
     }
 } while ($counter < $total && isset($data['response']['docs']));
 var_dump('ConceptSchemes added: ');
@@ -721,7 +745,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -741,14 +765,54 @@ do {
     $logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
-} while ($counter < $total && isset($data['response']['docs']));
+} while ($counter < 100 && isset($data['response']['docs']));
 var_dump('Concepts added: ');
 var_dump($added);
 
+echo "Migration is finished. Removing dangling references. \n";
+$logger->info("Migration is finished. Removing dangling references.");
+
+function remove_dangling_references($manager, $resources, $property, $rdfType) {
+    foreach ($resources as $resource) {
+        $references = $resource->getProperty($property);
+        $newreferences = array();
+        foreach ($references as $reference) {
+            $count = $manager->countTriples('<' . trim($reference->getUri()) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
+            if ($count > 0) {
+                $newreferences[]=$reference;
+            }
+        }
+        $resource -> unsetProperty($property);
+        if (count($newreferences) > 0) {
+            $resource->addProperties($property, $newreferences);
+        }
+        $manager->replace($resource);        
+    }
+}
+
+echo "Removing dangling has-top-concept references in concept schemata ... \n";
+$schemataURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPTSCHEME . '>', null);
+$schemata = $resourceManager->fetchByUris($schemataURIs, Skos::CONCEPTSCHEME);
+remove_dangling_references($resourceManager, $schemata, Skos::HASTOPCONCEPT, Skos::CONCEPT);
+
+echo "Removing dangling member references in skos collections ... \n";
+$skoscollectionsURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::SKOSCOLLECTION . '>', null);
+$skoscollections = $resourceManager->fetchByUris($skoscollectionsURIs, Skos::SKOSCOLLECTION);
+remove_dangling_references($resourceManager, $skoscollections, Skos::MEMBER, Skos::CONCEPT);
+
+echo "Removing dangling references in concept schemata... \n";
+$conceptURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
+$concepts = $resourceManager->fetchByUris($conceptURIs, Skos::CONCEPT);
+echo "All concepts have been just retrieved.\n";
+remove_dangling_references($resourceManager, $concepts, Skos::INSCHEME, Skos::CONCEPTSCHEME);
+echo "Dangling in-scheme references have been just removed.\n";
+remove_dangling_references($resourceManager, $concepts, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
+echo "Dangling top-concept-of references have been just removed.\n";
+remove_dangling_references($resourceManager, $concepts, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
 
 echo "done!\n";
 $logger->info("Done!");

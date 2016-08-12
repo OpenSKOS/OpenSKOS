@@ -212,7 +212,12 @@ class Autocomplete
             if (empty($solrQuery)) {
                 $solrQuery = $optionsQuery;
             } else {
-                $solrQuery .= ' AND (' . $optionsQuery . ')';
+                // a possible bug in solr version 
+                if (trim($optionsQuery) != '-s_status:deleted') {
+                    $solrQuery .= ' AND (' . $optionsQuery . ')';
+                } else {
+                    $solrQuery .= ' AND -s_status:deleted';
+                }
             }
         }
         

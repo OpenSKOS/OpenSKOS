@@ -130,7 +130,7 @@ class Command implements LoggerAwareInterface
                 $currentVersion = null;
             }
 
-            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri);
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, false);
             $valid = $validator->validate($preprocessedResource);
             if (!$valid) {
                 foreach ($validator->getErrorMessages() as $errorMessage) {

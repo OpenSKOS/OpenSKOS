@@ -76,10 +76,10 @@ class ResourceManager
         $resourceDoc = $convert->getDocument();
         
         $update->addDocument($resourceDoc);
-        
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }
+        
         
         // Sometimes solr update fails with timeout.
         $exception = null;
@@ -147,7 +147,7 @@ class ResourceManager
      * @return array Array of uris
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
-    {
+    { 
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
@@ -159,7 +159,6 @@ class ResourceManager
         }
         
         $solrResult = $this->solr->select($select);
-        
         $numFound = $solrResult->getNumFound();
         
         $uris = [];

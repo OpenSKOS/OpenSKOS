@@ -27,7 +27,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Validator\Resource;
 
 require_once dirname(__FILE__) .'/../../config.inc.php';
 /**

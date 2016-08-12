@@ -35,6 +35,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $resurceType;
     protected $isForUpdate;
     protected $tenantUri;
+    protected $referenceCheckOn;
     /**
      * @var array
      */
@@ -165,6 +166,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     
      // the resource referred by the uri must exist in the triple store, 
     private function existenceCheck($uri, $rdfType) {
+            if (!$this->referenceCheckOn){
+                return [];
+            }
             $count = $this->resourceManager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
             if ($count < 1) {
                 return ['The resource (of type ' . $rdfType. ') referred by  uri ' . $uri . ' is not found in the triple store. '];
@@ -174,7 +178,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     // some common for different types of resources properties
-    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $referencecheckOn, $type)
       
     protected function validateUUID(RdfResource $resource){
         return $this->validateProperty($resource, OpenSkos::UUID, true, true, false, true);
@@ -214,7 +218,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     protected function validateType(RdfResource $resource){
-        return $this->validateProperty( $resource, Rdf::TYPE, true, true, false, false);
+        return $this->validateProperty($resource, Rdf::TYPE, true, true, false, false);
     }
     
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
