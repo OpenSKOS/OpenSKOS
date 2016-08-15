@@ -52,10 +52,16 @@ return [
         ]);
     },
     'Editor_Models_ConceptSchemesCache' => function (ContainerInterface $c) {
-        return new Editor_Models_ConceptSchemesCache(
-            OpenSKOS_Db_Table_Tenants::fromIdentity()->code,
+        $conceptsSchemesCache = new Editor_Models_ConceptSchemesCache(
             $c->get('OpenSkos2\ConceptSchemeManager'),
             OpenSKOS_Cache::getCache()
         );
+        
+        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        if (!empty($tenant)) {
+            $conceptsSchemesCache->setTenantCode($tenant->code);
+        }
+        
+        return $conceptsSchemesCache;
     }
 ];

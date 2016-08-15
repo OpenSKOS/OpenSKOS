@@ -23,6 +23,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\ConceptScheme;
+use OpenSkos2\Exception\OpenSkosException;
 
 class Editor_Models_ConceptSchemesCache
 {
@@ -44,13 +45,42 @@ class Editor_Models_ConceptSchemesCache
     protected $cache;
     
     /**
+     * Get tenant for which the cache is done.
+     * @return string
+     */
+    public function getTenantCode()
+    {
+        return $this->tenantCode;
+    }
+    
+    /**
+     * Get tenant for which the cache is done.
+     * @return string
+     */
+    public function requireTenantCode()
+    {
+        if (empty($this->tenantCode)) {
+            throw new OpenSkosException('Tenant code is required for editor cache.');
+        }
+        return $this->tenantCode;
+    }
+
+    /**
+     * Sets tenant for which the cache is.
+     * @param string $tenantCode
+     */
+    public function setTenantCode($tenantCode)
+    {
+        $this->tenantCode = $tenantCode;
+    }
+    
+    /**
      * @param string $tenantCode
      * @param ConceptSchemeManager $manager
      * @param Zend_Cache_Core $cache
      */
-    public function __construct($tenantCode, ConceptSchemeManager $manager, Zend_Cache_Core $cache)
+    public function __construct(ConceptSchemeManager $manager, Zend_Cache_Core $cache)
     {
-        $this->tenantCode = $tenantCode;
         $this->manager = $manager;
         $this->cache = $cache;
     }
@@ -69,10 +99,15 @@ class Editor_Models_ConceptSchemesCache
      */
     public function fetchAll()
     {
-        $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->tenantCode);
+        $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
         if ($schemes === false) {
-            $schemes = $this->manager->fetch([OpenSkos::TENANT => new Literal($this->tenantCode)], null, null, true);
-            $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $this->tenantCode);
+            $schemes = $this->manager->fetch(
+                [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
+                null,
+                null,
+                true
+            );
+            $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
         }
         return $schemes;
     }
