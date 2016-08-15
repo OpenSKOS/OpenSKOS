@@ -62,11 +62,22 @@ class ParserText
         }
         return $text;
     }
+    
+    /**
+     * Fix "@nl" to "_nl"
+     * @param string $searchText
+     * @return string
+     */
+    public function replaceLanguageTags($searchText)
+    {
+        return preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $searchText);
+    }
 
     /**
      * Checks the search text for is it a complex query or a simple search text.
      *
      * @param string $searchText
+     * @return bool
      */
     public function isSearchTextQuery($searchText)
     {
@@ -79,6 +90,36 @@ class ParserText
         }
 
         return false;
+    }
+    
+    /**
+     * Checks the search text if it contains search based on fields
+     * @param string $searchText
+     * @return bool
+     */
+    public function isFieldSearch($searchText)
+    {
+        return preg_match('/(^|\s)[^"]*[a-z_]+:[^"]*(\s|$)/i', $searchText) === 1;
+    }
+    
+    /**
+     * Checks if the search text is fully quoted - like "Koomen, Theo"
+     * @param string $searchText
+     * @return bool
+     */
+    public function isFullyQuoted($searchText)
+    {
+        return preg_match('/^".*"$/', $searchText) === 1;
+    }
+    
+    /**
+     * Is the search a wildcard search. Containing ? or *
+     * @param string $searchText
+     * @return bool
+     */
+    public function isWildcardSearch($searchText)
+    {
+        return stripos($searchText, '*') !== false || stripos($searchText, '?') !== false;
     }
     
     /**
