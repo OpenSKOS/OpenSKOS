@@ -37,7 +37,7 @@ class Set extends Resource
     }
     
     public function getTenantUri(){
-        $tenants = $this ->getProperty(OpenSkos::TENANT);
+        $tenants = $this ->getProperty(DcTerms::PUBLISHER);
         if (count($tenants) < 1) {
             return null;
         } else {

@@ -95,7 +95,7 @@ abstract class AbstractTripleStoreResource {
     private function fetchDetailedList($params) {
         $resType = $this->manager->getResourceType();
         if ($resType === Dcmi::DATASET && $params['allow_oai'] !== null) {
-            $index = $this->manager->fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($params['allow_oai'], null, \OpenSkos2\Rdf\Literal::TYPE_BOOL),]);
+            $index = $this->manager->fetchAllSets($params['allow_oai']);
         } else {
             $index = $this->manager->fetch();
         }

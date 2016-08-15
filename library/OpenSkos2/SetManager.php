@@ -24,6 +24,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Set;
+use OpenSkos2\Rdf\Literal;
 use OpenSKOS_Db_Table_Collections;
 
 class SetManager extends ResourceManager
@@ -40,7 +41,10 @@ class SetManager extends ResourceManager
     }
     
     public function fetchAllSets($allowOAI){
-        return $this -> fetch([OpenSkos::ALLOW_OAI => new \OpenSkos2\Rdf\Literal($allowOAI, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)]);        
+        $query = 'DESCRIBE ?s {'
+                . 'select ?s where {?s <http://openskos.org/xmlns#allow_oai>  "'.$allowOAI.'"^^xsd:bool .} }';
+        $sets = $this -> fetchQuery($query);
+        return $sets;        
     }
     
     public function getUrisMap($tenantCode){

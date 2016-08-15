@@ -415,7 +415,6 @@ public function deleteSolrIntact(Uri $resource)
         }
 
         $query .= '}'; // end sub select
-        
         $resources = $this->fetchQuery($query, $resType);
         
        

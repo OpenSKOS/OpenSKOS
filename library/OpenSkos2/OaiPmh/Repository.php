@@ -193,9 +193,7 @@ class Repository implements InterfaceRepository
     public function listSets()
     {
         $oaisets = $this->getOaiSets();
-
         $items = [];
-
         $tenantAdded = [];
 
         foreach ($oaisets as $row) {
@@ -423,7 +421,7 @@ class Repository implements InterfaceRepository
      * @return OaiSet[]
      */
     private function getOaiSets() {
-        $sets = $this->setManager->fetchAllSets(true);
+        $sets = $this->setManager->fetchAllSets('true');
         $retVal = [];
         foreach ($sets as $set) {
             $row = [];
