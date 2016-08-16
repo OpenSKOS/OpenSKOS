@@ -118,11 +118,6 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                 return $this->_helper->redirector('edit', null, null, array('user' => $user->id));
             }
 
-            // For the unique tenant/eppn validator to work.
-            if ($user->eppn == '') {
-                $user->eppn = null;
-            }
-
             try {
                 $user->save();
                 $user->applyDefaultSearchProfile();

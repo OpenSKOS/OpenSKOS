@@ -65,13 +65,7 @@ $lang = (string)Zend_Registry::get('Zend_Locale');
 			?>
 			<div id="identity">
 				<?php echo $this->translate('Welcome')?> <a href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'users', 'action' => 'edit', 'user' => $identity->id), 'default', true)?>"><?php echo $identity->name?></a>
-				<?php
-				    //SAML users can not logout:
-				    if (isset($_SERVER['eppn'])):
-				?>
-				<?php else:?>
 				[<a href="<?php echo $this->url(array('module' => 'editor', 'controller' => 'logout'), 'default', true)?>"><?php echo $this->translate('logout')?></a>]
-				<?php endif?>
 			</div>
 			<?php endif?>
 	    </header>
