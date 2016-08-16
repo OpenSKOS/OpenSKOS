@@ -20,7 +20,7 @@
 namespace OpenSkos2\OaiPmh;
 
 use \OpenSkos2\ConceptSchemeManager;
-use \OpenSkos2\SetSchemeManager;
+use \OpenSkos2\SetManager;
 
 /**
  * Used to get tenant:set:schema sets.
@@ -93,23 +93,27 @@ class SetsMap
      */
     public function getSchemes($tenantCode, $setUri, $schemesUris)
     {
-        if (!isset($this->setsToSchemes[$tenantCode])) {
+       if (!isset($this->setsToSchemes[$tenantCode])) {
             $this->setsToSchemes[$tenantCode] = [];
         }
         
         if (!isset($this->setsToSchemes[$tenantCode][$setUri])) {
             $allSchemes = $this->schemeManager->getSchemeBySetUri($setUri);
             foreach ($allSchemes as $scheme) {
-                $this->setsToSchemes[$tenant][$setUri][$scheme->getUri()] = $scheme;
+                $this->setsToSchemes[$tenantCode][$setUri][$scheme->getUri()] = $scheme;
             }
         }
         
         $schemes = [];
         foreach ($schemesUris as $schemeUri) {
-            if (isset($this->setsToSchemes[$tenantCode][$setUri][$schemeUri])) {
-                $schemes[] = $this->setsToSchemes[$tenantCode][$setUri][$schemeUri];
+            if (isset($this->setsToSchemes[$tenantCode][$setUri][$schemeUri->getUri()])) {
+                $schemes[] = $this->setsToSchemes[$tenantCode][$setUri][$schemeUri->getUri()];
             }
         }
         return $schemes;
+    }
+    
+    public function fetchTenantSpec($concept){
+      return $this->setManager->fetchTenantSpecData($concept);
     }
 }
