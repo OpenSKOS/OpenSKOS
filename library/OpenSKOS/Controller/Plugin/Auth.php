@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,48 +19,31 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 class OpenSKOS_Controller_Plugin_Auth extends Zend_Controller_Plugin_Abstract
 {
-	protected $modules = array('editor');
-	
-	public function preDispatch(Zend_Controller_Request_Abstract $request)
-	{
-		if (!in_array($request->getModuleName(), $this->modules)) return;
+    protected $modules = array('editor');
 
-		$authInstance = Zend_Auth::getInstance();
-		
-		//SAML login:
-		if (isset($_SERVER['eppn'])) {
-		    //lookup user with this eduPersonPrincipalName:
-		    $model = new OpenSKOS_Db_Table_Users();
-		    $user = $model->fetchRow($model->select()->where('eppn=?', $_SERVER['eppn']));
-		    if (null!==$user) {
-            	if($user->active != 'Y') {
-    				Zend_Auth::getInstance()->clearIdentity();
-    				Zend_Session::forgetMe();
-    				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Your account is blocked.'));
-            		Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'index', 'website');
-            	}
-		        $login = new Editor_Models_Login ();
-        		$login->getStorage()->write($user);
-        		return;
-		    }
-		}
-		
+    public function preDispatch(Zend_Controller_Request_Abstract $request)
+    {
+        if (!in_array($request->getModuleName(), $this->modules)) {
+            return;
+        }
+
+        $authInstance = Zend_Auth::getInstance();
+
         $resource = $request->getControllerName();
         $actionName = $request->getActionName();
         if ($authInstance->hasIdentity()) {
-        	if($authInstance->getIdentity()->active != 'Y') {
-				Zend_Auth::getInstance()->clearIdentity();
-				Zend_Session::forgetMe();
-				Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Your account is blocked.'));
-        		Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'index', 'website');
-        	}
+            if ($authInstance->getIdentity()->active != 'Y') {
+                Zend_Auth::getInstance()->clearIdentity();
+                Zend_Session::forgetMe();
+                Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Your account is blocked.'));
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'index', 'website');
+            }
         } else {
-        	if ($request->getControllerName()!='login') {
-	        	Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'login', 'editor');
-        	}
+            if ($request->getControllerName() != 'login') {
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->direct('index', 'login', 'editor');
+            }
         }
-	}
+    }
 }
