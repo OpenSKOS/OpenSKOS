@@ -33,7 +33,6 @@ use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Foaf;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
@@ -1004,28 +1003,6 @@ public function deleteSolrIntact(Uri $resource)
             }
         }
         return null;
-    }
-    
-      // used in oai pmh
-    public function fetchTenantSpecData($concept){
-        $uri = $concept ->getUri();
-        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode WHERE { '
-                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkos::SET.'> ?seturi . ?seturi <'.DcTerms::PUBLISHER.'> ?tenanturi .'
-                .'?seturi <'.OpenSkos::CODE.'> ?setcode .'
-                . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkos::CODE . '> ?tenantcode .}';
-    
-        $response = $this->query($query);
-        $retVal = [];
-        foreach($response as $descr) {
-            $spec=[];
-            $spec['tenanturi']=$descr->tenanturi->getUri();
-            $spec['tenantname']=$descr->tenantname->getValue();
-            $spec['tenantcode']=$descr->tenantcode->getValue();
-            $spec['seturi'] = $descr ->seturi->getUri();
-            $spec['setcode'] = $descr->setcode->getValue();
-            $retVal[]=$spec;
-        }
-        return $retVal;  
     }
 
 }

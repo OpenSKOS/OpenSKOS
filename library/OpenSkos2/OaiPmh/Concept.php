@@ -69,7 +69,7 @@ class Concept implements Record
         }
         
         $setSpecs = [];
-        $specs = $this->setsMap->fetchTenantSpec($concept);
+        $specs = $this->conceptManager->fetchTenantSpecData($concept);
         foreach ($specs as $spec) {
             $setSpecs[] = $spec['tenantcode'];
             $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
