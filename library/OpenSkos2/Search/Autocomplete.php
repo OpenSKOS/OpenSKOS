@@ -23,7 +23,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Skos as SkosNamespace;
 use Solarium\Core\Query\Helper as QueryHelper;
 
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 class Autocomplete
 {
     /**
@@ -69,13 +69,13 @@ class Autocomplete
         if ($isDirectQuery) {
             if (!empty($term)) {
                 $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
-                // olha was here
                 $term = $this -> prepareTextFields($term);
-                // olha was here 
                 if (trim($term) !== "*:*") { // somehow my solr fails on (*:*)
                     $term = '(' . $term . ')';
                 }
                 $solrQuery = $term;
+            } else {
+               $solrQuery = "*:*"; 
             }
         } else {
             if ($parser->isSearchTextQuery($term)) {
@@ -233,7 +233,7 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-        
+        \Tools\Logging::var_error_log(" Solr request \n", $solrQuery , '/app/data/Logger.txt');
         $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
 //\Tools\Logging::var_error_log("\n solr query in searchAutocomplete ", $solrQuery, dirname(__FILE__) . '/../../../data/Logger.txt');
         //\Tools\Logging::var_error_log("\n Seacrh result in searchAutocomplete ", $retVal, dirname(__FILE__) . '/../../../data/Logger.txt');

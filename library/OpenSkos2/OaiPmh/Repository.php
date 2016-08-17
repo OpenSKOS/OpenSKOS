@@ -46,6 +46,8 @@ use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+
 class Repository implements InterfaceRepository
 {
 
@@ -397,10 +399,10 @@ class Repository implements InterfaceRepository
         $set = null;
         if (!empty($arrSet[1])) {
             $sets = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[1] . '"', $this->setManager->getResourceType());
-            if ($count($sets) > 0) {
+            if (count($sets) > 0) {
                 $set = $sets[0];
             } else {
-                $set = new Literal($arrSet[1]);
+                throw new Exception('A set with the code '. $arrSet[1]. " is not found in the triple store" );
             }
         }
 
@@ -596,7 +598,9 @@ class Repository implements InterfaceRepository
         } else {
             $searchOptions['searchText'] = '';
         }
-
-        return $this->searchAutocomplete->search($searchOptions, $numFound);
+        $retVal = $this->searchAutocomplete->search($searchOptions, $numFound);
+        //\Tools\Logging::var_error_log(" Solr response \n", $retVal , '/app/data/Logger.txt');
+        
+        return $retVal;
     }
 }
