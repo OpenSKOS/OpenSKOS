@@ -46,8 +46,6 @@ use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-
 class Repository implements InterfaceRepository
 {
 
@@ -599,8 +597,6 @@ class Repository implements InterfaceRepository
             $searchOptions['searchText'] = '';
         }
         $retVal = $this->searchAutocomplete->search($searchOptions, $numFound);
-        //\Tools\Logging::var_error_log(" Solr response \n", $retVal , '/app/data/Logger.txt');
-        
         return $retVal;
     }
 }

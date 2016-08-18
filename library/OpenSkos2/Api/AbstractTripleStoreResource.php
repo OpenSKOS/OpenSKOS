@@ -221,9 +221,8 @@ abstract class AbstractTripleStoreResource {
             if (!$canBeDeleted) {
                 throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
             }
-            $this->manager->delete(new Uri($uri));
-
-            $xml = (new DataRdf($resourceObject))->transform();
+            $this->manager->delete(new Uri($uri), $this->manager->getResoucreType());
+           $xml = (new DataRdf($resourceObject))->transform();
             return $this->getSuccessResponse($xml, 202);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);

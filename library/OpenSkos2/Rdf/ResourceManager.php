@@ -38,6 +38,8 @@ use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use RuntimeException;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
@@ -117,7 +119,14 @@ class ResourceManager
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
-        $this->solrResourceManager->insert($resource);
+        if ($this->resourceType == Skos::CONCEPT) {
+            $set_and_tenant = $this->fetchTenantSpec($resource);
+            foreach ($set_and_tenant as $spec) {
+                $resource->setProperty(OpenSkos::TENANT, new Uri($spec['tenanturi']));
+                $resource->setProperty(OpenSkos::SET, new Uri($spec['seturi']));
+            }
+            $this->solrResourceManager->insert($resource);
+        }
     }
     
     /**
@@ -127,7 +136,7 @@ class ResourceManager
     public function replace(Resource $resource)
     {
         // @TODO Danger if insert fails. Need transaction or something.
-        $this->delete($resource);
+        $this->delete($resource, $resource->getType()->getUri());
         $this->insert($resource);
     }
 
@@ -161,24 +170,15 @@ class ResourceManager
     /**
      * @param Uri $resource
      */
-    public function delete(Uri $resource)
+    public function delete(Uri $resource, $rdfType=null)
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-        $this->solrResourceManager->delete($resource);
+        if ($rdfType == Skos::CONCEPT) {
+            $this->solrResourceManager->delete($resource);
+        }
     }
    
-public function deleteSolrIntact(Uri $resource)
-    {
-        $uri = $resource->getUri();
-        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {<' . $uri . '> ?p ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
-        $this->client->update('DELETE {?b ?p2 ?o2}  WHERE {?s <' . $uri . '> ?b . ?b ?p2 ?o2 . FILTER isBlank(?b) .}');
-        $this->client->update('DELETE WHERE {<' . $uri . '> ?predicate ?object . }');
-        $this->client->update('DELETE WHERE {?subject <' . $uri . '> ?object . }');
-        $this->client->update('DELETE WHERE {?subject ?predicate <' . $uri . '> . }');
-        return $uri; 
-       
-    }
-    
+
   
    
 
@@ -1006,7 +1006,7 @@ public function deleteSolrIntact(Uri $resource)
         return null;
     }
 
-    // used in oai pmh
+   
     public function fetchTenantSpec($concept){
         $uri = $concept ->getUri();
         $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode WHERE { '
