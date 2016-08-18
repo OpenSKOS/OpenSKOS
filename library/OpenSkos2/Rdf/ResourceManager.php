@@ -119,7 +119,8 @@ class ResourceManager
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
-        if ($this->resourceType == Skos::CONCEPT) {
+        // solr
+        if ($resource->getType()->getUri() == Skos::CONCEPT) {
             $set_and_tenant = $this->fetchTenantSpec($resource);
             foreach ($set_and_tenant as $spec) {
                 $resource->setProperty(OpenSkos::TENANT, new Uri($spec['tenanturi']));
@@ -136,7 +137,7 @@ class ResourceManager
     public function replace(Resource $resource)
     {
         // @TODO Danger if insert fails. Need transaction or something.
-        $this->delete($resource, $resource->getType()->getUri());
+        $this->delete($resource->getUri(), $resource->getType()->getUri());
         $this->insert($resource);
     }
 

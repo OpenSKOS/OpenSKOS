@@ -83,45 +83,47 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 ));
 
 $tenant = $OPTS->tenant;
-$isDryRun = $OPTS->getOption('dryrun');
+var_dump('tenant: ' . $tenant);
+$isDryRun = $OPTS->dryrun;
+var_dump('dry run : ' . $isDryRun);
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
 var_dump($endPoint);
 
 $enableStatussesSystem = $OPTS->enablestatusses;
 $language = $OPTS->language;
-var_dump($language);
+var_dump('language: ' . $language);
 $license = $OPTS->license;
-var_dump($license);
+var_dump('license: ' . $license);
 
 $init = json_decode(file_get_contents($endPoint), true);
 $total = $init['response']['numFound'];
 
 echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
-function remove_resources($manager, $resources) {
+function remove_resources($manager, $resources, $rdfType) {
     foreach ($resources as $resource) {
-        $manager->delete($resource);
+        $manager->delete($resource, $rdfType);
     }
 }
 
 $concURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
 $concs = $resourceManager->fetchByUris($concURIs, Skos::CONCEPT);
-remove_resources($resourceManager, $concs);
+remove_resources($resourceManager, $concs, Skos::CONCEPT);
 
 $collURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::SKOSCOLLECTION . '>', null);
 $colls = $resourceManager->fetchByUris($collURIs, Skos::SKOSCOLLECTION);
-remove_resources($resourceManager, $colls);
+remove_resources($resourceManager, $colls, Skos::SKOSCOLLECTION);
 
 $schemURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPTSCHEME . '>', null);
 $schems = $resourceManager->fetchByUris($schemURIs, Skos::CONCEPTSCHEME);
-remove_resources($resourceManager, $schems);
+remove_resources($resourceManager, $schems, Skos::CONCEPTSCHEME);
 
 $setURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Dcmi::DATASET . '>', null);
 $sets = $resourceManager->fetchByUris($setURIs, Dcmi::DATASET);
-remove_resources($resourceManager, $sets);
+remove_resources($resourceManager, $sets, Dcmi::DATASET);
 
 $instURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' .  Org::FORMALORG. '>', null);
 $insts = $resourceManager->fetchByUris($instURIs, Org::FORMALORG);
-remove_resources($resourceManager, $insts);
+remove_resources($resourceManager, $insts, Org::FORMALORG);
 
 $getFieldsInClass = function ($class) {
     $retVal = '';

@@ -61,7 +61,6 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
         if (!$concept->isBlankNode()) {
             $uri = $concept->getUri();
         }
-        
         return $this->resourceManager->askForMatch(
             [
                 [

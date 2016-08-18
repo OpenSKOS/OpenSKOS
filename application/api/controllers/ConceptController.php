@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+use OpenSkos2\Namespaces\Skos;
 
 require_once 'FindConceptsController.php';
 
@@ -262,7 +263,7 @@ class Api_ConceptController extends Api_FindConceptsController
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
-        $response = $api->delete($request);
+        $response = $api->delete($request, Skos::CONCEPT);
         $this->emitResponse($response);
     }
 }

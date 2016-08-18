@@ -90,7 +90,7 @@ class Command implements LoggerAwareInterface
             }
             foreach ($conceptSchemes as $scheme) {
                 $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
-                $this->resourceManager->delete($scheme);
+                $this->resourceManager->delete($scheme, Skos::CONCEPTSCHEME);
             }
         }
         // ***
