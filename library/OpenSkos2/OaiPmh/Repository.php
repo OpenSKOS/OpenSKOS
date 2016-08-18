@@ -30,9 +30,10 @@ use OpenSkos2\Search\ParserText;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
-use OpenSkos2\Rdf\Literal;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
@@ -387,31 +388,40 @@ class Repository implements InterfaceRepository
 
         $return = [];
 
-        $tenant = null;
+        $tenantURI = null;
         if (!empty($arrSet[0])) {
-            $tenant = new Literal($arrSet[0]);
+            $tenants = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[0] . '"', Org::FORMALORG);
+            if (count($tenants) > 0) {
+                $tenantURI = $tenants[0];
+            } else {
+                throw new Exception('A tenant with the code '. $arrSet[0]. " is not found in the triple store" );
+            }
         }
+        $return['tenant'] = $tenantURI;
 
-        $return['tenant'] = $tenant;
-
-        $set = null;
+        $setURI = null;
         if (!empty($arrSet[1])) {
             $sets = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[1] . '"', $this->setManager->getResourceType());
             if (count($sets) > 0) {
-                $set = $sets[0];
+                $setURI = $sets[0];
             } else {
                 throw new Exception('A set with the code '. $arrSet[1]. " is not found in the triple store" );
             }
         }
 
-        $return['set'] = $set;
+        $return['set'] = $setURI;
         
-        $conceptScheme = null;
+        $conceptSchemeURI = null;
         if (!empty($arrSet[2])) {
-            $conceptScheme = new Literal($arrSet[2]);
+            $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $arrSet[2] . '"', Skos::CONCEPTSCHEME);
+            if (count($conceptSchemes) > 0) {
+                $conceptSchemeURI = $conceptSchemes[0];
+            } else {
+                throw new Exception('A concept scheme with the uuid '. $arrSet[2]. " is not found in the triple store" );
+            }
         }
 
-        $return['conceptScheme'] = $conceptScheme;
+        $return['conceptScheme'] = $conceptSchemeURI;
         return $return;
     }
 
@@ -570,7 +580,7 @@ class Repository implements InterfaceRepository
         ];
         
         if (!empty($tenant)) {
-            $searchOptions['tenants'] = [$tenant->getValue()];
+            $searchOptions['tenants'] = [$tenant];
         }
         
         if (!empty($set)) {
@@ -578,12 +588,7 @@ class Repository implements InterfaceRepository
         }
 
         if (!empty($scheme)) {
-            $schemeObj = $this->schemeManager->fetchByUuid($scheme->getValue());
-            if ($schemeObj) {
-                $searchOptions['conceptScheme'] = [$schemeObj->getUri()];
-            } else {
-                $searchOptions['conceptScheme'] = [$scheme->getValue()];
-            }
+                $searchOptions['conceptScheme'] = [$scheme];
         }
 
         if (!empty($from) || !empty($till)) {

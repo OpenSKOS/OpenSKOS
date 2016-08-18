@@ -59,7 +59,7 @@ class UniqueNotation extends AbstractConceptValidator
         if (!$hasOther) {
             return true;
         } else {
-            $this -> errorMessages[] = "The notation in the submitted concept has been alredy used in the given schema: use another notation.";
+            $this -> errorMessages[] = "One of the notations in the submitted concept has been alredy used in the given schema: use another notation.";
         }
 
         return false;

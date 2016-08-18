@@ -137,7 +137,7 @@ class ResourceManager
     public function replace(Resource $resource)
     {
         // @TODO Danger if insert fails. Need transaction or something.
-        $this->delete($resource->getUri(), $resource->getType()->getUri());
+        $this->delete($resource, $resource->getType()->getUri());
         $this->insert($resource);
     }
 
