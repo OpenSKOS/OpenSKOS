@@ -79,23 +79,6 @@ class Concept extends Resource
    
 
     /**
-     * Get tenant
-     *
-     * @return Uri (good) or Literal (obsolete)
-     */
-    public function getTenant()
-    {
-        $values = $this->getProperty(OpenSkos::TENANT);
-        if (isset($values[0])) {
-            return $values[0];
-        }else{
-            return new Literal(UNKNOWN);
-        }
-    }
-    
-  
-    
-    /**
      * Checks if the concept is top concept for the specified scheme.
      * @param string $conceptSchemeUri
      * @return bool

@@ -816,7 +816,6 @@ class ResourceManager
    
    // used only for HTML output
     public function getResourceSearchID($resourceReference, $resourceType) {
-        
         if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
             $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
             $response2 = $this->query($query);
@@ -1009,9 +1008,10 @@ class ResourceManager
    
     public function fetchTenantSpec($concept){
         $uri = $concept ->getUri();
-        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode WHERE { '
+        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
                 . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkos::SET.'> ?seturi . ?seturi <'.  DcTerms::PUBLISHER.'> ?tenanturi .'
                 .'?seturi <'.OpenSkos::CODE.'> ?setcode .'
+                 .'?seturi <'.  DcTerms::TITLE.'> ?settitle .'
                 . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkos::CODE . '> ?tenantcode .}';
     
         $response = $this->query($query);
@@ -1023,6 +1023,7 @@ class ResourceManager
             $spec['tenantcode']=$descr->tenantcode->getValue();
             $spec['seturi'] = $descr ->seturi->getUri();
             $spec['setcode'] = $descr->setcode->getValue();
+            $spec['settitle'] = $descr->settitle->getValue();
             $retVal[]=$spec;
         }
         return $retVal;  

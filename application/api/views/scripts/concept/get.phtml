@@ -33,39 +33,38 @@ $conceptManager = $di->get('OpenSkos2\ConceptManager');
 
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
 $title = $concept->getCaption($lang);
-
+$tenantspec_s = $conceptManager->fetchTenantSpec($concept);
 $this->headTitle($title);
 ?>
 <h2><?=$this->escape($title)?></h2>
 <dl>
-    <dt>Institution</dt>
-    <?php $tenantReference=$concept->getTenant();
-    $tenantCode=$conceptManager->getResourceSearchID($tenantReference, Org::FORMALORG);
-    ?>
-    <dd>
-        <a href="<?=$this->url([
+    <?php
+    foreach ($tenantspec_s as $tenantspec):
+        ?>
+       <dt>Institution: set</dt>
+       <dd>
+            <a href="<?=
+            $this->url([
                 'module' => 'api',
                 'controller' => 'institution',
-                'id' => $tenantCode,
-            ],
-            'rest'
-        )?>.html">
-            <?=$this->escape($conceptManager->getTenantNameByCode($tenantCode))?>
-        </a>
-    </dd>
-    
-    <dt>Set</dt>
-    <?php foreach ($conceptManager->fetchConceptSetCodeTitle($concept) as $setcode=>$settitle):?>
+                'id' => $tenantspec['tenantcode'],
+                    ], 'rest'
+            )
+            ?>.html">
+        <?= ($this->escape($tenantspec['tenantname'])).':' ?>
+            </a>
             <a href="<?=$this->url(array(
                                 'module' => 'api',
                                 'controller' => 'set',
-                                'id' => $setcode
+                                'id' => $tenantspec['setcode']
                             ), 'rest'
             )?>.html">
-                <?= $settitle?>
+                <?= $tenantspec['settitle']?>
             </a>
-    <?php endforeach;?>
-    <dt>URI:</dt>
+        </dd>
+    <?php endforeach; ?>
+    
+    <dt>URI (will throw an error if the production backend does not have a concept with this uri):</dt>
     <dd>
         <a rel="external" href="<?=$this->escape($concept->getUri())?>"><?=$this->escape($concept->getUri())?></a>
     </dd>
