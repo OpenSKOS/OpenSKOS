@@ -118,6 +118,10 @@ class Resource extends Uri implements ResourceIdentifier
         ],
     );
 
+    public static function getLanguagedProperties(){
+        $retVal = array_merge(self::$classes['DocumentationProperties'], [DcTerms::DESCRIPTION, DcTerms::TITLE]);
+        return $retVal;
+    }
 
     /**
      * @return array of RdfObject[]

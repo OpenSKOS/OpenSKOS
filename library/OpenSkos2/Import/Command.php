@@ -100,8 +100,10 @@ class Command implements LoggerAwareInterface
             $uri = $resourceToInsert->getUri();
             
             $types = $resourceToInsert->getProperty(Rdf::TYPE);
+            
             if (count($types)<1) {
                throw new \Exception("The resource " . $uri . " does not have rdf-type. "); 
+               
             }
             $type=$types[0]->getUri();
             $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser()->getUri());
@@ -168,18 +170,17 @@ class Command implements LoggerAwareInterface
             );
         }
 
-        // @TODO Those properties has to have types, rather then ignoring them from a list
-        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS, OpenSkos::UUID, OpenSkos::CODE];
+        $langProperties = \OpenSkos2\Rdf\Resource::getLanguagedProperties();
         if ($message->getFallbackLanguage()) {
             foreach ($concept->getProperties() as $predicate => $properties) {
                 foreach ($properties as $property) {
-                    if (!in_array($predicate, $nonLangProperties) && $property instanceof Literal && $property->getType() === null && $property->getLanguage() === null) {
+                    if (in_array($predicate, $langProperties) && $property instanceof Literal && $property->getLanguage() === null) {
                         $property->setLanguage($message->getFallbackLanguage());
                     }
                 }
             }
         }
-        return $concept;
+        return $concept; 
     }
     
 }
