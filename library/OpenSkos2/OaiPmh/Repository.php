@@ -21,19 +21,19 @@ namespace OpenSkos2\OaiPmh;
 
 use DateTime;
 use OpenSkos2\Concept;
-use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
-use OpenSkos2\SetManager;
-use OpenSkos2\Search\Autocomplete;
-use OpenSkos2\Search\ParserText;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
+use OpenSkos2\Search\Autocomplete;
+use OpenSkos2\Search\ParserText;
+use OpenSkos2\SetManager;
+use OpenSkos2\Tenant;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
@@ -46,6 +46,8 @@ use Picturae\OaiPmh\Interfaces\RecordList;
 use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
+
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 class Repository implements InterfaceRepository
 {
@@ -385,7 +387,7 @@ class Repository implements InterfaceRepository
     private function parseSet($set)
     {
         $arrSet = explode(':', $set);
-
+        
         $return = [];
 
         $tenantURI = null;

@@ -42,6 +42,7 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
  * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
  *  */
+// example :php migrate.php --endpoint=http://192.168.99.100:8984/solr/collection1/select --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
@@ -329,7 +330,7 @@ function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager
 
 $mappings = [
     'users' => [
-        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries, $resourceManager) {
+        'callback' => function ($value) use ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries, $resourceManager, $isDryRun) {
             if ($value === null || !$value || !isset($value)) {
                 return new \OpenSkos2\Rdf\Literal("Unknown");
             }
@@ -355,8 +356,9 @@ $mappings = [
                     $logger->notice("Could not find user with id/name: {$value}");
                     $notFoundUsers[] = $value;
                     $users[$value] = new \OpenSkos2\Rdf\Literal("Unknown");
-                } else
+                } else {
                     $users[$value] = new \OpenSkos2\Rdf\Uri($user->getFoafPerson(!$isDryRun)->getUri());
+                }
             }
 
             return $users[$value];
@@ -775,7 +777,6 @@ do {
 var_dump('Concepts added: ');
 var_dump($added);
 
-echo "Migration is finished. Removing dangling references. \n";
 $logger->info("Migration is finished. Removing dangling references.");
 
 function remove_dangling_references($manager, $resources, $property, $rdfType) {
@@ -806,7 +807,7 @@ $skoscollectionsURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, 
 $skoscollections = $resourceManager->fetchByUris($skoscollectionsURIs, Skos::SKOSCOLLECTION);
 remove_dangling_references($resourceManager, $skoscollections, Skos::MEMBER, Skos::CONCEPT);
 
-echo "Removing dangling references in concept schemata... \n";
+echo "Removing dangling references in concepts... \n";
 $conceptURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
 $concepts = $resourceManager->fetchByUris($conceptURIs, Skos::CONCEPT);
 echo "All concepts have been just retrieved.\n";
@@ -815,6 +816,7 @@ echo "Dangling in-scheme references have been just removed.\n";
 remove_dangling_references($resourceManager, $concepts, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
 echo "Dangling top-concept-of references have been just removed.\n";
 remove_dangling_references($resourceManager, $concepts, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
+echo "Dangling inSKOSCOLLECTION references have been just removed.\n";
 
 echo "done!\n";
 $logger->info("Done!");

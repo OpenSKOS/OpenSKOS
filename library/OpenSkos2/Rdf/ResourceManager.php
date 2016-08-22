@@ -122,6 +122,9 @@ class ResourceManager
         // solr
         if ($resource->getType()->getUri() == Skos::CONCEPT) {
             $set_and_tenant = $this->fetchTenantSpec($resource);
+            if (count($set_and_tenant)<1) {
+                var_dump('Cannot fetch tenant for the concept '. $resource->getUri());
+            }
             foreach ($set_and_tenant as $spec) {
                 $resource->setProperty(OpenSkos::TENANT, new Uri($spec['tenanturi']));
                 $resource->setProperty(OpenSkos::SET, new Uri($spec['seturi']));

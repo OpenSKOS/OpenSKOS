@@ -47,6 +47,7 @@ class Resource extends Uri implements ResourceIdentifier
     const STATUS_REJECTED = 'rejected';
     const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
+    const STATUS_EXPIRED = 'expired';
     
     protected $properties = [];
     
@@ -65,6 +66,7 @@ class Resource extends Uri implements ResourceIdentifier
             self::STATUS_REJECTED,
             self::STATUS_OBSOLETE,
             self::STATUS_DELETED,
+            self::STATUS_EXPIRED,
         ];
     }
     
