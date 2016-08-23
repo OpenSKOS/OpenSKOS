@@ -59,8 +59,9 @@ class UriGeneration {
             } else {
                 $uri = $setUri . '/' . $shortType . '_' . $plainUUID;
             }
+            
         } else {
-            $uri = URI_PREFIX . $shortType . '_' . $plainUUID;
+            $uri = URI_PREFIX.$shortType . '_' . $plainUUID;
         }
         return $uri;
     }

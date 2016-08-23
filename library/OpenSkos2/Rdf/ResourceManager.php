@@ -118,7 +118,8 @@ class ResourceManager
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
-        $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
+        $graph = EasyRdf::resourceToGraph($resource);
+        $this->insertWithRetry($graph);
         // solr
         if ($resource->getType()->getUri() == Skos::CONCEPT) {
             $set_and_tenant = $this->fetchTenantSpec($resource);

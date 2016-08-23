@@ -34,13 +34,15 @@ class Preprocessor {
         $preprocessed = $resourceObject;
         $preprocessed->addMetadata($this->userUri, $params, null);
         
-        if ($this->resourceType === Skos::CONCEPT || $this->resourceType === Skos::CONCEPTSCHEME || $this->resourceType === Skos::SKOSCOLLECTION) {
-          $sets = $preprocessed->getProperty(OpenSkos::SET);
-          if (count($sets)<1) {
-            throw new ApiException('The set (former known as tenant collection) of the resource is not given and cannot be derived', 400);
+        if ($this->resourceType === Skos::CONCEPTSCHEME || $this->resourceType === Skos::SKOSCOLLECTION) {
+            $sets = $preprocessed->getProperty(OpenSkos::SET);
+            if (count($sets) < 1) {
+                throw new ApiException('The set (former known as tenant collection) of the resource is not given', 400);
+            } else {
+                $params['seturi']=$sets[0]->getUri();
             }
         }
-        
+
         if ($autoGenerateUuidUriWhenAbsent) {
             $params['type'] = $this->resourceType;     
             if ($this->resourceType === Skos::CONCEPT) {

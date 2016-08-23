@@ -165,7 +165,7 @@ abstract class AbstractTripleStoreResource {
             $preprocessedResource = $preprocessor -> forCreation($resourceObject, $params, $autoGenerateUri);
             $this->validate($preprocessedResource, false, $params['tenanturi']);
             $this->manager->insert($preprocessedResource);
-            $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
+            $savedResource = $this->manager->fetchByUri($preprocessedResource->getUri());
             $rdf = (new DataRdf($savedResource, true, []))->transform();
             return $this->getSuccessResponse($rdf, 201);
         } catch (Exception $e) {
@@ -183,7 +183,7 @@ abstract class AbstractTripleStoreResource {
             $user = $this->getUserFromParams($params);
             
             $uri = $resourceObject->getUri();
-            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['tenantcode'], $user->getFoafPerson()->getUri());
+            $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $user->getFoafPerson()->getUri());
             $preprocessedResource = $preprocessor ->forUpdate($resourceObject, $params);
             if ($this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $preprocessedResource)) {
                 $this->validate($preprocessedResource, true, $params['tenanturi']);
