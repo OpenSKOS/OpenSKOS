@@ -47,7 +47,7 @@ use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 class Repository implements InterfaceRepository
 {

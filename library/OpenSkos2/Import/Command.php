@@ -34,6 +34,8 @@ use Psr\Log\LoggerAwareTrait;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
 
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+
 class Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -106,7 +108,7 @@ class Command implements LoggerAwareInterface
                
             }
             $type=$types[0]->getUri();
-            $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser()->getUri());
+            $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser());
 
             $exists = $this->resourceManager->countTriples("<".$uri.">","<".Rdf::TYPE.">", "<".$type.">");
             if($exists>0) {
@@ -137,6 +139,7 @@ class Command implements LoggerAwareInterface
             if (!$valid) {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
                     var_dump($errorMessage);
+                    \Tools\Logging::var_error_log("The followig resource has not been added due to the validation error ". $errorMessage, $preprocessedResource->getUri(), '/app/data/ValidationErrors.txt');
                 }
                 var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
                 continue;

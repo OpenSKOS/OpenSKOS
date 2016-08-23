@@ -260,31 +260,37 @@ class ResourceManager
         $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .} }';
         $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
-        // @TODO Add resourceType check.
+        $resources=$this->removeRelatedResourcesFromCollectionForOneResource($uri, $resources);
         
         if (count($resources) === 0) {
-            //echo '***';
-            //var_dump($resType);
-            //echo '***';
             if ($resType===null) {
                 $resType = "not given. ";
             }
             throw new ApiException('The requested resource <' . $uri . '> of type ' . $resType . ' was not found.', 404);
         }
         if (count($resources) > 1) {
-        echo '***';   
-        var_dump($resType);
-        echo '***';   
-        var_dump($resources[0]);
-        echo '***';   
-        var_dump($resources[1]);
-        
-        echo '***';   
+        //echo '***';   
+        //var_dump($resType);
+        //echo '***';   
+        //var_dump($resources[0]);
+        //echo '***';   
+        //var_dump($resources[1]);
+        //echo '***';   
             throw new ApiException('Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.', 500);
              
         }
  
         return $resources[0];
+    }
+    
+    private function removeRelatedResourcesFromCollectionForOneResource($originalUri, $resourceCollection) {
+        $retVal=[];
+        foreach ($resourceCollection as $resource) {
+            if ($originalUri == $resource->getUri()) {
+                $retVal[]=$resource;
+            }
+        }
+        return $retVal;
     }
     
     /**

@@ -251,8 +251,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $referenceUris = $resource->getProperty($referenceName);
         $errorsBeforeCheck = count($this->errorMessages);
         foreach ($referenceUris as $uri) {
-            $refResource = $this->resourceManager->fetchByUri($uri->getUri(), $referenceType); //throws an exception if something is wrong
-            $this->isSetOfCurrentTenant($refResource);
+            try {
+                $refResource = $this->resourceManager->fetchByUri($uri->getUri(), $referenceType); //throws an exception if something is wrong
+                $this->isSetOfCurrentTenant($refResource);
+            } catch (\Exception $e) {
+                $this->errorMessages[] = $e->getMessage();
+            }
         }
         $errorsAfterCheck = count($this->errorMessages);
         return ($errorsBeforeCheck===$errorsAfterCheck);
