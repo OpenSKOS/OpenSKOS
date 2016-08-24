@@ -209,7 +209,10 @@ class EasyRdf {
                 
                 if ($value instanceof Literal) {
                     $val = $value->getValue();
-                    
+                    $literalType = $value->getType();
+                    if  ($literalType != Literal::TYPE_BOOL && ($value=='true' || $value=='false')) {
+                        $literalType = Literal::TYPE_BOOL;
+                    }
                     // Convert timestamp to string
                     if ($val instanceof DateTime) {
                         $val = $val->format(\DATE_W3C);
@@ -217,7 +220,7 @@ class EasyRdf {
                     
                     $easyResource->addLiteral(
                         $propName,
-                        new Literal2($val, $value->getLanguage(), $value->getType())
+                        new Literal2($val, $value->getLanguage(), $literalType)
                     );
                 } else if ($value instanceof Uri) {
                     if ($value instanceof Resource) {

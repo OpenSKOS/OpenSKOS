@@ -233,7 +233,7 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-        //\Tools\Logging::var_error_log(" Solr request \n", $solrQuery , '/app/data/debug.log');
+        //\Tools\Logging::var_error_log(" Solr request \n", $solrQuery , '/app/data/debug.txt');
         $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
         return $retVal;
     }

@@ -157,7 +157,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
    
     private function checkBoolean($val, $propertyUri) {
         $testVal = trim($val);
-        if (!($testVal === "true" || $testVal === "false")) {
+        if (!($testVal == "true" || $testVal == "false")) {
             return ['The value of ' . $propertyUri . ' must be set to true or false. '];
         } else {
             return [];

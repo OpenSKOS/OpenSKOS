@@ -47,7 +47,7 @@ use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 class Repository implements InterfaceRepository
 {
@@ -196,9 +196,13 @@ class Repository implements InterfaceRepository
     public function listSets()
     {
         $oaisets = $this->getOaiSets();
+        
+        if (count($oaisets) < 1) {
+            throw new \Exception("No sets with enabled oai.");
+        }
+        
         $items = [];
         $tenantAdded = [];
-
         foreach ($oaisets as $row) {
             // Tenant spec
             $tenantCode = $row['tenant_code'];
@@ -263,8 +267,11 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
+        
         $pSet = $this->parseSet($set);
 
+        //\Tools\Logging::var_error_log(" pSet: ", $pSet , '/app/data/debug.txt');
+        
         $concepts = $this->getConcepts(
             $this->limit,
             0,
@@ -280,6 +287,9 @@ class Repository implements InterfaceRepository
         foreach ($concepts as $i => $concept) {
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
+        
+        //\Tools\Logging::var_error_log(" items: ", count($items) , '/app/data/debug.txt');
+        
         
         $token = null;
         if ($numFound > $this->limit) {
@@ -396,7 +406,7 @@ class Repository implements InterfaceRepository
             if (count($tenants) > 0) {
                 $tenantURI = $tenants[0];
             } else {
-                throw new Exception('A tenant with the code '. $arrSet[0]. " is not found in the triple store" );
+                throw new \Exception('A tenant with the code '. $arrSet[0]. " is not found in the triple store" );
             }
         }
         $return['tenant'] = $tenantURI;
@@ -407,23 +417,23 @@ class Repository implements InterfaceRepository
             if (count($sets) > 0) {
                 $setURI = $sets[0];
             } else {
-                throw new Exception('A set with the code '. $arrSet[1]. " is not found in the triple store" );
+                throw new \Exception('A set with the code '. $arrSet[1]. " is not found in the triple store" );
             }
         }
 
         $return['set'] = $setURI;
-        
         $conceptSchemeURI = null;
         if (!empty($arrSet[2])) {
             $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $arrSet[2] . '"', Skos::CONCEPTSCHEME);
             if (count($conceptSchemes) > 0) {
                 $conceptSchemeURI = $conceptSchemes[0];
             } else {
-                throw new Exception('A concept scheme with the uuid '. $arrSet[2]. " is not found in the triple store" );
+                throw new \Exception('A concept scheme with the uuid '. $arrSet[2]. " is not found in the triple store" );
             }
         }
 
         $return['conceptScheme'] = $conceptSchemeURI;
+        
         return $return;
     }
 

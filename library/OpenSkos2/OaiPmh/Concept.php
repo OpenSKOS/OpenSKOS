@@ -57,17 +57,21 @@ class Concept implements Record
     public function getHeader()
     {
         $concept = $this->concept;
-        
-        if (!$concept->isDeleted()) {
-            $datestamp = $concept->getPropertySingleValue(DcTerms::MODIFIED)->getValue();
+        $modified= $concept->getPropertySingleValue(DcTerms::MODIFIED);
+        if ($modified != null) {
+            $datestamp = $modified ->getValue();
         } else {
+            $submitted = $concept->getPropertySingleValue(DcTerms::DATESUBMITTED);
+            if ($submitted != null) {
+               $datestamp = $submitted ->getValue(); 
+            } 
+        }
+        if ($concept->isDeleted()) {
             if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
                 $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
-            } else {
-                $datestamp = $concept->getPropertySingleValue(DcTerms::MODIFIED)->getValue();
             }
         }
-        
+
         $setSpecs = [];
         $specs = $this->setsMap->fetchTenantSpecData($concept);
         foreach ($specs as $spec) {
