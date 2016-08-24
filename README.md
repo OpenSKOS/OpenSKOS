@@ -349,7 +349,8 @@ concept=http://hdl.handle.net/11148/CCR_C-2753_0d58c774-7ba4-60d1-9e79-88a031ec2
 related=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&key=<secret>
 ```
 
-
+Importnat: if you add a relation the admin of the backend should not forget to update your institution relations
+setting.
 
 Delete relation triple (with the inverse, if defined)
 ```

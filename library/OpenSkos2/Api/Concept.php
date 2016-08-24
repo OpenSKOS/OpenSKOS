@@ -332,7 +332,7 @@ class Concept extends AbstractTripleStoreResource {
     public function addRelationTriple(PsrServerRequestInterface $request) {
         $params = $this->getAndAdaptQueryParams($request);
         try {
-            $body = $this->preEditChecksRels($request, $params);
+            $body = $this->preEditChecksRels($request, $params, false);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
@@ -352,7 +352,7 @@ class Concept extends AbstractTripleStoreResource {
     public function deleteRelationTriple(PsrServerRequestInterface $request) {
         try {
             $params = $this->getAndAdaptQueryParams($request); // sets tenant info
-            $body = $this->preEditChecksRels($request, $params);
+            $body = $this->preEditChecksRels($request, $params, true);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -365,10 +365,9 @@ class Concept extends AbstractTripleStoreResource {
         return $response;
     }
 
-    private function preEditChecksRels(PsrServerRequestInterface $request, $params) {
+    private function preEditChecksRels(PsrServerRequestInterface $request, $params, $toBeDeleted) {
 
         $body = $request->getParsedBody();
-
         if (!isset($body['key'])) {
             throw new ApiException('Missing key', 400);
         }
@@ -405,10 +404,11 @@ class Concept extends AbstractTripleStoreResource {
             throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos concept-concept relation nor a user-defined relation. ', 400);
         }
 
+        if (!$toBeDeleted) {
+            $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
+            $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+        }
 
-        $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
-        $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
-        
         $user = $this->getUserByKey($body['key']);
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());

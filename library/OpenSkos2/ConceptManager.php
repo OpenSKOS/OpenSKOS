@@ -259,9 +259,7 @@ class ConceptManager extends ResourceManager
      */
     public function deleteRelationTriple($subjectUri, $relationType, $objectUri)
     {
-        if (!in_array($relationType, $this -> fetchRelationUris(), true)) {
-            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
-        }
+        
         $this->deleteMatchingTriples(
             new Uri($subjectUri),
             $relationType,
