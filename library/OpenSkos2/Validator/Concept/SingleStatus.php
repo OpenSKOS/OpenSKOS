@@ -37,6 +37,10 @@ class SingleStatus extends AbstractConceptValidator
             $this->errorMessages[] = 'Only single status is allowed.';
             return false;
         }
+        if (count($statusses) < 1) {
+             $this->errorMessages[] = ' An obligatory field status is absent. ';
+             return false;
+        }
         if (count($statusses) > 0) {
             $status = $statusses[0]->getValue();
             if (strtolower($status) !== $status) {
