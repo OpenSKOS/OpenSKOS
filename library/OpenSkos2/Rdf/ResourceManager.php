@@ -658,7 +658,8 @@ class ResourceManager
         if ($resType === null) {
            $resType =   $this->resourceType;
         }
-        return EasyRdf::graphToResourceCollection($result, $resType);
+        $retVal= EasyRdf::graphToResourceCollection($result, $resType);
+        return $retVal;
     }
 
     /**
@@ -897,30 +898,26 @@ class ResourceManager
     }
 
    // output is a list of related concepts, used in both managers: relation and concept.
-      public function fetchRelationsForConcept($uri, $relationType, $conceptScheme = null) {
+      public function fetchRelatedConcepts($uri, $relationType, $isTarget, $conceptScheme = null) {
+        
+          if ($isTarget) {
+            $startQuery = 'DESCRIBE ?subject {SELECT DISTINCT ?subject   WHERE { ?subject <' . $relationType . '> <' . $uri . '> . ';
+            if ($conceptScheme == null) {
+                $endQuery = '} }';
+            } else {
+                $endQuery = '  <'.$uri.'> <' . Skos::INSCHEME . '> <' . $conceptScheme . '>. } }';
+            }
+        } else {
+            $startQuery = 'DESCRIBE ?object {SELECT DISTINCT ?object   WHERE { <' . $uri . '> <' . $relationType . '> ?object . ';
+            if ($conceptScheme == null) {
+                $endQuery = '} }';
+            } else {
+                $endQuery = '  ?object <' . Skos::INSCHEME . '> <' . $conceptScheme . '>. } }';
+            }
+        };
 
-        $allRelations = new ConceptCollection([]);
-
-        if (!$uri instanceof Uri) {
-            $uri = new Uri($uri);
-        }
-
-        $patterns = [
-            [$uri, $relationType, '?subject'],
-        ];
-
-        if (!empty($conceptScheme)) {
-            $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
-        }
-
-        $start = 0;
-        //fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false, $resType=null)
-        $relations = $this->fetch($patterns, $start, MAXIMAL_ROWS, false, new Uri(Concept::TYPE));
-        foreach ($relations as $relation) {
-            $allRelations->append($relation);
-        }
-
-        return $allRelations;
+        $relatedConcepts = $this->fetchQuery($startQuery.$endQuery, Concept::TYPE);
+        return $relatedConcepts;
     }
 
     public function setUriWithEmptinessCheck(&$resource, $property, $val) {

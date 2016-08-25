@@ -77,14 +77,29 @@ class Relation extends AbstractTripleStoreResource {
     public function findRelatedConcepts($request, $uri, $format) {
         $params=$request->getQueryParams();
         $relType = $params['id'];
-        if (isset($params['inSchema'])) {
-            $schema = $params['inSchema'];
+        if (isset($params['inScheme'])) {
+            $schema = $params['inScheme'];
         } else {
             $schema = null;
 
         }
         try {
-            $concepts = $this->manager->fetchRelationsForConcept($uri, $relType, $schema);
+            
+            if (isset($params['isTarget'])) {
+               if ($params['isTarget'] === 'true') {
+                   $isTarget=true;
+               } else {
+                 if ($params['isTarget'] === 'false') {
+                     $isTarget=false;
+                 }  else {
+                     throw new Exception('Wrong value "'.$params['isTarget'].'" for parameter isTarget, must be "true" or "false"');
+                 }
+               }
+            } else {
+               $isTarget=false; 
+            }
+            $concepts = $this->manager->fetchRelatedConcepts($uri, $relType, $isTarget, $schema);
+            
             $result = new ResourceResultSet($concepts, $concepts->count(), 0, MAXIMAL_ROWS);
             switch ($format) {
             case 'json':

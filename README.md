@@ -294,14 +294,21 @@ http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23slower&mem
 http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&members=true
 ```
 
-Fetch all pairs for a given relations with a given concept as a source
+Fetch all concepts for a given relation with a given concept as a source
 ```
 http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
+```
+```
+http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&isTarget=false
 ```
 ```
 http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23faster&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
 ```
 
+Fetch all concepts for a given relation with a given concept as a target
+```
+http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&isTarget=true
+```
 
 Creating (user-)relation definition
 ```

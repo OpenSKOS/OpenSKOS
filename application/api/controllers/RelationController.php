@@ -44,7 +44,9 @@ class API_RelationController extends AbstractController {
             $this->emitResponse($response);
         } else {
             $conceptUri = $this->getParam('conceptUri');
-            if (isset($conceptUri)) { // gives all concepts related to the one with conceptUri
+            if (isset($conceptUri)) { 
+               // outputs all concepts-"targets" such that (conceptUri, relation, "target") holds if "isTarget=false" (default)
+                // outputs all concepts-"sources" such that ("source", relation, conceptUri) holds if "isTarget=true" 
                 $request = $this->getPsrRequest();
                 $api = $this->getDI()->make($this->fullNameResourceClass);
                 $format = $this->getRequestedFormat();
