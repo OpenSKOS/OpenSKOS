@@ -35,6 +35,8 @@ use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+
 
 class Concept extends AbstractTripleStoreResource {
 
@@ -68,6 +70,8 @@ class Concept extends AbstractTripleStoreResource {
         try {
             set_time_limit(120);
             $params = $request->getQueryParams();
+            //\Tools\Logging::var_error_log(" params \n", $params , '/app/data/debug.txt');
+        
             // offset
             $start = 0;
             if (!empty($params['start'])) {
@@ -107,20 +111,26 @@ class Concept extends AbstractTripleStoreResource {
                 $options['sets'] = explode(' ', trim($params['sets']));
             }
 
-
+            $tenantCodes=[];     
             if (isset($params['tenant'])) {
-                $options['tenants'] = explode(' ', trim($params['tenant']));
+                $tenantCodes = explode(' ', trim($params['tenant']));
             } else { // synomym parameter
                 if (isset($params['tenants'])) {
-                    $options['tenants'] = explode(' ', trim($params['tenants']));
+                    $tenantCodes  = explode(' ', trim($params['tenants']));
+                } else {
+                    if (isset($params['tenantUri'])) {
+                        $options['tenants'] = explode(' ', trim($params['tenantUri']));
+                    }
                 }
             }
-            if (isset($options['tenants'])) {
-                foreach ($options['tenants'] as $tenantcode) {
+            
+            if (count($tenantCodes)>0) {
+                foreach ($tenantCodes as $tenantcode) {
                     $tenantUri = $this->manager->fetchInstitutionUriByCode($tenantcode);
                     if ($tenantUri === null) {
                         throw new ApiException('The tenant referred by code ' . $tenantcode . ' does not exist in the triple store. ', 400);
-                    }
+                    };
+                    $options['tenants'][]=$tenantUri;
                 }
             }
 
@@ -133,6 +143,8 @@ class Concept extends AbstractTripleStoreResource {
                 $options['status'] = explode(' ', trim($params['status']));
             }
 
+            //\Tools\Logging::var_error_log(" params \n", $params , '/app/data/debug.txt');
+        
             $concepts = $this->searchAutocomplete->search($options, $total);
 
             foreach ($concepts as $concept) {

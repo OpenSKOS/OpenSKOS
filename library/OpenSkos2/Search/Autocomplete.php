@@ -23,7 +23,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Skos as SkosNamespace;
 use Solarium\Core\Query\Helper as QueryHelper;
 
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 class Autocomplete
 {
     /**
@@ -55,6 +55,7 @@ class Autocomplete
     public function search($options, &$numFound)
     {
         // @TODO Ensure all options are arrays.
+        //\Tools\Logging::var_error_log(" options \n", $options , '/app/data/debug.txt');
         
         $helper = new QueryHelper();
         
