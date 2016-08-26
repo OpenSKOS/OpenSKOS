@@ -37,8 +37,6 @@ try {
 
 include dirname(__FILE__) . '/bootstrap.inc.php';
 
-// Test....
-
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -60,7 +58,7 @@ $message = new \OpenSkos2\Import\Message(
 
 $importer->handle($message);
 
-
+include_once('RemoveDanglingReferences.php');
 
 
 echo "done!";

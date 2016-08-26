@@ -779,44 +779,6 @@ var_dump($added);
 
 $logger->info("Migration is finished. Removing dangling references.");
 
-function remove_dangling_references($manager, $resources, $property, $rdfType) {
-    foreach ($resources as $resource) {
-        $references = $resource->getProperty($property);
-        $newreferences = array();
-        foreach ($references as $reference) {
-            $count = $manager->countTriples('<' . trim($reference->getUri()) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-            if ($count > 0) {
-                $newreferences[]=$reference;
-            }
-        }
-        $resource -> unsetProperty($property);
-        if (count($newreferences) > 0) {
-            $resource->addProperties($property, $newreferences);
-        }
-        $manager->replace($resource);        
-    }
-}
+include_once('RemoveDanglingReferences.php');
 
-echo "Removing dangling has-top-concept references in concept schemata ... \n";
-$schemataURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPTSCHEME . '>', null);
-$schemata = $resourceManager->fetchByUris($schemataURIs, Skos::CONCEPTSCHEME);
-remove_dangling_references($resourceManager, $schemata, Skos::HASTOPCONCEPT, Skos::CONCEPT);
-
-echo "Removing dangling member references in skos collections ... \n";
-$skoscollectionsURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::SKOSCOLLECTION . '>', null);
-$skoscollections = $resourceManager->fetchByUris($skoscollectionsURIs, Skos::SKOSCOLLECTION);
-remove_dangling_references($resourceManager, $skoscollections, Skos::MEMBER, Skos::CONCEPT);
-
-echo "Removing dangling references in concepts... \n";
-$conceptURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
-$concepts = $resourceManager->fetchByUris($conceptURIs, Skos::CONCEPT);
-echo "All concepts have been just retrieved.\n";
-remove_dangling_references($resourceManager, $concepts, Skos::INSCHEME, Skos::CONCEPTSCHEME);
-echo "Dangling in-scheme references have been just removed.\n";
-remove_dangling_references($resourceManager, $concepts, Skos::TOPCONCEPTOF, Skos::CONCEPTSCHEME);
-echo "Dangling top-concept-of references have been just removed.\n";
-remove_dangling_references($resourceManager, $concepts, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION);
-echo "Dangling inSKOSCOLLECTION references have been just removed.\n";
-
-echo "done!\n";
 $logger->info("Done!");
