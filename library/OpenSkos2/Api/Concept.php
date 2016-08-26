@@ -35,7 +35,7 @@ use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 
 class Concept extends AbstractTripleStoreResource {

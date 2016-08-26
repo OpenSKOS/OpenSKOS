@@ -34,6 +34,7 @@ use OpenSkos2\Api\Exception\ApiException;
 
 
 require_once dirname(__FILE__) .'/config.inc.php';
+require_once dirname(__FILE__) . '/../../tools/Logging.php';
 
 class ConceptManager extends ResourceManager
 {
@@ -344,24 +345,26 @@ class ConceptManager extends ResourceManager
     }
     
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri) {
-        $trans = Relations::$transitive;
-        $closed = null;
-        if (!isset($trans[$relationUri]) || $trans[$relationUri] === null) {
-            $closed = false;
-        } else {
-            $closed = $trans[$relationUri];
+        $count = $this->countTriples('<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>');
+        if ($count > 0) {
+            $relation[] = $conceptUri;
+            $relation[] = $relationUri;
+            $relation[] = $relatedConceptUri;
+            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, '/app/data/info.log');
+            return false;
         }
-        if ($closed) {
+
+        $trans = Relations::$transitive;
+        if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {
-                throw new ApiException('The triple creates a relation which alredy exists (in the transitive closure).', 400);
+                $relation[] = $conceptUri;
+                $relation[] = $relationUri;
+                $relation[] = $relatedConceptUri;
+                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, '/app/data/info.log');
+                throw new ApiException('Concepts have not been updated because of attempt to add a relation which is in the transitive closure.', 400);
             }
-        } else {
-            $count = $this->countTriples('<'.$conceptUri.'>', '<'.$relationUri.'>', '<'.$relatedConceptUri.'>');
-            if ($count >0) {
-               throw new ApiException('The triple creates a relation which alredy exists.', 400); 
-            }
-        }
+        };
         return false;
     }
   
