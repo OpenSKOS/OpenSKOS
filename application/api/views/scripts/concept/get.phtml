@@ -21,7 +21,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
 use OpenSkos2\MyInstitutionModules\Relations;
 use OpenSkos2\Namespaces;
-use OpenSkos2\Namespaces\Org;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -125,10 +124,10 @@ $this->headTitle($title);
     ];
 ?>
 <?php foreach ($relationsClasses as $className):?>
-    <h3><?=$this->translate($className)?></h3>
+    <h3><?=$className?> (this concept is a source) </h3>
         
     <?php foreach (Concept::$classes[$className] as $property):?>
-        <?php $relations = $conceptManager->fetchRelationsForConcept($concept, $property);?>
+        <?php $relations = $conceptManager->fetchRelatedConcepts($concept, $property, false);?>
         <?php if ($relations->count() > 0):?>
             <h4>
                 <?= Namespaces::shortenProperty($property)?>
@@ -146,10 +145,10 @@ $this->headTitle($title);
     <?php endforeach; ?>
 <?php endforeach; ?>
 
-<h3>User-defined relations</h3>
+<h3>User-defined relations (this concept is a source)</h3>
 <?php  $specificRelations = Relations::$myrelations;
          foreach ($specificRelations as $key => $value):?>
-        <?php $relations = $conceptManager->fetchRelationsForConcept($concept, $value);?>
+        <?php $relations = $conceptManager->fetchRelatedConcepts($concept, $value, false);?>
         <?php if ($relations->count() > 0):?>
             <h4>
                 <?= $key?>
@@ -166,7 +165,49 @@ $this->headTitle($title);
         <?php endif; ?>
     <?php endforeach; ?>    
     
+
+<?php foreach ($relationsClasses as $className):?>
+    <h3><?=$className?> (this concept is a target) </h3>
+        
+    <?php foreach (Concept::$classes[$className] as $property):?>
+        <?php $relations = $conceptManager->fetchRelatedConcepts($concept, $property, true);?>
+        <?php if ($relations->count() > 0):?>
+            <h4>
+                <?= Namespaces::shortenProperty($property)?>
+            </h4>
+            <ul>
+                <?php foreach ($relations as $relationConcept):?>
+                    <li>
+                        <a href="<?=$this->url(['id' => $relationConcept->getUuid()])?>.html">
+                            <?= $this->escape($relationConcept->getCaption($lang))?>
+                        </a>
+                    </li>
+                <?php endforeach?>
+            </ul>
+        <?php endif; ?>
+    <?php endforeach; ?>
+<?php endforeach; ?>
+
+<h3>User-defined relations (this concept is a target)</h3>
+<?php  foreach ($specificRelations as $key => $value):?>
+        <?php $relations = $conceptManager->fetchRelatedConcepts($concept, $value, true);?>
+        <?php if ($relations->count() > 0):?>
+            <h4>
+                <?= $key?>
+            </h4>
+            <ul>
+                <?php foreach ($relations as $relationConcept):?>
+                    <li>
+                        <a href="<?=$this->url(['id' => $relationConcept->getUuid()])?>.html">
+                            <?= $this->escape($relationConcept->getCaption($lang))?>
+                        </a>
+                    </li>
+                <?php endforeach?>
+            </ul>
+        <?php endif; ?>
+    <?php endforeach; ?>    
     
+
 <h3><?=$this->translate('Alternative formats')?></h3>
 <ul>
     <li><a class="rdf" href="<?=$this->url(['id' => $concept->getUuid()])?>.rdf">RDF</a></li>

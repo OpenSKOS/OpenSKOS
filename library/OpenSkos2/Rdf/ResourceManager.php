@@ -228,22 +228,13 @@ class ResourceManager
      * @param string $uuid
      * @return Resource
      */
-    public function fetchByUuid($uuid)
+    public function fetchByUuid($uuid, $resType=null)
     {
-        $prefixes = [
-            'openskos' => OpenSkosNamespace::NAME_SPACE
-        ];
-
-        $lit = new Literal($uuid);
-        $qb = new QueryBuilder($prefixes);
-        $query = $qb->describe('?subject')
-            ->where('?subject', 'openskos:uuid', (new NTriple)->serialize($lit));
-        $data = $this->fetchQuery($query);
-
-        if (!isset($data[0])) {
-            return null;
-        }
-        return $data[0];
+        $query='DESCRIBE ?subject ?object '
+                . '{SELECT DISTINCT ?subject  ?object WHERE '
+                . '{ ?subject <'.OpenSkos::UUID.'> "'.$uuid.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+        $result = $this->fetchBy($query, $uuid, $resType);
+        return $result;
     }
 
     /**
@@ -252,47 +243,55 @@ class ResourceManager
      * @return Resource
      */
     public function fetchByUri($uri, $resType=null)
+    { 
+        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .  FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+        $result = $this->fetchBy($query, $uri, $resType);
+        return $result;
+    }
+    
+    /*
+     * Fetch resource by code
+     *
+     * @param string $code
+     * @return Resource
+     */
+    public function fetchByCode($code, $resType=null)
     {
+        $query='DESCRIBE ?subject ?object '
+                . '{SELECT DISTINCT ?subject  ?object WHERE '
+                . '{ ?subject <'.OpenSkos::CODE.'> "'.$code.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+        $result = $this->fetchBy($query, $code, $resType);
+        return $result;
+    }
+    
+    private function fetchBy($query, $reference, $resType = null) {
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
-        //$resource = new Uri($uri);
-        //$result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .} }';
         $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
-        $resources=$this->removeRelatedResourcesFromCollectionForOneResource($uri, $resources);
         
         if (count($resources) === 0) {
-            if ($resType===null) {
+            if ($resType === null) {
                 $resType = "not given. ";
             }
-            throw new ApiException('The requested resource <' . $uri . '> of type ' . $resType . ' was not found.', 404);
+            throw new ApiException('The requested resource ' . $reference . ' of type ' . $resType . ' was not found in the triple store.', 404);
         }
         if (count($resources) > 1) {
-        //echo '***';   
-        //var_dump($resType);
-        //echo '***';   
-        //var_dump($resources[0]);
-        //echo '***';   
-        //var_dump($resources[1]);
-        //echo '***';   
+            //echo '***';   
+            //var_dump($resType);
+            //echo '***';   
+            //var_dump($resources[0]);
+            //echo '***';   
+            //var_dump($resources[1]);
+            //echo '***';   
             throw new ApiException('Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.', 500);
-             
         }
- 
+
         return $resources[0];
     }
     
-    private function removeRelatedResourcesFromCollectionForOneResource($originalUri, $resourceCollection) {
-        $retVal=[];
-        foreach ($resourceCollection as $resource) {
-            if ($originalUri == $resource->getUri()) {
-                $retVal[]=$resource;
-            }
-        }
-        return $retVal;
-    }
+   
     
     /**
      * Fetches multiple records by list of uris.
@@ -955,17 +954,15 @@ class ResourceManager
             if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
                 $resource= $this->fetchByUri($id, $resourceType);
             } else {
-                $resources = $this->fetch([OpenSkosNamespace::UUID => new Literal($id)], null, null, false, new Uri($resourceType));
-                if (count($resources) < 1) { // the id might happen to be not an uuid but the code
-                    $resources = $this->fetch([OpenSkosNamespace::CODE => new Literal($id)], null, null, false, new Uri($resourceType));
-                    if (count($resources) > 0) {
-                        $resource= $resources[0];
-                    } else {
-                        throw new ApiException('The resource of type '.$resourceType. ' with the id/uri/code '. $id.' is not found. ', 404);
+                try {
+                $resource = $this->fetchByUuid($id, $resourceType);
+                } catch (\Exception $ex) {
+                    try  {
+                    $resource = $this->fetchByCode($id, $resourceType);
+                    } catch (\Exception $ex2) {
+                         throw new ApiException('The resource of type '.$resourceType. ' with the id/uri/code '. $id.' cannot be found (detailed reasons : ' . $ex->getMessage() . ' AND   ' .  $ex2->getMessage() .')', 404);
                        }
-                } else {
-                    $resource= $resources[0];
-                }
+                } 
             }
             
         $resource = $this->augmentResourceWithTenant($resource);

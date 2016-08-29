@@ -47,7 +47,7 @@ function remove_dangling_references($manager, $resources, $property, $rdfType) {
         $manager->replace($resource);
         $removed += count($newreferences)-$oldcount;
     }
-    echo "Removed ". $removed . "references \n";
+    echo "Removed ". $removed . " references \n";
 }
 
 function cleaner($resourceManager) {

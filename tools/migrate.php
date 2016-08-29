@@ -25,6 +25,7 @@
  * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
  *  */
 require dirname(__FILE__) . '/autoload.inc.php';
+require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
@@ -677,6 +678,8 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
             } else {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
                     var_dump($errorMessage);
+                    \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $preprocessedResource->getUri(), '/app/data/ValidationErrors.txt');
+                
                 }
                 var_dump($resource->getUri() . " cannot not been inserted due to the validation error(s) above.");
             }
