@@ -50,7 +50,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addElement('select', 'role', array('label' => _('Role'), 'required' => true))
                     ->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
                     ->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
-                    ->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication)'), 'required' => false))
                     ->addElement('multiselect', 'defaultSearchProfileIds', array('label' => _('Search Profile Id'), 'required' => false))
                     ->addElement('checkbox', 'disableSearchProfileChanging', array('label' => _('Disable changing search profile'), 'required' => false))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
@@ -85,17 +84,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addValidator($validator)
                     ->addValidator(new Zend_Validate_EmailAddress());
 
-
-            $validator = new Zend_Validate_Callback([$this->getTable(), 'uniqueEppn']);
-            $validator
-                ->setMessage(
-                    _("there is already a user with eduPersonPrincipalName '%value%'"),
-                    Zend_Validate_Callback::INVALID_VALUE
-                );
-
-            $form->getElement('eppn')
-                 ->addValidator($validator);
-
             $validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
             $validator
                     ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
@@ -124,7 +112,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     $form->removeElement('role');
                     $form->removeElement('type');
                     $form->removeElement('apikey');
-                    $form->removeElement('eppn');
                     $form->removeElement('defaultSearchProfileIds');
                     $form->removeElement('disableSearchProfileChanging');
                 }

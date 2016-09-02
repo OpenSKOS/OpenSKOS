@@ -174,11 +174,6 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
         return $result;
     }
 
-    public function uniqueEppn($eppn, Array $data)
-    {
-        return $this->_uniqueFieldValue('eppn', $eppn, $data);
-    }
-
     public static function pwgen($length)
     {
         return substr(md5(rand() . rand()), 0, $length);

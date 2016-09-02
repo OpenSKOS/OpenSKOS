@@ -18,6 +18,7 @@
  */
 namespace OpenSkos2;
 
+use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
