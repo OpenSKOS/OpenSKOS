@@ -110,8 +110,8 @@ class Command implements LoggerAwareInterface
             $type=$types[0]->getUri();
             $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser());
 
-            $exists = $this->resourceManager->countTriples("<".$uri.">","<".Rdf::TYPE.">", "<".$type.">");
-            if($exists>0) {
+            $exists = $this->resourceManager->resourceExists($uri,$type);
+            if($exists) {
                 $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
                 if ($message->getNoUpdates()) {
                     var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");

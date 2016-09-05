@@ -279,8 +279,8 @@ class Concept extends AbstractTripleStoreResource {
                 $relatedConcepts = $concept->getProperty($property);
                 foreach ($relatedConcepts as $relConcept) {
                     // check if related concept exists
-                    $count = $this->manager->countTriples('<' . $relConcept . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
-                    if ($count < 1) {
+                    $exists = $this->manager->resourceExists($relConcept, Skos::CONCEPT);
+                    if (!$exists) {
                        throw new ApiException('The related concept  ' . $relConcept . '  does not exist. ', 400);
                     }
                     $this->manager->relationTripleIsDuplicated($conceptUri, $relConcept, $property);
@@ -393,12 +393,13 @@ class Concept extends AbstractTripleStoreResource {
             throw new ApiException('Missing type', 400);
         }
 
-        $count1 = $this->manager->countTriples('<' . $body['concept'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
-        if ($count1 < 1) {
+        $exists1 = $this->manager->resourceExists($body['concept'], Skos::CONCEPT);
+        if (!$exists1) {
             throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 400);
         }
-        $count2 = $this->manager->countTriples('<' . $body['related'] . '>', '<' . Rdf::TYPE . '>', '<' . Skos::CONCEPT . '>');
-        if ($count2 < 1) {
+        
+        $exists2 = $this->manager->resourceExists($body['related'], Skos::CONCEPT);
+        if (!$exists2) {
             throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
         }
 

@@ -35,8 +35,8 @@ function remove_dangling_references($manager, $resources, $property, $rdfType) {
         $oldcount= count($references)
 ;        $newreferences = array();
         foreach ($references as $reference) {
-            $count = $manager->countTriples('<' . trim($reference->getUri()) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-            if ($count > 0) {
+            $exists = $manager->resourceExists(($reference->getUri()),$rdfType);
+            if ($exists) {
                 $newreferences[]=$reference;
             }
         }

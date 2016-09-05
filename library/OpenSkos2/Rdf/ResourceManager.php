@@ -501,7 +501,39 @@ class ResourceManager
         return $retVal;
     }
     
-  
+    public function resourceExists($id, $rdfType) {
+        
+        if ($rdfType == Concept::TYPE) {
+            if ($id !== null && isset($id)) {
+                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                    $query = 'uri:' . $id;
+                } else {
+                    $query = 'uuid:' . $id;
+                }
+                $solr_result = $this->solrResourceManager->search($query);
+                return ($solr_result->getNumFound() > 0);
+            } else {
+                return false;
+            }
+        } else {
+            if ($id !== null && isset($id)) {
+                if ($rdfType == null) {
+                    throw new ApiException('No rdf type is given for resource with id ' . $id, 412);
+                }
+                if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
+                    $count = $this->countTriples('<' . $id . '>', '<' . RdfNamespace::TYPE . '>', '<' . $rdfType . '>');
+                    return ($count > 0);
+                } else {
+                    $subjectURIs = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::UUID, '"' . $id . '"', $rdfType);
+                    return (count($subjectURIs) > 0);
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+    
+    
     public function fetchSubjectWithPropertyGiven($propertyUri, $value, $rdfType=null) {
         $typeFilter = "";
         if (isset($rdfType)) {
@@ -952,21 +984,25 @@ class ResourceManager
     public function findResourceById($id, $resourceType) {
         if ($id !== null && isset($id)) {
             if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                $resource= $this->fetchByUri($id, $resourceType);
+                $resource = $this->fetchByUri($id, $resourceType);
             } else {
                 try {
-                $resource = $this->fetchByUuid($id, $resourceType);
+                    $resource = $this->fetchByUuid($id, $resourceType);
                 } catch (\Exception $ex) {
-                    try  {
-                    $resource = $this->fetchByCode($id, $resourceType);
-                    } catch (\Exception $ex2) {
-                         throw new ApiException('The resource of type '.$resourceType. ' with the id/uri/code '. $id.' cannot be found (detailed reasons : ' . $ex->getMessage() . ' AND   ' .  $ex2->getMessage() .')', 404);
-                       }
-                } 
+                    if ($resourceType == Org::FORMALORG || $resourceType == Dcmi::DATASET) {
+                        try {
+                            $resource = $this->fetchByCode($id, $resourceType);
+                        } catch (\Exception $ex2) {
+                            throw new ApiException('The resource of type ' . $resourceType . ' with the id/uri/code ' . $id . ' cannot be found (detailed reasons : ' . $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')', 404);
+                        }
+                    } else {
+                       throw new ApiException('The resource of type ' . $resourceType . ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' . $ex->getMessage() .  ')', 404); 
+                    }
+                }
             }
-            
-        $resource = $this->augmentResourceWithTenant($resource);
-        return $resource;
+
+            $resource = $this->augmentResourceWithTenant($resource);
+            return $resource;
         } else {
             throw new ApiException('No Id (URI or UUID, or Code) is given', 400);
         }

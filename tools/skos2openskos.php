@@ -23,7 +23,7 @@ include dirname(__FILE__) . '/autoload.inc.php';
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'file|f=s' => 'File to import',
-    'userUri|u=s' => 'Uri of the user that is doing the import',
+    'userUri|u=s' => 'Uri of the user who is doing the import',
     'setUri=s' => 'Set uri'
 );
 

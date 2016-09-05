@@ -678,7 +678,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
             } else {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
                     var_dump($errorMessage);
-                    \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $preprocessedResource->getUri(), '/app/data/ValidationErrors.txt');
+                    \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $resource->getUri(), '/app/data/ValidationErrors.txt');
                 
                 }
                 var_dump($resource->getUri() . " cannot not been inserted due to the validation error(s) above.");

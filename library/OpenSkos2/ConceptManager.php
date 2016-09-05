@@ -48,13 +48,13 @@ class ConceptManager extends ResourceManager
     public function findResourceById($id, $resourceType) {
         $concept = parent::findResourceById($id, $resourceType);
         if ($concept->isDeleted()) {
-            throw new ApiException('Concept ' . $id . ' is deleted', 410);
+            throw new ApiException('Resource with id ' . $id . ' is deleted', 410);
         }
         return $concept;
     }
     
-   
     
+
     /**
      * Deletes and then inserts the resourse.
      * For concepts also deletes all relations for which the concept is object.
@@ -300,7 +300,7 @@ class ConceptManager extends ResourceManager
         foreach ($uris as $related) {
             $graph->addResource($uri, $relationType, $related);
         }
-
+        
         $this->client->insert($graph);
     }
     

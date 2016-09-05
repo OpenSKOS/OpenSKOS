@@ -169,9 +169,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if (!$this->referenceCheckOn){
                 return [];
             }
-            $count = $this->resourceManager->countTriples('<' . trim($uri) . '>', '<' . Rdf::TYPE . '>', '<' . $rdfType . '>');
-            if ($count < 1) {
-                return ['The resource (of type ' . $rdfType. ') referred by  uri ' . $uri . ' is not found in the triple store. '];
+            $exists = $this->resourceManager->resourceExists(trim($uri), $rdfType);
+            if (!$exists) {
+                return ['The resource (of type ' . $rdfType. ') referred by  uri ' . $uri . ' is not found. '];
             } else {
                 return [];
             }
