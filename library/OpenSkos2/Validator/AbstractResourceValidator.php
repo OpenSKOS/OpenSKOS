@@ -95,53 +95,35 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             }
         }
 
-       
-        if ($isBoolean) {
-            foreach ($val as $value) {
-                $this->errorMessages = array_merge($this->errorMessages, $this-> checkBoolean($value, $propertyUri));
+        foreach ($val as $value) {
+            if ($isBoolean) {
+                $this->errorMessages = array_merge($this->errorMessages, $this->checkBoolean($value, $propertyUri));
             }
-        }
-
-        if ($isUnique) {
-            foreach ($val as $value) {
-                if ($value instanceof Uri) {
-                    $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, '<' . $value->getUri() . '>', $this->resourceType);
-                    $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $value->getUri()));
-                } else { // a literal
-                    if ($value instanceof Literal) {
-                        $language=$value->getLanguage();
-                        if ($language !== null && $language !==''){
-                           $completeValue = '"'.$value->getValue().'"@'.$language; 
-                        } else {
-                           $completeValue = '"'.$value->getValue().'"'; 
-                         }
-                        $otherResources = $this->resourceManager->fetchSubjectWithPropertyGiven($propertyUri, $completeValue, $this->resourceType);
-                        $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResources, $propertyUri, $completeValue));
-                    } else {
-                        $this->errorMessages = array_merge($this->errorMessages, 'Not correct rdf type for value ' . (string) $value);
-                    }
+            if ($value instanceof Uri) {
+                if ($type != null) {
+                    $this->errorMessages = array_merge($this->errorMessages, $this->existenceCheck($value, $type));
+                };
+                if ($isUnique) {
+                    $otherResourceUris = $this->resourceManager->fetchSubjectUriForUriRdfObject($propertyUri, $value, $this->resourceType);
+                    $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value));
                 }
             }
-        }
-
-        if ($type !== null) { // check is the referred resource of the given type exists in the triple store
-            foreach ($val as $value) {
-                if ($value instanceof Uri)
-                    $this->errorMessages = array_merge($this->errorMessages, $this->existenceCheck($value->getUri(), $type));
+            if (($value instanceof Literal) || $isUnique) {
+                $otherResourceUris = $this->resourceManager->fetchSubjectUriForLiteralRdfObject($propertyUri, $value, $this->resourceType);
+                $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value));
             }
         }
-
         return (count($this->errorMessages)===0);
     }
     
-   private function uniquenessCheck($resource, $otherResourcesUris, $propertyUri, $value) {
-       $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered in the triple store.'];
-       if (count($otherResourcesUris)>0){ 
+    private function uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value){
+      $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered in the triple store.'];
+       if (count($otherResourceUris)>0){ 
            if ($this->isForUpdate) {
-               if (count($otherResourcesUris)>1) { 
+               if (count($otherResourceUris)>1) { 
                   return $errorMessages; 
-               } else { // a signle other resource is found but it may be the given resource and duplication is not a problem
-                   if ($resource ->getUri() !== $otherResourcesUris[0]){ // the same resource
+               } else { 
+                   if ($resource ->getUri() !== $otherResourceUris[0]){ // the same resource
                       return $errorMessages;
                   } else {
                       return [];
@@ -152,7 +134,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
            }
        } else { // no duplications found
            return [];
-       }
+       } 
    }
    
     private function checkBoolean($val, $propertyUri) {
@@ -169,9 +151,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if (!$this->referenceCheckOn){
                 return [];
             }
-            $exists = $this->resourceManager->resourceExists(trim($uri), $rdfType);
+            $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
             if (!$exists) {
-                return ['The resource (of type ' . $rdfType. ') referred by  uri ' . $uri . ' is not found. '];
+                return ['The resource (of type ' . $rdfType. ') referred by  uri ' . $uri->getUri() . ' is not found. '];
             } else {
                 return [];
             }

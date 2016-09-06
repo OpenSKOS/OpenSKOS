@@ -70,8 +70,6 @@ class ResourceManager
       */
     protected $solrResourceManager;
     
- 
-    
     public function getResourceType()
     {
         return $this->resourceType;
@@ -540,14 +538,63 @@ class ResourceManager
             $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
         $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
-        //var_dump($query);
         $result = $this->query($query);
         $retVal = $this -> makeListOfPrimitiveResults($result, 'subject');
         return $retVal;
     }
     
     
+    public function fetchSubjectUriForUriRdfObject($property, $value, $rdfType){
+        $uri = $value->getUri();
+        if ($rdfType === Concept::TYPE) {
+            $split = explode("#", $property);
+            $field = $split[1];
+            $solrQuery = 's_'.$field. ':"'. $uri.'"';
+            $docs = $this -> solrResourceManager -> search($solrQuery);
+            return $this->makeUriListFromSolrResponse($docs);
+        } else {
+            $retVal=$this->fetchSubjectWithPropertyGiven($propertyUri, '<'.$uri.'>', $rdfType);
+            return $retVal;
+        }
+        
+    }
    
+    public function fetchSubjectUriForLiteralRdfObject($property, $value, $rdfType) {
+        $language = $value->getLanguage();
+        $term = $value->getValue();
+        if ($rdfType === Concept::TYPE) { // solr request, wprks only for skos and open-skos properties
+            $split = explode("#", $property);
+            $field = $split[1];
+            if ($field === 'prefLabel' || $field == 'altLabel' || $field === 'hiddenLabel') {
+                if ($language !== null && $language !== '') {
+                    $solrQuery = 'a_' . $field . '_' . $language . ':' . $term;
+                } else {
+                    $solrQuery = 'a_' . $field . ':' . $term;
+                }
+            } else {
+                $solrQuery = "s_" . $field . ":" . $term;
+            }
+            $docs= $this->solrResourceManager->search($solrQuery);
+            return $this->makeUriListFromSolrResponse($docs);
+        } else { // triple store request 
+            if ($language !== null && $language !== '') {
+                $completeValue = '"' . $term . '"@' . $language;
+            } else {
+                $completeValue = '"' . $term . '"';
+            }
+            $retVal = $this->fetchSubjectWithPropertyGiven($propertyUri, $comleteValue, $rdfType);
+            return $retVal;
+        }
+    }
+    
+    private function makeUriListFromSolrResponse($docs) {
+        $retVal = [];
+        foreach ($docs as $doc) {
+            $retval[]=$doc;
+        }
+        return $retVal;
+    }
+
     public function fetchObjectsWtithProperty($propertyUri, $rdfType=null) {
         $typeFilter = "";
         if (isset($rdfType)) {
