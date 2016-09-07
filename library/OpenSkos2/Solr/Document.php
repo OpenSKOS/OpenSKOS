@@ -65,7 +65,7 @@ class Document
         Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote', 'editorialNote'],
         Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote', 'historyNote'],
         Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote', 'scopeNote'],
-        Skos::NOTATION =>   ['s_notaton', 't_notaton', 'a_notaton', 'notation'],
+        Skos::NOTATION =>   ['s_notation', 't_notation', 'a_notation', 'notation'],
         Skos::INSCHEME =>   ['s_inScheme', 'inScheme'],
         OpenSkos::INSKOSCOLLECTION =>   ['s_inSkosCollection', 'inSkosCollection'],
         OpenSkos::STATUS => ['s_status', 'status'],

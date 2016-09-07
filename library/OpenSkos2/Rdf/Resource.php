@@ -547,7 +547,7 @@ class Resource extends Uri implements ResourceIdentifier
             $uri = UriGeneration::generateURI($parameters);
             if ($manager->askForUri($uri, true)) {
                 throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+                'The generated uri "' . $uri . '" is already in use. Check if notation is already used somewhere.'
                 );
             }
              $this->setUri($uri);

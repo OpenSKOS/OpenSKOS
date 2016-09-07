@@ -10,8 +10,10 @@ use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
@@ -66,10 +68,24 @@ abstract class AbstractTripleStoreResource {
     public function fetchDeatiledListResponse($params) {
        
         try { 
-            
             $index = $this->fetchDetailedList($params);
-            foreach ($index as $resource) {
-                $resource = $this->manager->augmentResourceWithTenant($resource);
+            
+            // augmenting with tenants and sets when necessary 
+            $rdfType = $this->manager->getResourceType();
+            if ($rdfType === Skos::CONCEPT) {
+                foreach ($index as $concept) {
+                    $spec = $this->manager->fecthTenantSpec($concept);
+                    foreach ($spec as $tenant_and_set) {
+                        $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
+                        $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
+                    }
+                }
+            } else {
+                if ($rdfType === Skos::CONCEPTSCHEME || $rdfType===Skos::SKOSCOLLECTION) {
+                    foreach ($index as $resource) {
+                        $resource = $this->manager->augmentResourceWithTenant($resource);
+                    }
+                }
             }
             $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
             switch ($params['context']) {

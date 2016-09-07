@@ -28,9 +28,7 @@ class Preprocessor {
     }
 
     public function forCreation(Resource $resourceObject, $params, $autoGenerateUuidUriWhenAbsent) {
-        if ($this->resourceType === Skos::CONCEPT && !isset($params['seturi'])) {
-            $params['seturi'] = $this->deriveSetUriForConcepts($resourceObject);
-        }
+        
         $preprocessed = $resourceObject;
         $preprocessed->addMetadata($this->userUri, $params, null);
         
@@ -41,6 +39,12 @@ class Preprocessor {
             } else {
                 $params['seturi']=$sets[0]->getUri();
             }
+            $preprocessed->unsetProperty(OpenSkos::TENANT);
+        }
+        
+        if ($this->resourceType === Skos::CONCEPT) {
+            $preprocessed->unsetProperty(OpenSkos::SET);
+            $preprocessed->unsetProperty(OpenSkos::TENANT);
         }
 
         if ($autoGenerateUuidUriWhenAbsent) {
@@ -62,9 +66,7 @@ class Preprocessor {
     
 
     public function forUpdate(Resource $resourceObject, $params) {
-        if ($this->resourceType === Skos::CONCEPT && !isset($params['seturi'])) {
-            $params['seturi'] = $this->deriveSetUriForConcepts($resourceObject);
-        }
+        
         $uri = $resourceObject->getUri();
         $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
         if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
@@ -79,26 +81,15 @@ class Preprocessor {
             }
         }
         $preprocessed = $resourceObject;
+        if ($this->resourceType === Skos::CONCEPT) {
+            $preprocessed->unsetProperty(OpenSkos::SET);
+            $preprocessed->unsetProperty(OpenSkos::TENANT);
+        }
+        if ($this->resourceType === Skos::CONCEPTSCHEME || $this->resourceType === Skos::SKOSCOLLECTION) {
+            $preprocessed->unsetProperty(OpenSkos::TENANT);
+        }
         $preprocessed->addMetadata($this->userUri, $params, $existingResource);
         return $preprocessed;
-    }
-
-    private function deriveSetUriForConcepts($concept) {
-        $sets = $concept->getProperty(OpenSkos::SET);
-        if (count($sets) < 1) {
-            $schemes = $concept->getProperty(Skos::INSCHEME);
-            if (count($schemes) > 0) {
-                $schemeuri = $schemes[0]->getUri();
-                $scheme = $this->manager->fetchByUri($schemeuri, Skos::CONCEPTSCHEME);
-                $schemesets = $scheme->getProperty(OpenSkos::SET);
-                if (count($schemesets) > 0) {
-                    return $schemesets[0]->getUri();
-                }
-            }
-        } else {
-            return $sets[0]->getUri();
-        }
-        return null;
     }
 
 }

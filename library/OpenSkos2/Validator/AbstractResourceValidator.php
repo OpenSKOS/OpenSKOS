@@ -104,12 +104,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                     $this->errorMessages = array_merge($this->errorMessages, $this->existenceCheck($value, $type));
                 };
                 if ($isUnique) {
-                    $otherResourceUris = $this->resourceManager->fetchSubjectUriForUriRdfObject($propertyUri, $value, $this->resourceType);
+                    $otherResourceUris = $this->resourceManager->fetchSubjectUriForUriRdfObject($resource, $propertyUri, $value);
                     $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value));
                 }
             }
-            if (($value instanceof Literal) || $isUnique) {
-                $otherResourceUris = $this->resourceManager->fetchSubjectUriForLiteralRdfObject($propertyUri, $value, $this->resourceType);
+            if (($value instanceof Literal) && $isUnique) {
+                $otherResourceUris = $this->resourceManager->fetchSubjectUriForLiteralRdfObject($resource, $propertyUri, $value);
                 $this->errorMessages = array_merge($this->errorMessages, $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value));
             }
         }
@@ -117,8 +117,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     private function uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value){
-      $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered in the triple store.'];
-       if (count($otherResourceUris)>0){ 
+      $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered.'];
+      if (count($otherResourceUris)>0){ 
+          
            if ($this->isForUpdate) {
                if (count($otherResourceUris)>1) { 
                   return $errorMessages; 

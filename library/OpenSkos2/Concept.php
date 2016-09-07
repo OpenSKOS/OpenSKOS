@@ -117,11 +117,6 @@ class Concept extends Resource
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         
-        $setUri = $this->deriveSetUri($params, $existingConcept);
-        if ($setUri !== null) { // othewrise it is either set in this or not derivable
-           $this->setProperty(OpenSkos::SET, $setUri);
-        }
-        
         if ($existingConcept === null) { // a completely new concept under creation
             
             $this->setProperty(DcTerms::CREATOR, new Uri($userUri));

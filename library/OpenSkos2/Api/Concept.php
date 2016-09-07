@@ -23,6 +23,7 @@ use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
@@ -148,8 +149,13 @@ class Concept extends AbstractTripleStoreResource {
             $concepts = $this->searchAutocomplete->search($options, $total);
 
             foreach ($concepts as $concept) {
-                $concept = $this->manager->augmentResourceWithTenant($concept);
+                $spec = $this->manager->fetchTenantSpec($concept);
+                foreach ($spec as $tenant_and_set) {
+                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
+                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
+                }
             }
+
 
             $result = new ResourceResultSet($concepts, $total, $start, $limit);
 

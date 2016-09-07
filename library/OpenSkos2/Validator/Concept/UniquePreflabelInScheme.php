@@ -34,17 +34,8 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $schemes = $concept->getProperty(Skos::INSCHEME);
-        $preflabel = $concept->getProperty(Skos::PREFLABEL);
-        foreach ($preflabel as $label) {
-            foreach ($schemes as $scheme) {
-                if ($this->labelExistsInScheme($concept, $label, $scheme)) {
-                    $this->errorMessages[] = 'The pref label ' . $label->getValue() .' already exists in the concept scheme '. $scheme->getUri() ;
-                    return false;
-                }
-            }
-        }
-        return true;
+        return $this->validateProperty($concept, Skos::PREFLABEL, true, true, false, true);
+        
     }
     
     /**

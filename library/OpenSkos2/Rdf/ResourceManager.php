@@ -544,8 +544,10 @@ class ResourceManager
     }
     
     
-    public function fetchSubjectUriForUriRdfObject($property, $value, $rdfType){
+    public function fetchSubjectUriForUriRdfObject($resource, $property, $value){
         $uri = $value->getUri();
+        $types = $resource ->getProperty(RdfNamespace::TYPE);
+        $rdfType=$types[0]->getUri();
         if ($rdfType === Concept::TYPE) {
             $split = explode("#", $property);
             $field = $split[1];
@@ -553,16 +555,18 @@ class ResourceManager
             $docs = $this -> solrResourceManager -> search($solrQuery);
             return $this->makeUriListFromSolrResponse($docs);
         } else {
-            $retVal=$this->fetchSubjectWithPropertyGiven($propertyUri, '<'.$uri.'>', $rdfType);
+            $retVal=$this->fetchSubjectWithPropertyGiven($property, '<'.$uri.'>', $rdfType);
             return $retVal;
         }
         
     }
    
-    public function fetchSubjectUriForLiteralRdfObject($property, $value, $rdfType) {
+    public function fetchSubjectUriForLiteralRdfObject($resource, $property, $value) {
         $language = $value->getLanguage();
         $term = $value->getValue();
-        if ($rdfType === Concept::TYPE) { // solr request, wprks only for skos and open-skos properties
+        $types = $resource ->getProperty(RdfNamespace::TYPE);
+        $rdfType=$types[0]->getUri();
+        if ($rdfType=== Concept::TYPE) { // solr request, wprks only for skos and open-skos properties
             $split = explode("#", $property);
             $field = $split[1];
             if ($field === 'prefLabel' || $field == 'altLabel' || $field === 'hiddenLabel') {
@@ -574,7 +578,23 @@ class ResourceManager
             } else {
                 $solrQuery = "s_" . $field . ":" . $term;
             }
-            $docs= $this->solrResourceManager->search($solrQuery);
+        
+            if ($field === 'prefLabel' || $field === 'altLabel' || $field === 'hiddenLabel' || $field = 'notation') {
+                $schemes = $resource->getProperty(Skos::INSCHEME);
+                $n = count($schemes);
+                if ($n > 0) {
+
+                    $solrSchemes = ' AND inScheme:(';
+                    if ($n > 1) {
+                        for ($i = 0; $i < n - 1; $i++) {
+                            $solrSchemes.= '"' . $schemes[$i]->getUri() . '" OR ';
+                        }
+                    }
+                    $solrSchemes.= '"' . $schemes[$n - 1]->getUri() . '")';
+                    $solrQuery.= $solrSchemes;
+                }
+            }
+            $docs = $this->solrResourceManager->search($solrQuery);
             return $this->makeUriListFromSolrResponse($docs);
         } else { // triple store request 
             if ($language !== null && $language !== '') {
@@ -582,15 +602,15 @@ class ResourceManager
             } else {
                 $completeValue = '"' . $term . '"';
             }
-            $retVal = $this->fetchSubjectWithPropertyGiven($propertyUri, $comleteValue, $rdfType);
+            $retVal = $this->fetchSubjectWithPropertyGiven($property, $completeValue, $rdfType);
             return $retVal;
         }
     }
-    
+
     private function makeUriListFromSolrResponse($docs) {
         $retVal = [];
         foreach ($docs as $doc) {
-            $retval[]=$doc;
+            $retVal[]=$doc;
         }
         return $retVal;
     }
@@ -1064,6 +1084,11 @@ class ResourceManager
     
     public function augmentResourceWithTenant($resource) {
         if ($resource !== null) {
+            $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
+            $rdfType= $rdfTypes[0]->getUri();
+            if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION && $rdfType !== Dcmi::DATASET) {
+                throw new \Exception("The method augmentResourceWithTenant can be used only for concept schemata, skos collections and sets. ");
+            }
             $tenants = $resource->getProperty(OpenSkosNamespace::TENANT);
             if (count($tenants) < 1) {
                 $tenantUri = $this->fetchTenantUriViaSet($resource);
@@ -1075,7 +1100,13 @@ class ResourceManager
         return $resource;
     }
 
-    public function fetchTenantUriViaSet($resource) {
+    private function fetchTenantUriViaSet($resource) {
+        $rdfTypes = $resource ->getProperty(RdfNamespace::TYPE);
+        $rdfType= $rdfTypes[0]->getUri();
+            
+        if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION) {
+            throw new \Exception("The method fetchTenantUriViaSet can be used only for concept chemata and skos collections. ");
+        }
         if ($resource !== null) {
             $setUris = $resource->getProperty(OpenSkosNamespace::SET);
             if (count($setUris) > 0) {

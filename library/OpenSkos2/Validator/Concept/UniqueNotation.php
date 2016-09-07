@@ -30,39 +30,11 @@ class UniqueNotation extends AbstractConceptValidator
      * @param Concept $concept
      * @return bool
      */
-    protected function validateConcept(Concept $concept)
-    {
+    protected function validateConcept(Concept $concept) {
         if ($concept->isPropertyEmpty(Skos::NOTATION)) {
             return true;
         }
-
-        $params = [];
-        $params[] = [
-            'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-            'predicate' => Skos::NOTATION,
-            'value' => $concept->getProperty(Skos::NOTATION)
-        ];
-
-        if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
-            $params[] = [
-                'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                'predicate' => Skos::INSCHEME,
-                'value' => $concept->getProperty(Skos::INSCHEME)
-            ];
-        }
-
-        $hasOther = $this->resourceManager->askForMatch(
-            $params,
-            $concept->getUri()
-        );
-
-        if (!$hasOther) {
-            return true;
-        } else {
-            $this -> errorMessages[] = "One of the notations in the submitted concept has been alredy used in the given schema: use another notation.";
-        }
-
-        return false;
+        return $this->validateProperty($concept, Skos::NOTATION, false, true, false, true);
     }
 
 }
