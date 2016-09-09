@@ -289,8 +289,20 @@ class ResourceManager
         return $resources[0];
     }
     
-   
-    
+   public function fetchSubjectTypePropertyForObject($objectUri){
+       $query= 'SELECT ?subject  ?type ?property WHERE '
+                . '{ ?subject <'.RdfNamespace::TYPE.'> ?type . ?subject ?property <'.$objectUri .'> .}';
+        $result = $this->query($query);
+        $retVal=[];
+        $i=0;
+        foreach ($result as $triple) {
+            $retVal[$i]['subject']=$triple->subject->getUri();
+            $retVal[$i]['type']=$triple->type->getUri();
+            $retVal[$i]['property']=$triple->property->getUri();
+            $i++;
+        }
+        return $retVal;
+   }    
     /**
      * Fetches multiple records by list of uris.
      * @param string[] $uris
@@ -504,12 +516,12 @@ class ResourceManager
         if ($rdfType == Concept::TYPE) {
             if ($id !== null && isset($id)) {
                 if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                    $query = 'uri:' . $id;
+                    $query = 'uri:"' . $id.'"';
                 } else {
                     $query = 'uuid:' . $id;
                 }
                 $solr_result = $this->solrResourceManager->search($query);
-                return ($solr_result->getNumFound() > 0);
+                return (count($solr_result) > 0);
             } else {
                 return false;
             }
@@ -571,12 +583,12 @@ class ResourceManager
             $field = $split[1];
             if ($field === 'prefLabel' || $field == 'altLabel' || $field === 'hiddenLabel') {
                 if ($language !== null && $language !== '') {
-                    $solrQuery = 'a_' . $field . '_' . $language . ':' . $term;
+                    $solrQuery = 'a_' . $field . '_' . $language . ':"' . $term .'"';
                 } else {
-                    $solrQuery = 'a_' . $field . ':' . $term;
+                    $solrQuery = 'a_' . $field . ':"' . $term.'"';
                 }
             } else {
-                $solrQuery = "s_" . $field . ":" . $term;
+                $solrQuery = 's_' . $field . ':"' . $term.'"';
             }
         
             if ($field === 'prefLabel' || $field === 'altLabel' || $field === 'hiddenLabel' || $field = 'notation') {
@@ -586,7 +598,7 @@ class ResourceManager
 
                     $solrSchemes = ' AND inScheme:(';
                     if ($n > 1) {
-                        for ($i = 0; $i < n - 1; $i++) {
+                        for ($i = 0; $i < $n - 1; $i++) {
                             $solrSchemes.= '"' . $schemes[$i]->getUri() . '" OR ';
                         }
                     }

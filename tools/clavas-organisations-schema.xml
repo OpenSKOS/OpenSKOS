@@ -2,11 +2,9 @@
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:openskos="http://openskos.org/xmlns#">
     <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations">
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
-        <dcterms:title xml:lang="en">OpenSKOS-CLARIN Organizations</dcterms:title>
+        <dcterms:title xml:lang="en">OpenSKOS-CLARIN Organizations-2</dcterms:title>
         <dcterms:description xml:lang="en">Organization Vocabulary, bootstrapped by manual curation from the list of VLO organization names (http://www.clarin.eu/vlo).</dcterms:description>
-        <openskos:uuid>Organisations</openskos:uuid>
-        <!-- <openskos:set rdf:resource="SET_URI"/>-->
-        <openskos:set rdf:resource="http://mertens/knaw/dataset_cab5e078-0ec3-4d13-bbd6-a84f5085b63e"/>
+        <openskos:uuid>Organisations-2</openskos:uuid>s
     </rdf:Description>
 </rdf:RDF>
       

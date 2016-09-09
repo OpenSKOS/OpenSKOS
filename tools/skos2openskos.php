@@ -37,6 +37,7 @@ try {
 
 include dirname(__FILE__) . '/bootstrap.inc.php';
 
+$old_time = time();
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -56,9 +57,17 @@ $message = new \OpenSkos2\Import\Message(
     true, false, 'en', false, false
 );
 
-$importer->handle($message);
-
-include_once('RemoveDanglingReferences.php');
-
+$not_valid_resource_uris = $importer->handle($message);
+$elapsed = time()-$old_time;
+echo "\n time elapsed since start of import (sec): ". $elapsed . "\n";
+$old_time = time();
+//$not_valid_resource_uris = ["http://openskos.meertens.knaw.nl/Organisations/ea373664-6d46-48a3-b4e0-fce0db71777c", "http://openskos.meertens.knaw.nl/Organisations/9e33ff35-1955-4c41-93f1-2184f83b272c"];
+require_once 'RemoveDanglingReferences.php';
+\Tools\RemoveDanglingReferences::remove_dangling_references($resourceManager, $not_valid_resource_uris);
+$elapsed = time()-$old_time;
+echo "\n time elapsed since start of cleaning (sec) : ". $elapsed . "\n";
 
 echo "done!";
+
+
+//php skos2openskos.php --setUri=http://mertens/knaw/dataset_2216cd25-47d7-4f6a-ad5b-9cec0900b5ae --userUri=http://192.168.99.100/public/api/users/02173d52-a71f-4470-b77d-20c181139a38 --file=iso-language-639-3-clavas-incl-cs.xml

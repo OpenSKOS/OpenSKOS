@@ -25,7 +25,7 @@
  * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
  *  */
 require dirname(__FILE__) . '/autoload.inc.php';
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+require_once 'Logging.php';
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
@@ -68,7 +68,6 @@ require dirname(__FILE__) . '/bootstrap.inc.php';
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-
 /**
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
@@ -126,6 +125,9 @@ remove_resources($resourceManager, $sets, Dcmi::DATASET);
 $instURIs=$resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' .  Org::FORMALORG. '>', null);
 $insts = $resourceManager->fetchByUris($instURIs, Org::FORMALORG);
 remove_resources($resourceManager, $insts, Org::FORMALORG);
+
+$old_time = time();
+
 
 $getFieldsInClass = function ($class) {
     $retVal = '';
@@ -529,7 +531,7 @@ do {
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
-function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $synonym, $labelMapping, $mappings, $logger) {
+function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $synonym, $labelMapping, $mappings, $logger, &$black_list) {
     if ($doc['class'] === $class) {
         try {
             $uri = $doc['uri'];
@@ -677,6 +679,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                 $resourceManager->insert($resource);
             } else {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
+                    $black_list[]=$resource->getUri();
                     var_dump($errorMessage);
                     \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $resource->getUri(), '/app/data/ValidationErrors.txt');
                 
@@ -697,6 +700,8 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
     }
 }
 
+$black_list=[];
+
 var_dump("run Set (aka tenant collection) round, # documents to process: ");
 var_dump($total);
 if (!empty($OPTS->start)) {
@@ -709,7 +714,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $language, $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
         $added = $added + $check;
         $counter++;
     }
@@ -731,7 +736,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $language, $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
         $added = $added + $check;
         $counter++;
     }
@@ -752,7 +757,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $language, $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
         $added = $added + $check;
         $counter++;
     }
@@ -772,7 +777,7 @@ do {
     $logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $language, $synonym, $labelMapping, $mappings, $logger);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
         $added = $added + $check;
         $counter++;
     }
@@ -781,7 +786,16 @@ var_dump('Concepts added: ');
 var_dump($added);
 
 $logger->info("Migration is finished. Removing dangling references.");
+$elapsed = time()-$old_time;
+echo "\n time elapsed since start of migration (sec): ". $elapsed . "\n";
+$old_time = time();
 
-include_once('RemoveDanglingReferences.php');
+
+require_once 'RemoveDanglingReferences.php';
+$bads = count($black_list);
+echo "\n the size of the black list (resource uri's): ". $bads . "\n";
+\Tools\RemoveDanglingReferences::remove_dangling_references($resourceManager, $black_list);
+$elapsed = time()-$old_time;
+echo "\n time elapsed since start of cleaning (sec): ". $elapsed . "\n";
 
 $logger->info("Done!");

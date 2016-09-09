@@ -50,6 +50,8 @@ class Command implements LoggerAwareInterface
      * @var Tenant
      */
     protected $tenant;
+    
+    private $black_list;
 
     /**
      * Command constructor.
@@ -62,6 +64,8 @@ class Command implements LoggerAwareInterface
     ) {
         $this->resourceManager = $resourceManager;
         $this->tenant = $tenant;
+        $this->black_list= [];
+        
     }
 
 
@@ -135,9 +139,12 @@ class Command implements LoggerAwareInterface
             }
 
             $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, false);
+            
             $valid = $validator->validate($preprocessedResource);
+            
             if (!$valid) {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
+                    $this->black_list[] = $uri;
                     var_dump($errorMessage);
                     \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $preprocessedResource->getUri(), '/app/data/ValidationErrors.txt');
                 }
@@ -155,6 +162,7 @@ class Command implements LoggerAwareInterface
             $this->resourceManager->insert($preprocessedResource);
             var_dump($preprocessedResource->getUri() . " has been inserted.");
         }
+        return $this->black_list;
     }
 
     function specialConceptImportLogic($message, $concept, $currentVersion) {
