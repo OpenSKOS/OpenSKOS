@@ -33,6 +33,10 @@ class DuplicateBroader extends AbstractConceptValidator
     {
         $broaderTerms = $concept->getProperty(Skos::BROADER);
 
+        if (empty($broaderTerms)) {
+            return true;
+        }
+
         $loopedConcepts = [];
         foreach ($broaderTerms as $broaderTerm) {
             if (isset($loopedConcepts[$broaderTerm->getUri()])) {

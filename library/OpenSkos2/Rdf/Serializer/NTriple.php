@@ -54,13 +54,11 @@ class NTriple
                 'value' => $object->getValue(),
                 'lang' => $object->getLanguage()
             ]);
-            
         } elseif ($object instanceof \OpenSkos2\Rdf\Uri) {
             return $serializer->serialiseValue([
                 'type' => 'uri',
                 'value' => $object->getUri()
             ]);
-            
         } else {
             throw new Exception\InvalidArgumentException('Invalid object: ' . get_class($object));
         }
