@@ -105,7 +105,8 @@ class Command implements LoggerAwareInterface
             }
             foreach ($conceptSchemes as $scheme) {
                 $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
-                $this->resourceManager->delete($scheme->getUri());
+                $schemeUri = new \OpenSkos2\Rdf\Uri($scheme->getUri());
+                $this->resourceManager->delete($scheme);
             }
         }
 
