@@ -31,7 +31,7 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
 {
     use ResourceManagerAwareTrait;
     use TenantAwareTrait;
-    
+
     /**
      * Ensure the preflabel does not already exists in the scheme
      *
@@ -50,39 +50,33 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Check if the preflabel already exists in scheme
      *
      * @param Concept $concept
-     * @param string $label
-     * @param string $scheme
+     * @param \OpenSkos2\Rdf\Literal $label
+     * @param \OpenSkos2\Rdf\Uri $scheme
      * @return boolean
      */
-    private function labelExistsInScheme(Concept $concept, $label, $scheme)
+    private function labelExistsInScheme(Concept $concept, \OpenSkos2\Rdf\Literal $label, \OpenSkos2\Rdf\Uri $scheme)
     {
         $uri = null;
         if (!$concept->isBlankNode()) {
             $uri = $concept->getUri();
         }
-        
-        return $this->resourceManager->askForMatch(
-            [
-                [
-                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                    'predicate' => Skos::PREFLABEL,
-                    'value' => $label
-                ],
-                [
-                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                    'predicate' => Skos::INSCHEME,
-                    'value' => $scheme
-                ]
-            ],
-            $uri
-        );
+
+        $ntriple = new \OpenSkos2\Rdf\Serializer\NTriple();
+        $escapedLabel = $ntriple->serialize($label);
+        $escapedScheme = $ntriple->serialize($scheme);
+
+        $query = '
+              ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
+              ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme;
+
+        return $this->resourceManager->ask($query);
     }
 }
