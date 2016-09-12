@@ -75,7 +75,8 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
 
         $query = '
               ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
-              ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme;
+              ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme
+                . ' FILTER( ?subject != ' . $ntriple->serialize($concept) . ')';
 
         return $this->resourceManager->ask($query);
     }
