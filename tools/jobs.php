@@ -144,7 +144,7 @@ switch ($action) {
 
             $jobs = $model->fetchAll($select);
         }
-        
+
         if (!count($jobs)) {
             exit(0);
         }
@@ -167,10 +167,10 @@ switch ($action) {
             if (count($busyJobs)) {
                 exit(0);
             }
-            
+
             // We want only one job at a time.
             $job = $jobs[0];
-            
+
             /** @var OpenSKOS_Db_Table_Row_Job $job */
             $set = $job->getCollection();
             switch ($job->task) {
@@ -219,8 +219,16 @@ switch ($action) {
 
                         } catch (Exception $e) {
 
-                            $job->error("Aborting job because: " . $e->getMessage())->finish()->save();
+                            $errorMsg = "Aborting job because: " . $e->getMessage();
+                            $job->error($errorMsg)->finish()->save();
+                            fwrite(
+                                STDERR, 
+                                $errorMsg . PHP_EOL
+                                . get_class($e) . PHP_EOL
+                                . $e->getTraceAsString() . PHP_EOL
+                            );
                             exit($e->getCode());
+
                         }
                     }
 
