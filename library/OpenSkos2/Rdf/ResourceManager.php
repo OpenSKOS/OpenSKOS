@@ -32,7 +32,6 @@ use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Foaf;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
@@ -124,8 +123,8 @@ class ResourceManager
                 var_dump('Cannot fetch tenant for the concept '. $resource->getUri());
             }
             foreach ($set_and_tenant as $spec) {
-                $resource->setProperty(OpenSkos::TENANT, new Uri($spec['tenanturi']));
-                $resource->setProperty(OpenSkos::SET, new Uri($spec['seturi']));
+                $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
+                $resource->setProperty(OpenSkosNameSpace::SET, new Uri($spec['seturi']));
             }
             $this->solrResourceManager->insert($resource);
         }
@@ -139,6 +138,7 @@ class ResourceManager
     {
         // @TODO Danger if insert fails. Need transaction or something.
         $this->delete($resource, $resource->getType()->getUri());
+        //var_dump($resource);
         $this->insert($resource);
     }
 
@@ -174,12 +174,15 @@ class ResourceManager
     public function delete(Uri $resource, $rdfType=null)
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-        if ($rdfType == Skos::CONCEPT) {
+        if ($rdfType === Skos::CONCEPT) {
             $this->solrResourceManager->delete($resource);
         }
     }
    
-
+     public function deleteReferencesToObject(Uri $resource)
+    {
+        $this->client->update("DELETE WHERE {?subject ?predicate  <{$resource->getUri()}> }");
+    }
   
    
 
@@ -228,7 +231,7 @@ class ResourceManager
     {
         $query='DESCRIBE ?subject ?object '
                 . '{SELECT DISTINCT ?subject  ?object WHERE '
-                . '{ ?subject <'.OpenSkos::UUID.'> "'.$uuid.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+                . '{ ?subject <'.OpenSkosNameSpace::UUID.'> "'.$uuid.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
         $result = $this->fetchBy($query, $uuid, $resType);
         return $result;
     }
@@ -255,7 +258,7 @@ class ResourceManager
     {
         $query='DESCRIBE ?subject ?object '
                 . '{SELECT DISTINCT ?subject  ?object WHERE '
-                . '{ ?subject <'.OpenSkos::CODE.'> "'.$code.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+                . '{ ?subject <'.OpenSkosNamespace::CODE.'> "'.$code.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
         $result = $this->fetchBy($query, $code, $resType);
         return $result;
     }
@@ -287,20 +290,15 @@ class ResourceManager
         return $resources[0];
     }
     
-   public function fetchSubjectTypePropertyForObject($objectUri){
-       $query= 'SELECT ?subject  ?type ?property WHERE '
-                . '{ ?subject <'.RdfNamespace::TYPE.'> ?type . ?subject ?property <'.$objectUri .'> .}';
+    
+    public function fetchSubjectTypePropertyForObject($objectUri) {
+        $query = 'SELECT ?subject  ?type ?property WHERE '
+                . '{  ?subject <' . RdfNamespace::TYPE . '> ?type . ?subject ?property <' . $objectUri . '> .}';
         $result = $this->query($query);
-        $retVal=[];
-        $i=0;
-        foreach ($result as $triple) {
-            $retVal[$i]['subject']=$triple->subject->getUri();
-            $retVal[$i]['type']=$triple->type->getUri();
-            $retVal[$i]['property']=$triple->property->getUri();
-            $i++;
-        }
-        return $retVal;
-   }    
+        return $result;
+    }
+    
+    
     /**
      * Fetches multiple records by list of uris.
      * @param string[] $uris
@@ -1148,10 +1146,10 @@ class ResourceManager
     public function fetchTenantSpec($concept){
         $uri = $concept ->getUri();
         $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
-                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkos::SET.'> ?seturi . ?seturi <'.  DcTerms::PUBLISHER.'> ?tenanturi .'
-                .'?seturi <'.OpenSkos::CODE.'> ?setcode .'
+                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkosNamespace::SET.'> ?seturi . ?seturi <'.  DcTerms::PUBLISHER.'> ?tenanturi .'
+                .'?seturi <'.OpenSkosNamespace::CODE.'> ?setcode .'
                  .'?seturi <'.  DcTerms::TITLE.'> ?settitle .'
-                . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkos::CODE . '> ?tenantcode .}';
+                . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .}';
     
         $response = $this->query($query);
         $retVal = [];

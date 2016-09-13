@@ -13,7 +13,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
@@ -125,7 +124,9 @@ abstract class AbstractTripleStoreResource {
             if (isset($params['id'])) {
                 $id = $params['id'];
             };
+            
             $resource = $this->findResourcebyId($id);
+            
             if (isset($context)) {
                 $format = $context;
             } else {
@@ -157,7 +158,21 @@ abstract class AbstractTripleStoreResource {
 
     // Id is either an URI or uuid
     public function findResourceById($id) {
-       return $this->manager->findResourceById($id, $this->manager->getResourceType());
+        $rdfType = $this->manager->getResourceType();
+        $resource = $this->manager->findResourceById($id, $rdfType);
+        if ($rdfType === Skos::CONCEPTSCHEME || $rdfType === Skos::SKOSCOLLECTION) {
+            return $this->manager->augmentResourceWithTenant($resource);
+        } else {
+            if ($rdfType === Skos::CONCEPT) {
+                $spec = $this->manager->fecthTenantSpec($resource);
+                foreach ($spec as $tenant_and_set) {
+                    $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
+                    $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
+                }
+            } else {
+                return $resource;
+            }
+        }
     }
 
     public function create(ServerRequestInterface $request) {

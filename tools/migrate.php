@@ -34,6 +34,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Rdf\DanglingReferencesHelper;
 
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
@@ -103,6 +104,7 @@ echo "Cleaning round, used when migrate script runs a few times with the same da
 function remove_resources($manager, $resources, $rdfType) {
     foreach ($resources as $resource) {
         $manager->delete($resource, $rdfType);
+        $manager -> deleteReferencesToObject($resource);
     }
 }
 
@@ -682,8 +684,10 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                     $black_list[]=$resource->getUri();
                     var_dump($errorMessage);
                     \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $resource->getUri(), '/app/data/ValidationErrors.txt');
-                
+               
                 }
+                $resourceManager->delete($resource); //remove garbage - 1
+                $resourceManager->deleteReferencesToObject($resource); //remove garbage - 2
                 var_dump($resource->getUri() . " cannot not been inserted due to the validation error(s) above.");
             }
 
@@ -791,11 +795,12 @@ echo "\n time elapsed since start of migration (sec): ". $elapsed . "\n";
 $old_time = time();
 
 
-require_once 'RemoveDanglingReferences.php';
+
 $bads = count($black_list);
 echo "\n the size of the black list (resource uri's): ". $bads . "\n";
-\Tools\RemoveDanglingReferences::remove_dangling_references($resourceManager, $black_list);
-$elapsed = time()-$old_time;
-echo "\n time elapsed since start of cleaning (sec): ". $elapsed . "\n";
+//$cleaner = new DanglingReferencesHelper($resourceManager, $black_list);
+//$cleaner ->removeDanglingReferences();
+//elapsed = time()-$old_time;
+//echo "\n time elapsed since start of cleaning (sec): ". $elapsed . "\n";
 
 $logger->info("Done!");
