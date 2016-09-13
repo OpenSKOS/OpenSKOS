@@ -34,8 +34,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Rdf\DanglingReferencesHelper;
-
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
@@ -533,7 +531,7 @@ do {
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
-function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $synonym, $labelMapping, $mappings, $logger, &$black_list) {
+function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $synonym, $labelMapping, $mappings, $logger) {
     if ($doc['class'] === $class) {
         try {
             $uri = $doc['uri'];
@@ -681,7 +679,6 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                 $resourceManager->insert($resource);
             } else {
                 foreach ($validator->getErrorMessages() as $errorMessage) {
-                    $black_list[]=$resource->getUri();
                     var_dump($errorMessage);
                     \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $resource->getUri(), '/app/data/ValidationErrors.txt');
                
@@ -704,7 +701,6 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
     }
 }
 
-$black_list=[];
 
 var_dump("run Set (aka tenant collection) round, # documents to process: ");
 var_dump($total);
@@ -718,7 +714,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Collection', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -740,7 +736,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'ConceptScheme', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -761,7 +757,7 @@ do {
     //$logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'SKOSCollection', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
@@ -781,26 +777,16 @@ do {
     $logger->info("fetching " . $endPoint . "&start=$counter");
     $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
     foreach ($data['response']['docs'] as $doc) {
-        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $language, $synonym, $labelMapping, $mappings, $logger, $black_list);
+        $check = run_round($doc, $resourceManager, $tenantUri, 'Concept', $language, $synonym, $labelMapping, $mappings, $logger);
         $added = $added + $check;
         $counter++;
     }
 } while ($counter < $total && isset($data['response']['docs']));
 var_dump('Concepts added: ');
 var_dump($added);
-
-$logger->info("Migration is finished. Removing dangling references.");
 $elapsed = time()-$old_time;
 echo "\n time elapsed since start of migration (sec): ". $elapsed . "\n";
 $old_time = time();
 
-
-
-$bads = count($black_list);
-echo "\n the size of the black list (resource uri's): ". $bads . "\n";
-//$cleaner = new DanglingReferencesHelper($resourceManager, $black_list);
-//$cleaner ->removeDanglingReferences();
-//elapsed = time()-$old_time;
-//echo "\n time elapsed since start of cleaning (sec): ". $elapsed . "\n";
 
 $logger->info("Done!");

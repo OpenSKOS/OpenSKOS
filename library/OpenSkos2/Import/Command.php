@@ -149,6 +149,9 @@ class Command implements LoggerAwareInterface
                     \Tools\Logging::var_logger("The followig resource has not been added due to the validation error ". $errorMessage, $preprocessedResource->getUri(), '/app/data/ValidationErrors.txt');
                 }
                 var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
+                $this->resourceManager->delete($preprocessedResource); //remove garbage - 1
+                $this->resourceManager->deleteReferencesToObject($preprocessedResource); //remove garbage - 2
+                
                 continue;
             }
 
