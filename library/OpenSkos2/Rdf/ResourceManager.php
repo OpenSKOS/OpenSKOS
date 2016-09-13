@@ -24,7 +24,6 @@ use EasyRdf\Http;
 use EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Concept;
-use OpenSkos2\ConceptCollection;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
@@ -167,7 +166,6 @@ class ResourceManager
         }
 
         $this->replace($resource);
-        $this->solrResourceManager->deleteSoft($resource);
     }
 
     /**
@@ -700,11 +698,12 @@ class ResourceManager
      * ];
      * </code>
      *
-     * @param array $params
+     * @param array $matchProperties
      * @param string $excludeUri
+     * @param bool $ignoreDeleted
      * @return boolean
      */
-    public function askForMatch(array $matchProperties, $excludeUri = null)
+    public function askForMatch(array $matchProperties, $excludeUri = null, $ignoreDeleted = true)
     {
         $select = '';
         $filter = 'FILTER(' . PHP_EOL;
@@ -734,10 +733,21 @@ class ResourceManager
 
             $newFilter = [];
             foreach ($value as $val) {
-                $newFilter[] = '?' . $i . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
+                $object = '?' . $i;
+                if (isset($data['ignoreLanguage']) && $data['ignoreLanguage']) {
+                    // Get only the simple string literal to compare without language.
+                    $object = 'str(' . $object . ')';
+                }
+                
+                $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
             }
 
             $filters[] = '(' . implode(' || ', $newFilter) . ') ';
+        }
+        
+        if ($ignoreDeleted) {
+            $select .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status. ' . PHP_EOL;
+            $filters[] = '(!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
         }
 
         $filter .= implode(' && ', $filters) . ' ';
@@ -745,7 +755,6 @@ class ResourceManager
         if ($excludeUri) {
             $uri = new Uri($excludeUri);
             $filter .= '&& ?subject != ' . (new NTriple())->serialize($uri);
-
         }
 
         $ask = $select . $filter . ')';
@@ -1080,7 +1089,6 @@ class ResourceManager
                 }
             }
 
-            $resource = $this->augmentResourceWithTenant($resource);
             return $resource;
         } else {
             throw new ApiException('No Id (URI or UUID, or Code) is given', 400);

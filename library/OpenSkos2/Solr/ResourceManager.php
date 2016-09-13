@@ -100,26 +100,6 @@ class ResourceManager
     }
     
     /**
-     * Updates the status of the resource to deleted.
-     * @param Resource $resource
-     */
-    public function deleteSoft(Resource $resource)
-    {
-        $update = $this->solr->createUpdate();
-        $doc = $update->createDocument();
-        $doc->setKey('uri', $resource->getUri());
-        $doc->addField('s_status', Resource::STATUS_DELETED);
-        $doc->setFieldModifier('s_status', 'set');
-        $update->addDocument($doc);
-        
-        if (!$this->getIsNoCommitMode()) {
-            $update->addCommit(true);
-        }
-        
-        $this->solr->update($update);
-    }
-    
-    /**
      * @param Resource $resource
      */
     public function delete(Resource $resource)

@@ -61,48 +61,38 @@ class Autocomplete
         
         $parser = new ParserText();
         
-        $term = $options['searchText'];
+        $searchText = $options['searchText'];
         
-        $isDirectQuery = !empty($options['directQuery']);
+        $searchText = $parser->replaceLanguageTags($searchText);
         
-        $solrQuery = '';
-        
-        if ($isDirectQuery) {
-            if (!empty($term)) {
-                $term = preg_replace('/([^@]*)@(\w{2}:)/', '$1_$2', $term); // Fix "@nl" to "_nl"
-                $term = $this -> prepareTextFields($term);
-                if (trim($term) !== "*:*") { // somehow my solr fails on (*:*)
-                    $term = '(' . $term . ')';
-                }
-                $solrQuery = $term;
-            } else {
-               $solrQuery = "*:*"; 
-            }
+        if ($parser->isSearchTextQuery($searchText) || $parser->isFieldSearch($searchText)) {
+            // Custom user query, he has to escape and do everything.
+            $searchText = '(' . $searchText . ')';
+
         } else {
-            if ($parser->isSearchTextQuery($term)) {
-                // Custom user query, he has to escape and do everything.
-                $term = '(' . $term . ')';
-            } else {
-                $term = trim($term);
-                if (empty($term)) {
-                    $term = '*';
-                }
-                if (stripos($term, '*') !== false || stripos($term, '?') !== false) {
-                    $term = $parser->escapeSpecialChars($term);
-                } else {
-                    $term = $helper->escapePhrase($term);
-                }
+            $searchText = trim($searchText);
+            if (empty($searchText)) {
+                $searchText = '*';
             }
             
-            
-            $solrQuery .= '(';
+            if ($parser->isFullyQuoted($searchText)) {
+                $searchText = $searchText;
+            } elseif ($parser->isWildcardSearch($searchText)) {
+                $searchText = $parser->escapeSpecialChars($searchText);
+            } else {
+                $searchText = $helper->escapePhrase($searchText);
+            }
+        }
 
-            $languages = $options['languages'];
+        // @TODO Better to use edismax qf
+        
+        $searchTextQueries = [];
 
-            // labels
-            if (!empty($options['label'])) {
-                foreach ($options['label'] as $label) {
-                    foreach ($languages as $lang) {
+        // labels
+        if (!empty($options['label'])) {
+            foreach ($options['label'] as $label) {
+                if (!empty($options['languages'])) {
+                    foreach ($options['languages'] as $lang) {
                         // boost important labels
                         $boost = '';
                         if ($label === 'prefLabel') {
@@ -115,47 +105,56 @@ class Autocomplete
                             $boost = '^10';
                         }
 
-                        $solrQuery .= 'a_'.$label.'_'.$lang.':'.$term.$boost.' OR ';
+                        $searchTextQueries[] = 'a_' . $label . '_' . $lang . ':' . $searchText . $boost;
                     }
+                } else {
+                    $searchTextQueries[] = 'a_' . $label . ':' . $searchText . $boost;
                 }
             }
-
-            // notes
-            if (!empty($options['properties'])) {
-                foreach ($options['properties'] as $property) {
-                    foreach ($languages as $lang) {
-                        $solrQuery .= 't_'.$property.':'.$term.' OR ';
-                    }
-                }
-            }
-
-            // strip last or
-            $solrQuery = substr($solrQuery, 0, -4);
-
-            // search notation
-            if (!empty($options['searchNotation'])) {
-                $solrQuery .= ' OR s_notation:'.$term;
-            }
-
-            // search uri
-            if (!empty($options['searchUri'])) {
-                $solrQuery .= ' OR s_uri:'.$term;
-            }
-
-            $solrQuery .= ')';
         }
 
-        $optionsQuery = '';
+        // notes
+        if (!empty($options['properties'])) {
+            foreach ($options['properties'] as $property) {
+                if (!empty($options['languages'])) {
+                    foreach ($options['languages'] as $lang) {
+                        $searchTextQueries[] = 'a_' . $property . '_' . $lang . ':' . $searchText;
+                    }
+                } else {
+                    $searchTextQueries[] = 'a_' . $property . ':' . $searchText;
+                }
+            }
+        }
+
+        // search notation
+        if (!empty($options['searchNotation'])) {
+            $searchTextQueries[] = 's_notation:' . $searchText;
+        }
+
+        // search uri
+        if (!empty($options['searchUri'])) {
+            $searchTextQueries[] = 's_uri:' . $searchText;
+        }
+
+        if (empty($searchTextQueries)) {
+            $solrQuery = $searchText;
+        } else {
+            $solrQuery = '(' . implode(' OR ', $searchTextQueries) . ')';
+        }
+
+        // @TODO Use filter queries
+        
+        $optionsQueries = [];
         
         //status
-        if (strpos($optionsQuery, 'status') === false) { // We dont add status query if it is in the query already.
+        if (strpos($searchText, 'status') === false) { // We dont add status query if it is in the query already.
             if (!empty($options['status'])) {
-                $optionsQuery .= ' (';
-                $optionsQuery .= 's_status:('
+                $optionsQueries[] = '('
+                    . 's_status:('
                     . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
                     . '))';
             } else {
-                $optionsQuery .= ' -s_status:' . Resource::STATUS_DELETED;
+                $optionsQueries[] = '-s_status:' . Resource::STATUS_DELETED;
             }
         }
    
@@ -166,7 +165,7 @@ class Autocomplete
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
                 . '))';
         }
-        
+ 
         // skos collections
         if (!empty($options['skosCollection'])) {
             $solrQuery .= ' AND (';
@@ -177,39 +176,38 @@ class Autocomplete
 
         // schemes
         if (!empty($options['conceptScheme'])) {
-            $optionsQuery .= ' AND (';
-            $optionsQuery .= 's_inScheme:('
+            $optionsQueries[] = '('
+                . 's_inScheme:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
                 . '))';
         }
         
         // tenants
         if (!empty($options['tenants'])) {
-            $optionsQuery .= ' AND (';
-            $optionsQuery .= 's_tenant:('
+            $optionsQueries[] = '('
+                . 's_tenant:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
                 . '))';
         }
         
-        
-        
         // to be checked
         if (!empty($options['toBeChecked'])) {
-            $optionsQuery .= ' AND (b_toBeChecked:true) ';
+            $optionsQueries[] = '(b_toBeChecked:true) ';
         }
         
         // topconcepts
         if (!empty($options['topConcepts'])) {
-            $optionsQuery .= ' AND (b_isTopConcept:true) ';
+            $optionsQueries[] = '(b_isTopConcept:true) ';
         }
 
         // orphaned concepts
         if (!empty($options['orphanedConcepts'])) {
-            $optionsQuery .= ' AND (b_isOrphan:true) ';
+            $optionsQueries[] = '(b_isOrphan:true) ';
         }
         
         // combine
-        if (!empty($optionsQuery)) {
+        if (!empty($optionsQueries)) {
+            $optionsQuery = implode(' AND ', $optionsQueries);
             if (empty($solrQuery)) {
                 $solrQuery = $optionsQuery;
             } else {
@@ -227,8 +225,7 @@ class Autocomplete
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
-        
-        
+                
         if (!empty($options['sorts'])) {
             $sorts = $options['sorts'];
         } else {
@@ -312,14 +309,5 @@ class Autocomplete
         return implode(' OR ', $interactionsQueries);
     }
     
-    private function prepareTextFields($searchterm){
-        $tokenizedFields = SkosNamespace::getTokenizedFields();
-        $retVal = $searchterm;
-        foreach ($tokenizedFields as $field){
-            $old = $field . "Text:";
-            $new ="t_".$field . ":";
-           $retVal = str_replace($old, $new, $retVal); 
-        }
-        return $retVal;
-    }
+    
 }

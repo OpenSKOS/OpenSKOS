@@ -125,6 +125,7 @@ class ConceptManager extends ResourceManager
             [
                 'predicate' => Skos::PREFLABEL,
                 'value' => new Literal($prefLabel),
+                'ignoreLanguage' => true
             ]
         ]);
     }

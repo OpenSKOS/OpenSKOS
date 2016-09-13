@@ -22,7 +22,6 @@ use OpenSkos2\RelationManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Search\Autocomplete;
@@ -88,8 +87,7 @@ class Concept extends AbstractTripleStoreResource {
             $options = [
                 'start' => $start,
                 'rows' => $limit,
-                'directQuery' => true,
-                // upstream 'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
+                 'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
             ];
 
             // search query
