@@ -100,7 +100,6 @@ class Command implements LoggerAwareInterface
             }
         }
         // ***
-       
         foreach ($resourceCollection as $resourceToInsert) {
             $params['seturi'] = $message->getSetUri();
             $uri = $resourceToInsert->getUri();

@@ -164,14 +164,13 @@ abstract class AbstractTripleStoreResource {
             return $this->manager->augmentResourceWithTenant($resource);
         } else {
             if ($rdfType === Skos::CONCEPT) {
-                $spec = $this->manager->fecthTenantSpec($resource);
+                $spec = $this->manager->fetchTenantSpec($resource);
                 foreach ($spec as $tenant_and_set) {
                     $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
                     $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
                 }
-            } else {
-                return $resource;
-            }
+            };
+            return $resource;
         }
     }
 

@@ -68,7 +68,7 @@ class Concept extends AbstractTripleStoreResource {
      */
     public function findConcepts(PsrServerRequestInterface $request, $context) {
         try {
-            set_time_limit(120);
+            set_time_limit(MAXIMAL_TIME_LIMIT);
             $params = $request->getQueryParams();
             //\Tools\Logging::var_error_log(" params \n", $params , '/app/data/debug.txt');
         
@@ -175,7 +175,7 @@ class Concept extends AbstractTripleStoreResource {
                 default:
                     throw new InvalidArgumentException('Invalid context: ' . $context);
             }
-            set_time_limit(30);
+            set_time_limit(NORMAL_TIME_LIMIT);
             return $response;
         } catch (Exception $ex) {
             return $this->getErrorResponseFromException($ex);

@@ -60,13 +60,10 @@ $message = new \OpenSkos2\Import\Message(
 $not_valid_resource_uris = $importer->handle($message);
 $elapsed = time()-$old_time;
 echo "\n time elapsed since start of import (sec): ". $elapsed . "\n";
-$old_time = time();
-//$not_valid_resource_uris = ["http://openskos.meertens.knaw.nl/Organisations/ea373664-6d46-48a3-b4e0-fce0db71777c", "http://openskos.meertens.knaw.nl/Organisations/9e33ff35-1955-4c41-93f1-2184f83b272c"];
-require_once 'RemoveDanglingReferences.php';
-\Tools\RemoveDanglingReferences::remove_dangling_references($resourceManager, $not_valid_resource_uris);
-$elapsed = time()-$old_time;
-echo "\n time elapsed since start of cleaning (sec) : ". $elapsed . "\n";
-
+echo "The following " . count($not_valid_resource_uris). " resources are not valid and not imported: \n";
+foreach ($not_valid_resource_uris as $uri) {
+    echo "\n ".$uri;
+}
 echo "done!";
 
 
