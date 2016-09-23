@@ -48,14 +48,22 @@ class Preprocessor {
         }
 
         if ($autoGenerateUuidUriWhenAbsent) {
-            $params['type'] = $this->resourceType;     
+            $params['type'] = $this->resourceType;
             if ($this->resourceType === Skos::CONCEPT) {
-                    $notations = $preprocessed->getProperty(Skos::NOTATION);
-                    if (count($notations) === 0) {
-                        $params['notation'] = null;
-                    } else {
-                        $params['notation'] = $notations[0];
+                $notations = $preprocessed->getProperty(Skos::NOTATION);
+                if (count($notations) === 0) {
+                    $params['notation'] = null;
+                } else {
+                    $params['notation'] = $notations[0];
+                }
+                if (!isset($params['seturi'])) {
+                    $schemes = $preprocessed->getProperty(Skos::INSCHEME);
+                    if (count($schemes) > 0) {
+                        $schemeUri = $schemes[0]->getUri();
+                        $setUri = $this->manager->fetchObjectForSubjectAndProperty($schemeUri, OpenSkos::SET);
+                        $params['seturi'] = $setUri[0];
                     }
+                }
             }
             $preprocessed->selfGenerateUuidAndUriWhenAbsent($this->manager, $params);
         };

@@ -574,7 +574,7 @@ class ResourceManager
         $term = $value->getValue();
         $types = $resource ->getProperty(RdfNamespace::TYPE);
         $rdfType=$types[0]->getUri();
-        if ($rdfType=== Concept::TYPE) { // solr request, wprks only for skos and open-skos properties
+        if ($rdfType=== Concept::TYPE) { // solr request, works only for skos and open-skos properties
             $split = explode("#", $property);
             $field = $split[1];
             if ($field === 'prefLabel' || $field == 'altLabel' || $field === 'hiddenLabel') {
@@ -623,12 +623,21 @@ class ResourceManager
         return $retVal;
     }
 
-    public function fetchObjectsWtithProperty($propertyUri, $rdfType=null) {
+    public function fetchObjectsWithProperty($propertyUri, $rdfType=null) {
         $typeFilter = "";
         if (isset($rdfType)) {
             $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
         $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . '. $typeFilter. '}';
+
+        $result = $this->query($query);
+        $retVal = $this->makeListOfPrimitiveResults($result, 'object');
+        return $retVal;
+    }
+    
+    public function fetchObjectForSubjectAndProperty($subjectUri, $propertyUri) {
+        
+        $query = 'SELECT DISTINCT ?object WHERE { <'. $subjectUri .'> <' . $propertyUri . '> ?object . }';
 
         $result = $this->query($query);
         $retVal = $this->makeListOfPrimitiveResults($result, 'object');
@@ -1166,5 +1175,5 @@ class ResourceManager
         return $retVal;  
     }
     
- 
+    
 }

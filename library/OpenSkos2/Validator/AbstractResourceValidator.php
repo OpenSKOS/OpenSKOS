@@ -119,7 +119,6 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     private function uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value){
       $errorMessages = ['The resource with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered.'];
       if (count($otherResourceUris)>0){ 
-          
            if ($this->isForUpdate) {
                if (count($otherResourceUris)>1) { 
                   return $errorMessages; 
