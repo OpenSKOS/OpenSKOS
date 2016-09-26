@@ -27,7 +27,7 @@ use OpenSkos2\Namespaces\Dc;
 
 class FieldsMaps {
   
-private static function getNamesToProperties() {
+public static function getNamesToProperties() {
     return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,

@@ -28,7 +28,7 @@ epic.password=xrl#4xbE
 epic.prefix=11148
 epic.guid.prefix=CCRtest_
 epic.resolver=http://hdl.handle.net/
-epic.forwardLocationPrefix=http://145.100.58.248/ccrtest/public/api/
+epic.forwardLocationPrefix=http://145.100.58.79/ccrtest/public/api/
 
 
 editor.languages.nl="Dutch"

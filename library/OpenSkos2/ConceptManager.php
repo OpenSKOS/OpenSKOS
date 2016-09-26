@@ -29,6 +29,7 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\MyInstitutionModules\Relations;
 use OpenSkos2\Api\Exception\ApiException;
 
