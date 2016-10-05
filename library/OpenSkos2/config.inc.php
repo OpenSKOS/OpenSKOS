@@ -1,6 +1,6 @@
 <?php
 
-define('APPLICATION_BASE_PATH', '/app/ccr');
+define('APPLICATION_BASE_PATH', '/app/clavas');
 define('COMMON_APPLICATION_INI', APPLICATION_BASE_PATH. '/application/configs/application.ini');
 define('ERROR_LOG', APPLICATION_BASE_PATH. '/data/ValidationErrors.txt');
 
