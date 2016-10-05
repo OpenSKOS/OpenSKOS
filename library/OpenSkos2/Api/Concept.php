@@ -70,7 +70,7 @@ class Concept extends AbstractTripleStoreResource {
         try {
             set_time_limit(MAXIMAL_TIME_LIMIT);
             $params = $request->getQueryParams();
-            //\Tools\Logging::var_error_log(" params \n", $params , '/app/data/debug.txt');
+            //\Tools\Logging::var_error_log(" params \n", $params , APPLICATION_BASE_PATH.'/data/debug.txt');
         
             // offset
             $start = 0;
@@ -142,7 +142,7 @@ class Concept extends AbstractTripleStoreResource {
                 $options['status'] = explode(' ', trim($params['status']));
             }
 
-            //\Tools\Logging::var_error_log(" params \n", $params , '/app/data/debug.txt');
+            //\Tools\Logging::var_error_log(" params \n", $params , APPLICATION_BASE_PATH.'/data/debug.txt);
         
             $concepts = $this->searchAutocomplete->search($options, $total);
 

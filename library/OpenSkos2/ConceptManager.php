@@ -352,7 +352,7 @@ class ConceptManager extends ResourceManager
             $relation[] = $conceptUri;
             $relation[] = $relationUri;
             $relation[] = $relatedConceptUri;
-            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, '/app/data/info.log');
+            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, APPLICATION_BASE_PATH.'/data/info.log');
             return false;
         }
 
@@ -363,7 +363,7 @@ class ConceptManager extends ResourceManager
                 $relation[] = $conceptUri;
                 $relation[] = $relationUri;
                 $relation[] = $relatedConceptUri;
-                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, '/app/data/info.log');
+                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, APPLICATION_BASE_PATH.'/data/info.log');
                 throw new ApiException('Concepts have not been updated because of attempt to add a relation which is in the transitive closure.', 400);
             }
         };

@@ -270,7 +270,7 @@ class Repository implements InterfaceRepository
         
         $pSet = $this->parseSet($set);
 
-        //\Tools\Logging::var_error_log(" pSet: ", $pSet , '/app/data/debug.txt');
+        //\Tools\Logging::var_error_log(" pSet: ", $pSet , APPLICATION_BASE_PATH.'/data/debug.txt');
         
         $concepts = $this->getConcepts(
             $this->limit,
@@ -288,7 +288,7 @@ class Repository implements InterfaceRepository
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
         
-        //\Tools\Logging::var_error_log(" items: ", count($items) , '/app/data/debug.txt');
+        //\Tools\Logging::var_error_log(" items: ", count($items) , APPLICATION_BASE_PATH .'/data/debug.txt');
         
         
         $token = null;

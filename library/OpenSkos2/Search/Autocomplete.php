@@ -55,7 +55,7 @@ class Autocomplete
     public function search($options, &$numFound)
     {
         // @TODO Ensure all options are arrays.
-        //\Tools\Logging::var_error_log(" options \n", $options , '/app/data/debug.txt');
+        //\Tools\Logging::var_error_log(" options \n", $options , APPLICATION_BASE_PATH.'/data/debug.txt');
         
         $helper = new QueryHelper();
         
@@ -231,7 +231,7 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-        //\Tools\Logging::var_error_log(" Solr request \n", $solrQuery , '/app/data/debug.txt');
+        //\Tools\Logging::var_error_log(" Solr request \n", $solrQuery , APPLICATION_BASE_PATH. '/data/debug.txt');
         $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
         return $retVal;
     }

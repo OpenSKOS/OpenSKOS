@@ -1,6 +1,8 @@
 <?php
 
-define('COMMON_APPLICATION_INI', '/app/application/configs/application.ini');
+define('APPLICATION_BASE_PATH', '/app/ccr');
+define('COMMON_APPLICATION_INI', APPLICATION_BASE_PATH. '/application/configs/application.ini');
+define('ERROR_LOG', APPLICATION_BASE_PATH. '/data/ValidationErrors.txt');
 
 // roles //
 define('ROOT', 'root');
