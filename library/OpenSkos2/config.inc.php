@@ -1,8 +1,8 @@
 <?php
 
 define('APPLICATION_BASE_PATH', '/app/backendname');
-define('COMMON_APPLICATION_INI', APPLICATION_BASE_PATH. '/application/configs/application.ini');
-define('ERROR_LOG', APPLICATION_BASE_PATH. '/data/ValidationErrors.txt');
+define('COMMON_APPLICATION_INI', '/app/backendname/application/configs/application.ini');
+define('ERROR_LOG', '/app/backendname/data/ValidationErrors.txt');
 
 // roles //
 define('ROOT', 'root');
