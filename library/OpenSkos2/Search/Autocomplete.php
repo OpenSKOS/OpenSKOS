@@ -60,26 +60,30 @@ class Autocomplete
         
         $searchText = $options['searchText'];
         
-        $searchText = $parser->replaceLanguageTags($searchText);
+        // Empty query and query for all is replaced with *
+        $searchText = trim($searchText);
+        if (empty($searchText) || $searchText == '*:*') {
+            $searchText = '*';
+        }
         
-        if ($parser->isSearchTextQuery($searchText) || $parser->isFieldSearch($searchText)) {
-            // Custom user query, he has to escape and do everything.
-            $searchText = '(' . $searchText . ')';
-        } else {
-            $searchText = trim($searchText);
-            if (empty($searchText)) {
-                $searchText = '*';
-            }
-            
-            if ($parser->isFullyQuoted($searchText)) {
-                $searchText = $searchText;
-            } elseif ($parser->isWildcardSearch($searchText)) {
-                $searchText = $parser->escapeSpecialChars($searchText);
+        // In all other cases - start parsing the query
+        if ($searchText != '*') {
+            $searchText = $parser->replaceLanguageTags($searchText);
+
+            if ($parser->isSearchTextQuery($searchText) || $parser->isFieldSearch($searchText)) {
+                // Custom user query, he has to escape and do everything.
+                $searchText = '(' . $searchText . ')';
             } else {
-                $searchText = $helper->escapePhrase($searchText);
+                if ($parser->isFullyQuoted($searchText)) {
+                    $searchText = $searchText;
+                } elseif ($parser->isWildcardSearch($searchText)) {
+                    $searchText = $parser->escapeSpecialChars($searchText);
+                } else {
+                    $searchText = $helper->escapePhrase($searchText);
+                }
             }
         }
-
+        
         // @TODO Better to use edismax qf
         
         $searchTextQueries = [];
