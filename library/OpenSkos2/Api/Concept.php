@@ -283,7 +283,6 @@ class Concept
             $this->validate($concept, $tenant);
             
             $this->conceptManager->replaceAndCleanRelations($concept);
-            
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
