@@ -59,12 +59,12 @@ class Concept implements Record
         $concept = $this->concept;
         
         if (!$concept->isDeleted()) {
-            $datestamp = $concept->getPropertySingleValue(DcTerms::MODIFIED)->getValue();
+            $datestamp = $concept->getLatestModifyDate();
         } else {
             if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
                 $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
             } else {
-                $datestamp = $concept->getPropertySingleValue(DcTerms::MODIFIED)->getValue();
+                $datestamp = $concept->getLatestModifyDate();
             }
         }
         
