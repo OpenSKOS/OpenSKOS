@@ -99,7 +99,7 @@ class ParserText
      */
     public function isFieldSearch($searchText)
     {
-        return preg_match('/(^|\s)[^"]*[a-z_]+:[^"]*(\s|$)/i', $searchText) === 1;
+        return preg_match('/(^|\s)[^"]*[a-z_]+:"?[^"]*"?(\s|$)/i', $searchText) === 1;
     }
     
     /**
