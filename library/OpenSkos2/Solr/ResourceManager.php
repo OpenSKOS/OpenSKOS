@@ -177,7 +177,7 @@ class ResourceManager
     public function commit()
     {
         $update = $this->solr->createUpdate();
-        $update->addOptimize(true, false);
+        $update->addOptimize();
         return $this->solr->update($update);
     }
 }
