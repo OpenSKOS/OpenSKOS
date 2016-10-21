@@ -549,7 +549,7 @@ class ResourceManager
      * @param string $query
      * @return \EasyRdf\Graph
      */
-    protected function query($query)
+    public function query($query)
     {
         $maxTries = 3;
         $tries = 0;
