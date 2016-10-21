@@ -535,6 +535,14 @@ class ResourceManager
     }
 
     /**
+     * @return SolrResourceManager
+     */
+    public function getSolrManager()
+    {
+        return $this->solrResourceManager;
+    }
+
+    /**
      * Execute raw query
      * Retries on timeout, because when jena stays idle for some time, sometimes throws a timeout error.
      *
