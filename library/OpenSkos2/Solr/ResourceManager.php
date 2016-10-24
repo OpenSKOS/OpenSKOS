@@ -169,12 +169,23 @@ class ResourceManager
 
         return $solrResult->getIterator()->current()->{$field};
     }
-    
+
     /**
      * Send a commit request to solr
      * @return \Solarium\QueryType\Update\Result
      */
     public function commit()
+    {
+        $update = $this->solr->createUpdate();
+        $update->addCommit();
+        return $this->solr->update($update);
+    }
+
+    /**
+     * Send a commit request to solr
+     * @return \Solarium\QueryType\Update\Result
+     */
+    public function optimize()
     {
         $update = $this->solr->createUpdate();
         $update->addOptimize();
