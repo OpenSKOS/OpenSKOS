@@ -28,7 +28,7 @@ class Autocomplete
      * @var \OpenSkos2\ConceptManager
      */
     protected $manager;
-    
+
     /**
      * @var OpenSKOS_Db_Table_Users
      */
@@ -53,19 +53,19 @@ class Autocomplete
     public function search($options, &$numFound)
     {
         // @TODO Ensure all options are arrays.
-        
+
         $helper = new QueryHelper();
-        
+
         $parser = new ParserText();
-        
+
         $searchText = $options['searchText'];
-        
+
         // Empty query and query for all is replaced with *
         $searchText = trim($searchText);
         if (empty($searchText) || $searchText == '*:*') {
             $searchText = '*';
         }
-        
+
         // In all other cases - start parsing the query
         if ($searchText != '*') {
             $searchText = $parser->replaceLanguageTags($searchText);
@@ -77,15 +77,16 @@ class Autocomplete
                 if ($parser->isFullyQuoted($searchText)) {
                     $searchText = $searchText;
                 } elseif ($parser->isWildcardSearch($searchText)) {
-                    $searchText = $parser->escapeSpecialChars($searchText);
+                    // do not escape wildcard search with the new tokenizer
+                    // $searchText = $helper->escapePhrase($searchText);
                 } else {
                     $searchText = $helper->escapePhrase($searchText);
                 }
             }
         }
-        
+
         // @TODO Better to use edismax qf
-        
+
         $searchTextQueries = [];
 
         // labels
@@ -143,9 +144,9 @@ class Autocomplete
         }
 
         // @TODO Use filter queries
-        
+
         $optionsQueries = [];
-        
+
         //status
         if (strpos($searchText, 'status') === false) { // We dont add status query if it is in the query already.
             if (!empty($options['status'])) {
@@ -157,7 +158,7 @@ class Autocomplete
                 $optionsQueries[] = '-s_status:' . Resource::STATUS_DELETED;
             }
         }
-        
+
         // sets (collections)
         if (!empty($options['collections'])) {
             $optionsQueries[] = '('
@@ -173,7 +174,7 @@ class Autocomplete
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
                 . '))';
         }
-        
+
         // tenants
         if (!empty($options['tenants'])) {
             $optionsQueries[] = '('
@@ -181,12 +182,12 @@ class Autocomplete
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
                 . '))';
         }
-        
+
         // to be checked
         if (!empty($options['toBeChecked'])) {
             $optionsQueries[] = '(b_toBeChecked:true) ';
         }
-        
+
         // topconcepts
         if (!empty($options['topConcepts'])) {
             $optionsQueries[] = '(b_isTopConcept:true) ';
@@ -196,7 +197,7 @@ class Autocomplete
         if (!empty($options['orphanedConcepts'])) {
             $optionsQueries[] = '(b_isOrphan:true) ';
         }
-        
+
         // combine
         if (!empty($optionsQueries)) {
             $optionsQuery = implode(' AND ', $optionsQueries);
@@ -206,22 +207,22 @@ class Autocomplete
                 $solrQuery .= ' AND (' . $optionsQuery . ')';
             }
         }
-        
-        
+
+
         $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
-                
+
         if (!empty($options['sorts'])) {
             $sorts = $options['sorts'];
         } else {
             $sorts = null;
         }
-        
+
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
     }
-    
+
     /**
      * Creates the query for creator, modifier and accepted by in combination with date created and etc.
      * @param array $options
@@ -244,11 +245,11 @@ class Autocomplete
                 'd_dateAccepted',
             ],
         ];
-        
+
         if (empty($options['userInteractionType'])) {
             $options['userInteractionType'] = [];
         }
-        
+
         $interactionsQueries = [];
         foreach ($options['userInteractionType'] as $type) {
             $users = [];
@@ -265,29 +266,29 @@ class Autocomplete
                 $users = array_merge($users, $options['interactionByUsers']);
             }
             $users = array_unique($users);
-            
+
             $dateQuery = $parser->buildDatePeriodQuery(
                 $map[$type][1],
                 isset($options['interactionDateFrom']) ? $options['interactionDateFrom'] : null,
                 isset($options['interactionDateTo']) ? $options['interactionDateTo'] : null
             );
-            
+
             $query = '';
             if (!empty($users)) {
                 $query = $map[$type][0] . ':('
                     . implode(' OR ', array_map([$helper, 'escapePhrase'], $users))
                     . ')';
             }
-            
+
             if (!empty($query) && !empty($dateQuery)) {
                 $query = '(' . $query . ' AND ' . $dateQuery . ')';
             } elseif (empty($query) && !empty($dateQuery)) {
                 $query = $dateQuery;
             }
-            
+
             $interactionsQueries[] = $query;
         }
-        
+
         return implode(' OR ', $interactionsQueries);
     }
 }
