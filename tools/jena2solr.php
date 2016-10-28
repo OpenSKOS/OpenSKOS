@@ -1,21 +1,21 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
- * 
+ *
  * LICENSE
- * 
+ *
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * 
+ *
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
- * 
+ *
  * Index Jena to SOLR run this if the search is out of sync
  */
 
@@ -67,7 +67,7 @@ $total = $result->getArrayCopy()[0]->count->getValue();
 $rows = 1000;
 
 $fetchConcepts = "
-    DESCRIBE ?subject 
+    DESCRIBE ?subject
     WHERE {
       ?subject ?predicate <http://www.w3.org/2004/02/skos/core#Concept>
     }
@@ -80,13 +80,20 @@ $solrResourceManager->setIsNoCommitMode(true);
 
 $offset = 0;
 while ($offset < $total) {
-    
-    $concepts = $conceptManager->fetchQuery($fetchConcepts . ' OFFSET ' . $offset);    
+
+    $concepts = $conceptManager->fetchQuery($fetchConcepts . ' OFFSET ' . $offset);
     $offset = $offset + $rows;
-    
+
     foreach ($concepts as $concept) {
+
         $logger->debug($concept->getUri());
-        $solrResourceManager->insert($concept);
+
+        try {
+            $solrResourceManager->insert($concept);
+        } catch (\Exception $exc) {
+            echo $exc->getTraceAsString() . PHP_EOL;
+        }
+
     }
 }
 
