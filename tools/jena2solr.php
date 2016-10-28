@@ -87,10 +87,11 @@ while ($offset < $total) {
     foreach ($concepts as $concept) {
 
         $logger->debug($concept->getUri());
-
+        
         try {
             $solrResourceManager->insert($concept);
         } catch (\Exception $exc) {
+            echo $exc->getMessage() . PHP_EOL;
             echo $exc->getTraceAsString() . PHP_EOL;
         }
 
