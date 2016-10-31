@@ -33,6 +33,10 @@ class DuplicateRelated extends AbstractConceptValidator
     {
         $relatedTerms = $concept->getProperty(Skos::RELATED);
 
+        if (empty($relatedTerms)) {
+            return true;
+        }
+
         $loopedConcepts = [];
         foreach ($relatedTerms as $relatedTerm) {
             if (isset($loopedConcepts[$relatedTerm->getUri()])) {

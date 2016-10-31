@@ -33,6 +33,10 @@ class DuplicateNarrower extends AbstractConceptValidator
     {
         $narrowerTerms = $concept->getProperty(Skos::NARROWER);
 
+        if (empty($narrowerTerms)) {
+            return true;
+        }
+
         $loopedConcepts = [];
         foreach ($narrowerTerms as $narrowerTerm) {
             if (isset($loopedConcepts[$narrowerTerm->getUri()])) {

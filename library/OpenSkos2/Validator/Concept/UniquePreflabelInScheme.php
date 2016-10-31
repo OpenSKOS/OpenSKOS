@@ -25,7 +25,7 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class UniquePreflabelInScheme extends AbstractConceptValidator
 {
-    
+
     /**
      * Ensure the preflabel does not already exists in the scheme
      *
@@ -35,37 +35,7 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
     protected function validateConcept(Concept $concept)
     {
         return $this->validateProperty($concept, Skos::PREFLABEL, true, true, false, true);
-        
+ 
     }
-    
-    /**
-     * Check if the preflabel already exists in scheme
-     *
-     * @param Concept $concept
-     * @param string $label
-     * @param string $scheme
-     * @return boolean
-     */
-    private function labelExistsInScheme(Concept $concept, $label, $scheme)
-    {
-        $uri = null;
-        if (!$concept->isBlankNode()) {
-            $uri = $concept->getUri();
-        }
-        return $this->resourceManager->askForMatch(
-            [
-                [
-                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                    'predicate' => Skos::PREFLABEL,
-                    'value' => $label
-                ],
-                [
-                    'operator' => \OpenSkos2\Sparql\Operator::EQUAL,
-                    'predicate' => Skos::INSCHEME,
-                    'value' => $scheme
-                ]
-            ],
-            $uri
-        );
-    }
+
 }

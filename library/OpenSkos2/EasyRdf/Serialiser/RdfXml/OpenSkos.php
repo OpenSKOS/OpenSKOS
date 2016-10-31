@@ -214,7 +214,6 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
                 return $tag."/>\n";
             //}
-
         } elseif (is_object($obj) and $obj instanceof Literal) {
             $atrributes = "";
             $datatype = $obj->getDatatypeUri();

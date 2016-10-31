@@ -100,13 +100,13 @@ class ResourceManager
     }
     
     /**
-     * @param Resource $resource
+     * @param Resource $uri
      */
-    public function delete(Resource $resource)
+    public function delete(\OpenSkos2\Rdf\Uri $uri)
     {
         // delete resource in solr
         $update = $this->solr->createUpdate();
-        $update->addDeleteById($resource->getUri());
+        $update->addDeleteById($uri->getUri());
         
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);

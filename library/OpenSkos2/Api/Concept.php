@@ -1,9 +1,20 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
 namespace OpenSkos2\Api;
@@ -70,18 +81,17 @@ class Concept extends AbstractTripleStoreResource {
         try {
             set_time_limit(MAXIMAL_TIME_LIMIT);
             $params = $request->getQueryParams();
-            //\Tools\Logging::var_error_log(" params \n", $params , APPLICATION_BASE_PATH.'/data/debug.txt');
         
             // offset
             $start = 0;
             if (!empty($params['start'])) {
-                $start = (int) $params['start'];
+            $start = (int)$params['start'];
             }
 
             // limit
             $limit = MAXIMAL_ROWS;
             if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
-                $limit = (int) $params['rows'];
+                $limit = (int)$params['rows'];
             }
 
             $options = [
@@ -142,7 +152,6 @@ class Concept extends AbstractTripleStoreResource {
                 $options['status'] = explode(' ', trim($params['status']));
             }
 
-            //\Tools\Logging::var_error_log(" params \n", $params , APPLICATION_BASE_PATH.'/data/debug.txt);
         
             $concepts = $this->searchAutocomplete->search($options, $total);
 
@@ -435,5 +444,4 @@ class Concept extends AbstractTripleStoreResource {
 
         return $body;
     }
-
 }

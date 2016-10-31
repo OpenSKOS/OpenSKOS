@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "OpenSkos2\\": "library/OpenSkos2"            
+            "OpenSkos2\\": "library/OpenSkos2"
         },
         "psr-0": {
             "OpenSKOS_": "library/"
@@ -24,9 +24,15 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "^2.3"
+        "squizlabs/php_codesniffer": "^2.7"
     },
     "scripts": {
+        "validate": [
+			"phpcs library/OpenSkos2 --standard=PSR2"
+		],
+		"format": [
+			"phpcbf library/OpenSkos2 --standard=PSR2 --no-patch"
+		],
         "post-install-cmd": [
             "bash contrib/setup.sh"
         ]
