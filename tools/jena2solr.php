@@ -22,10 +22,10 @@
 require dirname(__FILE__) . '/autoload.inc.php';
 
 $options = [
-    'env|e=s' => 'The environment to use (defaults to "production")',
-    'uri|u=s' => 'Index single uri e.g -u http://data.beeldengeluid.nl/gtaa/356512',
+    'env|e=s'   => 'The environment to use (defaults to "production")',
+    'uri|u=s'   => 'Index single uri e.g -u http://data.beeldengeluid.nl/gtaa/356512',
     'verbose|v' => 'Verbose',
-    'help|h' => 'Show this help',
+    'help|h'    => 'Show this help',
 ];
 
 try {
