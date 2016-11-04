@@ -5,38 +5,16 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix fuseki: <http://jena.apache.org/fuseki#> .
 
-:service_tdb_all
-        a                                   fuseki:Service ;
+:service_tdb_all  a                         fuseki:Service ;
         rdfs:label                          "TDB openskos" ;
-        fuseki:dataset                      <#openskos> ;
+        fuseki:dataset                      :tdb_dataset_readwrite ;
         fuseki:name                         "openskos" ;
         fuseki:serviceQuery                 "query" , "sparql" ;
         fuseki:serviceReadGraphStore        "get" ;
         fuseki:serviceReadWriteGraphStore   "data" ;
         fuseki:serviceUpdate                "update" ;
-        fuseki:serviceUpload                "upload"
-.
+        fuseki:serviceUpload                "upload" .
 
-<#openskos> 
-        a       ja:RDFDataset ;    
-        ja:defaultGraph <#modelDft> ;
-.
-
-<#modelDft>
-        a       ja:InfModel ;
-        ja:baseModel <#tdbGraph> ;
-	ja:reasoner [
-		ja:rulesFrom <file:rules/skos>
-	]
-.
-
-<#tdbDataset>
+:tdb_dataset_readwrite
         a             tdb:DatasetTDB ;
         tdb:location  "run/databases/openskos" ;
-        ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "30000" ] 
-.
-
-<#tdbGraph> 
-        a tdb:GraphTDB ;
-        tdb:dataset <#tdbDataset>
-.
