@@ -306,7 +306,7 @@ do {
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
 
-        $uri = $doc['uri'];
+        $uri = trim($doc['uri']); // seems there are uri's with a space prefix ? :|
         // Prevent deleted resources from having same uri.
         if (!empty($doc['deleted'])) {
             $uri = rtrim($uri, '/') . '/deleted';
