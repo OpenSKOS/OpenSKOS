@@ -413,7 +413,7 @@ do {
 
 $logger->info("Done!");
 
-function insertResource($resourceManager, $resource, $retry = 5, $count = 0) {
+function insertResource($resourceManager, $resource, $retry = 20, $count = 0) {
 
     try {
 
@@ -426,8 +426,8 @@ function insertResource($resourceManager, $resource, $retry = 5, $count = 0) {
         }
 
         sleep(2);
-
-        insertResource($resourceManager, $resource, $retry, $count++);
+        $count++;
+        insertResource($resourceManager, $resource, $retry, $count);
     }
 }
 
@@ -440,7 +440,7 @@ function insertResource($resourceManager, $resource, $retry = 5, $count = 0) {
  * @return \stdClass
  * @throws \Exception
  */
-function getFileContents($url, $retry = 5, $count = 0) {
+function getFileContents($url, $retry = 20, $count = 0) {
 
     $body = file_get_contents($url);
 
@@ -452,7 +452,8 @@ function getFileContents($url, $retry = 5, $count = 0) {
 
         sleep(2);
 
-        return getFileContents($url, $retry, $count++);
+        $count++;
+        return getFileContents($url, $retry, $count);
     }
 
     return json_decode($body, true);
