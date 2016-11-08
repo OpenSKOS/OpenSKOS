@@ -8,9 +8,6 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
@@ -20,7 +17,7 @@
  */
 
 /**
- * Script to migrate the data from SOLR to Jena run as following: 
+ * Script to migrate the data from SOLR to Jena run as following:
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
  */
 require dirname(__FILE__) . '/autoload.inc.php';
@@ -71,7 +68,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
 $endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
-$init = json_decode(file_get_contents($endPoint), true);
+$init = getFileContents($endPoint);
 $total = $init['response']['numFound'];
 
 $validator = new \OpenSkos2\Validator\Resource($resourceManager, new \OpenSkos2\Tenant($tenant), $logger);
@@ -135,11 +132,11 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-            
+
             if (in_array($value, $notFoundUsers)) {
                 return null;
             }
-            
+
             if (!isset($users[$value])) {
                 /**
                  * @var $user OpenSKOS_Db_Table_Row_User
@@ -188,11 +185,11 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-            
+
             if (in_array($value, $notFoundCollections)) {
                 return null;
             }
-                        
+
             if (!isset($collections[$value])) {
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
@@ -297,12 +294,12 @@ $mappings = [
 $logger->info('Found ' . $total . ' records');
 do {
     $logger->debug("fetching " . $endPoint . "&start=$counter");
-    
+
     if ($counter % 5000 == 0) {
         $logger->info('Processed so far: ' . $counter);
     }
-    
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+
+    $data = getFileContents($endPoint . "&start=$counter");
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
 
@@ -311,7 +308,7 @@ do {
         if (!empty($doc['deleted'])) {
             $uri = rtrim($uri, '/') . '/deleted';
         }
-        
+
         switch ($doc['class']) {
             case 'ConceptScheme':
                 $resource = new \OpenSkos2\ConceptScheme($uri);
@@ -327,7 +324,7 @@ do {
         }
 
         foreach ($doc as $field => $value) {
-            
+
             //this is just a copy field
             if (isset($labelMapping[$field])) {
                 continue;
@@ -352,9 +349,9 @@ do {
                         $insertValue = $mapping['callback']($v);
                         if ($insertValue !== null) {
                             $resource->addProperty($mapping['fields'][$field], $insertValue);
-                            
+
                         } elseif (in_array($field, ['created_by', 'dcterms_creator']) && !empty($v)) {
-                            
+
                             // Handle dcterms_creator and dc_creator
                             if (filter_var($v, FILTER_VALIDATE_URL) === false) {
                                 $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($v));
@@ -377,7 +374,7 @@ do {
                     if ($field != 'dcterms_contributor') {
                         $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
                     } else {
-                        
+
                         // Handle dcterms_contributor and dc_contributor
                         if (filter_var($v, FILTER_VALIDATE_URL) === false) {
                             $resource->addProperty(Dc::CONTRIBUTOR, new \OpenSkos2\Rdf\Literal($v));
@@ -389,10 +386,9 @@ do {
                 continue;
             }
 
-            var_dump($doc);
             throw new Exception("What to do with field {$field}");
         }
-        
+
         // Add tenant in graph
         $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
 
@@ -400,14 +396,14 @@ do {
         if (!empty($doc['deleted'])) {
             $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
         }
-        
+
         // Validate (only if not deleted, all deleted resources are considered valid.
         if ($resource->isDeleted()) {
             $isValid = true;
         } else {
             $isValid = $validator->validate($resource);
         }
-        
+
         // Insert
         if ($isValid && !$isDryRun) {
             $resourceManager->insert($resource);
@@ -415,5 +411,49 @@ do {
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
-
 $logger->info("Done!");
+
+function insertResource($resourceManager, $resource, $retry = 5, $count = 0) {
+
+    try {
+
+        $resourceManager->insert($resource);
+
+    } catch (\EasyRdf\Exception $exc) {
+
+        if ($retry === $count) {
+            throw new \Exception('Give up inserting concept', $exc->getCode(), $exc);
+        }
+
+        sleep(2);
+
+        insertResource($resourceManager, $resource, $retry, $count++);
+    }
+}
+
+/**
+ * Get file contents with retry, and json decode results
+ *
+ * @param string $url
+ * @param int $retry
+ * @param int $count
+ * @return \stdClass
+ * @throws \Exception
+ */
+function getFileContents($url, $retry = 5, $count = 0) {
+
+    $body = file_get_contents($url);
+
+    if ($body === false) {
+
+        if ($retry === $count) {
+            throw new \Exception('Failed doing request: ' . $$url . ' retry time ' . $count);
+        }
+
+        sleep(2);
+
+        return getFileContents($url, $retry, $count++);
+    }
+
+    return json_decode($body, true);
+}
