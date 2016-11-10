@@ -67,10 +67,17 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
-$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
+
+$query = [
+    'q' => 'tenant:"'.$tenant.'"',
+    'rows' => 100,
+    'wt' => 'json',
+];
+
+$endPoint = $OPTS->endpoint . "?" . http_build_query($query);
+
 $init = getFileContents($endPoint);
 $total = $init['response']['numFound'];
-
 $validator = new \OpenSkos2\Validator\Resource($resourceManager, new \OpenSkos2\Tenant($tenant), $logger);
 
 if (!empty($OPTS->start)) {
@@ -78,7 +85,6 @@ if (!empty($OPTS->start)) {
 } else {
     $counter = 0;
 }
-
 
 $getFieldsInClass = function ($class) {
     $return = '';
@@ -413,22 +419,28 @@ do {
 
 $logger->info("Done!");
 
-function insertResource($resourceManager, $resource, $retry = 20, $count = 0) {
+function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resource, $retry = 20) {
 
-    try {
+    $tried = 0;
 
-        $resourceManager->insert($resource);
+    do {
 
-    } catch (\EasyRdf\Exception $exc) {
+        try {
+            
+            return $resourceManager->insert($resource);
 
-        if ($retry === $count) {
-            throw new \Exception('Give up inserting concept', $exc->getCode(), $exc);
+        } catch (\EasyRdf\Exception $exc) {
+            
+            $tried++;
+            
+            if ($tried > $retry) {
+                throw new \Exception('Give up inserting concept', $exc->getCode(), $exc);
+            }
+
+            sleep(2);            
         }
-
-        sleep(2);
-        $count++;
-        insertResource($resourceManager, $resource, $retry, $count);
-    }
+        
+    } while($tried < $retry);
 }
 
 /**
@@ -442,19 +454,19 @@ function insertResource($resourceManager, $resource, $retry = 20, $count = 0) {
  */
 function getFileContents($url, $retry = 20, $count = 0) {
 
-    $body = file_get_contents($url);
+    $tried = 0;
+    do {
+        $body = file_get_contents($url);
 
-    if ($body === false) {
-
-        if ($retry === $count) {
-            throw new \Exception('Failed doing request: ' . $$url . ' retry time ' . $count);
+        if ($body !== false) {
+            return json_decode($body, true);
         }
 
         sleep(2);
 
-        $count++;
-        return getFileContents($url, $retry, $count);
-    }
+        $tried++;
 
-    return json_decode($body, true);
+    } while ($tried < $retry);
+
+    throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
 }
