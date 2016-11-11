@@ -251,7 +251,7 @@ class Document
 
         // Filter the first modified date
         if ($field === 'sort_d_modified_earliest') {
-            usort($data[$field], function($a, $b) {
+            usort($data[$field], function ($a, $b) {
                 return (new \DateTime($a))->getTimestamp() > (new \DateTime($b))->getTimestamp();
             });
             $data[$field] = [current($data[$field])];
