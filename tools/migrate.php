@@ -419,7 +419,7 @@ do {
 
 $logger->info("Done!");
 
-function validateResource(\OpenSkos2\Validator\Resource $validator, \OpenSkos2\Concept $resource, $retry = 20) {
+function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rdf\Resource $resource, $retry = 20) {
 
     $tried = 0;
 
