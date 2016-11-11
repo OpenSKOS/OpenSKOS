@@ -407,17 +407,36 @@ do {
         if ($resource->isDeleted()) {
             $isValid = true;
         } else {
-            $isValid = $validator->validate($resource);
+            $isValid = validateResource($validator, $resource);
         }
 
         // Insert
         if ($isValid && !$isDryRun) {
-            $resourceManager->insert($resource);
+            insertResource($resourceManager, $resource);
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
 $logger->info("Done!");
+
+function validateResource(\OpenSkos2\Validator\Resource $validator, \OpenSkos2\Concept $resource, $retry = 20) {
+
+    $tried = 0;
+
+    do {
+
+        try {
+            return $validator->validate($resource);
+        } catch (\Exception $exc) {
+
+            echo 'failed validating retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
+        }
+
+    } while($tried < $retry);
+}
 
 function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resource, $retry = 20) {
 
@@ -426,20 +445,17 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resour
     do {
 
         try {
-            
+
             return $resourceManager->insert($resource);
 
-        } catch (\EasyRdf\Exception $exc) {
-            
-            $tried++;
-            
-            if ($tried > $retry) {
-                throw new \Exception('Give up inserting concept', $exc->getCode(), $exc);
-            }
+        } catch (\Exception $exc) {
 
-            sleep(2);            
+            echo 'failed inserting retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
         }
-        
+
     } while($tried < $retry);
 }
 
@@ -462,7 +478,9 @@ function getFileContents($url, $retry = 20, $count = 0) {
             return json_decode($body, true);
         }
 
-        sleep(2);
+        echo 'failed get contents retry' . PHP_EOL;
+
+        sleep(5);
 
         $tried++;
 
