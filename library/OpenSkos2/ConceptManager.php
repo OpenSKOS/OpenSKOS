@@ -337,8 +337,8 @@ class ConceptManager extends ResourceManager
         }
 
         $date = current($concept->getProperty(DcTerms::MODIFIED));
-        if ($date instanceof \DateTime) {
-            return $date;
+        if ($date->getValue() instanceof \DateTime) {
+            return $date->getValue();
         }
 
         return $now;
