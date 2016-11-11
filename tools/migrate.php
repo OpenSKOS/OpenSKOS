@@ -431,15 +431,13 @@ function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rd
 
             echo 'failed validating retry' . PHP_EOL;
 
-            if (($tried + 1) === $retry) {
-                throw $exc;
-            }
-
             $tried++;
             sleep(5);
         }
 
     } while($tried < $retry);
+
+    throw $exc;
 }
 
 function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resource, $retry = 20) {
@@ -456,15 +454,13 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resour
 
             echo 'failed inserting retry' . PHP_EOL;
 
-            if (($tried + 1) === $retry) {
-                throw $exc;
-            }
-
             $tried++;
             sleep(5);
         }
 
     } while($tried < $retry);
+
+    throw $exc;
 }
 
 /**
