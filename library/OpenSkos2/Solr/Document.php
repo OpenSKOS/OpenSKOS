@@ -80,7 +80,7 @@ class Document
         DcTerms::CONTRIBUTOR => ['s_contributor'],
         Dc::CONTRIBUTOR => ['s_contributor'],
         OpenSkos::MODIFIEDBY => ['s_modifiedBy'],
-        DcTerms::MODIFIED => ['d_modified'],
+        DcTerms::MODIFIED => ['d_modified', 'sort_d_modified_earliest'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
     ];
@@ -247,6 +247,14 @@ class Document
                 }
                 $data[$langField][] = $this->valueToSolr($value);
             }
+        }
+
+        // Filter the first modified date
+        if ($field === 'sort_d_modified_earliest') {
+            usort($data[$field], function($a, $b) {
+                return (new \DateTime($a))->getTimestamp() > (new \DateTime($b))->getTimestamp();
+            });
+            $data[$field] = [current($data[$field])];
         }
 
         // Flat array for sorting
