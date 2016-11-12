@@ -55,6 +55,9 @@ class ConceptManager extends ResourceManager
      * Perform basic autocomplete search on pref and alt labels
      *
      * @param string $term
+     * @param string $searchLabel
+     * @param string $returnLabel
+     * @param string $lang
      * @return array
      */
     public function autoComplete($term, $searchLabel = Skos::PREFLABEL, $returnLabel = Skos::PREFLABEL, $lang = null)
@@ -258,6 +261,7 @@ class ConceptManager extends ResourceManager
      * @param int $rows
      * @param int $start
      * @param int &$numFound output Total number of found records.
+     * @param array $sorts
      * @return ConceptCollection
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
