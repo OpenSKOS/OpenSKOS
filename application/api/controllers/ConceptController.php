@@ -225,7 +225,33 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiParam {String} id The uri of the concept
      * @apiSuccess (202) {String} Concept uri
      * @apiSuccessExample {String} Success-Response
-     *   HTTP/1.1 202 Deleted
+     *   HTTP/1.1 202 Accepted
+     *   &lt;?xml version="1.0"?>
+     *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+     *      xmlns:dcterms="http://purl.org/dc/terms/"
+     *      xmlns:openskos="http://openskos.org/xmlns#"
+     *      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *      xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+     *     &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/285863243243224">
+     *           &lt;rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+     *           &lt;skos:prefLabel xml:lang="nl">doodstraff</skos:prefLabel>
+     *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+     *           &lt;skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+     *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+     *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+     *           &lt;skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+     *           &lt;skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+     *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+     *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+     *           &lt;skos:notation>285863243243224</skos:notation>
+     *           &lt;openskos:status>deleted</openskos:status>
+     *           &lt;openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-11-12T04:13:45+00:00&lt;/openskos:dateDeleted>
+     *     &lt;/rdf:Description>
+     *   &lt;/rdf:RDF>
+     * @apiError Gone {String} Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
+     * @apiErrorExample Gone
+     *   HTTP/1.1 410 Gone
+     *   Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
