@@ -48,6 +48,7 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
      * @api {get} /api/collections Get collections details
      * @apiName GetCollections
      * @apiGroup Collections
+     * @apiParam {String="true","false","1","0","yes","no","y","n"} allow_oai If present return either only collections that are oai harvestable or just collections that can not be harvested.
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
