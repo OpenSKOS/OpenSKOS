@@ -50,7 +50,7 @@ use Zend\Diactoros\Stream;
 class Concept
 {
     use \OpenSkos2\Api\Response\ApiResponseTrait;
-    
+
     const QUERY_DESCRIBE = 'describe';
     const QUERY_COUNT = 'count';
 
@@ -60,14 +60,14 @@ class Concept
      * @var \OpenSkos2\Rdf\ResourceManager
      */
     private $manager;
-    
+
     /**
      * Concept manager
      *
      * @var \OpenSkos2\ConceptManager
      */
     private $conceptManager;
-    
+
     /**
      * Search autocomplete
      *
@@ -109,11 +109,12 @@ class Concept
      * @param ServerRequestInterface $request
      * @param string $context
      * @return ResponseInterface
+     * @throws InvalidArgumentException
      */
     public function findConcepts(ServerRequestInterface $request, $context)
     {
         $params = $request->getQueryParams();
-        
+
         // offset
         $start = 0;
         if (!empty($params['start'])) {
@@ -125,34 +126,46 @@ class Concept
         if (isset($params['rows']) && $params['rows'] < 1001) {
             $limit = (int)$params['rows'];
         }
-        
+
         $options = [
             'start' => $start,
             'rows' => $limit,
             'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
-        
+
         // tenant
+        $tenant = null;
         if (isset($params['tenant'])) {
             $tenant = $this->getTenantFromParams($params);
             $options['tenants'] = [$tenant->code];
         }
-        
+
+        // collection -> set in OpenSKOS 2
+        if (isset($params['collection'])) {
+            $collection = $this->getCollection($params, $tenant);
+            $options['collections'] = [$collection->getUri()];
+        }
+
+        // conceptScheme
+        if (isset($params['scheme'])) {
+            $options['conceptScheme'] = [$params['scheme']];
+        }
+
         // search query
         if (isset($params['q'])) {
             $options['searchText'] = $params['q'];
         }
-        
+
         $concepts = $this->searchAutocomplete->search($options, $total);
-        
+
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-        
+
         switch ($context) {
             case 'json':
                 $response = (new JsonResponse($result, $propertiesList))->getResponse();
@@ -184,13 +197,13 @@ class Concept
         $concept = $this->getConcept($uuid);
 
         $params = $request->getQueryParams();
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-        
+
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
@@ -224,7 +237,7 @@ class Concept
         } else {
             $concept = $this->manager->fetchByUuid($id);
         }
-        
+
         if (!$concept) {
             throw new NotFoundException('Concept not found by id: ' . $id, 404);
         }
@@ -251,7 +264,7 @@ class Concept
         }
         return $response;
     }
-    
+
     /**
      * Update a concept
      *
@@ -263,32 +276,32 @@ class Concept
         try {
             $concept = $this->getConceptFromRequest($request);
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
-            
+
             $params = $this->getParams($request);
-                        
+
             $tenant = $this->getTenantFromParams($params);
-            
+
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUserFromParams($params);
-            
+
             $this->resourceEditAllowed($concept, $tenant, $user);
-        
+
             $concept->ensureMetadata(
                 $tenant->code,
                 $collection->getUri(),
                 $user->getFoafPerson(),
                 $existingConcept->getStatus()
             );
-            
+
             $this->validate($concept, $tenant);
-            
+
             $this->conceptManager->replaceAndCleanRelations($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
             return $this->getErrorResponse(404, 'Concept not found try insert');
         }
-        
+
         $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
         return $this->getSuccessResponse($xml);
     }
@@ -308,46 +321,47 @@ class Concept
             if (empty($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter');
             }
-            
+
             $id = $params['id'];
             /* @var $concept \OpenSkos2\Concept */
             $concept = $this->manager->fetchByUri($id);
             if (!$concept) {
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
-            
+
             if ($concept->isDeleted()) {
                 throw new NotFoundException('Concept already deleted :' . $id, 410);
             }
-            
+
             $user = $this->getUserFromParams($params);
             $tenant = $this->getTenantFromParams($params);
-            
+
             $this->resourceEditAllowed($concept, $tenant, $user);
-            
+
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
-        
+
         $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
         return $this->getSuccessResponse($xml, 202);
     }
-    
+
     /**
      * Gets a list (array or string) of fields and try to recognise the properties from it.
      * @param array $fieldsList
      * @return array
+     * @throws InvalidPredicateException
      */
     protected function fieldsListToProperties($fieldsList)
     {
         if (!is_array($fieldsList)) {
             $fieldsList = array_map('trim', explode(',', $fieldsList));
         }
-        
+
         $propertiesList = [];
         $fieldsMap = FieldsMaps::getOldToProperties();
-        
+
         // Tries to search for the field in fields map.
         // If not found there tries to expand it from short property.
         // If not that - just pass it as it is.
@@ -360,7 +374,7 @@ class Concept
                 }
             }
         }
-        
+
         // Check if we have a nice properties list at the end.
         foreach ($propertiesList as $propertyUri) {
             if ($propertyUri == 'uri') {
@@ -372,14 +386,14 @@ class Concept
                 );
             }
         }
-        
+
         return $propertiesList;
     }
-    
+
     /**
      * Applies all validators to the concept.
      * @param \OpenSkos2\Concept $concept
-     * @param OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
      * @throws InvalidArgumentException
      */
     protected function validate(\OpenSkos2\Concept $concept, \OpenSKOS_Db_Table_Row_Tenant $tenant)
@@ -388,41 +402,43 @@ class Concept
             $this->manager,
             new Tenant($tenant->code)
         );
-        
-        
+
+
         if (!$validator->validate($concept)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
     }
-    
+
     /**
      * Handle the action of creating the concept
      *
      * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws InvalidArgumentException
      */
     private function handleCreate(ServerRequestInterface $request)
     {
         $concept = $this->getConceptFromRequest($request);
-        
+
         if (!$concept->isBlankNode() && $this->manager->askForUri((string)$concept->getUri())) {
             throw new InvalidArgumentException(
                 'The concept with uri ' . $concept->getUri() . ' already exists. Use PUT instead.',
                 400
             );
         }
-        
+
         $params = $this->getParams($request);
-        
+
         $tenant = $this->getTenantFromParams($params);
         $collection = $this->getCollection($params, $tenant);
         $user = $this->getUserFromParams($params);
-        
+
         $concept->ensureMetadata(
             $tenant->code,
             $collection->getUri(),
             $user->getFoafPerson()
         );
-        
+
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
         if ($autoGenerateUri) {
             $concept->selfGenerateUri(
@@ -430,15 +446,15 @@ class Concept
                 $this->conceptManager
             );
         }
-        
+
         $this->validate($concept, $tenant);
-        
+
         $this->manager->insert($concept);
-        
+
         $rdf = (new Transform\DataRdf($concept))->transform();
         return $this->getSuccessResponse($rdf, 201);
     }
-    
+
     /**
      * Get request params, including parameters send in XML body
      *
@@ -458,7 +474,7 @@ class Concept
         }
         return $params;
     }
-    
+
     /**
      * Get the skos concept from the request to insert or update
      * does some validation to see if the xml is valid
@@ -471,7 +487,7 @@ class Concept
     {
         $doc = $this->getDomDocumentFromRequest($request);
 
-        $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
+        $descriptions = $doc->documentElement->getElementsByTagNameNS(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
             throw new InvalidArgumentException(
                 'Expected exactly one '
@@ -497,10 +513,10 @@ class Concept
 
         /** @var $concept \OpenSkos2\Concept **/
         $concept = $resource[0];
-        
+
         return $concept;
     }
-    
+
     /**
      * Get dom document from request
      *
@@ -514,7 +530,7 @@ class Concept
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 412);
         }
-        
+
         $doc = new \DOMDocument();
         if (!@$doc->loadXML($xml)) {
             throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
@@ -528,16 +544,17 @@ class Concept
                 412
             );
         }
-        
+
         return $doc;
     }
 
     /**
-     * @params array $queryParams
-     * @params \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param $params
+     * @param \OpenSKOS_Db_Table_Row_Tenant|null $tenant
      * @return OpenSKOS_Db_Table_Row_Collection
+     * @throws InvalidArgumentException
      */
-    private function getCollection($params, \OpenSKOS_Db_Table_Row_Tenant $tenant)
+    private function getCollection($params, $tenant)
     {
         if (empty($params['collection'])) {
             throw new InvalidArgumentException('No collection specified', 412);
@@ -591,7 +608,8 @@ class Concept
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \OpenSkos2\Concept $concept
-     * @return boolean If an uri must be autogenerated
+     * @return bool If an uri must be autogenerated
+     * @throws InvalidArgumentException
      */
     private function checkConceptIdentifiers(ServerRequestInterface $request, \OpenSkos2\Concept $concept)
     {
@@ -626,7 +644,7 @@ class Concept
 
         return $autoGenerateIdentifiers;
     }
-    
+
     /**
      * @param array $params
      * @return \OpenSKOS_Db_Table_Row_Tenant
@@ -637,10 +655,10 @@ class Concept
         if (empty($params['tenant'])) {
             throw new InvalidArgumentException('No tenant specified', 412);
         }
-            
+
         return $this->getTenant($params['tenant']);
     }
-    
+
     /**
      *
      * @param array $params

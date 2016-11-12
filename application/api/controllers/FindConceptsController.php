@@ -53,6 +53,8 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *
      * /api/find-concepts?q=do*&tenant=beng&collection=gtaa
      *
+     * /api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten
+     *
      * @api {get} /api/find-concepts Find a concept
      * @apiName FindConcepts
      * @apiGroup FindConcept
@@ -61,6 +63,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @apiParam {String} fl List of fields to return
      * @apiParam {String} tenant Name of the tenant to query. Default is all tenants
      * @apiParam {String} collection OpenSKOS set to query. Default is all sets
+     * @apiParam {String} scheme id of the SKOS concept scheme to query. Default is all schemes
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
