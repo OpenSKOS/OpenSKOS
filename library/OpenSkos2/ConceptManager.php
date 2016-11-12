@@ -39,7 +39,7 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
 
     /**
-     * Deletes and then inserts the resourse.
+     * Deletes and then inserts the resource.
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
