@@ -331,7 +331,12 @@ class ResourceManager
 
         if (!empty($this->resourceType)) {
             $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
-            $simplePatterns = array_merge($newPatterns, $simplePatterns);
+
+            if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
+                $simplePatterns = array_merge($newPatterns, $simplePatterns);
+            } else {
+                $simplePatterns = array_merge($simplePatterns, $newPatterns);
+            }
         }
 
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
