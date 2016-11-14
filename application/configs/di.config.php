@@ -27,17 +27,19 @@ return [
         foreach (\OpenSkos2\Namespaces::getAdditionalNamespaces() as $prefix => $namespace) {
             EasyRdf\RdfNamespace::set($prefix, $namespace);
         }
-        
+
         // @TODO Why is that OpenSKOS_Application_BootstrapAccess needed?
         $sparqlOptions = OpenSKOS_Application_BootstrapAccess::getOption('sparql');
-        
-        return new \EasyRdf\Sparql\Client(
+
+        EasyRdf\Http::getDefaultHttpClient()->setConfig(['timeout' => 100]);
+
+        return  new \EasyRdf\Sparql\Client(
             $sparqlOptions['queryUri'],
             $sparqlOptions['updateUri']
         );
     },
     'Solarium\Client' => function (ContainerInterface $c) {
-        
+
         $solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
 
         return new Solarium\Client([
@@ -56,12 +58,12 @@ return [
             $c->get('OpenSkos2\ConceptSchemeManager'),
             OpenSKOS_Cache::getCache()
         );
-        
+
         $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
         if (!empty($tenant)) {
             $conceptsSchemesCache->setTenantCode($tenant->code);
         }
-        
+
         return $conceptsSchemesCache;
     }
 ];

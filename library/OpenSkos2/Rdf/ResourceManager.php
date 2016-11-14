@@ -562,7 +562,7 @@ class ResourceManager
                     throw $ex;
                 }
             }
-            sleep(1);
+            sleep(30);
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
 
