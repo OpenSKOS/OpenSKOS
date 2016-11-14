@@ -26,13 +26,48 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
         parent::init();
         $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'rdf'));
-        
+
         if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
             //enable layout:
             $this->getHelper('layout')->enableLayout();
         }
     }
-    
+
+    /**
+     * @apiVersion 1.0.0
+     * @apiDescription Fetch all Institutions in this repository
+     *
+     * in RDF: /api/institutions
+     *
+     * in JSON: /api/institutions?format=json
+     *
+     * in JSONP: /api/institutions?format=jsonp&callback=myCallback_1234
+     *
+     * in HTML: /api/institutions?format=html
+     *
+     * @api {get} /api/institutions Get institutions details
+     * @apiName GetInstitutions
+     * @apiGroup Institutions
+     * @apiSuccess (200) {String} XML
+     * @apiSuccessExample {String} Success-Response
+     *   HTTP/1.1 200 Ok
+     *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:v="http://www.w3.org/2006/vcard/ns#">
+     *       &lt;v:Vcard rdf:about="http://production.openskos.zend.picturae.pro/api/institutions/beng" v:url="http://www.beeldengeluid.nl">
+     *         &lt;v:fn>Nederlands Instituut voor Beeld en Geluid&lt;/v:fn>
+     *         &lt;rdf:Description>
+     *           &lt;v:organisation-name>Nederlands Instituut voor Beeld en Geluid&lt;/v:organisation-name>
+     *           &lt;v:organisation-unit>Afdeling Metadatabeheer&lt;/v:organisation-unit>
+     *         &lt;/rdf:Description>
+     *         &lt;v:email rdf:about="mailto:thesaurus@beeldengeluid.nl"/>
+     *         &lt;v:adr>
+     *           &lt;v:street-address>Media Park, Sumatralaan 45&lt;/v:street-address>
+     *           &lt;v:locality>Hilversum&lt;/v:locality>
+     *           &lt;v:postal-code>1851RW&lt;/v:postal-code>
+     *           &lt;v:country-name>Nederland&lt;/v:country-name>
+     *         &lt;/v:adr>
+     *       &lt;/v:Vcard>
+     *   &lt;/rdf:RDF>
+     */
     public function indexAction()
     {
         $model = new OpenSKOS_Db_Table_Tenants();
@@ -43,7 +78,43 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
             $this->view->tenants = $model->fetchAll();
         }
     }
-    
+
+    /**
+     * @apiVersion 1.0.0
+     * @apiDescription Fetch a single Institute from this repository
+     *
+     * in RDF: /api/institutions/{id}
+     *
+     * in JSON: /api/institutions/{id}.json
+     *
+     * in JSONP: /api/institutions/{id}.jsonp?callback=myCallback_1234
+     *
+     * in HTML: /api/institutions/{id}.html
+     *
+     * @api {get} /api/institutions/{id} Get institution details
+     * @apiName GetInstitution
+     * @apiGroup Institutions
+     * @apiParam id {String} Institution code
+     * @apiSuccess (200) {String} XML
+     * @apiSuccessExample {String} Success-Response
+     *   HTTP/1.1 200 Ok
+     *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:v="http://www.w3.org/2006/vcard/ns#">
+     *       &lt;v:Vcard rdf:about="http://production.openskos.zend.picturae.pro/api/institutions/beng" v:url="http://www.beeldengeluid.nl">
+     *         &lt;v:fn>Nederlands Instituut voor Beeld en Geluid&lt;/v:fn>
+     *         &lt;rdf:Description>
+     *           &lt;v:organisation-name>Nederlands Instituut voor Beeld en Geluid&lt;/v:organisation-name>
+     *           &lt;v:organisation-unit>Afdeling Metadatabeheer&lt;/v:organisation-unit>
+     *         &lt;/rdf:Description>
+     *         &lt;v:email rdf:about="mailto:thesaurus@beeldengeluid.nl"/>
+     *         &lt;v:adr>
+     *           &lt;v:street-address>Media Park, Sumatralaan 45&lt;/v:street-address>
+     *           &lt;v:locality>Hilversum&lt;/v:locality>
+     *           &lt;v:postal-code>1851RW&lt;/v:postal-code>
+     *           &lt;v:country-name>Nederland&lt;/v:country-name>
+     *         &lt;/v:adr>
+     *       &lt;/v:Vcard>
+     *   &lt;/rdf:RDF>
+     */
     public function getAction()
     {
         $model = new OpenSKOS_Db_Table_Tenants();
@@ -62,17 +133,17 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
             $this->view->assign('tenant', $tenant);
         }
     }
-    
+
     public function postAction()
     {
         $this->_501('post');
     }
-    
+
     public function putAction()
     {
         $this->_501('put');
     }
-    
+
     public function deleteAction()
     {
         $this->_501('delete');
