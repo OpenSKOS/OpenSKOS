@@ -239,12 +239,12 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
      *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
      *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
-     *           &lt;skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+     *           &lt;skos:altLabel xml:lang="nl">kruisigingen&lt;/skos:altLabel>
      *           &lt;skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
      *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
      *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
-     *           &lt;skos:notation>285863243243224</skos:notation>
-     *           &lt;openskos:status>deleted</openskos:status>
+     *           &lt;skos:notation>285863243243224&lt;/skos:notation>
+     *           &lt;openskos:status>deleted&lt;/openskos:status>
      *           &lt;openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-11-12T04:13:45+00:00&lt;/openskos:dateDeleted>
      *     &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
