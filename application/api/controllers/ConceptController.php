@@ -34,32 +34,28 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiVersion 1.0.0
      * @apiDescription Create a SKOS Concept
      *
-     * Add the following XML to the body of the request
+     * Create a new SKOS concept based on the post data
      *
-     * <pre class="prettyprint language-xml prettyprinted">
-     * &lt;rdf:RDF
-     *
-     *    xmlns:rdf=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;
-     *
-     *    xmlns:openskos=&quot;http://openskos.org/xmlns#&quot;
-     *
-     *    xmlns:skos=&quot;http://www.w3.org/2004/02/skos/core#&quot;
-     *    openskos:tenant=&quot;beg&quot; openskos:collection=&quot;gtaa&quot; openskos:key=&quot;your-api-key&quot;&gt;
-     *    &lt;rdf:Description rdf:about=&quot;http://data.beeldengeluid.nl/gtaa/28586&quot;&gt;
-     *      &lt;rdf:type rdf:resource=&quot;http://www.w3.org/2004/02/skos/core#Concept&quot;/&gt;
-     *      &lt;skos:prefLabel xml:lang=&quot;nl&quot;&gt;doodstraf&lt;/skos:prefLabel&gt;
-     *      &lt;skos:inScheme rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/Onderwerpen&quot;/&gt;
-     *      &lt;skos:broader rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/24842&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/25652&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/24957&quot;/&gt;
-     *      &lt;skos:altLabel xml:lang=&quot;nl&quot;&gt;kruisigingen&lt;/skos:altLabel&gt;
-     *      &lt;skos:broader rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/27731&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/28109&quot;/&gt;
-     *      &lt;skos:inScheme rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/GTAA&quot;/&gt;
-     *      &lt;skos:notation&gt;28586&lt;/skos:notation&gt;
-     *    &lt;/rdf:Description&gt;
-     *  &lt;/rdf:RDF&gt;
-     * </pre>
+     * @apiExample {String} Example request
+     * <rdf:RDF
+     *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *    xmlns:openskos="http://openskos.org/xmlns#"
+     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *    openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
+     *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept">
+     *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen">
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957">
+     *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109">
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA">
+     *      <skos:notation>28586</skos:notation>
+     *    </rdf:Description>
+     *  </rdf:RDF>
      *
      * @api {post} /api/concept Create SKOS concept
      * @apiName CreateConcept
@@ -128,34 +124,34 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * @apiVersion 1.0.0
      * @apiDescription Update a SKOS Concept
-     * Add the following XML to the body of the request
      *
-     * <pre class="prettyprint language-xml prettyprinted">
-     * &lt;rdf:RDF
-     *    xmlns:rdf=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;
-     *    xmlns:openskos=&quot;http://openskos.org/xmlns#&quot;
-     *    xmlns:skos=&quot;http://www.w3.org/2004/02/skos/core#&quot;
-     *    openskos:tenant=&quot;beg&quot; openskos:collection=&quot;gtaa&quot; openskos:key=&quot;your-api-key&quot;&gt;
-     *    &lt;rdf:Description rdf:about=&quot;http://data.beeldengeluid.nl/gtaa/28586&quot;&gt;
-     *      &lt;rdf:type rdf:resource=&quot;http://www.w3.org/2004/02/skos/core#Concept&quot;/&gt;
-     *      &lt;skos:prefLabel xml:lang=&quot;nl&quot;&gt;doodstraf&lt;/skos:prefLabel&gt;
-     *      &lt;skos:inScheme rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/Onderwerpen&quot;/&gt;
-     *      &lt;skos:broader rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/24842&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/25652&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/24957&quot;/&gt;
-     *      &lt;skos:altLabel xml:lang=&quot;nl&quot;&gt;kruisigingen&lt;/skos:altLabel&gt;
-     *      &lt;skos:broader rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/27731&quot;/&gt;
-     *      &lt;skos:related rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/28109&quot;/&gt;
-     *      &lt;skos:inScheme rdf:resource=&quot;http://data.beeldengeluid.nl/gtaa/GTAA&quot;/&gt;
-     *      &lt;skos:notation&gt;28586&lt;/skos:notation&gt;
-     *    &lt;/rdf:Description&gt;
-     *  &lt;/rdf:RDF&gt;
-     * </pre>
+     * Update the specified concept with the new data present in the request.
      *
-     * @api {put} /api/concept Update SKOS concept
+     * @apiExample {String} Example request
+     *  <rdf:RDF
+     *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *    xmlns:openskos="http://openskos.org/xmlns#"
+     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *    openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
+     *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
+     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+     *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+     *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+     *      <skos:notation>28586</skos:notation>
+     *    </rdf:Description>
+     *  </rdf:RDF>
+     *
      * @apiName UpdateConcept
      * @apiGroup Concept
      *
+     * @api {put} /api/concept Update SKOS concept
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
