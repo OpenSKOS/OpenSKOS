@@ -52,18 +52,18 @@ class ConceptSchemeManager extends ResourceManager
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                 SELECT ?subject ?title ?uuid
                 WHERE {
-                    ?subject rdf:type skos:conceptScheme;
+                    ?subject rdf:type skos:ConceptScheme;
                     <' . OpenSkos::SET .  '> ' . $escaped . ';
                     dc:title ?title;
                     openskos:uuid ?uuid;
             ';
-        
+
         if (!empty($filterUris)) {
             $query .= 'FILTER (?subject = '
                 . implode(' || ?subject = ', array_map([$this, 'valueToTurtle'], $filterUris))
                 . ')';
         }
-        
+
         $query .= '}';
 
         $result = $this->query($query);
