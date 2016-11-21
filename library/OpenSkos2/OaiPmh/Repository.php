@@ -31,6 +31,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
 use OpenSKOS_Db_Table_Row_Collection;
+use Picturae\OaiPmh\Exception\BadResumptionTokenException;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
 use Picturae\OaiPmh\Implementation\RecordList as OaiRecordList;
@@ -455,6 +456,9 @@ class Repository implements InterfaceRepository
     {
         $params = (array) json_decode(base64_decode($token));
 
+        if (!empty($token) && is_null(json_decode(base64_decode($token)))) {
+            throw new BadResumptionTokenException("Resumption token present but contains invalid data");
+        }
         if (!empty($params['from'])) {
             $params['from'] = new \DateTime('@' . $params['from']);
         }

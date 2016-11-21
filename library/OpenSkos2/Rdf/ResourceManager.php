@@ -214,10 +214,13 @@ class ResourceManager
     public function fetchByUri($uri)
     {
         $resource = new Uri($uri);
-        $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
-
-        // @TODO Add resourceType check.
+        try {
+            $result = $this->query('DESCRIBE ' . (new NTriple)->serialize($resource));
+            $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+            // @TODO Add resourceType check.
+        } catch (\Exception $exp) {
+            throw new ResourceNotFoundException("Unable to fetch resource");
+        }
 
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
