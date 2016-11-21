@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ff41b88578e907e674421a8629dd03b3",
+    "hash": "def2830d94bfbb8fe30caa77ab10f374",
     "content-hash": "a487e1a2adf843ff97925cd8c6abfd1a",
     "packages": [
         {
@@ -781,16 +781,16 @@
         },
         {
             "name": "picturae/oai-pmh",
-            "version": "0.5.14",
+            "version": "0.5.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picturae/OaiPmh.git",
-                "reference": "15a87329348157b3d46e1cf7d7e117da6c44a110"
+                "reference": "c5bfc492dfecd75efefc828e746590c26c4eb266"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/15a87329348157b3d46e1cf7d7e117da6c44a110",
-                "reference": "15a87329348157b3d46e1cf7d7e117da6c44a110",
+                "url": "https://api.github.com/repos/picturae/OaiPmh/zipball/c5bfc492dfecd75efefc828e746590c26c4eb266",
+                "reference": "c5bfc492dfecd75efefc828e746590c26c4eb266",
                 "shasum": ""
             },
             "require": {
