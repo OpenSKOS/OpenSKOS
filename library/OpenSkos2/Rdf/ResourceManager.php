@@ -557,6 +557,7 @@ class ResourceManager
      *
      * @param string $query
      * @return \EasyRdf\Graph
+     * @throws \EasyRdf\Exception
      */
     public function query($query)
     {
@@ -583,6 +584,7 @@ class ResourceManager
     /**
      * Performs client->insert. Retry on timeout.
      * @param Graph $data
+     * @return Http\Response
      * @throws \EasyRdf\Exception
      */
     protected function insertWithRetry($data)
