@@ -28,7 +28,7 @@ use OpenSkos2\Namespaces\Dc;
 class FieldsMaps
 {
     // @TODO Move to correct namespace/context
-    
+
     /**
      * Gets map of fields to property uris.
      * @return array
@@ -36,7 +36,7 @@ class FieldsMaps
     public static function getOldToProperties()
     {
         // @TODO Ensure all fields
-        
+
         return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
@@ -44,11 +44,11 @@ class FieldsMaps
             'uuid' => OpenSkos::UUID,
             'notation' => Skos::NOTATION,
             'inScheme' => Skos::INSCHEME,
-            
+
             'prefLabel' => Skos::PREFLABEL,
             'altLabel' => Skos::ALTLABEL,
             'hiddenLabel' => Skos::HIDDENLABEL,
-            
+
             'changeNote' => Skos::CHANGENOTE,
             'definition' => Skos::DEFINITION,
             'editorialNote' => Skos::EDITORIALNOTE,
@@ -56,24 +56,22 @@ class FieldsMaps
             'historyNote' => Skos::HISTORYNOTE,
             'note' => Skos::NOTE,
             'scopeNote' => Skos::SCOPENOTE,
-            
-            'related' => Skos::RELATED,
-            
+
             'broader' => Skos::BROADER,
             'broaderTransitive' => Skos::BROADERTRANSITIVE,
             'narrower' => Skos::NARROWER,
             'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
             'related' => Skos::RELATED,
-            
+
             'broadMatch' => Skos::BROADMATCH,
             'closeMatch' => Skos::CLOSEMATCH,
             'exactMatch' => Skos::EXACTMATCH,
             'mappingRelation' => Skos::MAPPINGRELATION,
             'narrowMatch' => Skos::NARROWMATCH,
             'relatedMatch' => Skos::RELATEDMATCH,
-            
+
             'topConceptOf' => Skos::TOPCONCEPTOF,
-            
+
             'created_timestamp' => DcTerms::CREATED,
             'modified_timestamp' => DcTerms::MODIFIED,
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
@@ -83,17 +81,17 @@ class FieldsMaps
             'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
             'dcterms_contributor' => DcTerms::CONTRIBUTOR,
             'dc_contributor' => Dc::CONTRIBUTOR,
-            
+
             'dcterms_title' => DcTerms::TITLE,
-            
+
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
         ];
     }
-    
+
     /**
-     * Returns the corresposing property for the given field.
+     * Returns the corresponding property for the given field.
      * If property not found - returns $field.
      * @param string $field
      * @return string
