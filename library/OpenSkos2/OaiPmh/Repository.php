@@ -337,6 +337,14 @@ class Repository implements InterfaceRepository
     {
         $formats = [];
 
+        // We don't support different metadata formats based on identifier, but spec requires error if identifier
+        // can not be found.
+        try {
+            $concept = $this->conceptManager->fetchByUri($identifier);
+        } catch (ResourceNotFoundException $exc) {
+            throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
+        }
+
         // @TODO The oai_dc is actually required by the oai-pmh specs. So some day has to be implemented.
 //        $formats[] = new ImplementationMetadataFormatType(
 //            'oai_dc',
