@@ -48,7 +48,7 @@ class Autocomplete
      * Perform a autocomplete search with a search profile from the editor
      *
      * @param array $options
-     * @return ConceptCollection
+     * @return \OpenSkos2\ConceptCollection
      */
     public function search($options, &$numFound)
     {
@@ -208,7 +208,6 @@ class Autocomplete
             }
         }
 
-
         $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
@@ -228,6 +227,7 @@ class Autocomplete
      * @param array $options
      * @param \Solarium\Core\Query\Helper $helper
      * @param ParserText $parser
+     * @return string
      */
     protected function interactionsQuery($options, $helper, $parser)
     {

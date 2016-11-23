@@ -124,6 +124,7 @@ class Resource extends Uri implements ResourceIdentifier
      * Set multiple values at once, override existing values
      * @param string $predicate
      * @param RdfObject[] $values
+     * @return $this
      */
     public function setProperties($predicate, array $values)
     {
@@ -134,6 +135,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     /**
      * @param string $predicate
+     * @return $this
      */
     public function unsetProperty($predicate)
     {
@@ -298,7 +300,8 @@ class Resource extends Uri implements ResourceIdentifier
     /**
      * Gets proprty value and checks if it is only one.
      * @param string $property
-     * @return string|null
+     * @return null|string
+     * @throws OpenSkosException
      */
     public function getPropertySingleValue($property)
     {

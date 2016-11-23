@@ -124,6 +124,7 @@ class ResourceManager
      * @param int $rows
      * @param int $start
      * @param int &$numFound output Total number of found records.
+     * @param array $sorts
      * @return array Array of uris
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)

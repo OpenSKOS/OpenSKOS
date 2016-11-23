@@ -214,10 +214,13 @@ class ResourceManager
     public function fetchByUri($uri)
     {
         $resource = new Uri($uri);
-        $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
-
-        // @TODO Add resourceType check.
+        try {
+            $result = $this->query('DESCRIBE ' . (new NTriple)->serialize($resource));
+            $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+            // @TODO Add resourceType check.
+        } catch (\Exception $exp) {
+            throw new ResourceNotFoundException("Unable to fetch resource");
+        }
 
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
@@ -554,6 +557,7 @@ class ResourceManager
      *
      * @param string $query
      * @return \EasyRdf\Graph
+     * @throws \EasyRdf\Exception
      */
     public function query($query)
     {
@@ -580,6 +584,7 @@ class ResourceManager
     /**
      * Performs client->insert. Retry on timeout.
      * @param Graph $data
+     * @return Http\Response
      * @throws \EasyRdf\Exception
      */
     protected function insertWithRetry($data)
