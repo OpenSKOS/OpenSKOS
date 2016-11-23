@@ -58,6 +58,7 @@ class Resource extends Uri implements ResourceIdentifier
     /**
      * @param string $predicate
      * @param RdfObject $value
+     * @return $this
      */
     public function addProperty($predicate, RdfObject $value)
     {
@@ -70,6 +71,7 @@ class Resource extends Uri implements ResourceIdentifier
      * Add multiple values at once, keeps the existing values
      * @param string $predicate
      * @param RdfObject[] $values
+     * @return $this
      */
     public function addProperties($predicate, array $values)
     {
@@ -298,7 +300,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     /**
-     * Gets proprty value and checks if it is only one.
+     * Gets property value and checks if it is only one.
      * @param string $property
      * @return null|string
      * @throws OpenSkosException
@@ -322,7 +324,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     /**
-     * Gets proprty value and implodes it if multiple values are found.
+     * Gets property value and implodes it if multiple values are found.
      * @param string $property
      * @param string $language
      * @return string
