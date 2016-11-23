@@ -32,6 +32,10 @@ class Uri implements Object, ResourceIdentifier
      */
     public function __construct($value)
     {
+        if (!filter_var($value, FILTER_VALIDATE_URL)) {
+            throw new Exception\InvalidUriException('Invalid URI: ' . $value);
+        }
+
         $this->uri = $value;
     }
 
