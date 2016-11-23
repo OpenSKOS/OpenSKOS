@@ -30,6 +30,10 @@ use OpenSkos2\Namespaces\Skos;
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
+    'db-hostname=s' => 'Origin database host',
+    'db-database=s' => 'Origin database name',
+    'db-username=s' => 'Origin database username',
+    'db-password=s' => 'Origin database password',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
     'dryrun' => 'Only validate the data, do not migrate it.',
@@ -45,6 +49,18 @@ try {
 }
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
+
+validateOptions($OPTS);
+
+$dbSource = \Zend_Db::factory('Pdo_Mysql', array(
+    'host'      => $OPTS->getOption('db-hostname'),
+    'dbname'    => $OPTS->getOption('db-database'),
+    'username'  => $OPTS->getOption('db-username'),
+    'password'  => $OPTS->getOption('db-password'),
+));
+$dbSource->setFetchMode(\PDO::FETCH_OBJ);
+$collectionCache = new Collections($dbSource);
+$collectionCache->validateCollections();
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -69,7 +85,7 @@ $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
 
 $query = [
-    'q' => 'tenant:"'.$tenant.'"',
+    'q' => 'tenant:"'.$tenant.'" AND notation:"240125"',
     'rows' => 100,
     'wt' => 'json',
 ];
@@ -320,6 +336,10 @@ do {
                 $resource = new \OpenSkos2\ConceptScheme($uri);
                 break;
             case 'Concept':
+
+                // Make sure we have a valid uri in all caes.
+                $uri = getConceptUri($uri, $doc, $collectionCache);
+
                 $resource = new \OpenSkos2\Concept($uri);
                 break;
             case 'Collection':
@@ -491,4 +511,117 @@ function getFileContents($url, $retry = 20, $count = 0) {
     } while ($tried < $retry);
 
     throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
+}
+
+/**
+ * Make sure all cli options are given
+ *
+ * @param \Zend_Console_Getopt $opts
+ */
+function validateOptions(\Zend_Console_Getopt $opts) {
+
+    $required = [
+        'db-hostname',
+        'db-database',
+        'db-username',
+        'db-password',
+    ];
+
+    foreach ($required as $req) {
+        if (empty($opts->getOption($req))) {
+            echo $opts->getUsageMessage();
+            exit();
+        }
+    }
+}
+
+/**
+ * Used to generate uri's for bad data from the source
+ * where the uri only had a notation
+ *
+ * @param string $uri
+ * @param array $solrDoc
+ * @return string
+ */
+function getConceptUri($uri, array $solrDoc, \Collections $collections) {
+
+    if (filter_var($uri, FILTER_VALIDATE_URL, $uri)) {
+        return $uri;
+    }
+
+    $collection = $collections->fetchById($solrDoc['collection']);
+    if (count($solrDoc['notation']) !== 1) {
+        throw new \RuntimeException('More then one notation: ' . var_export($solrDoc[['notation']]));
+    }
+
+    return $collection->conceptsBaseUrl . '/' . current($solrDoc['notation']);
+}
+
+class Collections {
+
+    /**
+     * @var \Zend_Db_Adapter_Abstract
+     */
+    private $db;
+
+    /**
+     * @var array
+     */
+    private $collections = [];
+
+    /**
+     * Use the source db as parameter not the target.
+     *
+     * @param \Zend_Db_Adapter_Abstract $db
+     */
+    public function __construct(\Zend_Db_Adapter_Abstract $db) {
+        $this->db = $db;
+    }
+
+    /**
+     * @param int $id
+     * @return \stdClass
+     */
+    public function fetchById($id)
+    {
+
+        if (!isset($this->fetchAll()[$id])) {
+            throw new \RunTimeException('Collection not found');
+        }
+
+        return $this->fetchAll()[$id];
+    }
+
+    /**
+     * Fetch all collections
+     *
+     * @return array
+     */
+    public function fetchAll()
+    {
+        if (!empty($this->collections)) {
+            return $this->collections;
+        }
+
+        $collections = $this->db->fetchAll('select * from collection');
+        foreach ($collections as $collection) {
+            $this->collections[$collection->id] = $collection;
+        }
+
+        return $this->collections;
+    }
+
+    /**
+     * Check if
+     *
+     * @throw \RuntimeException
+     */
+    public function validateCollections()
+    {
+        foreach ($this->fetchAll() as $row) {
+            if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
+                throw new \RuntimeException('Could not validate url for collection: ' . var_export($row, true));
+            }
+        }
+    }
 }
