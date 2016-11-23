@@ -185,7 +185,8 @@ class ResourceManager
      * Fetch resource by uuid
      *
      * @param string $uuid
-     * @return \OpenSkos2\Rdf\Resource
+     * @return Resource
+     * @throws ResourceNotFoundException
      */
     public function fetchByUuid($uuid)
     {
@@ -199,9 +200,18 @@ class ResourceManager
             ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
         $data = $this->fetchQuery($query);
 
-        if (!isset($data[0])) {
-            return;
+        if (count($data) == 0) {
+            throw new ResourceNotFoundException(
+                'The requested resource with openskos::uuid <' . $uuid . '> was not found.'
+            );
         }
+
+        if (count($data) > 1) {
+            throw new \RuntimeException(
+                'Something went very wrong. The requested resource with uuid <' . $uuid . '> was found more than once.'
+            );
+        }
+
         return $data[0];
     }
 
@@ -230,7 +240,7 @@ class ResourceManager
 
         if (count($resources) > 1) {
             throw new \RuntimeException(
-                'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
+                'Something went very wrong. The requested resource <' . $uri . '> was found more than once.'
             );
         }
 
