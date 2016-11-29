@@ -430,7 +430,7 @@ class Concept
         $params = $this->getParams($request);
 
         $tenant = $this->getTenantFromParams($params);
-        $collection = $this->getCollection($params, $tenant);
+        $collection = $this->getCollection($params, $tenant, $concept);
         $user = $this->getUserFromParams($params);
 
         $concept->ensureMetadata(
@@ -496,14 +496,8 @@ class Concept
             );
         }
 
-        // is a tenant, collection or api key set in the XML?
-        foreach (array('tenant', 'collection', 'key') as $attributeName) {
-            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            // remove the api key
-            if (!empty($value) && $attributeName === 'key') {
-                $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            }
-        }
+        // remove the api key
+        $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
 
         $resource = (new Text($doc->saveXML()))->getResources();
 
@@ -513,6 +507,22 @@ class Concept
 
         /** @var $concept \OpenSkos2\Concept **/
         $concept = $resource[0];
+
+        // Is a tenant in the custom openskos xml attributes but not in the rdf add the values to the concept
+        $xmlTenant = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, 'tenant');
+        if (!$concept->getTenant() && !empty($xmlTenant)) {
+            $concept->addUniqueProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($xmlTenant));
+        }
+
+        // If there still is no tenant add it from the query params
+        $params = $request->getQueryParams();
+        if (!$concept->getTenant() && isset($params['tenant'])) {
+            $concept->addUniqueProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($params['tenant']));
+        }
+
+        if (!$concept->getTenant()) {
+            throw new InvalidArgumentException('No tenant specified', 400);
+        }
 
         return $concept;
     }
@@ -528,12 +538,12 @@ class Concept
     {
         $xml = $request->getBody();
         if (!$xml) {
-            throw new InvalidArgumentException('No RDF-XML recieved', 412);
+            throw new InvalidArgumentException('No RDF-XML recieved', 400);
         }
 
         $doc = new \DOMDocument();
         if (!@$doc->loadXML($xml)) {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 412);
+            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 400);
         }
 
         //do some basic tests
@@ -541,7 +551,7 @@ class Concept
             throw new InvalidArgumentException(
                 'Recieved RDF-XML is not valid: '
                 . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>',
-                412
+                400
             );
         }
 
@@ -557,7 +567,7 @@ class Concept
     private function getCollection($params, $tenant)
     {
         if (empty($params['collection'])) {
-            throw new InvalidArgumentException('No collection specified', 412);
+            throw new InvalidArgumentException('No collection specified', 400);
         }
         $code = $params['collection'];
         $model = new \OpenSKOS_Db_Table_Collections();
@@ -653,7 +663,7 @@ class Concept
     private function getTenantFromParams($params)
     {
         if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 412);
+            throw new InvalidArgumentException('No tenant specified', 400);
         }
 
         return $this->getTenant($params['tenant']);
@@ -668,7 +678,7 @@ class Concept
     private function getUserFromParams($params)
     {
         if (empty($params['key'])) {
-            throw new InvalidArgumentException('No key specified', 412);
+            throw new InvalidArgumentException('No key specified', 400);
         }
         return $this->getUserByKey($params['key']);
     }

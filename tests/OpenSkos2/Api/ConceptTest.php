@@ -36,7 +36,7 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
         $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
         $response = $concept->create($request);
         
-        $this->assertEquals(412, $response->getStatusCode());
+        $this->assertEquals(400, $response->getStatusCode());
         $this->assertEquals((string)$response->getBody(), 'Recieved RDF-XML is not valid XML');
     }
     
@@ -55,7 +55,7 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
         $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
         $response = $concept->create($request);
         
-        $this->assertEquals(412, $response->getStatusCode());
+        $this->assertEquals(400, $response->getStatusCode());
         $this->assertEquals((string)$response->getBody(), 'No tenant specified');
     }
     
