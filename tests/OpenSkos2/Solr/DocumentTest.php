@@ -22,6 +22,23 @@ namespace OpenSkos2\Concept;
 class DocumentTest extends \PHPUnit_Framework_TestCase
 {
 
+    public function testNotation()
+    {
+        $uri = 'http://example.com/1';
+        $resource = new \OpenSkos2\Rdf\Resource($uri);
+        $resource->addProperty(\OpenSkos2\Namespaces\Skos::NOTATION, new \OpenSkos2\Rdf\Literal(123));
+
+        $solr = new \Solarium\QueryType\Update\Query\Document\Document();
+        $skosSolr = new \OpenSkos2\Solr\Document($resource, $solr);
+
+        $doc = $skosSolr->getDocument();
+
+        $this->assertEquals(123, $doc->notation);
+        $this->assertEquals([123], $doc->t_notation);
+        $this->assertEquals([123], $doc->a_notation);
+        $this->assertEquals([123], $doc->s_notation);
+    }
+
     public function testMapping()
     {
         $uri = 'http://example.com/1';

@@ -68,7 +68,7 @@ class Document
         Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote'],
         Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote'],
         Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote'],
-        Skos::NOTATION =>   ['s_notaton', 't_notaton', 'a_notaton'],
+        Skos::NOTATION =>   ['s_notation', 't_notation', 'a_notation'],
         Skos::INSCHEME =>   ['s_inScheme'],
         OpenSkos::STATUS => ['s_status'],
         OpenSkos::SET => ['s_set'],
@@ -266,8 +266,27 @@ class Document
         }
 
         foreach ($data as $mappedField => $val) {
+            if ($mappedField === 'notation') {
+                $val = $this->getLiteral($val);
+            }
+
             $document->{$mappedField} = $val;
         }
+    }
+
+    /**
+     *
+     * @param array $val
+     * @return string|int
+     * @throws Exception\InvalidValue
+     */
+    private function getLiteral(array $val)
+    {
+        if (count($val) > 1) {
+            throw new Exception\InvalidValue('Invalid value for notation: ' . var_export($val, true));
+        }
+
+        return current($val);
     }
 
     /**
