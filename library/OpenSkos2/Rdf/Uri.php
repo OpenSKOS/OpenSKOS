@@ -32,7 +32,8 @@ class Uri implements Object, ResourceIdentifier
      */
     public function __construct($value)
     {
-        if (!filter_var($value, FILTER_VALIDATE_URL)) {
+        // Null values where allowed from the start some functionality depends on it like createing new graphs :(
+        if ($value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
             throw new Exception\InvalidUriException('Invalid URI: ' . $value);
         }
 
