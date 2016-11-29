@@ -85,7 +85,7 @@ $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
 
 $query = [
-    'q' => 'tenant:"'.$tenant.'" AND notation:"240125"',
+    'q' => 'tenant:"'.$tenant.'"',
     'rows' => 100,
     'wt' => 'json',
 ];
