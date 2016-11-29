@@ -31,6 +31,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Rdf\Literal;
 use OpenSKOS_Db_Table_Row_Collection;
+use Picturae\OaiPmh\Exception\BadArgumentException;
 use Picturae\OaiPmh\Exception\BadResumptionTokenException;
 use Picturae\OaiPmh\Exception\IdDoesNotExistException;
 use Picturae\OaiPmh\Implementation\MetadataFormatType as ImplementationMetadataFormatType;
@@ -243,7 +244,11 @@ class Repository implements InterfaceRepository
     public function getRecord($metadataFormat, $identifier)
     {
         try {
-            $concept = $this->conceptManager->fetchByUri($identifier);
+            if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
+                $concept = $this->conceptManager->fetchByUuid($identifier);
+            } else {
+                throw new BadArgumentException('Invalid identifier ' . $identifier);
+            }
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
@@ -341,7 +346,11 @@ class Repository implements InterfaceRepository
         // can not be found.
         if (!is_null($identifier)) {
             try {
-                $concept = $this->conceptManager->fetchByUri($identifier);
+                if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
+                    $concept = $this->conceptManager->fetchByUuid($identifier);
+                } else {
+                    throw new BadArgumentException('Invalid identifier ' . $identifier);
+                }
             } catch (ResourceNotFoundException $exc) {
                 throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
             }
@@ -570,10 +579,10 @@ class Repository implements InterfaceRepository
         }
 
         if (!empty($scheme)) {
-            $schemeObj = $this->schemeManager->fetchByUuid($scheme->getValue());
-            if ($schemeObj) {
+            try {
+                $schemeObj = $this->schemeManager->fetchByUuid($scheme->getValue());
                 $searchOptions['conceptScheme'] = [$schemeObj->getUri()];
-            } else {
+            } catch (ResourceNotFoundException $exc) {
                 $searchOptions['conceptScheme'] = [$scheme->getValue()];
             }
         }
