@@ -80,7 +80,7 @@
         <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
 
         <!-- string for sorting -->
-        <dynamicField name="sort_s_*" type="string" indexed="true" stored="false" required="false" multiValued="false" />
+        <dynamicField name="sort_s_*" type="textSort" indexed="true" stored="false" required="false" multiValued="false" />
 
         <!-- int for sorting -->
         <dynamicField name="sort_i_*" type="integer" indexed="true" stored="false" required="false" multiValued="false" />
@@ -153,6 +153,21 @@
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
         </fieldtype>
+
+        <fieldType name="textSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+            <analyzer>
+                <!-- KeywordTokenizer does no actual tokenizing, so the entire input string is preserved as a single token -->
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+
+                <!-- The LowerCase TokenFilter does what you expect, which can be when you want your sorting to be case insensitive -->
+                <filter class="solr.LowerCaseFilterFactory"/>
+
+                <!-- The TrimFilter removes any leading or trailing whitespace -->
+                <filter class="solr.TrimFilterFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
     </types>
 
     <solrQueryParser defaultOperator="AND"/>
