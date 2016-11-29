@@ -528,7 +528,8 @@ function validateOptions(\Zend_Console_Getopt $opts) {
     ];
 
     foreach ($required as $req) {
-        if (empty($opts->getOption($req))) {
+        $reqOption = $opts->getOption($req);
+        if (empty($reqOption)) {
             echo $opts->getUsageMessage();
             exit();
         }
