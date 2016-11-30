@@ -100,9 +100,8 @@ class ConceptManager extends ResourceManager
             $filter .= 'lang(?returnLabel) = "' . $lang . '"';
         }
         $query->filter($filter);
-
+        
         $result = $this->query($query);
-
         $items = [];
         $i=0;
         foreach ($result as $literal) {

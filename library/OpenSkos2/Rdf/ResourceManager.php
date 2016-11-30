@@ -577,22 +577,12 @@ class ResourceManager
         if ($rdfType=== Concept::TYPE) { // solr request, works only for skos and open-skos properties
             $split = explode("#", $property);
             $field = $split[1];
-            if ($field === 'prefLabel' || $field == 'altLabel' || $field === 'hiddenLabel') {
-                if ($language !== null && $language !== '') {
-                    $solrQuery = 'a_' . $field . '_' . $language . ':"' . $term .'"';
-                } else {
-                    $solrQuery = 'a_' . $field . ':"' . $term.'"';
-                }
-            } else {
-                $solrQuery = 's_' . $field . ':"' . $term.'"';
-            }
-        
+            $solrQuery = 's_' . $field . ':"' . $term.'"';
             if ($field === 'prefLabel' || $field === 'altLabel' || $field === 'hiddenLabel' || $field = 'notation') {
                 $schemes = $resource->getProperty(Skos::INSCHEME);
                 $n = count($schemes);
                 if ($n > 0) {
-
-                    $solrSchemes = ' AND inScheme:(';
+                   $solrSchemes = ' AND inScheme:(';
                     if ($n > 1) {
                         for ($i = 0; $i < $n - 1; $i++) {
                             $solrSchemes.= '"' . $schemes[$i]->getUri() . '" OR ';
