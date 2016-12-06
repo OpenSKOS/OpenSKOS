@@ -85,7 +85,7 @@ $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
 
 $query = [
-    'q' => 'tenant:"'.$tenant.'"',
+    'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
     'rows' => 100,
     'wt' => 'json',
 ];
@@ -460,9 +460,11 @@ function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rd
     throw $exc;
 }
 
-function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resource, $retry = 20) {
+function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSkos2\Rdf\Resource $resource, $retry = 20) {
 
     $tried = 0;
+
+    filterLastModifiedDate($resource);
 
     do {
 
@@ -481,6 +483,36 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, $resour
     } while($tried < $retry);
 
     throw $exc;
+}
+
+/**
+ * Filter multiple modified dates to the last modified date.
+ *
+ * @param \OpenSkos2\Rdf\Resource $resource
+ */
+function filterLastModifiedDate(\OpenSkos2\Rdf\Resource $resource) {
+
+    $dates = $resource->getProperty(DcTerms::MODIFIED);
+
+    if (count($dates) < 2) {
+        return;
+    }
+
+    $lastDate = new \DateTime($dates[0]->getValue());
+    foreach ($dates as $date) {
+        $otherDate = new \DateTime($date->getValue());
+        if ($lastDate->getTimestamp() < $otherDate->getTimestamp()) {
+            $lastDate = $otherDate;
+        }
+    }
+
+    $newDate = new \OpenSkos2\Rdf\Literal(
+        $lastDate->format("Y-m-d\TH:i:s.z\Z"),
+        null,
+        \OpenSkos2\Rdf\Literal::TYPE_DATETIME
+    );
+
+    $resource->setProperty(DcTerms::MODIFIED, $newDate);
 }
 
 /**
