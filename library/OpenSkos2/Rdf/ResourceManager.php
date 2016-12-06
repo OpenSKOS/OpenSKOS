@@ -220,6 +220,55 @@ class ResourceManager
         $query .= PHP_EOL . '}';
         $this->client->update($query);
     }
+    
+    public function fetchResourceFilters()
+    {
+        $query='SELECT DISTINCT ?uri  ?title ?type WHERE '
+                . '{ {?uri <'.DcTerms::TITLE.'> ?title . ?uri <' .RdfNamespace::TYPE . '> ?type . '
+          . 'FILTER ( ?type = <'.Skos::SKOSCOLLECTION.'> || ?type = <'.Skos::CONCEPTSCHEME.'> || ?type = <'.Dcmi::DATASET.'>  ) } '
+          . ' UNION { ?uri <' .RdfNamespace::TYPE . '> ?type . '
+          . ' ?uri <' .vCard::ORG . '> ?node . ?node <' .vCard::ORGNAME . '> ?title '
+          . ' FILTER ( ?type = <'.Org::FORMALORG.'>)} } ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[Skos::SKOSCOLLECTION] = [];
+        $retVal[Skos::CONCEPTSCHEME] = [];
+        $retVal[Dcmi::DATASET] = [];
+        $retVal[Org::FORMALORG] = [];
+        foreach($response as $descr) {
+            $spec=[];
+            $spec['uri']=$descr->uri->getUri();
+            $spec['title']=$descr->title->getValue();
+            $retVal[$descr->type->getUri()][]=$spec;
+        }
+        return $retVal;  
+    }
+    
+    public function fetchResourceFiltersForRelations()
+    {
+        $query='SELECT DISTINCT ?uri  ?title ?type WHERE '
+                . ' {?uri <'.DcTerms::TITLE.'> ?title . ?uri <' .RdfNamespace::TYPE . '> ?type . '
+          . 'FILTER ( ?type = <'.Owl::OBJECT_PROPERTY.'> || ?type = <'.Skos::CONCEPTSCHEME.'> )} ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[Owl::OBJECT_PROPERTY] = [];
+        $retVal[Skos::CONCEPTSCHEME] = [];
+        foreach($response as $descr) {
+            $spec=[];
+            $spec['uri']=$descr->uri->getUri();
+            $spec['title']=$descr->title->getValue();
+            $retVal[$descr->type->getUri()][]=$spec;
+        }
+        $skosrels = Skos::getSkosRelations();
+        $len = strlen(Skos::NAME_SPACE);
+        foreach($skosrels as $skosrel) {
+            $spec=[];
+            $spec['uri']=$skosrel;
+            $spec['title']='skos:'.substr($skosrel, $len);
+            $retVal[Owl::OBJECT_PROPERTY][]=$spec;
+        }
+        return $retVal;  
+    }
 
     /**
      * Fetch resource by uuid
@@ -284,7 +333,7 @@ class ResourceManager
             //echo '***';   
             //var_dump($resources[1]);
             //echo '***';   
-            throw new ApiException('Something went very wrong. The requested resource <' . $uri . '> is found more than 1 time.', 500);
+            throw new ApiException('Something went very wrong. The requested resource <' . $reference . '> is found more than 1 time.', 500);
         }
 
         return $resources[0];

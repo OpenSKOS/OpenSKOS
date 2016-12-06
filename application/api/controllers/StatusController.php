@@ -1,7 +1,6 @@
 <?php
 // meertens was here
 
-use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Concept;
 
 class Api_StatusController extends OpenSKOS_Rest_Controller
