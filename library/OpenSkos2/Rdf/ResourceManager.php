@@ -259,7 +259,7 @@ class ResourceManager
             $spec['title']=$descr->title->getValue();
             $retVal[$descr->type->getUri()][]=$spec;
         }
-        $skosrels = Skos::getSkosRelations();
+        $skosrels = Skos::getSkosConceptConceptRelations();
         $len = strlen(Skos::NAME_SPACE);
         foreach($skosrels as $skosrel) {
             $spec=[];
