@@ -58,12 +58,12 @@ class Editor_Forms_Concept_FormToConcept
     protected static function translatedPropertiesToConcept(Concept &$concept, $formData)
     {
         foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
-            if (!empty($formData[$field])) {
+            if (!self::emptyStringOrNull($formData[$field])) {
                 $propertyValues = [];
                 foreach ($formData[$field] as $language => $values) {
                     if (is_string($language)) { // If int - it is a template
                         foreach ($values as $value) {
-                            if (!empty($value)) {
+                            if (!self::emptyStringOrNull($value)) {
                                 $propertyValues[] = new Literal($value, $language);
                             }
                         }
@@ -82,7 +82,7 @@ class Editor_Forms_Concept_FormToConcept
     protected static function flatPropertiesToConcept(Concept &$concept, $formData)
     {
         foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
-            if (!empty($formData[$field])) {
+            if (!self::emptyStringOrNull($formData[$field])) {
                 $concept->setProperty($property, new Literal($formData[$field]));
             } else {
                 $concept->unsetProperty($property);
@@ -99,7 +99,7 @@ class Editor_Forms_Concept_FormToConcept
     {
         foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
             $concept->unsetProperty($property);
-            if (!empty($formData[$field])) {
+            if (!self::emptyStringOrNull($formData[$field])) {
                 $values = array_filter(array_map('trim', $formData[$field]));
                 foreach ($values as $value) {
                     $concept->addProperty($property, new Literal($value));
@@ -121,9 +121,9 @@ class Editor_Forms_Concept_FormToConcept
         
         $fieldToUris = function ($value) {
             $uris = [];
-            if (!empty($value)) {
+            if (!self::emptyStringOrNull($value)) {
                 foreach ($value as $uri) {
-                    if (!empty($uri)) {
+                    if (!self::emptyStringOrNull($uri)) {
                         $uris[] = new Uri($uri);
                     }
                 }
@@ -189,5 +189,15 @@ class Editor_Forms_Concept_FormToConcept
             $user->getFoafPerson(),
             $oldStatus
         );
+    }
+    
+    /**
+     * Checks if the value is empty string or null.
+     * @param mixed $value
+     * @return bool
+     */
+    protected static function emptyStringOrNull($value)
+    {
+        return $value === null || $value === '';
     }
 }
