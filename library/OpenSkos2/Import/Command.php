@@ -183,6 +183,7 @@ class Command implements LoggerAwareInterface
                     $this->tenant->getCode(),
                     $message->getSetUri(),
                     $message->getUser(),
+                    $this->conceptManager->getLabelManager(),
                     $currentVersion ? $currentVersion->getStatus(): null
                 );
             } elseif ($resourceToInsert instanceof ConceptScheme) {

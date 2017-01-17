@@ -290,6 +290,7 @@ class Concept
                 $tenant->code,
                 $collection->getUri(),
                 $user->getFoafPerson(),
+                $this->conceptManager->getLabelManager(), //@TODO
                 $existingConcept->getStatus()
             );
 
@@ -436,7 +437,8 @@ class Concept
         $concept->ensureMetadata(
             $tenant->code,
             $collection->getUri(),
-            $user->getFoafPerson()
+            $user->getFoafPerson(),
+            $this->conceptManager->getLabelManager() //@TODO schemes will fail
         );
 
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
