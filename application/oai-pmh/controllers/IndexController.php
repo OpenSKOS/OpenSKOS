@@ -32,9 +32,9 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
         $this->_helper->viewRenderer->setNoRender(true);
 
         $repository = new OpenSkos2\OaiPmh\Repository(
-            $this->getDI()->get('\OpenSkos2\ConceptManager'),
-            $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
-            $this->getDI()->get('\OpenSkos2\Search\Autocomplete'),
+            $this->getDI()->get('OpenSkos2\ConceptManager'),
+            $this->getDI()->get('OpenSkos2\ConceptSchemeManager'),
+            $this->getDI()->get('OpenSkos2\Search\Autocomplete'),
             'OpenSKOS - OAI-PMH Service provider',
             $this->getBaseUrl(),
             ['oai-pmh@openskos.org'],

@@ -289,7 +289,7 @@ switch ($action) {
                         $userModel = new OpenSKOS_Db_Table_Users();
                         $user = $userModel->find($job['user'])[0];
 
-                        $conceptsManager = $diContainer->get('\OpenSkos2\ConceptManager');
+                        $conceptsManager = $diContainer->get('OpenSkos2\ConceptManager');
                         $conceptsManager->deleteSoftInScheme($scheme, $user->getFoafPerson());
 
                         // Clears the schemes cache after an icon is assigned.

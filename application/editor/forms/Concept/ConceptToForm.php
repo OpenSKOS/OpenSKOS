@@ -220,7 +220,7 @@ class Editor_Forms_Concept_ConceptToForm
      */
     protected static function relationsToForm(Concept $concept, &$formData)
     {
-        $conceptManager = self::getDI()->get('\OpenSkos2\ConceptManager');
+        $conceptManager = self::getDI()->get('OpenSkos2\ConceptManager');
         
         foreach (Editor_Forms_Concept::getPerSchemeRelationsMap() as $relationKey => $relationProperty) {
             $relations = $conceptManager->fetchByUris(
