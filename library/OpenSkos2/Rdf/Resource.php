@@ -160,7 +160,9 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isPropertyEmpty($predicate)
     {
-        return empty($this->properties[$predicate]);
+        return !isset($this->properties[$predicate])
+            || $this->properties[$predicate] === null
+            || $this->properties[$predicate] === '';
     }
 
     /**
