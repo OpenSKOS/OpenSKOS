@@ -1556,11 +1556,11 @@ msgstr "Back"
 
 #: ../application/editor/views/scripts/label/create.phtml:20
 msgid "Create a new skos xl label"
-msgstr "Create a new skis xl label"
+msgstr "Create a new skos xl label"
 
 #: ../application/editor/views/scripts/label/edit.phtml:22
 msgid "Edit skos xl label (will apply to all concpts with that label)"
-msgstr "Edit skis xl label (will apply to all concepts with that label)"
+msgstr "Edit skos xl label (will apply to all concepts with that label)"
 
 #: ../application/editor/views/scripts/login/index.phtml:22
 msgid "Login for OpenSKOS Editor"
