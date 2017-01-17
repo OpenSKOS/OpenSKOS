@@ -113,7 +113,8 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                 $literalForms = [];
                                 foreach ($this->currentConcept->getProperty($property) as $labelUri) {
                                     if ($labelManager->askForUri($labelUri)) {
-                                        $literalForm = $labelManager->fetchByUri($labelUri)->getProperty(SkosXl::LITERALFORM)[0];
+                                        $label = $labelManager->fetchByUri($labelUri);
+                                        $literalForm = $label->getProperty(SkosXl::LITERALFORM)[0];
                                         if ($literalForm->getLanguage() == $languageCode) {
                                             $literalForms[] = $literalForm->getValue();
                                         }
@@ -127,7 +128,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                     <div class="concept-lexical-values">
                                         <ul>
                                             <?php foreach ($literalForms as $literalForm): ?>
-                                                <li><?= $literalForm; ?></li>
+                                                <li title="<?= $label->getUri(); ?>"><?= $literalForm; ?></li>
                                             <?php endforeach ?>
                                         </ul>
                                     </div>
