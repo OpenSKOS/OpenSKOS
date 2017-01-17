@@ -40,13 +40,25 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
                     ->addElement('text', 'postalCode', array('label' => _('Postal Code')))
                     ->addElement('text', 'countryName', array('label' => _('Country Name')))
                     ->addElement('checkbox', 'enableStatusesSystem', array(
-                        'label' => _('Enable the statuses system for concepts. (check help below *)'),
+                        'label' => _('Enable the statuses system for concepts'),
+                        'required' => false
+                    ))
+                    ->addElement('checkbox', 'enableSkosXl', array(
+                        'label' => _('Enable the use of Skos-XL over simple labels'),
                         'required' => false
                     ))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
             ;
 
             $form->getElement('email')->addValidator(new Zend_Validate_EmailAddress());
+            
+            $form->getElement('enableStatusesSystem')->getDecorator('Label')
+                    ->setTagClass('decorator-with-helptext hand-cursor')
+                    ->setOption('data-helptext-id', 'decorator-helptext-statuses');
+            
+            $form->getElement('enableSkosXl')->getDecorator('Label')
+                    ->setTagClass('decorator-with-helptext hand-cursor')
+                    ->setOption('data-helptext-id', 'decorator-helptext-skosxl');
 
             $form->setDefaults($this->toArray());
         }
