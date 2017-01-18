@@ -69,8 +69,8 @@ class ConceptManager extends ResourceManager
      */
     public function insert(Resource $resource)
     {
-        $this->insertLabels($resource);
         parent::insert($resource);
+        $this->insertLabels($resource);
     }
 
     /**
@@ -389,39 +389,35 @@ class ConceptManager extends ResourceManager
     protected function insertLabels(Concept $concept)
     {
         //@TODO Can we have labels without uri here...
-        //@TODO Concept will get lost if this fails during update(replace)
         //@TODO What we do with deleted concepts
         //@TODO What we do with updated concepts which leave hanging labels (not attached to other concept)
         
         foreach (array_keys(Concept::$labelsMap) as $xlLabelProperty) {
-            
             // Loop through xl labels
             foreach ($concept->getProperty($xlLabelProperty) as $label) {
-                
                 if (!$label instanceof Uri) {
                     throw new OpenSkosException(
                         'Not a valid xl label provided.'
                     );
                 }
                 
+                $labelExists = $this->labelManager->askForUri($label->getUri());
+                
+                if (!$labelExists && !($label instanceof Label)) {
+                    throw new OpenSkosException(
+                        'The label ' . $label . ' is not a valid label resource and does not exist in the system.'
+                    );
+                }
+                
+                if (!$label instanceof Label) {
+                    continue; // It is just an uri - nothing to do with it.
+                }
+                
                 // Fetch, insert or replace label
-                if ($this->labelManager->askForUri($label->getUri())) {
-                    if ($label instanceof Label) {
-                        // We update the label if it is an existing one
-                        //@TODO Do we need to merge?
-                        $this->labelManager->replace($label);
-                    } else {
-                        // Just an uri - we do nothing.
-                    }
+                if ($labelExists) {
+                    $this->labelManager->replace($label);
                 } else {
-                    if ($label instanceof Label) {
-                        // We insert it if it is not
-                        $this->labelManager->insert($label);
-                    } else {
-                        throw new OpenSkosException(
-                            'The label ' . $label . ' is not a valid label resource and does not exist in the system.'
-                        );
-                    }
+                    $this->labelManager->insert($label);
                 }
             }
         }

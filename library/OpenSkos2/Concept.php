@@ -369,62 +369,51 @@ class Concept extends Resource
         return $uri;
     }
     
-    
-    
     /**
      * Dump down all xl labels to simple labels.
      * Create xl label for each simple label which is not already presented as xl label.
+     * @param LabelManager $labelManager
+     * @throws OpenSkosException
      */
     protected function resolveLabels(LabelManager $labelManager)
     {
-        //@TODO Never do inserts in this method so we can call it before validation. Only selects.
         //@TODO Where we handle the complete labels xml...
-        //@TODO Do not create labels if concept is not valid...
-        
+        //@TODO Can optimize by making 1 request to jena for all labels
         
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
-            
-            $xlLabelsLiterals = [];
-            
-            
-            // Loop through xl labels
-            foreach ($this->getProperty($xlLabelProperty) as $label) {
-                
-                
-                
-                if (!$label instanceof Uri) {
+            $fullXlLabels = [];
+            foreach ($this->getProperty($xlLabelProperty) as $labelValue) {
+                if (!$labelValue instanceof Uri) {
                     throw new OpenSkosException(
                         'Not a valid xl label provided.'
                     );
                 }
                 
-                
-                
-                
-                // Fetch, insert or replace label
-                if ($labelManager->askForUri($label->getUri())) {
-                    if (!$label instanceof Label) {
-                        //@TODO Fetch only if not fully provided, but should we merge as well?
-                        $label = $labelManager->fetchByUri($label);
-                    }
-                } else {
-                    if (!$label instanceof Label) {
-                        throw new OpenSkosException(
-                            'The label ' . $label . ' is not a valid label resource and does not exist in the system.'
-                        );
-                    }
+                if ($labelValue instanceof Label) {
+                    $fullXlLabels[] = $labelValue;
+                    continue;
                 }
                 
+                $labelExists = $labelManager->askForUri($labelValue->getUri());
                 
+                if (!$labelExists && !($labelValue instanceof Label)) {
+                    throw new OpenSkosException(
+                        'The label ' . $labelValue . ' is not a valid label resource and does not exist in the system.'
+                    );
+                }
+                
+                $fullXlLabels[] = $labelManager->fetchByUri($labelValue);
+            }
+            
+            // Extract all literals to compare agains simple labels
+            $xlLabelsLiterals = [];
+            foreach ($fullXlLabels as $label) {
                 $xlLabelsLiterals[] = $label->getPropertySingleValue(SkosXl::LITERALFORM);
             }
             
-            
-            
-            
             // Create xl label for any simple label which does not have one
             foreach ($this->getProperty($simpleLabelProperty) as $simpleLabel) {
-                if (!$this->isInLiteralsArray($simpleLabel, $xlLabelsLiterals)) {
+                if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                     $label = new Label(Label::generateUri());
                     $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
                     
@@ -434,36 +423,9 @@ class Concept extends Resource
                 }
             }
             
-            
-            
-            
-            
             // Dumping down to simple labels
-            //@TODO Should we do it with rules in jena.
             // All simple labels will depend on the xl labels so we overwrite existing values.
             $this->setProperties($simpleLabelProperty, $xlLabelsLiterals);
-            
-            
-            
         }
-    }
-    
-    /**
-     * Check if we have a simple value. If not - create it.
-     * @TODO move it out of here
-     * @param Literal $literal
-     * @param Literal[] $literalsArray
-     */
-    protected function isInLiteralsArray(Literal $literal, $literalsArray)
-    {
-        /* @var $simpleLabel Literal */
-        foreach ($literalsArray as $literalLookup) {
-            if ($literalLookup->getValue() == $literal->getValue()
-                && $literalLookup->getLanguage() == $literal->getLanguage()) {
-                return true;
-            }
-        }
-        
-        return false;
     }
 }

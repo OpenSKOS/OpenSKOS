@@ -127,4 +127,22 @@ class Literal implements Object
             return (string)$this->getValue();
         }
     }
+    
+    /**
+     * Finds if the current literal is in the given array.
+     * @param Literal[] $literalsArray
+     * @return boolean
+     */
+    public function isInArray(array $literalsArray)
+    {
+        foreach ($literalsArray as $literalLookup) {
+            if ($literalLookup->getValue() == $this->getValue()
+                && $literalLookup->getLanguage() == $this->getLanguage()
+                && $literalLookup->getType() == $this->getType()) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }
