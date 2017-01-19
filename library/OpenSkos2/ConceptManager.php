@@ -28,7 +28,11 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\Exception\OpenSkosException;
 
 class ConceptManager extends ResourceManager
 {
@@ -37,6 +41,37 @@ class ConceptManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
+    
+    /**
+     * @var LabelManager 
+     */
+    protected $labelManager;
+    
+    /**
+     * @return LabelManager
+     */
+    public function getLabelManager()
+    {
+        return $this->labelManager;
+    }
+
+    /**
+     * @param LabelManager $labelManager
+     */
+    public function setLabelManager(LabelManager $labelManager)
+    {
+        $this->labelManager = $labelManager;
+    }
+    
+    /**
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insert(Resource $resource)
+    {
+        parent::insert($resource);
+        $this->insertLabels($resource);
+    }
 
     /**
      * Deletes and then inserts the resource.
@@ -346,5 +381,45 @@ class ConceptManager extends ResourceManager
         }
 
         return $now;
+    }
+    
+    /**
+     * Insert any xl labels which do not exist yet.
+     */
+    protected function insertLabels(Concept $concept)
+    {
+        //@TODO Can we have labels without uri here...
+        //@TODO What we do with deleted concepts
+        //@TODO What we do with updated concepts which leave hanging labels (not attached to other concept)
+        
+        foreach (array_keys(Concept::$labelsMap) as $xlLabelProperty) {
+            // Loop through xl labels
+            foreach ($concept->getProperty($xlLabelProperty) as $label) {
+                if (!$label instanceof Uri) {
+                    throw new OpenSkosException(
+                        'Not a valid xl label provided.'
+                    );
+                }
+                
+                $labelExists = $this->labelManager->askForUri($label->getUri());
+                
+                if (!$labelExists && !($label instanceof Label)) {
+                    throw new OpenSkosException(
+                        'The label ' . $label . ' is not a valid label resource and does not exist in the system.'
+                    );
+                }
+                
+                if (!$label instanceof Label) {
+                    continue; // It is just an uri - nothing to do with it.
+                }
+                
+                // Fetch, insert or replace label
+                if ($labelExists) {
+                    $this->labelManager->replace($label);
+                } else {
+                    $this->labelManager->insert($label);
+                }
+            }
+        }
     }
 }

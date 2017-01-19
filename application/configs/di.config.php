@@ -65,5 +65,15 @@ return [
         }
 
         return $conceptsSchemesCache;
+    },
+    'OpenSkos2\ConceptManager' => function (ContainerInterface $c) {
+        $conceptManager = new OpenSkos2\ConceptManager(
+            $c->get('EasyRdf\Sparql\Client'),
+            $c->get('OpenSkos2\Solr\ResourceManager')
+        );
+        
+        $conceptManager->setLabelManager($c->get('OpenSkos2\SkosXl\LabelManager'));
+
+        return $conceptManager;
     }
 ];

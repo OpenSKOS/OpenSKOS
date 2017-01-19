@@ -53,7 +53,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 ));
 
 /* @var $conceptManager \OpenSkos2\ConceptManager */
-$conceptManager = $diContainer->make('\OpenSkos2\ConceptManager');
+$conceptManager = $diContainer->make('OpenSkos2\ConceptManager');
 
 /* @var $solrResourceManager \OpenSkos2\Solr\ResourceManager */
 $solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');

@@ -24,6 +24,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
@@ -32,6 +33,9 @@ use OpenSkos2\ConceptManager;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\Exception\OpenSkosException;
 
 class Concept extends Resource
 {
@@ -112,6 +116,12 @@ class Concept extends Resource
             Skos::RELATEDMATCH,
         ],
     );
+    
+    public static $labelsMap = [
+        SkosXl::PREFLABEL => Skos::PREFLABEL,
+        SkosXl::ALTLABEL => Skos::ALTLABEL,
+        SkosXl::HIDDENLABEL => Skos::HIDDENLABEL,
+    ];
 
     /**
      * Resource constructor.
@@ -214,9 +224,10 @@ class Concept extends Resource
      * @param string $tenantCode
      * @param Uri $set
      * @param Uri $person
+     * @param LabelManager $labelManager
      * @param string , optional $oldStatus
      */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person, $oldStatus = null)
+    public function ensureMetadata($tenantCode, Uri $set, Uri $person, LabelManager $labelManager, $oldStatus = null)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
@@ -263,6 +274,9 @@ class Concept extends Resource
                     break;
             }
         }
+        
+        // @TODO Should not be in the same method. Or rename the method
+        $this->resolveLabels($labelManager);
     }
     
     /**
@@ -353,5 +367,65 @@ class Concept extends Resource
         }
         
         return $uri;
+    }
+    
+    /**
+     * Dump down all xl labels to simple labels.
+     * Create xl label for each simple label which is not already presented as xl label.
+     * @param LabelManager $labelManager
+     * @throws OpenSkosException
+     */
+    protected function resolveLabels(LabelManager $labelManager)
+    {
+        //@TODO Where we handle the complete labels xml...
+        //@TODO Can optimize by making 1 request to jena for all labels
+        
+        foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
+            $fullXlLabels = [];
+            foreach ($this->getProperty($xlLabelProperty) as $labelValue) {
+                if (!$labelValue instanceof Uri) {
+                    throw new OpenSkosException(
+                        'Not a valid xl label provided.'
+                    );
+                }
+                
+                if ($labelValue instanceof Label) {
+                    $fullXlLabels[] = $labelValue;
+                    continue;
+                }
+                
+                $labelExists = $labelManager->askForUri($labelValue->getUri());
+                
+                if (!$labelExists && !($labelValue instanceof Label)) {
+                    throw new OpenSkosException(
+                        'The label ' . $labelValue . ' is not a valid label resource and does not exist in the system.'
+                    );
+                }
+                
+                $fullXlLabels[] = $labelManager->fetchByUri($labelValue);
+            }
+            
+            // Extract all literals to compare agains simple labels
+            $xlLabelsLiterals = [];
+            foreach ($fullXlLabels as $label) {
+                $xlLabelsLiterals[] = $label->getPropertySingleValue(SkosXl::LITERALFORM);
+            }
+            
+            // Create xl label for any simple label which does not have one
+            foreach ($this->getProperty($simpleLabelProperty) as $simpleLabel) {
+                if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
+                    $label = new Label(Label::generateUri());
+                    $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
+                    
+                    $this->addProperty($xlLabelProperty, $label);
+                    
+                    $xlLabelsLiterals[] = $simpleLabel;
+                }
+            }
+            
+            // Dumping down to simple labels
+            // All simple labels will depend on the xl labels so we overwrite existing values.
+            $this->setProperties($simpleLabelProperty, $xlLabelsLiterals);
+        }
     }
 }

@@ -518,7 +518,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      */
     protected function getConceptManager()
     {
-        return $this->getDI()->get('\OpenSkos2\ConceptManager');
+        return $this->getDI()->get('OpenSkos2\ConceptManager');
     }
     
     /**
