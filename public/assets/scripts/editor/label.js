@@ -42,6 +42,14 @@ var EditorLabel = new Class({
             ev.target.getParent('.skos-xl-label').dispose();
             self.ensureOnePrefLabelPerLanguage();
         });
+        $(document.body).addEvent('click:relay(.skos-xl-label-show-more)', function (ev) {
+            ev.stop();
+            var labelXlUri = ev.target.getProperty('data-label-uri');
+            var href = ev.target.getProperty('href') 
+                    + '/uri/' + encodeURIComponent(labelXlUri) ;
+            
+            SqueezeBox.open(href, {size: {x: 800, y: 600}, handler: 'iframe'});
+        });
     },
     showLabelsPerLanguageTab: function () {
         var language = Editor.Concept.getCurrentLanguage();
@@ -76,6 +84,13 @@ var EditorLabel = new Class({
         if (!element.hasClass(language)) {
             element.addClass(language);
         }
+    },
+    initConceptClick: function (relationsEl) {
+        relationsEl.getElements('.concept-link-content>a').addEvent('click', function (e) {
+            e.stop();
+            SqueezeBox.close();
+            Editor.Control.clickConcept(this.getParent('.concept-link').getElement('.uri').get('text'));
+        });
     },
     initAutocomplete: function (formEl, listEl) {
         var self = this;

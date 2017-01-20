@@ -133,7 +133,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                     <div class="concept-lexical-values">
                                         <ul>
                                             <?php foreach ($labelParams as $labelParam): ?>
-                                                <li title="<?= $labelParam['uri']; ?>"><?= $labelParam['literalForm']; ?></li>
+                                                <li title="<?= $labelParam['uri']; ?>"><?= $labelParam['literalForm']; ?>
                                                 <a class="skos-xl-label-show-more"
                                                    data-label-uri="<?= $labelParam['uri'] ?>"
                                                    href="<?= $this->url([
@@ -141,6 +141,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                                         'controller' => 'label',  
                                                         'action' => 
                                                         'skos-xl-linked-data'], null, true)?>"></a>
+                                                </li>
                                             <?php endforeach ?>
                                         </ul>
                                     </div>

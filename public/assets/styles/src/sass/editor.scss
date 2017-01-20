@@ -498,6 +498,15 @@ div#right-panel-tab-links {
     select {
         visibility: visible !important; /* Fix for squeezbox visibility hidden for selects */
     }
+    
+    .skos-xl-label-show-more {
+        background-image: url(../images/related-icon.png);
+        width: 16px;
+        height: 10px;
+        display: inline-block;
+        cursor: pointer;
+        background-position: 0px -4px;
+    };
 }
 
 #concept-view {
@@ -674,6 +683,46 @@ legend {
     ul {
         padding: 0px;
         margin: 0px;
+    }
+}
+
+.skosxl-label-more-info{
+    margin: 0px 10px;
+    ul {
+        margin: 0px;
+        padding: 0px;
+    }
+    li {
+        list-style: none;
+        margin-bottom: 5px;
+    }
+    .other-data {
+        padding: 24px 0px;
+        border-bottom: 1px solid #dddddd;
+        .other-data-content {
+            .data-field {                
+                font-weight: 600;
+                line-height: 1.5em;
+                float: left;
+                width: 180px;                
+            }
+
+            .data-values {
+                float: left;
+                li {
+                    margin: 0px;
+                }
+            }
+        }
+    }
+    .skosxl-label-relations {
+        margin: 10px 0px;
+        .concept-scheme-relation-grid{
+            background: white;
+            padding: 0px;
+            margin: 0px;
+            border-bottom: none;
+        }
     }
 }
 

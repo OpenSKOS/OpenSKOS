@@ -20,11 +20,13 @@
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Namespaces\Skos;
 
 class Editor_LabelController extends OpenSKOS_Controller_Editor
 {
     public function init()
     {
+        parent::init();
         $this->_helper->_layout->setLayout('editor_modal_box');
     }
     
@@ -113,7 +115,24 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         ]);
         $this->emitResponse($response);
     }
-
+    
+    public function skosXlLinkedDataAction() {
+        $labelXlUri = $this->_request->getParam('uri');
+        
+        if(empty($labelXlUri) === true) {
+            echo 'Uri not specified';
+        }
+        
+        /* @var $labelXL OpenSkos2\SkosXl\Label */
+        $labelXL = $this->getLabelManager()->fetchByUri($labelXlUri);
+        
+        /* @var $conceptManager OpenSkos2\ConceptManager */
+        $conceptManager = $this->getDI()->get('OpenSkos2\ConceptManager');
+        $relations = $conceptManager->fetchByLabel($labelXL);
+        
+        $this->view->labelXL = $labelXL;
+        $this->view->relations = $relations;
+    }
 
     /**
      * @return OpenSkos2\SkosXl\Label
