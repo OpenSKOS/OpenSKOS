@@ -50,14 +50,17 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $concept = new OpenSkos2\Concept('http://example.com/1');
 
-$prefLabel = new OpenSkos2\Rdf\Literal('Test');
+$prefLabel = new OpenSkos2\Rdf\Literal('xxxxxxxx');
 $concept->addProperty(Skos::PREFLABEL, $prefLabel);
 
 $notation = new OpenSkos2\Rdf\Literal('123');
 $concept->addProperty(Skos::NOTATION, $notation);
 
-$tenant = new OpenSkos2\Tenant('rce');
+$scheme = new \OpenSkos2\Rdf\Uri('http://example.com/1');
+$concept->addProperty(Skos::INSCHEME, $scheme);
+
+$tenant = new OpenSkos2\Tenant('beng');
 $validator = new \OpenSkos2\Validator\Resource($resourceManager, $tenant);
 $valid = $validator->validate($concept);
-var_dump($valid, $validator->getErrorMessages());
-//$resourceManager->insert($concept);
+//var_dump($valid, $validator->getErrorMessages());
+$resourceManager->insert($concept);

@@ -50,7 +50,7 @@ trait ApiResponseTrait
         $response = (new Response($stream, $status, ['X-Error-Msg' => $message]));
         return $response;
     }
-    
+
     /**
      * Get tenant
      *
@@ -90,7 +90,7 @@ trait ApiResponseTrait
 
         return $user;
     }
-    
+
     /**
      * Check if the user is from the given tenant
      * and if the resource matches the tenant
@@ -108,12 +108,18 @@ trait ApiResponseTrait
         if ($user->tenant !== $tenant->code) {
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
-        
+
         $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
         if ($tenant->code !== (string)$resourceTenant) {
-            throw new UnauthorizedException('Resource has different tenant', 403);
+            throw new UnauthorizedException(
+                'User has tenant '
+                . $user->code
+                . ' but resource has tenant '
+                . $resourceTenant,
+                403
+            );
         }
-        
+
         return true;
     }
 }

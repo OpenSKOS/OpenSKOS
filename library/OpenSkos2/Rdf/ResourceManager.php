@@ -51,7 +51,7 @@ class ResourceManager
      * @var \OpenSkos2\Solr\ResourceManager
      */
     protected $solrResourceManager;
-    
+
     /**
      * Use that if inserting a large amount of resources.
      * Call commit at the end.
@@ -71,7 +71,7 @@ class ResourceManager
     {
         $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
     }
-    
+
     /**
      * @param Client $client
      * @param SolrResourceManager $solrResourceManager
@@ -92,12 +92,12 @@ class ResourceManager
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
-        
+
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
-        
+
         $this->solrResourceManager->insert($resource);
     }
-    
+
     /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -141,7 +141,7 @@ class ResourceManager
     public function delete(Uri $resource)
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-        
+
         $this->solrResourceManager->delete($resource);
     }
 
@@ -158,10 +158,10 @@ class ResourceManager
         $query .= "?predicate ?object\n}";
 
         $this->client->update($query);
-        
+
         // @TODO remove from solr
     }
-    
+
     /**
      * Delete all triples where pattern matches
      * @todo Keep SOLR in sync
@@ -185,7 +185,8 @@ class ResourceManager
      * Fetch resource by uuid
      *
      * @param string $uuid
-     * @return \OpenSkos2\Rdf\Resource
+     * @return Resource
+     * @throws ResourceNotFoundException
      */
     public function fetchByUuid($uuid)
     {
@@ -199,9 +200,18 @@ class ResourceManager
             ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
         $data = $this->fetchQuery($query);
 
-        if (!isset($data[0])) {
-            return;
+        if (count($data) == 0) {
+            throw new ResourceNotFoundException(
+                'The requested resource with openskos::uuid <' . $uuid . '> was not found.'
+            );
         }
+
+        if (count($data) > 1) {
+            throw new \RuntimeException(
+                'Something went very wrong. The requested resource with uuid <' . $uuid . '> was found more than once.'
+            );
+        }
+
         return $data[0];
     }
 
@@ -214,11 +224,14 @@ class ResourceManager
     public function fetchByUri($uri)
     {
         $resource = new Uri($uri);
-        $result = $this->query('DESCRIBE '. (new NTriple)->serialize($resource));
-        $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+        try {
+            $result = $this->query('DESCRIBE ' . (new NTriple)->serialize($resource));
+            $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+            // @TODO Add resourceType check.
+        } catch (\Exception $exp) {
+            throw new ResourceNotFoundException("Unable to fetch resource");
+        }
 
-        // @TODO Add resourceType check.
-        
         if (count($resources) == 0) {
             throw new ResourceNotFoundException(
                 'The requested resource <' . $uri . '> was not found.'
@@ -227,13 +240,13 @@ class ResourceManager
 
         if (count($resources) > 1) {
             throw new \RuntimeException(
-                'Something went very wrong. The requested resource <' . $uri . '> is found twice.'
+                'Something went very wrong. The requested resource <' . $uri . '> was found more than once.'
             );
         }
 
         return $resources[0];
     }
-    
+
     /**
      * Fetches multiple records by list of uris.
      * @param string[] $uris
@@ -252,9 +265,9 @@ class ResourceManager
                 )
         }
         */
-        
+
         $resources = EasyRdf::createResourceCollection($this->resourceType);
-        
+
         if (!empty($uris)) {
             foreach (array_chunk($uris, 50) as $urisChunk) {
                 $filters = [];
@@ -275,7 +288,7 @@ class ResourceManager
                     $resources->append($resource);
                 }
             }
-            
+
             // Keep the ordering of the passed uris.
             $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
                 $searchUris = array_values($uris);
@@ -284,10 +297,10 @@ class ResourceManager
                 return $ind1 - $ind2;
             });
         }
-        
+
         return $resources;
     }
-    
+
     /**
      * Asks if a resource with the given uri exists.
      * @param string $uri
@@ -297,12 +310,12 @@ class ResourceManager
     public function askForUri($uri, $checkAllResourceTypes = false)
     {
         $query = '<' . $uri . '> ?predicate ?object';
-        
+
         if (!$checkAllResourceTypes && !empty($this->resourceType)) {
             $query .= ' . ';
             $query .= '<' . $uri . '> <' . RdfNamespace::TYPE . '> <' . $this->resourceType . '>';
         }
-        
+
         return $this->ask($query);
     }
 
@@ -328,23 +341,29 @@ class ResourceManager
             OFFSET 0
         }
         */
-        
+
         if (!empty($this->resourceType)) {
-            $simplePatterns[RdfNamespace::TYPE] = new Uri($this->resourceType);
+            $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
+
+            if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
+                $simplePatterns = array_merge($newPatterns, $simplePatterns);
+            } else {
+                $simplePatterns = array_merge($simplePatterns, $newPatterns);
+            }
         }
 
         $query = 'DESCRIBE ?subject {' . PHP_EOL;
 
         $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
-        
+
         if ($ignoreDeleted) {
             $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
             $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
         }
-        
+
         $query .= 'WHERE { ' . $where . '}';
-        
+
         // We need some order
         // @TODO provide possibility to order on other predicates.
         // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
@@ -359,7 +378,7 @@ class ResourceManager
         }
 
         $query .= '}'; // end sub select
-        
+
         $resources = $this->fetchQuery($query);
 
         // The order by part does not apply to the resources with describe.
@@ -383,7 +402,7 @@ class ResourceManager
     {
         // @TODO Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
         return \OpenSkos2\Namespaces::getRdfConceptNamespaces();
-        
+
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
 
@@ -459,7 +478,7 @@ class ResourceManager
                 'value' => new Uri($this->resourceType),
             ];
         }
-        
+
         $filters = [];
         foreach ($matchProperties as $i => $data) {
             $predicate = $data['predicate'];
@@ -483,13 +502,13 @@ class ResourceManager
                     // Get only the simple string literal to compare without language.
                     $object = 'str(' . $object . ')';
                 }
-                
+
                 $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
             }
 
             $filters[] = '(' . implode(' || ', $newFilter) . ') ';
         }
-        
+
         if ($ignoreDeleted) {
             $select .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status. ' . PHP_EOL;
             $filters[] = '(!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
@@ -503,7 +522,7 @@ class ResourceManager
         }
 
         $ask = $select . $filter . ')';
-        
+
         return $this->ask($ask);
     }
 
@@ -518,7 +537,7 @@ class ResourceManager
         if ($query instanceof \Asparagus\QueryBuilder) {
             $query = $query->getSPARQL();
         }
-        
+
         $result = $this->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
@@ -535,13 +554,22 @@ class ResourceManager
     }
 
     /**
+     * @return SolrResourceManager
+     */
+    public function getSolrManager()
+    {
+        return $this->solrResourceManager;
+    }
+
+    /**
      * Execute raw query
      * Retries on timeout, because when jena stays idle for some time, sometimes throws a timeout error.
      *
      * @param string $query
      * @return \EasyRdf\Graph
+     * @throws \EasyRdf\Exception
      */
-    protected function query($query)
+    public function query($query)
     {
         $maxTries = 3;
         $tries = 0;
@@ -554,7 +582,7 @@ class ResourceManager
                     throw $ex;
                 }
             }
-            sleep(1);
+            sleep(30);
             $tries ++;
         } while ($tries < $maxTries && $ex !== null);
 
@@ -562,10 +590,11 @@ class ResourceManager
             throw $ex;
         }
     }
-    
+
     /**
      * Performs client->insert. Retry on timeout.
      * @param Graph $data
+     * @return Http\Response
      * @throws \EasyRdf\Exception
      */
     protected function insertWithRetry($data)

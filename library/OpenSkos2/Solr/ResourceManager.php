@@ -28,7 +28,7 @@ class ResourceManager
      * @var Client
      */
     protected $solr;
-    
+
     /**
      * Use that if inserting a large amount of resources.
      * Call commit at the end.
@@ -55,7 +55,7 @@ class ResourceManager
     {
         $this->isNoCommitMode = $isNoCommitMode;
     }
-    
+
     /**
      * @param Client $solr
      */
@@ -63,7 +63,7 @@ class ResourceManager
     {
         $this->solr = $solr;
     }
-    
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws type
@@ -74,13 +74,13 @@ class ResourceManager
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
-        
+
         $update->addDocument($resourceDoc);
-        
+
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }
-        
+
         // Sometimes solr update fails with timeout.
         $exception = null;
         $tries = 0;
@@ -93,28 +93,28 @@ class ResourceManager
                 $tries ++;
             }
         } while ($exception !== null && $tries < $maxTries);
-        
+
         if ($exception !== null) {
             throw $exception;
         }
     }
-    
+
     /**
-     * @param Resource $resource
+     * @param Resource $uri
      */
-    public function delete(Resource $resource)
+    public function delete(\OpenSkos2\Rdf\Uri $uri)
     {
         // delete resource in solr
         $update = $this->solr->createUpdate();
-        $update->addDeleteById($resource->getUri());
-        
+        $update->addDeleteById($uri->getUri());
+
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }
-        
+
         $this->solr->update($update);
     }
-    
+
     /**
      * Perform a full text query
      * lucene / solr queries are possible
@@ -124,6 +124,7 @@ class ResourceManager
      * @param int $rows
      * @param int $start
      * @param int &$numFound output Total number of found records.
+     * @param array $sorts
      * @return array Array of uris
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
@@ -133,23 +134,23 @@ class ResourceManager
                 ->setRows($rows)
                 ->setFields(['uri'])
                 ->setQuery($query);
-        
+
         if (!empty($sorts)) {
             $select->setSorts($sorts);
         }
-        
+
         $solrResult = $this->solr->select($select);
-        
+
         $numFound = $solrResult->getNumFound();
-        
+
         $uris = [];
         foreach ($solrResult as $doc) {
             $uris[] = $doc->uri;
         }
-        
+
         return $uris;
     }
-    
+
     /**
      * Get the max value of a single value field
      * @param string $field Get the max value of a single value field
@@ -158,15 +159,37 @@ class ResourceManager
     public function getMaxFieldValue($query, $field)
     {
         // Solarium brakes stat results when we have long int, so we use ordering.
-        
+
         $select = $this->solr->createSelect()
             ->setQuery($query)
             ->setRows(1)
             ->addSort($field, 'desc')
             ->addField($field);
-        
+
         $solrResult = $this->solr->select($select);
-        
+
         return $solrResult->getIterator()->current()->{$field};
+    }
+
+    /**
+     * Send a commit request to solr
+     * @return \Solarium\QueryType\Update\Result
+     */
+    public function commit()
+    {
+        $update = $this->solr->createUpdate();
+        $update->addCommit();
+        return $this->solr->update($update);
+    }
+
+    /**
+     * Send a commit request to solr
+     * @return \Solarium\QueryType\Update\Result
+     */
+    public function optimize()
+    {
+        $update = $this->solr->createUpdate();
+        $update->addOptimize();
+        return $this->solr->update($update);
     }
 }

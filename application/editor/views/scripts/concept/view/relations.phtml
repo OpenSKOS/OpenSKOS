@@ -40,7 +40,7 @@ use OpenSkos2\Namespaces\Skos;
                 <span class="concept-link-content">
                     <?php
                         $language = Zend_Registry::get('Zend_Locale')->getLanguage();
-                        $scopeNote = $concept->retrievePropertyInLanguage(Skos::SCOPENOTE, $language);
+                        $scopeNote = $concept->getPropertyFlatValue(Skos::SCOPENOTE, $language);
                     ?>
                     <a href="#" title="<?= $concept->getCaption($language); ?>
                         <?= (empty($scopeNote) ? '' : ' {' . $scopeNote . '}') ?>">

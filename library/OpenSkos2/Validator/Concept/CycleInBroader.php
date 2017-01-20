@@ -43,14 +43,18 @@ class CycleInBroader extends AbstractConceptValidator implements ResourceManager
     {
         $broaderTerms = $concept->getProperty(Skos::BROADER);
 
+        if (empty($broaderTerms)) {
+            return true;
+        }
+
         $uri = new Uri($concept->getUri());
 
         $query = '?broader skos:broader+ ' . (new NTriple())->serialize($uri) . PHP_EOL
                 . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
-        
+
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic broader relation detected for concept: {$concept->getUri()}";
-            
+
             return false;
         }
 
