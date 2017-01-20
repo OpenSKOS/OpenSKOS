@@ -41,12 +41,12 @@ class Command implements LoggerAwareInterface
      * @var ResourceManager
      */
     private $resourceManager;
-    
+
     /**
      * @var ConceptManager
      */
     private $conceptManager;
-    
+
     /**
      * @var Tenant
      */
@@ -73,19 +73,22 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
 
+        // Disable commit's for every concept
+        $this->resourceManager->setIsNoCommitMode(true);
+
         // Srtuff needed before validation.
         foreach ($resourceCollection as $resourceToInsert) {
             // Concept only logic
             // Generate uri if none or blank (_:genid<n>) is given.
             if ($resourceToInsert instanceof Concept) {
                 $resourceToInsert->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, $message->getSetUri());
-                
+
                 if ($resourceToInsert->isBlankNode()) {
                     $resourceToInsert->selfGenerateUri($this->tenant, $this->conceptManager);
                 }
             }
         }
-        
+
         $validator = new \OpenSkos2\Validator\Collection($this->resourceManager, $this->tenant);
         if (!$validator->validate($resourceCollection, $this->logger)) {
             throw new \Exception('Failed validation: ' . PHP_EOL . implode(PHP_EOL, $validator->getErrorMessages()));
@@ -123,7 +126,7 @@ class Command implements LoggerAwareInterface
             } catch (ResourceNotFoundException $e) {
                 //do nothing
             }
-            
+
             //special import logic
             if ($resourceToInsert instanceof Concept) {
                 // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
@@ -142,7 +145,7 @@ class Command implements LoggerAwareInterface
                         );
                     }
                 }
-    
+
 
                 if ($message->getIgnoreIncomingStatus()) {
                     $resourceToInsert->unsetProperty(OpenSkos::STATUS);
@@ -160,7 +163,7 @@ class Command implements LoggerAwareInterface
                         new Literal($message->getImportedConceptStatus())
                     );
                 }
-                
+
                 // @TODO Those properties has to have types, rather then ignoring them from a list
                 $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS];
                 if ($message->getFallbackLanguage()) {
@@ -175,7 +178,7 @@ class Command implements LoggerAwareInterface
                         }
                     }
                 }
-                
+
                 $resourceToInsert->ensureMetadata(
                     $this->tenant->getCode(),
                     $message->getSetUri(),
@@ -189,11 +192,14 @@ class Command implements LoggerAwareInterface
                     $message->getUser()
                 );
             }
-            
+
             if (isset($currentVersions[$resourceToInsert->getUri()])) {
                 $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
             }
             $this->resourceManager->insert($resourceToInsert);
         }
+
+        // Commit all solr documents
+        $this->resourceManager->getSolrManager()->commit();
     }
 }

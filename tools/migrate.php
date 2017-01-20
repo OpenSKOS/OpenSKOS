@@ -8,9 +8,6 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
@@ -20,7 +17,7 @@
  */
 
 /**
- * Script to migrate the data from SOLR to Jena run as following: 
+ * Script to migrate the data from SOLR to Jena run as following:
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
  */
 require dirname(__FILE__) . '/autoload.inc.php';
@@ -33,6 +30,10 @@ use OpenSkos2\Namespaces\Skos;
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
+    'db-hostname=s' => 'Origin database host',
+    'db-database=s' => 'Origin database name',
+    'db-username=s' => 'Origin database username',
+    'db-password=s' => 'Origin database password',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
     'dryrun' => 'Only validate the data, do not migrate it.',
@@ -48,6 +49,18 @@ try {
 }
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
+
+validateOptions($OPTS);
+
+$dbSource = \Zend_Db::factory('Pdo_Mysql', array(
+    'host'      => $OPTS->getOption('db-hostname'),
+    'dbname'    => $OPTS->getOption('db-database'),
+    'username'  => $OPTS->getOption('db-username'),
+    'password'  => $OPTS->getOption('db-password'),
+));
+$dbSource->setFetchMode(\PDO::FETCH_OBJ);
+$collectionCache = new Collections($dbSource);
+$collectionCache->validateCollections();
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -70,10 +83,17 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
-$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
-$init = json_decode(file_get_contents($endPoint), true);
-$total = $init['response']['numFound'];
 
+$query = [
+    'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
+    'rows' => 100,
+    'wt' => 'json',
+];
+
+$endPoint = $OPTS->endpoint . "?" . http_build_query($query);
+
+$init = getFileContents($endPoint);
+$total = $init['response']['numFound'];
 $validator = new \OpenSkos2\Validator\Resource($resourceManager, new \OpenSkos2\Tenant($tenant), $logger);
 
 if (!empty($OPTS->start)) {
@@ -81,7 +101,6 @@ if (!empty($OPTS->start)) {
 } else {
     $counter = 0;
 }
-
 
 $getFieldsInClass = function ($class) {
     $return = '';
@@ -135,11 +154,11 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-            
+
             if (in_array($value, $notFoundUsers)) {
                 return null;
             }
-            
+
             if (!isset($users[$value])) {
                 /**
                  * @var $user OpenSKOS_Db_Table_Row_User
@@ -188,11 +207,11 @@ $mappings = [
             if (!$value) {
                 return null;
             }
-            
+
             if (in_array($value, $notFoundCollections)) {
                 return null;
             }
-                        
+
             if (!isset($collections[$value])) {
                 /**
                  * @var $collection OpenSKOS_Db_Table_Row_Collection
@@ -297,26 +316,30 @@ $mappings = [
 $logger->info('Found ' . $total . ' records');
 do {
     $logger->debug("fetching " . $endPoint . "&start=$counter");
-    
+
     if ($counter % 5000 == 0) {
         $logger->info('Processed so far: ' . $counter);
     }
-    
-    $data = json_decode(file_get_contents($endPoint . "&start=$counter"), true);
+
+    $data = getFileContents($endPoint . "&start=$counter");
     foreach ($data['response']['docs'] as $doc) {
         $counter++;
 
-        $uri = $doc['uri'];
+        $uri = trim($doc['uri']); // seems there are uri's with a space prefix ? :|
         // Prevent deleted resources from having same uri.
         if (!empty($doc['deleted'])) {
             $uri = rtrim($uri, '/') . '/deleted';
         }
-        
+
         switch ($doc['class']) {
             case 'ConceptScheme':
                 $resource = new \OpenSkos2\ConceptScheme($uri);
                 break;
             case 'Concept':
+
+                // Make sure we have a valid uri in all caes.
+                $uri = getConceptUri($uri, $doc, $collectionCache);
+
                 $resource = new \OpenSkos2\Concept($uri);
                 break;
             case 'Collection':
@@ -327,7 +350,7 @@ do {
         }
 
         foreach ($doc as $field => $value) {
-            
+
             //this is just a copy field
             if (isset($labelMapping[$field])) {
                 continue;
@@ -352,9 +375,9 @@ do {
                         $insertValue = $mapping['callback']($v);
                         if ($insertValue !== null) {
                             $resource->addProperty($mapping['fields'][$field], $insertValue);
-                            
+
                         } elseif (in_array($field, ['created_by', 'dcterms_creator']) && !empty($v)) {
-                            
+
                             // Handle dcterms_creator and dc_creator
                             if (filter_var($v, FILTER_VALIDATE_URL) === false) {
                                 $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($v));
@@ -377,7 +400,7 @@ do {
                     if ($field != 'dcterms_contributor') {
                         $resource->addProperty('http://purl.org/dc/terms/' . $match[1], new \OpenSkos2\Rdf\Literal($v));
                     } else {
-                        
+
                         // Handle dcterms_contributor and dc_contributor
                         if (filter_var($v, FILTER_VALIDATE_URL) === false) {
                             $resource->addProperty(Dc::CONTRIBUTOR, new \OpenSkos2\Rdf\Literal($v));
@@ -389,10 +412,9 @@ do {
                 continue;
             }
 
-            var_dump($doc);
             throw new Exception("What to do with field {$field}");
         }
-        
+
         // Add tenant in graph
         $resource->addProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, new OpenSkos2\Rdf\Literal($tenant));
 
@@ -400,20 +422,239 @@ do {
         if (!empty($doc['deleted'])) {
             $resource->setProperty(OpenSkos::STATUS, new OpenSkos2\Rdf\Literal(\OpenSkos2\Concept::STATUS_DELETED));
         }
-        
+
         // Validate (only if not deleted, all deleted resources are considered valid.
         if ($resource->isDeleted()) {
             $isValid = true;
         } else {
-            $isValid = $validator->validate($resource);
+            $isValid = validateResource($validator, $resource);
         }
-        
+
         // Insert
         if ($isValid && !$isDryRun) {
-            $resourceManager->insert($resource);
+            insertResource($resourceManager, $resource);
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
-
 $logger->info("Done!");
+
+function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rdf\Resource $resource, $retry = 20) {
+
+    $tried = 0;
+
+    do {
+
+        try {
+            return $validator->validate($resource);
+        } catch (\Exception $exc) {
+
+            echo 'failed validating retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
+        }
+
+    } while($tried < $retry);
+
+    throw $exc;
+}
+
+function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSkos2\Rdf\Resource $resource, $retry = 20) {
+
+    $tried = 0;
+
+    filterLastModifiedDate($resource);
+
+    do {
+
+        try {
+
+            return $resourceManager->insert($resource);
+
+        } catch (\Exception $exc) {
+
+            echo 'failed inserting retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
+        }
+
+    } while($tried < $retry);
+
+    throw $exc;
+}
+
+/**
+ * Filter multiple modified dates to the last modified date.
+ *
+ * @param \OpenSkos2\Rdf\Resource $resource
+ */
+function filterLastModifiedDate(\OpenSkos2\Rdf\Resource $resource) {
+
+    $dates = $resource->getProperty(DcTerms::MODIFIED);
+
+    if (count($dates) < 2) {
+        return;
+    }
+
+    $lastDate = new \DateTime($dates[0]->getValue());
+    foreach ($dates as $date) {
+        $otherDate = new \DateTime($date->getValue());
+        if ($lastDate->getTimestamp() < $otherDate->getTimestamp()) {
+            $lastDate = $otherDate;
+        }
+    }
+
+    $newDate = new \OpenSkos2\Rdf\Literal(
+        $lastDate->format("Y-m-d\TH:i:s.z\Z"),
+        null,
+        \OpenSkos2\Rdf\Literal::TYPE_DATETIME
+    );
+
+    $resource->setProperty(DcTerms::MODIFIED, $newDate);
+}
+
+/**
+ * Get file contents with retry, and json decode results
+ *
+ * @param string $url
+ * @param int $retry
+ * @param int $count
+ * @return \stdClass
+ * @throws \Exception
+ */
+function getFileContents($url, $retry = 20, $count = 0) {
+
+    $tried = 0;
+    do {
+        $body = file_get_contents($url);
+
+        if ($body !== false) {
+            return json_decode($body, true);
+        }
+
+        echo 'failed get contents retry' . PHP_EOL;
+
+        sleep(5);
+
+        $tried++;
+
+    } while ($tried < $retry);
+
+    throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
+}
+
+/**
+ * Make sure all cli options are given
+ *
+ * @param \Zend_Console_Getopt $opts
+ */
+function validateOptions(\Zend_Console_Getopt $opts) {
+
+    $required = [
+        'db-hostname',
+        'db-database',
+        'db-username',
+        'db-password',
+    ];
+
+    foreach ($required as $req) {
+        $reqOption = $opts->getOption($req);
+        if (empty($reqOption)) {
+            echo $opts->getUsageMessage();
+            exit();
+        }
+    }
+}
+
+/**
+ * Used to generate uri's for bad data from the source
+ * where the uri only had a notation
+ *
+ * @param string $uri
+ * @param array $solrDoc
+ * @return string
+ */
+function getConceptUri($uri, array $solrDoc, \Collections $collections) {
+
+    if (filter_var($uri, FILTER_VALIDATE_URL, $uri)) {
+        return $uri;
+    }
+
+    $collection = $collections->fetchById($solrDoc['collection']);
+    if (count($solrDoc['notation']) !== 1) {
+        throw new \RuntimeException('More then one notation: ' . var_export($solrDoc[['notation']]));
+    }
+
+    return $collection->conceptsBaseUrl . '/' . current($solrDoc['notation']);
+}
+
+class Collections {
+
+    /**
+     * @var \Zend_Db_Adapter_Abstract
+     */
+    private $db;
+
+    /**
+     * @var array
+     */
+    private $collections = [];
+
+    /**
+     * Use the source db as parameter not the target.
+     *
+     * @param \Zend_Db_Adapter_Abstract $db
+     */
+    public function __construct(\Zend_Db_Adapter_Abstract $db) {
+        $this->db = $db;
+    }
+
+    /**
+     * @param int $id
+     * @return \stdClass
+     */
+    public function fetchById($id)
+    {
+
+        if (!isset($this->fetchAll()[$id])) {
+            throw new \RunTimeException('Collection not found');
+        }
+
+        return $this->fetchAll()[$id];
+    }
+
+    /**
+     * Fetch all collections
+     *
+     * @return array
+     */
+    public function fetchAll()
+    {
+        if (!empty($this->collections)) {
+            return $this->collections;
+        }
+
+        $collections = $this->db->fetchAll('select * from collection');
+        foreach ($collections as $collection) {
+            $this->collections[$collection->id] = $collection;
+        }
+
+        return $this->collections;
+    }
+
+    /**
+     * Check if
+     *
+     * @throw \RuntimeException
+     */
+    public function validateCollections()
+    {
+        foreach ($this->fetchAll() as $row) {
+            if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
+                throw new \RuntimeException('Could not validate url for collection: ' . var_export($row, true));
+            }
+        }
+    }
+}

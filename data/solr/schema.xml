@@ -3,7 +3,7 @@
 
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-        
+
         <field name="max_numeric_notation" type="long" indexed="true" stored="true" multiValued="false" />
 
         <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
@@ -12,20 +12,20 @@
         <field name="status" type="string" indexed="true" stored="false" required="false"/>
         <field name="toBeChecked" type="boolean" indexed="true" stored="false" required="false"/>
         <field name="notation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        
-        <field name="LexicalLabels" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>        
+
+        <field name="LexicalLabels" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="prefLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="altLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="hiddenLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <field name="skosXlPrefLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="skosXlAltLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="skosXlHiddenLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
-        <field name="DocumentationProperties" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>        
+
+        <field name="DocumentationProperties" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="note" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="changeNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="definition" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -33,7 +33,7 @@
         <field name="example" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="historyNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="scopeNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <field name="broader" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="narrower" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="related" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -46,16 +46,16 @@
         <field name="mappingRelation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="narrowMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="relatedMatch" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <dynamicField name="dc_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="dcterms_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <!-- Languages -->
         <dynamicField name="LexicalLabels_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="prefLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="false"/>
         <dynamicField name="altLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="hiddenLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <dynamicField name="DocumentationProperties_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="noteLabel_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="changeNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -64,7 +64,7 @@
         <dynamicField name="example_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="historyNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <dynamicField name="scopeNote_*" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        
+
         <!-- universal fields (used internally) -->
         <!-- date -->
         <dynamicField name="d_*" type="date" indexed="true" stored="false" required="false" multiValued="true" />
@@ -78,23 +78,28 @@
         <dynamicField name="i_*" type="integer" indexed="true" stored="false" required="false" multiValued="true" />
         <!-- boolean -->
         <dynamicField name="b_*" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
-        
+
         <!-- string for sorting -->
-        <dynamicField name="sort_s_*" type="string" indexed="true" stored="false" required="false" multiValued="false" />
-        
+        <dynamicField name="sort_s_*" type="textSort" indexed="true" stored="false" required="false" multiValued="false" />
+
         <!-- int for sorting -->
         <dynamicField name="sort_i_*" type="integer" indexed="true" stored="false" required="false" multiValued="false" />
-        
+
         <!-- date for sorting -->
         <dynamicField name="sort_d_*" type="date" indexed="true" stored="false" required="false" multiValued="false" />
-        
-        <!-- default search -->                
-        <field name="search" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true" />
-        
+
+        <!-- default search -->
+        <field name="search" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- lower case without space tokenized search -->
+        <field name="search_lower" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true" />
+        <!-- autocomplete search -->
+        <field name="autocomplete" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
+
         <copyField source="prefLabel" dest="search" />
         <copyField source="altLabel" dest="search" />
         <copyField source="hiddenLabel" dest="search" />
-        
+        <copyField source="a_*" dest="autocomplete" />
+
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
     </fields>
 
@@ -104,22 +109,22 @@
 
     <types>
         <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
-        
+
         <fieldType name="long" class="solr.TrieLongField" omitNorms="true"/>
-        
+
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
-        
+
         <fieldtype name="string_lowercase" class="solr.TextField" positionIncrementGap="100">
             <analyzer>
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
                 <filter class="solr.LowerCaseFilterFactory"/>
             </analyzer>
         </fieldtype>
-        
+
         <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
-        
+
         <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
-        
+
         <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">
             <analyzer type="index">
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -133,22 +138,37 @@
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
          </fieldType>
-        
+
         <fieldtype name="text" class="solr.TextField" positionIncrementGap="100">
-            <analyzer>
-                <tokenizer class="solr.StandardTokenizerFactory"/>
-                <filter class="solr.WordDelimiterFilterFactory"
-                        generateWordParts="1"
-                        generateNumberParts="1"
-                        catenateWords="1"
-                        catenateNumbers="1"
-                        catenateAll="0"/>
+            <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
                 <filter class="solr.LowerCaseFilterFactory"/>
-                <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
         </fieldtype>
+
+        <fieldType name="textSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+            <analyzer>
+                <!-- KeywordTokenizer does no actual tokenizing, so the entire input string is preserved as a single token -->
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+
+                <!-- The LowerCase TokenFilter does what you expect, which can be when you want your sorting to be case insensitive -->
+                <filter class="solr.LowerCaseFilterFactory"/>
+
+                <!-- The TrimFilter removes any leading or trailing whitespace -->
+                <filter class="solr.TrimFilterFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
     </types>
-    
+
     <solrQueryParser defaultOperator="AND"/>
 </schema>

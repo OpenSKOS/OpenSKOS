@@ -50,12 +50,12 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 				}
 			}
 		</script>
-        
+
 		<?php $scriptsVersion = 7; // Change that if the scripts are changed.?>
-                
+
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/squeezebox/SqueezeBox.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
 		<link rel="stylesheet" href="<?php echo $baseUrl?>assets/styles/editor.css?v=<?php echo $scriptsVersion;?>" type="text/css" media="all" />
-		
+
 		<?php if ($controller == 'index'):?>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor.js?v=<?php echo $scriptsVersion;?>"></script>
 			<script src="<?php echo $baseUrl?>assets/scripts/editor/search.js?v=<?php echo $scriptsVersion;?>"></script>
@@ -157,7 +157,7 @@ $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerN
 			    <?php endif?>
 		    </div>
 
-			<div id="footer"><div id="copyright"><span>Copyright 2011-2013 <a href="http://www.picturae.com" target="_blank">Picturae</a>, distributed under the terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU General Public License v3</a>.</span></div></div>
+			<div id="footer"><div id="copyright"><span>Copyright 2011-2016 <a href="http://www.picturae.com" target="_blank">Picturae</a>, distributed under the terms of the <a href="http://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU General Public License v3</a>.</span></div></div>
 		</div>
 	</body>
 </html>

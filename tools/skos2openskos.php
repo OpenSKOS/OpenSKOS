@@ -23,7 +23,8 @@ include dirname(__FILE__) . '/autoload.inc.php';
 $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'file|f=s' => 'File to import',
-    'userUri|u=s' => 'Uri of the user that is doing the import'
+    'userUri|u=s' => 'Uri of the user that is doing the import',
+    'tenant|t=s' => 'Tenant into which the data should be imported'
 );
 
 try {
@@ -50,7 +51,11 @@ $user = $resourceManager->fetchByUri($OPTS->userUri);
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$importer = new \OpenSkos2\Import\Command($resourceManager);
+$conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
+
+$tenant = new \OpenSkos2\Tenant($OPTS->tenant);
+
+$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $tenant);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
     $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'), true, OpenSKOS_Concept_Status::CANDIDATE,

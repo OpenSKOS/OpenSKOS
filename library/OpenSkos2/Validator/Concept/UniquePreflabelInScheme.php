@@ -21,6 +21,7 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
@@ -74,9 +75,17 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
         $escapedScheme = $ntriple->serialize($scheme);
 
         $query = '
-              ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
-              ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme
-                . ' FILTER( ?subject != ' . $ntriple->serialize($concept) . ')';
+                ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
+                ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme . ' .
+                ?subject <'.OpenSkos::STATUS .'> ?status
+                FILTER(
+                    ?subject != ' . $ntriple->serialize($concept) . '
+                        && (
+                            ?status = \''.Concept::STATUS_CANDIDATE.'\' 
+                            || ?status = \''.Concept::STATUS_APPROVED.'\'
+                            || ?status = \''.Concept::STATUS_REDIRECTED.'\'
+                        )
+                )';
 
         return $this->resourceManager->ask($query);
     }

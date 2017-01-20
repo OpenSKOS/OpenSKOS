@@ -31,8 +31,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
     {
         $this->_helper->viewRenderer->setNoRender(true);
 
-        $db = $this->getInvokeArg('bootstrap')->getResource('db');
-
         $repository = new OpenSkos2\OaiPmh\Repository(
             $this->getDI()->get('\OpenSkos2\ConceptManager'),
             $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),

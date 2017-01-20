@@ -39,7 +39,7 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
 
     /**
-     * Deletes and then inserts the resourse.
+     * Deletes and then inserts the resource.
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
@@ -55,6 +55,9 @@ class ConceptManager extends ResourceManager
      * Perform basic autocomplete search on pref and alt labels
      *
      * @param string $term
+     * @param string $searchLabel
+     * @param string $returnLabel
+     * @param string $lang
      * @return array
      */
     public function autoComplete($term, $searchLabel = Skos::PREFLABEL, $returnLabel = Skos::PREFLABEL, $lang = null)
@@ -70,7 +73,7 @@ class ConceptManager extends ResourceManager
             ->also('<' . $returnLabel . '>', '?returnLabel')
             ->also('<' . $searchLabel . '>', '?searchLabel')
             ->limit(50);
-        
+
         $filter = 'regex(str(?searchLabel), ' . $eTerm . ', "i")';
         if (!empty($lang)) {
             $filter .= ' && ';
@@ -100,7 +103,7 @@ class ConceptManager extends ResourceManager
         if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
-        
+
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
@@ -109,7 +112,7 @@ class ConceptManager extends ResourceManager
         }
 
         $graph = new \EasyRdf\Graph();
-        
+
         if (!is_array($uris)) {
             $uris = [$uris];
         }
@@ -119,7 +122,7 @@ class ConceptManager extends ResourceManager
 
         $this->client->insert($graph);
     }
-    
+
     /**
      * Delete relations between two skos concepts.
      * Deletes in both directions (narrower and broader for example).
@@ -139,14 +142,14 @@ class ConceptManager extends ResourceManager
             $relationType,
             new Uri($objectUri)
         );
-        
+
         $this->deleteMatchingTriples(
             new Uri($objectUri),
             Skos::getInferredRelationsMap()[$relationType],
             new Uri($subjectUri)
         );
     }
-    
+
     /**
      * Fetches all relations (can be a large number) for the given relation type.
      * @param string $uri
@@ -157,21 +160,21 @@ class ConceptManager extends ResourceManager
     public function fetchRelations($uri, $relationType, $conceptScheme = null)
     {
         // @TODO It is possible that there are relations to uris, for which there is no resource.
-        
+
         $allRelations = new ConceptCollection([]);
-        
+
         if (!$uri instanceof Uri) {
             $uri = new Uri($uri);
         }
-        
+
         $patterns = [
             [$uri, $relationType, '?subject'],
         ];
-        
+
         if (!empty($conceptScheme)) {
             $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
         }
-        
+
         $start = 0;
         $step = 100;
         do {
@@ -181,10 +184,10 @@ class ConceptManager extends ResourceManager
             }
             $start += $step;
         } while (!(count($relations) < $step));
-        
+
         return $allRelations;
     }
-    
+
     /**
      * Delete all relations for which the concepts is object (target)
      * @param Concept $concept
@@ -195,7 +198,7 @@ class ConceptManager extends ResourceManager
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
     }
-    
+
     /**
      * Checks if there is a concept with the same pref label.
      * @param string $prefLabel
@@ -211,7 +214,7 @@ class ConceptManager extends ResourceManager
             ]
         ]);
     }
-    
+
     /**
      * Deletes all concepts inside a concept scheme.
      * @param \OpenSkos2\ConceptScheme $scheme
@@ -229,7 +232,7 @@ class ConceptManager extends ResourceManager
                 $start,
                 $step
             );
-            
+
             foreach ($concepts as $concept) {
                 $inSchemes = $concept->getProperty(Skos::INSCHEME);
                 if (count($inSchemes) == 1) {
@@ -248,7 +251,7 @@ class ConceptManager extends ResourceManager
             $start += $step;
         } while (!(count($concepts) < $step));
     }
-    
+
     /**
      * Perform a full text query
      * lucene / solr queries are possible
@@ -258,17 +261,18 @@ class ConceptManager extends ResourceManager
      * @param int $rows
      * @param int $start
      * @param int &$numFound output Total number of found records.
+     * @param array $sorts
      * @return ConceptCollection
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
         // @TODO There is nowhere in solr check for class:Concept, but all resources are there
-        
+
         return $this->fetchByUris(
             $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
-    
+
     /**
      * Gets the current max numeric notation for all concepts. Fast.
      * @param \OpenSkos2\Tenant $tenant
@@ -281,10 +285,10 @@ class ConceptManager extends ResourceManager
             'tenant:' . $tenant->getCode(),
             'max_numeric_notation'
         );
-        
+
         return intval($max);
     }
-    
+
     /**
      * Gets the current max numeric notation.
      * This method is extremely slow...
@@ -300,38 +304,47 @@ class ConceptManager extends ResourceManager
             ->where('?subject', '<' . Skos::NOTATION . '>', '?notation')
             ->also('<' . OpenSkos::TENANT . '>', $this->valueToTurtle(new Literal($tenant->getCode())))
             ->filter('regex(?notation, \'^[0-9]*$\', "i")');
-        
+
         $maxNotationResult = $this->query($maxNotationQuery);
-        
+
         $maxNotation = null;
         if (!empty($maxNotationResult->offsetGet(0)->maxNotation)) {
             $maxNotation = $maxNotationResult->offsetGet(0)->maxNotation->getValue();
         }
-        
+
         return $maxNotation;
     }
-    
+
     /**
      * Gets the current min dcterms:modified date.
-     * @return \DateTime|null
+     * @return \DateTime
      */
     public function fetchMinModifiedDate()
     {
+        $now = new \DateTime();
+
         $minDateQuery = (new QueryBuilder())
             ->select('(MIN(?date) AS ?minDate)')
             ->where('?subject', '<' . DcTerms::MODIFIED . '>', '?date')
             ->also('<' . Rdf::TYPE . '>', '<' . $this->resourceType . '>');
 
-        $minDateResult = $this->query($minDateQuery);
-        
-        $minDate = null;
-        if (!empty($minDateResult->offsetGet(0)->minDate)) {
-            $minDate = $minDateResult->offsetGet(0)->minDate;
-            if ($minDate instanceof \EasyRdf\Literal\DateTime) {
-                $minDate = new \DateTime('@' . $minDate->format('U'));
-            }
+        $result = $this->solrResourceManager->search('*:*', 1, 0, $numFound, ['sort_d_modified_earliest' => 'asc']);
+        $uri = current($result);
+
+        if (!$uri) {
+            return $now;
         }
-        
-        return $minDate;
+
+        $concept = $this->fetchByUri($uri);
+        if (!$concept) {
+            return $now;
+        }
+
+        $date = current($concept->getProperty(DcTerms::MODIFIED));
+        if ($date->getValue() instanceof \DateTime) {
+            return $date->getValue();
+        }
+
+        return $now;
     }
 }
