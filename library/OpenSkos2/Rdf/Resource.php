@@ -175,6 +175,17 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return false;
     }
+    
+    /**
+     * @return array of RdfObject[]
+     */
+    public function getPropertiesSortedByKey()
+    {
+        $retArray = $this->properties;
+        ksort($retArray);
+        
+        return $retArray;
+    }
 
     /**
      * @TODO Separate in StatusAwareResource class or something like that

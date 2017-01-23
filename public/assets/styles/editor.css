@@ -494,6 +494,16 @@ div#right-panel-tab-links ul.tab-links li:last-child.active a {
   visibility: visible !important;
   /* Fix for squeezbox visibility hidden for selects */
 }
+#concept-view .skos-xl-label-show-more,
+#concept-edit-form .skos-xl-label-show-more,
+#concept-scheme-edit-form .skos-xl-label-show-more {
+  background-image: url(../images/related-icon.png);
+  width: 16px;
+  height: 10px;
+  display: inline-block;
+  cursor: pointer;
+  background-position: 0px -4px;
+}
 
 #concept-view {
   position: relative;
@@ -661,6 +671,43 @@ legend {
 .concept-left ul {
   padding: 0px;
   margin: 0px;
+}
+
+.skosxl-label-more-info {
+  margin: 0px 10px;
+}
+.skosxl-label-more-info ul {
+  margin: 0px;
+  padding: 0px;
+}
+.skosxl-label-more-info li {
+  list-style: none;
+  margin-bottom: 5px;
+}
+.skosxl-label-more-info .other-data {
+  padding: 24px 0px;
+  border-bottom: 1px solid #dddddd;
+}
+.skosxl-label-more-info .other-data .other-data-content .data-field {
+  font-weight: 600;
+  line-height: 1.5em;
+  float: left;
+  width: 180px;
+}
+.skosxl-label-more-info .other-data .other-data-content .data-values {
+  float: left;
+}
+.skosxl-label-more-info .other-data .other-data-content .data-values li {
+  margin: 0px;
+}
+.skosxl-label-more-info .skosxl-label-relations {
+  margin: 10px 0px;
+}
+.skosxl-label-more-info .skosxl-label-relations .concept-scheme-relation-grid {
+  background: white;
+  padding: 0px;
+  margin: 0px;
+  border-bottom: none;
 }
 
 .concept-lexical-field,

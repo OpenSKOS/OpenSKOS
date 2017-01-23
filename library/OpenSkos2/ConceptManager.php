@@ -184,6 +184,25 @@ class ConceptManager extends ResourceManager
             new Uri($subjectUri)
         );
     }
+    
+    /**
+     * Get all concepts that are related as subjects to the given label uri
+     * @param Label $label
+     * @return ConceptCollection
+     */    
+    public function fetchByLabel($label)
+    {
+        $query = '
+                DESCRIBE ?subject
+                WHERE {
+                    ?subject ?predicate <' . $label->getUri() . '> .
+                    ?subject <' . \OpenSkos2\Namespaces\Rdf::TYPE . '> <' . \OpenSkos2\Concept::TYPE . '>
+                }';
+        
+        $concepts = $this->fetchQuery($query);
+        
+        return $concepts;
+    }
 
     /**
      * Fetches all relations (can be a large number) for the given relation type.

@@ -59,6 +59,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
     ?>
     <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
         <div id="tab_language_<?= $languageCode; ?>" class="tab-content">
+            <?php if($this->tenant->enableSkosXl === '0'): ?>
             <div class="concept-left" id="concept-lexical">
                 <div class="concept-left-content">
                     <ul id="concept-lexical-list">
@@ -80,29 +81,9 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                     </ul>
                 </div>
             </div>
-
-            <div class="concept-left" id="concept-document">
-                <div class="concept-right-content">
-                    <ul id="concept-document-list">
-                        <?php foreach ($propertyNames as $docKey => $docTitle): ?>
-                            <?php if ($this->currentConcept->hasPropertyInLanguage($docKey, $languageCode)) : ?>
-                                <li>
-                                    <div class="concept-document-field"><?= $docTitle; ?></div> 
-                                    <div class="concept-document-values">
-                                        <ul>
-                                            <?php foreach ($this->currentConcept->retrievePropertyInLanguage($docKey, $languageCode) as $docValue): ?>
-                                                <li id="pref_Label"><?= $docValue; ?></li>
-                                            <?php endforeach ?>
-                                        </ul>
-                                    </div>
-                                    <div class="clear"></div>
-                                </li>
-                            <?php endif ?>
-                        <?php endforeach ?>
-                    </ul>
-                </div>
-            </div>
-            
+            <?php endif; ?>
+                       
+            <?php if($this->tenant->enableSkosXl === '1'): ?>
             <div class="concept-left" id="concept-skos-xl-labels">
                 <div class="concept-right-content">
                     <ul>
@@ -133,7 +114,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                     <div class="concept-lexical-values">
                                         <ul>
                                             <?php foreach ($labelParams as $labelParam): ?>
-                                                <li title="<?= $labelParam['uri']; ?>"><?= $labelParam['literalForm']; ?></li>
+                                                <li title="<?= $labelParam['uri']; ?>"><?= $labelParam['literalForm']; ?>
                                                 <a class="skos-xl-label-show-more"
                                                    data-label-uri="<?= $labelParam['uri'] ?>"
                                                    href="<?= $this->url([
@@ -141,6 +122,30 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                                                         'controller' => 'label',  
                                                         'action' => 
                                                         'skos-xl-linked-data'], null, true)?>"></a>
+                                                </li>
+                                            <?php endforeach ?>
+                                        </ul>
+                                    </div>
+                                    <div class="clear"></div>
+                                </li>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <div class="concept-left" id="concept-document">
+                <div class="concept-right-content">
+                    <ul id="concept-document-list">
+                        <?php foreach ($propertyNames as $docKey => $docTitle): ?>
+                            <?php if ($this->currentConcept->hasPropertyInLanguage($docKey, $languageCode)) : ?>
+                                <li>
+                                    <div class="concept-document-field"><?= $docTitle; ?></div> 
+                                    <div class="concept-document-values">
+                                        <ul>
+                                            <?php foreach ($this->currentConcept->retrievePropertyInLanguage($docKey, $languageCode) as $docValue): ?>
+                                                <li id="pref_Label"><?= $docValue; ?></li>
                                             <?php endforeach ?>
                                         </ul>
                                     </div>
