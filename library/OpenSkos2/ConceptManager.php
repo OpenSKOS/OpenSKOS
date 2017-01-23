@@ -189,7 +189,7 @@ class ConceptManager extends ResourceManager
      * Get all concepts that are related as subjects to the given label uri
      * @param Label $label
      * @return ConceptCollection
-     */    
+     */
     public function fetchByLabel($label)
     {
         $query = '
