@@ -419,11 +419,11 @@ class Concept
      */
     private function handleCreate(ServerRequestInterface $request)
     {
-        $concept = $this->getConceptFromRequest($request);
+        $resource = $this->getConceptFromRequest($request);
 
-        if (!$concept->isBlankNode() && $this->manager->askForUri((string)$concept->getUri())) {
+        if (!$resource->isBlankNode() && $this->manager->askForUri((string)$resource->getUri())) {
             throw new InvalidArgumentException(
-                'The concept with uri ' . $concept->getUri() . ' already exists. Use PUT instead.',
+                'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.',
                 400
             );
         }
@@ -431,29 +431,37 @@ class Concept
         $params = $this->getParams($request);
 
         $tenant = $this->getTenantFromParams($params);
-        $collection = $this->getCollection($params, $tenant, $concept);
+        $collection = $this->getCollection($params, $tenant, $resource);
         $user = $this->getUserFromParams($params);
 
-        $concept->ensureMetadata(
-            $tenant->code,
-            $collection->getUri(),
-            $user->getFoafPerson(),
-            $this->conceptManager->getLabelManager() //@TODO schemes will fail
-        );
+        if ($resource instanceof Concept) {
+            $resource->ensureMetadata(
+                $tenant->code,
+                $collection->getUri(),
+                $user->getFoafPerson(),
+                $this->conceptManager->getLabelManager()
+            );
+        } else {
+            $resource->ensureMetadata(
+                $tenant->code,
+                $collection->getUri(),
+                $user->getFoafPerson()
+            );
+        }
 
-        $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
+        $autoGenerateUri = $this->checkConceptIdentifiers($request, $resource);
         if ($autoGenerateUri) {
-            $concept->selfGenerateUri(
+            $resource->selfGenerateUri(
                 new Tenant($tenant->code),
                 $this->conceptManager
             );
         }
 
-        $this->validate($concept, $tenant);
+        $this->validate($resource, $tenant);
 
-        $this->manager->insert($concept);
+        $this->manager->insert($resource);
 
-        $rdf = (new Transform\DataRdf($concept))->transform();
+        $rdf = (new Transform\DataRdf($resource))->transform();
         return $this->getSuccessResponse($rdf, 201);
     }
 
