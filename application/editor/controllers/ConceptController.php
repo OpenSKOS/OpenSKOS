@@ -174,12 +174,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         if (!empty($user)) {
             $user->updateUserHistory($concept->getUri());
         }
-
+        
         $this->view->assign('currentConcept', $concept);
         $this->view->assign('personManager', $this->getDI()->get('\OpenSkos2\PersonManager'));
         $this->view->assign('conceptManager', $this->getConceptManager());
         $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
         $this->view->assign('footerData', $this->_generateFooter($concept));
+        $this->view->assign('tenant', $this->_tenant);
     }
 
     public function deleteAction()
