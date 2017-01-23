@@ -107,7 +107,11 @@ var EditorLabel = new Class({
             }
         });
         
-        formEl.getElement('[name=query]').addEvent('keyup', function () {
+        formEl.addEvent('submit', function (ev) {
+            ev.stop();
+        });
+        
+        formEl.getElement('[name=query]').addEvent('keyup', function (ev) {
             formEl.send();
         });
         
