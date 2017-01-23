@@ -41,7 +41,7 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
     
     /**
-     * @var LabelManager 
+     * @var LabelManager
      */
     protected $labelManager;
     

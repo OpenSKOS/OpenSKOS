@@ -28,7 +28,7 @@ use OpenSkos2\Exception\OpenSkosException;
 class LabelHelper
 {
     /**
-     * @var LabelManager 
+     * @var LabelManager
      */
     protected $labelManager;
     

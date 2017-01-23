@@ -18,7 +18,6 @@
  */
 namespace OpenSkos2\Concept;
 
-
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
@@ -33,7 +32,7 @@ class IdentifierHelper
     protected $tenant;
     
     /**
-     * @var ConceptManager 
+     * @var ConceptManager
      */
     protected $conceptManager;
     
@@ -71,7 +70,7 @@ class IdentifierHelper
     /**
      * Generates an uri for the concept.
      * Requires a URI from to an openskos collection
-     * 
+     *
      * @param Concept &$concept
      * @return string The generated uri.
      * @throws UriGenerationException
