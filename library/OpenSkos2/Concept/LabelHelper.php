@@ -43,10 +43,10 @@ class LabelHelper
     /**
      * Dump down all xl labels to simple labels.
      * Create xl label for each simple label which is not already presented as xl label.
-     * @param Concept $concept
+     * @param Concept &$concept
      * @throws OpenSkosException
      */
-    public function assertLabels(Concept $concept)
+    public function assertLabels(Concept &$concept)
     {
         //@TODO Where we handle the complete labels xml...
         //@TODO Can optimize by making 1 request to jena for all labels

@@ -66,7 +66,7 @@ class ResourceManager
 
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
-     * @throws type
+     * @throws \Exception
      */
     public function insert(Resource $resource)
     {

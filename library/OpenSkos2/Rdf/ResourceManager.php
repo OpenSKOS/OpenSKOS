@@ -95,7 +95,11 @@ class ResourceManager
 
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
 
-        $this->solrResourceManager->insert($resource);
+        // Add only concepts to solr.
+        // @TODO Move to concept manager and ensure that it is used always for concepts
+        if ($resource instanceof \OpenSkos2\Concept) {
+            $this->solrResourceManager->insert($resource);
+        }
     }
 
     /**
