@@ -102,10 +102,10 @@ class ResourceManagerWithSearch extends ResourceManager
     }
 
     /**
-     * @return SolrResourceManager
+     * Commit the transaction
      */
-    public function getSolrManager()
+    public function commit()
     {
-        return $this->solrResourceManager;
+        $this->solrResourceManager->commit();
     }
 }

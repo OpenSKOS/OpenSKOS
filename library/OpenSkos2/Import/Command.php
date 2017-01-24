@@ -115,6 +115,6 @@ class Command implements LoggerAwareInterface
         }
 
         // Commit all solr documents
-        $this->conceptManager->getSolrManager()->commit();
+        $this->conceptManager->commit();
     }
 }
