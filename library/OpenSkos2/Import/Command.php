@@ -74,7 +74,7 @@ class Command implements LoggerAwareInterface
         $resourceCollection = $file->getResources();
 
         // Disable commit's for every concept
-        $this->resourceManager->setIsNoCommitMode(true);
+        $this->conceptManager->setIsNoCommitMode(true);
 
         // Srtuff needed before validation.
         foreach ($resourceCollection as $resourceToInsert) {
@@ -95,6 +95,7 @@ class Command implements LoggerAwareInterface
         }
 
         if ($message->getClearSet()) {
+            $this->conceptManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
             $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
         }
 
@@ -107,8 +108,7 @@ class Command implements LoggerAwareInterface
                 }
             }
             foreach ($conceptSchemes as $scheme) {
-                $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
-                $schemeUri = new \OpenSkos2\Rdf\Uri($scheme->getUri());
+                $this->conceptManager->deleteBy([Skos::INSCHEME => $scheme]);
                 $this->resourceManager->delete($scheme);
             }
         }
@@ -132,12 +132,9 @@ class Command implements LoggerAwareInterface
                 // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
                 $currentVersion = null;
                 if (isset($currentVersions[$resourceToInsert->getUri()])) {
-                    /**
-                     * @var Resource $currentVersion
-                     */
+                    /* @var $currentVersion Resource */
                     $currentVersion = $currentVersions[$resourceToInsert->getUri()];
-                    if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
-                    }
+                    
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                         $resourceToInsert->setProperty(
                             DcTerms::DATESUBMITTED,
@@ -194,13 +191,14 @@ class Command implements LoggerAwareInterface
                 );
             }
 
-            if (isset($currentVersions[$resourceToInsert->getUri()])) {
-                $this->resourceManager->delete($currentVersions[$resourceToInsert->getUri()]);
+            if ($resourceToInsert instanceof Concept) {
+                $this->conceptManager->replace($resourceToInsert);
+            } else {
+                $this->resourceManager->replace($resourceToInsert);
             }
-            $this->resourceManager->insert($resourceToInsert);
         }
 
         // Commit all solr documents
-        $this->resourceManager->getSolrManager()->commit();
+        $this->conceptManager->getSolrManager()->commit();
     }
 }

@@ -27,12 +27,12 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\ResourceManagerWithSearch;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\SkosXl\LabelManager;
 
-class ConceptManager extends ResourceManager
+class ConceptManager extends ResourceManagerWithSearch
 {
     /**
      * What is the basic resource for this manager.
@@ -304,27 +304,6 @@ class ConceptManager extends ResourceManager
             }
             $start += $step;
         } while (!(count($concepts) < $step));
-    }
-
-    /**
-     * Perform a full text query
-     * lucene / solr queries are possible
-     * for the available fields see schema.xml
-     *
-     * @param string $query
-     * @param int $rows
-     * @param int $start
-     * @param int &$numFound output Total number of found records.
-     * @param array $sorts
-     * @return ConceptCollection
-     */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
-    {
-        // @TODO There is nowhere in solr check for class:Concept, but all resources are there
-
-        return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
-        );
     }
 
     /**

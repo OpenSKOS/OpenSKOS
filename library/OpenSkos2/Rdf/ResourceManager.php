@@ -27,7 +27,6 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
-use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -48,38 +47,11 @@ class ResourceManager
     protected $resourceType = null;
 
     /**
-     * @var \OpenSkos2\Solr\ResourceManager
-     */
-    protected $solrResourceManager;
-
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @return bool
-     */
-    public function getIsNoCommitMode()
-    {
-        return $this->solrResourceManager->getIsNoCommitMode();
-    }
-
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @param bool
-     */
-    public function setIsNoCommitMode($isNoCommitMode)
-    {
-        $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
-    }
-
-    /**
      * @param Client $client
-     * @param SolrResourceManager $solrResourceManager
      */
-    public function __construct(Client $client, SolrResourceManager $solrResourceManager)
+    public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->solrResourceManager = $solrResourceManager;
     }
 
     /**
@@ -94,12 +66,6 @@ class ResourceManager
         }
 
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
-
-        // Add only concepts to solr.
-        // @TODO Move to concept manager and ensure that it is used always for concepts
-        if ($resource instanceof \OpenSkos2\Concept) {
-            $this->solrResourceManager->insert($resource);
-        }
     }
 
     /**
@@ -145,8 +111,6 @@ class ResourceManager
     public function delete(Uri $resource)
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-
-        $this->solrResourceManager->delete($resource);
     }
 
     /**
@@ -555,14 +519,6 @@ class ResourceManager
     {
         $query = 'ASK {' . PHP_EOL . $query . PHP_EOL . '}';
         return $this->query($query)->getBoolean();
-    }
-
-    /**
-     * @return SolrResourceManager
-     */
-    public function getSolrManager()
-    {
-        return $this->solrResourceManager;
     }
 
     /**

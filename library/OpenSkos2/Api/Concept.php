@@ -459,7 +459,11 @@ class Concept
 
         $this->validate($resource, $tenant);
 
-        $this->manager->insert($resource);
+        if ($resource instanceof Concept) {
+            $this->conceptManager->insert($resource);
+        } else {
+            $this->manager->insert($resource);
+        }
 
         $rdf = (new Transform\DataRdf($resource))->transform();
         return $this->getSuccessResponse($rdf, 201);
