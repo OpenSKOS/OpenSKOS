@@ -159,7 +159,7 @@ class Editor_Models_ConceptSchemesCache
                     'caption',
                     DcTerms::TITLE
                 ]);
-                $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
+                $schemeMeta['iconPath'] = $scheme->getIconPath();
                 $result[] = $schemeMeta;
             }
         }
