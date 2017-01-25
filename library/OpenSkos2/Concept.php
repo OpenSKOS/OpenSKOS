@@ -74,9 +74,14 @@ class Concept extends Resource
             Skos::TOPCONCEPTOF,
         ],
         'LexicalLabels' => [
+            Skos::PREFLABEL,
             Skos::ALTLABEL,
             Skos::HIDDENLABEL,
-            Skos::PREFLABEL,
+        ],
+        'SkosXlLabels' => [
+            SkosXl::PREFLABEL,
+            SkosXl::ALTLABEL,
+            SkosXl::HIDDENLABEL,
         ],
         'Notations' => [
             Skos::NOTATION,
