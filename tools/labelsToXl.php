@@ -61,18 +61,32 @@ $offset = 0;
 $limit = 200;
 $counter = 0;
 do {
-    $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
-    
-    foreach ($concepts as $concept) {
-        $counter ++;
-        $logger->debug($concept->getUri());
-        
-        $labelHelper->assertLabels($concept);
-        $labelHelper->insertLabels($concept);
+    try {
+        $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
+
+        foreach ($concepts as $concept) {
+            $counter ++;
+            $logger->debug($concept->getUri());
+
+            try {
+                $labelHelper->assertLabels($concept);
+                $labelHelper->insertLabels($concept);
+            } catch (\Exception $ex) {
+                $logger->warning(
+                    'Problem with the labels for "' . $concept->getUri()
+                    . '". The message is: ' . $ex->getMessage()
+                );
+            }
+        }
+    } catch (\Exception $ex) {
+        $logger->warning(
+            'Problem processing concepts from ' . $offset . ', limit ' . $limit
+            . '". The message is: ' . $ex->getMessage()
+        );
     }
     
     $offset += $limit;
-    $logger->info('Concepts processed so far: ' . $offset);
+    $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 
 $logger->info('Concepts processed (total): ' . $counter);
