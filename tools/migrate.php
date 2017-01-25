@@ -336,6 +336,14 @@ do {
                 $resource = new \OpenSkos2\ConceptScheme($uri);
                 break;
             case 'Concept':
+                // Fix for notation
+                if (count($doc['notation']) !== 1) {
+                    $logger->notice(
+                        'found double notations in same concept ' . print_r($doc['notation'])
+                        . ' will leave only the first one and import the concept.'
+                    );
+                    $doc['notation'] = [current($doc['notation'])];
+                }
 
                 // Make sure we have a valid uri in all caes.
                 $uri = getConceptUri($uri, $doc, $collectionCache);
@@ -482,7 +490,11 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSk
 
     } while($tried < $retry);
 
-    throw $exc;
+//    throw $exc;
+    echo PHP_EOL;
+    echo 'failed inserting ' . $retry . ' times ' . PHP_EOL;
+    echo 'last exception is ' . print_r($exc, true) . PHP_EOL;
+    echo PHP_EOL;
 }
 
 /**
