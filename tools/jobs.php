@@ -233,7 +233,7 @@ switch ($action) {
                     }
 
                     $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                    $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+                    $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 
                     $job->finish()->save();
 
