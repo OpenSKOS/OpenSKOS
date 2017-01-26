@@ -82,12 +82,13 @@ class CollectionHelper implements LoggerAwareInterface
      */
     public function prepare(ResourceCollection &$resourceCollection)
     {
-        foreach ($resourceCollection as $key => $resourceToInsert) {
+        $removeResources = [];
+        foreach ($resourceCollection as $key => &$resourceToInsert) {
             $alreadyExists = $this->resourceManager->askForUri($resourceToInsert->getUri());
             
             if ($alreadyExists && $this->message->getNoUpdates()) {
                 $this->logger->warning("Skipping resource {$resourceToInsert->getUri()}, because it already exists");
-                unset($resourceCollection[$key]);
+                $removeResources[] = $key;
                 continue;
             }
 
@@ -96,6 +97,10 @@ class CollectionHelper implements LoggerAwareInterface
             } elseif ($resourceToInsert instanceof ConceptScheme) {
                 $this->prepareConceptScheme($resourceToInsert);
             }
+        }
+        
+        foreach ($removeResources as $removeKey) {
+            $resourceCollection->offsetUnset($removeKey);
         }
     }
     
