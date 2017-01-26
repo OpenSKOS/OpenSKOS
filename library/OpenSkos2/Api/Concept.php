@@ -39,6 +39,7 @@ use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Tenant as Tenant;
+use OpenSkos2\SkosXl\LabelManager;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -74,7 +75,7 @@ class Concept
      * @var \OpenSkos2\Search\Autocomplete
      */
     private $searchAutocomplete;
-
+    
     /**
      * Amount of concepts to return
      *
@@ -139,7 +140,7 @@ class Concept
             $tenant = $this->getTenantFromParams($params);
             $options['tenants'] = [$tenant->code];
         }
-
+        
         // collection -> set in OpenSKOS 2
         if (isset($params['collection'])) {
             $collection = $this->getCollection($params, $tenant);
@@ -157,7 +158,7 @@ class Concept
         }
 
         $concepts = $this->searchAutocomplete->search($options, $total);
-
+        
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {
@@ -165,16 +166,24 @@ class Concept
         } else {
             $propertiesList = [];
         }
+        
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        
+        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+            foreach ($concepts as $concept) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            }
+        }
 
         switch ($context) {
             case 'json':
-                $response = (new JsonResponse($result, $propertiesList))->getResponse();
+                $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
+                $response = (new JsonpResponse($result, $params['callback'], $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'rdf':
-                $response = (new RdfResponse($result, $propertiesList))->getResponse();
+                $response = (new RdfResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
@@ -195,30 +204,54 @@ class Concept
     public function getConceptResponse(ServerRequestInterface $request, $uuid, $context)
     {
         $concept = $this->getConcept($uuid);
+        
+        $tenant = $concept->getInstitution();
 
         $params = $request->getQueryParams();
-
+        
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-
+        
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);                
+        
+        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+            $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+        
         switch ($context) {
             case 'json':
-                $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
+                $response = (new DetailJsonResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList))->getResponse();
+                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'rdf':
-                $response = (new DetailRdfResponse($concept, $propertiesList))->getResponse();
+                $response = (new DetailRdfResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
 
         return $response;
+    }
+    
+    /**
+     * Get a list of label exclude properties based on tenant configuration and request XL param
+     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     */
+    public function getExcludeProperties($tenant, $request)
+    {
+        $useXlLabels = $this->useXlLabels($tenant, $request);
+                
+        if ($useXlLabels === true) {
+            return \OpenSkos2\Concept::$classes['LexicalLabels'];
+        } else {
+            return \OpenSkos2\Concept::$classes['SkosXlLabels'];
+        }
     }
 
     /**
@@ -245,10 +278,10 @@ class Concept
         if ($concept->isDeleted()) {
             throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
-
+        
         return $concept;
     }
-
+    
     /**
      * Create the concept
      *
@@ -290,7 +323,7 @@ class Concept
                 $tenant->code,
                 $collection->getUri(),
                 $user->getFoafPerson(),
-                $this->conceptManager->getLabelManager(), //@TODO
+                $this->conceptManager->getLabelManager(),
                 $existingConcept->getStatus()
             );
 
@@ -346,6 +379,31 @@ class Concept
 
         $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
         return $this->getSuccessResponse($xml, 202);
+    }
+
+    /**
+     * Check if the requested label format conforms to the tenant configuration
+     * @return boolean Returns TRUE only if XL labels are enabled and requested
+     * @throws Zend_Controller_Exception when XL labels are requested but are not configured for tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     */
+    public function useXlLabels($tenant, $request) {
+
+        $xlParam = filter_var($request->getQueryParams()['xl'], FILTER_VALIDATE_BOOLEAN);
+        
+        if ($xlParam === false) {
+            return false;
+        } else {
+            if ($tenant !== null && $tenant->toArray()['enableSkosXl'] === '1') {
+                return true;
+            } else {
+                //TODO: throw better error message when tenant=null && xl=true for /api/find-concepts
+                throw new \Zend_Controller_Exception(
+                    'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
+                    501);
+            }
+        }
     }
 
     /**
@@ -409,7 +467,7 @@ class Concept
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
     }
-
+    
     /**
      * Handle the action of creating the concept
      *

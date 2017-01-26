@@ -187,13 +187,17 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
         $apiConcept = $this->getDI()->make('OpenSkos2\Api\Concept');
         $context = $this->_helper->contextSwitch()->getCurrentContext();
 
+        $request = $this->getPsrRequest();
+        
         // Exception for html use ZF 1 easier with linking in the view
         if ('html' === $context) {
-            $this->view->concept = $apiConcept->getConcept($id);
+            $concept = $apiConcept->getConcept($id);
+            
+            $this->view->useXlLabels = $apiConcept->useXlLabels($concept->getInstitution(), $request);
+            $this->view->concept = $concept;
             return $this->renderScript('concept/get.phtml');
         }
 
-        $request = $this->getPsrRequest();
         $response = $apiConcept->getConceptResponse($request, $id, $context);
         $this->emitResponse($response);
     }

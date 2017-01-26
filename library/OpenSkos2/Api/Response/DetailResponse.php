@@ -33,14 +33,20 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
      * @var []
      */
     protected $propertiesList;
+    
+    /**
+     * @var []
+     */
+    protected $excludePropertiesList;
 
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Rdf\Resource $resource, $propertiesList = null)
+    public function __construct(\OpenSkos2\Rdf\Resource $resource, $propertiesList = null, $excludePropertiesList = [])
     {
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
     }
 }

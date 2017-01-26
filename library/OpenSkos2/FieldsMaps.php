@@ -87,6 +87,7 @@ class FieldsMaps
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
+            'skosXlLiteralForm' => SkosXl::LITERALFORM,
         ];
     }
 

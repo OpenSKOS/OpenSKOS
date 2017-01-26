@@ -42,13 +42,19 @@ class DataArray
     private $propertiesList;
     
     /**
+     * @var array
+     */
+    private $excludePropertiesList;
+    
+    /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(Resource $resource, $propertiesList = null)
+    public function __construct(Resource $resource, $propertiesList = null, $excludePropertiesList = [])
     {
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
     }
     
     /**
@@ -77,6 +83,7 @@ class DataArray
             }
             $newResource = $this->getPropertyValue($data, $field, $prop, $newResource);
         }
+        
         return $newResource;
     }
     
@@ -87,7 +94,25 @@ class DataArray
      */
     protected function doIncludeProperty($property)
     {
-        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+        //The exclude list specifies properties which properties should be skipped
+        //If a property is both in the include and exclude list we throw an error
+        
+        if (empty($this->propertiesList)) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (in_array($property, $this->propertiesList) === true) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                throw new \OpenSkos2\Exception\InvalidArgumentException(
+                        'The property ' . $property . ' is present both in the include and exclude lists');
+            }
+        }
     }
     
     /**
@@ -104,6 +129,11 @@ class DataArray
         foreach ($prop as $val) {
             // Some values only have a URI but not getValue or getLanguage
             if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
+                if ($val instanceof Resource) {
+                    $resource[$field][] = (new DataArray($val))->transform();
+                    continue;
+                }
+                
                 if ($settings['repeatable'] === true) {
                     $resource[$field][] = $val->getUri();
                 } else {

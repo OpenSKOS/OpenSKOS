@@ -295,4 +295,21 @@ class Concept extends Resource
         
         return $uri;
     }
+    
+    /**
+     * Loads the XL labels and replaces the default URI value with the full resource
+     * @param LabelManager $labelManager
+     */
+    public function loadFullXlLabels($labelManager)
+    {
+        foreach ($this->properties as $predicate => $objectList) {
+            if (in_array($predicate, Concept::$classes['SkosXlLabels'])) {
+                $fullXlLabels = [];
+                foreach ($objectList as $xlLabelUri) {
+                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabelUri);
+                }
+                $this->properties[$predicate] = $fullXlLabels;
+            }
+        }
+    }
 }

@@ -30,6 +30,9 @@ $concept = $this->concept;
 /* @var $conceptManager \OpenSkos2\ConceptManager */
 $conceptManager = $di->get('OpenSkos2\ConceptManager');
 
+/* @var $useSkosXlLabels boolean */
+$useXlLabels = $this->useXlLabels;
+
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
 $title = $concept->getCaption($lang);
 
@@ -97,11 +100,17 @@ $this->headTitle($title);
 <?php endif?>
 
 <?php
-    $displayClasses = [
-        'LexicalLabels',
-        'Notations',
-        'DocumentationProperties',
-    ];
+    if ($useXlLabels === true) {
+        $displayClasses = [
+            'SkosXlLabels',
+        ];
+    } else {
+        $displayClasses = [
+            'LexicalLabels',
+        ];
+    }
+    $displayClasses[] = 'Notations';
+    $displayClasses[] = 'DocumentationProperties';
 ?>
 <?php foreach ($displayClasses as $className):?>
     <h3><?=$this->translate($className)?></h3>
