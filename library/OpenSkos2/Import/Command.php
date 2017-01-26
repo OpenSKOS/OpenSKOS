@@ -77,7 +77,7 @@ class Command implements LoggerAwareInterface
             $this->resourceManager,
             $this->conceptManager,
             $this->tenant,
-            $this->message
+            $message
         );
         $helper->setLogger($this->logger);
         $helper->prepare($resourceCollection);

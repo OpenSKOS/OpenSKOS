@@ -17,7 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2\Import;
+namespace OpenSkos2\Import\Command;
 
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptScheme;
@@ -77,16 +77,17 @@ class CollectionHelper implements LoggerAwareInterface
 
     /**
      * Prepare the resource collection for importing.
-     * @param ResourceCollection $resourceCollection
+     * @param ResourceCollection &$resourceCollection
      * @throws \Exception
      */
     public function prepare(ResourceCollection &$resourceCollection)
     {
-        foreach ($resourceCollection as $resourceToInsert) {
+        foreach ($resourceCollection as $key => $resourceToInsert) {
             $alreadyExists = $this->resourceManager->askForUri($resourceToInsert->getUri());
             
             if ($alreadyExists && $this->message->getNoUpdates()) {
                 $this->logger->warning("Skipping resource {$resourceToInsert->getUri()}, because it already exists");
+                unset($resourceCollection[$key]);
                 continue;
             }
 
@@ -100,7 +101,7 @@ class CollectionHelper implements LoggerAwareInterface
     
     /**
      * Makes concept specific changes prior to import.
-     * @param Concept $concept
+     * @param Concept &$concept
      * @param bool $alreadyExists
      */
     protected function prepareConcept(Concept &$concept, $alreadyExists)
@@ -139,7 +140,7 @@ class CollectionHelper implements LoggerAwareInterface
         }
 
         // @TODO Those properties has to have types, rather then ignoring them from a list
-        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS];
+        $nonLangProperties = [Skos::NOTATION, OpenSkos::TENANT, OpenSkos::STATUS, OpenSkos::UUID];
         if ($this->message->getFallbackLanguage()) {
             foreach ($concept->getProperties() as $predicate => $properties) {
                 foreach ($properties as $property) {
@@ -164,7 +165,7 @@ class CollectionHelper implements LoggerAwareInterface
     
     /**
      * Makes concept scheme specific changes prior to import.
-     * @param ConceptScheme $conceptScheme
+     * @param ConceptScheme &$conceptScheme
      */
     protected function prepareConceptScheme(ConceptScheme &$conceptScheme)
     {
