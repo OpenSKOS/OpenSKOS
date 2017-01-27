@@ -90,7 +90,7 @@ class EasyRdf
     {
         $graph = new Graph();
         
-        self::addResourceToGraph($resource, $graph);
+        self::fromOpenSkosResource($resource, $graph);
 
         return $graph;
     }
@@ -104,7 +104,7 @@ class EasyRdf
         $graph = new Graph();
         
         foreach ($collection as $resource) {
-            self::addResourceToGraph($resource, $graph);
+            self::fromOpenSkosResource($resource, $graph);
         }
 
         return $graph;
@@ -161,11 +161,12 @@ class EasyRdf
     }
 
     /**
-     * @param Resource $resource
+     * @param \OpenSkos2\Rdf\Resource $resource
      * @param \EasyRdf\Graph $graph
+     * @return \EasyRdf\Resource
      * @throws InvalidArgumentException
      */
-    protected static function addResourceToGraph(Resource $resource, \EasyRdf\Graph $graph)
+    protected static function fromOpenSkosResource(Resource $resource, \EasyRdf\Graph $graph)
     {
         $easyResource = new \EasyRdf\Resource($resource->getUri(), $graph);
         
@@ -186,6 +187,8 @@ class EasyRdf
                         $propName,
                         new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
                     );
+                } elseif ($value instanceof Resource) {
+                    $easyResource->addResource($propName, self::fromOpenSkosResource($value, $graph));
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, trim($value->getUri()));
                 } else {
@@ -195,5 +198,7 @@ class EasyRdf
                 }
             }
         }
+        
+        return $easyResource;
     }
 }
