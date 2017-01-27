@@ -128,7 +128,29 @@ $this->headTitle($title);
                             <span class="label" xml:lang="<?=$value->getLanguage()?>"><?=$this->escape((string)$value)?></span>
                             <span class="lang <?=$value->getLanguage()?>">(<?=$value->getLanguage()?>)</span>
                         <?php else:?>
-                            <?=$this->escape((string)$value)?>
+                            <?php if ($value instanceof \OpenSkos2\SkosXl\Label): ?>
+                                <dl>
+                                    <h4><?=$this->escape((string)$value)?></h4>
+                                    <?php foreach ($value->getProperties() as $labelProperty => $propertyValues):?>
+                                    <?php if ($labelProperty === Namespaces\Rdf::TYPE) {
+                                        //skip the type property
+                                        continue;
+                                    }?>
+                                        <dt>
+                                            <?php echo Namespaces::shortenProperty($labelProperty); ?>
+                                        </dt>
+                                        <dd>
+                                            <ul>
+                                            <?php foreach ($propertyValues as $propertyValue): ?>
+                                                <li><?= $propertyValue; ?></li>
+                                            <?php endforeach; ?>
+                                            </ul>
+                                        </dd>
+                                    <?php endforeach; ?>
+                                </dl>
+                            <?php else: ?>
+                                <?=$this->escape((string)$value)?>
+                            <?php endif; ?>
                         <?php endif?>
                     </li>
                 <?php endforeach?>
