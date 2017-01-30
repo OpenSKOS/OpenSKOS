@@ -49,6 +49,10 @@ use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
 class Repository implements InterfaceRepository
 {
+    const PREFIX_OAI_RDF = 'oai_rdf';
+    const PREFIX_OAI_RDF_XL = 'oai_rdf_xl';
+    
+    const SCHEMA_OAI_RDF = 'http://www.openarchives.org/OAI/2.0/rdf.xsd';
 
     /**
      * Amount of records to be displayed
@@ -247,7 +251,7 @@ class Repository implements InterfaceRepository
         try {
             if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
                 $concept = $this->conceptManager->fetchByUuid($identifier);
-                if ($metadataFormat === ImplementationMetadataFormatType::PREFIX_OAI_RDF_XL) {
+                if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
                     $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
                 }
             } else {
@@ -286,7 +290,7 @@ class Repository implements InterfaceRepository
         $items = [];
         foreach ($concepts as $i => $concept) {
             /* @var $concept Concept */
-            if ($metadataFormat === ImplementationMetadataFormatType::PREFIX_OAI_RDF_XL) {
+            if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
                 $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
             }
             $items[] = new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
@@ -372,14 +376,14 @@ class Repository implements InterfaceRepository
 //        );
 
             $formats[] = new ImplementationMetadataFormatType(
-                ImplementationMetadataFormatType::PREFIX_OAI_RDF,
-                ImplementationMetadataFormatType::SCHEMA_OAI_RDF,
+                self::PREFIX_OAI_RDF,
+                self::SCHEMA_OAI_RDF,
                 Namespaces\Skos::NAME_SPACE
             );
             
             $formats[] = new ImplementationMetadataFormatType(
-                ImplementationMetadataFormatType::PREFIX_OAI_RDF_XL,
-                ImplementationMetadataFormatType::SCHEMA_OAI_RDF,
+                self::PREFIX_OAI_RDF_XL,
+                self::SCHEMA_OAI_RDF,
                 Namespaces\SkosXl::NAME_SPACE
             );
 

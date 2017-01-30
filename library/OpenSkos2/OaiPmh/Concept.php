@@ -27,7 +27,7 @@ use OpenSkos2\Concept as SkosConcept;
 use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
-use Picturae\OaiPmh\Implementation\MetadataFormatType;
+use OpenSkos2\OaiPmh\Repository;
 
 class Concept implements Record
 {
@@ -149,9 +149,9 @@ class Concept implements Record
     {
         $metadataFormat = $this->metadataFormat;
         
-        if ($metadataFormat === MetadataFormatType::PREFIX_OAI_RDF) {
+        if ($metadataFormat === Repository::PREFIX_OAI_RDF) {
             return \OpenSkos2\Concept::$classes['SkosXlLabels'];
-        } elseif ($metadataFormat === MetadataFormatType::PREFIX_OAI_RDF_XL) {
+        } elseif ($metadataFormat === Repository::PREFIX_OAI_RDF_XL) {
             return \OpenSkos2\Concept::$classes['LexicalLabels'];
         } else {
             return [];
