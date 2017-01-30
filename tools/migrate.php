@@ -38,6 +38,7 @@ $opts = [
     'start|s=s' => 'Start from that record',
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
+    'modified|m=s' => 'Fetch only those modified after that date.',
 ];
 
 try {
@@ -83,9 +84,22 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
+$modifiedSince = $OPTS->getOption('modified');
+
+$queryQuery = 'tenant:"'.$tenant.'"';
+if (!empty($modifiedSince)) {
+    $logger->info('Index only concpets modified (timestamp field) after ' . $modifiedSince);
+    
+    $checkDate = DateTime::createFromFormat(DATE_ATOM, $modifiedSince);
+    if ($checkDate === false) {
+        throw new \Exception('Input date for modified option is not valid iso8601 (for solr)');
+    }
+    
+    $queryQuery .= ' AND timestamp:[' . $modifiedSince . ' TO *]';
+}
 
 $query = [
-    'q' => 'tenant:"'.$tenant.'"',
+    'q' => $queryQuery,
     'rows' => 100,
     'wt' => 'json',
 ];
@@ -445,6 +459,8 @@ do {
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
+
+$logger->info("Processed in total: $counter");
 $logger->info("Done!");
 
 function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rdf\Resource $resource, $retry = 20) {
@@ -478,7 +494,7 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSk
 
         try {
 
-            return $resourceManager->insert($resource);
+            return $resourceManager->replace($resource);
 
         } catch (\Exception $exc) {
 
