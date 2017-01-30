@@ -41,7 +41,7 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
             new \OpenSKOS_Db_Table_Collections(),
             null
         );
-
+        
         $request = Zend\Diactoros\ServerRequestFactory::fromGlobals();
         $provider = new Picturae\OaiPmh\Provider($repository, $request);
         $response = $provider->getResponse();

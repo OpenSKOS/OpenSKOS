@@ -26,6 +26,7 @@ use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Search\ParserText;
 use OpenSkos2\Exception\ResourceNotFoundException;
+use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
@@ -122,7 +123,7 @@ class Repository implements InterfaceRepository
      * @var Autocomplete
      */
     private $searchAutocomplete;
-
+    
     /**
      * @param ConceptManager $conceptManager
      * @param ConceptSchemeManager $schemeManager
@@ -246,14 +247,17 @@ class Repository implements InterfaceRepository
         try {
             if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
                 $concept = $this->conceptManager->fetchByUuid($identifier);
+                if ($metadataFormat === ImplementationMetadataFormatType::PREFIX_OAI_RDF_XL) {
+                    $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+                }
             } else {
                 throw new BadArgumentException('Invalid identifier ' . $identifier);
             }
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
-
-        return new OaiConcept($concept, $this->getSetsMap());
+        
+        return new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
     }
 
     /**
@@ -363,11 +367,17 @@ class Repository implements InterfaceRepository
 //            'http://www.openarchives.org/OAI/2.0/oai_dc/'
 //        );
 
-        $formats[] = new ImplementationMetadataFormatType(
-            'oai_rdf',
-            'http://www.openarchives.org/OAI/2.0/rdf.xsd',
-            'http://www.w3.org/2004/02/skos/core#'
-        );
+            $formats[] = new ImplementationMetadataFormatType(
+                ImplementationMetadataFormatType::PREFIX_OAI_RDF,
+                ImplementationMetadataFormatType::SCHEMA_OAI_RDF,
+                Namespaces\Skos::NAME_SPACE
+            );
+            
+            $formats[] = new ImplementationMetadataFormatType(
+                ImplementationMetadataFormatType::PREFIX_OAI_RDF_XL,
+                ImplementationMetadataFormatType::SCHEMA_OAI_RDF,
+                Namespaces\SkosXl::NAME_SPACE
+            );
 
         return $formats;
     }
