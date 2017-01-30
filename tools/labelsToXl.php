@@ -62,7 +62,7 @@ $limit = 200;
 $counter = 0;
 do {
     try {
-        $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
+        $concepts = $conceptManager->search('uri:"http://data.beeldengeluid.nl/gtaa/215571"', $limit, $offset);
 
         foreach ($concepts as $concept) {
             $counter ++;
@@ -70,7 +70,7 @@ do {
 
             try {
                 $labelHelper->assertLabels($concept);
-                $labelHelper->insertLabels($concept);
+                $conceptManager->replace($concept);
             } catch (\Exception $ex) {
                 $logger->warning(
                     'Problem with the labels for "' . $concept->getUri()
