@@ -50,7 +50,7 @@ class Concept implements Record
      * @param SkosConcept $concept
      * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
      */
-    public function __construct(SkosConcept $concept, SetsMap $setsMap, $metadataFormat)
+    public function __construct(SkosConcept $concept, SetsMap $setsMap, $metadataFormat = null)
     {
         $this->concept = $concept;
         $this->setsMap = $setsMap;
