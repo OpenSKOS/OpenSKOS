@@ -62,7 +62,7 @@ $limit = 200;
 $counter = 0;
 do {
     try {
-        $concepts = $conceptManager->search('uri:"http://data.beeldengeluid.nl/gtaa/215571"', $limit, $offset);
+        $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
 
         foreach ($concepts as $concept) {
             $counter ++;
