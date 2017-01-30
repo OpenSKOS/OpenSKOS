@@ -46,8 +46,17 @@ use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
+// Meerens: all concrete resource api classes extends AbstractTripleStoreResource . 
+// This abtsract class containes generic methods for get, create, update and delete for any 
+// kind of resource. 
+// -- Here in the Concept class only "concept-secific" autocomplete and "findConcepts" are implemented, 
+// the other methods can be found in the parent class.
+// -- ApiResponseTrait is not used any more.
+// -- Maximal time limit is changed in "fincConceptMethod" (by the constant set in the config),
+// and set back before the method return.
+// -- Maximal rows are set via the config's constant as well, not via $this->limit as it has been implemented by picturae
+// -- 'collection' is replaced by 'set'
 
 class Concept extends AbstractTripleStoreResource {
 
@@ -76,6 +85,7 @@ class Concept extends AbstractTripleStoreResource {
      * @param ServerRequestInterface $request
      * @param string $context
      * @return ResponseInterface
+     * @throws InvalidArgumentException
      */
     public function findConcepts(PsrServerRequestInterface $request, $context) {
         try {
@@ -94,6 +104,7 @@ class Concept extends AbstractTripleStoreResource {
                 $limit = (int)$params['rows'];
             }
 
+
             $options = [
                 'start' => $start,
                 'rows' => $limit,
@@ -111,11 +122,12 @@ class Concept extends AbstractTripleStoreResource {
                 $options['sorts'] = $sortmap;
             }
 
+
             if (isset($params['skosCollection'])) {
                 $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
             }
 
-           
+
             if (isset($params['sets'])) {
                 $options['sets'] = explode(' ', trim($params['sets']));
             }
@@ -143,7 +155,6 @@ class Concept extends AbstractTripleStoreResource {
                 }
             }
 
-
             if (isset($params['conceptScheme'])) {
                 $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
             }
@@ -154,6 +165,7 @@ class Concept extends AbstractTripleStoreResource {
 
         
             $concepts = $this->searchAutocomplete->search($options, $total);
+
 
             foreach ($concepts as $concept) {
                 $spec = $this->manager->fetchTenantSpec($concept);
@@ -190,12 +202,14 @@ class Concept extends AbstractTripleStoreResource {
             return $this->getErrorResponseFromException($ex);
 
         }
+
     }
 
     /**
      * Gets a list (array or string) of fields and try to recognise the properties from it.
      * @param array $fieldsList
      * @return array
+     * @throws InvalidPredicateException
      */
     protected function fieldsListToProperties($fieldsList) {
         if (!is_array($fieldsList)) {
@@ -203,7 +217,6 @@ class Concept extends AbstractTripleStoreResource {
         }
 
         $propertiesList = [];
-        //olha was here, it used to be getOldToProperties();
         $fieldsMap = FieldsMaps::getNamesToProperties();
 
         // Tries to search for the field in fields map.
@@ -233,6 +246,7 @@ class Concept extends AbstractTripleStoreResource {
 
         return $propertiesList;
     }
+
 
     public function delete(PsrServerRequestInterface $request) {
         try {
@@ -334,6 +348,7 @@ class Concept extends AbstractTripleStoreResource {
     private function prepareSortFieldForSolr($term) { // translate field name  to am internal sort-field name
         if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
             return $term;
+
         }
         if ($this->isDateField($term)) {
             return "sort_d_" . $term;
@@ -390,6 +405,7 @@ class Concept extends AbstractTripleStoreResource {
         return $response;
     }
 
+
     private function preEditChecksRels(PsrServerRequestInterface $request, $params, $toBeDeleted) {
 
         $body = $request->getParsedBody();
@@ -404,6 +420,7 @@ class Concept extends AbstractTripleStoreResource {
         }
         if (!isset($body['type'])) {
             throw new ApiException('Missing type', 400);
+
         }
 
         $exists1 = $this->manager->resourceExists($body['concept'], Skos::CONCEPT);
@@ -430,9 +447,11 @@ class Concept extends AbstractTripleStoreResource {
             throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos concept-concept relation nor a user-defined relation. ', 400);
         }
 
+
         if (!$toBeDeleted) {
             $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
             $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+
         }
 
         $user = $this->getUserByKey($body['key']);

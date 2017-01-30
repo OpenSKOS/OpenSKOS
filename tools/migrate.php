@@ -9,9 +9,6 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
@@ -24,6 +21,7 @@
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
  * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
  *  */
+
 require dirname(__FILE__) . '/autoload.inc.php';
 require_once 'Logging.php';
 
@@ -37,6 +35,9 @@ use OpenSkos2\Namespaces\Rdf;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
+// Meertens: some fragments have been taken from Picturae, het are commented. 
+// Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
+
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
  * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
@@ -46,6 +47,10 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
+    'db-hostname=s' => 'Origin database host',
+    'db-database=s' => 'Origin database name',
+    'db-username=s' => 'Origin database username',
+    'db-password=s' => 'Origin database password',
     'tenant=s' => 'Tenant to migrate',
     'start|s=s' => 'Start from that record',
     'enablestatusses=s' => 'true/false, enables/disables statusses',
@@ -64,6 +69,18 @@ try {
 }
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
+
+validateOptions($OPTS);
+
+$dbSource = \Zend_Db::factory('Pdo_Mysql', array(
+    'host'      => $OPTS->getOption('db-hostname'),
+    'dbname'    => $OPTS->getOption('db-database'),
+    'username'  => $OPTS->getOption('db-username'),
+    'password'  => $OPTS->getOption('db-password'),
+));
+$dbSource->setFetchMode(\PDO::FETCH_OBJ);
+$collectionCache = new Collections($dbSource);
+$collectionCache->validateCollections();
 
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -86,17 +103,32 @@ $tenant = $OPTS->tenant;
 var_dump('tenant: ' . $tenant);
 $isDryRun = $OPTS->dryrun;
 var_dump('dry run : ' . $isDryRun);
-$endPoint = $OPTS->endpoint . "?q=tenant%3A$tenant&rows=100&wt=json";
+
+// overtaken from Picturae
+$query = [
+    'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
+    'rows' => 100,
+    'wt' => 'json',
+];
+
+$endPoint = $OPTS->endpoint . "?" . http_build_query($query);
 var_dump($endPoint);
+
+$init = getFileContents($endPoint);
+$total = $init['response']['numFound'];
+$validator = new \OpenSkos2\Validator\Resource($resourceManager, new \OpenSkos2\Tenant($tenant), $logger);
+if (!empty($OPTS->start)) {
+    $counter = $OPTS->start;
+} else {
+    $counter = 0;
+}
+/// end of overtaken from picturae
 
 $enableStatussesSystem = $OPTS->enablestatusses;
 $language = $OPTS->language;
 var_dump('language: ' . $language);
 $license = $OPTS->license;
 var_dump('license: ' . $license);
-
-$init = json_decode(file_get_contents($endPoint), true);
-$total = $init['response']['numFound'];
 
 echo "Cleaning round, used when migrate script runs a few times with the same data, all removes concept schemata, collections and concepts, # documents to process: ";
 function remove_resources($manager, $resources, $rdfType) {
@@ -522,11 +554,10 @@ do {
             }
         } catch (Exception $ex) {
             var_dump($ex->getMessage());
+
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));
-
-
 
 
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
@@ -538,6 +569,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
             // Prevent deleted resources from having same uri.
             if (!empty($doc['deleted'])) {
                 $uri = rtrim($uri, '/') . '/deleted';
+
             }
 
             switch ($doc['class']) {
@@ -590,6 +622,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                         }
                     }
 
+
                     $lang = null;
                     if (preg_match('#^(?<field>.+)@(?<lang>\w+)$#', $field, $m2)) {
                         $lang = $m2['lang'];
@@ -598,6 +631,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                             foreach ((array) $value as $v) {
                                 $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $lang));
                                 $setLabels[$field][] = $v;
+
                             }
                             continue;
                         }
@@ -644,6 +678,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                 }
             }
 
+
             // check if there are orfan (without language) labels and documentation properties
             foreach ($doc as $field => $value) {
                 if (array_key_exists($field, $labelMapping)) {
@@ -651,6 +686,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
                         if (!array_key_exists($field, $setLabels)) {
                             $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $default_lang));
                             $setLabels[$field][] = $v;
+
                         } else {
                             if (!in_array($v, $setLabels[$field])) {
                                 $resource->addProperty($labelMapping[$field], new \OpenSkos2\Rdf\Literal($v, $default_lang));
@@ -695,6 +731,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $default_lang, $s
             //var_dump($ex->getTraceAsString());
             var_dump("And the following document has not been added: ");
             var_dump($doc['uri']);
+
         }
     } else {
         return 0;
@@ -788,5 +825,224 @@ $elapsed = time()-$old_time;
 echo "\n time elapsed since start of migration (sec): ". $elapsed . "\n";
 $old_time = time();
 
-
 $logger->info("Done!");
+
+function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rdf\Resource $resource, $retry = 20) {
+
+    $tried = 0;
+
+    do {
+
+        try {
+            return $validator->validate($resource);
+        } catch (\Exception $exc) {
+
+            echo 'failed validating retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
+        }
+
+    } while($tried < $retry);
+
+    throw $exc;
+}
+
+function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSkos2\Rdf\Resource $resource, $retry = 20) {
+
+    $tried = 0;
+
+    filterLastModifiedDate($resource);
+
+    do {
+
+        try {
+
+            return $resourceManager->insert($resource);
+
+        } catch (\Exception $exc) {
+
+            echo 'failed inserting retry' . PHP_EOL;
+
+            $tried++;
+            sleep(5);
+        }
+
+    } while($tried < $retry);
+
+    throw $exc;
+}
+
+/**
+ * Filter multiple modified dates to the last modified date.
+ *
+ * @param \OpenSkos2\Rdf\Resource $resource
+ */
+function filterLastModifiedDate(\OpenSkos2\Rdf\Resource $resource) {
+
+    $dates = $resource->getProperty(DcTerms::MODIFIED);
+
+    if (count($dates) < 2) {
+        return;
+    }
+
+    $lastDate = new \DateTime($dates[0]->getValue());
+    foreach ($dates as $date) {
+        $otherDate = new \DateTime($date->getValue());
+        if ($lastDate->getTimestamp() < $otherDate->getTimestamp()) {
+            $lastDate = $otherDate;
+        }
+    }
+
+    $newDate = new \OpenSkos2\Rdf\Literal(
+        $lastDate->format("Y-m-d\TH:i:s.z\Z"),
+        null,
+        \OpenSkos2\Rdf\Literal::TYPE_DATETIME
+    );
+
+    $resource->setProperty(DcTerms::MODIFIED, $newDate);
+}
+
+/**
+ * Get file contents with retry, and json decode results
+ *
+ * @param string $url
+ * @param int $retry
+ * @param int $count
+ * @return \stdClass
+ * @throws \Exception
+ */
+function getFileContents($url, $retry = 20, $count = 0) {
+
+    $tried = 0;
+    do {
+        $body = file_get_contents($url);
+
+        if ($body !== false) {
+            return json_decode($body, true);
+        }
+
+        echo 'failed get contents retry' . PHP_EOL;
+
+        sleep(5);
+
+        $tried++;
+
+    } while ($tried < $retry);
+
+    throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
+}
+
+/**
+ * Make sure all cli options are given
+ *
+ * @param \Zend_Console_Getopt $opts
+ */
+function validateOptions(\Zend_Console_Getopt $opts) {
+
+    $required = [
+        'db-hostname',
+        'db-database',
+        'db-username',
+        'db-password',
+    ];
+
+    foreach ($required as $req) {
+        $reqOption = $opts->getOption($req);
+        if (empty($reqOption)) {
+            echo $opts->getUsageMessage();
+            exit();
+        }
+    }
+}
+
+/**
+ * Used to generate uri's for bad data from the source
+ * where the uri only had a notation
+ *
+ * @param string $uri
+ * @param array $solrDoc
+ * @return string
+ */
+function getConceptUri($uri, array $solrDoc, \Collections $collections) {
+
+    if (filter_var($uri, FILTER_VALIDATE_URL, $uri)) {
+        return $uri;
+    }
+
+    $collection = $collections->fetchById($solrDoc['collection']);
+    if (count($solrDoc['notation']) !== 1) {
+        throw new \RuntimeException('More then one notation: ' . var_export($solrDoc[['notation']]));
+    }
+
+    return $collection->conceptsBaseUrl . '/' . current($solrDoc['notation']);
+}
+
+class Collections {
+
+    /**
+     * @var \Zend_Db_Adapter_Abstract
+     */
+    private $db;
+
+    /**
+     * @var array
+     */
+    private $collections = [];
+
+    /**
+     * Use the source db as parameter not the target.
+     *
+     * @param \Zend_Db_Adapter_Abstract $db
+     */
+    public function __construct(\Zend_Db_Adapter_Abstract $db) {
+        $this->db = $db;
+    }
+
+    /**
+     * @param int $id
+     * @return \stdClass
+     */
+    public function fetchById($id)
+    {
+
+        if (!isset($this->fetchAll()[$id])) {
+            throw new \RunTimeException('Collection not found');
+        }
+
+        return $this->fetchAll()[$id];
+    }
+
+    /**
+     * Fetch all collections
+     *
+     * @return array
+     */
+    public function fetchAll()
+    {
+        if (!empty($this->collections)) {
+            return $this->collections;
+        }
+
+        $collections = $this->db->fetchAll('select * from collection');
+        foreach ($collections as $collection) {
+            $this->collections[$collection->id] = $collection;
+        }
+
+        return $this->collections;
+    }
+
+    /**
+     * Check if
+     *
+     * @throw \RuntimeException
+     */
+    public function validateCollections()
+    {
+        foreach ($this->fetchAll() as $row) {
+            if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
+                throw new \RuntimeException('Could not validate url for collection: ' . var_export($row, true));
+            }
+        }
+    }
+}

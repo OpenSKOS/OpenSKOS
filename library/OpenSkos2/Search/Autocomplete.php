@@ -30,7 +30,7 @@ class Autocomplete
      * @var \OpenSkos2\ConceptManager
      */
     protected $manager;
-    
+
     /**
      * @var OpenSKOS_Db_Table_Users
      */
@@ -50,25 +50,23 @@ class Autocomplete
      * Perform a autocomplete search with a search profile from the editor
      *
      * @param array $options
-     * @return ConceptCollection
+     * @return \OpenSkos2\ConceptCollection
      */
     public function search($options, &$numFound)
     {
-        // @TODO Ensure all options are arrays.
-        //\Tools\Logging::var_error_log(" options \n", $options , APPLICATION_BASE_PATH.'/data/debug.txt');
-        
+
         $helper = new QueryHelper();
-        
+
         $parser = new ParserText();
-        
+
         $searchText = $options['searchText'];
-        
+
         // Empty query and query for all is replaced with *
         $searchText = trim($searchText);
         if (empty($searchText) || $searchText == '*:*') {
             $searchText = '*';
         }
-        
+
         // In all other cases - start parsing the query
         if ($searchText != '*') {
             $searchText = $parser->replaceLanguageTags($searchText);
@@ -80,15 +78,16 @@ class Autocomplete
                 if ($parser->isFullyQuoted($searchText)) {
                     $searchText = $searchText;
                 } elseif ($parser->isWildcardSearch($searchText)) {
-                    $searchText = $parser->escapeSpecialChars($searchText);
+                    // do not escape wildcard search with the new tokenizer
+                    // $searchText = $helper->escapePhrase($searchText);
                 } else {
                     $searchText = $helper->escapePhrase($searchText);
                 }
             }
         }
-        
+
         // @TODO Better to use edismax qf
-        
+
         $searchTextQueries = [];
 
         // labels
@@ -146,9 +145,9 @@ class Autocomplete
         }
 
         // @TODO Use filter queries
-        
+
         $optionsQueries = [];
-        
+
         //status
         if (strpos($searchText, 'status') === false) { // We dont add status query if it is in the query already.
             if (!empty($options['status'])) {
@@ -174,30 +173,31 @@ class Autocomplete
             $solrQuery .= ' AND (';
             $solrQuery .= 's_inSkosCollection:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['skosCollection']))
+
                 . '))';
         }
 
         // schemes
-        if (!empty($options['conceptScheme'])) {
+        if (!empty($options['scheme'])) {
             $optionsQueries[] = '('
                 . 's_inScheme:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['scheme']))
                 . '))';
         }
-        
+
         // tenants
-        if (!empty($options['tenants'])) {
+        if (!empty($options['tenant'])) {
             $optionsQueries[] = '('
                 . 's_tenant:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenant']))
                 . '))';
         }
-        
+
         // to be checked
         if (!empty($options['toBeChecked'])) {
             $optionsQueries[] = '(b_toBeChecked:true) ';
         }
-        
+
         // topconcepts
         if (!empty($options['topConcepts'])) {
             $optionsQueries[] = '(b_isTopConcept:true) ';
@@ -207,7 +207,7 @@ class Autocomplete
         if (!empty($options['orphanedConcepts'])) {
             $optionsQueries[] = '(b_isOrphan:true) ';
         }
-        
+
         // combine
         if (!empty($optionsQueries)) {
             $optionsQuery = implode(' AND ', $optionsQueries);
@@ -222,28 +222,27 @@ class Autocomplete
                 }
             }
         }
-        
-        
+
         $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
         if (!empty($interactionsQuery)) {
             $solrQuery .= ' AND (' . $interactionsQuery . ')';
         }
-                
+
         if (!empty($options['sorts'])) {
             $sorts = $options['sorts'];
         } else {
             $sorts = null;
         }
-        //\Tools\Logging::var_error_log(" Solr request \n", $solrQuery , APPLICATION_BASE_PATH. '/data/debug.txt');
-        $retVal = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
-        return $retVal;
+        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+
     }
-    
+
     /**
      * Creates the query for creator, modifier and accepted by in combination with date created and etc.
      * @param array $options
      * @param \Solarium\Core\Query\Helper $helper
      * @param ParserText $parser
+     * @return string
      */
     protected function interactionsQuery($options, $helper, $parser)
     {
@@ -265,11 +264,11 @@ class Autocomplete
                 'd_dateDeleted',
             ],
         ];
-        
+
         if (empty($options['userInteractionType'])) {
             $options['userInteractionType'] = [];
         }
-        
+
         $interactionsQueries = [];
         foreach ($options['userInteractionType'] as $type) {
             $users = [];
@@ -286,29 +285,29 @@ class Autocomplete
                 $users = array_merge($users, $options['interactionByUsers']);
             }
             $users = array_unique($users);
-            
+
             $dateQuery = $parser->buildDatePeriodQuery(
                 $map[$type][1],
                 isset($options['interactionDateFrom']) ? $options['interactionDateFrom'] : null,
                 isset($options['interactionDateTo']) ? $options['interactionDateTo'] : null
             );
-            
+
             $query = '';
             if (!empty($users)) {
                 $query = $map[$type][0] . ':('
                     . implode(' OR ', array_map([$helper, 'escapePhrase'], $users))
                     . ')';
             }
-            
+
             if (!empty($query) && !empty($dateQuery)) {
                 $query = '(' . $query . ' AND ' . $dateQuery . ')';
             } elseif (empty($query) && !empty($dateQuery)) {
                 $query = $dateQuery;
             }
-            
+
             $interactionsQueries[] = $query;
         }
-        
+
         return implode(' OR ', $interactionsQueries);
     }
     

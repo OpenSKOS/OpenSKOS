@@ -1,15 +1,15 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
- * 
+ *
  * LICENSE
- * 
+ *
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * 
+ *
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
@@ -34,12 +34,12 @@ class Concept implements Record
      * @var SkosConcept $concept
      */
     protected $concept;
-    
+
     /**
      * @var SetsMap
      */
     protected $setsMap;
-    
+
     /**
      * @param SkosConcept $concept
      * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
@@ -57,9 +57,8 @@ class Concept implements Record
     public function getHeader()
     {
         $concept = $this->concept;
-        $modified= $concept->getPropertySingleValue(DcTerms::MODIFIED);
-        if ($modified != null) {
-            $datestamp = $modified ->getValue();
+        if (!$concept->isDeleted()) {
+            $datestamp = $concept->getLatestModifyDate();
         } else {
             $submitted = $concept->getPropertySingleValue(DcTerms::DATESUBMITTED);
             if ($submitted != null) {
@@ -69,6 +68,8 @@ class Concept implements Record
         if ($concept->isDeleted()) {
             if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
                 $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
+            } else {
+                $datestamp = $concept->getLatestModifyDate();
             }
         }
 
@@ -82,8 +83,22 @@ class Concept implements Record
                 $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode']. ':' . $scheme->getUuid()->getValue();
             }
         }
-        
-        return new Header($concept->getUri(), $datestamp, $setSpecs, $concept->isDeleted());
+
+        /*
+         * @TODO: Fix once migration works correctly
+         * We should be able to just fetch a single value, but due to bad data in the old system we will
+         * just return the first value. The migration script will be fixed. Once this is done the first line
+         * of code can be used.
+         */
+        // $uuid = $concept->getPropertySingleValue(OpenSKOS::UUID);
+        $uuid = $concept->getProperty(OpenSKOS::UUID)[0]->getValue();
+
+        return new Header(
+            $uuid,
+            $datestamp,
+            $setSpecs,
+            $concept->isDeleted()
+        );
     }
 
     /**
@@ -97,10 +112,10 @@ class Concept implements Record
         $metadata->loadXML(
             (new DataRdf($this->concept))->transform()
         );
-        
+
         return $metadata;
     }
-    
+
     /**
      * @return DomDocument|null
      */

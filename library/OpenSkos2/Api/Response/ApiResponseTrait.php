@@ -50,7 +50,7 @@ trait ApiResponseTrait
         $response = (new Response($stream, $status, ['X-Error-Msg' => $message]));
         return $response;
     }
-    
+
     /**
      * Get tenant
      *
@@ -90,7 +90,7 @@ trait ApiResponseTrait
 
         return $user;
     }
-    
+
     /**
      * Check if the user is from the given tenant
      * and if the resource matches the tenant
@@ -100,6 +100,10 @@ trait ApiResponseTrait
      * @param OpenSKOS_Db_Table_Row_User $user
      * @throws UnauthorizedException
      */
+    
+    // Meertens: we have moved resourceEditingAllowed methods to the MyInstitutionModules directory
+    // so that the developers of the given institution can adjust it for their own requirements
+    // there are different resourceEdition requirements for different sorts of resources
     public function resourceEditAllowed(
         Resource $resource,
         $tenantcode,
@@ -108,12 +112,21 @@ trait ApiResponseTrait
         if ($user->tenant !== $tenantcode) {
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
-        
-        $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
+
+       $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
+        // Meertens: the code above will not work for us, because in our implementation 
+        // TENANT property is only for sets. For the other resources (schemata, collections, concepts)
+ 
         if ($tenantcode !== (string)$resourceTenant) {
-            throw new UnauthorizedException('Resource has tenant ' . (string)$resourceTenant . ' which differs from the given ' . $tenant -> code, 403);
+            throw new UnauthorizedException(
+                'User has tenant '
+                . $user->code
+                . ' but resource has tenant '
+                . $resourceTenant,
+                403
+            );
         }
-        
+
         return true;
     }
     

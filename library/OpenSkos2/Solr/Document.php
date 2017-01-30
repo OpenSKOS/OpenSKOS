@@ -31,6 +31,11 @@ use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 /**
  * Get a solr document from a skos concept resource
  */
+
+// Meertens:
+// -- removed OpenSkos::MODIFIEDBY, Dc::CONTRIBUTOR, Dc::CREATOR.
+// -- added  OpenSkos:INSKOSKCOLLECTION,OpenSkos:DELTEDBY,OpenSkos:DATEDELETED
+// -- calls to getOldfield are removed, since migration script contains translation of old fields
 class Document
 {
     /**
@@ -80,6 +85,7 @@ class Document
         DcTerms::DATEACCEPTED => ['d_dateAccepted', 'dateAccepted'],
         OpenSkos::DELETEDBY => ['s_deletedBy', 'deletedBy'],
         OpenSkos::DATE_DELETED => ['d_dateDeleted', 'dateDeleted']
+      
     ];
 
     /**
@@ -102,13 +108,10 @@ class Document
     {
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
-        
-        // Index old fields as well for backward compatibility: obsolete after migration
-        //$predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
-        
+       
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();
-        
+
         foreach ($properties as $predicate => $values) {
             if (!array_key_exists($predicate, $this->mapping)) {
                 continue;
@@ -116,36 +119,29 @@ class Document
 
             // Explicitly mapped fields
             $fields = $this->mapping[$predicate];
-            
-            // Old fields
-            // This should not be needed after succesfull migration
-            // If there is a need for it, it measn migration went wrong
-            /*if (isset($predicatesToOldField[$predicate])) {
-                $fields[] = $predicatesToOldField[$predicate];
-            }*/
-            
+
             // Dc terms
             $dcTermKey = array_search($predicate, $dcTerms);
             if ($dcTermKey !== false) {
                 $fields[] = 'dcterms_' . $dcTermKey;
             }
-            
+
             foreach ($fields as $field) {
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
-        
+
         if ($this->resource instanceof Concept) {
             $this->addConceptClasses($this->resource, $this->document);
             $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
             $this->document->b_isOrphan = $this->isOrphan();
-            
+
             $this->addMaxNumericNotation();
         }
-        
+
         return $this->document;
     }
-    
+
     /**
      * Check if the concept is an orphan
      *
@@ -171,10 +167,10 @@ class Document
         if ($this->resource->isPropertyEmpty(Skos::BROADMATCH)) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Add lexical labels and documentation properties combined fields to document.
      * @param Concept $concept
@@ -192,7 +188,7 @@ class Document
             $this->mapValuesToField($propertiesClass, $values, $document);
         }
     }
-    
+
     /**
      * Add the special single numeric notation. Only used for get max notation of all concepts later.
      */
@@ -200,7 +196,7 @@ class Document
     {
         // Gets one of the numeric notations of the concept.
         // Should be the highest one.
-        
+
         $max = 0;
         foreach ($this->resource->getProperty(Skos::NOTATION) as $notation) {
             $value = $notation->getValue();
@@ -208,7 +204,7 @@ class Document
                 $max = $value;
             }
         }
-        
+
         if (!empty($max)) {
             $this->document->max_numeric_notation = $max;
         }
@@ -224,25 +220,38 @@ class Document
     protected function mapValuesToField($field, array $values, DocumentInterface $document)
     {
         $langSeparator = '_';
-        
+
         $data = [];
         foreach ($values as $value) {
+            // Make sure we have valid dates.
+            if (strpos($field, 'd_') === 0 && $value->getType() !== Literal::TYPE_DATETIME) {
+                continue;
+            }
+
             if (!isset($data[$field])) {
                 $data[$field] = [];
             }
             $data[$field][] = $this->valueToSolr($value);
-            
+
             // + language
             if (method_exists($value, 'getLanguage') && $value->getLanguage()) {
                 $langField = $field . $langSeparator . $value->getLanguage();
-                
+
                 if (!isset($data[$langField])) {
                     $data[$langField] = [];
                 }
                 $data[$langField][] = $this->valueToSolr($value);
             }
         }
-        
+
+        // Filter the first modified date
+        if ($field === 'sort_d_modified_earliest') {
+            usort($data[$field], function ($a, $b) {
+                return (new \DateTime($a))->getTimestamp() > (new \DateTime($b))->getTimestamp();
+            });
+            $data[$field] = [current($data[$field])];
+        }
+
         // Flat array for sorting
         if ($this->isSortField($field)) {
             array_walk($data, function (&$mappedValues) {
@@ -252,10 +261,29 @@ class Document
         }
 
         foreach ($data as $mappedField => $val) {
+            if ($mappedField === 'notation') {
+                $val = $this->getLiteral($val);
+            }
+
             $document->{$mappedField} = $val;
         }
     }
-    
+
+    /**
+     *
+     * @param array $val
+     * @return string|int
+     * @throws Exception\InvalidValue
+     */
+    private function getLiteral(array $val)
+    {
+        if (count($val) > 1) {
+            throw new Exception\InvalidValue('Invalid value for notation: ' . var_export($val, true));
+        }
+
+        return current($val);
+    }
+
     /**
      * Is the mapping field a sort field.
      * @param string $field
@@ -265,7 +293,7 @@ class Document
     {
         return stripos($field, 'sort_') === 0;
     }
-    
+
     /**
      * @param Object $value
      * @return string

@@ -2,10 +2,10 @@
 
 1. Install the OpenSKOS code
 ===============================================================================
-Copy the code to a location of your choice. 
+Copy the code to a location of your choice.
 
 Make sure all files are readable by your webserver. Make sure the directories
-`data/uploads`, `cache`, `public/data/icons/assigned` and 
+`data/uploads`, `cache`, `public/data/icons/assigned` and
 `public/data/icons/uploads` are writable for the webserver.
 
 For security reasons you can place the `data` directory outside your
@@ -27,7 +27,7 @@ to
 
 Now you can edit the `APPROOT/application/configs/application.ini`.
 
-You can have separate config settings for specific deployments. The 
+You can have separate config settings for specific deployments. The
 configuration section marked by the Environment Variable `APPLICATION_ENV` (see
 *2.1 Setting Up Your VHOST*). Most settings are self explanatory.
 
@@ -52,7 +52,7 @@ The setup for "openskos" types is easy:
     instances.openskos.url=http://HOSTNAME
     instances.openskos.label=YOUR LABEL
 
-For "external" types use this syntax: 
+For "external" types use this syntax:
 
     instances.example1.type=external
     instances.example1.url=http://HOSTNAME
@@ -84,14 +84,14 @@ The following is a sample VHOST you might want to consider for your project.
 
    # This should be omitted in the production environment
    SetEnv APPLICATION_ENV development
-    
+
    <Directory "/PATH/TO/CODE/public">
        Options Indexes MultiViews FollowSymLinks
        AllowOverride All
        Order allow,deny
        Allow from all
    </Directory>
-    
+
 </VirtualHost>
 ```
 
@@ -99,9 +99,9 @@ The following is a sample VHOST you might want to consider for your project.
 ===============================================================================
 Install your choice of Zend Framework supported Database engine (see
 http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
-access your database can be configured in the application's configuration. 
+access your database can be configured in the application's configuration.
 
-Once you have created an empty database, you have to run the SQL script 
+Once you have created an empty database, you have to run the SQL script
 `APPROOT/data/openskos-create.sql` to create the db-tables.
 
 You also have to run the php-script to create a tenant:
@@ -136,7 +136,7 @@ Download a 3.4 release of Apache Solr and extract it somewhere on your server:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 - go to the `example` directory and create a directory named `openskos`
-- copy the `data/solr/conf` directory of the OpenSKOS checkout to the 
+- copy the `data/solr/conf` directory of the OpenSKOS checkout to the
   `SOLR-INSTALL_DIR/example/openskos` directory
 
 You can now start Solr (in this example with 1,024 MB memory assigned):
@@ -163,7 +163,7 @@ You find the required format of the input data described in the API-docs under:
 http://openskos.org/api#concept-create
 
 You may send only one concept per call.
-Also, you have to identify the tenant and provide the API key, 
+Also, you have to identify the tenant and provide the API key,
 which you assign to the user in the dashboard.
 
 
@@ -175,20 +175,20 @@ Here you can provide many concepts within one file (XPath: `/rdf:RDF/rdf:Descrip
 Once you successfully upload the file, it is scheduled for import,
 as seen in *dashboard:Manage jobs*.
 
-The import job can be started with `./tools/jobs.php`, 
-a CLI script intended to be run with a Cron like task runner. 
+The import job can be started with `./tools/jobs.php`,
+a CLI script intended to be run with a Cron like task runner.
 
 
 6.3 OAI ???
 -------------------------------------------------------------------------------
-Third possiblity is to replicate an existing dataset via OAI-PMH, 
+Third possiblity is to replicate an existing dataset via OAI-PMH,
 either from other OpenSKOS-instances or from an external source providing SKOS-data.
 
 ???
 For this, you set the [OAI baseURL]-field of a collection to the OAI-PMH endpoint of an external provider
 and let the source be harvested.
 
-The harvest job can be started with ./tools/harvest.php, 
+The harvest job can be started with ./tools/harvest.php,
 another CLI script meant to be run as a cron-task.
 ???
 
@@ -200,8 +200,8 @@ It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 inst
 
 Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
 
-5.5
--------------------------------------------------------------------------------
+6.5
+---
 
 Generate API Documentation
 

@@ -80,14 +80,17 @@ class DataArray
                 continue;
             }
             
-            $data = $resource->getProperty($prop['uri']);
-            //var_dump('data ' . $data);
-            if (empty($data)) {
+            if ($resource->isPropertyEmpty($prop['uri'])) {
                 continue;
             }
-            $newResource = $this->getPropertyValue($data, $field, $prop, $newResource);
+            
+            $newResource = $this->getPropertyValue(
+                $resource->getProperty($prop['uri']),
+                $field,
+                $prop,
+                $newResource
+            );
         }
-         
         return $newResource;
     }
     
@@ -161,7 +164,7 @@ class DataArray
                 $value = $value->format(DATE_W3C);
             }
 
-            if (empty($value)) {
+            if ($value === null || $value === '') {
                 continue;
             }
             $lang = $val->getLanguage();

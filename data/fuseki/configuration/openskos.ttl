@@ -5,6 +5,9 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix fuseki: <http://jena.apache.org/fuseki#> .
 
+# Can be removed in later release https://issues.apache.org/jira/browse/JENA-1181
+tdb:GraphTDB rdfs:subClassOf ja:Model .
+
 :service_tdb_all
         a                                   fuseki:Service ;
         rdfs:label                          "TDB openskos" ;

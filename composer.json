@@ -28,11 +28,11 @@
     },
     "scripts": {
         "validate": [
-			"phpcs library/OpenSkos2 --standard=PSR2"
-		],
-		"format": [
-			"phpcbf library/OpenSkos2 --standard=PSR2 --no-patch"
-		],
+            "phpcs library/OpenSkos2 --standard=PSR2"
+        ],
+        "format": [
+            "phpcbf library/OpenSkos2 --standard=PSR2 --no-patch"
+        ],
         "post-install-cmd": [
             "bash contrib/setup.sh"
         ]

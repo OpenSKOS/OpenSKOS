@@ -49,7 +49,7 @@ class Resource extends Uri implements ResourceIdentifier
     const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
     const STATUS_EXPIRED = 'expired';
-    
+
     protected $properties = [];
     
      
@@ -144,7 +144,6 @@ class Resource extends Uri implements ResourceIdentifier
             return $this->properties[$predicate];
         }
     }
-    
     // used in Tenant and Set
     public function getCode() {
         return $this ->getPropertyOneLiteralValue(OpenSkos::CODE);
@@ -162,10 +161,11 @@ class Resource extends Uri implements ResourceIdentifier
             return new Literal(UNKNOWN);
         } 
     }
-    
+ 
     /**
      * @param string $predicate
      * @param RdfObject $value
+     * @return $this
      */
     public function addProperty($predicate, RdfObject $value)
     {
@@ -173,11 +173,12 @@ class Resource extends Uri implements ResourceIdentifier
         $this->properties[$predicate][] = $value;
         return $this;
     }
-    
+
     /**
      * Add multiple values at once, keeps the existing values
      * @param string $predicate
      * @param RdfObject[] $values
+     * @return $this
      */
     public function addProperties($predicate, array $values)
     {
@@ -186,7 +187,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return $this;
     }
-    
+
     /**
      * Make sure the property is only added once
      *
@@ -227,11 +228,12 @@ class Resource extends Uri implements ResourceIdentifier
             ->addProperty($predicate, $value);
         return $this;
     }
-    
+
     /**
      * Set multiple values at once, override existing values
      * @param string $predicate
      * @param RdfObject[] $values
+     * @return $this
      */
     public function setProperties($predicate, array $values)
     {
@@ -242,6 +244,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     /**
      * @param string $predicate
+     * @return $this
      */
     public function unsetProperty($predicate)
     {
@@ -257,16 +260,18 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return isset($this->properties[$predicate]);
     }
-    
+
     /**
      * @param string $predicate
      * @return bool
      */
     public function isPropertyEmpty($predicate)
     {
-        return empty($this->properties[$predicate]);
+        return !isset($this->properties[$predicate])
+            || $this->properties[$predicate] === null
+            || $this->properties[$predicate] === '';
     }
-    
+
     /**
      * @param string $predicate
      * @return bool
@@ -279,7 +284,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return false;
     }
-    
+
     /**
      * @TODO Separate in StatusAwareResource class or something like that
      * @return string|null
@@ -292,10 +297,10 @@ class Resource extends Uri implements ResourceIdentifier
             return $this->getProperty(OpenSkos::STATUS)[0]->getValue();
         }
     }
-    
+
      /**
      * Check if the resource is deleted
-     *
+     * @TODO Separate in StatusAwareResource class or something like that
      * @return boolean
      */
     public function isDeleted()
@@ -353,11 +358,13 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return current($this->getProperty(DcTerms::DATESUBMITTED));
     }
-    
     public function getUuid()
     {
         return $this->getPropertyOneLiteralValue(OpenSkos::UUID);
     }
+    
+    
+// TODO : ask Picturae about this function, look for usages before
     /**
      * @return string
      */
@@ -365,9 +372,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return $this->uri;
     }
-    
-   
-    
+
     /**
      * Is the current resource a blank node.
      * It is if no uri given or generated uri starting with _:
@@ -377,8 +382,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return empty($this->uri) || preg_match('/^_:/', $this->uri);
     }
-    
-    
+
     /**
      * Go through the propery values and check if there is one in the specified language.
      * @param string $predicate
@@ -394,7 +398,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return false;
     }
-    
+
     /**
      * Gets the specified property values but filter only those in the specified language.
      * @TODO Rename to getPropertyInLanguage
@@ -412,7 +416,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return $values;
     }
-    
+
     /**
      * Gets list of all languages that currently exist in the properties of the resource.
      * @TODO Rename to getLanguages
@@ -430,35 +434,36 @@ class Resource extends Uri implements ResourceIdentifier
                 }
             }
         }
-        
+
         return array_keys($languages);
     }
-    
+
     /**
-     * Gets proprty value and checks if it is only one.
+     * Gets property value and checks if it is only one.
      * @param string $property
-     * @return string|null
+     * @return null|string
+     * @throws OpenSkosException
      */
     public function getPropertySingleValue($property)
     {
         $values = $this->getProperty($property);
-        
+
         if (count($values) > 1) {
             throw new OpenSkosException(
                 'Multiple values found for property "' . $property . '" while a single one was requested.'
                 . ' Values ' . implode(', ', $values)
             );
         }
-        
+
         if (!empty($values)) {
             return $values[0];
         } else {
             return null;
         }
     }
-    
+
     /**
-     * Gets proprty value and implodes it if multiple values are found.
+     * Gets property value and implodes it if multiple values are found.
      * @param string $property
      * @param string $language
      * @return string
@@ -470,10 +475,10 @@ class Resource extends Uri implements ResourceIdentifier
         } else {
             $values = $this->getProperty($property);
         }
-        
+
         return implode(', ', $values);
     }
-    
+
     /**
      * Gets the resource in simple flat array with all (or filtered) properties.
      * @param array $filter , optional
@@ -483,13 +488,13 @@ class Resource extends Uri implements ResourceIdentifier
     public function toFlatArray($filter = [], $language = null)
     {
         $result = [];
-        
+
         foreach (array_keys($this->getProperties()) as $property) {
             if (empty($filter) || in_array($property, $filter)) {
                 $result[Namespaces::shortenProperty($property)] = $this->getPropertyFlatValue($property, $language);
             }
         }
-        
+
         // @TODO uri and caption are out of scope here, but really handful.
         if (empty($filter) || in_array('uri', $filter)) {
             $result['uri'] = $this->getUri();
@@ -497,10 +502,9 @@ class Resource extends Uri implements ResourceIdentifier
         if (empty($filter) || in_array('caption', $filter)) {
             $result['caption'] = $this->getCaption($language);
         }
-        
+
         return $result;
     }
-    
 
     // override for a concerete resources when necessary
     public function addMetadata($userUri, $params, $existingResource) {
@@ -577,6 +581,33 @@ class Resource extends Uri implements ResourceIdentifier
         return null;
     }
     
+
+ // TODO : find usages and ask Picturae if it is not used
+    /**
+     *
+     * @return \DateTime|null 
+     */
+    public function getLatestModifyDate()
+    {
+        $dates = $this->getProperty(Namespaces\DcTerms::MODIFIED);
+        if (empty($dates)) {
+            return;
+        }
+
+        $latestDate = null;
+        foreach ($dates as $date) {
+            /* @var $date \OpenSkos2\Rdf\Literal */
+            /* @var $dateTime \DateTime */
+            $dateTime = $date->getValue();
+            if (!$latestDate || $dateTime->getTimestamp() > $latestDate->getTimestamp()) {
+                $latestDate = $dateTime;
+            }
+        }
+
+        return $latestDate;
+    }
+    
+    // TODO: find usages, test and ask picturaa if of no use of buggy
     /**
      * @TODO Separate in StatusAwareResource class or something like that
      * @param string &$predicate
@@ -586,7 +617,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         // Validation throws an error when not all letters are lowercase while 
         // creating or updating an object
-        
+        // @TODO find better way and prevent hidden altering of the properties values in the Resource class.
         // Status is always transformed to lowercase.
         if ($predicate === OpenSkos::STATUS) {
             $value->setValue(strtolower($value->getValue()));

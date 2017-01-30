@@ -46,8 +46,16 @@ use Picturae\OaiPmh\Interfaces\RecordList;
 use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
+use Picturae\OaiPmh\Exception\BadArgumentException;
+use Picturae\OaiPmh\Exception\BadResumptionTokenException;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+// Meertens: 
+// -- we have setManager class, with sets inhabiting the triple store.
+// As a result we have removed table "collections" from the MySql, the class OpenSKOS_Db_Table_Collections
+// and all related code.
+// -- all the resources are referred-to in other resources via their Uri's not via their codes, or so; 
+// as a result getConcept has tenant, set and conceptschema parameters us Uri's not as literals.
+// -- Picturae code changes starting from 21/11/2016 are taken except one (commented) fragment in getConcepts
 
 class Repository implements InterfaceRepository
 {
@@ -84,7 +92,7 @@ class Repository implements InterfaceRepository
      * @var string|null
      */
     private $description;
-    
+
     /**
      * Used to get tenant:set:schema sets.
      * @var SetsMap
@@ -119,7 +127,7 @@ class Repository implements InterfaceRepository
      * @var ConceptSchemeManager
      */
     private $schemeManager;
-    
+
     /**
      *
      * @var Autocomplete
@@ -155,7 +163,7 @@ class Repository implements InterfaceRepository
         $this->setManager = $setManager;
         $this->description = $description;
     }
-    
+
     /**
      * @return string the base URL of the repository
      */
@@ -163,7 +171,7 @@ class Repository implements InterfaceRepository
     {
         return $this->baseUrl;
     }
-    
+
     /**
      * @return string
      * the finest harvesting granularity supported by the repository. The legitimate values are
@@ -249,7 +257,11 @@ class Repository implements InterfaceRepository
     public function getRecord($metadataFormat, $identifier)
     {
         try {
-            $concept = $this->conceptManager->fetchByUri($identifier);
+            if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
+                $concept = $this->conceptManager->fetchByUuid($identifier);
+            } else {
+                throw new BadArgumentException('Invalid identifier ' . $identifier);
+            }
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
@@ -282,20 +294,16 @@ class Repository implements InterfaceRepository
             $pSet['conceptScheme'],
             $numFound
         );
-        
+
         $items = [];
         foreach ($concepts as $i => $concept) {
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
-        
-        //\Tools\Logging::var_error_log(" items: ", count($items) , APPLICATION_BASE_PATH .'/data/debug.txt');
-        
-        
         $token = null;
         if ($numFound > $this->limit) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
-        
+
         return new OaiRecordList($items, $token, $numFound, 0);
     }
 
@@ -310,7 +318,7 @@ class Repository implements InterfaceRepository
         $pSet = $this->parseSet($params['set']);
 
         $cursor = (int)$params['offset'];
-        
+
         $concepts = $this->getConcepts(
             $this->limit,
             $cursor,
@@ -348,7 +356,21 @@ class Repository implements InterfaceRepository
     public function listMetadataFormats($identifier = null)
     {
         $formats = [];
-        
+
+        // We don't support different metadata formats based on identifier, but spec requires error if identifier
+        // can not be found.
+        if (!is_null($identifier)) {
+            try {
+                if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
+                    $concept = $this->conceptManager->fetchByUuid($identifier);
+                } else {
+                    throw new BadArgumentException('Invalid identifier ' . $identifier);
+                }
+            } catch (ResourceNotFoundException $exc) {
+                throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
+            }
+        }
+
         // @TODO The oai_dc is actually required by the oai-pmh specs. So some day has to be implemented.
 //        $formats[] = new ImplementationMetadataFormatType(
 //            'oai_dc',
@@ -364,7 +386,7 @@ class Repository implements InterfaceRepository
 
         return $formats;
     }
-    
+
     /**
      * @return SetsMap
      */
@@ -423,6 +445,7 @@ class Repository implements InterfaceRepository
 
         $return['set'] = $setURI;
         $conceptSchemeURI = null;
+        
         if (!empty($arrSet[2])) {
             $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $arrSet[2] . '"', Skos::CONCEPTSCHEME);
             if (count($conceptSchemes) > 0) {
@@ -503,6 +526,9 @@ class Repository implements InterfaceRepository
     {
         $params = (array) json_decode(base64_decode($token));
 
+        if (!empty($token) && is_null(json_decode(base64_decode($token)))) {
+            throw new BadResumptionTokenException("Resumption token present but contains invalid data");
+        }
         if (!empty($params['from'])) {
             $params['from'] = new \DateTime('@' . $params['from']);
         }
@@ -559,7 +585,7 @@ class Repository implements InterfaceRepository
         if (!$this->earliestDateStamp) {
             $this->earliestDateStamp = $this->conceptManager->fetchMinModifiedDate();
         }
-        
+
         return $this->earliestDateStamp;
     }
 
@@ -570,7 +596,11 @@ class Repository implements InterfaceRepository
      * @param int $offset
      * @param \DateTime $from
      * @param \DateTime $till
-     * @return Concept[]
+     * @param \OpenSKOS2\Rdf\Uri $tenant
+     * @param \OpenSKOS2\Rdf\Uri $set
+     * @param \OpenSKOS2\Rdf\Uri $scheme
+     * @param int $numFound
+     * @return \OpenSKOS2\ConceptCollection
      */
     private function getConcepts(
         $limit = 10,
@@ -590,17 +620,18 @@ class Repository implements InterfaceRepository
             'status' => Concept::getAvailableStatuses(),
             'sorts' => ['uri' => 'asc'],
         ];
-        
+
         if (!empty($tenant)) {
-            $searchOptions['tenants'] = [$tenant];
+            $searchOptions['tenant'] = [$tenant];
         }
-        
         if (!empty($set)) {
-            $searchOptions['sets'] = [$set];
+            $searchOptions['set'] = [$set];
         }
 
+        //Meertens: the scheme is already an Uri.
+        // obtaining Uri of the scheme from its uuid happens in parseSet.
         if (!empty($scheme)) {
-                $searchOptions['conceptScheme'] = [$scheme];
+                $searchOptions['scheme'] = [$scheme];
         }
 
         if (!empty($from) || !empty($till)) {

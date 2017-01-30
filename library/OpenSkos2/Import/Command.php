@@ -36,6 +36,13 @@ use OpenSkos2\Preprocessor;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
+// Meertens: no need for ConceptManager since it goes not only for concepts
+// the Picturae's change of 21/10/2016 is not taken, because it is not clear where to locate it and why
+// (after Meertens changings): 
+ // "// Disable commit's for every concept"
+ // "$this->resourceManager->setIsNoCommitMode(true);"
+// may be it does make to have two import scripts, meertens version and picturae's version
+
 class Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -44,8 +51,6 @@ class Command implements LoggerAwareInterface
      * @var ResourceManager
      */
     private $resourceManager;
-    
-   
     /**
      * @var Tenant
      */
@@ -81,7 +86,7 @@ class Command implements LoggerAwareInterface
         };       
         $tenantUri = $tenantUris[0]->getUri();
         
-        //** Some purging stuff from the original picturae code,
+        //** Some purging stuff from the original picturae code
         if ($message->getClearSet()) {
                 $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
             }
@@ -120,9 +125,11 @@ class Command implements LoggerAwareInterface
                     var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
                     $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
                     continue;
+
                 } else {
                     $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
                     $isForUpdates = true;
+
 
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                         $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
@@ -130,6 +137,7 @@ class Command implements LoggerAwareInterface
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
+
             } else { // adding a new resource
                 $autoGenerateIdentifiers = true;
                 $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
@@ -157,6 +165,7 @@ class Command implements LoggerAwareInterface
             if ($preprocessedResource instanceof Concept) {
                 $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
             }
+
 
             if ($currentVersion !== null) {
                 $this->resourceManager->delete($currentVersion);
@@ -194,6 +203,7 @@ class Command implements LoggerAwareInterface
             }
         }
         return $concept; 
+
     }
     
 }

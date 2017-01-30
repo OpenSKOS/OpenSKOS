@@ -18,6 +18,15 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+// Meertens:
+// -- conceptManager in our version is not necessary, Resource manager is reposinsible for managing all sort of recourses.
+// -- We do not have tenant as command line-parameter because we already have a setUri as a command-line parameter which is more precise, because a tenant may have few sets.
+// tenant's Uri  is derived in "handle" of OpenSkos2\Import\Command from setUri (once, so it should not slow down import)
+// -- because of this merging becomes a bit of a problem (Pictira'es code appeal to tenant quite a few times) and 
+// it does make sence to keep two skos2openskos sets
+// -- we alse refer set and tenant via their URI, not code. In the future a syntacti sugar we can use tenant and set code for user' concevnience
+
 include dirname(__FILE__) . '/autoload.inc.php';
 
 $opts = array(
@@ -45,8 +54,8 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
-$conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
 $user = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
+
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 

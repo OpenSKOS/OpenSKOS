@@ -1,15 +1,15 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
- * 
+ *
  * LICENSE
- * 
+ *
  * This source file is subject to the GPLv3 license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
- * 
+ *
  * @category   OpenSKOS
  * @package    OpenSKOS
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
@@ -24,25 +24,27 @@ use OpenSkos2\Rdf\Resource;
 
 /**
  * Transform Resource to a RDF string.
- * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
+ * Provide backwards compatibility to the API output from OpenSKOS 1 as much as possible
  */
+
+// Meertens: theis class is used not only for concepts but for the other resources represented in triple store,
+// Therefore we do not have a private variable "concept", but we have "resource" instead
 class DataRdf
 {
     /**
      * @var Resource
      */
     private $resource;
-    
     /**
      * @var bool
      */
     private $includeRdfHeader = true;
-    
+
     /**
      * @var array
      */
     private $propertiesList;
-    
+
     /**
      * @param Resource $concept
      * @param bool $includeRdfHeader
@@ -53,14 +55,14 @@ class DataRdf
         $this->resource = $resource;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
-        
+
         // @TODO - put it somewhere globally
         \EasyRdf\Format::registerSerialiser(
             'rdfxml_openskos',
             '\OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions'
         );
     }
-    
+
     /**
      * Transform the concept to xml string
      *
@@ -78,7 +80,6 @@ class DataRdf
         } else {
             $reducedResource = $this->resource;
         }
-        
         $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
         // namespaces are still all here
         $retVal = $resource->serialise(
@@ -88,7 +89,7 @@ class DataRdf
         // user-defined namespace prefix is changed
         return $retVal;
     }
-    
+
     /**
      * Should the property be included in the serialized data.
      * @param string $property

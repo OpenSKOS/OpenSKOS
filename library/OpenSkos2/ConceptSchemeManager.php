@@ -61,13 +61,13 @@ class ConceptSchemeManager extends ResourceManager
                     dcterms:title ?title;
                     openskos:uuid ?uuid;
             ';
-        
+
         if (!empty($filterUris)) {
             $query .= 'FILTER (?subject = '
                 . implode(' || ?subject = ', array_map([$this, 'valueToTurtle'], $filterUris))
                 . ')';
         }
-        
+
         $query .= '}';
 
         $result = $this->query($query);
