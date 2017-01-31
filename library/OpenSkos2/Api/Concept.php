@@ -169,7 +169,7 @@ class Concept
         
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
         
-        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+        if ($this->useXlLabels($tenant, $request) === true) {
             foreach ($concepts as $concept) {
                 $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
             }
