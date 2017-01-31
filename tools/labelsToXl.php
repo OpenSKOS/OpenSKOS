@@ -70,7 +70,13 @@ do {
 
             try {
                 $labelHelper->assertLabels($concept);
-                $conceptManager->replace($concept);
+                
+                $partialConcept = new \OpenSkos2\Concept($concept->getUri());
+                foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                    $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+                }
+                
+                $conceptManager->insert($concept);
             } catch (\Exception $ex) {
                 $logger->warning(
                     'Problem with the labels for "' . $concept->getUri()
