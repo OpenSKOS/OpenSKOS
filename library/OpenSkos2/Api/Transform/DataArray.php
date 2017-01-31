@@ -33,6 +33,8 @@ require_once dirname(__FILE__) .'/../../config.inc.php';
  * Transform Resource to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
  */
+
+// Meertens: changes of 16/01/2017 are present (previois changes were from 12/03/2016) 
 class DataArray
 {
     /**
@@ -72,11 +74,7 @@ class DataArray
         }
         
         foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
-            //var_dump($field);
-            //var_dump($prop);
-            //var_dump('uri: ' . $prop['uri']);
             if (!$this->doIncludeProperty($prop['uri'])) {
-                //var_dump($prop['uri']);
                 continue;
             }
             

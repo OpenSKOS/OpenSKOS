@@ -48,6 +48,12 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 
+// Mertens: 
+// -- for refactored "fetchByUri" and "fecthByUuid" the corresponding versions of picturae (23,21/11/2016) cannot be taken,
+// see the comment inside the body of "fetchByUuid". Complaint "something went very wrong" is thrown now
+// by "fetchBy method", called from both, "fetchByUri" and "fecthByUuid".
+// -- other chnages starting from 14/11/2016 are taken
+
 class ResourceManager
 {
     /**
@@ -280,8 +286,8 @@ class ResourceManager
      */
     public function fetchByUuid($uuid, $resType=null)
     {
-      // The request below using FILTER NOT EXIST is necessary because  institutions have "nested" structure,
-      // that is they have sub-elements (adress and institution description) which have internal uuid-s and are rdf-s on itself.
+      // Meertens: The request below using FILTER NOT EXIST is necessary because  institutions have "nested" structure,
+      // that is they have sub-elements (address and institution description) which have internal node id-s and are rdf-s on itself.
       // The difference between them and regular rdf resources is that they do not have types
       
     
@@ -484,7 +490,7 @@ class ResourceManager
             $newPatterns[RdfNamespace::TYPE] = $resType;
         };
         if ($newPatterns[RdfNamespace::TYPE] !== null) {
-          if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
+          if ($newPatterns[RdfNamespace::TYPE] ->getUri() === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);
@@ -754,6 +760,9 @@ class ResourceManager
         return $items;
     }
     
+    /* Returns a map, mapping resource's titles to the resource's Uri
+     * Works for set, schema, skos colllection, user relation definition
+     */
     public function fetchNameUri() {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <' . $this->getResourceType() . '> .}';
         $response = $this->query($query);
@@ -1160,7 +1169,7 @@ class ResourceManager
         $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
     }
     
-    // Id is either an URI or uuid, or code for tenants and sets
+    // Id is either an URI or uuid, or, for user concevinece, code for tenants and sets
     public function findResourceById($id, $resourceType) {
         if ($id !== null && isset($id)) {
             if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {

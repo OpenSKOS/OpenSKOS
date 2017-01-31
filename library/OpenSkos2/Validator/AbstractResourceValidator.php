@@ -57,9 +57,6 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
     
     public function setTenant($tenantUri) {
-        if ($tenantUri === null) {
-            throw new Exception("Passed tenant uri is null in this validator. Proper content validation is not possible");
-        }
         $this->tenantUri = $tenantUri;
     }
 

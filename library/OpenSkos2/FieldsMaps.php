@@ -23,11 +23,12 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Dc;
 
 class FieldsMaps {
 
-//Meertens: the Picturae's function  getOldToProperties is renamed getNamesToProperties
+// Meertens: this class is not used to support old names but to map short names to URI's 
+// in the OpenSKOS2. So that's why the following changes have happened.
+// The Picturae's function  "getOldToProperties" is renamed to "getNamesToProperties"
 // because it is used not for mapping old names to properties but just to map
 // short names to the corresponding property uri's.
 // Also old field names like 'created_timestamp', 'modified_timestamp' is removed, 
@@ -36,16 +37,18 @@ class FieldsMaps {
 // the method ResolveOldFields is removed 
   public static function getNamesToProperties() {
     return [
-
       'status' => OpenSkos::STATUS,
       'tenant' => OpenSkos::TENANT,
+      'set' => OpenSkos::SET,
       'uuid' => OpenSkos::UUID,
-      'date_deleted' => OpenSkos::DATE_DELETED,
       'notation' => Skos::NOTATION,
       'inScheme' => Skos::INSCHEME,
+      'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
+      
       'prefLabel' => Skos::PREFLABEL,
       'altLabel' => Skos::ALTLABEL,
       'hiddenLabel' => Skos::HIDDENLABEL,
+      
       'changeNote' => Skos::CHANGENOTE,
       'definition' => Skos::DEFINITION,
       'editorialNote' => Skos::EDITORIALNOTE,
@@ -53,6 +56,7 @@ class FieldsMaps {
       'historyNote' => Skos::HISTORYNOTE,
       'note' => Skos::NOTE,
       'scopeNote' => Skos::SCOPENOTE,
+      
       'broader' => Skos::BROADER,
       'broaderTransitive' => Skos::BROADERTRANSITIVE,
       'narrower' => Skos::NARROWER,
@@ -64,28 +68,30 @@ class FieldsMaps {
       'mappingRelation' => Skos::MAPPINGRELATION,
       'narrowMatch' => Skos::NARROWMATCH,
       'relatedMatch' => Skos::RELATEDMATCH,
+      
       'topConceptOf' => Skos::TOPCONCEPTOF,
+      'member' => Skos::MEMBER,
+      
+      'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
       'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
       'dcterms_modified' => DcTerms::MODIFIED,
       'dcterms_creator' => DcTerms::CREATOR,
-      'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
       'dcterms_contributor' => DcTerms::CONTRIBUTOR,
-      'dc_contributor' => Dc::CONTRIBUTOR,
       'dcterms_title' => DcTerms::TITLE,
+      
       'skosXlPrefLabel' => SkosXl::PREFLABEL,
       'skosXlAltLabel' => SkosXl::ALTLABEL,
       'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
-      'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
-      'member' => Skos::MEMBER,
-      'set' => OpenSkos::SET,
-      'creator' => DcTerms::CREATOR,
+      
       'dateSubmitted' => DcTerms::DATESUBMITTED,
-      'contributor' => DcTerms::CONTRIBUTOR,
       'modified' => DcTerms::MODIFIED,
-      'acceptedBy' => OpenSkos::ACCEPTEDBY,
       'dateAccepted' => DcTerms::DATEACCEPTED,
-      'deletedBy' => OpenSkos::DELETEDBY,
       'dateDeleted' => OpenSkos::DATE_DELETED,
+      
+      'creator' => DcTerms::CREATOR,
+      'contributor' => DcTerms::CONTRIBUTOR,
+      'acceptedBy' => OpenSkos::ACCEPTEDBY,
+      'deletedBy' => OpenSkos::DELETEDBY,
     ];
   }
 

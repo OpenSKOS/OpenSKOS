@@ -20,7 +20,6 @@
 namespace OpenSkos2\OaiPmh;
 
 use DOMDocument;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept as SkosConcept;
@@ -28,63 +27,60 @@ use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
 
-class Concept implements Record
-{
-    /**
-     * @var SkosConcept $concept
-     */
-    protected $concept;
+// Meertens: OpenSKOS:TENANT and OpenSKOS:SET are derived properties for a concept.
+// therefore obtaining them in "getHeader" for Meertens differ's from Picturae's version.
+// Picturae's  changes from 23/11/2016 are taken.
 
-    /**
-     * @var SetsMap
-     */
-    protected $setsMap;
+class Concept implements Record {
 
-    /**
-     * @param SkosConcept $concept
-     * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
-     */
-    public function __construct(SkosConcept $concept, SetsMap $setsMap)
-    {
-        $this->concept = $concept;
-        $this->setsMap = $setsMap;
+  /**
+   * @var SkosConcept $concept
+   */
+  protected $concept;
+
+  /**
+   * @var SetsMap
+   */
+  protected $setsMap;
+
+  /**
+   * @param SkosConcept $concept
+   * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
+   */
+  public function __construct(SkosConcept $concept, SetsMap $setsMap) {
+    $this->concept = $concept;
+    $this->setsMap = $setsMap;
+  }
+
+  /**
+   * Get header
+   * @return Header
+   */
+  public function getHeader() {
+    $concept = $this->concept;
+    
+    if (!$concept->isDeleted()) {
+      $datestamp = $concept->getLatestModifyDate();
+    } else {
+      if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
+        $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
+      } else {
+        $datestamp = $concept->getLatestModifyDate();
+      }
     }
 
-    /**
-     * Get header
-     * @return Header
-     */
-    public function getHeader()
-    {
-        $concept = $this->concept;
-        if (!$concept->isDeleted()) {
-            $datestamp = $concept->getLatestModifyDate();
-        } else {
-            $submitted = $concept->getPropertySingleValue(DcTerms::DATESUBMITTED);
-            if ($submitted != null) {
-               $datestamp = $submitted ->getValue(); 
-            } 
-        }
-        if ($concept->isDeleted()) {
-            if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
-                $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
-            } else {
-                $datestamp = $concept->getLatestModifyDate();
-            }
-        }
+    $setSpecs = [];
+    $specs = $this->setsMap->fetchTenantSpecData($concept);
+    foreach ($specs as $spec) {
+      $setSpecs[] = $spec['tenantcode'];
+      $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
+      $schemes = $this->setsMap->getSchemes($spec['tenantcode'], $spec['seturi'], $concept->getProperty(Skos::INSCHEME));
+      foreach ($schemes as $scheme) {
+        $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'] . ':' . $scheme->getUuid()->getValue();
+      }
+    }
 
-        $setSpecs = [];
-        $specs = $this->setsMap->fetchTenantSpecData($concept);
-        foreach ($specs as $spec) {
-            $setSpecs[] = $spec['tenantcode'];
-            $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
-            $schemes = $this->setsMap->getSchemes($spec['tenantcode'], $spec['seturi'], $concept->getProperty(Skos::INSCHEME));
-            foreach ($schemes as $scheme) {
-                $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode']. ':' . $scheme->getUuid()->getValue();
-            }
-        }
-
-        /*
+     /*
          * @TODO: Fix once migration works correctly
          * We should be able to just fetch a single value, but due to bad data in the old system we will
          * just return the first value. The migration script will be fixed. Once this is done the first line
@@ -92,34 +88,33 @@ class Concept implements Record
          */
         // $uuid = $concept->getPropertySingleValue(OpenSKOS::UUID);
         $uuid = $concept->getProperty(OpenSKOS::UUID)[0]->getValue();
-
         return new Header(
             $uuid,
             $datestamp,
             $setSpecs,
             $concept->isDeleted()
         );
-    }
+  }
 
-    /**
-     * Convert skos concept to \DomDocument to use as metadata in OAI-PMH Interface
-     *
-     * @return DOMDocument
-     */
-    public function getMetadata()
-    {
-        $metadata = new \DOMDocument();
-        $metadata->loadXML(
-            (new DataRdf($this->concept))->transform()
-        );
+  /**
+   * Convert skos concept to \DomDocument to use as metadata in OAI-PMH Interface
+   *
+   * @return DOMDocument
+   */
+  public function getMetadata() {
+    $metadata = new \DOMDocument();
+    $metadata->loadXML(
+      (new DataRdf($this->concept))->transform()
+    );
 
-        return $metadata;
-    }
+    return $metadata;
+  }
 
-    /**
-     * @return DomDocument|null
-     */
-    public function getAbout()
-    {
-    }
+  /**
+   * @return DomDocument|null
+   */
+  public function getAbout() {
+    
+  }
+
 }

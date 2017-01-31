@@ -22,6 +22,8 @@ namespace OpenSkos2\Solr;
 use Solarium\Client;
 use OpenSkos2\Rdf\Resource;
 
+// Meertens: chnages staring from 21/10/2016 are taken,
+
 class ResourceManager
 {
     /**

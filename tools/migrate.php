@@ -35,8 +35,10 @@ use OpenSkos2\Namespaces\Rdf;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
-// Meertens: some fragments have been taken from Picturae, het are commented. 
-// Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
+// Meertens: 
+// -- Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
+// -- Picturae changes starting from the last two of 11/11/2016 are taken (there were a lot of chnages on 10 and 11/11,
+// -- some of them contradict each other (lie retry tome or so)
 
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
@@ -104,7 +106,8 @@ var_dump('tenant: ' . $tenant);
 $isDryRun = $OPTS->dryrun;
 var_dump('dry run : ' . $isDryRun);
 
-// overtaken from Picturae
+// Meertens: overtaken from Picturae
+// btw, why is that fake query?
 $query = [
     'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
     'rows' => 100,

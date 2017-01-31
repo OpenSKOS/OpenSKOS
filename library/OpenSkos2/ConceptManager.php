@@ -37,11 +37,15 @@ use OpenSkos2\Api\Exception\ApiException;
 require_once dirname(__FILE__) .'/config.inc.php';
 require_once dirname(__FILE__) . '/../../tools/Logging.php';
 
-// Mertens: we use addRelationTriple and deleteRelationTriple since old names
-// "addRelation" and "deleteRelation" are used for a resource of Relation type
-// describing user-defined relations
+// Mertens: the difference is in handling relations.
+// We use "addRelationTriple" and "deleteRelationTriple" since old names
+// "addRelation" and "deleteRelation" are related for a resource of Relation type
+// describing user-defined relations.
 // also the code for these methods is different (refactored)
+// An auxiliary method deleteRelationsWhereObject is replaced with more generic deleteMatchingTriples
+// which is implemented in the prent class ResourceManager
 
+// Mertens: the changes introduced by Picturae starting from 11/11/2016 are taken.
 
 class ConceptManager extends ResourceManager
 {

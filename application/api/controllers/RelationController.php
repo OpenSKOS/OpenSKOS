@@ -19,6 +19,14 @@
 
 require_once 'AbstractController.php';
 
+/* 
+ * Relation is a resource as for instance, a concept or a chema. User-defined relation definitions are stored in triple store as any other resource.
+ * There is a difference between a relation as a definition (works for used-defined relations) and relation as a triple. This is reflectied
+ * in the naming of methods, e.g. deleteRelation means deleting the relation definition (if no correspondingly related concepts are detected)
+ * and deleteRelationTriple amounts to updating corresponding related concepts.
+ * 
+ */
+
 class API_RelationController extends AbstractController {
     
    

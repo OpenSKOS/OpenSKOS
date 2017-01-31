@@ -28,7 +28,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Tenant;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use OpenSkos2\Validator\Resource as ResourceValidator;
@@ -36,12 +35,17 @@ use OpenSkos2\Preprocessor;
 
 require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
-// Meertens: no need for ConceptManager since it goes not only for concepts
-// the Picturae's change of 21/10/2016 is not taken, because it is not clear where to locate it and why
-// (after Meertens changings): 
+// Meertens: 
+// -- no need for ConceptManager since import runs also for other resources as well and Resource Manager will do the job.
+// -- Tenant is not a constructor parameter because its Uri is derived from setUri passed via message in "handle".
+// this derivation is not happens in the loop, but only one time, so it should skow down the import process.
+// -- the following Picturae's change of 21/10/2016 is not taken, because it is not clear where to locate it and why
+// (after Meertens refactoring and adjusting for importing schemata): 
  // "// Disable commit's for every concept"
  // "$this->resourceManager->setIsNoCommitMode(true);"
-// may be it does make to have two import scripts, meertens version and picturae's version
+// --  may be it does make to have two Command scripts, meertens version and picturae's version
+
+
 
 class Command implements LoggerAwareInterface
 {
@@ -51,24 +55,18 @@ class Command implements LoggerAwareInterface
      * @var ResourceManager
      */
     private $resourceManager;
-    /**
-     * @var Tenant
-     */
-    protected $tenant;
-    
+   
     private $black_list;
 
     /**
      * Command constructor.
      * @param ResourceManager $resourceManager
-     * @param Tenant $tenant optional If specified - tenant specific validation can be made.
+     * @param String $tenantUri optional If specified - tenant specific validation can be made.
      */
     public function __construct(
-        ResourceManager $resourceManager,
-        Tenant $tenant = null
+        ResourceManager $resourceManager
     ) {
-        $this->resourceManager = $resourceManager;
-        $this->tenant = $tenant;
+        $this->resourceManager = $resourceManager;       
         $this->black_list= [];
         
     }

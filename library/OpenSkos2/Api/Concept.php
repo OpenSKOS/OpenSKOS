@@ -128,8 +128,8 @@ class Concept extends AbstractTripleStoreResource {
             }
 
 
-            if (isset($params['sets'])) {
-                $options['sets'] = explode(' ', trim($params['sets']));
+            if (isset($params['set'])) {
+                $options['set'] = explode(' ', trim($params['set']));
             }
 
             $tenantCodes=[];     
@@ -155,8 +155,8 @@ class Concept extends AbstractTripleStoreResource {
                 }
             }
 
-            if (isset($params['conceptScheme'])) {
-                $options['conceptScheme'] = explode(' ', trim($params['conceptScheme']));
+            if (isset($params['scheme'])) {
+                $options['scheme'] = explode(' ', trim($params['scheme']));
             }
 
             if (isset($params['status'])) {
@@ -166,7 +166,7 @@ class Concept extends AbstractTripleStoreResource {
         
             $concepts = $this->searchAutocomplete->search($options, $total);
 
-
+            // Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly inthe riples store)    
             foreach ($concepts as $concept) {
                 $spec = $this->manager->fetchTenantSpec($concept);
                 foreach ($spec as $tenant_and_set) {
@@ -250,7 +250,7 @@ class Concept extends AbstractTripleStoreResource {
 
     public function delete(PsrServerRequestInterface $request) {
         try {
-            $params = $this->getAndAdaptQueryParams($request);
+            $params = $this->getQueryParams($request);
             if (!isset($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter', 412);
             }
@@ -264,11 +264,7 @@ class Concept extends AbstractTripleStoreResource {
             if ($concept->isDeleted()) {
                  throw new NotFoundException('Concept already deleted :' . $id, 410);
              }
-
-            $user = $this->getUserFromParams($params);
-
-            $this->authorisationManager->resourceDeleteAllowed($user, $params['tenantcode'], $concept);
-
+            $this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenantcode'], $concept);
             $this->manager->deleteSoft($concept);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -370,7 +366,7 @@ class Concept extends AbstractTripleStoreResource {
      * @return Response
      */
     public function addRelationTriple(PsrServerRequestInterface $request) {
-        $params = $this->getAndAdaptQueryParams($request);
+        $params = $this->getQueryParams($request);
         try {
             $body = $this->preEditChecksRels($request, $params, false);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
@@ -391,7 +387,7 @@ class Concept extends AbstractTripleStoreResource {
      */
     public function deleteRelationTriple(PsrServerRequestInterface $request) {
         try {
-            $params = $this->getAndAdaptQueryParams($request); // sets tenant info
+            $params = $this->getQueryParams($request); // sets tenant info
             $body = $this->preEditChecksRels($request, $params, true);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (Exception $e) {

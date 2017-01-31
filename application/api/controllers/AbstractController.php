@@ -15,7 +15,6 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $this->_helper->contextSwitch() ->initContext($this->getRequestedFormat());
         $this->getHelper('viewRenderer')->setNoRender(true);
         if ('html' === $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
             $this->getHelper('layout')->enableLayout();
         } else {
             $this->getHelper('layout')->disableLayout();
@@ -25,7 +24,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     public function indexAction() {
         $params = $this->handleParams();
         $api = $this->getDI()->make($this->fullNameResourceClass);
-        if ($params['shortlist']) { // used for meertens fronten
+        if ($params['shortlist']) { // needed for meertens browser
             $result = $api->mapNameSearchID();
             $this->_helper->contextSwitch()->setAutoJsonSerialization(true);
             return $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
@@ -90,9 +89,6 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         return $parts[1];
     }
     
-    
-   
-   
 
     public function postAction()
     {
@@ -118,6 +114,10 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $this->emitResponse($response);
     }
     
+    /*
+     * Input: request parameters (which may or may not contan context, format, and have 1 and 0, "yes" and "no" for boolean values)
+     * Output: a mapping parameter->value, where values are filled in as completely as possible and standatized (true/false for booleans) 
+     */
     private function handleParams() {
         $retVal=[];
         $retVal['callback'] = null;
@@ -145,6 +145,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
                 $retVal['shortlist'] = false;
             }
         }
+        
         $allow_oai = $this->getRequest()->getParam('allow_oai');
         if (null !== $allow_oai) {
             switch (strtolower($allow_oai)) {

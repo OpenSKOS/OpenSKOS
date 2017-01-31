@@ -31,7 +31,7 @@ class Authorisation {
             case Set::TYPE:
                 return $this->setCreationAllowed($user, $tenantCode, $resource);
             case Tenant::TYPE:
-                return $this->tenantCreationAllowed($user, $tenantCode, $resource);
+                return $this->tenantCreationAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionCreationAllowed($user, $tenantCode, $resource);
             case Relation::TYPE:
@@ -51,7 +51,7 @@ class Authorisation {
             case Set::TYPE:
                 return $this->setEditAllowed($user, $tenantCode, $resource);
             case Tenant::TYPE:
-                return $this->tenantEditAllowed($user, $tenantCode, $resource);
+                return $this->tenantEditAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionEditAllowed($user, $tenantCode, $resource);
             case Relation::TYPE:
@@ -71,7 +71,7 @@ class Authorisation {
             case Set::TYPE:
                 return $this->setDeleteAllowed($user, $tenantCode, $resource);
             case Tenant::TYPE:
-                return $this->tenantDeleteAllowed($user, $tenantCode, $resource);
+                return $this->tenantDeleteAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionDeleteAllowed($user, $tenantCode, $resource);
             case Relation::TYPE:
@@ -162,16 +162,16 @@ class Authorisation {
         return $this->resourceDeleteAllowedBasic($user, $tenantCode, $resource);
     }
 
-    private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $resource) {
-        return $this->resourceCreationAllowedBasic($user, $tenantCode, $resource);
+    private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT);
     }
 
-    private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $resource) {
-        return $this->resourceEditAllowedBasic($user, $tenantCode, $resource);
+    private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT);
     }
 
-    private function tenantDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $resource) {
-        return $this->resourceDeleteAllowedBasic($user, $tenantCode, $resource);
+    private function tenantDeleteAllowed(OpenSKOS_Db_Table_Row_User $user) {
+        return ($user->role === ADMINISTRATOR || $user->role === ROOT);
     }
 
     private function skosCollectionCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenantCode, $resource) {

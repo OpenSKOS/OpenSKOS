@@ -27,8 +27,10 @@ use OpenSkos2\Rdf\Resource;
  * Provide backwards compatibility to the API output from OpenSKOS 1 as much as possible
  */
 
-// Meertens: theis class is used not only for concepts but for the other resources represented in triple store,
-// Therefore we do not have a private variable "concept", but we have "resource" instead
+// Meertens: this class is used not only for concepts but for the other resources represented in triple store,
+// Therefore we do not have a private variable "concept", but we have "resource" instead.
+// Picturae's changes after 26/10/2016 are present.
+
 class DataRdf
 {
     /**
@@ -46,7 +48,7 @@ class DataRdf
     private $propertiesList;
 
     /**
-     * @param Resource $concept
+     * @param Resource $resource
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
@@ -81,12 +83,10 @@ class DataRdf
             $reducedResource = $this->resource;
         }
         $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
-        // namespaces are still all here
         $retVal = $resource->serialise(
             'rdfxml_openskos',
             [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
         );
-        // user-defined namespace prefix is changed
         return $retVal;
     }
 

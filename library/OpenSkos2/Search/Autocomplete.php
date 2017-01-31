@@ -20,10 +20,12 @@
 namespace OpenSkos2\Search;
 
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Namespaces\Skos as SkosNamespace;
 use Solarium\Core\Query\Helper as QueryHelper;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
+// Meertens:
+// - 'collection' is not used as key in our version, use 'set' and 'skosCollection' instead
+// Picturae's changes starting from  28/10/2016 are taken.
+
 class Autocomplete
 {
     /**
@@ -50,6 +52,7 @@ class Autocomplete
      * Perform a autocomplete search with a search profile from the editor
      *
      * @param array $options
+     * 
      * @return \OpenSkos2\ConceptCollection
      */
     public function search($options, &$numFound)

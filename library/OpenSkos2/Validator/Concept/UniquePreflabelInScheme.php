@@ -24,6 +24,9 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
+// Meertens: the code is fully taken from Picturae except declarations of Traits,
+// which were removed; they are unused.
+
 class UniquePreflabelInScheme extends AbstractConceptValidator
 {
 

@@ -32,6 +32,8 @@ use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Relation;
 
+// Meertens: Picturae changes starting from 22/11/2016 are taken
+
 class Resource extends Uri implements ResourceIdentifier
 {
     /**

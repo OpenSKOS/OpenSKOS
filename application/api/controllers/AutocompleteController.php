@@ -20,18 +20,18 @@
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Api\Response\Detail\JsonpResponse;
 
-// TODO: question to myself, why did I implemented autocomplete for html? it is blocked on init phase, but still implemented below!
+// Meertens: 
+// -- we have implemented autocomplete for html, whereas for Picturae it is blocked on init phase, 
+// see 24837 issue
+// -- Meertens code is refactored by introducing "handleContext" and "dispatchRequest" methods.
+// -- there was no code changes of Pcitura since march 2016, only documentation and formatting 11/11/2016
+
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
     public function init()
     {
         parent::init();
-
-        if ($this->getRequest()->getParam('format', 'json') == 'html') {
-            throw new Exception('Html format is not supported for autocomplete', 400);
-        }
-
-        $this->_helper->contextSwitch()
+       $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'json'));
         $this->view->setEncoding('UTF-8');
     }
