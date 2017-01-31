@@ -25,6 +25,7 @@ use OpenSkos2\Exception\OpenSkosException;
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 {
     const OPTION_RENDER_ITEMS_ONLY = 'renderItemsOnly';
+    const OPTION_RESOURCE_TYPES_TO_SERIALIZE = 'serializableResourceTypes';
     
     protected $objects = [];
     private $outputtedResources = array();
@@ -47,7 +48,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
         // Serialise URIs first
         foreach ($graph->resources() as $resource) {
-            if (!$resource->isBnode()) {
+            if (!$resource->isBnode() && $this->shouldBeSerialized($resource, $options)) {
+                /* @var $resource Resource */
                 $this->rdfxmlResource($resource, true);
             }
         }
@@ -238,5 +240,26 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     protected function determineResType(Resource $res)
     {
         return $res->type();
+    }
+    
+    /**
+     * Determines if $resource should be serialized based on its rdf:type and $options
+     * @param type $resource
+     * @param type $options
+     * @return boolean
+     */
+    protected function shouldBeSerialized($resource, $options)
+    {
+        if (empty($options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
+            return true;
+        }
+        
+        if ($resource->get('rdf:type') !== null
+            && $resource->get('rdf:type')->getUri() !== null
+            && in_array($resource->get('rdf:type')->getUri(), $options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

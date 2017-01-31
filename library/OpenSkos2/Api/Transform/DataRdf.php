@@ -89,10 +89,17 @@ class DataRdf
             $reducedResource = $this->concept;
         }
         
+        $resourceTypes = [
+            \OpenSkos2\Concept::TYPE
+        ];
+        
         $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
         return $concept->serialise(
             'rdfxml_openskos',
-            [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
+            [
+                EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader,
+                EasyRdfOpenSkos::OPTION_RESOURCE_TYPES_TO_SERIALIZE => $resourceTypes
+            ]
         );
     }
 
