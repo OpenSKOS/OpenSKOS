@@ -45,6 +45,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
      * @var bool
      */
     protected $_enableStatusesSystem = false;
+    
+    /**
+     * Show Skos-XL labels in the form and hide simple value labels.
+     * 
+     * @var bool
+     */
+    protected $_useXlLabels = false;
 
     /**
      * A flag indicating that the form is for proposal only.
@@ -115,7 +122,17 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     {
         $this->_enableStatusesSystem = $enableStatusesSystem;
     }
-
+    
+    /**
+     * Sets the use xl labels over simple labels
+     *
+     * @param bool $useXlLabels
+     */
+    public function setUseXlLabels($useXlLabels)
+    {
+        $this->_useXlLabels = $useXlLabels;
+    }
+    
     /**
      * Gets the current status of the concept. Before save or anything.
      *
@@ -365,8 +382,30 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             $documentProperties['editorialNote'] = 'Editorial note';
             $documentProperties['historyNote'] = 'History note';
         }
+        
+        $skosXlLabels = [
+            'skosXlPrefLabel' => _('Skos Xl preferred label'),
+            'skosXlAltLabel' => _('Skos Xl alt label'),
+            'skosXlHiddenLabel' => _('Skos Xl hidden label'),
+        ];
 
-        $this->buildMultiElements($labels, 'OpenSKOS_Form_Element_Multitext', array(), null, 'concept-edit-language-labels');
+        if ($this->_useXlLabels) {
+            $this->buildMultiElements(
+                $skosXlLabels,
+                'OpenSKOS_Form_Element_Multiskosxllabel',
+                [],
+                null,
+                'concept-edit-language-skos-xl-labels'
+            );
+        } else {
+            $this->buildMultiElements(
+                $labels, 
+                'OpenSKOS_Form_Element_Multitext', 
+                array(), 
+                null, 
+                'concept-edit-language-labels'
+            );
+        }
         $this->buildMultiElements($documentProperties, 'OpenSKOS_Form_Element_Multitextarea', array(), null, 'concept-edit-language-properties');
 
         $this->addElement('select', 'conceptPropertySelect', array(
@@ -384,19 +423,6 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             'class' => 'concept-edit-property-action',
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'id' => 'concept-edit-property-action')))
         ));
-        
-        $skosXlLabels = [
-            'skosXlPrefLabel' => _('Skos Xl preferred label'),
-            'skosXlAltLabel' => _('Skos Xl alt label'),
-            'skosXlHiddenLabel' => _('Skos Xl hidden label'),
-        ];
-        $this->buildMultiElements(
-            $skosXlLabels,
-            'OpenSKOS_Form_Element_Multiskosxllabel',
-            [],
-            null,
-            'concept-edit-language-skos-xl-labels'
-        );
         
         $this->addElement('hidden', 'wrapLeftBottom', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly' => true)))
@@ -594,11 +620,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
             if ($tenant !== null) {
                 $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
             }
-
+            if ($tenant !== null) {
+                $useXlLabels = (bool) $tenant['enableSkosXl'];
+            }
+            
             $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
                 'currentStatus' => (null !== $concept ? $concept->getPropertyFlatValue(OpenSkos::STATUS) : null),
                 'enableStatusesSystem' => $enableStatusesSystem,
+                'useXlLabels' => $useXlLabels
             ]);
         }
 
