@@ -55,9 +55,14 @@ foreach ($collectionsTable->fetchAll() as $collection) {
     $collectionsMap[$collection->id] = $collection->uri;
 }
 
+$usersMap = [];
+$usersTable = new \OpenSKOS_Db_Table_Users();
+foreach ($usersTable->fetchAll() as $user) {
+    $usersMap[$user->id] = $user->uri;
+}
+
 $fixedCounter = 0;
 
-$usersTable = new \OpenSKOS_Db_Table_Users();
 foreach ($usersTable->fetchAll() as $user) {
     $fixed = fixOptions(unserialize($user->searchOptions), $collectionsMap);
     $user->searchOptions = serialize($fixed);
@@ -65,29 +70,43 @@ foreach ($usersTable->fetchAll() as $user) {
     $fixedCounter ++;
 }
 
-$profilesTable = new \OpenSKOS_Db_Table_SearchProfiles();
-foreach ($profilesTable->fetchAll() as $profile) {
+$searchProfilesTable = new \OpenSKOS_Db_Table_SearchProfiles();
+foreach ($searchProfilesTable->fetchAll() as $profile) {
     $fixed = fixOptions(unserialize($profile->searchOptions), $collectionsMap);
     $profile->searchOptions = serialize($fixed);
     $profile->save();
     $fixedCounter ++;
 }
 
-function fixOptions($options, $collectionsMap)
+function fixOptions($options)
 {
+    global $collectionsMap;
+    global $usersMap;
+    
     if (!empty($options['collections'])) {
-        $newCol = [];
-        foreach ($options['collections'] as $colId) {
-            if (isset($collectionsMap[$colId])) {
-                $newCol[] = $collectionsMap[$colId];
-            } elseif (in_array($colId, $collectionsMap)) {
-                $newCol[] = $colId;
-            }
-        }
-        $options['collections'] = $newCol;
+        $options['collections'] = fixFromMap($options['collections'], $collectionsMap);
+    }
+    
+    if (!empty($options['interactionByUsers'])) {
+        $options['interactionByUsers'] = fixFromMap($options['interactionByUsers'], $usersMap);
     }
     
     return $options;
+}
+
+
+function fixFromMap($optionsValues, $map)
+{
+    $result = [];
+    foreach ($optionsValues as $idOrUri) {
+        if (isset($map[$idOrUri])) {
+            $result[] = $map[$idOrUri];
+        } elseif (in_array($idOrUri, $map)) {
+            $result[] = $idOrUri;
+        }
+    }
+    
+    return $result;
 }
 
 echo $fixedCounter . ' users and profiles were updated.' . "\n";
