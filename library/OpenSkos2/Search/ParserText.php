@@ -33,6 +33,7 @@ class ParserText
      * @var string
      */
     const SEARCH_TEXT_SPLIT_REGEX = '/[\s]+/';
+    
 
     /**
      * Holds an array of the chars which if are contained in the text field it will be considered query.
@@ -40,6 +41,8 @@ class ParserText
      * @var array
      */
     private $operatorsDeterminingTextAsQuery = ['AND', 'OR', 'NOT', '&&', '||'];
+    
+    
 
     /**
      * Holds the regular expression for characters that are part of the solr syntax and needs escaping.
@@ -48,6 +51,8 @@ class ParserText
      */
     //!NOTE "\" must be first in the list.
     private $charsToEscape = array('\\', ' ', '+', '-', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', ':');
+    
+    
 
     /**
      * Escapes chars that are part of solr syntax.
@@ -163,5 +168,12 @@ class ParserText
         }
         
         return gmdate('Y-m-d\TH:i:s.z\Z', $timestamp);
+    }
+    
+    public function labelsTo_a_Labels($searchText) {
+       $retval = str_replace("prefLabel:", "t_prefLabel:", $searchText);
+       $retval = str_replace("altLabel:", "t_altLabel:", $retval);
+       $retval = str_replace("hiddenLabel:", "t_hiddenLabel:", $retval);
+       return $retval;
     }
 }

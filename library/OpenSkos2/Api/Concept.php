@@ -57,6 +57,7 @@ require_once dirname(__FILE__) . '/../config.inc.php';
 // and set back before the method return.
 // -- Maximal rows are set via the config's constant as well, not via $this->limit as it has been implemented by picturae
 // -- 'collection' is replaced by 'set'
+// -- added 'label' to options in findConcepts otherwise $options['label'] in autocomplete->search is useless
 
 class Concept extends AbstractTripleStoreResource {
 
@@ -116,6 +117,9 @@ class Concept extends AbstractTripleStoreResource {
                 $options['searchText'] = $params['q'];
             }
 
+            if (isset($params['label'])) {
+                $options['label'] = explode(' ', trim($params['label']));
+            }
             
             if (isset($params['sorts'])) {
                 $sortmap = $this->prepareSortsForSolr($params['sorts']);
@@ -162,8 +166,8 @@ class Concept extends AbstractTripleStoreResource {
             if (isset($params['status'])) {
                 $options['status'] = explode(' ', trim($params['status']));
             }
-
-        
+                
+           
             $concepts = $this->searchAutocomplete->search($options, $total);
 
             // Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly inthe riples store)    
