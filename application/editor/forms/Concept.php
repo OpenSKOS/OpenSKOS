@@ -51,7 +51,7 @@ class Editor_Forms_Concept extends OpenSKOS_Form
      * 
      * @var bool
      */
-    protected $_useXlLabels = false;
+    protected $_useXlLabels = null;
 
     /**
      * A flag indicating that the form is for proposal only.
@@ -64,6 +64,10 @@ class Editor_Forms_Concept extends OpenSKOS_Form
     {
         $this->setName("Edit concept");
         $this->setMethod('Post');
+        
+        if ($this->_useXlLabels === null) {
+            throw new \Exception('UseXlLabels option not set. It must be set in order to properly display the form.');
+        }
 
         $this->_isProposalOnly = (!(OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'full-create') || OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')));
 
