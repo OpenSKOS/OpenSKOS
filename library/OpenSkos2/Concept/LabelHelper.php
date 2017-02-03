@@ -51,6 +51,15 @@ class LabelHelper
         //@TODO Where we handle the complete labels xml...
         //@TODO Can optimize by making 1 request to jena for all labels
         
+        $tenant = $concept->getInstitution();
+        if (empty($tenant)) {
+            throw new OpenSkosException(
+                'Could not determite tenant for concept.'
+            );
+        }
+        
+        $useXlLabels = (bool)$tenant['enableSkosXl'];
+        
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
             $fullXlLabels = [];
             foreach ($concept->getProperty($xlLabelProperty) as $labelValue) {
@@ -59,43 +68,46 @@ class LabelHelper
                         'Not a valid xl label provided.'
                     );
                 }
-                
+
                 if ($labelValue instanceof Label) {
                     $fullXlLabels[] = $labelValue;
                     continue;
                 }
-                
+
                 $labelExists = $this->labelManager->askForUri($labelValue->getUri());
-                
+
                 if (!$labelExists && !($labelValue instanceof Label)) {
                     throw new OpenSkosException(
                         'The label ' . $labelValue . ' is not a valid label resource and does not exist in the system.'
                     );
                 }
-                
+
                 $fullXlLabels[] = $this->labelManager->fetchByUri($labelValue);
             }
-            
+
             // Extract all literals to compare agains simple labels
             $xlLabelsLiterals = [];
             foreach ($fullXlLabels as $label) {
                 $xlLabelsLiterals[] = $label->getPropertySingleValue(SkosXl::LITERALFORM);
             }
-            
-            // Create xl label for any simple label which does not have one
-            foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
-                if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
-                    $label = new Label(Label::generateUri());
-                    $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
-                    
-                    $concept->addProperty($xlLabelProperty, $label);
-                    
-                    $xlLabelsLiterals[] = $simpleLabel;
+
+            // Create xl label for any simple label which does not have matching one.
+            // Do this only if skos xl labels are disabled, i.e. simple labels are primary.
+            if ($useXlLabels === false) {
+                foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
+                    if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
+                        $label = new Label(Label::generateUri());
+                        $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
+
+                        $concept->addProperty($xlLabelProperty, $label);
+
+                        $xlLabelsLiterals[] = $simpleLabel;
+                    }
                 }
             }
-            
-            // Dumping down to simple labels
-            // All simple labels will depend on the xl labels so we overwrite existing values.
+
+            // Dumbing down xl labels to simple labels.
+            // Match all simple labels to the existing xl labels.
             $concept->setProperties($simpleLabelProperty, $xlLabelsLiterals);
         }
     }
