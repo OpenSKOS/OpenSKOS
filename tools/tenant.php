@@ -144,14 +144,14 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
        
 
     $tenantResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($code));
-    $organisation = new \OpenSkos2\Rdf\Resource('node-org-'. Uuid::uuid4());
+    $organisation = new \OpenSkos2\Rdf\Resource('http://node-org-'. Uuid::uuid4());
     $resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGNAME, $name);
     //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
     $tenantResource->setProperty(vCard::ORG, $organisation);
     //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
     //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
 
-    $adress = new \OpenSkos2\Rdf\Resource('node-adr-'.Uuid::uuid4());
+    $adress = new \OpenSkos2\Rdf\Resource('http://node-adr-'.Uuid::uuid4());
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
