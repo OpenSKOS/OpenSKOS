@@ -247,7 +247,7 @@ abstract class AbstractTripleStoreResource {
     }
   }
 
-  public function deleteResourceObject(ServerRequestInterface $request) {
+  public function delete(ServerRequestInterface $request) {
     try {
       $params = $this->getQueryParams($request);
       if (empty($params['uri'])) {
@@ -268,7 +268,7 @@ abstract class AbstractTripleStoreResource {
       if (!$canBeDeleted) {
         throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
       }
-      $this->manager->delete(new Uri($uri), $this->manager->getResoucreType());
+      $this->manager->delete(new Uri($uri), $this->manager->getResourceType());
       $xml = (new DataRdf($resourceObject))->transform();
       return $this->getSuccessResponse($xml, 202);
     } catch (Exception $e) {

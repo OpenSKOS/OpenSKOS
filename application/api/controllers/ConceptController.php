@@ -266,11 +266,8 @@ class Api_ConceptController extends Api_FindConceptsController
      */
     public function deleteAction()
     {
+      $this->throw501=false;
       parent::deleteAction();
-       /* $request = $this->getPsrRequest();
-        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
-        $response = $api->delete($request, Skos::CONCEPT);
-        $this->emitResponse($response);*/
     }
     
     

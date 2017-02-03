@@ -180,7 +180,7 @@ class ResourceManager
      */
     public function delete(Uri $resource, $rdfType=null)
     {
-        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+       $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
         if ($rdfType === Skos::CONCEPT) {
             $this->solrResourceManager->delete($resource);
         }

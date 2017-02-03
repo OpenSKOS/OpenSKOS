@@ -110,7 +110,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->fullNameResourceClass);
-        $response = $api->deleteResourceObject($request);
+        $response = $api->delete($request);
         $this->emitResponse($response);
     }
     

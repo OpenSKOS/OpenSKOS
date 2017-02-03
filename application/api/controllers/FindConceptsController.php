@@ -206,7 +206,7 @@ class Api_FindConceptsController extends AbstractController {
 
   public function deleteAction() {
     if ($this->throw501) {
-      $this->_501('POST');
+      $this->_501('DELETE');
     } else {
       parent::deleteAction();
     }
