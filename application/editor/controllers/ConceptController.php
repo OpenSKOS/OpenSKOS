@@ -107,7 +107,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $concept = $this->_getConcept();
         
-        $form = Editor_Forms_Concept::getInstance($concept);
+        $form = Editor_Forms_Concept::getInstance($concept, $this->_tenant);
         
         if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
