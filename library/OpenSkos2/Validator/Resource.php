@@ -26,6 +26,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
+use OpenSkos2\Relation;
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
 use OpenSkos2\Validator\Concept\CycleInNarrower;
@@ -176,7 +177,6 @@ class Resource {
    * @return array
    */
   private function getValidators(RdfResource $resource) {
-
     if ($resource instanceof Concept) {
       return $this->getConceptValidators();
     }

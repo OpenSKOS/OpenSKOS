@@ -94,8 +94,8 @@ class API_RelationController extends AbstractController {
     
     public function deleteAction() {
 
-        $remove = $this->getParam('removeDefinition');
-        if (isset($remove) && $remove === 'true') { // deleting a user-defined relation
+        $remove = $this->getParam('removeType');
+        if (isset($remove) && $remove === 'true') { // deleting a relation type
             parent::deleteAction();
         } else { // deleting a pair of related concepts
             $request = $this->getPsrRequest();

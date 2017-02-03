@@ -38,7 +38,7 @@ abstract class AbstractRelationValidator extends AbstractResourceValidator
         return false;
     }
 
-    abstract protected function validateRelation(UserRelation $ur);
+    abstract protected function validateRelation(Relation $ur);
     
     
 }
