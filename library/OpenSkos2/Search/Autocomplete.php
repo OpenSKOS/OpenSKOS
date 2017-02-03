@@ -287,7 +287,9 @@ class Autocomplete
                 $query = $dateQuery;
             }
 
-            $interactionsQueries[] = $query;
+            if (!empty($query)) {
+                $interactionsQueries[] = $query;
+            }
         }
 
         return implode(' OR ', $interactionsQueries);
