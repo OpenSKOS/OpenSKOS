@@ -19,6 +19,7 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Exception\UriGenerationException;
+use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
@@ -216,7 +217,7 @@ class Concept extends Resource
      * @param Uri $person
      * @param string , optional $oldStatus
      */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person, $oldStatus = null)
+    public function ensureMetadata($tenantCode, $set, Uri $person, $oldStatus = null)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
@@ -225,11 +226,18 @@ class Concept extends Resource
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
-            OpenSkos::SET => $set,
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
+        
+        if (!empty($set)) {
+            if (!($set instanceof Uri)) {
+                throw new OpenSkosException('The set must be instance of Uri');
+            }
+            // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = $set;
+        }
         
         // Do not consider dcterms:creator if we have dc:creator
         if (!$this->hasProperty(Dc::CREATOR)) {

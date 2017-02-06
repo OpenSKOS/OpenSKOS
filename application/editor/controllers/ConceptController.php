@@ -85,7 +85,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             Editor_Forms_Concept_FormToConcept::toConcept(
                 $concept,
                 $this->getRequest()->getPost(),
-                $this->getSet(),
+                $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
                 OpenSKOS_Db_Table_Users::fromIdentity()
             );
         }
@@ -131,7 +131,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         Editor_Forms_Concept_FormToConcept::toConcept(
             $concept,
             $form->getValues(),
-            $this->getSet(),
+            $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
             OpenSKOS_Db_Table_Users::fromIdentity()
         );
         
@@ -544,21 +544,5 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $initialLanguage = key($editorOptions['languages']);
         }
         return $initialLanguage;
-    }
-    
-    /**
-     * @return OpenSKOS_Db_Table_Row_Collection
-     */
-    private function getSet()
-    {
-        // @TODO Where to get that from!!! First concept scheme again?
-        
-        $code = 'gtaa';
-        $model = new \OpenSKOS_Db_Table_Collections();
-        $set = $model->findByCode($code, $this->getCurrentUser()->tenant);
-        if (null === $set) {
-            throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
-        }
-        return $set;
     }
 }
