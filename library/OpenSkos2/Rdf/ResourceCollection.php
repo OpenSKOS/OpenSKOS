@@ -69,4 +69,15 @@ class ResourceCollection extends \ArrayObject
         }
         return null;
     }
+    
+    /**
+     * Appends other collection to this one.
+     * @param \OpenSkos2\Rdf\ResourceCollection $otherCollection
+     */
+    public function merge(ResourceCollection $otherCollection)
+    {
+        foreach ($otherCollection as $resource) {
+            $this->append($resource);
+        }
+    }
 }

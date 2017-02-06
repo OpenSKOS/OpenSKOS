@@ -25,6 +25,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\SkosXl\Label;
+use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Exception\OpenSkosException;
 
 class LabelHelper
@@ -46,12 +47,12 @@ class LabelHelper
      * Dump down all xl labels to simple labels.
      * Create xl label for each simple label which is not already presented as xl label.
      * @param Concept &$concept
+     * @param bool $forceCreationOfXl , optional, Default: false
      * @throws OpenSkosException
      */
-    public function assertLabels(Concept &$concept)
+    public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
         //@TODO Where we handle the complete labels xml...
-        //@TODO Can optimize by making 1 request to jena for all labels
         
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
@@ -95,7 +96,7 @@ class LabelHelper
 
             // Create xl label for any simple label which does not have matching one.
             // Do this only if skos xl labels are disabled, i.e. simple labels are primary.
-            if ($useXlLabels === false) {
+            if ($useXlLabels === false || $forceCreationOfXl) {
                 foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                         $tenant = $concept->getTenant();
@@ -109,7 +110,7 @@ class LabelHelper
                     }
                 }
             }
-
+            
             // Dumbing down xl labels to simple labels.
             // Match all simple labels to the existing xl labels.
             $concept->setProperties($simpleLabelProperty, $xlLabelsLiterals);
@@ -120,6 +121,8 @@ class LabelHelper
      * Insert any xl labels for the concept which do not exist yet.
      * Meant to be called together with insert of the concept.
      * @param Concept $concept
+     * @param bool $returnOnly , optional, default: false. 
+     *  Set to true if the labels have to be returned only. Not inserted. Existing labels still will be deleted.
      * @throws OpenSkosException
      */
     public function insertLabels(Concept $concept)
@@ -128,6 +131,26 @@ class LabelHelper
         //@TODO What we do with deleted concepts
         //@TODO What we do with updated concepts which leave hanging labels (not attached to other concept)
         //@TODO Can we insert them as one graph together with the full concept. What will happen with existing labels
+        
+        $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
+        
+        foreach ($inserAndDelete['delete'] as $deleteLabel) {
+            $this->labelManager->delete($deleteLabel);
+        }
+        
+        $this->labelManager->insertCollection($inserAndDelete['insert']);
+    }
+    
+    /**
+     * Gets collections of labels to insert and to delete.
+     * @param Concept $concept
+     * @return ['delete' => $deleteLabels, 'insert' => LabelCollection]
+     * @throws OpenSkosException
+     */
+    public function getLabelsForInsertAndDelete($concept)
+    {
+        $deleteLabels = new LabelCollection([]);
+        $insertlabels = new LabelCollection([]);
         
         foreach (array_keys(Concept::$labelsMap) as $xlLabelProperty) {
             // Loop through xl labels
@@ -152,11 +175,16 @@ class LabelHelper
                 
                 // Fetch, insert or replace label
                 if ($labelExists) {
-                    $this->labelManager->replace($label);
-                } else {
-                    $this->labelManager->insert($label);
+                    $deleteLabels->append($label);
                 }
+                
+                $insertlabels->append($label);
             }
         }
+        
+        return [
+            'delete' => $deleteLabels,
+            'insert' => $insertlabels,
+        ];
     }
 }

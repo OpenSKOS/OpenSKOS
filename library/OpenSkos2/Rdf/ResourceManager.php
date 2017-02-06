@@ -101,6 +101,15 @@ class ResourceManager
             $this->solrResourceManager->insert($resource);
         }
     }
+    
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insertCollection(ResourceCollection $resourceCollection)
+    {
+        $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
+    }
 
     /**
      * Deletes and then inserts the resourse.

@@ -51,6 +51,14 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
     \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
     $logLevel
 ));
+
+
+
+
+
+/* @var $resourceManager \OpenSkos2\Rdf\ResourceManager */
+$resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManager');
+
 /* @var $conceptManager \OpenSkos2\ConceptManager */
 $conceptManager = $diContainer->make('OpenSkos2\ConceptManager');
 
@@ -64,25 +72,42 @@ do {
     try {
         $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
 
-        foreach ($concepts as $concept) {
-            $counter ++;
-            $logger->debug($concept->getUri());
+        if ($concepts->count() > 0) {
+            $deleteResources = new \OpenSkos2\Rdf\ResourceCollection([]);
+            $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
 
-            try {
-                $labelHelper->assertLabels($concept);
-                
-                $partialConcept = new \OpenSkos2\Concept($concept->getUri());
-                foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
-                    $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+            foreach ($concepts as $concept) {
+                $counter ++;
+                $logger->debug($concept->getUri());
+
+                try {
+                    $labelHelper->assertLabels($concept, true);
+
+                    $insertAndDelete = $labelHelper->getLabelsForInsertAndDelete($concept);
+
+                    $deleteResources->merge($insertAndDelete['delete']);
+                    $inserResources->merge($insertAndDelete['insert']);
+
+                    // Create concept only with xl labels to insert it as partial resource
+                    $partialConcept = new \OpenSkos2\Concept($concept->getUri());
+                    foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                        $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+                    }
+
+                    $inserResources->append($partialConcept);
+                } catch (\Exception $ex) {
+                    $logger->warning(
+                        'Problem with the labels for "' . $concept->getUri()
+                        . '". The message is: ' . $ex->getMessage()
+                    );
                 }
-                
-                $conceptManager->insert($concept);
-            } catch (\Exception $ex) {
-                $logger->warning(
-                    'Problem with the labels for "' . $concept->getUri()
-                    . '". The message is: ' . $ex->getMessage()
-                );
             }
+            
+            foreach ($deleteResources as $deleteResource) {
+                $resourceManager->delete($deleteResource);
+            }
+            
+            $resourceManager->insertCollection($inserResources);
         }
     } catch (\Exception $ex) {
         $logger->warning(
