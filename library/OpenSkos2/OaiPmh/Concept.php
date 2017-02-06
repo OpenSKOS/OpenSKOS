@@ -58,9 +58,12 @@ class Concept implements Record {
    */
   public function getHeader() {
     $concept = $this->concept;
-    
     if (!$concept->isDeleted()) {
       $datestamp = $concept->getLatestModifyDate();
+      // Meertens: the fallback is necessary for us because we do not always have lastmodifies in a concept
+      if ($datestamp == null) {
+         $datestamp = $concept->getDateSubmitted()->getValue();
+      }
     } else {
       if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
         $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();

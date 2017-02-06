@@ -212,9 +212,8 @@ class Api_FindConceptsController extends AbstractController {
     }
   }
 
-// Meertens: ask Picturae when do they need that id prefix: why ID prefix is not a part of ID
-  // also, it is a bit strange to use id generation in get function
-  // and what is this check isValid, what does it check??
+// Meertens:  Gusy, when do you need that id_prefix: why ID prefix is not a part of ID
+  // also, !!!
   /**
    * Get concept id
    *

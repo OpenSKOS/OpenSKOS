@@ -47,17 +47,19 @@ use Zend\Diactoros\Response;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
 
-// Meerens: all concrete resource api classes extends AbstractTripleStoreResource . 
-// This abtsract class containes generic methods for get, create, update and delete for any 
+// Meerens: 
+// -- all concrete resource api classes extends AbstractTripleStoreResource . 
+// This abtsract class contains generic methods for get, create, update and delete for any 
 // kind of resource. 
-// -- Here in the Concept class only "concept-secific" autocomplete and "findConcepts" are implemented, 
+// -- Here in the Concept class only concept-secific "autocomplete" and "findConcepts" are implemented, 
 // the other methods can be found in the parent class.
 // -- ApiResponseTrait is not used any more.
-// -- Maximal time limit is changed in "fincConceptMethod" (by the constant set in the config),
+// -- Maximal time limit is changed at the begin of "fincConceptMethod" (by the constant set in the config),
 // and set back before the method return.
 // -- Maximal rows are set via the config's constant as well, not via $this->limit as it has been implemented by picturae
 // -- 'collection' is replaced by 'set'
-// -- added 'label' to options in findConcepts otherwise $options['label'] in autocomplete->search is useless
+// -- added 'label' to options in findConcepts otherwise $options['label'] in autocomplete->search is useless (also see my e-mail 2/02 question
+// about "where translation prefLabel to t_prefLabel or a_prefLabel happens")
 
 class Concept extends AbstractTripleStoreResource {
 
@@ -166,7 +168,7 @@ class Concept extends AbstractTripleStoreResource {
 
       $concepts = $this->searchAutocomplete->search($options, $total);
 
-      // Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly inthe riples store)    
+      // Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly in the triple store)    
       foreach ($concepts as $concept) {
         $spec = $this->manager->fetchTenantSpec($concept);
         foreach ($spec as $tenant_and_set) {

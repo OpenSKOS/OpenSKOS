@@ -38,7 +38,7 @@ require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 // Meertens: 
 // -- no need for ConceptManager since import runs also for other resources as well and Resource Manager will do the job.
 // -- Tenant is not a constructor parameter because its Uri is derived from setUri passed via message in "handle".
-// this derivation is not happens in the loop, but only one time, so it should skow down the import process.
+// this derivation is not happening in the loop, but only one time, so it should not slow down the import process.
 // -- the following Picturae's change of 21/10/2016 is not taken, because it is not clear where to locate it and why
 // (after Meertens refactoring and adjusting for importing schemata): 
  // "// Disable commit's for every concept"

@@ -22,7 +22,7 @@ namespace OpenSkos2\Namespaces;
 // Meertens: 
 // -- added const CONCEPT = 'http://www.w3.org/2004/02/skos/core#Concept';
 // -- "getRelationsTypes' is renamed to "getSkosRelations"
-// -- Picturae's changes starting from 18/11/2016 are taken modulo renaming the function above/
+// -- Picturae's changes starting from 18/11/2016 are taken modulo renaming the function above.
 
 class Skos {
 

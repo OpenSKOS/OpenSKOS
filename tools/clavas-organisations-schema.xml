@@ -4,7 +4,7 @@
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
         <dcterms:title xml:lang="en">OpenSKOS-CLARIN Organizations-2</dcterms:title>
         <dcterms:description xml:lang="en">Organization Vocabulary, bootstrapped by manual curation from the list of VLO organization names (http://www.clarin.eu/vlo).</dcterms:description>
-        <openskos:uuid>Organisations-2</openskos:uuid>s
+        <openskos:uuid>Organisations-2</openskos:uuid>
     </rdf:Description>
 </rdf:RDF>
       

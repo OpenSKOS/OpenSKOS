@@ -36,8 +36,8 @@ use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
 // Meertens: 
-// -- Full merge is hardly possible due to different strcuture of the code and the fact that migration's target is MySQL database. It does make sence to keep two separate migrate scripts.
-// -- what does it mean validate URI in validate collections (now sets)? Validate syntactically, I guess? I switched it off because it all fails in Meertens database
+// -- Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
+// -- what does it mean to validate URI in validate collections (now sets)? Validate syntactically, I guess? I switched it off because it all fails in Meertens database
 // -- commnetd out the piece of code with the init query for solr
 /**
  * Script to migrate the data from SOLR to Jena run as following: 
@@ -110,7 +110,7 @@ var_dump('tenant: ' . $tenant);
 $isDryRun = $OPTS->dryrun;
 var_dump('dry run : ' . $isDryRun);
 
-// Meertens: Why is that noation necessary? 
+// Meertens: Why is that dummy notation necessary? 
 /*$query = [
     'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
     'rows' => 100,

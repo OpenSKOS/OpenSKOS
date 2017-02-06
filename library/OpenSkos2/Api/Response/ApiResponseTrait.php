@@ -101,9 +101,11 @@ trait ApiResponseTrait
      * @throws UnauthorizedException
      */
     
-    // Meertens: we have moved resourceEditingAllowed methods to the MyInstitutionModules directory
+    // Meertens: we do not use this method.
+    // we have moved resourceEditingAllowed methods to the MyInstitutionModules directory
     // so that the developers of the given institution can adjust it for their own requirements
-    // there are different resourceEdition requirements for different sorts of resources
+    // alos, there are different authorisation requirements for different sorts of resources 
+    // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)
     public function resourceEditAllowed(
         Resource $resource,
         $tenantcode,
@@ -115,7 +117,8 @@ trait ApiResponseTrait
 
        $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
         // Meertens: the code above will not work for us, because in our implementation 
-        // TENANT property is only for sets. For the other resources (schemata, collections, concepts)
+        // TENANT property is only for sets. For the other resources (schemata, collections, concepts) it is derived
+       // moreover, it is a reference uri, not code literal
  
         if ($tenantcode !== (string)$resourceTenant) {
             throw new UnauthorizedException(

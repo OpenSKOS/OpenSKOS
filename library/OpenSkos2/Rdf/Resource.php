@@ -584,11 +584,12 @@ class Resource extends Uri implements ResourceIdentifier
     }
     
 
- // TODO : find usages and ask Picturae if it is not used
+ 
     /**
      *
      * @return \DateTime|null 
      */
+    //Meertens: for us modified is not alwaus given, so if it absent 
     public function getLatestModifyDate()
     {
         $dates = $this->getProperty(Namespaces\DcTerms::MODIFIED);
