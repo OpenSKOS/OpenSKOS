@@ -19,8 +19,10 @@
 namespace OpenSkos2\Concept;
 
 use OpenSkos2\Namespaces\SkosXl;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Exception\OpenSkosException;
@@ -96,7 +98,9 @@ class LabelHelper
             if ($useXlLabels === false) {
                 foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
+                        $tenant = $concept->getTenant();
                         $label = new Label(Label::generateUri());
+                        $label->setProperty(OpenSkos::TENANT, new Literal($tenant));
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
 
                         $concept->addProperty($xlLabelProperty, $label);

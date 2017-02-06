@@ -43,7 +43,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         $this->_helper->_layout->setLayout('editor_central_content');
 
-        $form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
+        $form = Editor_Forms_Concept::getInstance(null, $this->getOpenSkosDbTableRowTenant());
         
         $form->populate(
             Editor_Forms_Concept_ConceptToForm::getNewConceptFormData(
@@ -107,7 +107,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $concept = $this->_getConcept();
         
-        $form = Editor_Forms_Concept::getInstance($concept, $this->_tenant);
+        $form = Editor_Forms_Concept::getInstance($concept, $this->getOpenSkosDbTableRowTenant());
         
         if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
@@ -137,13 +137,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         
         $validator = new ResourceValidator(
             $this->getConceptManager(),
-            $this->getTenant()
+            $this->getOpenSkos2Tenant()
         );
         
         if ($validator->validate($concept)) {
             if ($form->getIsCreate()) {
                 $concept->selfGenerateUri(
-                    $this->getTenant(),
+                    $this->getOpenSkos2Tenant(),
                     $this->getConceptManager()
                 );
             }
@@ -180,7 +180,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $this->view->assign('conceptManager', $this->getConceptManager());
         $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
         $this->view->assign('footerData', $this->_generateFooter($concept));
-        $this->view->assign('tenant', $this->_tenant);
+        $this->view->assign('tenant', $this->getOpenSkos2Tenant());
     }
 
     public function deleteAction()
@@ -521,17 +521,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         return $this->getDI()->get('OpenSkos2\ConceptManager');
     }
-    
-    /**
-     * @return OpenSkos2\Tenant
-     */
-    protected function getTenant()
-    {
-        return new OpenSkos2\Tenant(
-            $this->getCurrentUser()->tenant
-        );
-    }
-    
+        
     /**
      * Checks if the browser language is supported and returns it. If not supported - gets the first one.
      * @return string

@@ -22,6 +22,7 @@
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
+use OpenSkos2\Exception;
 
 class Editor_Forms_Concept extends OpenSKOS_Form
 {
@@ -66,7 +67,8 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         $this->setMethod('Post');
         
         if ($this->_useXlLabels === null) {
-            throw new \Exception('UseXlLabels option not set. It must be set in order to properly display the form.');
+            //@TODO: exceptions from inside this class do not show. How to make them bubble up to the frontend
+            throw new \Exception('UseXlLabels option not set.');
         }
 
         $this->_isProposalOnly = (!(OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'full-create') || OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.concepts', 'edit')));
@@ -617,16 +619,17 @@ class Editor_Forms_Concept extends OpenSKOS_Form
         static $instance;
 
         if (null === $instance) {
-            $enableStatusesSystem = false;
             if ($tenant === null && $concept !== null) {
                 $tenant = $concept->getInstitution();
             }
-            if ($tenant !== null) {
-                $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
+            
+            if ($tenant === null) {
+                //@TODO: exceptions from inside this class do not show. How to make them bubble up to the frontend
+                throw new Exception\TenantNotFoundException('Tenant is not specified or could not be resolved.');
             }
-            if ($tenant !== null) {
-                $useXlLabels = (bool) $tenant['enableSkosXl'];
-            }
+            
+            $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
+            $useXlLabels = (bool) $tenant['enableSkosXl'];
             
             $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),

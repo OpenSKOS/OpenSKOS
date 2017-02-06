@@ -59,7 +59,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
     ?>
     <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
         <div id="tab_language_<?= $languageCode; ?>" class="tab-content">
-            <?php if($this->tenant->enableSkosXl === '0'): ?>
+            <?php if($this->tenant->getEnableSkosXl() === false): ?>
             <div class="concept-left" id="concept-lexical">
                 <div class="concept-left-content">
                     <ul id="concept-lexical-list">
@@ -83,7 +83,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
             </div>
             <?php endif; ?>
                        
-            <?php if($this->tenant->enableSkosXl === '1'): ?>
+            <?php if($this->tenant->getEnableSkosXl() === true): ?>
             <div class="concept-left" id="concept-skos-xl-labels">
                 <div class="concept-right-content">
                     <ul>

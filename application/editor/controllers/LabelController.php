@@ -21,6 +21,7 @@ use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 
 class Editor_LabelController extends OpenSKOS_Controller_Editor
 {
@@ -63,6 +64,12 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
     
     public function saveAction()
     {
+        $tenant = $this->getOpenSkos2Tenant();
+        
+        if ($tenant === null) {
+            throw new OpenSkos2\Exception\TenantNotFoundException('Could not get tenant.');
+        }
+                
         $form = Editor_Forms_Label::getInstance();
         $label = $this->getLabel();
         
@@ -80,6 +87,8 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
                 $form->getValue('language')
             )
         );
+        
+        $label->setProperty(OpenSkos::TENANT, new Literal($tenant->getCode()));
         
         $this->getLabelManager()->replace($label);
         

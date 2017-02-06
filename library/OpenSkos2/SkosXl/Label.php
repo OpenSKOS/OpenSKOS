@@ -20,6 +20,7 @@ namespace OpenSkos2\SkosXl;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\Rdf;
 use Rhumsaa\Uuid\Uuid;
@@ -36,6 +37,31 @@ class Label extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
+    
+    /**
+     * Get tenant
+     *
+     * @return Literal
+     */
+    public function getTenant()
+    {
+        $values = $this->getProperty(OpenSkos::TENANT);
+        if (isset($values[0])) {
+            return $values[0];
+        }
+    }
+        
+    /**
+     * Get institution row. Code adapted from OpenSkos2\Concept
+     * @TODO Remove dependency on OpenSKOS v1 library
+     * @return OpenSKOS_Db_Table_Row_Tenant
+     */
+    public function getInstitution()
+    {
+        // @TODO Remove dependency on OpenSKOS v1 library
+        $model = new \OpenSKOS_Db_Table_Tenants();
+        return $model->find($this->getTenant())->current();
     }
     
     /**
