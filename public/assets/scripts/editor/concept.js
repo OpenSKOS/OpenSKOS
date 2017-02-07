@@ -404,7 +404,7 @@ var EditorConcept = new Class({
         
         for (var i = (xlPrefLabels.length - 1); i >= 0; i--) {
             if (xlPrefLabels[i].get('html') !== '') {
-                prefLabelText = xlPrefLabels[i].get('value');
+                prefLabelText = xlPrefLabels[i].get('html');
             }
         }
         

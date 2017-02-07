@@ -28,6 +28,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
 
@@ -45,13 +46,17 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $form = Editor_Forms_Concept::getInstance(null, $this->getOpenSkosDbTableRowTenant());
         
+        $labelHelper = $this->getDI()->get('\OpenSkos2\Concept\LabelHelper');
+        
         $form->populate(
             Editor_Forms_Concept_ConceptToForm::getNewConceptFormData(
                 $this->getInitialLanguage(),
-                $this->getRequest()->getParam('label')
+                $this->getRequest()->getParam('label'),
+                $this->getOpenSkos2Tenant(),
+                $labelHelper
             )
         );
-         
+        
         $this->view->form = $form->setAction(
             $this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save'))
         );

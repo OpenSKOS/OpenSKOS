@@ -27,6 +27,8 @@ use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Exception\OpenSkosException;
+use OpenSkos2\Exception\TenantNotFoundException;
+use OpenSkos2\Tenant;
 
 class LabelHelper
 {
@@ -56,7 +58,7 @@ class LabelHelper
         
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
-            throw new OpenSkosException(
+            throw new TenantNotFoundException(
                 'Could not determite tenant for concept.'
             );
         }
@@ -186,5 +188,31 @@ class LabelHelper
             'delete' => $deleteLabels,
             'insert' => $insertlabels,
         ];
+    }
+    
+    /**
+     * Creates a new label using the parameters and inserts it into the DB
+     * @param string $literalForm
+     * @param string $language
+     * @param Tenant $tenant
+     * @return Label
+     * @throws OpenSkosException
+     */
+    public function createNewLabel($literalForm, $language, Tenant $tenant)
+    {
+        if (empty($literalForm) || empty($language) || empty($tenant)) {
+            throw new OpenSkosException('LiteralForm Language and Tenant must be specified when creating a new label.');
+        }
+        
+        $rdfLiteral = new Literal($literalForm);
+        $rdfLiteral->setLanguage($language);
+        
+        $label = new Label(Label::generateUri());
+        $label->addProperty(SkosXl::LITERALFORM, $rdfLiteral);
+        $label->addProperty(OpenSkos::TENANT, new Literal($tenant->getCode()));
+        
+        $this->labelManager->insert($label);
+        
+        return $label;
     }
 }
