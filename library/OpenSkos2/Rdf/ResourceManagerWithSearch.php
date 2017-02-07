@@ -23,6 +23,7 @@ use EasyRdf\Sparql\Client;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\ResourceCollection;
 
 // @TODO Include resource type in insert/delete/search. Now we know it is only concepts
 
@@ -92,7 +93,7 @@ class ResourceManagerWithSearch extends ResourceManager
      * @param int $start
      * @param int &$numFound output Total number of found records.
      * @param array $sorts
-     * @return ConceptCollection
+     * @return ResourceCollection
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
