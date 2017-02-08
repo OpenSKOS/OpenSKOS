@@ -28,7 +28,7 @@ EditorSearch = new Class({
     moreResultsProccessing: false,
     searchFromUrl: false,
     resultsFound: 0,
-    delayedSearchDelay: 500,
+    delayedSearchDelay: 750,
     delayedSearchTimeoutHandle: null,
     initialize: function (searchForm, searchResults) {
         var self = this;
@@ -105,7 +105,7 @@ EditorSearch = new Class({
     search: function () {
 
         clearTimeout(this.delayedSearchTimeoutHandle);
-
+        
         this.hideCustomProfileIfNotSelected();
 
         if (!this.searchFromUrl) {
