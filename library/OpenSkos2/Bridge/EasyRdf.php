@@ -87,13 +87,13 @@ class EasyRdf
                         )
                     );
                 } elseif ($propertyValue instanceof \EasyRdf\Resource) {
-                    $subResource = self::easyRdfResourceToOpenskosResource($propertyValue);
-                    if ($subResource !== false) {
-                        $openskosResource->addProperty($propertyUri, $subResource);
-                    } else {
+//                    $subResource = self::easyRdfResourceToOpenskosResource($propertyValue);
+//                    if ($subResource !== false) {
+//                        $openskosResource->addProperty($propertyUri, $subResource);
+//                    } else {
                         // Not a fully described resource so we just add the uri.
                         $openskosResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
-                    }
+//                    }
                 }
             }
         }
