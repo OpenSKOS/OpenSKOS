@@ -169,11 +169,5 @@ class ParserText
         
         return gmdate('Y-m-d\TH:i:s.z\Z', $timestamp);
     }
-    
-    public function labelsTo_a_Labels($searchText) {
-       $retval = str_replace("prefLabel:", "t_prefLabel:", $searchText);
-       $retval = str_replace("altLabel:", "t_altLabel:", $retval);
-       $retval = str_replace("hiddenLabel:", "t_hiddenLabel:", $retval);
-       return $retval;
-    }
+  
 }

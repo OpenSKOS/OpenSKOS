@@ -60,6 +60,9 @@ require_once dirname(__FILE__) . '/../config.inc.php';
 // -- 'collection' is replaced by 'set'
 // -- added 'label' to options in findConcepts otherwise $options['label'] in autocomplete->search is useless (also see my e-mail 2/02 question
 // about "where translation prefLabel to t_prefLabel or a_prefLabel happens")
+// 
+//-- added new parameter 'wholeword' to handle switch between whole word search (prefix t_) and the part-of-word search (prefix a_)
+// // -- added 'properties' to options otherwise $options['properties'] in autocomplete->search is useless
 
 class Concept extends AbstractTripleStoreResource {
 
@@ -95,13 +98,13 @@ class Concept extends AbstractTripleStoreResource {
       set_time_limit(MAXIMAL_TIME_LIMIT);
       $params = $request->getQueryParams();
 
-      // offset
+// offset
       $start = 0;
       if (!empty($params['start'])) {
         $start = (int) $params['start'];
       }
 
-      // limit
+// limit
       $limit = MAXIMAL_ROWS;
       if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
         $limit = (int) $params['rows'];
@@ -114,13 +117,17 @@ class Concept extends AbstractTripleStoreResource {
         'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
       ];
 
-      // search query
+// search query
       if (isset($params['q'])) {
         $options['searchText'] = $params['q'];
       }
 
       if (isset($params['label'])) {
         $options['label'] = explode(' ', trim($params['label']));
+      }
+      
+       if (isset($params['properties'])) {
+        $options['properties'] = explode(' ', trim($params['properties']));
       }
 
       if (isset($params['sorts'])) {
@@ -137,7 +144,7 @@ class Concept extends AbstractTripleStoreResource {
       if (isset($params['set'])) {
         $options['set'] = explode(' ', trim($params['set']));
       }
-      
+
       $tenantCodes = [];
       if (isset($params['tenant'])) {
         $tenantCodes = explode(' ', trim($params['tenant']));
@@ -165,10 +172,16 @@ class Concept extends AbstractTripleStoreResource {
         $options['status'] = explode(' ', trim($params['status']));
       }
 
+      $options['wholeword'] = false;
+      if (isset($params['wholeword'])) {
+        if ($params['wholeword'] === 'true') {
+          $options['wholeword'] = true;
+        }
+      }
 
       $concepts = $this->searchAutocomplete->search($options, $total);
 
-      // Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly in the triple store)    
+// Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly in the triple store)    
       foreach ($concepts as $concept) {
         $spec = $this->manager->fetchTenantSpec($concept);
         foreach ($spec as $tenant_and_set) {
@@ -219,9 +232,9 @@ class Concept extends AbstractTripleStoreResource {
     $propertiesList = [];
     $fieldsMap = FieldsMaps::getNamesToProperties();
 
-    // Tries to search for the field in fields map.
-    // If not found there tries to expand it from short property.
-    // If not that - just pass it as it is.
+// Tries to search for the field in fields map.
+// If not found there tries to expand it from short property.
+// If not that - just pass it as it is.
     foreach ($fieldsList as $field) {
       if (!empty($field)) {
         if (isset($fieldsMap[$field])) {
@@ -232,7 +245,7 @@ class Concept extends AbstractTripleStoreResource {
       }
     }
 
-    // Check if we have a nice properties list at the end.
+// Check if we have a nice properties list at the end.
     foreach ($propertiesList as $propertyUri) {
       if ($propertyUri == 'uri') {
         continue;
@@ -278,7 +291,7 @@ class Concept extends AbstractTripleStoreResource {
     $this->checkRelationsInConcept($resourceObject);
   }
 
-  // also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
+// also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
   private function checkRelationsInConcept(ConceptResource $concept) {
     $userDefinedRelUris = array_values(Relations::$myrelations);
     $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
@@ -287,16 +300,16 @@ class Concept extends AbstractTripleStoreResource {
     $properties = array_keys($concept->getProperties());
     foreach ($properties as $property) {
       if (in_array($property, $allRelationUris)) { // is a relation 
-        // if it is a user-defined, it must be registered
+// if it is a user-defined, it must be registered
         if (in_array($property, $userDefinedRelUris)) { // is a user-defined relation
           if (!in_array($property, $registeredRelationUris)) {
             throw new ApiException('The relation  ' . $property . '  is not registered in the triple store. ', 400);
           }
         }
-        // cycle-check and duplication check
+// cycle-check and duplication check
         $relatedConcepts = $concept->getProperty($property);
         foreach ($relatedConcepts as $relConcept) {
-          // check if related concept exists
+// check if related concept exists
           $exists = $this->manager->resourceExists($relConcept, Skos::CONCEPT);
           if (!$exists) {
             throw new ApiException('The related concept  ' . $relConcept . '  does not exist. ', 400);
@@ -425,7 +438,7 @@ class Concept extends AbstractTripleStoreResource {
     $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
     $allRelationUris = array_values(RelationManager::fetchConceptConceptRelationsNameUri());
     if (in_array($body['type'], $allRelationUris)) { // is a concept-concept relation 
-      // if it is a user-defined, it must be registered
+// if it is a user-defined, it must be registered
       if (in_array($body['type'], $userDefinedRelUris)) { // is a user-defined relation
         if (!in_array($body['type'], $registeredRelationUris)) {
           throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 400);

@@ -109,9 +109,9 @@
         <!-- autocomplete search -->
         <field name="autocomplete" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
 
-        <copyField source="prefLabel" dest="search" />
-        <copyField source="altLabel" dest="search" />
-        <copyField source="hiddenLabel" dest="search" />
+        <copyField source="t_prefLabel" dest="search" />
+        <copyField source="t_altLabel" dest="search" />
+        <copyField source="t_hiddenLabel" dest="search" />
         <copyField source="a_*" dest="autocomplete" />
 
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />

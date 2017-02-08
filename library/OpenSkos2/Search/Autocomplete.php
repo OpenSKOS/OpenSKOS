@@ -26,7 +26,7 @@ use Solarium\Core\Query\Helper as QueryHelper;
 // - 'collection' is not used as key in our version, use 'set' and 'skosCollection' instead
 // Picturae's changes starting from  28/10/2016 are taken.
 // in search $boost variable is moved  up in the loop for labels, otherwise for label with no languages it is not defined.
-
+//-- added new parameter 'wholeword' to handle switch betwen whole word search (prefix t_) and the part-of-word search (prefix a_)
 class Autocomplete {
 
   /**
@@ -74,8 +74,6 @@ class Autocomplete {
       $searchText = $parser->replaceLanguageTags($searchText);
 
       if ($parser->isSearchTextQuery($searchText) || $parser->isFieldSearch($searchText)) {
-        // labels
-        $searchText = $parser->labelsTo_a_Labels($searchText);
         // Custom user query, he has to escape and do everything.
         $searchText = '(' . $searchText . ')';
       } else {
@@ -90,6 +88,13 @@ class Autocomplete {
       }
     }
 
+    $prefix = 'a_';
+    if (isset($options['wholeword'])) {
+      if ($options['wholeword']) {
+        $prefix = 't_';
+      }
+    }
+    
     // @TODO Better to use edismax qf
 
     $searchTextQueries = [];
@@ -111,10 +116,10 @@ class Autocomplete {
         if (!empty($options['languages'])) {
           foreach ($options['languages'] as $lang) {
 
-            $searchTextQueries[] = 'a_' . $label . '_' . $lang . ':' . $searchText . $boost;
+            $searchTextQueries[] = $prefix . $label . '_' . $lang . ':' . $searchText . $boost;
           }
         } else {
-          $searchTextQueries[] = 'a_' . $label . ':' . $searchText . $boost;
+          $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
         }
       }
     }
@@ -124,10 +129,10 @@ class Autocomplete {
       foreach ($options['properties'] as $property) {
         if (!empty($options['languages'])) {
           foreach ($options['languages'] as $lang) {
-            $searchTextQueries[] = 'a_' . $property . '_' . $lang . ':' . $searchText;
+            $searchTextQueries[] = $prefix . $property . '_' . $lang . ':' . $searchText;
           }
         } else {
-          $searchTextQueries[] = 'a_' . $property . ':' . $searchText;
+          $searchTextQueries[] = $prefix . $property . ':' . $searchText;
         }
       }
     }

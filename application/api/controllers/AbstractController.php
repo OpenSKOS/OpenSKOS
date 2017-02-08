@@ -146,6 +146,8 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
             }
         }
         
+       
+        
         $allow_oai = $this->getRequest()->getParam('allow_oai');
         if (null !== $allow_oai) {
             switch (strtolower($allow_oai)) {
