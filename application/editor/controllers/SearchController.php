@@ -404,10 +404,6 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                 $searchOptions['allowedConceptScheme'] = $profileSearchOptions['conceptScheme'];
             }
             
-            if (empty($detailedSearchOptions['allowedConceptScheme'])) {
-                $detailedSearchOptions['allowedConceptScheme'] = $profileSearchOptions['conceptScheme'];
-            }
-                
             $loggedUser->setSearchOptions($detailedSearchOptions);
         }
         
