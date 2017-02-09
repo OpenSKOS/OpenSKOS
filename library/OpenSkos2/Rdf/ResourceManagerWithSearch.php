@@ -97,8 +97,16 @@ class ResourceManagerWithSearch extends ResourceManager
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
+        $filterQueries = null;
+        
+        if (!empty($this->resourceType)) {
+            $filterQueries = [
+                'rdfTypeFilter' => 's_rdfType:"' . $this->resourceType . '"'
+            ];
+        }
+        
         return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
         );
     }
 

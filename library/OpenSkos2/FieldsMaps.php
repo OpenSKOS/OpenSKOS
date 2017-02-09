@@ -83,12 +83,23 @@ class FieldsMaps
             'dc_contributor' => Dc::CONTRIBUTOR,
 
             'dcterms_title' => DcTerms::TITLE,
-
+        ];
+    }
+    
+    /**
+     * Returns a mapping of string keys to property URIs. Include the old key to propery mapping and the XL properties.
+     * @return array
+     */
+    public static function getKeyToPropertyMapping()
+    {
+        $xlProperties = [
             'skosXlPrefLabel' => SkosXl::PREFLABEL,
             'skosXlAltLabel' => SkosXl::ALTLABEL,
             'skosXlHiddenLabel' => SkosXl::HIDDENLABEL,
-            'skosXlLiteralForm' => SkosXl::LITERALFORM,
+            'skosXlLiteralForm' => SkosXl::LITERALFORM
         ];
+        
+        return array_merge(FieldsMaps::getOldToProperties(), $xlProperties);
     }
 
     /**

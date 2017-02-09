@@ -21,6 +21,7 @@ namespace OpenSkos2\Api\Transform;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\FieldsMaps;
@@ -187,10 +188,11 @@ class DataArray
             OpenSkos::UUID,
             OpenSkos::TOBECHECKED,
             Skos::PREFLABEL,
+            SkosXl::LITERALFORM
         ];
         
         $map = [];
-        foreach (FieldsMaps::getOldToProperties() as $field => $property) {
+        foreach (FieldsMaps::getKeyToPropertyMapping() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
                 'repeatable' => !in_array($property, $notRepeatable),

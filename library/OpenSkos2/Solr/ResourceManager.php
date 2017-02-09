@@ -74,7 +74,7 @@ class ResourceManager
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
-
+        
         $update->addDocument($resourceDoc);
 
         if (!$this->getIsNoCommitMode()) {
@@ -127,27 +127,37 @@ class ResourceManager
      * @param array $sorts
      * @return array Array of uris
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
+    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null, array $filterQueries = null)
     {
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
                 ->setFields(['uri'])
                 ->setQuery($query);
-
+        
         if (!empty($sorts)) {
             $select->setSorts($sorts);
+        }
+        
+        if (!empty($filterQueries)) {
+            if (!is_array($filterQueries)) {
+                throw new OpenSkos2\Exception\InvalidArgumentException('Filter queries must be array.');
+            }
+            
+            foreach ($filterQueries as $key => $value) {
+                $select->addFilterQuery($select->createFilterQuery($key)->setQuery($value));
+            }
         }
 
         $solrResult = $this->solr->select($select);
 
         $numFound = $solrResult->getNumFound();
-
+        
         $uris = [];
         foreach ($solrResult as $doc) {
             $uris[] = $doc->uri;
         }
-
+        
         return $uris;
     }
 

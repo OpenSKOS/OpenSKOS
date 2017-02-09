@@ -20,8 +20,8 @@
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Search\Autocomplete;
 
 class Editor_LabelController extends OpenSKOS_Controller_Editor
 {
@@ -103,10 +103,16 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
     
     public function autocompleteAction()
     {
-        $labels = $this->getLabelManager()->autocomplete(
-            $this->getRequest()->getParam('query'),
-            $this->getRequest()->getParam('language')
-        );
+        /* @var $autocomplete Autocomplete */
+        $autocomplete = $this->getDI()->get('\OpenSkos2\Search\AutocompleteLabels');
+
+        $options = [
+            'searchText' => $this->getRequest()->getParam('query'),
+            'language' => $this->getRequest()->getParam('language'),
+            'rows' => 20,
+            'start' => 0 //TODO: implement pagination
+        ];
+        $labels = $autocomplete->search($options, $numFound);
         
         $labelsData = [];
         foreach ($labels as $label) {
