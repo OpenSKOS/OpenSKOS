@@ -54,8 +54,6 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
-        //@TODO Where we handle the complete labels xml...
-        
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
             throw new TenantNotFoundException(
@@ -131,9 +129,6 @@ class LabelHelper
     public function insertLabels(Concept $concept)
     {
         //@TODO Can we have labels without uri here...
-        //@TODO What we do with deleted concepts
-        //@TODO What we do with updated concepts which leave hanging labels (not attached to other concept)
-        //@TODO Can we insert them as one graph together with the full concept. What will happen with existing labels
         
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
         

@@ -34,7 +34,6 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Namespaces\SkosXl;
 
 class EasyRdf
 {
