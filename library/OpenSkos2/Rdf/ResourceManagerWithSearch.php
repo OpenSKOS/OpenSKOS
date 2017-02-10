@@ -73,6 +73,16 @@ class ResourceManagerWithSearch extends ResourceManager
         parent::insert($resource);
         $this->solrResourceManager->insert($resource);
     }
+    
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insertCollection(ResourceCollection $resourceCollection)
+    {
+        parent::insertCollection($resourceCollection);
+        $this->solrResourceManager->insertCollection($resourceCollection);
+    }
 
     /**
      * @param Uri $resource
