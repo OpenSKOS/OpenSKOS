@@ -492,7 +492,7 @@ class Concept
         $collection = $this->getCollection($params, $tenant, $resource);
         $user = $this->getUserFromParams($params);
 
-        if ($resource instanceof Concept) {
+        if ($resource instanceof \OpenSkos2\Concept) {
             $resource->ensureMetadata(
                 $tenant->code,
                 $collection->getUri(),
@@ -517,7 +517,7 @@ class Concept
 
         $this->validate($resource, $tenant);
 
-        if ($resource instanceof Concept) {
+        if ($resource instanceof \OpenSkos2\Concept) {
             $this->conceptManager->insert($resource);
         } else {
             $this->manager->insert($resource);
@@ -571,8 +571,8 @@ class Concept
         // remove the api key
         $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
 
-        $resource = (new Text($doc->saveXML()))->getResources();
-
+        $resource = (new Text($doc->saveXML()))->getResources(\OpenSkos2\Concept::$classes['SkosXlLabels']);
+        
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
             throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
         }

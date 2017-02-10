@@ -164,7 +164,8 @@ class CollectionHelper implements LoggerAwareInterface
             $this->message->getSetUri(),
             $this->message->getUser(),
             $this->conceptManager->getLabelManager(),
-            $alreadyExists ? $currentVersion->getStatus(): null
+            $alreadyExists ? $currentVersion->getStatus(): null,
+            true
         );
     }
     

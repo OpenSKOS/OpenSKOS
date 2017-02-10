@@ -229,8 +229,14 @@ class Concept extends Resource
      * @param LabelManager $labelManager
      * @param string , optional $oldStatus
      */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person, LabelManager $labelManager, $oldStatus = null)
-    {
+    public function ensureMetadata(
+        $tenantCode,
+        Uri $set,
+        Uri $person,
+        LabelManager $labelManager,
+        $oldStatus = null,
+        $forceCreationOfXl = false
+    ) {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
@@ -279,7 +285,7 @@ class Concept extends Resource
         
         // Create all asserted labels
         $labelHelper = new Concept\LabelHelper($labelManager);
-        $labelHelper->assertLabels($this);
+        $labelHelper->assertLabels($this, $forceCreationOfXl);
     }
     
     /**

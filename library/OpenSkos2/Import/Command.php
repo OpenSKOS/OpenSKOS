@@ -68,7 +68,7 @@ class Command implements LoggerAwareInterface
     public function handle(Message $message)
     {
         $file = new File($message->getFile());
-        $resourceCollection = $file->getResources();
+        $resourceCollection = $file->getResources(Concept::$classes['SkosXlLabels']);
         
         // Disable commit's for every concept
         $this->conceptManager->setIsNoCommitMode(true);

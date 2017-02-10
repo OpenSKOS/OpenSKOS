@@ -83,7 +83,8 @@ class LabelHelper
 
                 if (!$labelExists && !($labelValue instanceof Label)) {
                     throw new OpenSkosException(
-                        'The label ' . $labelValue . ' is not a valid label resource and does not exist in the system.'
+                        'The label ' . $labelValue . ' is not a fully described label resource '
+                        . 'and does not exist in the system.'
                     );
                 }
 
@@ -167,7 +168,8 @@ class LabelHelper
                 
                 if (!$labelExists && !($label instanceof Label)) {
                     throw new OpenSkosException(
-                        'The label ' . $label . ' is not a valid label resource and does not exist in the system.'
+                        'The label ' . $label . ' is not a fully described label resource '
+                        . 'and does not exist in the system.'
                     );
                 }
                 
