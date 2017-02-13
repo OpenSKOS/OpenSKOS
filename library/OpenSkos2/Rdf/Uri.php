@@ -32,8 +32,11 @@ class Uri implements Object, ResourceIdentifier
      */
     public function __construct($value)
     {
+        // We allow generated (by easy rdf) uris which are not valid uri.
+        $isGeneratedUri = stripos($value, '_:genid') === 0;
+        
         // Null values where allowed from the start some functionality depends on it like createing new graphs :(
-        if ($value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
+        if (!$isGeneratedUri && $value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
             throw new Exception\InvalidUriException('Invalid URI: ' . $value);
         }
 

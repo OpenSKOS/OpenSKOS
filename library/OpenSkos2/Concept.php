@@ -222,6 +222,36 @@ class Concept extends Resource
     }
     
     /**
+     * Does the concept has any xl labels in it.
+     * @return boolean
+     */
+    public function hasXlLabels()
+    {
+        foreach (self::$classes['SkosXlLabels'] as $predicate) {
+            if (!$this->isPropertyEmpty($predicate)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Does the concept has any xl labels in it.
+     * @return boolean
+     */
+    public function hasSimpleLabels()
+    {
+        foreach (self::$classes['LexicalLabels'] as $predicate) {
+            if (!$this->isPropertyEmpty($predicate)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param string $tenantCode
      * @param Uri $set

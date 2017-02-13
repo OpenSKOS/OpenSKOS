@@ -39,7 +39,6 @@ use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Tenant as Tenant;
-use OpenSkos2\SkosXl\LabelManager;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -313,11 +312,14 @@ class Concept
             $params = $this->getParams($request);
 
             $tenant = $this->getTenantFromParams($params);
+            $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
 
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUserFromParams($params);
 
             $this->resourceEditAllowed($concept, $tenant, $user);
+            
+            $this->checkConceptXl($concept, $openSkos2Tenant);
 
             $concept->ensureMetadata(
                 $tenant->code,
@@ -327,7 +329,7 @@ class Concept
                 $existingConcept->getStatus()
             );
 
-            $this->validate($concept, $tenant);
+            $this->validate($concept, $openSkos2Tenant);
 
             $this->conceptManager->replaceAndCleanRelations($concept);
         } catch (ApiException $ex) {
@@ -452,14 +454,14 @@ class Concept
     /**
      * Applies all validators to the concept.
      * @param \OpenSkos2\Concept $concept
-     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param Tenant $tenant
      * @throws InvalidArgumentException
      */
-    protected function validate(\OpenSkos2\Concept $concept, \OpenSKOS_Db_Table_Row_Tenant $tenant)
+    protected function validate(\OpenSkos2\Concept $concept, Tenant $tenant)
     {
         $validator = new ResourceValidator(
             $this->manager,
-            new Tenant($tenant->code)
+            $tenant
         );
 
 
@@ -489,19 +491,22 @@ class Concept
         $params = $this->getParams($request);
 
         $tenant = $this->getTenantFromParams($params);
+        $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
         $collection = $this->getCollection($params, $tenant, $resource);
         $user = $this->getUserFromParams($params);
 
         if ($resource instanceof \OpenSkos2\Concept) {
+            $this->checkConceptXl($resource, $openSkos2Tenant);
+            
             $resource->ensureMetadata(
-                $tenant->code,
+                $openSkos2Tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson(),
                 $this->conceptManager->getLabelManager()
             );
         } else {
             $resource->ensureMetadata(
-                $tenant->code,
+                $openSkos2Tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson()
             );
@@ -510,12 +515,12 @@ class Concept
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $resource);
         if ($autoGenerateUri) {
             $resource->selfGenerateUri(
-                new Tenant($tenant->code),
+                $openSkos2Tenant,
                 $this->conceptManager
             );
         }
 
-        $this->validate($resource, $tenant);
+        $this->validate($resource, $openSkos2Tenant);
 
         if ($resource instanceof \OpenSkos2\Concept) {
             $this->conceptManager->insert($resource);
@@ -525,6 +530,33 @@ class Concept
 
         $rdf = (new Transform\DataRdf($resource))->transform();
         return $this->getSuccessResponse($rdf, 201);
+    }
+    
+    /**
+     * Check if there are both xl labels and simple labels.
+     * @param \OpenSkos2\Concept $concept
+     * @param Tenant $tenant
+     * @throws InvalidArgumentException
+     */
+    protected function checkConceptXl(\OpenSkos2\Concept $concept, Tenant $tenant)
+    {
+        if ($tenant->getEnableSkosXl()) {
+            if ($concept->hasSimpleLabels()) {
+                throw new InvalidArgumentException(
+                    'The concept contains simple labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with xl labels.',
+                    400
+                );
+            }
+        } else {
+            if ($concept->hasXlLabels()) {
+                throw new InvalidArgumentException(
+                    'The concept contains xl labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with simple labels.',
+                    400
+                );
+            }
+        }
     }
 
     /**
