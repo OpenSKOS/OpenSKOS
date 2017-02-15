@@ -392,6 +392,10 @@ class Concept
      */
     public function useXlLabels($tenant, $request) {
 
+        if (empty($request->getQueryParams()['xl'])) {
+            return false;
+        }
+        
         $xlParam = filter_var($request->getQueryParams()['xl'], FILTER_VALIDATE_BOOLEAN);
         
         if ($xlParam === false) {
