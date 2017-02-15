@@ -88,7 +88,7 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
             )
         );
         
-        $label->setProperty(OpenSkos::TENANT, new Literal($tenant->getCode()));
+        $label->ensureMetadata($tenant->getCode());
         
         $this->getLabelManager()->replace($label);
         

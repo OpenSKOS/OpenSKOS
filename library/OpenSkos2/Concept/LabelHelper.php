@@ -54,6 +54,7 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
+        /* @var $tenant OpenSKOS_Db_Table_Row_Tenant */
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
             throw new TenantNotFoundException(
@@ -122,7 +123,7 @@ class LabelHelper
      * Insert any xl labels for the concept which do not exist yet.
      * Meant to be called together with insert of the concept.
      * @param Concept $concept
-     * @param bool $returnOnly , optional, default: false. 
+     * @param bool $returnOnly , optional, default: false.
      *  Set to true if the labels have to be returned only. Not inserted. Existing labels still will be deleted.
      * @throws OpenSkosException
      */
@@ -172,6 +173,8 @@ class LabelHelper
                     continue; // It is just an uri - nothing to do with it.
                 }
                 
+                $label->ensureMetadata($concept->getInstitution()['code']);
+                
                 // Fetch, insert or replace label
                 if ($labelExists) {
                     $deleteLabels->append($label);
@@ -206,7 +209,7 @@ class LabelHelper
         
         $label = new Label(Label::generateUri());
         $label->addProperty(SkosXl::LITERALFORM, $rdfLiteral);
-        $label->addProperty(OpenSkos::TENANT, new Literal($tenant->getCode()));
+        $label->ensureMetadata($tenant->getCode());
         
         $this->labelManager->insert($label);
         
