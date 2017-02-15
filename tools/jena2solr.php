@@ -77,14 +77,14 @@ $rows = 1000;
 
 if ($uri) {
     
-    $fetchConcepts = "DESCRIBE <$uri>";
+    $fetchResources = "DESCRIBE <$uri>";
     
 } else {
     
-    $fetchConcepts = "
+    $fetchResources = "
         DESCRIBE ?subject
         WHERE {
-          " . $sparqlWhere . "
+          $sparqlWhere
         }
         LIMIT $rows
     ";
@@ -97,7 +97,7 @@ $solrResourceManager->setIsNoCommitMode(true);
 $offset = 0;
 while ($offset < $total) {
 
-    $resources = $resourceManager->fetchQuery($fetchConcepts . ' OFFSET ' . $offset);
+    $resources = $resourceManager->fetchQuery($fetchResources . ' OFFSET ' . $offset);
     
     $offset = $offset + $rows;
     
@@ -122,23 +122,22 @@ $logger->info("Done!");
 /**
  * Get total amount of concepts
  * @param \OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager
- * @param type $uri
  * @return int
  */
 function getTotal(\OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager, $sparqlWhere)
 {
 
-    $countAllConcepts = "
+    $countAll = "
         prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         prefix owl: <http://www.w3.org/2002/07/owl#>
 
         SELECT (count(?subject) AS ?count)
         WHERE {
-          " . $sparqlWhere . "
+          $sparqlWhere
         }
     ";
     
-    $result = $resourceManager->query($countAllConcepts);
+    $result = $resourceManager->query($countAll);
     $total = $result->getArrayCopy()[0]->count->getValue();
     return $total;
 }
