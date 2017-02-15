@@ -57,10 +57,22 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $uri = $OPTS->getOption('uri');
 
-/* @var $conceptManager \OpenSkos2\ConceptManager */
-$conceptManager = $diContainer->make('\OpenSkos2\ConceptManager');
+/* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
+$resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
 
-$total = getTotal($conceptManager, $uri);
+$resourceTypes = [
+    \OpenSkos2\Concept::TYPE,
+    \OpenSkos2\SkosXl\Label::TYPE
+];
+
+$sparqlWhere = getSparqlWhereClause($resourceTypes);
+
+if (empty($uri)) {
+    $total = getTotal($resourceManager, $sparqlWhere);
+} else {
+    $total = 1;
+}
+
 $rows = 1000;
 
 if ($uri) {
@@ -72,7 +84,7 @@ if ($uri) {
     $fetchConcepts = "
         DESCRIBE ?subject
         WHERE {
-          ?subject ?predicate <http://www.w3.org/2004/02/skos/core#Concept>
+          " . $sparqlWhere . "
         }
         LIMIT $rows
     ";
@@ -85,21 +97,20 @@ $solrResourceManager->setIsNoCommitMode(true);
 $offset = 0;
 while ($offset < $total) {
 
-    $concepts = $conceptManager->fetchQuery($fetchConcepts . ' OFFSET ' . $offset);
+    $resources = $resourceManager->fetchQuery($fetchConcepts . ' OFFSET ' . $offset);
     
     $offset = $offset + $rows;
     
-    foreach ($concepts as $concept) {
-
-        $logger->debug($concept->getUri());
+    foreach ($resources as $resource) {
+        
+        $logger->debug($resource->getUri());
 
         try {
-            $solrResourceManager->insert($concept);
+            $solrResourceManager->insert($resource);
         } catch (\Exception $exc) {
             echo $exc->getMessage() . PHP_EOL;
             echo $exc->getTraceAsString() . PHP_EOL;
         }
-
     }
 }
 
@@ -110,16 +121,12 @@ $logger->info("Done!");
 
 /**
  * Get total amount of concepts
- * 
- * @param \OpenSkos2\ConceptManager $conceptManager
+ * @param \OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager
  * @param type $uri
  * @return int
  */
-function getTotal(\OpenSkos2\ConceptManager $conceptManager, $uri = null) {
-
-    if ($uri) {
-        return 1;
-    }
+function getTotal(\OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager, $sparqlWhere)
+{
 
     $countAllConcepts = "
         prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -127,11 +134,25 @@ function getTotal(\OpenSkos2\ConceptManager $conceptManager, $uri = null) {
 
         SELECT (count(?subject) AS ?count)
         WHERE {
-          ?subject ?predicate <http://www.w3.org/2004/02/skos/core#Concept>
+          " . $sparqlWhere . "
         }
     ";
-
-    $result = $conceptManager->query($countAllConcepts);
+    
+    $result = $resourceManager->query($countAllConcepts);
     $total = $result->getArrayCopy()[0]->count->getValue();
     return $total;
+}
+
+function getSparqlWhereClause($resourceTypes)
+{
+    $whereClause = '';
+    
+    foreach ($resourceTypes as $resourceType) {
+        if (!empty($whereClause)) {
+            $whereClause .= ' UNION ';
+        }
+        $whereClause .= '{?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <' . $resourceType . '> }';
+    }
+    
+    return $whereClause;
 }
