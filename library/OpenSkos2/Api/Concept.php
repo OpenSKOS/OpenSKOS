@@ -595,19 +595,17 @@ class Concept
     {
         $doc = $this->getDomDocumentFromRequest($request);
 
-        $descriptions = $doc->documentElement->getElementsByTagNameNS(Rdf::NAME_SPACE, 'Description');
-        if ($descriptions->length != 1) {
-            throw new InvalidArgumentException(
-                'Expected exactly one '
-                . '/rdf:RDF/rdf:Description, got '.$descriptions->length,
-                412
-            );
-        }
-
         // remove the api key
         $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
 
         $resource = (new Text($doc->saveXML()))->getResources(\OpenSkos2\Concept::$classes['SkosXlLabels']);
+        
+        if ($resource->count() != 1) {
+            throw new InvalidArgumentException(
+                'Expected exactly one concept, got ' . $resource->count(),
+                412
+            );
+        }
         
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
             throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
