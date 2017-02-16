@@ -24,7 +24,6 @@ use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSKOS_Db_Table_Row_Collection;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
@@ -404,10 +403,15 @@ class Concept
             if ($tenant !== null && $tenant->toArray()['enableSkosXl'] === '1') {
                 return true;
             } else {
-                //TODO: throw better error message when tenant=null && xl=true for /api/find-concepts
-                throw new \Zend_Controller_Exception(
-                    'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
-                    501);
+                if ($tenant === null) {
+                    throw new \Zend_Controller_Exception(
+                        'SKOS-XL labels are requested, but tenant is not defined',
+                        501);
+                } else {
+                    throw new \Zend_Controller_Exception(
+                        'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
+                        501);
+                }
             }
         }
     }
