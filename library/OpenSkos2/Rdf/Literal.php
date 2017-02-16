@@ -136,13 +136,20 @@ class Literal implements Object
     public function isInArray(array $literalsArray)
     {
         foreach ($literalsArray as $literalLookup) {
-            if ($literalLookup->getValue() == $this->getValue()
-                && $literalLookup->getLanguage() == $this->getLanguage()
-                && $literalLookup->getType() == $this->getType()) {
+            if ($this->isEqual($literalLookup)) {
                 return true;
             }
         }
         
         return false;
+    }
+    
+    public function isEqual($literalToCompare)
+    {
+        if ($literalToCompare->getValue() == $this->getValue()
+         && $literalToCompare->getLanguage() == $this->getLanguage()
+         && $literalToCompare->getType() == $this->getType()) {
+            return true;
+        }
     }
 }

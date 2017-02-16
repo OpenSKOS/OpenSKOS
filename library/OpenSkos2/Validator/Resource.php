@@ -36,6 +36,7 @@ use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
+use OpenSkos2\Validator\Concept\DisjointXlLabels;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
@@ -168,6 +169,7 @@ class Resource
             new CycleInBroader(),
             new CycleInNarrower(),
             new RelatedToSelf(),
+            new DisjointXlLabels(),
         ];
         
         foreach ($validators as $validator) {
