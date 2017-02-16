@@ -83,6 +83,6 @@ class AutocompleteLabels
         
         $solrQuery = 'a_skosXlLiteralForm_' . $options['language'] . ':' . $searchText;
         
-        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound);
     }
 }
