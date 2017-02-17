@@ -334,15 +334,18 @@ class Concept extends Resource
     
     /**
      * Loads the XL labels and replaces the default URI value with the full resource
+     * Performs a check and doesn't re-load if the label is already a full resource
      * @param LabelManager $labelManager
      */
     public function loadFullXlLabels($labelManager)
     {
-        foreach ($this->properties as $predicate => $objectList) {
-            if (in_array($predicate, Concept::$classes['SkosXlLabels'])) {
+        foreach (Concept::$classes['SkosXlLabels'] as $predicate) {
+            foreach ($this->getProperty($predicate) as $objects) {
                 $fullXlLabels = [];
-                foreach ($objectList as $xlLabelUri) {
-                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabelUri);
+                foreach ($objects as $xlLabel) {
+                    if (!($xlLabel instanceof SkosXl\Label)) {
+                        $fullXlLabels[] = $labelManager->fetchByUri($xlLabel);
+                    }
                 }
                 $this->properties[$predicate] = $fullXlLabels;
             }
