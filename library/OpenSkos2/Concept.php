@@ -338,14 +338,17 @@ class Concept extends Resource
      */
     public function loadFullXlLabels($labelManager)
     {
-        foreach ($this->properties as $predicate => $objectList) {
-            if (in_array($predicate, Concept::$classes['SkosXlLabels'])) {
-                $fullXlLabels = [];
-                foreach ($objectList as $xlLabelUri) {
-                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabelUri);
+        foreach (Concept::$classes['SkosXlLabels'] as $xlLabelPredicate) {
+            $fullXlLabels = [];
+            foreach ($this->getProperty($xlLabelPredicate) as $xlLabel) {
+                if ($xlLabel instanceof Label) {
+                    $fullXlLabels[] = $xlLabel;
+                } else {
+                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabel);
                 }
-                $this->properties[$predicate] = $fullXlLabels;
             }
+
+            $this->setProperties($xlLabelPredicate, $fullXlLabels);
         }
     }
 }
