@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * OpenSKOS
  *
  * LICENSE
@@ -20,8 +20,6 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
-use OpenSkos2\Namespaces\SkosXl;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
@@ -29,7 +27,7 @@ use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\OpenSkosException;
 
-class DisjointXlLabels extends AbstractConceptValidator implements ResourceManagerAware
+class SinglePrefLabelXl extends AbstractConceptValidator implements ResourceManagerAware
 {
     
     use ResourceManagerAwareTrait;
@@ -49,35 +47,18 @@ class DisjointXlLabels extends AbstractConceptValidator implements ResourceManag
         
         $concept->loadFullXlLabels($this->resourceManager->getLabelManager());
         
-        $xlLabelPredicates = [
-            \OpenSkos2\Namespaces\SkosXl::PREFLABEL,
-            \OpenSkos2\Namespaces\SkosXl::ALTLABEL,
-            \OpenSkos2\Namespaces\SkosXl::HIDDENLABEL,
-        ];
+        $labels = $concept->getProperty(\OpenSkos2\Namespaces\SkosXl::PREFLABEL);
         
-        $literalForms = [];
-        
-        foreach ($xlLabelPredicates as $predicate) {
-            $labels = $concept->getProperty($predicate);
-            foreach ($labels as $label) {
-                
-                if (!($label instanceof Label)) {
-                    $this->errorMessages[] =
-                            "Skos-xl label expected to be of type Label but "
-                            . "instead is \"" . get_class($label) . "\"";
-                    return false;
-                }
-                
-                $literalForm = $label->getProperty(SkosXl::LITERALFORM)[0];
-                
-                if ($literalForm->isInArray($literalForms)) {
-                    $this->errorMessages[] =
-                            "Skos-xl Literal Form \"{$literalForm->getValue()}\" "
-                            . "is present more than once in concept <{$concept->getUri()}>";
-                    return false;
-                }
-                
-                $literalForms[] = $literalForm;
+        $labelsPerLanguage = [];
+        foreach ($labels as $label) {
+            /* @var $label Label*/
+            $language = $label->getProperty(SkosXl::LITERALFORM)[0]->getLanguage();
+            if (isset($labelsPerLanguage[$language])) {
+                $this->errorMessages[] =
+                    "More than one skos-xl pref labels found in concept <{$concept->getUri()}>";
+                return false;
+            } else {
+                $labelsPerLanguage[$language] = $label;
             }
         }
         
