@@ -109,6 +109,8 @@
         <!-- autocomplete search -->
         <field name="autocomplete" type="autocomplete" indexed="true" stored="false" required="false" multiValued="true" />
 
+        <!-- Meertens: without adding preifx t_ the default search gave 0 documents,
+        with prefix t_ it gives the same result as in the acceptation environment -->
         <copyField source="t_prefLabel" dest="search" />
         <copyField source="t_altLabel" dest="search" />
         <copyField source="t_hiddenLabel" dest="search" />

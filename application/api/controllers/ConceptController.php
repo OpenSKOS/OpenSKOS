@@ -205,10 +205,6 @@ class Api_ConceptController extends Api_FindConceptsController
     {
       $this->throw501 =false; 
       parent::putAction();
-       /* $request = $this->getPsrRequest();
-        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
-        $response = $api->update($request);
-        $this->emitResponse($response);*/
     }
 
     /**

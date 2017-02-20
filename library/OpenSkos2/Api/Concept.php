@@ -73,6 +73,11 @@ class Concept extends AbstractTripleStoreResource {
    */
   private $searchAutocomplete;
 
+  /**
+   * 
+   * @param ConceptManager $manager
+   * @param Autocomplete $searchAutocomplete
+   */
   public function __construct(ConceptManager $manager, Autocomplete $searchAutocomplete) {
     $this->manager = $manager;
     $this->searchAutocomplete = $searchAutocomplete;

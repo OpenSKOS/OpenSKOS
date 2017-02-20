@@ -46,7 +46,7 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
  *  */
 
 // example :php migrate.php --endpoint=http://192.168.99.100:8984/solr/collection1/select --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
-// php migrate.php --endpoint=http://192.168.99.100:8984/solr/collection1/select --db-hostname=localhost --db-database=openskos --db-username=root --db-password="" --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
+// php migrate.php --endpoint=http://145.100.58.150:8984/solr/collection1/select --db-hostname=localhost --db-database=openskos --db-username=root --db-password="" --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
 
   $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
