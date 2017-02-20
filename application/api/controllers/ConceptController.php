@@ -65,7 +65,6 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiGroup Concept
      *
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
-     * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
      * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
      *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.

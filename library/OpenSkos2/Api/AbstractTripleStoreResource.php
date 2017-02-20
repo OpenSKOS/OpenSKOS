@@ -212,7 +212,7 @@ abstract class AbstractTripleStoreResource {
       $this->manager->insert($preprocessedResource);
       $savedResource = $this->manager->fetchByUri($preprocessedResource->getUri());
       $rdf = (new DataRdf($savedResource, true, []))->transform();
-      return $this->getSuccessResponse($rdf, $preprocessedResource->getUri(), 201);
+      return $this->getSuccessResponse($rdf, 201, $preprocessedResource->getUri());
     } catch (Exception $e) {
       return $this->getErrorResponseFromException($e);
     }
@@ -236,9 +236,9 @@ abstract class AbstractTripleStoreResource {
       if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $preprocessedResource)) {
         $this->validate($preprocessedResource, true, $params['tenanturi']);
         $this->manager->replace($preprocessedResource);
-        $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
+        $savedResource = $this->manager->fetchByUri($uri);
         $rdf = (new DataRdf($savedResource, true, []))->transform();
-        return $this->getSuccessResponse($rdf, $resourceObject->getUri());
+        return $this->getSuccessResponse($rdf);
       } else {
         throw new ApiException('You do not have rights to edit resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenantcode'], 403);
       }
@@ -270,7 +270,7 @@ abstract class AbstractTripleStoreResource {
       }
       $this->manager->delete(new Uri($uri), $this->manager->getResourceType());
       $xml = (new DataRdf($resourceObject))->transform();
-      return $this->getSuccessResponse($xml, $uri, 202);
+      return $this->getSuccessResponse($xml, 202);
     } catch (Exception $e) {
       return $this->getErrorResponseFromException($e);
     }
@@ -391,11 +391,16 @@ abstract class AbstractTripleStoreResource {
     return $user;
   }
 
-  protected function getSuccessResponse($message, $uri, $status = 200, $format = "text/xml") {
+  protected function getSuccessResponse($message, $status = 200, $uri = null, $format = "text/xml") {
     $stream = new Stream('php://memory', 'wb+');
     $stream->write($message);
-    $response = (new Response($stream, $status, ['Location'=>$uri]))
-      ->withHeader('Content-Type', $format . ' ; charset="utf-8"');
+    if ($status === 201) {
+      $response = (new Response($stream, $status, ['Location' => $uri]))
+        ->withHeader('Content-Type', $format . '; charset="utf-8"');
+    } else {
+       $response = (new Response($stream, $status))
+        ->withHeader('Content-Type', $format . '; charset="utf-8"');
+    }
     return $response;
   }
 
