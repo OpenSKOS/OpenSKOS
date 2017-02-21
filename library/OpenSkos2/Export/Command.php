@@ -19,30 +19,34 @@
 
 namespace OpenSkos2\Export;
 
-use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Export\Serialiser\FormatFactory;
 use OpenSkos2\Search\Autocomplete;
 
 class Command
 {
     /**
-     * @var ResourceManager
+     * @var ConceptManager
      */
-    private $resourceManager;
+    protected $conceptManager;
     
     /**
      * Searcher for when search options are provided.
-     * @var \OpenSkos2\Search\Autocomplete
+     * @var Autocomplete
      */
     protected $searchAutocomplete;
 
     /**
-     * Command constructor.
-     * @param ResourceManager $resourceManager
+     * @param ConceptManager $conceptManager
+     * @param Autocomplete $searchAutocomplete
      */
-    public function __construct(ResourceManager $resourceManager, Autocomplete $searchAutocomplete)
-    {
-        $this->resourceManager = $resourceManager;
+    public function __construct(
+        ConceptManager $conceptManager,
+        Autocomplete $searchAutocomplete
+    ) {
+        $this->conceptManager = $conceptManager;
         $this->searchAutocomplete = $searchAutocomplete;
     }
     
@@ -52,14 +56,23 @@ class Command
      */
     public function handle(Message $message)
     {
+        if ($message->getTenant()->getEnableSkosXl()) {
+            $excludeProperties = Concept::$classes['LexicalLabels'];
+        } else {
+            $excludeProperties = Concept::$classes['SkosXlLabels'];
+        }
+        
         $format = FormatFactory::create(
             $message->getFormat(),
             $message->getPropertiesToExport(),
-            $this->resourceManager->fetchNamespaces(),
-            $message->getMaxDepth()
+            $this->conceptManager->fetchNamespaces(),
+            $message->getMaxDepth(),
+            $excludeProperties
         );
         
         $serialiser = new Serialiser(
+            $message->getTenant(),
+            $this->conceptManager,
             $format
         );
         
@@ -69,7 +82,6 @@ class Command
             $serialiser->setSearchAutocomplete($this->searchAutocomplete);
         } else {
             $serialiser->setUris($message->getUris());
-            $serialiser->setResourceManager($this->resourceManager);
         }
         
         if ($message->getOutputFilePath()) {
