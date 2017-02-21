@@ -130,8 +130,8 @@ class Concept extends AbstractTripleStoreResource {
       if (isset($params['label'])) {
         $options['label'] = explode(' ', trim($params['label']));
       }
-      
-       if (isset($params['properties'])) {
+
+      if (isset($params['properties'])) {
         $options['properties'] = explode(' ', trim($params['properties']));
       }
 
@@ -169,8 +169,12 @@ class Concept extends AbstractTripleStoreResource {
         }
       }
 
-      if (isset($params['scheme'])) {
-        $options['scheme'] = explode(' ', trim($params['scheme']));
+      if (isset($params['conceptScheme'])) {
+        $options['scheme'] = explode(' ', trim($params['conceptScheme']));
+      } else {
+        if (isset($params['scheme'])) {
+          $options['scheme'] = explode(' ', trim($params['scheme']));
+        }
       }
 
       if (isset($params['status'])) {
