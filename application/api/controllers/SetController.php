@@ -19,10 +19,13 @@ class Api_SetController extends AbstractController
     
      * Get a detailed list of OpenSKOS sets
      *
-     * @api {get} /api/set Get OpenSKOS sets
+     * @api {get} /api/set[?format=rdf, ?format=html, ?format=json, ?format=jsonp&callback=f]  Get OpenSKOS sets
      * @apiName GetSets
      * @apiGroup Set
      *
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String} callback If format set to jsonp, must be non-empty
+     * 
      * @apiSuccess (200) OK
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 OK
@@ -56,7 +59,7 @@ class Api_SetController extends AbstractController
      *     <openskos:allow_oai rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:allow_oai>
      *     <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"/>
      *     <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
-     *  </rdf:Description></rdf:RDF>
+     *  </rdf:Description>
      *  </rdf:RDF>
      * @apiError SetExists {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample Not found:
@@ -75,11 +78,14 @@ class Api_SetController extends AbstractController
     
      * Get an OpenSKOS set by its uri or uuid
      *
-     * @api {get} /api/set Get OpenSKOS set
+     * @api {get} /api/set/{uuid}[.rdf, .html, .json, .jsonp] Get OpenSKOS set
      * @apiName GetSet
      * @apiGroup Set
      *
      * @apiParam {String} id
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String} callback If format set to jsonp, must be non-empty
+     * 
      * @apiSuccess (200) OK
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 OK
@@ -124,17 +130,17 @@ class Api_SetController extends AbstractController
      *   xmlns:openskos = "http://openskos.org/xmlns#"
      *  xmlns:dcterms = "http://purl.org/dc/terms/"
      * xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
-    <rdf:Description>
-        <openskos:code>ISO-lang</openskos:code>
-        <dcterms:title xml:lang="en">CLARIN Languages</dcterms:title>
-        <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
-        <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"></dcterms:publisher>
-        <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens1"/>
-        <openskos:allow_oai>true</openskos:allow_oai>
-        <openskos:conceptBaseUri>http://example.com/collection-example</openskos:conceptBaseUri>
-        <openskos:webpage rdf:resource="http://ergens"/>
-     </rdf:Description>
-     </rdf:RDF>
+     *     <rdf:Description>
+     *         <openskos:code>ISO-lang</openskos:code>
+     *         <dcterms:title xml:lang="en">CLARIN Languages</dcterms:title>
+     *         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
+     *    <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"></dcterms:publisher>
+     *         <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens1"/>
+     *         <openskos:allow_oai>true</openskos:allow_oai>
+     *         <openskos:conceptBaseUri>http://example.com/collection-example</openskos:conceptBaseUri>
+     *         <openskos:webpage rdf:resource="http://ergens"/>
+     *      </rdf:Description>
+     * </rdf:RDF>
      *
      * @api {post} /api/set Create an OpenSKOS set
      * @apiName CreateSet
@@ -251,7 +257,7 @@ class Api_SetController extends AbstractController
      /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Delete an OpensSKOS Set
+     * @apiDescription Delete an OpensSKOS Set by its uri
      * @api {delete} /api/set Delete OpensSKOS set
      * @apiName DeleteSet
      * @apiGroup Set
@@ -277,8 +283,8 @@ class Api_SetController extends AbstractController
      *   </rdf:Description>
      *   </rdf:RDF>
      * @apiError Not found {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
-     * @apiErrorExample Not found
-     *   HTTP/1.1 404 Gone
+     * @apiErrorExample NotFound
+     *   HTTP/1.1 404 NotFound
      *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey
