@@ -160,7 +160,7 @@ class ConceptScheme extends Resource
      */
     public function getIconPath($tenant = null)
     {
-        return self::buildIconPath((string)$this->getPropertySingleValue(OpenSkos::UUID), $tenant);
+        return self::buildIconPath($this->getUuid(), $tenant);
     }
     
     /**

@@ -263,7 +263,7 @@ class Concept extends Resource
      */
     public function ensureMetadata(
         $tenantCode,
-        Uri $set,
+        $set,
         Uri $person,
         LabelManager $labelManager,
         $oldStatus = null,
@@ -278,11 +278,18 @@ class Concept extends Resource
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
-            OpenSkos::SET => $set,
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
+        
+        if (!empty($set)) {
+            if (!($set instanceof Uri)) {
+                throw new OpenSkosException('The set must be instance of Uri');
+            }
+            // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = $set;
+        }
         
         // Do not consider dcterms:creator if we have dc:creator
         if (!$this->hasProperty(Dc::CREATOR)) {

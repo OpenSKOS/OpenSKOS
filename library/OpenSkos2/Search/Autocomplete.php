@@ -218,7 +218,7 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-
+        
         return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
     }
 
@@ -247,7 +247,8 @@ class Autocomplete
         ];
 
         if (empty($options['userInteractionType'])) {
-            $options['userInteractionType'] = [];
+            // If non is checked = all are checked
+            $options['userInteractionType'] = array_keys($map);
         }
 
         $interactionsQueries = [];
@@ -286,7 +287,9 @@ class Autocomplete
                 $query = $dateQuery;
             }
 
-            $interactionsQueries[] = $query;
+            if (!empty($query)) {
+                $interactionsQueries[] = $query;
+            }
         }
 
         return implode(' OR ', $interactionsQueries);
