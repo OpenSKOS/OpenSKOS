@@ -33,6 +33,7 @@ use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
 
 class Concept extends Resource
 {
