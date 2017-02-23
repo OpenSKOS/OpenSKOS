@@ -319,33 +319,27 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $user = $this->getCurrentUser();
             $concepts = $user->getConceptsSelection();
 
+            $this->getConceptManager()->setIsNoCommitMode(true);
+            
+            /* @var $concept \OpenSkos2\Concept */
             foreach ($concepts as $key => $concept) {
-
-                $oldData = $concept->getData();
-
                 // It is not allowed to edit concepts of different tenants.
-                if ($oldData['tenant'] != $user->tenant) {
+                if ($concept->getTenant() != $user->tenant) {
                     continue;
                 }
-
-                // The real update data...
-                $updateExtraData['status'] = $status;
-
-                $updateExtraData['modified_by'] = $user->id;
-                $updateExtraData['modified_timestamp'] = date("Y-m-d\TH:i:s\Z");
-
-                if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED &&
-                        $status == OpenSKOS_Concept_Status::APPROVED) {
-                    $updateExtraData['approved_by'] = $user->id;
-                    $updateExtraData['approved_timestamp'] = date("Y-m-d\TH:i:s\Z");
-                }
-
-                // The actual update...
-                $doCommit = ($key == (count($concepts) - 1)); // Commit only on the last concept.
-
-                $concept = new Editor_Models_Concept($concept);
-                $concept->update(array(), $updateExtraData, $doCommit, true);
+                
+                $currentStatus = $concept->getStatus();
+                $person = $user->getFoafPerson();
+                
+                $concept->setModified($person);
+                $concept->setProperty(OpenSkos::STATUS, new Literal($status));
+                $concept->handleStatusChange($person, $currentStatus);
+                
+                $this->getConceptManager()->replace($concept);
             }
+            
+            $this->getConceptManager()->commit();
+            $this->getConceptManager()->setIsNoCommitMode(false);
         }
 
         $this->getHelper('json')->sendJson(array('status' => 'ok'));
