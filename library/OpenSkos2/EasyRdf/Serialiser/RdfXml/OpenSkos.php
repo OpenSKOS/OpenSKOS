@@ -187,12 +187,14 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                 if ($alreadyOutput or $rpcount > 1 or $pcount == 0) {
                     $tag .= " rdf:nodeID=\"".htmlspecialchars($obj->getBNodeId()).'"';
                 }
-            } else {
+            } elseif ($pcount == 0) {
+                // if we have resource with properties - it will be on its own, we should not put rdf:resource here.
+                
 //                if ($rpcount != 1 or $pcount == 0) { //  if ($alreadyOutput or $rpcount != 1 or $pcount == 0) {
                     $tag .= " rdf:resource=\"".htmlspecialchars($obj->getURI()).'"';
 //                }
             }
-
+            
             if ($pcount > 0) {
                 $xml = $this->getResourceXmlString($obj, false, $depth + 1);
 
