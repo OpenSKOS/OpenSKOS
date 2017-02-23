@@ -28,6 +28,7 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
+use OpenSkos2\Person;
 use OpenSkos2\ConceptManager;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
@@ -294,8 +295,43 @@ class Concept extends Resource
             }
         }
         
+        $this->setModified($person);
+        
+        $this->handleStatusChange($person, $oldStatus);
+        
+        // Create all asserted labels
+        $labelHelper = new Concept\LabelHelper($labelManager);
+        $labelHelper->assertLabels($this, $forceCreationOfXl);
+    }
+    
+    /**
+     * Mark the concept as modified.
+     * @param Uri|Person $person
+     */
+    public function setModified($person)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
+        
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
         $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
+    }
+    
+    /**
+     * Handle change in status.
+     * @param Uri|Person $person
+     * @param string $oldStatus
+     */
+    public function handleStatusChange($person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
         
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
@@ -315,10 +351,6 @@ class Concept extends Resource
                     break;
             }
         }
-        
-        // Create all asserted labels
-        $labelHelper = new Concept\LabelHelper($labelManager);
-        $labelHelper->assertLabels($this, $forceCreationOfXl);
     }
     
     /**
