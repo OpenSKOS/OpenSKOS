@@ -271,6 +271,8 @@ class Concept extends Resource
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
         
+        $personUri = new Uri($person->getUri());
+        
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
@@ -282,7 +284,7 @@ class Concept extends Resource
         
         // Do not consider dcterms:creator if we have dc:creator
         if (!$this->hasProperty(Dc::CREATOR)) {
-            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
+            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $personUri;
         }
         
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -292,7 +294,7 @@ class Concept extends Resource
         }
         
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
+        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
         
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
@@ -304,11 +306,11 @@ class Concept extends Resource
             switch ($this->getStatus()) {
                 case \OpenSkos2\Concept::STATUS_APPROVED:
                     $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, $personUri);
                     break;
                 case \OpenSkos2\Concept::STATUS_DELETED:
                     $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    $this->addProperty(OpenSkos::DELETEDBY, $personUri);
                     break;
             }
         }

@@ -304,8 +304,13 @@ class Concept
      */
     public function update(ServerRequestInterface $request)
     {
+        $concept = $this->getConceptFromRequest($request);
+        
+        if (!$this->manager->askForUri((string)$concept->getUri())) {
+            return $this->getErrorResponse(404, 'Concept not found try insert');
+        }
+            
         try {
-            $concept = $this->getConceptFromRequest($request);
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
 
             $params = $this->getParams($request);
@@ -333,8 +338,6 @@ class Concept
             $this->conceptManager->replaceAndCleanRelations($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
-            return $this->getErrorResponse(404, 'Concept not found try insert');
         }
 
         $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
