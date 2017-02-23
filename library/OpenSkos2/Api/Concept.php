@@ -468,7 +468,7 @@ class Concept
     protected function validate(\OpenSkos2\Concept $concept, Tenant $tenant)
     {
         $validator = new ResourceValidator(
-            $this->manager,
+            $this->conceptManager,
             $tenant
         );
 
