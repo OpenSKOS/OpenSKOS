@@ -88,73 +88,81 @@ class Autocomplete {
       }
     }
 
-    $prefix = 'a_';
+    $prefix = 's_'; //TODO make it case insensitive: introduce sl of string_lowercase and use ths prefix
+    // first hack docker's solr schema, then update the source schema if hacking works
+    // for hacking I need wim on docker and it is problematic to download it from trains
     if (isset($options['wholeword'])) {
       if ($options['wholeword']) {
         $prefix = 't_';
       }
     }
-    
+
     // @TODO Better to use edismax qf
 
-    $searchTextQueries = [];
-    // labels
-    if (!empty($options['label'])) {
-      foreach ($options['label'] as $label) {
-        // boost important labels
-        $boost = '';
-        if ($label === 'prefLabel') {
-          $boost = '^40';
-        }
-        if ($label === 'altLabel') {
-          $boost = '^20';
-        }
-        if ($label === 'hiddenLabel') {
-          $boost = '^10';
-        }
-
-        if (!empty($options['languages'])) {
-          foreach ($options['languages'] as $lang) {
-
-            $searchTextQueries[] = $prefix . $label . '_' . $lang . ':' . $searchText . $boost;
+    if (!$parser->isFieldSearch($searchText)) { // searchText does not contain ":"
+      $searchTextQueries = [];
+      // labels
+      if (!empty($options['label'])) {
+        foreach ($options['label'] as $label) {
+          // boost important labels
+          $boost = '';
+          if ($label === 'prefLabel') {
+            $boost = '^40';
           }
-        } else {
-          $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
+          if ($label === 'altLabel') {
+            $boost = '^20';
+          }
+          if ($label === 'hiddenLabel') {
+            $boost = '^10';
+          }
+
+          if (!empty($options['languages'])) {
+            foreach ($options['languages'] as $lang) {
+
+              $searchTextQueries[] = $prefix . $label . '_' . $lang . ':' . $searchText . $boost;
+            }
+          } else {
+            $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
+          }
         }
       }
-    }
 
-    // notes
-    if (!empty($options['properties'])) {
-      foreach ($options['properties'] as $property) {
-        if (!empty($options['languages'])) {
-          foreach ($options['languages'] as $lang) {
-            $searchTextQueries[] = $prefix . $property . '_' . $lang . ':' . $searchText;
+      // notes
+      if (!empty($options['properties'])) {
+        foreach ($options['properties'] as $property) {
+          if (!empty($options['languages'])) {
+            foreach ($options['languages'] as $lang) {
+              $searchTextQueries[] = $prefix . $property . '_' . $lang . ':' . $searchText;
+            }
+          } else {
+            $searchTextQueries[] = $prefix . $property . ':' . $searchText;
           }
-        } else {
-          $searchTextQueries[] = $prefix . $property . ':' . $searchText;
         }
       }
-    }
 
-    // search notation
-    if (!empty($options['searchNotation'])) {
-      $searchTextQueries[] = 's_notation:' . $searchText;
-    }
+      // search notation
+      if (!empty($options['searchNotation'])) {
+        $searchTextQueries[] = 's_notation:' . $searchText;
+      }
 
-    // search uri
-    if (!empty($options['searchUri'])) {
-      $searchTextQueries[] = 's_uri:' . $searchText;
+      // search uri
+      if (!empty($options['searchUri'])) {
+        $searchTextQueries[] = 's_uri:' . $searchText;
+      }
     }
-
+    
+    
     if (empty($searchTextQueries)) {
+      $searchfields= explode(",", SEARCHFILEDS);
+      foreach ($searchfields as $field) {
+        $searchText = str_replace($field, $prefix . $field, $searchText);
+      };
       $solrQuery = $searchText;
     } else {
       $solrQuery = '(' . implode(' OR ', $searchTextQueries) . ')';
     }
 
     // @TODO Use filter queries
-
     $optionsQueries = [];
 
     //status

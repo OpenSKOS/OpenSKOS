@@ -19,11 +19,11 @@ class Api_ConceptschemeController extends AbstractController
     
      * Get a detailed list of SKOS concept schemata
      *
-     * @api {get} /api/conceptscheme[?format=rdf, ?format=html, ?format=json, ?format=jsonp&callback=f] Get SKOS concept scheme
-     * @apiName GetConceptScheme
+     * @api {get} /api/conceptscheme Get SKOS concept scheme
+     * @apiName GetConceptSchemata
      * @apiGroup ConceptScheme
      *
-     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty 
      * 
      * @apiSuccess (200) OK
@@ -59,6 +59,7 @@ class Api_ConceptschemeController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Return a  specific SKOS Concept Scheme by its uri or uuid
      *
+     * @api {get} /api/conceptscheme/ Get SKOS concept scheme details by its id (which is set to the set's uri or uuid) as a request parameter
      * @api {get} /api/conceptscheme/{uuid}[.rdf, .html, .json, .jsonp] Get SKOS concept scheme details
      * @apiName GetConceptScheme
      * @apiGroup conceptScheme
@@ -85,6 +86,7 @@ class Api_ConceptschemeController extends AbstractController
      *    <openskos:tenant rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"/>
      *  </rdf:Description>
      * </rdf:RDF>
+     * 
      * @apiError NotFound {String} The requested resource <id> of type http://www.w3.org/2004/02/skos/core#ConceptScheme was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
@@ -101,7 +103,11 @@ class Api_ConceptschemeController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Create a SKOS concept scheme 
     
-     * Create a new SKOS concept scheme based on the post data
+     * Create a new SKOS concept scheme based on the post data.
+     * The concept schema's title provided in the requests' body has an obligatory attribute "language".
+     * The title must be unique per language and single per language.
+     * The reference to a set, to which  the schema under submission belongs to, must be the reference to an existing set.
+     * If one of the conditions above is not fullfilled the validator will throw an error.
      *
      @apiExample {String} Example request
      * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -140,18 +146,38 @@ class Api_ConceptschemeController extends AbstractController
      *     <openskos:uuid>fed05e8d-f586-45b5-934a-7e8fccb61871</openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      * @apiError ConceptSchemeExists {String} X-Error-Msg: The resource with <id> already exists. Use PUT instead.
      * @apiErrorExample ConceptSchemeExists:
      *   HTTP/1.1 400 Bad request
      *   The resource with <id> already exists. Use PUT instead.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/ns/org#Dataset) referred by  uri <sets's reference> is not found.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   The resource (of type http://www.w3.org/ns/org#Dataset) referred by  uri <sets's reference> is not found.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The resource with the property http://purl.org/dc/terms/title set to <dctermstitle> has been already registered.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   The resource with the property http://purl.org/dc/terms/title set to <dctermstitle> has been already registered.
+     *
+     * @apiError ValidationError {String} X-Error-Msg: Title <dctermstitle> is given without language.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   Title <dctermstitle>  is given without language.
+     *
+     * 
      */
     public function postAction()
     {
@@ -162,10 +188,11 @@ class Api_ConceptschemeController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Update a SKOS concept scheme 
-    
-     * Update a SKOS scheme based on the post data
      *
-     @apiExample {String} Example request
+     * Update a SKOS concept scheme based on the post data. The validation requrements are the same as for
+     * the POST request.
+     *
+     * @apiExample {String} Example request
      * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      * xmlns:openskos = "http://openskos.org/xmlns#"
      * xmlns:dcterms = "http://purl.org/dc/terms/">
@@ -203,14 +230,18 @@ class Api_ConceptschemeController extends AbstractController
      *     <openskos:uuid>fed05e8d-f586-45b5-934a-7e8fccb61871</openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
+     * Validation errors are identic to validation errors for POST requests.
      */
     public function putAction()
     {

@@ -19,7 +19,7 @@ class Api_SetController extends AbstractController
     
      * Get a detailed list of OpenSKOS sets
      *
-     * @api {get} /api/set[?format=rdf, ?format=html, ?format=json, ?format=jsonp&callback=f]  Get OpenSKOS sets
+     * @api {get} /api/set  Get OpenSKOS sets
      * @apiName GetSets
      * @apiGroup Set
      *
@@ -61,10 +61,7 @@ class Api_SetController extends AbstractController
      *     <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
      *  </rdf:Description>
      *  </rdf:RDF>
-     * @apiError SetExists {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
-     * @apiErrorExample Not found:
-     *   HTTP/1.1 404 Not Found
-     *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * 
      */
      public function indexAction()
     {
@@ -78,19 +75,20 @@ class Api_SetController extends AbstractController
     
      * Get an OpenSKOS set by its uri or uuid
      *
+     * @api {get} /api/set/ Get OpenSKOS set details given its id (which is set to the set's uri or uuid) as a request parameter
      * @api {get} /api/set/{uuid}[.rdf, .html, .json, .jsonp] Get OpenSKOS set
      * @apiName GetSet
      * @apiGroup Set
      *
      * @apiParam {String} id
-     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
      * 
      * @apiSuccess (200) OK
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 OK
      *   <?xml version="1.0" encoding="utf-8" ?>
-     *<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     * <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
      * <rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
@@ -106,7 +104,8 @@ class Api_SetController extends AbstractController
      *   <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
      * </rdf:Description>
      * </rdf:RDF>
-     * @apiError SetExists {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * 
+     * @apiError NotFound {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
      *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
@@ -122,7 +121,11 @@ class Api_SetController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Create an OpenSKOS Set
     
-     * Create a new OpenSKOS set based on the post data
+     * Create a new OpenSKOS set based on the post data.
+     * The set's code and the web-page provided in the request body, must be unique. 
+     * The obligatory publisher reference must be the reference to an existing institution and must 
+     * coinside with the one with tenant code given in the request parameter.
+     * If one of the conditions above is not fullfilled the validator will throw an error.
      *
      @apiExample {String} Example request
      * <?xml version="1.0" encoding="UTF-8"?>
@@ -170,19 +173,28 @@ class Api_SetController extends AbstractController
      *   <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"/>
      *   <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
      *   </rdf:Description>
-     *   </rdf:RDF>
+     *  </rdf:RDF>
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      * @apiError SetExists {String} X-Error-Msg: The resource with <id> already exists. Use PUT instead.
      * @apiErrorExample SetExists:
      *   HTTP/1.1 400 Bad request
      *   The resource with <id> already exists. Use PUT instead.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/ns/org#FormalOrganization) referred by  uri <publisher's reference> is not found.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   The resource (of type http://www.w3.org/ns/org#FormalOrganization) referred by  uri <publisher's reference> is not found.
+     *
      */
     public function postAction()
     {
@@ -240,14 +252,22 @@ class Api_SetController extends AbstractController
      *   <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
      *   </rdf:Description>
      *   </rdf:RDF>
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The given publisher <publisher's reference>  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri <tenant's uri>.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   The given publisher <publisher's reference>  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri <tenant's uri>.
+     *
      */
     public function putAction()
     {
@@ -282,19 +302,22 @@ class Api_SetController extends AbstractController
      *   <openskos:uuid>5980699b-2c9a-4717-ac30-aed13743cc84</openskos:uuid>
      *   </rdf:Description>
      *   </rdf:RDF>
+     * 
      * @apiError Not found {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-      */
+     */
     public function deleteAction()
     {
         parent::deleteAction();

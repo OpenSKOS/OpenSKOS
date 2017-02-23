@@ -16,11 +16,11 @@ class Api_SkoscollectionController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Return a list of SKOS Collections
-     * @api {get} /api/skoscollection[?format=rdf, ?format=html, ?format=json, ?format=jsonp&callback=f]   Get SKOS collections
-     * @apiName GetSkosCollection
+     * @api {get} /api/skoscollection   Get SKOS collections
+     * @apiName GetSkosCollections
      * @apiGroup SkosCollection
      *
-     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain non-empty parameter callback as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
      * 
      * @apiSuccess (200) OK
@@ -65,14 +65,15 @@ class Api_SkoscollectionController extends AbstractController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Return a specific SKOS collection by its uri or uuid
+     * @apiDescription Return a specific SKOS collection given its uri or uuid
      *
+     * @api {get} /api/skoscollection/ Get SKOS collection details given its id (which is set to the collection's uri or uuid) as a request parameter
      * @api {get} /api/skoscollection/{uuid}[.rdf, .html, .json, .jsonp] Get SKOS collection details
      * @apiName GetSkosCollection
      * @apiGroup SkosCollection
      *
      * @apiParam {String} id (uuid, or uri)
-     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
+     * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
      * 
      * @apiSuccess (200) OK
@@ -112,7 +113,12 @@ class Api_SkoscollectionController extends AbstractController
      * @apiDescription Create a SKOS collecion 
     
      * Create a new SKOS collection based on the post data
-     *
+     * The collection's title provided in the requests' body has an obligatory attribute "language".
+     * The title must be unique per language and single per language.
+     * The reference to a set, to which  the collection under submission belongs to, must be the reference to an existing set.
+     * If one of the conditions above is not fullfilled the validator will throw an error.
+     * 
+     * 
      @apiExample {String} Example request
      * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      * xmlns:openskos = "http://openskos.org/xmlns#"
@@ -150,18 +156,28 @@ class Api_SkoscollectionController extends AbstractController
      *    <openskos:uuid>5234162d-dc05-462f-90a6-5e42f4d5c07e</openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      * @apiError SkosCollectionExists {String} X-Error-Msg: The resource with <id> already exists. Use PUT instead.
      * @apiErrorExample SkosCollectionExists:
      *   HTTP/1.1 400 Bad request
      *   The resource with <id> already exists. Use PUT instead.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: http://purl.org/dc/terms/title is required for all resources of this type.
+     * @apiErrorExample ValidationError: 
+     *   HTTP/1.1 400 Bad request
+     *   http://purl.org/dc/terms/title is required for all resources of this type.
+     * 
+     * 
      */
     public function postAction()
     {
@@ -172,8 +188,8 @@ class Api_SkoscollectionController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Update a SKOS collecion 
-    
-     * Update a SKOS collection based on the post data
+     *
+     * Update a SKOS collection based on the post data. Validation requirements are the same as for the POST request.
      *
      * @apiExample {String} Example request
      * <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -213,23 +229,33 @@ class Api_SkoscollectionController extends AbstractController
      *      <openskos:uuid>5234162d-dc05-462f-90a6-5e42f4d5c07e</openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
+     * 
      * @apiError MissingKey {String} X-Error-Msg: No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      * @apiError MissedUri {String} X-Error-Msg:  Missed uri (rdf:about)!
      * @apiErrorExample MissedUri: 
      *   HTTP/1.1 400 Bad request
      *   Missed uri (rdf:about)!
+     *
      * @apiError ChangedOrNoUuid {String} X-Error-Msg:  You cannot change UUID of the resouce. Keep it <oldUuid>
      * @apiErrorExample ChangedOrNoUuid: 
      *   HTTP/1.1 400 Bad request
      *   You cannot change UUID of the resouce. Keep it <oldUuid>
+     * 
+     * Validation error are identic to validation errors for POST requests, and similar to concept shcme validation errors.
+     * 
      */
+    
+    
+    
     public function putAction()
     {
         parent::putAction();
@@ -263,18 +289,22 @@ class Api_SkoscollectionController extends AbstractController
      *     <dcterms:title xml:lang="en">SkosCollection1new</dcterms:title>
      *     <openskos:uuid>2dfa20f7-9e84-4b80-9a00-83e5a66b6933</openskos:uuid>
      * </rdf:RDF>
+     * 
      * @apiError Not found {String} The requested resource <uri> of type type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource <uri> of type type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
+     * 
      * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No key specified
+     * 
      * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      * @apiError MissedUri {String} X-Error-Msg:  Missing uri parameter
      * @apiErrorExample MissedUri: 
      *   HTTP/1.1 400 Bad request
