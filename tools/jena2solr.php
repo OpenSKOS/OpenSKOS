@@ -73,7 +73,9 @@ if (empty($uri)) {
     $total = 1;
 }
 
-$rows = 1000;
+$logger->info('Total: ' . $total);
+
+$rows = 500;
 
 if ($uri) {
     
@@ -112,9 +114,10 @@ while ($offset < $total) {
             echo $exc->getTraceAsString() . PHP_EOL;
         }
     }
+    
+    $logger->info('Commit ' . $rows);
+    $solrResourceManager->commit();
 }
-
-$solrResourceManager->commit();
 
 $logger->info('Processed: ' . $total);
 $logger->info("Done!");
@@ -139,6 +142,7 @@ function getTotal(\OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager, $sp
     
     $result = $resourceManager->query($countAll);
     $total = $result->getArrayCopy()[0]->count->getValue();
+    
     return $total;
 }
 
