@@ -87,7 +87,7 @@ class Api_ConceptschemeController extends AbstractController
      *  </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError NotFound {String} The requested resource <id> of type http://www.w3.org/2004/02/skos/core#ConceptScheme was not found in the triple store.
+     * @apiError NotFound {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/2004/02/skos/core#ConceptScheme was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
      *   The requested resource <id> of type http://www.w3.org/2004/02/skos/core#ConceptScheme was not found in the triple store.
@@ -147,12 +147,12 @@ class Api_ConceptschemeController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg:  No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
@@ -231,12 +231,12 @@ class Api_ConceptschemeController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
@@ -277,11 +277,13 @@ class Api_ConceptschemeController extends AbstractController
      *     <openskos:uuid>fed05e8d-f586-45b5-934a-7e8fccb61871</openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
-     * @apiError MissingKey {String} No key specified
+     * 
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
-     * @apiError MissingTenant {String} No tenant specified
+     *   No user key specified
+     * 
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified

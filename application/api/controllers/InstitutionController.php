@@ -85,7 +85,7 @@ class Api_InstitutionController extends AbstractController
      * </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError NotFound {String} The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     * @apiError NotFound {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
      *   The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
@@ -165,10 +165,10 @@ class Api_InstitutionController extends AbstractController
      * </rdf:RDF>  
      * 
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
      * @apiError InstitutionExists {String} X-Error-Msg: The resource with <id> already exists. Use PUT instead.
      * @apiErrorExample SetExists:
@@ -261,10 +261,10 @@ class Api_InstitutionController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>  
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
      * @apiError MissingUri {String} X-Error-Msg: Missed uri (rdf:about)!
      * @apiErrorExample MissingUri:
@@ -321,15 +321,15 @@ class Api_InstitutionController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF> 
      *  
-     * @apiError Not found {String} The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     * @apiError Not found {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      *
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      */
     public function deleteAction()
     {

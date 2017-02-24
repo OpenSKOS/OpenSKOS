@@ -97,7 +97,8 @@ class Api_SkoscollectionController extends AbstractController
      *     <openskos:tenant rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"/>
      *   </rdf:Description>
      * </rdf:RDF>
-     * @apiError NotFound {String} The requested resource <id> of type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
+     * 
+     * @apiError NotFound {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
      *   The requested resource <id> of type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
@@ -157,12 +158,12 @@ class Api_SkoscollectionController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
@@ -230,10 +231,10 @@ class Api_SkoscollectionController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
      * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
@@ -290,17 +291,17 @@ class Api_SkoscollectionController extends AbstractController
      *     <openskos:uuid>2dfa20f7-9e84-4b80-9a00-83e5a66b6933</openskos:uuid>
      * </rdf:RDF>
      * 
-     * @apiError Not found {String} The requested resource <uri> of type type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
+     * @apiError Not found {String} X-Error-Msg: The requested resource <uri> of type type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource <uri> of type type http://www.w3.org/2004/02/skos/core#Collection was not found in the triple store.
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified

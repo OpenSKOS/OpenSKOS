@@ -146,8 +146,8 @@ class Concept extends AbstractTripleStoreResource {
       }
 
 
-      if (isset($params['set'])) {
-        $options['set'] = explode(' ', trim($params['set']));
+      if (isset($params['setUri'])) {
+        $options['set'] = explode(' ', trim($params['setUri']));
       }
 
       $tenantCodes = [];

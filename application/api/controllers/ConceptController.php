@@ -39,25 +39,6 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * Create a new SKOS concept based on the post data
      *
-     @apiExample {String} Example request
-     * <rdf:RDF
-     *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     *    xmlns:openskos="http://openskos.org/xmlns#"
-     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#">
-     *    <rdf:Description>
-     *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
-     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen">
-     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842">
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652">
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957">
-     *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
-     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731">
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109">
-     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA">
-     *      <skos:notation>28586</skos:notation>
-     *    </rdf:Description>
-     *  </rdf:RDF>
-     *
      * @api {post} /api/concept Create SKOS concept
      * @apiName CreateConcept
      * @apiGroup Concept
@@ -94,22 +75,31 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;openskos:tenant rdf:resource="http://data.beeldengeluid.nl"/>
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * @apiError MissingKey {String} No key specified
+     * 
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
-     * @apiError MissingTenant {String} No tenant specified
+     *   No user key specified
+     * 
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-     * @apiError ConceptExists {String} Concept `uri` already exists
+     * 
+     * @apiError ConceptExists {String} X-Error-Msg: The resource with uri <oncept uri> already exists. Use PUT instead.
      * @apiErrorExample ConceptExists:
      *   HTTP/1.1 400 Bad request
-     *   Concept `uri` already exists
-     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
-     * @apiErrorExample UniquePreflabel:
+     *   The resource with uri <oncept uri> already exists. Use PUT instead.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The pref label already exists in that concept scheme.
+     * @apiErrorExample ValidationError:
      *   HTTP/1.1 400 Bad request
-     *   The concept preflabel must be unique per scheme
+     *   TThe pref label already exists in that concept scheme.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
+     * @apiErrorExample ValidationError:
+     *   HTTP/1.1 400 Bad request
+     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
      */
     public function postAction()
     {
@@ -178,22 +168,31 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;openskos:tenant rdf:resource="http://data.beeldengeluid.nl"/>
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * @apiError MissingKey {String} No key specified
-     * @apiErrorExample MissingKey
+     * 
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
+     * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
-     * @apiError MissingTenant {String} No tenant specified
-     * @apiErrorExample MissingTenant
+     *   No user key specified
+     * 
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
+     * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-     * @apiError ConceptExists {String} Concept `uri` already exists
-     * @apiErrorExample ConceptExists
+     * 
+     * @apiError ConceptExists {String} X-Error-Msg: The resource with uri <oncept uri> already exists. Use PUT instead.
+     * @apiErrorExample ConceptExists:
      *   HTTP/1.1 400 Bad request
-     *  Concept `uri` already exists
-     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
-     * @apiErrorExample UniquePreflabel
+     *   The resource with uri <oncept uri> already exists. Use PUT instead.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The pref label already exists in that concept scheme.
+     * @apiErrorExample ValidationError:
      *   HTTP/1.1 400 Bad request
-     *   The concept preflabel must be unique per scheme
+     *   TThe pref label already exists in that concept scheme.
+     * 
+     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
+     * @apiErrorExample ValidationError:
+     *   HTTP/1.1 400 Bad request
+     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
      */
     public function putAction()
     {
@@ -237,18 +236,22 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-11-12T04:13:45+00:00&lt;/openskos:dateDeleted>
      *     &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * @apiError Gone {String} Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
+     * 
+     * @apiError Gone {String} X-Error-Msg: Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
      * @apiErrorExample Gone
      *   HTTP/1.1 410 Gone
      *   Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
-     * @apiError MissingKey {String} No key specified
-     * @apiErrorExample MissingKey
+     * 
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
+     * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
-     * @apiError MissingTenant {String} No tenant specified
-     * @apiErrorExample MissingTenant
+     *   No user key specified
+     * 
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
+     * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
      */
     public function deleteAction()
     {

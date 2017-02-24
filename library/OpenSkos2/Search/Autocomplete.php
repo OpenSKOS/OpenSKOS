@@ -231,7 +231,8 @@ class Autocomplete {
         }
       }
     }
-
+ 
+    
     $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
     if (!empty($interactionsQuery)) {
       $solrQuery .= ' AND (' . $interactionsQuery . ')';
@@ -242,6 +243,7 @@ class Autocomplete {
     } else {
       $sorts = null;
     }
+    
     return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
   }
 

@@ -105,7 +105,7 @@ class Api_SetController extends AbstractController
      * </rdf:Description>
      * </rdf:RDF>
      * 
-     * @apiError NotFound {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiError NotFound {String} X-Error-Msg: The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
      *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
@@ -175,12 +175,12 @@ class Api_SetController extends AbstractController
      *   </rdf:Description>
      *  </rdf:RDF>
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
@@ -253,12 +253,12 @@ class Api_SetController extends AbstractController
      *   </rdf:Description>
      *   </rdf:RDF>
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
      * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
@@ -303,17 +303,17 @@ class Api_SetController extends AbstractController
      *   </rdf:Description>
      *   </rdf:RDF>
      * 
-     * @apiError Not found {String} The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiError Not found {String} X-Error-Msg: The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource <id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * 
-     * @apiError MissingKey {String} No key specified
+     * @apiError MissingKey {String} X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
-     *   No key specified
+     *   No user key specified
      * 
-     * @apiError MissingTenant {String} No tenant specified
+     * @apiError MissingTenant {String} X-Error-Msg:  No tenant specified
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified

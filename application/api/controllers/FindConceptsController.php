@@ -36,9 +36,15 @@ class Api_FindConceptsController extends AbstractController {
    * @apiDescription Find a SKOS Concept
    * The following requests are possible
    *
-   * /api/find-concepts?q=doood
+   * /api/find-concepts?q=ateu  // search for a tokenized substring, case insensitive
+   * 
+   * /api/find-concepts?q=amateur
    *
-   * /api/find-concepts?q=do*
+   * /api/find-concepts?q=*ateu 
+   * 
+   * /api/find-concepts?q=ateu* 
+   *
+   * /api/find-concepts?q=*ateu* 
    *
    * /api/find-concepts?q=prefLabel:dood
    *
@@ -47,12 +53,16 @@ class Api_FindConceptsController extends AbstractController {
    * /api/find-concepts?q=prefLabel:do*&rows=0
    *
    * /api/find-concepts?q=prefLabel@nl:doo
-   *
+   * 
    * /api/find-concepts?q=prefLabel@nl:do*
    *
-   * /api/find-concepts?q=do*&tenant=beng&collection=gtaa
+   * /api/find-concepts?q=Label*&tenantUri=http://mertens/knaw/formalorganization_bd9df26b-313c-445a-ab4e-3467b0429494
    *
-   * /api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten
+   * /api/find-concepts?q=Label*&setUri=http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372
+   * 
+   * /api/find-concepts?q=Label*&tenant=example
+   *
+   * /api/find-concepts?q=do*&conceptScheme=http://data.cultureelerfgoed.nl/semnet/objecten
    *
    * @api {get} /api/find-concepts Find a concept
    * @apiName FindConcepts
@@ -61,8 +71,8 @@ class Api_FindConceptsController extends AbstractController {
    * @apiParam {String} rows Number of rows to return
    * @apiParam {String} fl List of fields to return
    * @apiParam {String} tenant Name of the tenant to query. Default is all tenants
-   * @apiParam {String} collection OpenSKOS set to query. Default is all sets
-   * @apiParam {String} scheme id of the SKOS concept scheme to query. Default is all schemes
+   * @apiParam {String} set OpenSKOS set to query. Default is all sets
+   * @apiParam {String} conceptScheme id of the SKOS concept scheme to query. Default is all concept schemes
    * @apiSuccess (200) {String} XML
    * @apiSuccessExample {String} Success-Response
    *   HTTP/1.1 200 Ok
@@ -79,9 +89,8 @@ class Api_FindConceptsController extends AbstractController {
    *   &lt;rdf:Description xmlns:dc="http://purl.org/dc/terms/"
    *      rdf:about="http://data.cultureelerfgoed.nl/semnet/efc584d7-9880-43fb-9a0b-76f3036aa315">
    *      &lt;rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-   *         &lt;skos:prefLabel xml:lang="nl">doodshemden&lt;/skos:prefLabel>
-   *         &lt;skos:altLabel xml:lang="nl">doodshemd&lt;/skos:altLabel>
-   *         &lt;openskos:tenant>rce&lt;/openskos:tenant>
+   *         &lt;skos:prefLabel xml:lang="nl">Label-A&lt;/skos:prefLabel>
+   *         &lt;skos:altLabel xml:lang="nl">label-a&lt;/skos:altLabel>
    *         &lt;skos:notation>1183132&lt;/skos:notation>
    *         &lt;skos:inScheme rdf:resource="http://data.cultureelerfgoed.nl/semnet/erfgoedthesaurus"/>
    *         &lt;skos:inScheme rdf:resource="http://data.cultureelerfgoed.nl/semnet/objecten"/>
@@ -93,7 +102,8 @@ class Api_FindConceptsController extends AbstractController {
    *         &lt;dc:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-07-03T09:27:56+00:00&lt;/dc:dateSubmitted>
    *         &lt;openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-10-09T09:33:06+00:00&lt;/openskos:dateDeleted>
    *         &lt;openskos:status>deleted&lt;/openskos:status>
-   *         &lt;openskos:collection rdf:resource="http://openskos.org/api/collections/rce:EGT"/>
+   *         &lt;openskos:set rdf:resource="http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372"/>
+   *         &lt;openskos:tenant rdf:resource="http://mertens/knaw/formalorganization_bd9df26b-313c-445a-ab4e-3467b0429494"/>
    *     &lt;/rdf:Description>
    *   &lt;/rdf:RDF>
    *
@@ -134,9 +144,11 @@ class Api_FindConceptsController extends AbstractController {
    *
    * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json (json format)
    *
-   * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)
+   * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp?callback=test (jsonp format)
    *
-   * /api/concept/?id=http://example.com/1 (rdf format)
+   * /api/concept/ec56c9f1-371b-4505-bdac-9687640882ab (rdf format)
+   * 
+   * /api/concept/?id=http://hdl.handle.net/11148/backendname_concept_ec56c9f1-371b-4505-bdac-9687640882ab   (rdf format)
    *
    * @api {get} /api/concept/{id}.rdf Get concept detail
    * @apiName GetConcept
@@ -153,7 +165,7 @@ class Api_FindConceptsController extends AbstractController {
    *           xmlns:openskos="http://openskos.org/xmlns#">
    *
 
-   *   &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/218059">
+   *   &lt;rdf:Description rdf:about="http://hdl.handle.net/11148/backendname_concept_ec56c9f1-371b-4505-bdac-9687640882ab">
    *       &lt;rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
    *       &lt;skos:historyNote xml:lang="nl">Recordnummer: 11665
    *   Datum invoer: 13-12-1998
@@ -168,12 +180,11 @@ class Api_FindConceptsController extends AbstractController {
    *       &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/217572"/>
    *       &lt;dcterms:creator rdf:resource="http://openskos.org/users/9f598c22-1fd4-4113-9447-7c71d0c7146f"/>
    *       &lt;skos:broadMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
-   *       &lt;openskos:collection rdf:resource="http://openskos.org/api/collections/beg:gtaa"/>
    *       &lt;openskos:status>approved&lt;/openskos:status>
-   *       &lt;skos:prefLabel xml:lang="nl">doodstraf&lt;/skos:prefLabel>
-   *       &lt;skos:altLabel xml:lang="nl">kruisigingen&lt;/skos:altLabel>
-   *       &lt;openskos:tenant>beg&lt;/openskos:tenant>
-   *       &lt;dc:contributor>RVD, SFW, NFM, GWA, TVA&lt;/dc:contributor>
+   *       &lt;skos:prefLabel xml:lang="nl">Label-B&lt;/skos:prefLabel>
+   *       &lt;skos:altLabel xml:lang="nl">label-b&lt;/skos:altLabel>
+   *       &lt;openskos:set rdf:resource="http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372"/>
+   *       &lt;openskos:tenant rdf:resource="http://mertens/knaw/formalorganization_bd9df26b-313c-445a-ab4e-3467b0429494"/>
    *       &lt;skos:notation>218059&lt;/skos:notation>
    *       &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
    *       &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T17:30:51+00:00&lt;/dcterms:modified>
@@ -212,7 +223,7 @@ class Api_FindConceptsController extends AbstractController {
     }
   }
 
-// Meertens:  Gusy, when do you need that id_prefix: why ID prefix is not a part of ID
+// Meertens:  Guys, when do you need that id_prefix: why ID prefix is not a part of ID
   // also, !!!
   /**
    * Get concept id
