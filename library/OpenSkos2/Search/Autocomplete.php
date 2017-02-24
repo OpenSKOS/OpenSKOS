@@ -88,19 +88,16 @@ class Autocomplete {
       }
     }
 
-    $prefix = 's_'; //TODO make it case insensitive: introduce sl of string_lowercase and use ths prefix
-    // first hack docker's solr schema, then update the source schema if hacking works
-    // for hacking I need wim on docker and it is problematic to download it from trains
-    if (isset($options['wholeword'])) {
+    $prefix = ''; 
+    //Meertens: the feature wholeworld  works only  when labels and/or properties are given as request parameters
+    if (isset($options['wholeword'])) { 
       if ($options['wholeword']) {
         $prefix = 't_';
       }
     }
 
     // @TODO Better to use edismax qf
-
-    if (!$parser->isFieldSearch($searchText)) { // searchText does not contain ":"
-      $searchTextQueries = [];
+    $searchTextQueries = [];
       // labels
       if (!empty($options['label'])) {
         foreach ($options['label'] as $label) {
@@ -149,14 +146,10 @@ class Autocomplete {
       if (!empty($options['searchUri'])) {
         $searchTextQueries[] = 's_uri:' . $searchText;
       }
-    }
+   
     
     
     if (empty($searchTextQueries)) {
-      $searchfields= explode(",", SEARCHFILEDS);
-      foreach ($searchfields as $field) {
-        $searchText = str_replace($field, $prefix . $field, $searchText);
-      };
       $solrQuery = $searchText;
     } else {
       $solrQuery = '(' . implode(' OR ', $searchTextQueries) . ')';

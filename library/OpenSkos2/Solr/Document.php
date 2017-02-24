@@ -26,6 +26,7 @@ use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\FieldsMaps;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
 /**
@@ -61,11 +62,12 @@ class Document
      *
      * @var array
      */
+    
     protected $mapping = [
         Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel', 'sort_s_prefLabel'],
         Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel', 'sort_s_altLabel'],
         Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel', 'sort_s_hiddenLabel'],
-        Skos::DEFINITION => ['t_definition', 'a_definition'],
+        Skos::DEFINITION => ['t_definition', 'a_definition', 'definition'],
         Skos::EXAMPLE => ['t_example', 'a_example'],
         Skos::CHANGENOTE => ['t_changeNote', 'a_changeNote'],
         Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote'],
@@ -109,6 +111,9 @@ class Document
     {
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
+        
+         // Index bare SKOS and OpenSKOs fields via their standart map to SKOS and OpenSKOS predicates
+        $predicateToField = array_flip(FieldsMaps::getNamesToProperties());
        
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();
@@ -121,6 +126,10 @@ class Document
             // Explicitly mapped fields
             $fields = $this->mapping[$predicate];
 
+             // bare (non-"_"-prefixed) fields
+            if (isset($predicateToField[$predicate])) {
+                $fields[] = $predicateToField[$predicate];
+            }
             // Dc terms
             $dcTermKey = array_search($predicate, $dcTerms);
             if ($dcTermKey !== false) {
