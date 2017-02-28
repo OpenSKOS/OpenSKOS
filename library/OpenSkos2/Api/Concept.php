@@ -29,7 +29,7 @@ use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Concept as ConceptResource;
-use OpenSkos2\RelationManager;
+use OpenSkos2\RelationTypeManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
@@ -41,7 +41,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
-use OpenSkos2\MyInstitutionModules\Relations;
+use OpenSkos2\MyInstitutionModules\RelationTypes;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
@@ -302,9 +302,9 @@ class Concept extends AbstractTripleStoreResource {
 
 // also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
   private function checkRelationsInConcept(ConceptResource $concept) {
-    $userDefinedRelUris = array_values(Relations::$myrelations);
-    $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
-    $allRelationUris = array_values(RelationManager::fetchConceptConceptRelationsNameUri());
+    $userDefinedRelUris = array_values(RelationTypes::$myrelations);
+    $registeredRelationUris = array_values($this->manager->getNonSKOSRelationTypes());
+    $allRelationUris = array_values(RelationTypeManager::fetchConceptConceptRelationsNameUri());
     $conceptUri = $concept->getUri();
     $properties = array_keys($concept->getProperties());
     foreach ($properties as $property) {
@@ -421,7 +421,7 @@ class Concept extends AbstractTripleStoreResource {
 
     $body = $request->getParsedBody();
     if (!isset($body['key'])) {
-      throw new ApiException('Missing key', 400);
+      throw new ApiException('Missing key in the request body', 400);
     }
     if (!isset($body['concept'])) {
       throw new ApiException('Missing concept', 400);
@@ -435,26 +435,26 @@ class Concept extends AbstractTripleStoreResource {
 
     $exists1 = $this->manager->resourceExists($body['concept'], Skos::CONCEPT);
     if (!$exists1) {
-      throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 400);
+      throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 404);
     }
 
     $exists2 = $this->manager->resourceExists($body['related'], Skos::CONCEPT);
     if (!$exists2) {
-      throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 400);
+      throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 404);
     }
 
-    $userDefinedRelUris = array_values(Relations::$myrelations);
-    $registeredRelationUris = array_values($this->manager->getUserRelationQNameUris());
-    $allRelationUris = array_values(RelationManager::fetchConceptConceptRelationsNameUri());
+    $userDefinedRelUris = array_values(RelationTypes::$myrelations);
+    $registeredRelationUris = array_values($this->manager->getNonSKOSRelationTypes());
+    $allRelationUris = array_values(RelationTypeManager::fetchConceptConceptRelationsNameUri());
     if (in_array($body['type'], $allRelationUris)) { // is a concept-concept relation 
-// if it is a user-defined, it must be registered
+// if it is a user-defined relation type, it must be registered as a resource
       if (in_array($body['type'], $userDefinedRelUris)) { // is a user-defined relation
         if (!in_array($body['type'], $registeredRelationUris)) {
-          throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 400);
+          throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 404);
         }
       }
     } else {
-      throw new ApiException('The relation  ' . $body['type'] . '  is neither a skos concept-concept relation nor a user-defined relation. ', 400);
+      throw new ApiException('The relation type ' . $body['type'] . '  is neither a skos concept-concept relation type nor a user-defined relation type. ', 404);
     }
 
 

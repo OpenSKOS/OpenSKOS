@@ -21,27 +21,27 @@ class Api_InstitutionController extends AbstractController
      *
      * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain parameter callback as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
-     * @apiSuccess (200) OK
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess {String} StatusCode 200 OK.
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 200 OK 
-     * <?xml version="1.0"?>
-     * <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+     * &lt;?xml version="1.0"?>
+     * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
      *   xmlns:dc="http://purl.org/dc/elements/1.1/" 
      *   xmlns:dcterms="http://purl.org/dc/terms/" 
      *   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
      *   xmlns:openskos="http://openskos.org/xmlns#" openskos:numFound="1" openskos:rows="5000" openskos:start="1">
-     * <rdf:Description xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">
-     *  <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
-     *   <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *   <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:disableSearchInOtherTenants>
-     *   <vcard:ADR rdf:resource="http://node-adr-b9f78264-16e3-4650-8360-caca8f9f91ed"/>
-     *   <vcard:ORG rdf:about="http://node-org-a97a9d95-9b53-4ccc-93bf-330cb947ff00">
-     *     <vcard:orgname>example.com</vcard:orgname>
-     *  </vcard:ORG>
-     *  <openskos:code>example</openskos:code>
-     *  <openskos:uuid>10302a0e-7e4e-4dbb-bce0-59e2a21c8785</openskos:uuid>
-     *  </rdf:Description>
-     * </rdf:RDF>
+     * &lt;rdf:Description xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">
+     *  &lt;rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
+     *   &lt;openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *   &lt;openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:disableSearchInOtherTenants>
+     *   &lt;vcard:ADR rdf:resource="http://node-adr-b9f78264-16e3-4650-8360-caca8f9f91ed"/>
+     *   &lt;vcard:ORG rdf:about="http://node-org-a97a9d95-9b53-4ccc-93bf-330cb947ff00">
+     *     &lt;vcard:orgname>example.com&lt;/vcard:orgname>
+     *  &lt;/vcard:ORG>
+     *  &lt;openskos:code>example&lt;/openskos:code>
+     *  &lt;openskos:uuid>10302a0e-7e4e-4dbb-bce0-59e2a21c8785&lt;/openskos:uuid>
+     *  &lt;/rdf:Description>
+     * &lt;/rdf:RDF>
      * 
      */
      public function indexAction()
@@ -54,41 +54,40 @@ class Api_InstitutionController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Return a specific OpenSKOS institution given its uri or uuid
      *
-     * @api {get} /api/institution/ Get OpenSKOS institution details given its id (which is set to the institutions's uri or uuid) as a request parameter
-     * @api {get} /api/institution/{uuid}[.rdf, .html, .json, .jsonp]  Get OpenSKOS institution details
+     * @api {get} /api/institution/[{uuid}[.rdf,.html,.json,.jsonp]]  Get OpenSKOS institution details
      
      * @apiName GetInstitution
      * @apiGroup Institution
      *
-     * @apiParam {String} id (uuid or uri)
+     * @apiParam {String} id uuid or uri
      * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
     
-     * @apiSuccess (200) OK
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess {String} StatusCode 200 OK.
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 200 OK
-     * <?xml version="1.0"?>
-     * <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+     * &lt;?xml version="1.0"?>
+     * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
      * xmlns:dc="http://purl.org/dc/elements/1.1/" 
      * xmlns:dcterms="http://purl.org/dc/terms/" 
      * xmlns:skos="http://www.w3.org/2004/02/skos/core#">
-     * <rdf:Description xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">
-     * <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
-     *   <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *   <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:disableSearchInOtherTenants>
-     *   <vcard:ADR rdf:resource="http://node-adr-b9f78264-16e3-4650-8360-caca8f9f91ed"/>
-     *   <vcard:ORG rdf:about="http://node-org-a97a9d95-9b53-4ccc-93bf-330cb947ff00">
-     *     <vcard:orgname>example.com</vcard:orgname>
-     *   </vcard:ORG>
-     *  <openskos:code>example</openskos:code>
-     *  <openskos:uuid>10302a0e-7e4e-4dbb-bce0-59e2a21c8785</openskos:uuid>
-     * </rdf:Description>
-     * </rdf:RDF>
+     * &lt;rdf:Description xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">
+     * &lt;rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
+     *   &lt;openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *   &lt;openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:disableSearchInOtherTenants>
+     *   &lt;vcard:ADR rdf:resource="http://node-adr-b9f78264-16e3-4650-8360-caca8f9f91ed"/>
+     *   &lt;vcard:ORG rdf:about="http://node-org-a97a9d95-9b53-4ccc-93bf-330cb947ff00">
+     *     &lt;vcard:orgname>example.com&lt;/vcard:orgname>
+     *   &lt;/vcard:ORG>
+     *  &lt;openskos:code>example&lt;/openskos:code>
+     *  &lt;openskos:uuid>10302a0e-7e4e-4dbb-bce0-59e2a21c8785&lt;/openskos:uuid>
+     * &lt;/rdf:Description>
+     * &lt;/rdf:RDF>
      * 
-     * @apiError NotFound {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     * @apiError NotFound X-Error-Msg: The requested resource &lt;id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      * @apiErrorExample Not found:
      *   HTTP/1.1 404 Not Found
-     *   The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     *   The requested resource &lt;id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      */
     
     public function getAction()
@@ -110,21 +109,21 @@ class Api_InstitutionController extends AbstractController
      *          xmlns:openskos="http://openskos.org/xmlns#"
      *          xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
      *   <rdf:Description>
-     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
+     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false&lt;/openskos:disableSearchInOtherTenants>
      *     <vcard:ADR rdf:parseType="Resource">
-     *       <vcard:Country>Netherlands</vcard:Country>
-     *       <vcard:Pcode>5555</vcard:Pcode>
-     *       <vcard:Locality>Amsterdam Centrum</vcard:Locality>
-     *       <vcard:Street>ErgensAchetrburgwal</vcard:Street>
-     *     </vcard:ADR>
-     *     <vcard:EMAIL>info@meertens3.knaw.nl</vcard:EMAIL>
-     *     <vcard:URL>http://meetens.knaw.nl</vcard:URL>
+     *       <vcard:Country>Netherlands&lt;/vcard:Country>
+     *       <vcard:Pcode>5555&lt;/vcard:Pcode>
+     *       <vcard:Locality>Amsterdam Centrum&lt;/vcard:Locality>
+     *       <vcard:Street>ErgensAchetrburgwal&lt;/vcard:Street>
+     *       </vcard:ADR>
+     *     <vcard:EMAIL>info@meertens3.knaw.nl&lt;/vcard:EMAIL>
+     *     <vcard:URL>http://meetens.knaw.nl&lt;/vcard:URL>
      *     <vcard:ORG rdf:parseType="Resource">
-     *       <vcard:orgunit>XXX</vcard:orgunit>
-     *       <vcard:orgname>Meertens Institute 3</vcard:orgname>
+     *       <vcard:orgunit>XXX&lt;/vcard:orgunit>
+     *       <vcard:orgname>Meertens Institute 3&lt;/vcard:orgname>
      *     </vcard:ORG>
-     *     <openskos:code>meertens3</openskos:code>
+     *     <openskos:code>meertens3&lt;/openskos:code>
      *   </rdf:Description>
      * </rdf:RDF>
      *
@@ -136,59 +135,59 @@ class Api_InstitutionController extends AbstractController
      * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
      *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
      *                                           If set to false - the xml must contain uri (rdf:about) and openskos:uuid.
-     * @apiSuccess (201) {String} Institution uri
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess (201) {String} Location Institution uri.
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 201 Created
-     *   <?xml version="1.0" encoding="utf-8" ?>
-     *   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *   &lt;?xml version="1.0" encoding="utf-8" ?>
+     *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *            xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
      *            xmlns:openskos="http://openskos.org/xmlns#">
-     *  <rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
-     *  <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
-     *    <vcard:URL>http://meetens.knaw.nl</vcard:URL>
-     *    <vcard:ADR rdf:nodeID="genid3">
-     *      <vcard:Street>ErgensAchetrburgwal</vcard:Street>
-     *      <vcard:Locality>Amsterdam Centrum</vcard:Locality>
-     *      <vcard:Pcode>5555</vcard:Pcode>
-     *      <vcard:Country>Netherlands</vcard:Country>
-     *    </vcard:ADR>
-     *    <vcard:ORG rdf:nodeID="genid1">
-     *      <vcard:orgunit>XXX</vcard:orgunit>
-     *       <vcard:orgname>Meertens Institute 3</vcard:orgname>
-     *    </vcard:ORG>
-     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *    <openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32</openskos:uuid>
-     *    <openskos:code>meertens3</openskos:code>
-     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
-     *    <vcard:EMAIL>info@meertens3.knaw.nl</vcard:EMAIL>
-     *   </rdf:Description>
-     * </rdf:RDF>  
+     *  &lt;rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
+     *  &lt;rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
+     *    &lt;vcard:URL>http://meetens.knaw.nl&lt;/vcard:URL>
+     *    &lt;vcard:ADR rdf:nodeID="genid3">
+     *      &lt;vcard:Street>ErgensAchetrburgwal&lt;/vcard:Street>
+     *      &lt;vcard:Locality>Amsterdam Centrum&lt;/vcard:Locality>
+     *      &lt;vcard:Pcode>5555&lt;/vcard:Pcode>
+     *      &lt;vcard:Country>Netherlands&lt;/vcard:Country>
+     *    &lt;/vcard:ADR>
+     *    &lt;vcard:ORG rdf:nodeID="genid1">
+     *      &lt;vcard:orgunit>XXX&lt;/vcard:orgunit>
+     *       &lt;vcard:orgname>Meertens Institute 3&lt;/vcard:orgname>
+     *    &lt;/vcard:ORG>
+     *    &lt;openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *    &lt;openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32&lt;/openskos:uuid>
+     *    &lt;openskos:code>meertens3&lt;/openskos:code>
+     *    &lt;openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false&lt;/openskos:disableSearchInOtherTenants>
+     *    &lt;vcard:EMAIL>info@meertens3.knaw.nl&lt;/vcard:EMAIL>
+     *   &lt;/rdf:Description>
+     * &lt;/rdf:RDF>  
      * 
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
+     * @apiError MissingKey X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError InstitutionExists {String} X-Error-Msg: The resource with <id> already exists. Use PUT instead.
+     * @apiError InstitutionExists X-Error-Msg: The resource with &lt;id> already exists. Use PUT instead.
      * @apiErrorExample SetExists:
      *   HTTP/1.1 400 Bad request
-     *   The resource with <id> already exists. Use PUT instead.
+     *   The resource with &lt;id> already exists. Use PUT instead.
      *
-     * @apiError GivenURI {String} X-Error-Msg: Parameter autoGenerateIdentifiers is set to true, but the provided xml already contains uri (rdf:about).
+     * @apiError GivenURI X-Error-Msg: Parameter autoGenerateIdentifiers is set to true, but the provided xml already contains uri (rdf:about).
      * @apiErrorExample GivenURI: 
      *   HTTP/1.1 400 Bad request
      *   Parameter autoGenerateIdentifiers is set to true, but the provided xml already contains uri (rdf:about).
      * 
-     * @apiError GivenUUID {String} X-Error-Msg: Parameter autoGenerateIdentifiers is set to true, but the provided xml  already contains uuid.
+     * @apiError GivenUUID X-Error-Msg: Parameter autoGenerateIdentifiers is set to true, but the provided xml  already contains uuid.
      * @apiErrorExample GivenUUID:
      *   HTTP/1.1 400 Bad request
      *   Parameter autoGenerateIdentifiers is set to true, but the provided xml already contains uuid.
      * 
-     * @apiError ValidationError {String} X-Error-Msg: The resource with the property http://openskos.org/xmlns#code set to <code> has been already registered.
+     * @apiError ValidationError X-Error-Msg: The resource with the property http://openskos.org/xmlns#code set to &lt;code> has been already registered.
      * @apiErrorExample ValidationError
      *   HTTP/1.1 400 Bad request
-     *   The resource with the property http://openskos.org/xmlns#code set to <code> has been already registered.
+     *   The resource with the property http://openskos.org/xmlns#code set to &lt;code> has been already registered.
      */
     
     public function postAction()
@@ -209,22 +208,22 @@ class Api_InstitutionController extends AbstractController
      *          xmlns:openskos="http://openskos.org/xmlns#"
      *          xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
      *  <rdf:Description df:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
-     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
+     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false&lt;/openskos:disableSearchInOtherTenants>
      *     <vcard:ADR rdf:parseType="Resource">
-     *       <vcard:Country>Netherlands</vcard:Country>
-     *       <vcard:Pcode>5555</vcard:Pcode>
-     *       <vcard:Locality>Amsterdam Centrum</vcard:Locality>
-     *       <vcard:Street>ErgensAchetrburgwal</vcard:Street>
+     *       <vcard:Country>Netherlands&lt;/vcard:Country>
+     *       <vcard:Pcode>5555&lt;/vcard:Pcode>
+     *       <vcard:Locality>Amsterdam Centrum&lt;/vcard:Locality>
+     *       <vcard:Street>ErgensAchetrburgwal&lt;/vcard:Street>
      *     </vcard:ADR>
-     *     <vcard:EMAIL>info@meertens3.knaw.nl</vcard:EMAIL>
-     *     <vcard:URL>http://meetens.knaw.nl</vcard:URL>
+     *     <vcard:EMAIL>info@meertens3.knaw.nl&lt;/vcard:EMAIL>
+     *     <vcard:URL>http://meetens.knaw.nl&lt;/vcard:URL>
      *     <vcard:ORG rdf:parseType="Resource">
-     *       <vcard:orgunit>XXX</vcard:orgunit>
-     *       <vcard:orgname>Meertens Institute 3 upd</vcard:orgname>
+     *       <vcard:orgunit>XXX&lt;/vcard:orgunit>
+     *       <vcard:orgname>Meertens Institute 3 upd&lt;/vcard:orgname>
      *     </vcard:ORG>
-     *     <openskos:code>meertens3</openskos:code>
-     *     <openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32</openskos:uuid>
+     *     <openskos:code>meertens3&lt;/openskos:code>
+     *     <openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32&lt;/openskos:uuid>
      *   </rdf:Description>
      * </rdf:RDF>
      *
@@ -233,53 +232,53 @@ class Api_InstitutionController extends AbstractController
      * @apiGroup Institution
      *
      * @apiParam {String} key A valid API key
-     * @apiSuccess (200) 
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess {String} StatusCode 200 OK.
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 200 OK
-     *   <?xml version="1.0" encoding="utf-8" ?>
-     *   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     *   &lt;?xml version="1.0" encoding="utf-8" ?>
+     *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *            xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
      *            xmlns:openskos="http://openskos.org/xmlns#">
-     *  <rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
-     *  <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
-     *    <vcard:URL>http://meetens.knaw.nl</vcard:URL>
-     *    <vcard:ADR rdf:nodeID="genid3">
-     *      <vcard:Street>ErgensAchetrburgwal</vcard:Street>
-     *      <vcard:Locality>Amsterdam Centrum</vcard:Locality>
-     *      <vcard:Pcode>5555</vcard:Pcode>
-     *      <vcard:Country>Netherlands</vcard:Country>
-     *    </vcard:ADR>
-     *    <vcard:ORG rdf:nodeID="genid1">
-     *      <vcard:orgunit>XXX</vcard:orgunit>
-     *       <vcard:orgname>Meertens Institute 3 upd</vcard:orgname>
-     *    </vcard:ORG>
-     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *    <openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32</openskos:uuid>
-     *    <openskos:code>meertens3</openskos:code>
-     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
-     *    <vcard:EMAIL>info@meertens3.knaw.nl</vcard:EMAIL>
-     *   </rdf:Description>
-     * </rdf:RDF>  
+     *  &lt;rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
+     *  &lt;rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
+     *    &lt;vcard:URL>http://meetens.knaw.nl&lt;/vcard:URL>
+     *    &lt;vcard:ADR rdf:nodeID="genid3">
+     *      &lt;vcard:Street>ErgensAchetrburgwal&lt;/vcard:Street>
+     *      &lt;vcard:Locality>Amsterdam Centrum&lt;/vcard:Locality>
+     *      &lt;vcard:Pcode>5555&lt;/vcard:Pcode>
+     *      &lt;vcard:Country>Netherlands&lt;/vcard:Country>
+     *    &lt;/vcard:ADR>
+     *    &lt;vcard:ORG rdf:nodeID="genid1">
+     *      &lt;vcard:orgunit>XXX&lt;/vcard:orgunit>
+     *       &lt;vcard:orgname>Meertens Institute 3 upd&lt;/vcard:orgname>
+     *    &lt;/vcard:ORG>
+     *    &lt;openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *    &lt;openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32&lt;/openskos:uuid>
+     *    &lt;openskos:code>meertens3&lt;/openskos:code>
+     *    &lt;openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false&lt;/openskos:disableSearchInOtherTenants>
+     *    &lt;vcard:EMAIL>info@meertens3.knaw.nl&lt;/vcard:EMAIL>
+     *   &lt;/rdf:Description>
+     * &lt;/rdf:RDF>  
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
+     * @apiError MissingKey X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingUri {String} X-Error-Msg: Missed uri (rdf:about)!
+     * @apiError MissingUri X-Error-Msg: Missed uri (rdf:about)!
      * @apiErrorExample MissingUri:
      *   HTTP/1.1 400 Bad Request
      *   Missed uri (rdf:about)! 
      * 
-     * @apiError ValidationError {String} X-Error-Msg: You cannot change UUID of the resouce. Keep it <uuid_of_resource_uri>
+     * @apiError ValidationError X-Error-Msg: You cannot change UUID of the resouce. Keep it &lt;uuid_of_resource_uri>
      * @apiErrorExample ChangedOrMissingUuid: 
      *   HTTP/1.1 400 Bad Request
-     *   You cannot change UUID of the resouce. Keep it <uuid_of_resource_uri>
+     *   You cannot change UUID of the resouce. Keep it &lt;uuid_of_resource_uri>
      *
-     * @apiError ValidationError {String} X-Error-Msg: The resource with the property http://www.w3.org/2006/vcard/ns#EMAIL set to <email> has been already registered.
+     * @apiError ValidationError X-Error-Msg: The resource with the property http://www.w3.org/2006/vcard/ns#EMAIL set to &lt;email> has been already registered.
      * @apiErrorExample ValidationError: 
      *   HTTP/1.1 400 Bad Request
-     *   The resource with the property http://www.w3.org/2006/vcard/ns#EMAIL set to <email> has been already registered.
+     *   The resource with the property http://www.w3.org/2006/vcard/ns#EMAIL set to &lt;email> has been already registered.
      */
     public function putAction()
     {
@@ -295,38 +294,40 @@ class Api_InstitutionController extends AbstractController
      * @apiGroup Institution
      * @apiParam {String} key A valid API key
      * @apiParam {String} uri The uri of the institution
-     * @apiSuccess (202) Accepted
-     *   <?xml version="1.0" encoding="utf-8" ?>
-     *   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     * @apiSuccess {String} StatusCode 200 OK.
+     * @apiSuccessExample {xml+rdf} Success-Response:
+     *    HTTP/1.1 200 OK
+     *   &lt;?xml version="1.0" encoding="utf-8" ?>
+     *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *            xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
      *            xmlns:openskos="http://openskos.org/xmlns#">
-     *  <rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
-     *  <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
-     *    <vcard:URL>http://meetens.knaw.nl</vcard:URL>
-     *    <vcard:ADR rdf:nodeID="genid3">
-     *      <vcard:Street>ErgensAchetrburgwal</vcard:Street>
-     *      <vcard:Locality>Amsterdam Centrum</vcard:Locality>
-     *      <vcard:Pcode>5555</vcard:Pcode>
-     *      <vcard:Country>Netherlands</vcard:Country>
-     *    </vcard:ADR>
-     *    <vcard:ORG rdf:nodeID="genid1">
-     *      <vcard:orgunit>XXX</vcard:orgunit>
-     *       <vcard:orgname>Meertens Institute 3 upd</vcard:orgname>
-     *    </vcard:ORG>
-     *    <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
-     *    <openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32</openskos:uuid>
-     *    <openskos:code>meertens3</openskos:code>
-     *    <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
-     *    <vcard:EMAIL>info@meertens3.knaw.nl</vcard:EMAIL>
-     *   </rdf:Description>
-     * </rdf:RDF> 
+     *  &lt;rdf:Description rdf:about="http://mertens/knaw/formalorganization_61762b29-6047-47a7-99ba-ad8ef6010b32">
+     *  &lt;rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
+     *    &lt;vcard:URL>http://meetens.knaw.nl&lt;/vcard:URL>
+     *    &lt;vcard:ADR rdf:nodeID="genid3">
+     *      &lt;vcard:Street>ErgensAchetrburgwal&lt;/vcard:Street>
+     *      &lt;vcard:Locality>Amsterdam Centrum&lt;/vcard:Locality>
+     *      &lt;vcard:Pcode>5555&lt;/vcard:Pcode>
+     *      &lt;vcard:Country>Netherlands&lt;/vcard:Country>
+     *    &lt;/vcard:ADR>
+     *    &lt;vcard:ORG rdf:nodeID="genid1">
+     *      &lt;vcard:orgunit>XXX&lt;/vcard:orgunit>
+     *       &lt;vcard:orgname>Meertens Institute 3 upd&lt;/vcard:orgname>
+     *    &lt;/vcard:ORG>
+     *    &lt;openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:enableStatussesSystem>
+     *    &lt;openskos:uuid>61762b29-6047-47a7-99ba-ad8ef6010b32&lt;/openskos:uuid>
+     *    &lt;openskos:code>meertens3&lt;/openskos:code>
+     *    &lt;openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false&lt;/openskos:disableSearchInOtherTenants>
+     *    &lt;vcard:EMAIL>info@meertens3.knaw.nl&lt;/vcard:EMAIL>
+     *   &lt;/rdf:Description>
+     * &lt;/rdf:RDF> 
      *  
-     * @apiError Not found {String} X-Error-Msg: The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     * @apiError Not found X-Error-Msg: The requested resource &lt;id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
-     *   The requested resource <id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
+     *   The requested resource &lt;id> of type http://www.w3.org/ns/org#FormalOrganization was not found in the triple store.
      *
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
+     * @apiError MissingKey X-Error-Msg: No user key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified

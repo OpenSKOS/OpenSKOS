@@ -8,7 +8,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
-use OpenSkos2\Relation;
+use OpenSkos2\RelationType;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Api\Exception\UnauthorizedException;
@@ -34,7 +34,7 @@ class Authorisation {
                 return $this->tenantCreationAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionCreationAllowed($user, $tenantCode, $resource);
-            case Relation::TYPE:
+            case RelationType::TYPE:
                 return $this->relationCreationAllowed($user, $tenantCode, $resource);
             default:
                 return false;
@@ -54,7 +54,7 @@ class Authorisation {
                 return $this->tenantEditAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionEditAllowed($user, $tenantCode, $resource);
-            case Relation::TYPE:
+            case RelationType::TYPE:
                 return $this->relationEditAllowed($user, $tenantCode, $resource);
             default:
                 return false;
@@ -74,7 +74,7 @@ class Authorisation {
                 return $this->tenantDeleteAllowed($user);
             case SkosCollection::TYPE:
                 return $this->skosCollectionDeleteAllowed($user, $tenantCode, $resource);
-            case Relation::TYPE:
+            case RelationType::TYPE:
                 return $this->relationDeleteAllowed($user, $tenantCode, $resource);
             default:
                 return false;

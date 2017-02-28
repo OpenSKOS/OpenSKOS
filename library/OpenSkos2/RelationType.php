@@ -27,7 +27,7 @@ use OpenSkos2\Rdf\Uri;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 
-class Relation extends Resource
+class RelationType extends Resource
 {
     const TYPE = Owl::OBJECT_PROPERTY;
     

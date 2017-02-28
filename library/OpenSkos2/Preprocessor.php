@@ -79,7 +79,7 @@ class Preprocessor {
 
     $uri = $resourceObject->getUri();
     $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
-    if ($this->manager->getResourceType() !== Relation::TYPE) { // we do not have an uuid for relations
+    if ($this->manager->getResourceType() !== RelationType::TYPE) { // we do not have an uuid for relations
       if ($resourceObject->getUuid() !== null) {
         $uuidNew = $resourceObject->getUuid()->getValue();
       } else {

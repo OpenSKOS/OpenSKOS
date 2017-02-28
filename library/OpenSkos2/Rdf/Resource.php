@@ -30,7 +30,7 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Relation;
+use OpenSkos2\RelationType;
 
 // Meertens: Picturae changes starting from 22/11/2016 are taken
 
@@ -520,7 +520,7 @@ class Resource extends Uri implements ResourceIdentifier
         } else {
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
-            if ($this->getType() != Relation::TYPE) {
+            if ($this->getType() != RelationType::TYPE) {
                 $this->setProperty(OpenSkos::UUID, $existingResource->getUuid());
             }
             $creators = $existingResource->getProperty(DcTerms::CREATOR);

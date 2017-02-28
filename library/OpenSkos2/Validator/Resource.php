@@ -26,7 +26,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
-use OpenSkos2\Relation;
+use OpenSkos2\RelationType;
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
 use OpenSkos2\Validator\Concept\CycleInNarrower;
@@ -192,7 +192,7 @@ class Resource {
     if ($resource instanceof Tenant) {
       return $this->getTenantValidators();
     }
-    if ($resource instanceof Relation) {
+    if ($resource instanceof RelationType) {
       return $this->getRelationValidators();
     }
     return [];

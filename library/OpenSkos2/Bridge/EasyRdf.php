@@ -39,8 +39,8 @@ use OpenSkos2\Set;
 use OpenSkos2\SetCollection;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\SkosCollectionCollection;
-use OpenSkos2\Relation;
-use OpenSkos2\RelationCollection;
+use OpenSkos2\RelationType;
+use OpenSkos2\RelationTypeCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Namespaces\Rdf;
@@ -151,8 +151,8 @@ class EasyRdf {
           return new Label($uri);
         case SkosCollection::TYPE:
           return new SkosCollection($uri);
-        case Relation::TYPE:
-          return new Relation($uri);
+        case RelationType::TYPE:
+          return new RelationType($uri);
         default:
           return new Resource($uri);
       }
@@ -182,8 +182,8 @@ class EasyRdf {
         return new LabelCollection();
       case SkosCollection::TYPE:
         return new SkosCollectionCollection();
-      case Relation::TYPE:
-        return new RelationCollection();
+      case RelationType::TYPE:
+        return new RelationTypeCollection();
       default:
         return new ResourceCollection();
     }

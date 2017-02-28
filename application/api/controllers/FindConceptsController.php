@@ -73,8 +73,8 @@ class Api_FindConceptsController extends AbstractController {
    * @apiParam {String} tenant Name of the tenant to query. Default is all tenants
    * @apiParam {String} set OpenSKOS set to query. Default is all sets
    * @apiParam {String} conceptScheme id of the SKOS concept scheme to query. Default is all concept schemes
-   * @apiSuccess (200) {String} XML
-   * @apiSuccessExample {String} Success-Response
+   * @apiSuccess {String} StatusCode 200 OK
+   * @apiSuccessExample {xml+rdf} Success-Response:
    *   HTTP/1.1 200 Ok
    *   &lt;?xml version="1.0"?>
    *      &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -154,9 +154,9 @@ class Api_FindConceptsController extends AbstractController {
    * @apiName GetConcept
    * @apiGroup FindConcept
    * @apiParam {String} fl List of fields to return
-   * @apiSuccess (200) {String} XML
-   * @apiSuccessExample {String} Success-Response
-   *   HTTP/1.1 200 Ok
+   * @apiSuccess {String} StatusCode 200 OK.
+   * @apiSuccessExample {xml+rdf} Success-Response:
+   *   HTTP/1.1 200 OK
    *   &lt;?xml version="1.0" encoding="utf-8" ?>
    *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    *           xmlns:skos="http://www.w3.org/2004/02/skos/core#"
@@ -168,10 +168,10 @@ class Api_FindConceptsController extends AbstractController {
    *   &lt;rdf:Description rdf:about="http://hdl.handle.net/11148/backendname_concept_ec56c9f1-371b-4505-bdac-9687640882ab">
    *       &lt;rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
    *       &lt;skos:historyNote xml:lang="nl">Recordnummer: 11665
-   *   Datum invoer: 13-12-1998
-   *   Gebruiker invoer: SEBASTIAAN
-   *   Datum gewijzigd: 12-10-2004
-   *   Gebruiker gewijzigd: Beng&lt;/skos:historyNote>
+   *             Datum invoer: 13-12-1998
+   *             Gebruiker invoer: SEBASTIAAN
+   *             Datum gewijzigd: 12-10-2004
+   *             Gebruiker gewijzigd: Beng&lt;/skos:historyNote>
    *       &lt;skos:historyNote xml:lang="nl">Goedgekeurd door: Alma Wolthuis&lt;/skos:historyNote>
    *       &lt;skos:historyNote xml:lang="nl">Gewijzigd door: Alma Wolthuis&lt;/skos:historyNote>
    *       &lt;skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/217190"/>
@@ -223,8 +223,7 @@ class Api_FindConceptsController extends AbstractController {
     }
   }
 
-// Meertens:  Guys, when do you need that id_prefix: why ID prefix is not a part of ID
-  // also, !!!
+  // Meertens:  Guys, when do you need that id_prefix: why ID prefix is not a part of ID
   /**
    * Get concept id
    *

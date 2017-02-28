@@ -30,7 +30,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\MyInstitutionModules\Relations;
+use OpenSkos2\MyInstitutionModules\RelationTypes;
 use OpenSkos2\Api\Exception\ApiException;
 
 
@@ -283,7 +283,7 @@ class ConceptManager extends ResourceManager
             $relationType,
             new Uri($objectUri)
         );
-        $inverses = array_merge(Skos::getInverseRelationsMap(), Relations::$inverses);
+        $inverses = array_merge(Skos::getInverseRelationsMap(), RelationTypes::$inverses);
         $this->deleteMatchingTriples(
             new Uri($objectUri),
             $inverses[$relationType],
@@ -347,7 +347,7 @@ class ConceptManager extends ResourceManager
             throw new ApiException('The triple creates transitive link of the source to itself, possibly via inverse relation.', 400);
         }
         // overkill??
-        $inverses = array_merge(Skos::getInverseRelationsMap(), Relations::$inverses);
+        $inverses = array_merge(Skos::getInverseRelationsMap(), RelationTypes::$inverses);
         if (array_key_exists($relationUri, $inverses)) {
             $inverseRelUri = $inverses[$relationUri];
             $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
@@ -371,7 +371,7 @@ class ConceptManager extends ResourceManager
             return false;
         }
 
-        $trans = Relations::$transitive;
+        $trans = RelationTypes::$transitive;
         if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {

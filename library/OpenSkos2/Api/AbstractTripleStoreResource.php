@@ -270,7 +270,11 @@ abstract class AbstractTripleStoreResource {
       }
       $this->manager->delete(new Uri($uri), $this->manager->getResourceType());
       $xml = (new DataRdf($resourceObject))->transform();
-      return $this->getSuccessResponse($xml, 202);
+      $status =   202;
+      if ($this->manager->getResourceType() !== Skos::CONCEPT) {
+        $status = 200;
+      }
+      return $this->getSuccessResponse($xml, $status);
     } catch (Exception $e) {
       return $this->getErrorResponseFromException($e);
     }

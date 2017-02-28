@@ -7,7 +7,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
-use OpenSkos2\Relation;
+use OpenSkos2\RelationType;
 
 class Deletion {
     
@@ -30,7 +30,7 @@ class Deletion {
                 return $this->tenantCanBeDeleted($uri);  
             case SkosCollection::TYPE:
                 return $this->skosCollectionCanBeDeleted($uri);
-            case Relation::TYPE:
+            case RelationType::TYPE:
                 return $this->relationCanBeDeleted($uri);
             default:
                 return false;

@@ -3,7 +3,7 @@
 namespace OpenSkos2\MyInstitutionModules;
 use OpenSkos2\Namespaces\Skos;
 
-class Relations
+class RelationTypes
 {
     
     const FASTER = 'http://menzo.org/xmlns#faster';
@@ -11,21 +11,21 @@ class Relations
     const LONGER = 'http://menzo.org/xmlns#longer';
     
     public static $myrelations = array (
-        'menzo:faster' => Relations::FASTER, 
-        'menzo:slower' => Relations::SLOWER, 
-        'menzo:longer' => Relations::LONGER
+        'menzo:faster' => RelationTypes::FASTER, 
+        'menzo:slower' => RelationTypes::SLOWER, 
+        'menzo:longer' => RelationTypes::LONGER
     );
     
     public static $inverses = array (
-        Relations::FASTER => Relations::SLOWER,
-        Relations::SLOWER => Relations::FASTER
+        RelationTypes::FASTER => RelationTypes::SLOWER,
+        RelationTypes::SLOWER => RelationTypes::FASTER
     );
     
     // if direct relation belongs to the transitive closure
     // default is false
     public static $transitive = array (
-        Relations::FASTER => true,
-        Relations::SLOWER => true,
+        RelationTypes::FASTER => true,
+        RelationTypes::SLOWER => true,
         Skos::BROADER => false,
         Skos::NARROWER => false
     );

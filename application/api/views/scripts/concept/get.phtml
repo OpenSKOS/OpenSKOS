@@ -19,7 +19,7 @@
 
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
-use OpenSkos2\MyInstitutionModules\Relations;
+use OpenSkos2\MyInstitutionModules\RelationTypes;
 use OpenSkos2\Namespaces;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -146,7 +146,7 @@ $this->headTitle($title);
 <?php endforeach; ?>
 
 <h3>User-defined relations (this concept is a source)</h3>
-<?php  $specificRelations = Relations::$myrelations;
+<?php  $specificRelations = RelationTypes::$myrelations;
          foreach ($specificRelations as $key => $value):?>
         <?php $relations = $conceptManager->fetchRelatedConcepts($concept, $value, false);?>
         <?php if ($relations->count() > 0):?>

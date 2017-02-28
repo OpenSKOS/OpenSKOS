@@ -35,9 +35,7 @@ class Api_ConceptController extends Api_FindConceptsController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Create a SKOS Concept
-     *
-     * Create a new SKOS concept based on the post data
+     * @apiDescription Create a new SKOS concept based on the post data
      *
      * @api {post} /api/concept Create SKOS concept
      * @apiName CreateConcept
@@ -45,11 +43,11 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
-     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
-     *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
-     *                                           If set to false - the xml must contain uri (rdf:about).
-     * @apiSuccess (201) {String} Concept uri
-     * @apiSuccessExample {String} Success-Response
+     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) and uuid will be automatically generated.
+     *                                           If uri exists in the xml and autoGenerateIdentifiers is true then an error will be thrown.
+     *                                           If the parameter set to false then the xml must contain uri (rdf:about) and uuid.
+     * @apiSuccess (201) {String} Location Concept uri.
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 201 Created
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -76,30 +74,30 @@ class Api_ConceptController extends Api_FindConceptsController
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
-     * @apiErrorExample MissingKey:
+     * @apiError MissingKey X-Error-Msg: No user key specified
+     * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
-     * @apiErrorExample MissingTenant:
+     * @apiError MissingTenant X-Error-Msg: No tenant specified
+     * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
      * 
-     * @apiError ConceptExists {String} X-Error-Msg: The resource with uri <oncept uri> already exists. Use PUT instead.
-     * @apiErrorExample ConceptExists:
+     * @apiError ConceptExists X-Error-Msg: The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
+     * @apiErrorExample ConceptExists
      *   HTTP/1.1 400 Bad request
-     *   The resource with uri <oncept uri> already exists. Use PUT instead.
+     *   The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
      * 
-     * @apiError ValidationError {String} X-Error-Msg: The pref label already exists in that concept scheme.
-     * @apiErrorExample ValidationError:
+     * @apiError ValidationError X-Error-Msg: The pref label already exists in that concept scheme.
+     * @apiErrorExample ValidationError
      *   HTTP/1.1 400 Bad request
-     *   TThe pref label already exists in that concept scheme.
+     *   The pref label already exists in that concept scheme.
      * 
-     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
-     * @apiErrorExample ValidationError:
+     * @apiError ValidationError X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
+     * @apiErrorExample ValidationError
      *   HTTP/1.1 400 Bad request
-     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
+     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found.
      */
     public function postAction()
     {
@@ -110,9 +108,7 @@ class Api_ConceptController extends Api_FindConceptsController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Update a SKOS Concept
-     *
-     * Update the specified concept with the new data present in the request.
+     * @apiDescription Update a specified SKOS concept with the new data provided in the request body.
      *
      * @apiExample {String} Example request
      *  <rdf:RDF
@@ -141,8 +137,8 @@ class Api_ConceptController extends Api_FindConceptsController
      * @api {put} /api/concept Update SKOS concept
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
-     * @apiSuccess (200) {String} 
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess {String} StatusCode 200 OK
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 200 Ok
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -169,30 +165,30 @@ class Api_ConceptController extends Api_FindConceptsController
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
-     * @apiErrorExample MissingKey:
+     * @apiError MissingKey X-Error-Msg: No user key specified
+     * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
-     * @apiErrorExample MissingTenant:
+     * @apiError MissingTenant X-Error-Msg: No tenant specified
+     * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
      * 
-     * @apiError ConceptExists {String} X-Error-Msg: The resource with uri <oncept uri> already exists. Use PUT instead.
-     * @apiErrorExample ConceptExists:
+     * @apiError ConceptExists X-Error-Msg: The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
+     * @apiErrorExample ConceptExists
      *   HTTP/1.1 400 Bad request
-     *   The resource with uri <oncept uri> already exists. Use PUT instead.
+     *   The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
      * 
-     * @apiError ValidationError {String} X-Error-Msg: The pref label already exists in that concept scheme.
-     * @apiErrorExample ValidationError:
+     * @apiError ValidationError X-Error-Msg: The pref label already exists in that concept scheme.
+     * @apiErrorExample ValidationError
      *   HTTP/1.1 400 Bad request
      *   TThe pref label already exists in that concept scheme.
      * 
-     * @apiError ValidationError {String} X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
-     * @apiErrorExample ValidationError:
+     * @apiError ValidationError X-Error-Msg: The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri &lt;concept schema uri&gt; is not found,
+     * @apiErrorExample ValidationError
      *   HTTP/1.1 400 Bad request
-     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
+     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri &lt;concept schema uri&gt; is not found,
      */
     public function putAction()
     {
@@ -210,8 +206,8 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
      * @apiParam {String} id The uri of the concept
-     * @apiSuccess (202) 
-     * @apiSuccessExample {String} Success-Response
+     * @apiSuccess (202) {String} StatusCode 202 Accepted
+     * @apiSuccessExample {xml+rdf} Success-Response:
      *   HTTP/1.1 202 Accepted
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -237,18 +233,18 @@ class Api_ConceptController extends Api_FindConceptsController
      *     &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError Gone {String} X-Error-Msg: Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
+     * @apiError Gone X-Error-Msg: Concept already deleted: &lt;concept uri&gt;
      * @apiErrorExample Gone
      *   HTTP/1.1 410 Gone
-     *   Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
+     *   Concept already deleted: &lt;concept uri&gt;
      * 
-     * @apiError MissingKey {String} X-Error-Msg: No user key specified
-     * @apiErrorExample MissingKey:
+     * @apiError MissingKey X-Error-Msg: No user key specified
+     * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant {String} X-Error-Msg: No tenant specified
-     * @apiErrorExample MissingTenant:
+     * @apiError MissingTenant X-Error-Msg: No tenant specified
+     * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
      * 
