@@ -15,19 +15,29 @@ class Api_SetController extends AbstractController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Get OpenSKOS Sets
-    
-     * Get a detailed list of OpenSKOS sets
+     * @apiDescription Get a detailed list of OpenSKOS sets
+     * 
+     * in RDF: /api/set/  or /api/set?format=rdf
+     * 
+     * in JSON: /api/set?format=json
+     * 
+     * in JSONP: /api/set?format=jsonp&callback=myCallback1234
+     * 
+     * in HTML: /api/set?format=html
      *
+     * in JSON as name-uri map: /api/set?shortlist=true&format=json
+     *  
      * @api {get} /api/set  Get OpenSKOS sets
      * @apiName GetSets
      * @apiGroup Set
      *
      * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, must contain parameter callback as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
+     * @apiParam {String=empty, true, false, 1, 0} shortlist If set to true, then format must be set to json
      * 
-     * @apiSuccess {String} StatusCode 200 OK.
-     * @apiSuccessExample {xml+rdf} Success-Response:
+     * 
+     * @apiSuccess {xml/json/jsonp/html} Body
+     * @apiSuccessExample Success-Response:
      *   HTTP/1.1 200 OK
      * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
      *    xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -62,30 +72,67 @@ class Api_SetController extends AbstractController
      *  &lt;/rdf:Description>
      *  &lt;/rdf:RDF>
      * 
+     * @apiSuccessExample Success-Response for shortlist=true:
+     * HTTP/1.1 200 OK
+     * {
+     *  "Clavas Laguages":"http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372",
+     *  "Clavas Organisations":"http://mertens/knaw/dataset_96036967-5215-413a-a3bc-f4c07b14c16b",
+     *  "clavas set 3":"http://hdl.handle.net/11148/backendname_dataset_3c30c1e5-9e55-44a2-9735-82a5d9a34336"
+     * }
      */
      public function indexAction()
     {
-      parent::indexAction();
+      return parent::indexAction();
     }
     
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Get an OpenSKOS Set by its uri or uuid.
+     * @apiDescription Get an OpenSKOS Set details by its uri or uuid:
+     * 
+     * in RDF: /api/set/{uuid} 
+     * 
+     * or /api/set/{uuid.rdf}
+     * 
+     * or /api/set?id={uuid}
+     * 
+     * or /api/set?id={uuid}&format=rdf
+     * 
+     * or /api/set?id={uri}
+     * 
+     * or /api/set?id={uri}&format=rdf
+     * 
+     * in JSON: /api/set/{uuid.json}
+     * 
+     * or /api/set?id={uuid}&format=json
+     * 
+     * or /api/set?id={uri}&format=json
+     * 
+     * in JSONP: /api/set/{uuid.jsonp}?callback=myCallback1234
+     * 
+     * or /api/set?id={uuid}&format=jsonp&callback=myCallback1234
+     * 
+     * or /api/set?id={uri}&format=jsonp&callback=myCallback1234
+     * 
+     * in HTML: /api/set/{uuid.html}
+     * 
+     * or /api/set?id={uuid}&format=html
+     * 
+     * or /api/set?id={uri}&format=html
+     * 
      *
-     * @api {get} /api/set/ Get OpenSKOS set details given its id (which is set to the set's uri or uuid) as a request parameter
-     * @api {get} /api/set/{uuid}[.rdf, .html, .json, .jsonp] Get OpenSKOS set
+     * @api {get} /api/set/{uuid} Get OpenSKOS set details
      * @apiName GetSet
      * @apiGroup Set
      *
-     * @apiParam {String} id
+     * @apiParam {String} id the set's uri or uuid
      * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
      * @apiParam {String} callback If format set to jsonp, must be non-empty
      * 
-     * @apiSuccess {String} StatusCode 200 OK.
-     * @apiSuccessExample {xml+rdf} Success-Response:
+     * @apiSuccess {xml/json/jsonp/html} Body 
+     * @apiSuccessExample Success-Response:
      *   HTTP/1.1 200 OK
-     *   &lt;?xml version="1.0" encoding="utf-8" ?>
+     * &lt;?xml version="1.0" encoding="utf-8" ?>
      * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
@@ -103,15 +150,15 @@ class Api_SetController extends AbstractController
      * &lt;/rdf:Description>
      * &lt;/rdf:RDF>
      * 
-     * @apiError NotFound X-Error-Msg: The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
-     * @apiErrorExample Not found:
+     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiErrorExample Not found
      *   HTTP/1.1 404 Not Found
      *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      */
    
     public function getAction()
     {
-        parent::getAction();
+        return parent::getAction();
     }
     
     /**
@@ -120,7 +167,7 @@ class Api_SetController extends AbstractController
      * @apiDescription Create a new OpenSKOS set based on the post data.
      * The set's code and the web-page provided in the request body, must be unique. 
      * The obligatory publisher reference must be the reference to an existing institution and must 
-     * coinside with the one with tenant code given in the request parameter.
+     * coinside with the tenant code given as a the request parameter.
      * If one of the conditions above is not fullfilled the validator will throw an error.
      *
      @apiExample {String} Example request
@@ -131,9 +178,9 @@ class Api_SetController extends AbstractController
      *     xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
      *     <rdf:Description>
      *         <openskos:code>ISO-lang&lt;/openskos:code>
-     *         <dcterms:title xml:lang="en">CLARIN Languages&lt;/dcterms:title>
-     *         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/">&lt;/dcterms:license>
-     *         <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">&lt;/dcterms:publisher>
+     *         <dcterms:title xml:lang="en">CLARIN Languages</dcterms:title>
+     *         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
+     *         <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"></dcterms:publisher>
      *         <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens1"/>
      *         <openskos:allow_oai>true&lt;/openskos:allow_oai>
      *         <openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
@@ -147,11 +194,11 @@ class Api_SetController extends AbstractController
      *
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
-     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
-     *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
-     *                                           If set to false - the xml must contain uri (rdf:about).
+     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the set uri (rdf:about) and it uuid will be automatically generated.
+     *                                           If uri and/or uuid exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+     *                                           If set to false - the xml must contain uri (rdf:about) and uuid.
      * @apiSuccess {String} Location Set uri
-     * @apiSuccessExample {xml+rdf} Success-Response:
+     * @apiSuccessExample Success-Response:
      *   HTTP/1.1 201 Created
      *   &lt;?xml version="1.0" encoding="utf-8" ?>
      *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -171,23 +218,23 @@ class Api_SetController extends AbstractController
      *   &lt;/rdf:Description>
      *  &lt;/rdf:RDF>
      * 
-     * @apiError MissingKey X-Error-Msg: No user key specified
-     * @apiErrorExample MissingKey:
+     * @apiError MissingKey No user key specified
+     * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant X-Error-Msg: No tenant specified
-     * @apiErrorExample MissingTenant:
+     * @apiError MissingTenant No tenant specified
+     * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
      * 
-     * @apiError SetExists X-Error-Msg: The resource with &lt;id> already exists. Use PUT instead.
+     * @apiError SetExists The resource with &lt;id> already exists. Use PUT instead.
      * @apiErrorExample SetExists:
      *   HTTP/1.1 400 Bad request
      *   The resource with &lt;id> already exists. Use PUT instead.
      * 
-     * @apiError ValidationError X-Error-Msg: The resource (of type http://www.w3.org/ns/org#FormalOrganization) referred by  uri &lt;publisher's reference> is not found.
-     * @apiErrorExample ValidationError: 
+     * @apiError ValidationError The resource (of type http://www.w3.org/ns/org#FormalOrganization) referred by  uri &lt;publisher's reference> is not found.
+     * @apiErrorExample ValidationError 
      *   HTTP/1.1 400 Bad request
      *   The resource (of type http://www.w3.org/ns/org#FormalOrganization) referred by  uri &lt;publisher's reference> is not found.
      *
@@ -211,9 +258,9 @@ class Api_SetController extends AbstractController
      *   xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
      *  <rdf:Description>
      *     <openskos:code>ISO-lang&lt;/openskos:code>
-     *     <dcterms:title xml:lang="en">CLARIN Languages new&lt;/dcterms:title>
-     *     <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/">&lt;/dcterms:license>
-     *     <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785">&lt;/dcterms:publisher>
+     *     <dcterms:title xml:lang="en">CLARIN Languages new</dcterms:title>
+     *     <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
+     *     <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"></dcterms:publisher>
      *     <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens1"/>
      *     <openskos:allow_oai>true&lt;/openskos:allow_oai>
      *     <openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
@@ -226,8 +273,8 @@ class Api_SetController extends AbstractController
      * @apiGroup Set
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
-       @apiSuccess {String} StatusCode 200 OK.
-     * @apiSuccessExample {xml+rdf} Success-Response:
+       @apiSuccess {xml} Body
+     * @apiSuccessExample Success-Response:
      *   HTTP/1.1 200 OK
      *   &lt;?xml version="1.0" encoding="utf-8" ?>
      *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -247,18 +294,18 @@ class Api_SetController extends AbstractController
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError MissingKey X-Error-Msg: No user key specified
-     * @apiErrorExample MissingKey:
+     * @apiError MissingKey No user key specified
+     * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant X-Error-Msg: No tenant specified
-     * @apiErrorExample MissingTenant:
+     * @apiError MissingTenant No tenant specified
+     * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
      * 
-     * @apiError ValidationError X-Error-Msg: The given publisher &lt;publisher's reference>  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri &lt;tenant's uri>.
-     * @apiErrorExample ValidationError: 
+     * @apiError ValidationError The given publisher &lt;publisher's reference>  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri &lt;tenant's uri>.
+     * @apiErrorExample ValidationError 
      *   HTTP/1.1 400 Bad request
      *   The given publisher &lt;publisher's reference>  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri &lt;tenant's uri>.
      *
@@ -278,8 +325,8 @@ class Api_SetController extends AbstractController
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
      * @apiParam {String} id The uri of the set
-     * @apiSuccess {String} StatusCode 200 OK.
-     * @apiSuccessExample {xml+rdf} Success-Response:
+     * @apiSuccess {xml} Body
+     * @apiSuccessExample Success-Response:
      *    HTTP/1.1 200 OK
      * &lt;?xml version="1.0" encoding="utf-8" ?>
      *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -299,17 +346,17 @@ class Api_SetController extends AbstractController
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError Not found X-Error-Msg: The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
      *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
      * 
-     * @apiError MissingKey X-Error-Msg: No user key specified
+     * @apiError MissingKey No user key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
      *   No user key specified
      * 
-     * @apiError MissingTenant X-Error-Msg:  No tenant specified
+     * @apiError MissingTenant No tenant specified
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified

@@ -26,7 +26,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         $api = $this->getDI()->make($this->fullNameResourceClass);
         if ($params['shortlist']) { // needed for meertens browser
             $result = $api->mapNameSearchID();
-            $this->_helper->contextSwitch()->setAutoJsonSerialization(true);
+            $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
             return $this->getResponse()->setBody(json_encode($result, JSON_UNESCAPED_SLASHES));
         } else {
             if ($params['context'] === 'html') {
@@ -139,7 +139,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         if ($request->getParam('shortlist') === null) {
            $retVal['shortlist']= false;
         } else {
-            if ($request->getParam('shortlist') === 'true') {
+            if ($request->getParam('shortlist') === 'true' || $request->getParam('shortlist')==='1') {
                 $retVal['shortlist']= true;
             } else {
                 $retVal['shortlist'] = false;

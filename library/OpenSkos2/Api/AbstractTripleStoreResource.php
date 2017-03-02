@@ -69,7 +69,7 @@ abstract class AbstractTripleStoreResource {
   }
 
   /* Returns a map, mapping resource's titles to the resource's Uri
-   *  Works for set, schema, skos colllection, user relation definition
+   *  Works for set, concept schem, skos colllection, relation type
    */
 
   public function mapNameSearchID() {

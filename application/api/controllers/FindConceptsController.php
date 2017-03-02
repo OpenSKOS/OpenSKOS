@@ -73,8 +73,8 @@ class Api_FindConceptsController extends AbstractController {
    * @apiParam {String} tenant Name of the tenant to query. Default is all tenants
    * @apiParam {String} set OpenSKOS set to query. Default is all sets
    * @apiParam {String} conceptScheme id of the SKOS concept scheme to query. Default is all concept schemes
-   * @apiSuccess {String} StatusCode 200 OK
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess {xml/json/jsonp/html} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 Ok
    *   &lt;?xml version="1.0"?>
    *      &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -150,12 +150,12 @@ class Api_FindConceptsController extends AbstractController {
    * 
    * /api/concept/?id=http://hdl.handle.net/11148/backendname_concept_ec56c9f1-371b-4505-bdac-9687640882ab   (rdf format)
    *
-   * @api {get} /api/concept/{id}.rdf Get concept detail
+   * @api {get} /api/concept/{uuid} Get concept details
    * @apiName GetConcept
    * @apiGroup FindConcept
    * @apiParam {String} fl List of fields to return
-   * @apiSuccess {String} StatusCode 200 OK.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess {xml/json/jsonp/html} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 OK
    *   &lt;?xml version="1.0" encoding="utf-8" ?>
    *   &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

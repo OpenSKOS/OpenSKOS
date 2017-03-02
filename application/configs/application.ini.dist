@@ -1,10 +1,11 @@
 ; "production" is the default environment used
 [production]
+; "production" is the default environment used
+[production]
 
 ; general settings:
 phpSettings.display_startup_errors = 1
 phpSettings.display_errors = 1
-resources.frontController.params.displayExceptions = 1
 includePaths.openskos = APPLICATION_PATH "/../library/openSKOS"
 bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
 bootstrap.class = "Bootstrap"
@@ -18,6 +19,17 @@ autoloadernamespaces[] = Net_
 ; it is not required to put this directory inside your DocumentRoot
 ; make sure this directory is writable by your webserver!
 upload_path = APPLICATION_PATH "/../data/uploads"
+
+
+; EPIC
+epic.host=pid.gwdg.de/handles/
+epic.username=epic_username
+epic.password=epic_password
+epic.prefix=11148
+epic.guid.prefix=backend_name_
+epic.resolver=http://hdl.handle.net/
+epic.forwardLocationPrefix=http://host/backend_name/public/api/
+
 
 editor.languages.nl="Dutch"
 editor.languages.en="English"
@@ -35,9 +47,6 @@ editor.schemeIcons.extension="png"
 ; Export configuration
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
 editor.export.filesHttpPath = "/data/export/"
-
-; Editor behaviour
-editor.allowNotationEdit = "@editor-allow-notation-edit@"
 
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
@@ -77,10 +86,20 @@ solr.port = 8983
 solr.context = /solr
 
 ; Database configuration:
+;resources.db.adapter=pdo_mysql
+;resources.db.params.host=localhost
+;resources.db.params.username=mysql_username
+;resources.db.params.password=mysql_password
+;resources.db.params.charset=utf8
+;resources.db.params.dbname=openskos
+;resources.db.isDefaultTableAdapter = true
+
+; Database configuration:
 resources.db.adapter=pdo_mysql
 resources.db.params.host=localhost
-resources.db.params.username=openskos
-resources.db.params.password=openskos
+resources.db.params.port=3306
+resources.db.params.username=mysql_username
+resources.db.params.password=mysql_password
 resources.db.params.charset=utf8
 resources.db.params.dbname=openskos
 resources.db.isDefaultTableAdapter = true
@@ -95,6 +114,11 @@ resources.cachemanager.general.backend.customBackendNaming=false
 resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
 resources.cachemanager.general.frontendBackendAutoload=false
 
+
+;; SESSION ;;
+resources.session.cookie_path = "/backend_name/"
+
+
 ;; PLUGINS ;;
 resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
 resources.frontController.plugins.auth="OpenSKOS_Controller_Plugin_Auth"
@@ -104,25 +128,27 @@ resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
 
 ; @extra routes here@
 
-resources.frontController.params.displayExceptions = 1
+resources.frontController.params.displayExceptions = 0
 resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
-resources.view.options.doctype=XHTML1_STRICT
-
+resources.view.options.doctype=XHTML1_STRICTF
 ; Apache Jena Fuseki configuration:
 sparql.queryUri = http://localhost:3030/openskos/query
 sparql.updateUri = http://localhost:3030/openskos/update
 
-; Client id and client secret configured in https://console.developers.google.com
+; Client id and clie nt secret configured in https://console.developers.google.com
 oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
 ; Api configuration
-api.baseUri = "@api-base-uri@"
+api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
 [staging : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.frontController.params.displayExceptions = 1
 
 [testing : production]
 phpSettings.display_startup_errors = 1

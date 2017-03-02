@@ -69,32 +69,32 @@ class API_RelationController extends AbstractController {
    *
    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
    * @apiParam {String} key A valid API key
-   * @apiSuccess {String} StatusCode 200 OK.
-   * @apiSuccessExample {String} Success-Response:
+   * @apiSuccess {String} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 OK
    * Relations added
    * 
-   * @apiError MissingKey X-Error-Msg: No user key specified
-   * @apiErrorExample MissingKey:
+   * @apiError MissingKey No user key specified
+   * @apiErrorExample MissingKey
    *   HTTP/1.1 412 Precondition Failed
    *   No user key specified
    * 
-   * @apiError MissingTenant X-Error-Msg:  No tenant specified
-   * @apiErrorExample MissingTenant:
+   * @apiError MissingTenant No tenant specified
+   * @apiErrorExample MissingTenant
    *   HTTP/1.1 412 Precondition Failed
    *   No tenant specified
    * 
-   * @apiError Not found X-Error-Msg: The concept referred by the uri &lt;uri&gt; does not exist. 
+   * @apiError NotFound The concept referred by the uri &lt;uri&gt; does not exist. 
    * @apiErrorExample NotFound
    *   HTTP/1.1 404 NotFound
    *   The concept referred by the uri &lt;uri&gt; does not exist.
    * 
-   * @apiError Not found X-Error-Msg: The relation type &lt;uir&gt;  is neither a skos concept-concept relation nor a user-defined relation type. 
+   * @apiError NotFound The relation type &lt;uir&gt;  is neither a skos concept-concept relation nor a user-defined relation type. 
    * @apiErrorExample NotFound
    * HTTP/1.1 404 NotFound
    * The relation type &lt;uir&gt;  is neither a skos concept-concept relation type nor a user-defined relation type. 
    * 
-   * @apiError TransitiveLink X-Error-Msg: The triple creates transitive link of the source to itself, possibly via inverse relation.
+   * @apiError TransitiveLink The triple creates transitive link of the source to itself, possibly via inverse relation.
    * @apiErrorExample TransitiveLink
    *   HTTP/1.1 400 Bad request
    *   The triple creates transitive link of the source to itself, possibly via inverse relation.
@@ -127,27 +127,27 @@ class API_RelationController extends AbstractController {
    *
    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
    * @apiParam {String} key A valid API key
-   * @apiSuccess {String} StatusCode 200 OK.
+   * @apiSuccess {String} Body
    * @apiSuccessExample {String} Success-Response:
    *   HTTP/1.1 200 OK
    * Relation deleted
    * 
-   * @apiError MissingKey X-Error-Msg: No user key specified
-   * @apiErrorExample MissingKey:
+   * @apiError MissingKey No user key specified
+   * @apiErrorExample MissingKey
    *   HTTP/1.1 412 Precondition Failed
    *   No user key specified
    * 
-   * @apiError MissingTenant X-Error-Msg:  No tenant specified
-   * @apiErrorExample MissingTenant:
+   * @apiError MissingTenant No tenant specified
+   * @apiErrorExample MissingTenant
    *   HTTP/1.1 412 Precondition Failed
    *   No tenant specified
    * 
-   * @apiError Not found X-Error-Msg: The concept referred by the uri &lt;uri&gt; does not exist. 
+   * @apiError NotFound The concept referred by the uri &lt;uri&gt; does not exist. 
    * @apiErrorExample NotFound
    *   HTTP/1.1 404 NotFound
    *   The concept referred by the uri &lt;uri&gt; does not exist.
    * 
-   * @apiError Not found X-Error-Msg: The relation type &lt;uir&gt;  is neither a skos concept-concept relation nor a user-defined relation type. 
+   * @apiError NotFound The relation type &lt;uir&gt;  is neither a skos concept-concept relation nor a user-defined relation type. 
    * @apiErrorExample NotFound
    * HTTP/1.1 404 NotFound
    * The relation type &lt;uir&gt;  is neither a skos concept-concept relation type nor a user-defined relation type. 

@@ -26,7 +26,7 @@
   },
   "apidoc": {
     "title": "OpenSKOS backend",
-    "url": "https://github.com/OpenSKOS/OpenSKOS",
+    "url": "<protocol>://<server>/public",
     "version": "1.0.0",
     "template": {
         "forceLanguage": "en"

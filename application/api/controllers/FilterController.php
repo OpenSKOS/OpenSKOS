@@ -27,8 +27,8 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
    * @apiGroup Filter
    *
    * @apiParam {String="json"}  format Other, than json, formats are not implemented (no need)
-   * @apiSuccess {String} StatusCode 200 OK
-   * @apiSuccessExample {json} Success-Response
+   * @apiSuccess {json} Body
+   * @apiSuccessExample Success-Response
    *   HTTP/1.1 200 OK 
    * {"http://www.w3.org/2004/02/skos/core#Collection": [
    *     {"uri":"http://hdl.handle.net/11148/backendname_collection_b4f030d2-fd31-4987-93e2-4dc9d3f9e3ea", "title":"SkosCollection1"}

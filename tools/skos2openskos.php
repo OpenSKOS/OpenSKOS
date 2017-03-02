@@ -76,4 +76,4 @@ foreach ($not_valid_resource_uris as $uri) {
 echo "done!";
 
 
-//php skos2openskos.php --setUri=http://mertens/knaw/dataset_20871b2a-362c-4190-85c3-4bec80e2021d --userUri=http://localhost/clavas/public/api/users/96533fd7-322c-4d3e-8509-64442a3cf296 --file=iso-language-639-3-clavas_1.xml
+//php skos2openskos.php --setUri=http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372 --userUri=http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5 --file=iso-language-639-3-clavas_1.xml

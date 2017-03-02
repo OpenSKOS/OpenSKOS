@@ -68,9 +68,7 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 
     /**
      * @apiVersion 1.0.0
-     * @apiDescription  Autocomplete on labels of concepts matching the term
-     *
-     * The autocomplete API is a simplified version of the Find concepts API.
+     * @apiDescription  Autocomplete on labels of concepts matching the term. The autocomplete API is a simplified version of the Find concepts API.
      * You can use the autocomplete API in your projects, for example with as Javascript based autocompete field.
      *
      * Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "dood":
@@ -102,8 +100,7 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      *
      * /api/autocomplete/something
      *
-     * Must have a term in the path from the request:
-     * /api/autocomplete/something
+     * Must have a term in the path from the request: /api/autocomplete/something
      *
      * Can use parameters searchLabel, returnLabel and lang
      *
@@ -114,7 +111,7 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      * @apiParam {String} searchLabel Term label to search in
      * @apiParam {String} returnLabel Term label to return
      * @apiParam {String} lang Language to use for the searching
-     * @apiSuccess (200) {String} JSON array
+     * @apiSuccess {json} Body
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   [

@@ -39,16 +39,29 @@ class API_RelationtypeController extends AbstractController {
    *
    * @apiVersion 1.0.0
    * @apiDescription Get a detailed list OpenSKOS (non-SKOS) relation types
+   * 
+   * in RDF: /api/relationtype/  or /api/relationtype?format=rdf
+   * 
+   * in JSON: /api/relationtype?format=json
+   * 
+   * in JSONP: /api/relationtype?format=jsonp&callback=myCallback1234
+   * 
+   * in HTML: /api/relationtype?format=html
    *
+   * in JSON as name-uri map (SKOS relation types are included): /api/relationtype?shortlist=true&format=json
+   * 
+   *  
    * @api {get} /api/relationtype Get OpenSKOS (non-KOS) relation types
    * @apiName GetRelationTypes
    * @apiGroup RelationType
    *
    * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
    * @apiParam {String} callback If format set to jsonp, must be non-empty 
+   * @apiParam {String=empty, true, false, 1, 0} shortlist If set to true, then format must be set to json
    * 
-   * @apiSuccess {String} StatusCode 200 OK.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   *  
+   * @apiSuccess {xml/json/jsonp/html} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 OK
    * &lt;?xml version="1.0"?>
    * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
@@ -71,20 +84,68 @@ class API_RelationtypeController extends AbstractController {
    *   &lt;dcterms:title xml:lang="nl">slower&lt;/dcterms:title>
    * &lt;/rdf:Description>
    * &lt;/rdf:RDF>
-   * 
+   *
+   * @apiSuccessExample Success-Response for shortlist=true:
+   * HTTP/1.1 200 OK
+   * {
+   *  "skos:broader":"http://www.w3.org/2004/02/skos/core#broader",
+   *  "skos:narrower":"http://www.w3.org/2004/02/skos/core#narrower",
+   *  "skos:related":"http://www.w3.org/2004/02/skos/core#related",
+   *  "skos:broaderTransitive":"http://www.w3.org/2004/02/skos/core#broaderTransitive",
+   *  "skos:narrowerTransitive":"http://www.w3.org/2004/02/skos/core#narrowerTransitive",
+   *  "skos:broadMatch":"http://www.w3.org/2004/02/skos/core#broadMatch",
+   *  "skos:narrowMatch":"http://www.w3.org/2004/02/skos/core#narrowMatch",
+   *  "skos:closeMatch":"http://www.w3.org/2004/02/skos/core#closeMatch",
+   *  "skos:exactMatch":"http://www.w3.org/2004/02/skos/core#exactMatch",
+   *  "skos:relatedMatch":"http://www.w3.org/2004/02/skos/core#relatedMatch",
+   *  "menzo:faster":"http://menzo.org/xmlns#faster",
+   *  "menzo:slower":"http://menzo.org/xmlns#slower",
+   *  "menzo:longer":"http://menzo.org/xmlns#longer"
+   * }
    */
   public function indexAction() {
     if ($this->getRequest()->getParam('format') === 'html') {
       $this->_501('INDEX for html format');
     }
-    parent::indexAction();
+    return parent::indexAction();
   }
 
   /**
    *
    * @apiVersion 1.0.0
    * @apiDescription Get a specific OpenSKOS (non-SKOS) relation type 
-
+   *
+   * in RDF: /api/relationtype/{uuid} 
+   * 
+   * or /api/relationtype/{uuid.rdf}
+   * 
+   * or /api/relationtype?id={uuid}
+   * 
+   * or /api/relationtype?id={uuid}&format=rdf
+   * 
+   * or /api/relationtype?id={uri}
+   * 
+   * or /api/relationtype?id={uri}&format=rdf
+   * 
+   * in JSON: /api/relationtype/{uuid.json}
+   * 
+   * or /api/relationtype?id={uuid}&format=json
+   * 
+   * or /api/relationtype?id={uri}&format=json
+   * 
+   * in JSONP: /api/relationtype/{uuid.jsonp}?callback=myCallback1234
+   * 
+   * or /api/relationtype?id={uuid}&format=jsonp&callback=myCallback1234
+   * 
+   * or /api/relationtype?id={uri}&format=jsonp&callback=myCallback1234
+   * 
+   * in HTML: /api/relationtype/{uuid.html}
+   * 
+   * or /api/relationtype?id={uuid}&format=html
+   * 
+   * or /api/relationtype?id={uri}&format=html
+   * 
+   *
    * @api {get} /api/relationtype an OpenSKOS (non-SKOS) relation type
    * @apiName GetRelationType
    * @apiGroup RelationType
@@ -93,8 +154,8 @@ class API_RelationtypeController extends AbstractController {
    * @apiParam {String=empty, "rdf","html","json","jsonp"}  format If set to jsonp, the request must contain a non-empty parameter "callback" as well
    * @apiParam {String} callback If format set to jsonp, must be non-empty. 
    * 
-   * @apiSuccess {String} StatusCode 200 OK.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess {xml/json/jsonp/html} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 OK
    * &lt;?xml version="1.0"?>
    * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
@@ -102,10 +163,10 @@ class API_RelationtypeController extends AbstractController {
    *          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#>
    * &lt;rdf:Description rdf:about="http://menzo.org/xmlns#faster">
    *   &lt;rdf:type rdf:resource="http://www.w3.org/2002/07/owl#objectProperty"/>
-   *     &lt;rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#related"/>
+   *    &lt;rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#related"/>
    *    &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T11:34:49+00:00&lt;/dcterms:dateSubmitted>
    *    &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
-   *     &lt;dcterms:title>faster&lt;/dcterms:title>
+   *    &lt;dcterms:title>faster&lt;/dcterms:title>
    *   &lt;/rdf:Description>
    * &lt;/rdf:RDF>
    * 
@@ -143,8 +204,8 @@ class API_RelationtypeController extends AbstractController {
    *
    * @apiVersion 1.0.0
    * @apiDescription Create a new OpenSKOS (non-SKOS) relation type 
-
-   * The attribute rdf:about in the rdf:description element is abligatory. It is of the form &lt;namespace_uri>#&lt;title>.
+   *
+   * The attribute rdf:about in the rdf:description element is obligatory. It is of the form &lt;namespace_uri>#&lt;title>.
    * The title is an obligatory element and must be unique within all relation types.
    *
    * @apiExample {String} Example request
@@ -153,7 +214,7 @@ class API_RelationtypeController extends AbstractController {
    *          xmlns:openskos = "http://openskos.org/xmlns#"
    * xmlns:dcterms = "http://purl.org/dc/terms/">
    * <rdf:Description rdf:about="http://menzo.org/xmlns#slower">
-   *        <dcterms:title>slower&lt;/dcterms:title>
+   *        <dcterms:title>slower</dcterms:title>
    * </rdf:Description>
    * </rdf:RDF>
    *
@@ -164,8 +225,9 @@ class API_RelationtypeController extends AbstractController {
    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
    * @apiParam {String} key A valid API key
    * 
-   * @apiSuccess (201) {String} Location relation-type uri.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess (Created 201) {String} Location relation-type uri
+   * @apiSuccess (Created 201) {xml} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 201 Created
    * &lt;?xml version="1.0"?>
    * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
@@ -182,23 +244,23 @@ class API_RelationtypeController extends AbstractController {
    * &lt;/rdf:Description>
    * &lt;/rdf:RDF>
    * 
-   * @apiError MissingKey X-Error-Msg: No user key specified
-   * @apiErrorExample MissingKey:
+   * @apiError MissingKey No user key specified
+   * @apiErrorExample MissingKey
    *   HTTP/1.1 412 Precondition Failed
    *   No user key specified
    * 
-   * @apiError MissingTenant X-Error-Msg:  No tenant specified
-   * @apiErrorExample MissingTenant:
+   * @apiError MissingTenant No tenant specified
+   * @apiErrorExample MissingTenant
    *   HTTP/1.1 412 Precondition Failed
    *   No tenant specified
    * 
-   * @apiError RelationTypeExists X-Error-Msg: The resource with uri &lt;id> already exists. Use PUT instead.
+   * @apiError RelationTypeExists The resource with uri &lt;id> already exists. Use PUT instead.
    * @apiErrorExample RelationTypeExists:
    *   HTTP/1.1 400 Bad request
    *   The resource with &lt;id> already exists. Use PUT instead.
    *
-   * @apiError ValidationError X-Error-Msg: The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
-   * @apiErrorExample ValidationError: 
+   * @apiError ValidationError The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
+   * @apiErrorExample ValidationError 
    *   HTTP/1.1 400 Bad request
    *   The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
    *
@@ -212,7 +274,7 @@ class API_RelationtypeController extends AbstractController {
    * @apiVersion 1.0.0
    * @apiDescription Update an OpenSKOS (non-SKOS) relation type 
 
-   * The attribute rdf:about in the rdf:description element is abligatory. It is of the form &lt;namespace_uri>#&lt;title>.
+   * The attribute rdf:about in the rdf:description element is obligatory. It is of the form &lt;namespace_uri>#&lt;title>.
    * The title is an obligatory element and must be unique within all relation types.
    *
    * @apiExample {String} Example request
@@ -221,7 +283,7 @@ class API_RelationtypeController extends AbstractController {
    *          xmlns:openskos = "http://openskos.org/xmlns#"
    *          xmlns:dcterms = "http://purl.org/dc/terms/">
    * <rdf:Description rdf:about="http://menzo.org/xmlns#better">
-   *        <dcterms:title>warmer&lt;/dcterms:title>
+   *        <dcterms:title>warmer</dcterms:title>
    * </rdf:Description>
    * </rdf:RDF>
    *
@@ -232,8 +294,8 @@ class API_RelationtypeController extends AbstractController {
    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
    * @apiParam {String} key A valid API key
    * 
-   * @apiSuccess {String} StatusCode 200 Ok.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess {xml} Body
+   * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 Created
    * &lt;?xml version="1.0"?>
    * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
@@ -247,21 +309,23 @@ class API_RelationtypeController extends AbstractController {
    *   &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T18:36:03+00:00&lt;/dcterms:dateSubmitted>
    *   &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
    *   &lt;dcterms:title>warmer&lt;/dcterms:title>
+   *   &lt;dcterms:contributor rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
+   *   &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T13:56:48+00:00&lt;/dcterms:modified>
    * &lt;/rdf:Description>
    * &lt;/rdf:RDF>
    * 
-   * @apiError MissingKey X-Error-Msg: No user key specified
-   * @apiErrorExample MissingKey:
+   * @apiError MissingKey No user key specified
+   * @apiErrorExample MissingKey
    *   HTTP/1.1 412 Precondition Failed
    *   No user key specified
    * 
-   * @apiError MissingTenant X-Error-Msg:  No tenant specified
-   * @apiErrorExample MissingTenant:
+   * @apiError MissingTenant No tenant specified
+   * @apiErrorExample MissingTenant
    *   HTTP/1.1 412 Precondition Failed
    *   No tenant specified
    *
-   * @apiError ValidationError X-Error-Msg: The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
-   * @apiErrorExample ValidationError: 
+   * @apiError ValidationError The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
+   * @apiErrorExample ValidationError 
    *   HTTP/1.1 400 Bad request
    *   The resource of type http://www.w3.org/2002/07/owl#objectProperty with the property http://purl.org/dc/terms/title set to &lt;title> has been already registered.
    *
@@ -275,14 +339,14 @@ class API_RelationtypeController extends AbstractController {
    * @apiVersion 1.0.0
    * @apiDescription Delete an OpenSKOS (non-SKOS) relation type by its uri
    * 
-   * @api {delete} /api/relationtype an OpenSKOS (non-SKOS) relation type
+   * @api {delete} /api/relationtype Delete an OpenSKOS (non-SKOS) relation type
    * @apiName DeleteRelationType
    * @apiGroup RelationType
    *
    * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
    * @apiParam {String} key A valid API key
-   * @apiSuccess {String} StatusCode 200 OK.
-   * @apiSuccessExample {xml+rdf} Success-Response:
+   * @apiSuccess {xml} Body
+   * @apiSuccessExample Success-Response:
    *    HTTP/1.1 200 OK
    * &lt;?xml version="1.0" encoding="utf-8" ?>
    * &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -291,7 +355,7 @@ class API_RelationtypeController extends AbstractController {
    *  &lt;rdf:Description rdf:about="http://menzo.org/xmlns#better"">
    *     &lt;rdf:type rdf:resource="http://www.w3.org/2002/07/owl#objectProperty"/>
    *     &lt;dcterms:contributor rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
-   *    &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T13:56:48+00:00&lt;/dcterms:modified>
+   *     &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T13:56:48+00:00&lt;/dcterms:modified>
    *     &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T13:47:36+00:00&lt;/dcterms:dateSubmitted>
    *     &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
    *     &lt;dcterms:description xml:lang="nl">example1&lt;/dcterms:description>
@@ -299,18 +363,18 @@ class API_RelationtypeController extends AbstractController {
    *   &lt;/rdf:Description>
    * &lt;/rdf:RDF>
    * 
-   * @apiError Not found X-Error-Msg: The requested resource &lt;uri> of type http://www.w3.org/2002/07/owl#objectProperty was not found in the triple store.
+   * @apiError NotFound The requested resource &lt;uri> of type http://www.w3.org/2002/07/owl#objectProperty was not found in the triple store.
    * @apiErrorExample NotFound
    *   HTTP/1.1 404 NotFound
    *   The requested resource &lt;uri> of type http://www.w3.org/2002/07/owl#objectProperty was not found in the triple store.
    * 
-   * @apiError MissingKey X-Error-Msg: No user key specified
-   * @apiErrorExample MissingKey:
+   * @apiError MissingKey No user key specified
+   * @apiErrorExample MissingKey
    *   HTTP/1.1 412 Precondition Failed
    *   No user key specified
    * 
-   * @apiError MissingTenant X-Error-Msg: No tenant specified
-   * @apiErrorExample MissingTenant:
+   * @apiError MissingTenant No tenant specified
+   * @apiErrorExample MissingTenant
    *   HTTP/1.1 412 Precondition Failed
    *   No tenant specified
    */

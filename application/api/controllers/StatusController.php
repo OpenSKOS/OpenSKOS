@@ -27,8 +27,8 @@ class Api_StatusController extends OpenSKOS_Rest_Controller
      * @apiGroup Status
      *
      * @apiParam {String="json"}  format Other, than json, formats are not implemented (no need)
-     * @apiSuccess {String} StatusCode 200 OK.
-     * @apiSuccessExample {String} Success-Response:
+     * @apiSuccess {json} Body
+     * @apiSuccessExample Success-Response:
      *   HTTP/1.1 200 OK 
      * ["candidate","approved","redirected","not_compliant","rejected","obsolete","deleted","expired"]
      *  
