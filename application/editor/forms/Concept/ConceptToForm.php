@@ -138,7 +138,7 @@ class Editor_Forms_Concept_ConceptToForm
                     }
                     
                     $groupedValues[$value->getLanguage()]['value'][] = $value->getValue();
-                } else {
+                } elseif ($value->getValue() !== '') {
                     throw new \Exception(
                         'Value ' . $value . ' from field ' . $field . ' is not translated.'
                     );
