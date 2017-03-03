@@ -19,14 +19,19 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
   /**
    *
    * @apiVersion 1.0.0
-   * @apiDescription Return a map from OpenSKOS concept search filter types (collection, concept scheme, set, tenant, status
-   * to the lists of corresponding literal values or uris (with titels or codes when applicable)
+   * @apiDescription Returns a list of filters (skos collection, concept scheme, set, tenant, status, relation types)
+   * to facilitate concept or relation search via a frontend.
    *   
-   * @api {get} /api/filter Get OpenSKOS concept-search filters
+   * @api {get} /api/filter Get OpenSKOS search filters 
    * @apiName GetFilters 
    * @apiGroup Filter
    *
    * @apiParam {String="json"}  format Other, than json, formats are not implemented (no need)
+   * @apiParam {String="empty", "true", "false", "1", "0"}  relations Other, than json, formats are not implemented (no need). 
+   *                                                              If set to true, returns the map qname-uri for all relation types, 
+   *                                                              and a map title-uri for concept schemata to facliltate search for relation
+   *                                                              instances of a given type with source and target for given schemata.
+   * 
    * @apiSuccess {json} Body
    * @apiSuccessExample Success-Response
    *   HTTP/1.1 200 OK 
@@ -48,12 +53,34 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
    *    ["candidate", "approved", "redirected", "not_compliant", "rejected", "obsolete", "deleted", "expired"]
    * }
    *
+   * @apiSuccessExample Success-Response for relations=true
+   * HTTP/1.1 200 OK 
+   * {
+   * "http://www.w3.org/2002/07/owl#objectProperty": [
+   *  {"uri":"http://menzo.org/xmlns#slower","title":"slower"},
+   *  {"uri":"http://menzo.org/xmlns#faster","title":"faster"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#broader","title":"skos:broader"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#narrower","title":"skos:narrower"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#related","title":"skos:related"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#broaderTransitive","title":"skos:broaderTransitive"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#narrowerTransitive","title":"skos:narrowerTransitive"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#broadMatch","title":"skos:broadMatch"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#narrowMatch","title":"skos:narrowMatch"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#closeMatch","title":"skos:closeMatch"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#exactMatch","title":"skos:exactMatch"},
+   *  {"uri":"http://www.w3.org/2004/02/skos/core#relatedMatch","title":"skos:relatedMatch"}
+   *  ],
+   *  "http://www.w3.org/2004/02/skos/core#ConceptScheme": [
+   *   {"uri":"http://mertens/knaw/dataset_6c71d9c1-e4cc-4aa7-980c-cada7702e372/conceptscheme_e0ede522-61ff-4bbe-9547-4874d96d3251","title":"Schema-test"},
+   *   {"uri":"http://openskos.meertens.knaw.nl/iso-639-3","title":"ISO 639-3"}
+   *  ]
+   *  }
    */
   public function indexAction() {
     $api = $this->getDI()->make('OpenSkos2\Api\Filters');
     $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
     $rels = $this->getRequest()->getParam('relations');
-    if ($rels === 'true') {
+    if ($rels === 'true' || $rels==="1") {
       $response = $api->fetchFiltersForRelations();
     } else {
       $response = $api->fetchFilters();
