@@ -63,6 +63,14 @@ class Api_FindConceptsController extends AbstractController {
    * /api/find-concepts?q=Label*&tenant=example
    *
    * /api/find-concepts?q=do*&conceptScheme=http://data.cultureelerfgoed.nl/semnet/objecten
+   * 
+   * api/find-concepts?q=delivery&label=prefLabel&wholeword=true
+   * 
+   * api/find-concepts?q=data&properties=scopeNote&wholeword=true
+   * 
+   * api/find-concepts?q=data&properties=scopeNote definition
+   * 
+   * api/find-concepts?q=data&properties=scopeNote definition&wholeword=true
    *
    * @api {get} /api/find-concepts Find a concept
    * @apiName FindConcepts
@@ -73,6 +81,9 @@ class Api_FindConceptsController extends AbstractController {
    * @apiParam {String} tenant Name of the tenant to query. Default is all tenants
    * @apiParam {String} set OpenSKOS set to query. Default is all sets
    * @apiParam {String} conceptScheme id of the SKOS concept scheme to query. Default is all concept schemes
+   * @apiParam {String} label space-separated list of labels 
+   * @apiParam {String} properties space-separated list of documentation properties
+   * @apiParam {String="", true, false} wholeword if set to true then search is tokenized, that is it is a search for occurences of the given term as a separate word in given properties and /or labels. Has an effect only if parameters "label" and "properties" are nont empty (that is for SoLR-syntax independent requests)
    * @apiSuccess {xml/json/jsonp/html} Body
    * @apiSuccessExample Success-Response:
    *   HTTP/1.1 200 Ok
@@ -84,7 +95,7 @@ class Api_FindConceptsController extends AbstractController {
    *          xmlns:openskos="http://openskos.org/xmlns#"
    *          xmlns:owl="http://www.w3.org/2002/07/owl#"
    *          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-   *          openskos:numFound="15"
+   *          openskos:numFound="1"
    *          openskos:start="0">
    *   &lt;rdf:Description xmlns:dc="http://purl.org/dc/terms/"
    *      rdf:about="http://data.cultureelerfgoed.nl/semnet/efc584d7-9880-43fb-9a0b-76f3036aa315">

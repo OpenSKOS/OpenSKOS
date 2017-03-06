@@ -16,11 +16,6 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-/**
- * Script to migrate the data from SOLR to Jena run as following: 
- * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
- * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
- *  */
 
 require dirname(__FILE__) . '/autoload.inc.php';
 require_once 'Logging.php';
@@ -39,15 +34,9 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
 // -- Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
 // -- what does it mean to validate URI in validate collections (now sets)? Validate syntactically, I guess? I switched it off because it all fails in Meertens database
 // -- commnetd out the piece of code with the init query for solr
-/**
- * Script to migrate the data from SOLR to Jena run as following: 
- * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code> --enablestatusses=<bool>
- * Run for every tenant seperately. It is assumed that each tenant before migrating has only one set aka tenant collection (you are free add more sets to tenants after migration).
- *  */
-
-// example :php migrate.php --endpoint=http://192.168.99.100:8984/solr/collection1/select --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
-// php migrate.php --endpoint=http://145.100.58.150:8984/solr/collection1/select --db-hostname=localhost --db-database=openskos --db-username=root --db-password="" --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
-
+/** Script to migrate the data from SOLR to Jena run as following
+// example : php migrate.php --endpoint=http://145.100.58.150:8984/solr/collection1/select --db-hostname=localhost --db-database=openskos --db-username=someone --db-password="password" --tenant=meertens --enablestatusses=true --language=en --license=http://creativecommons.org/licenses/by/4.0/ --dryrun=false --debug=false
+**/
   $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'endpoint=s' => 'Solr endpoint to fetch data from',
