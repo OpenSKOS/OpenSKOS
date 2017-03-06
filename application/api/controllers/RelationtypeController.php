@@ -38,7 +38,7 @@ class API_RelationtypeController extends AbstractController {
   /**
    *
    * @apiVersion 1.0.0
-   * @apiDescription If the parameter "shortlits" is not set or set to foulse
+   * @apiDescription If the parameter "shortlits" is not set or set to "false" then descriptions of the OpenSKOs (non-SKOS) relation types will be listed in the response. Othewrise the json map name-uri for all relation types will be in the response body.
    * 
    * in RDF: /api/relationtype/  or /api/relationtype?format=rdf
    * 
@@ -51,7 +51,7 @@ class API_RelationtypeController extends AbstractController {
    * in JSON as name-uri map (SKOS relation types are included): /api/relationtype?shortlist=true&format=json
    * 
    *  
-   * @api {get} /api/relationtype Get OpenSKOS relation types. 
+   * @api {get} /api/relationtype Get OpenSKOS relation types 
    * @apiName GetRelationTypes
    * @apiGroup RelationType
    *
