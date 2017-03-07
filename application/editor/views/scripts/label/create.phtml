@@ -20,7 +20,7 @@
 <?php $this->headTitle($this->translate('Create a new skos xl label'))?>
 <div id="label-edit-form">
     <?= $this->form;?>
-    <a href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'add-to-concept', 'language' => $this->language], null, true)?>" class="button">
+    <a href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'add-to-concept'], null, true)?>?language=<?= $this->language?>" class="button">
         <?= $this->translate('Back')?>
     </a>
 </div>

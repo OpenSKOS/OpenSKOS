@@ -43,6 +43,7 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
             'language' => $this->getRequest()->getParam('language'),
         ]);
         $this->view->form = $form;
+        $this->view->language = $this->getRequest()->getParam('language');
     }
     
     public function editAction()
