@@ -20,7 +20,6 @@
 namespace OpenSkos2\OaiPmh;
 
 use DOMDocument;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept as SkosConcept;
@@ -132,7 +131,6 @@ class Concept implements Record
     }
     
     /**
-     * 
      * @return \OpenSkos2\Concept
      */
     public function getConcept()

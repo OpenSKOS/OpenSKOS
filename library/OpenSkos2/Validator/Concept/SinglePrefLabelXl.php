@@ -42,7 +42,8 @@ class SinglePrefLabelXl extends AbstractConceptValidator implements ResourceMana
     protected function validateConcept(Concept $concept)
     {
         if (!$this->resourceManager instanceof ConceptManager) {
-            throw new OpenSkosException('Resource manager expected to be concept manager. Given ' . get_class($this->resourceManager));
+            $class = get_class($this->resourceManager);
+            throw new OpenSkosException('Resource manager expected to be concept manager. Given ' . $class);
         }
         
         $concept->loadFullXlLabels($this->resourceManager->getLabelManager());
