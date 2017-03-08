@@ -61,7 +61,7 @@ API section &raquo;</a></p>
 Data Providers are repositories that expose structured metadata via
 OAI-PMH. Service Providers then make OAI-PMH service requests to harvest
 that metadata. OAI-PMH is a set of six verbs or services that are
-invoked within HTTP. The OpenSKOS project supports 2 <a rel="external" href="http://www.openarchives.org/OAI/openarchivesprotocol.html#MetadataNamespaces">metadataPrefixes</a>: <em>oai_dc</em> and <em>oai_rdf</em>.</p>
+invoked within HTTP. The OpenSKOS project supports 2 <a rel="external" href="http://www.openarchives.org/OAI/openarchivesprotocol.html#MetadataNamespaces">metadataPrefixes</a>: <em>oai_rdf</em> and <em>oai_rdf_xl</em>.</p>
 <p>OpenSKOS implements a Service Provider:</p>
 <ul>
 	<li>Identify:<br/>
@@ -74,19 +74,19 @@ invoked within HTTP. The OpenSKOS project supports 2 <a rel="external" href="htt
 		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListSets</a>
 	</li>
 	<li>List Concepts:<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc</a>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_rdf"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_rdf</a>
 	</li>
 	<li>List Concepts modified since <em>2011-09-01 12:00:00</em>:<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01T12:00:00Z"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01T12:00:00Z</a>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01T12:00:00Z"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_rdf&amp;from=2011-09-01T12:00:00Z</a>
 	</li>
 	<li>List Concepts modified between <em>2011-09-01</em> and <em>2011-09-10</em>:<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&from=2011-09-01&until=2011-09-10"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;from=2011-09-01&amp;until=2011-09-10</a>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01&until=2011-09-10"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_rdf&amp;from=2011-09-01&amp;until=2011-09-10</a>
 	</li>
 	<li>List Concepts in from the "<em>Gemeenschappelijke Thesaurus Audiovisuele Archieven</em>" (setSpec 4):<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_dc&set=4"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=4</a>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&metadataPrefix=oai_rdf&set=4"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=ListRecords&amp;metadataPrefix=oai_rdf&amp;set=4</a>
 	</li>
 	<li>Get Concepts "<em>A.G. Wildervankkanaal</em>" (uuid 238c8bfb-8915-0379-b52e-0885bfc9e500):<br/>
-		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&metadataPrefix=oai_dc&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&amp;metadataPrefix=oai_dc&amp;identifier=238c8bfb-8915-0379-b52e-0885bfc9e500</a>
+		<a href="<?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&metadataPrefix=oai_rdf&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500"><?php echo $this->url(array('controller' => 'oai-pmh'))?>?verb=GetRecord&amp;metadataPrefix=oai_rdf&amp;identifier=238c8bfb-8915-0379-b52e-0885bfc9e500</a>
 	</li>
 	
 </ul>
