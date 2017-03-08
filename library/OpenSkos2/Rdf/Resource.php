@@ -218,22 +218,6 @@ class Resource extends Uri implements ResourceIdentifier
     /**
      * @return string
      */
-    public function getUri()
-    {
-        return $this->uri;
-    }
-
-    /**
-     * @param string $uri
-     */
-    public function setUri($uri)
-    {
-        $this->uri = $uri;
-    }
-
-    /**
-     * @return string
-     */
     public function getType()
     {
         return current($this->getProperty(\OpenSkos2\Namespaces\Rdf::TYPE));

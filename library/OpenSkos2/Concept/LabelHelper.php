@@ -74,6 +74,9 @@ class LabelHelper
                 }
 
                 if ($labelValue instanceof Label) {
+                    if ($labelValue->isUriTempGenerated()) {
+                        $labelValue->setUri(Label::generateUri());
+                    }
                     $fullXlLabels[] = $labelValue;
                     continue;
                 }
@@ -101,10 +104,9 @@ class LabelHelper
             if ($useXlLabels === false || $forceCreationOfXl) {
                 foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
-                        $tenant = $concept->getTenant();
                         $label = new Label(Label::generateUri());
-                        $label->setProperty(OpenSkos::TENANT, new Literal($tenant));
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
+                        $label->ensureMetadata($concept->getTenant());
 
                         $concept->addProperty($xlLabelProperty, $label);
 

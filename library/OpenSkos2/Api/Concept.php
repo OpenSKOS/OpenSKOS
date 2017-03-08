@@ -34,6 +34,7 @@ use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
@@ -309,7 +310,7 @@ class Concept
         if (!$this->manager->askForUri((string)$concept->getUri())) {
             return $this->getErrorResponse(404, 'Concept not found try insert');
         }
-            
+        
         try {
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
 
@@ -340,8 +341,7 @@ class Concept
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
 
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml);
+        return $this->getSuccessResponse($this->loadResourceToRdf($concept));
     }
 
     /**
@@ -381,8 +381,7 @@ class Concept
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
 
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml, 202);
+        return $this->getSuccessResponse($this->loadResourceToRdf($concept), 202);
     }
 
     /**
@@ -417,6 +416,23 @@ class Concept
                 }
             }
         }
+    }
+    
+    /**
+     * Loads the resource from the db and transforms it to rdf.
+     * @param Resource $resource
+     * @return string
+     */
+    protected function loadResourceToRdf(Resource $resource)
+    {
+        $loadedResource = $this->manager->fetchByUri($resource->getUri());
+        
+        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($loadedResource->getInstitution());
+        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
+            $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+        
+        return (new Transform\DataRdf($loadedResource))->transform();
     }
 
     /**
@@ -539,8 +555,7 @@ class Concept
             $this->manager->insert($resource);
         }
 
-        $rdf = (new Transform\DataRdf($resource))->transform();
-        return $this->getSuccessResponse($rdf, 201);
+        return $this->getSuccessResponse($this->loadResourceToRdf($resource), 201);
     }
     
     /**
