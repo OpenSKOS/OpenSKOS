@@ -20,10 +20,12 @@
 ?>
 <div class="skosxl-label-more-info">
     <h2><?= $this->labelXL->getProperty(OpenSkos2\Namespaces\SkosXl::LITERALFORM)[0] ?></h2>
+    <div>
+        <?= $this->labelXL->getUri()?>
+    </div>
     <div class="other-data">
         <div class="concept-item-subtitle">
-            <?php $this->title = 'Other data associated with this label'; ?>
-            <?= $this->title; ?>
+            <?= 'Other data associated with this label'; ?>
         </div>
         <div class="other-data-content">
             <ul>

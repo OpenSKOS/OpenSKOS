@@ -132,10 +132,11 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         $this->emitResponse($response);
     }
     
-    public function skosXlLinkedDataAction() {
+    public function viewAction()
+    {
         $labelXlUri = $this->_request->getParam('uri');
         
-        if(empty($labelXlUri) === true) {
+        if (empty($labelXlUri) === true) {
             echo 'Uri not specified';
         }
         
