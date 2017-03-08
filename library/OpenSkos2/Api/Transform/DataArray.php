@@ -116,7 +116,8 @@ class DataArray
                 return true;
             } else {
                 throw new \OpenSkos2\Exception\InvalidArgumentException(
-                        'The property ' . $property . ' is present both in the include and exclude lists');
+                    'The property ' . $property . ' is present both in the include and exclude lists'
+                );
             }
         }
     }

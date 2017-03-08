@@ -21,7 +21,6 @@ namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\SkosXl;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
@@ -44,7 +43,8 @@ class DisjointXlLabels extends AbstractConceptValidator implements ResourceManag
     protected function validateConcept(Concept $concept)
     {
         if (!$this->resourceManager instanceof ConceptManager) {
-            throw new OpenSkosException('Resource manager expected to be concept manager. Given ' . get_class($this->resourceManager));
+            $class = get_class($this->resourceManager);
+            throw new OpenSkosException('Resource manager expected to be concept manager. Given ' . $class);
         }
         
         $concept->loadFullXlLabels($this->resourceManager->getLabelManager());
@@ -60,7 +60,6 @@ class DisjointXlLabels extends AbstractConceptValidator implements ResourceManag
         foreach ($xlLabelPredicates as $predicate) {
             $labels = $concept->getProperty($predicate);
             foreach ($labels as $label) {
-                
                 if (!($label instanceof Label)) {
                     $this->errorMessages[] =
                             "Skos-xl label expected to be of type Label but "

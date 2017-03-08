@@ -375,17 +375,17 @@ class Repository implements InterfaceRepository
 //            'http://www.openarchives.org/OAI/2.0/oai_dc/'
 //        );
 
-            $formats[] = new ImplementationMetadataFormatType(
-                self::PREFIX_OAI_RDF,
-                self::SCHEMA_OAI_RDF,
-                Namespaces\Skos::NAME_SPACE
-            );
-            
-            $formats[] = new ImplementationMetadataFormatType(
-                self::PREFIX_OAI_RDF_XL,
-                self::SCHEMA_OAI_RDF,
-                Namespaces\SkosXl::NAME_SPACE
-            );
+        $formats[] = new ImplementationMetadataFormatType(
+            self::PREFIX_OAI_RDF,
+            self::SCHEMA_OAI_RDF,
+            Namespaces\Skos::NAME_SPACE
+        );
+
+        $formats[] = new ImplementationMetadataFormatType(
+            self::PREFIX_OAI_RDF_XL,
+            self::SCHEMA_OAI_RDF,
+            Namespaces\SkosXl::NAME_SPACE
+        );
 
         return $formats;
     }

@@ -54,11 +54,11 @@ class DataRdf
      * @param array $propertiesList Properties to serialize.
      */
     public function __construct(
-            Resource $concept,
-            $includeRdfHeader = true,
-            $propertiesList = null,
-            $excludePropertiesList = [])
-    {
+        Resource $concept,
+        $includeRdfHeader = true,
+        $propertiesList = null,
+        $excludePropertiesList = []
+    ) {
         $this->concept = $concept;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
@@ -126,7 +126,8 @@ class DataRdf
                 return true;
             } else {
                 throw new \OpenSkos2\Exception\InvalidArgumentException(
-                        'The property ' . $property . ' is present both in the include and exclude lists');
+                    'The property ' . $property . ' is present both in the include and exclude lists'
+                );
             }
         }
     }

@@ -38,11 +38,11 @@ class JsonpResponse extends DetailResponse
      * @param array $propertiesList Properties to serialize.
      */
     public function __construct(
-            \OpenSkos2\Rdf\Resource $resource, 
-            $callback, 
-            $propertiesList = null,
-            $excludePropertiesList = [])
-    {
+        \OpenSkos2\Rdf\Resource $resource,
+        $callback,
+        $propertiesList = null,
+        $excludePropertiesList = []
+    ) {
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
         $this->excludePropertiesList = $excludePropertiesList;

@@ -179,7 +179,12 @@ class Concept
                 $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new JsonpResponse($result, $params['callback'], $propertiesList, $excludePropertiesList))->getResponse();
+                $response = (new JsonpResponse(
+                    $result,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
                 $response = (new RdfResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
@@ -214,7 +219,7 @@ class Concept
             $propertiesList = [];
         }
         
-        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);                
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
         
         if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
             $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
@@ -225,7 +230,12 @@ class Concept
                 $response = (new DetailJsonResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList, $excludePropertiesList))->getResponse();
+                $response = (new DetailJsonpResponse(
+                    $concept,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
                 $response = (new DetailRdfResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
@@ -391,8 +401,8 @@ class Concept
      * @param \Zend\Diactoros\ServerRequest $request
      * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
      */
-    public function useXlLabels($tenant, $request) {
-
+    public function useXlLabels($tenant, $request)
+    {
         if (empty($request->getQueryParams()['xl'])) {
             return false;
         }
@@ -408,11 +418,13 @@ class Concept
                 if ($tenant === null) {
                     throw new \Zend_Controller_Exception(
                         'SKOS-XL labels are requested, but tenant is not defined',
-                        501);
+                        501
+                    );
                 } else {
                     throw new \Zend_Controller_Exception(
                         'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
-                        501);
+                        501
+                    );
                 }
             }
         }

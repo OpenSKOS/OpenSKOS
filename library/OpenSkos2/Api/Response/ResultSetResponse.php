@@ -45,10 +45,10 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
      * @param array $propertiesList Properties to serialize.
      */
     public function __construct(
-            \OpenSkos2\Api\ResourceResultSet $result,
-            $propertiesList = null,
-            $excludePropertiesList = [])
-    {
+        \OpenSkos2\Api\ResourceResultSet $result,
+        $propertiesList = null,
+        $excludePropertiesList = []
+    ) {
         $this->result = $result;
         $this->propertiesList = $propertiesList;
         $this->excludePropertiesList = $excludePropertiesList;

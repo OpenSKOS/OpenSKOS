@@ -35,10 +35,11 @@ class RdfResponse extends DetailResponse
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $resource = (new \OpenSkos2\Api\Transform\DataRdf(
-                $this->resource, 
-                true, 
-                $this->propertiesList, 
-                $this->excludePropertiesList))->transform();
+            $this->resource,
+            true,
+            $this->propertiesList,
+            $this->excludePropertiesList
+        ))->transform();
         $stream->write($resource);
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)

@@ -114,7 +114,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         $this->objects[] = str_replace('dc11:subject', 'dc:subject', $xmlString);
     }
     
-    protected function getResourceXmlString($res, $showNodeId, $depth) 
+    protected function getResourceXmlString($res, $showNodeId, $depth)
     {
         $properties = $res->propertyUris();
         

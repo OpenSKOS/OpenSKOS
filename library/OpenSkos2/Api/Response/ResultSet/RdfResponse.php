@@ -67,10 +67,11 @@ class RdfResponse extends ResultSetResponse
             
             /* @var $resource \OpenSkos2\Rdf\Resource */
             $xml = (new \OpenSkos2\Api\Transform\DataRdf(
-                    $resource, 
-                    true, 
-                    $this->propertiesList, 
-                    $this->excludePropertiesList))->transform();
+                $resource,
+                true,
+                $this->propertiesList,
+                $this->excludePropertiesList
+            ))->transform();
             $resourceXML =  new \DOMDocument();
             $resourceXML->loadXML($xml);
                         
