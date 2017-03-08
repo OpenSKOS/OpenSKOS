@@ -131,8 +131,6 @@ class LabelHelper
      */
     public function insertLabels(Concept $concept)
     {
-        //@TODO Can we have labels without uri here...
-        
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
         
         foreach ($inserAndDelete['delete'] as $deleteLabel) {
