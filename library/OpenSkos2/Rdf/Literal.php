@@ -129,6 +129,15 @@ class Literal implements Object
     }
     
     /**
+     * Is the literal empty.
+     * @return type
+     */
+    public function isEmpty()
+    {
+        return $this->value === null || $this->value === '';
+    }
+    
+    /**
      * Finds if the current literal is in the given array.
      * @param Literal[] $literalsArray
      * @return boolean
@@ -144,7 +153,11 @@ class Literal implements Object
         return false;
     }
     
-    public function isEqual($literalToCompare)
+    /**
+     * @param Literal $literalToCompare
+     * @return boolean
+     */
+    public function isEqual(Literal $literalToCompare)
     {
         if ($literalToCompare->getValue() == $this->getValue()
          && $literalToCompare->getLanguage() == $this->getLanguage()

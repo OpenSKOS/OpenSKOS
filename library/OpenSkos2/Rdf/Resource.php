@@ -20,6 +20,8 @@
 namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
 use OpenSkos2\Exception\OpenSkosException;
@@ -160,9 +162,18 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isPropertyEmpty($predicate)
     {
-        return !isset($this->properties[$predicate])
-            || $this->properties[$predicate] === null
-            || $this->properties[$predicate] === '';
+        if (!$this->hasProperty($predicate)) {
+            return true;
+        }
+        
+        $allValuesAreEmpty = true;
+        foreach ($this->properties[$predicate] as $value) {
+            if (!$value->isEmpty()) {
+                $allValuesAreEmpty = false;
+                break;
+            }
+        }
+        return $allValuesAreEmpty;
     }
 
     /**

@@ -38,6 +38,7 @@ use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\Concept\DisjointXlLabels;
 use OpenSkos2\Validator\Concept\LanguageRequired;
+use OpenSkos2\Validator\Concept\NoEmptyValues;
 use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
 use OpenSkos2\Validator\DependencyAware\TenantAware;
 use Psr\Log\LoggerInterface;
@@ -158,6 +159,7 @@ class Resource
         $validators = [
             new InScheme(),
             new SingleStatus(),
+            new NoEmptyValues(),
             new LanguageRequired(),
             new SinglePrefLabel(),
             new UniqueNotation(),

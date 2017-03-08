@@ -33,7 +33,7 @@ class Uri implements Object, ResourceIdentifier
     public function __construct($value)
     {
         // Null values where allowed from the start some functionality depends on it like createing new graphs :(
-        if (!self::isValueTempGenerated($value) && $value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
+        if (!self::isUriTempGeneratedCheck($value) && $value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
             throw new Exception\InvalidUriException('Invalid URI: ' . $value);
         }
         $this->uri = $value;
@@ -46,6 +46,15 @@ class Uri implements Object, ResourceIdentifier
     public function __toString()
     {
         return $this->uri;
+    }
+    
+    /**
+     * Is the literal empty.
+     * @return type
+     */
+    public function isEmpty()
+    {
+        return $this->uri === null || $this->uri === '';
     }
 
     /**
@@ -70,7 +79,7 @@ class Uri implements Object, ResourceIdentifier
      */
     public function isUriTempGenerated()
     {
-        return self::isValueTempGenerated($this->uri);
+        return self::isUriTempGeneratedCheck($this->uri);
     }
     
     /**
@@ -78,7 +87,7 @@ class Uri implements Object, ResourceIdentifier
      * @param string $uri
      * @return bool
      */
-    public static function isValueTempGenerated($uri)
+    public static function isUriTempGeneratedCheck($uri)
     {
         return stripos($uri, '_:genid') === 0;
     }
