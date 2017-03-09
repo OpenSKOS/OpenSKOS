@@ -1717,8 +1717,8 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 }
 #concept-edit-form #concept-edit-language-labels,
 #concept-scheme-edit-form #concept-edit-language-labels {
-  padding-bottom: 34px;
-  margin-bottom: 24px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
   border-bottom: 1px solid #ddd;
   clear: both;
 }
@@ -1738,6 +1738,12 @@ ul#history-list > li > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field .concept-multi-template textarea,
 #concept-scheme-edit-form #concept-edit-language-labels .multi-field .concept-multi-template input {
   width: 70%;
+}
+#concept-edit-form #concept-edit-language-labels::after,
+#concept-scheme-edit-form #concept-edit-language-labels::after {
+  content: "";
+  display: block;
+  clear: both;
 }
 #concept-edit-form #concept-edit-language-properties,
 #concept-scheme-edit-form #concept-edit-language-properties {

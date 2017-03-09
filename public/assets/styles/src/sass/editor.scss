@@ -1120,10 +1120,10 @@ ul#history-list {
         margin: 0px;
         padding: 0px;
     };
-
+    
     #concept-edit-language-labels {
-        padding-bottom: 34px;
-        margin-bottom: 24px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
         border-bottom: 1px solid #ddd;
         clear: both;
         .multi-field {
@@ -1139,8 +1139,13 @@ ul#history-list {
                 };
             }
         };
+        &::after {
+            content: "";
+            display: block;
+            clear: both;
+        };
     };
-
+    
     #concept-edit-language-properties {
         clear: both;
         margin-bottom: 12px;
