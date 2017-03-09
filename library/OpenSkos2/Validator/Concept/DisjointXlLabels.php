@@ -30,7 +30,6 @@ use OpenSkos2\Exception\OpenSkosException;
 
 class DisjointXlLabels extends AbstractConceptValidator implements ResourceManagerAware
 {
-    
     use ResourceManagerAwareTrait;
     
     /**
@@ -49,15 +48,9 @@ class DisjointXlLabels extends AbstractConceptValidator implements ResourceManag
         
         $concept->loadFullXlLabels($this->resourceManager->getLabelManager());
         
-        $xlLabelPredicates = [
-            \OpenSkos2\Namespaces\SkosXl::PREFLABEL,
-            \OpenSkos2\Namespaces\SkosXl::ALTLABEL,
-            \OpenSkos2\Namespaces\SkosXl::HIDDENLABEL,
-        ];
-        
         $literalForms = [];
         
-        foreach ($xlLabelPredicates as $predicate) {
+        foreach (Concept::$classes['SkosXlLabels'] as $predicate) {
             $labels = $concept->getProperty($predicate);
             foreach ($labels as $label) {
                 if (!($label instanceof Label)) {
