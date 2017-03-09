@@ -19,6 +19,7 @@
 
 namespace OpenSkos2\Solr;
 
+use OpenSkos2\Rdf\Uri;
 use Solarium\Client;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
@@ -143,7 +144,7 @@ class ResourceManager
     /**
      * @param Resource $uri
      */
-    public function delete(\OpenSkos2\Rdf\Uri $uri)
+    public function delete(Uri $uri)
     {
         // delete resource in solr
         $update = $this->solr->createUpdate();
