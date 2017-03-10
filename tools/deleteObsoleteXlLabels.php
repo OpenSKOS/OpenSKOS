@@ -24,8 +24,8 @@ require dirname(__FILE__) . '/autoload.inc.php';
 
 $options = [
     'env|e=s'   => 'The environment to use (defaults to "production")',
-    'days|d=i'    => 'Labels modified in less that this mount will not be deleted.'
-                 . 'Default is 7 days.',
+    'days|d=i'    => 'Labels modified in less that this mount will not be deleted. '
+                 . 'Default is 7 days. Set to 0 to disable check.',
     'verbose|v' => 'Verbose',
     'help|h'    => 'Show this help',
 ];
@@ -57,7 +57,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
     $logLevel
 ));
 
-if ($OPTS->getOption('days')) {
+if ($OPTS->getOption('days') !== NULL) {
     $maxLabelAgeInDays = (int)$OPTS->getOption('days');
 } else {
     $maxLabelAgeInDays = 7;
@@ -66,18 +66,23 @@ if ($OPTS->getOption('days')) {
 /* @var $labelManager \OpenSkos2\SkosXl\LabelManager */
 $labelManager = $diContainer->make('\OpenSkos2\SkosXl\LabelManager');
 
+// Used to record time it takes for the script execution
+$scriptStart = microtime(true);
+
 // The where clause used to filter out labels
 $sparqlWhere = '
     ?label <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2008/05/skos-xl#Label>
 ';
 
-$timerStart = microtime(true);
 $total = getTotal($labelManager, $sparqlWhere);
-$countTime = microtime(true) - $timerStart;
-echo PHP_EOL . 'Time to count labels: ' . $countTime . 's' . PHP_EOL;
+
+if ($OPTS->getOption('verbose')) {
+    $timeToCount = microtime(true) - $scriptStart;
+    echo PHP_EOL . 'Time to count labels: ' . $timeToCount . 's' . PHP_EOL;
+    $processTime = 0;
+}
 
 $rows = 100;
-
 $fetchLabels = "
     DESCRIBE ?label
     WHERE {
@@ -95,18 +100,18 @@ $defaultXlLabelParameters = [
     \OpenSkos2\Namespaces\SkosXl::LITERALFORM
 ];
 
-$labelsToDelete = [];
-$processTime = 0;
 
 $offset = 0;
+$notLinkedLabelsCount = 0;
+$deletedLabelsCount = 0;
 while ($offset < $total) {
 
     $labels = $labelManager->fetchQuery($fetchLabels . ' OFFSET ' . $offset);
     $offset = $offset + $rows;
+    $labelsToDelete = [];
     
     foreach ($labels as $label) {
         /* @var $label \OpenSkos2\SkosXl\Label */
-        //$logger->debug($label->getUri());
         
         if ($labelManager->ask('
             ?concept ?predicate <' . $label->getUri() . '> .
@@ -115,60 +120,66 @@ while ($offset < $total) {
             // Skip labels that are linked to concepts
             continue;
         }
+        
+        $notLinkedLabelsCount++;
 
         try {
-            // We will not delete labels modified in less than 1 week
-            // We will still delete labels with no modified date!!!
-            $modified = $label->getProperty(OpenSkos2\Namespaces\DcTerms::MODIFIED);
-            if (!empty($modified) && $modified[0] instanceof OpenSkos2\Rdf\Literal) {
-                /* @var $date DateTime */
-                $dateModified = $modified[0]->getValue();
-                $now = new DateTime(date('c'));
-                if ($dateModified->diff($now)->days < $maxLabelAgeInDays) {
-                    continue;
+            if ($maxLabelAgeInDays > 0) {
+                // We will not delete labels modified in less than 1 week
+                // We will still delete labels with no modified date!!!
+                $modified = $label->getProperty(OpenSkos2\Namespaces\DcTerms::MODIFIED);
+                if (!empty($modified) && $modified[0] instanceof OpenSkos2\Rdf\Literal) {
+                    /* @var $date DateTime */
+                    $dateModified = $modified[0]->getValue();
+                    $now = new DateTime(date('c'));
+                    if ($dateModified->diff($now)->days < $maxLabelAgeInDays) {
+                        continue;
+                    }
                 }
             }
+            
             
             //We will not delete labels that contain extra information
             foreach ($label->getProperties() as $key => $value) {
                 if (!in_array($key, $defaultXlLabelParameters)) {
-                    continue;
+                    // Continue for the outer cycle
+                    continue(2);
                 }
             }
 
             // If we have not continued until now, the label is to be deleted
             $labelsToDelete[] = $label;
+            $deletedLabelsCount++;
             
         } catch (\Exception $exc) {
             echo $exc->getMessage() . PHP_EOL;
             echo $exc->getTraceAsString() . PHP_EOL;
         }
     }
-        
-    $pageTime = round(microtime(true) - $timerStart - $countTime - $processTime, 3);
-    $processTime = round(microtime(true) - $timerStart - $countTime, 3);
-    $count = count($labelsToDelete);
     
-    echo "Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime" . PHP_EOL;
+//    $labelManager->setIsNoCommitMode(true);
+//    foreach ($labelsToDelete as $label) {
+//        // Delete from Jena and Solr
+//        $labelManager->delete($label);
+//    }
+//    // Commit to Solr
+//    $labelManager->commit();
+        
+    if ($OPTS->getOption('verbose')) {
+        $pageTime = round(microtime(true) - $scriptStart - $timeToCount - $processTime, 3);
+        $processTime = round(microtime(true) - $scriptStart - $timeToCount, 3);
+        $count = count($labelsToDelete);
+        
+        echo "Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime" . PHP_EOL;
+    }
 }
 
-$scriptTime = microtime(true) - $timerStart;
-
-echo PHP_EOL . 'Labels to delete: ' . count($labelsToDelete) . PHP_EOL;
-echo PHP_EOL . 'Fetch time: ' . $fetchTotalTime . PHP_EOL;
-echo PHP_EOL . 'Script total time: ' . $scriptTime . PHP_EOL;
-die;
-//
-//$labelManager->setIsNoCommitMode(true);
-//foreach ($labelsToDelete as $label) {
-//    // Delete from Jena and Solr
-//    $labelManager->delete($label);
-//}
-//// Commit to Solr
-//$labelManager->commit();
-
-$logger->info('Labels not linked to concepts: ' . $total);
-$logger->info('Removed labels: ' . count($labelsToDelete));
+// report statistics
+$totalScriptTime = microtime(true) - $scriptStart;
+$logger->info('Script total time: ' . round($totalScriptTime, 3) . 's');
+$logger->info('Total labels: ' . $total);
+$logger->info('Labels not linked to concepts: ' . $notLinkedLabelsCount);
+$logger->info('Removed labels: ' . $deletedLabelsCount);
 $logger->info("Done!");
 
 /**
