@@ -46,6 +46,7 @@ abstract class AbstractTripleStoreResource {
     if (empty($queryparams['key'])) {
       throw new ApiException('No user key specified', 412);
     }
+    
     $user = $this->getUserByKey($queryparams['key']);
     $params = $queryparams;
     $params['user'] = $user;
@@ -191,7 +192,6 @@ abstract class AbstractTripleStoreResource {
     try {
       $params = $this->getQueryParams($request);
       $resourceObject = $this->getResourceObjectFromRequestBody($request);
-
       if (!$this->authorisationManager->resourceCreationAllowed($params['user'], $params['tenantcode'], $resourceObject)) {
         throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' . $$params['user']->role . '"', 403);
       }

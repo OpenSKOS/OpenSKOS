@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -18,54 +18,49 @@
  */
 
 namespace OpenSkos2\Api;
+use Zend_Application;
 
-class ConceptTest extends \PHPUnit_Framework_TestCase
-{
-    public function testCreateWithoutXML()
-    {
-        $request = (new \Zend\Diactoros\ServerRequest());
-        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
-                ->disableOriginalConstructor()
-                ->getMock();
-        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
-                     ->disableOriginalConstructor()
-                     ->getMock();
-        $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
-                     ->disableOriginalConstructor()
-                     ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
-        $response = $concept->create($request);
-        
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals((string)$response->getBody(), 'Recieved RDF-XML is not valid XML');
-    }
-    
-    public function testCreateWithoutTenant()
-    {
-        $request = $this->getRequest();
-        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
-                            ->disableOriginalConstructor()
-                            ->getMock();
-        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
-                             ->disableOriginalConstructor()
-                             ->getMock();
-        $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
-                                 ->disableOriginalConstructor()
-                                 ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
-        $response = $concept->create($request);
-        
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals((string)$response->getBody(), 'No tenant specified');
-    }
-    
-    /**
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    private function getRequest()
-    {
-        $xml = '<rdf:RDF 
+class ConceptTest extends \PHPUnit_Framework_TestCase {
+
+ 
+
+  public function testCreateWithoutXML() {
+    $request = (new \Zend\Diactoros\ServerRequest())->withQueryParams(array("key" => "xxx", "tenant" => "example"));
+    $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $concept = new \OpenSkos2\Api\Concept($conceptMock, $autocompleteMock);
+
+    $response = $concept->create($request);
+    var_dump($response->getHeader("X-Error-Msg"));
+    $this->assertEquals(400, $response->getStatusCode());
+    $this->assertEquals((string) $response->getBody(), 'Recieved RDF-XML is not valid XML');
+  }
+
+  public function testCreateWithoutTenant() {
+    $request = $this->getRequest();
+    $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $concept = new \OpenSkos2\Api\Concept($conceptMock, $autocompleteMock);
+    $response = $concept->create($request);
+
+    $this->assertEquals(400, $response->getStatusCode());
+    $this->assertEquals((string) $response->getBody(), 'No tenant specified');
+  }
+
+  /**
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   */
+  private function getRequest() {
+    $xml = '<rdf:RDF 
             xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
             xmlns:openskos="http://openskos.org/xmlns#"
             xmlns:skos="http://www.w3.org/2004/02/skos/core#"
@@ -84,8 +79,9 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
               <skos:notation>28586</skos:notation>
             </rdf:Description>
         </rdf:RDF>';
-        $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $stream->write($xml);
-        return (new \Zend\Diactoros\ServerRequest())->withBody($stream);
-    }
+    $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
+    $stream->write($xml);
+    return (new \Zend\Diactoros\ServerRequest())->withBody($stream);
+  }
+
 }

@@ -26,4 +26,13 @@
         <!--<log type="coverage-text" target="build/coverage.txt"/>-->
         <!--<log type="coverage-clover" target="build/logs/clover.xml"/>-->
     </logging>
+    <php>
+        <!-- clavas based settings -->
+        <const name="API_BASE_URI" value = "http://localhost:89/clavas/public/api"/>
+        <const name="TENANT" value="example"/>
+        <const name="API_KEY" value="xxx"/>
+        <const name="SCHEMA_URI_1" value ="http://openskos.meertens.knaw.nl/Organisations"/>
+        <const name="SCHEMA_URI_2" value ="http://openskos.meertens.knaw.nl/Languages"/>
+        <const name="SET_CODE" value="clavas:org"/>
+    </php>
 </phpunit>
