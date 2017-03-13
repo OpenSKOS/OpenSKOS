@@ -54,6 +54,10 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/find-concepts?q=do*&tenant=beng&collection=gtaa
      *
      * /api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten
+     * 
+     * Skos-XL labels can be fetched instead of simple labels for each of the valid requests by specifying the xl and tenant parameters
+     * 
+     * /api/find-concepts?q=do*&xl=1&tenant=pic
      *
      * @api {get} /api/find-concepts Find a concept
      * @apiName FindConcepts
@@ -132,6 +136,12 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)
      *
      * /api/concept/?id=http://example.com/1 (rdf format)
+     * 
+     * Skos-XL labels can be fetched instead of simple labels for each of the valid requests by specifying the xl parameter
+     * 
+     * /api/concept/?id=http://example.com/1?xl=1
+     * 
+     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json?xl=1
      *
      * @api {get} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
