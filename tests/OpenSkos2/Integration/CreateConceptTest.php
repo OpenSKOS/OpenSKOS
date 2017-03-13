@@ -2,13 +2,12 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-require_once __DIR__ . '/Utils.php';
+require_once 'AbstractTest.php';
 
-class CreateConceptTest extends \PHPUnit_Framework_TestCase {
 
-  private $client;
-  private $createdconcepts;
+class CreateConceptTest extends AbstractTest {
 
+  
   protected function setUp() {
     $this->client = new \Zend_Http_Client();
     $this->client->setConfig(array(
@@ -33,7 +32,7 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
 
   public function test01CreateConceptWithoutURIWithDateAccepted2() {
 //CreateConceptTest::test01CreateConceptWithoutURIWithDateAccepted();
-// Create new concept with dateAccepted filled (implicit status APPROVED). This should not be possible. 
+// Create new concept with dateAccepted filled (implicit status APPROVED). This should not be ignored. 
     print "\n\n test01 ... \n";
     $randomn = rand(0, 2048);
     $prefLabel = 'testPrefLable_' . $randomn;
@@ -48,13 +47,14 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml);
+    $response = $this->create($xml, true);
     if ($response->getStatus() === 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(201, $response->getStatus());
+    $this->AssertEquals(201, $response->getStatus(), $response ->getMessage());
   }
 
+  
   public function test02CreateConceptWithoutUriWithoutDateAccepted() {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
     print "\n\n test02 ... \n";
@@ -69,8 +69,8 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml);
-    $this->AssertEquals(201, $response->getStatus());
+    $response = $this->create($xml, true);
+    $this->AssertEquals(201, $response->getStatus(), $response ->getMessage());
     $this->CheckCreatedConcept($response);
   }
 
@@ -92,15 +92,15 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:RDF>';
 
 // create the first concept with which we will compare
-    $response = $this->create($xml, false);
+    $response = $this->create($xml);
     if ($response->getStatus() === 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
       $xml2 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml);
-      $response2 = $this->create($xml2, "false");
+      $response2 = $this->create($xml2);
       if ($response2->getStatus() == 201) {
-        array_push($this->createdconcepts, Utils::getAbout($response2));
+        array_push($this->createdconcepts, $this->getAbout($response2));
       }
-      $this->AssertEquals(400, $response2->getStatus());
+      $this->AssertEquals(400, $response2->getStatus(), $response2 ->getMessage());
     } else {
       throw (new \Exception('Fialure while creating the first concept. Status: ' . $response->getStatus() . "\n " . $response->getMessage()));
     }
@@ -121,7 +121,6 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
 
     $this->client->resetParameters();
     $this->client->setUri(API_BASE_URI . "/concept?");
-
     $response = $this->client
       ->setEncType('text/xml')
       ->setRawData($xml)
@@ -130,9 +129,9 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       ->request('POST');
 
     if ($response->getStatus() == 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(412, $response->getStatus());
+    $this->AssertEquals(412, $response->getStatus(), $response ->getMessage());
   }
 
   public function test05CreateConceptWithURIUniquePrefLabel() {
@@ -153,8 +152,8 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml, false);
-    $this->AssertEquals(201, $response->getStatus());
+    $response = $this->create($xml);
+    $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     $this->CheckCreatedConcept($response);
   }
 
@@ -204,19 +203,19 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response0 = $this->create($xml0, false);
+    $response0 = $this->create($xml0);
     if ($response0->getStatus() == 201) {
       array_push($this->createdconcepts, $about);
       $xml1 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml0);
       $xml1 = str_replace($about, $anotherAbout, $xml1);
       $xml1 = str_replace('<openskos:uuid>' . $uuid . '</openskos:uuid>', '<openskos:uuid>' . $anotherUUID . '</openskos:uuid>', $xml1);
-      $response1 = $this->create($xml1, false);
+      $response1 = $this->create($xml1);
       if ($response1->getStatus() == 201) {
         array_push($this->createdconcepts, $about);
       }
-      $this->AssertEquals(400, $response1->getStatus());
+      $this->AssertEquals(400, $response1->getStatus(), $response1 ->getMessage());
     } else {
-      throw new Exception('Creating first test concept has failed with the status: ' . $response0->getStatus());
+      throw new Exception('Creating first test concept has failed with the status: ' . $response0->getStatus(). 'Message: ' . $response0 ->getMessage());
     }
   }
 
@@ -232,11 +231,11 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description' .
       '</rdf:RDF>';
 
-    $response = $this->create($wrongXml);
+    $response = $this->create($wrongXml, true);
     if ($response->getStatus() == 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(412, $response->getStatus());
+    $this->AssertEquals(412, $response->getStatus(), $response ->getMessage());
   }
 
   public function test07CreateConceptWithoutUri() {
@@ -252,8 +251,8 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml);
-    $this->AssertEquals(201, $response->getStatus());
+    $response = $this->create($xml, true);
+    $this->AssertEquals(201, $response->getStatus(), $response ->getMessage());
     $this->CheckCreatedConcept($response);
   }
 
@@ -270,11 +269,11 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml, false);
+    $response = $this->create($xml);
     if ($response->getStatus() == 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(400, $response->getStatus());
+    $this->AssertEquals(400, $response->getStatus(), $response ->getMessage());
   }
 
   public function test09CreateConceptWithoutUriPrefLabelExists() {
@@ -293,19 +292,19 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response0 = $this->create($xml0);
+    $response0 = $this->create($xml0, true);
 
     if ($response0->getStatus() == 201) {
       // we can proceed with the test
-      array_push($this->createdconcepts, Utils::getAbout($response0));
+      array_push($this->createdconcepts, $this->getAbout($response0));
       $xml = str_replace('testAltLable_', '_another_testAltLable_', $xml0);
-      $response = $this->create($xml);
+      $response = $this->create($xml, true);
       if ($response->getStatus() == 201) {
-        array_push($this->createdconcepts, Utils::getAbout($response));
+        array_push($this->createdconcepts, $this->getAbout($response));
       }
-      $this->AssertEquals(400, $response->getStatus());
+      $this->AssertEquals(400, $response->getStatus(), $response ->getMessage());
     } else {
-      throw new Exception('create the first test concept');
+      throw new \Exception('create the first test concept');
     }
   }
 
@@ -325,11 +324,11 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml, false);
+    $response = $this->create($xml);
     if ($response->getStatus() === 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(400, $response->getStatus());
+    $this->AssertEquals(400, $response->getStatus(), $response ->getMessage());
   }
 
   public function test10BCreateConceptWithoutUriButWithoutNotationUniquePrefLabel() {
@@ -347,13 +346,13 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = $this->create($xml, false);
+    $response = $this->create($xml);
     if ($response->getStatus() == 201) {
-      array_push($this->createdconcepts, Utils::getAbout($response));
+      array_push($this->createdconcepts, $this->getAbout($response));
     }
-    $this->AssertEquals(400, $response->getStatus());
+    $this->AssertEquals(400, $response->getStatus(), $response ->getMessage());
   }
-
+  
   private function CheckCreatedConcept($response) {
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentXML($response->getBody());
@@ -374,41 +373,5 @@ class CreateConceptTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals("candidate", $status->current()->nodeValue, "Satus is not Candidate, as it must be by just created concept.");
   }
 
-  private function deleteConcepts($uris) {
-    foreach ($uris as $uri) {
-      if ($uri != null) {
-        $response = $this->deleteConcept($uri);
-        if ($response->getStatus() !== 202 && $response->getStatus() !== 200) {
-          throw Exception('delete while cleaning up database failed');
-        }
-      }
-    }
-  }
-
-  private function deleteConcept($id) {
-    $this->client->resetParameters();
-    $this->client->setUri(API_BASE_URI . '/concept');
-    $response = $this->client
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
-      ->setParameterGet('id', $id)
-      ->request('DELETE');
-    return $response;
-  }
-
-  private function create($xml, $autoGenerateIdentifiers = true) {
-    $this->client->resetParameters();
-    $this->client->setUri(API_BASE_URI . "/concept?");
-
-    $response = $this->client
-      ->setEncType('text/xml')
-      ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
-      ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers)
-      ->request('POST');
-
-    return $response;
-  }
-
+ 
 }
