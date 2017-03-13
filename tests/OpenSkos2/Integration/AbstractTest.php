@@ -4,13 +4,16 @@ namespace Tests\OpenSkos2\Integration;
 
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
-  protected $client;
-  protected $createdconcepts;
+  protected static $client;
+  protected static $createdconcepts;
 
-  protected function create($xml, $autoGenerateIdentifiers=false) {
-    $this->client->resetParameters();
-    $this->client->setUri(API_BASE_URI . "/concept?");
-    $response = $this->client
+  public static function tearDownAfterClass() {
+    self::deleteConcepts(self::$createdconcepts);
+  }
+  protected static function create($xml, $autoGenerateIdentifiers=false) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/concept?");
+    $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
       ->setParameterGet('tenant', TENANT)
@@ -18,13 +21,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
       ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers)
       ->request('POST');
     return $response;
-  }
+  }  
+  
+  protected static function update($xml) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/concept?");
 
-  protected function update($xml) {
-    $this->client->resetParameters();
-    $this->client->setUri(API_BASE_URI . "/concept?");
-
-    $response = $this->client
+    $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
       ->setParameterGet('tenant', TENANT)
@@ -33,30 +36,30 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
     return $response;
   }
-
-  protected function deleteConcepts($uris) {
+  
+  protected static  function deleteConcepts($uris) {
     foreach ($uris as $uri) {
       if ($uri != null) {
-        $response = $this->delete($uri);
-        if ($response->getStatus() !== 202 && $response->getStatus() !== 200) {
-          throw Exception('delete while cleaning up database failed');
+        $response = self::delete($uri);
+        if ($response->getStatus() !== 202) {
+           throw new \Exception('delete '.$uri. ' while cleaning up database failed: '. $response->getStatus(). ", ". $response->getMessage() );
         }
       }
     }
   }
 
-  protected function delete($id) {
-    $this->client->resetParameters();
-    $this->client->setUri(API_BASE_URI . '/concept');
-    $response = $this->client
+  protected static  function delete($id) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . '/concept');
+    $response = self::$client
       ->setParameterGet('tenant', TENANT)
       ->setParameterGet('key', API_KEY)
       ->setParameterGet('id', $id)
       ->request('DELETE');
     return $response;
   }
-
-  protected function getAbout($response){
+  
+   protected function getAbout($response){
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentXML($response->getBody());
         $description = $dom->queryXpath('/rdf:RDF/rdf:Description'); 
@@ -65,9 +68,21 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
         }
         $resURI = $description->current()->getAttribute("rdf:about");
         if ($resURI === "") {
-          throw Exception("No valid uri for SKOS concept");
+          throw new \Exception("No valid uri for SKOS concept");
         }
         return $resURI;
     }
-  
+    
+    public function getByIndex($list, $index) {
+        if ($index < 0 || $index >= count($list)) {
+            return null;
+        }
+        $list->rewind();
+        $i = 0;
+        while ($i < $index) {
+            $list->next();
+            $i++;
+        }
+        return $list->current();
+    }
 }

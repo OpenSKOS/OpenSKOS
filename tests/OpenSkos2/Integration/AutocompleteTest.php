@@ -1,29 +1,29 @@
 <?php
 
 namespace Tests\OpenSkos2\Integration;
+require_once 'AbstractTest.php';
 
-class AutocompleteTest extends \PHPUnit_Framework_TestCase {
+
+class AutocompleteTest extends AbstractTest {
 
   private static $prefix;
   private static $labelMap;
-  private static $client_autocomplete;
-  private static $createdconcepts_autocomplete;
 
   // static:   is a demand of the PHPunit test library
   public static function setUpBeforeClass() {
 
-    self::$client_autocomplete = new \Zend_Http_Client();
-    self::$client_autocomplete->setConfig(array(
+    self::$client = new \Zend_Http_Client();
+    self::$client->setConfig(array(
       'maxredirects' => 0,
       'timeout' => 30));
-    self::$client_autocomplete->SetHeaders(array(
+    self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
       'Content-Type' => 'application/json',
       'Accept-Language' => 'nl,en-US,en',
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdconcepts_autocomplete = array();
+    self::$createdconcepts = array();
     self::$labelMap = array(
       PREF_LABEL => PREF_LABEL . "_",
       ALT_LABEL => ALT_LABEL . "_",
@@ -71,7 +71,7 @@ class AutocompleteTest extends \PHPUnit_Framework_TestCase {
           throw new \Exception("setting status approved for a test concept has failed. ". " Status ". $response1 ->getStatus() . ' Message: ' . $response1->getMessage());
         }
       }
-      array_push(self::$createdconcepts_autocomplete, $about);
+      array_push(self::$createdconcepts, $about);
       echo $i;
       $i++;
     }
@@ -80,7 +80,7 @@ class AutocompleteTest extends \PHPUnit_Framework_TestCase {
   
   // delete all created concepts
   public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdconcepts_autocomplete);
+    self::deleteConcepts(self::$createdconcepts);
   }
 
 
@@ -188,58 +188,12 @@ class AutocompleteTest extends \PHPUnit_Framework_TestCase {
   }
   
   private function autocomplete($word, $parameterString) {
-        self::$client_autocomplete ->resetParameters();
+        self::$client ->resetParameters();
         $uri = API_BASE_URI . '/autocomplete/' . $word .  $parameterString;
-        self::$client_autocomplete ->setUri($uri);
-        $response = self::$client_autocomplete -> request(\Zend_Http_Client::GET);
+        self::$client ->setUri($uri);
+        $response = self::$client -> request(\Zend_Http_Client::GET);
         return $response;
     }
   
-  private static function create($xml) {
-    self::$client_autocomplete->resetParameters();
-    self::$client_autocomplete->setUri(API_BASE_URI . "/concept?");
-    $response = self::$client_autocomplete
-      ->setEncType('text/xml')
-      ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
-      ->request('POST');
-    return $response;
-  }  
   
-  private static function update($xml) {
-    self::$client_autocomplete->resetParameters();
-    self::$client_autocomplete->setUri(API_BASE_URI . "/concept?");
-
-    $response = self::$client_autocomplete
-      ->setEncType('text/xml')
-      ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
-      ->request('PUT');
-
-    return $response;
-  }
-  
-  private static  function deleteConcepts($uris) {
-    foreach ($uris as $uri) {
-      if ($uri != null) {
-        $response = self::delete($uri);
-        if ($response->getStatus() !== 202 && $response->getStatus() !== 200) {
-          throw Exception('delete while cleaning up database failed');
-        }
-      }
-    }
-  }
-
-  private static  function delete($id) {
-    self::$client_autocomplete->resetParameters();
-    self::$client_autocomplete->setUri(API_BASE_URI . '/concept');
-    $response = self::$client_autocomplete
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
-      ->setParameterGet('id', $id)
-      ->request('DELETE');
-    return $response;
-  }
 }
