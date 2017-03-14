@@ -66,30 +66,26 @@ if ($OPTS->getOption('days') !== NULL) {
 /* @var $labelManager \OpenSkos2\SkosXl\LabelManager */
 $labelManager = $diContainer->make('\OpenSkos2\SkosXl\LabelManager');
 
+/* @var $solrResourceManager \OpenSkos2\Solr\ResourceManager */
+$solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
+
 // Used to record time it takes for the script execution
 $scriptStart = microtime(true);
 
-// The where clause used to filter out labels
-$sparqlWhere = '
-    ?label <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2008/05/skos-xl#Label>
-';
+$labelSort = ['uri' => 'ASC'];
+$labelFilter = [
+    'rdfTypeFilter' => 's_rdfType:"' . OpenSkos2\SkosXl\Label::TYPE . '"'
+];
 
-$total = getTotal($labelManager, $sparqlWhere);
+$total = getTotal($solrResourceManager, $labelFilter);
 
 if ($OPTS->getOption('verbose')) {
     $timeToCount = microtime(true) - $scriptStart;
-    echo PHP_EOL . 'Time to count labels: ' . $timeToCount . 's' . PHP_EOL;
+    $logger->info('Time to count labels: ' . $timeToCount . 's');
     $processTime = 0;
 }
 
-$rows = 1000;
-$fetchLabels = "
-    DESCRIBE ?label
-    WHERE {
-        $sparqlWhere
-    }
-    LIMIT $rows
-";
+$rows = 100;
 
 // @TODO: Think of a way to globally define this list so in future when new 
 // default params are added to the label this script will continue to work
@@ -100,33 +96,40 @@ $defaultXlLabelParameters = [
     \OpenSkos2\Namespaces\SkosXl::LITERALFORM
 ];
 
-
 $offset = 0;
 $notLinkedLabelsCount = 0;
 $deletedLabelsCount = 0;
 while ($offset < $total) {
 
-    $labels = $labelManager->fetchQuery($fetchLabels . ' OFFSET ' . $offset);
+    $labelUris = $solrResourceManager->search('*:*', $rows, $offset, $total, $labelSort, $labelFilter);
     $offset = $offset + $rows;
     $labelsToDelete = [];
     
-    foreach ($labels as $label) {
+    foreach ($labelUris as $labelUri) {
         /* @var $label \OpenSkos2\SkosXl\Label */
         
         if ($labelManager->ask('
-            ?concept ?predicate <' . $label->getUri() . '> .
+            ?concept ?predicate <' . $labelUri . '> .
             ?concept <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>
         ')) {
             // Skip labels that are linked to concepts
             continue;
         }
         
+        //Get the label from Jena
+        $labels = $labelManager->fetchQuery('DESCRIBE <' . $labelUri . '>');
+        if (empty($labels)) {
+            continue;
+        }
+        
+        //Extract the label from collection
+        $label = $labels[0];
         $notLinkedLabelsCount++;
-
+        
         try {
+            // We will not delete labels modified in less than specified
+            // We will still delete labels with no modified date!!!
             if ($maxLabelAgeInDays > 0) {
-                // We will not delete labels modified in less than 1 week
-                // We will still delete labels with no modified date!!!
                 $modified = $label->getProperty(OpenSkos2\Namespaces\DcTerms::MODIFIED);
                 if (!empty($modified) && $modified[0] instanceof OpenSkos2\Rdf\Literal) {
                     /* @var $date DateTime */
@@ -138,7 +141,6 @@ while ($offset < $total) {
                 }
             }
             
-            
             //We will not delete labels that contain extra information
             foreach ($label->getProperties() as $key => $value) {
                 if (!in_array($key, $defaultXlLabelParameters)) {
@@ -147,9 +149,10 @@ while ($offset < $total) {
                 }
             }
 
-            // If we have not continued until now, the label is to be deleted
+            // If we have reached this part, the label is to be deleted
             $labelsToDelete[] = $label;
             $deletedLabelsCount++;
+            $offset--;
             
         } catch (\Exception $exc) {
             echo $exc->getMessage() . PHP_EOL;
@@ -157,20 +160,20 @@ while ($offset < $total) {
         }
     }
     
-//    $labelManager->setIsNoCommitMode(true);
-//    foreach ($labelsToDelete as $label) {
-//        // Delete from Jena and Solr
-//        $labelManager->delete($label);
-//    }
-//    // Commit to Solr
-//    $labelManager->commit();
-        
+    $labelManager->setIsNoCommitMode(true);
+    foreach ($labelsToDelete as $label) {
+        // Delete from Jena and Solr
+        $labelManager->delete($label);
+    }
+    // Commit to Solr
+    $labelManager->commit();
+    
     if ($OPTS->getOption('verbose')) {
         $pageTime = round(microtime(true) - $scriptStart - $timeToCount - $processTime, 3);
         $processTime = round(microtime(true) - $scriptStart - $timeToCount, 3);
         $count = count($labelsToDelete);
         
-        echo "Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime" . PHP_EOL;
+        $logger->debug("Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime");
     }
 }
 
@@ -183,20 +186,15 @@ $logger->info('Removed labels: ' . $deletedLabelsCount);
 $logger->info("Done!");
 
 /**
- * Get total amount of concepts
- * @param \OpenSkos2\Rdf\ResourceManagerWithSearch $labelManager
+ * Get total amount of labels
+ * @param OpenSkos2\Solr\ResourceManager $solrResourceManager
+ * @param array $labelFilter
  * @return int
  */
-function getTotal(\OpenSkos2\Rdf\ResourceManagerWithSearch $labelManager, $sparqlWhere)
+function getTotal(OpenSkos2\Solr\ResourceManager $solrResourceManager, $labelFilter)
 {
-    $countAllLabels = "
-        SELECT (count(?label) AS ?count)
-        WHERE {
-            $sparqlWhere
-        }
-    ";
+    $total = 0;
+    $solrResourceManager->search('*:*', 0, 0, $total, [], $labelFilter);
     
-    $result = $labelManager->query($countAllLabels);
-    $total = $result->getArrayCopy()[0]->count->getValue();
     return $total;
 }
