@@ -82,7 +82,7 @@ if ($OPTS->getOption('verbose')) {
     $processTime = 0;
 }
 
-$rows = 100;
+$rows = 1000;
 $fetchLabels = "
     DESCRIBE ?label
     WHERE {
