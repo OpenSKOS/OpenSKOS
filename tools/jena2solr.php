@@ -73,7 +73,7 @@ if (empty($uri)) {
     $total = 1;
 }
 
-$logger->info('Total: ' . $total);
+$logger->info('Total in Jena: ' . $total);
 
 $rows = 500;
 
@@ -96,6 +96,13 @@ if ($uri) {
 $solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
 $solrResourceManager->setIsNoCommitMode(true);
 
+$solrResourceManager->search('*:*', 0, 0, $solrTotal);
+$logger->info('Total in Solr: ' . $solrTotal);
+$logger->info('Start deleting from Solr');
+$deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger);
+$logger->info('Deleted from Solr: ' . $deleted);
+
+// Update all resources from Jena to Solr
 $offset = 0;
 while ($offset < $total) {
 
@@ -115,12 +122,19 @@ while ($offset < $total) {
         }
     }
     
-    $logger->info('Commit ' . $rows);
+    $logger->debug('Commit to Solr' . count($resources));
     $solrResourceManager->commit();
 }
 
-$logger->info('Processed: ' . $total);
+$logger->debug('Total in Jena: ' . $total);
+$logger->debug('Total in Solr: ' . $solrTotal);
+$logger->debug('Deleted from Solr: ' . $deleted);
 $logger->info("Done!");
+
+if ($solrTotal != ($total + $deleted)) {
+    $logger->notice('There is mismatch between deleted, solr total and indexed counts. Maybe something went wrong.');
+    $logger->notice('Should be solrTotal = indexed + deleted');
+}
 
 /**
  * Get total amount of concepts
@@ -158,4 +172,42 @@ function getSparqlWhereClause($resourceTypes)
     }
     
     return $whereClause;
+}
+
+/**
+ * Remove all resources in Solr that do not match a resource in Jena
+ * @param OpenSkos2\Solr\ResourceManager $solrResourceManager
+ * @param OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager
+ * @param Monolog\Logger $logger
+ * @return int The number of deleted Solr resources
+ */
+function removeDeletedResourcesFromSolr(
+    OpenSkos2\Solr\ResourceManager $solrResourceManager,
+    OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager,
+    Monolog\Logger $logger
+) {
+    $total = 0;
+    $solrResourceManager->search('*:*', 0, 0, $total);
+    $rows = 100;
+    $offset = 0;
+    $deleted = 0;
+    while ($offset < $total) {
+
+        $resources = $solrResourceManager->search('*:*', $rows, $offset, $total, ['uri' => 'ASC']);
+        $offset = $offset + $rows;
+
+        foreach ($resources as $resource) {
+            $ask = "<$resource> ?p ?o";
+            if ($resourceManager->ask($ask) === false) {
+                $solrResourceManager->delete(new OpenSkos2\Rdf\Uri($resource));
+                $deleted++;
+            }
+        }
+        
+        $logger->debug('Deleted from Solr ' . $deleted);
+
+        $solrResourceManager->commit();
+    }
+    
+    return $deleted;
 }
