@@ -57,6 +57,9 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $uri = $OPTS->getOption('uri');
 
+// Used to record time it takes for the script execution
+$scriptStart = microtime(true);
+
 /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
 
@@ -99,20 +102,21 @@ $solrResourceManager->setIsNoCommitMode(true);
 $solrResourceManager->search('*:*', 0, 0, $solrTotal);
 $logger->info('Total in Solr: ' . $solrTotal);
 $logger->info('Start deleting from Solr');
-$deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger);
-$logger->info('Deleted from Solr: ' . $deleted);
+$deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger, $scriptStart);
 
+$logger->info('Start commiting to Solr: ' . $deleted);
 // Update all resources from Jena to Solr
 $offset = 0;
 while ($offset < $total) {
-
+    $pageStart = microtime(true);
+    
     $resources = $resourceManager->fetchQuery($fetchResources . ' OFFSET ' . $offset);
     
     $offset = $offset + $rows;
     
     foreach ($resources as $resource) {
         
-        $logger->debug($resource->getUri());
+        //$logger->debug($resource->getUri());
 
         try {
             $solrResourceManager->insert($resource);
@@ -122,8 +126,12 @@ while ($offset < $total) {
         }
     }
     
-    $logger->debug('Commit to Solr' . count($resources));
     $solrResourceManager->commit();
+    
+    $commited =  count($resources);
+    $pageTime = round(microtime(true) - $pageStart, 3);
+    $processTime = round(microtime(true) - $scriptStart, 3);
+    $logger->debug("Offset: $offset, Commited: $commited, pageTime: $pageTime, totalTime: $processTime");
 }
 
 $logger->debug('Total in Jena: ' . $total);
@@ -179,19 +187,23 @@ function getSparqlWhereClause($resourceTypes)
  * @param OpenSkos2\Solr\ResourceManager $solrResourceManager
  * @param OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager
  * @param Monolog\Logger $logger
+ * @param int $scriptStart
  * @return int The number of deleted Solr resources
  */
 function removeDeletedResourcesFromSolr(
     OpenSkos2\Solr\ResourceManager $solrResourceManager,
     OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager,
-    Monolog\Logger $logger
+    Monolog\Logger $logger,
+    $scriptStart
 ) {
     $total = 0;
     $solrResourceManager->search('*:*', 0, 0, $total);
     $rows = 100;
     $offset = 0;
-    $deleted = 0;
+    
     while ($offset < $total) {
+        $pageStart = microtime(true);
+        $deleted = 0;
 
         $resources = $solrResourceManager->search('*:*', $rows, $offset, $total, ['uri' => 'ASC']);
         $offset = $offset + $rows;
@@ -204,8 +216,10 @@ function removeDeletedResourcesFromSolr(
                 $offset--;
             }
         }
-        
-        $logger->debug('Deleted from Solr ' . $deleted);
+
+        $pageTime = round(microtime(true) - $pageStart, 3);
+        $processTime = round(microtime(true) - $scriptStart, 3);
+        $logger->debug("Offset: $offset, Deleted: $deleted, pageTime: $pageTime, totalTime: $processTime");
 
         $solrResourceManager->commit();
     }
