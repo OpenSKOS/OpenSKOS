@@ -201,6 +201,7 @@ function removeDeletedResourcesFromSolr(
             if ($resourceManager->ask($ask) === false) {
                 $solrResourceManager->delete(new OpenSkos2\Rdf\Uri($resource));
                 $deleted++;
+                $offset--;
             }
         }
         
