@@ -106,10 +106,17 @@ while ($offset < $total) {
     $labelsToDelete = [];
     
     foreach ($labelUris as $labelUri) {
-        if ($labelManager->ask('
+        // @TODO Temp fix until data is cleaned from blank nodes.
+        if (\OpenSkos2\Rdf\Uri::isUriTempGeneratedCheck($labelUri)) {
+            continue;
+        }
+        
+        if ($labelManager->ask(
+            '
             ?concept ?predicate <' . $labelUri . '> .
             ?concept <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>
-        ')) {
+            '
+        )) {
             // Skip labels that are linked to concepts
             continue;
         }
