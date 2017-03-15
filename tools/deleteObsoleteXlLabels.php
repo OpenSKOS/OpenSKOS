@@ -115,12 +115,8 @@ while ($offset < $total) {
         }
         
         //Get the label from Jena
-        /* @var $labelCollection OpenSkos2\SkosXl\LabelCollection */
-        $labelCollection = $labelManager->fetchQuery('DESCRIBE <' . $labelUri . '>');
-        $label = $labelCollection->findByUri($labelUri);
-        if (empty($label)) {
-            continue;
-        }
+        /* @var $label OpenSkos2\SkosXl\Label */
+        $label = $labelManager->fetchByUri($labelUri);
         
         $notLinkedLabelsCount++;
         
