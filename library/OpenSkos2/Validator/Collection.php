@@ -123,7 +123,7 @@ class Collection
      */
     private function getResourceValidator($resource)
     {
-        if ($resource instanceof Concept || $resource instanceof Label) {
+        if ($resource instanceof Concept) {
             return new \OpenSkos2\Validator\Resource($this->conceptManager, $this->tenant, $this->logger);
         }
         
