@@ -57,7 +57,7 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
     $logLevel
 ));
 
-if ($OPTS->getOption('days') !== NULL) {
+if ($OPTS->getOption('days') !== null) {
     $maxLabelAgeInDays = (int)$OPTS->getOption('days');
 } else {
     $maxLabelAgeInDays = 7;
@@ -106,8 +106,6 @@ while ($offset < $total) {
     $labelsToDelete = [];
     
     foreach ($labelUris as $labelUri) {
-        /* @var $label \OpenSkos2\SkosXl\Label */
-        
         if ($labelManager->ask('
             ?concept ?predicate <' . $labelUri . '> .
             ?concept <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>
@@ -117,13 +115,13 @@ while ($offset < $total) {
         }
         
         //Get the label from Jena
-        $labels = $labelManager->fetchQuery('DESCRIBE <' . $labelUri . '>');
-        if (empty($labels)) {
+        /* @var $labelCollection OpenSkos2\SkosXl\LabelCollection */
+        $labelCollection = $labelManager->fetchQuery('DESCRIBE <' . $labelUri . '>');
+        $label = $labelCollection->findByUri($labelUri);
+        if (empty($label)) {
             continue;
         }
         
-        //Extract the label from collection
-        $label = $labels[0];
         $notLinkedLabelsCount++;
         
         try {
