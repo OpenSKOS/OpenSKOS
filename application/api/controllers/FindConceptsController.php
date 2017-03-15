@@ -246,9 +246,9 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
          */
 
         $id_prefix = $this->getRequest()->getParam('id_prefix');
-        if (null !== $id_prefix && \Rhumsaa\Uuid\Uuid::isValid($id)) {
+        if (null !== $id_prefix) {
             $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
-            $id = $id_prefix . $id;
+            $id = new OpenSkos2\Rdf\Uri($id_prefix . $id);
         }
 
         return $id;
