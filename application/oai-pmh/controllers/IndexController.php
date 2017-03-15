@@ -34,7 +34,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @apiDescription Identify the OAI-PMH endpoint<br>
      * <a href='/oai-pmh?verb=Identify' target='_blank'>/oai-pmh?verb=Identify</a>
      * @apiParam {String} verb=Identify
-     * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      * &lt;?xml version="1.0" encoding="UTF-8"?>
@@ -60,7 +59,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @apiDescription List metadataPrefixes<br>
      * <a href='/oai-pmh?verb=ListMetadataFormats' target='_blank'>/oai-pmh?verb=ListMetadataFormats</a>
      * @apiParam {String} verb=ListMetadataFormats
-     * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      * &lt;?xml version="1.0" encoding="UTF-8"?>
@@ -89,7 +87,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @apiDescription List ConceptSchemes (as OAI-PMH "sets")<br>
      * <a href='/oai-pmh?verb=ListSets' target='_blank'>/oai-pmh?verb=ListSets</a>
      * @apiParam {String} verb=ListSets
-     * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      * &lt;?xml version="1.0" encoding="UTF-8"?>
@@ -134,7 +131,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @apiParam {String=2011-09-10,2011-09-01T12:00:00Z} [from] Start date for filtering by period
      * @apiParam {String=2011-09-10,2011-09-01T12:00:00Z} [until] End date for filtering by period
      * @apiParam {String} [set] List Concepts from specific set
-     * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      * &lt;?xml version="1.0" encoding="UTF-8"?>
@@ -309,7 +305,6 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @apiParam {String} verb=GetRecord
      * @apiParam {String=oai_rdf, oai_rdf_xl} metadataPrefix
      * @apiParam {String} identifier The concept identifier
-     * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      * &lt;?xml version="1.0" encoding="UTF-8"?>
