@@ -174,7 +174,7 @@ while ($offset < $total) {
         $processTime = round(microtime(true) - $scriptStart - $timeToCount, 3);
         $count = count($labelsToDelete);
         
-        $logger->debug("Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime");
+        $logger->debug("Offset: $offset, Deleted: $count, pageTime: $pageTime, processingTime: $processTime");
     }
 }
 
