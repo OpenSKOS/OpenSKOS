@@ -31,7 +31,8 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @api {Identify} /oai-pmh?verb=Identify Identify
      * @apiVersion 1.0.0
      * @apiGroup OAI-PMH
-     * @apiDescription Identify the OAI-PMH endpoint
+     * @apiDescription Identify the OAI-PMH endpoint<br>
+     * <a href='/oai-pmh?verb=Identify' target='_blank'>/oai-pmh?verb=Identify</a>
      * @apiParam {String} verb=Identify
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
@@ -56,7 +57,8 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @api {ListMetadataFormats} /oai-pmh?verb=ListMetadataFormats ListMetadataFormats
      * @apiVersion 1.0.0
      * @apiGroup OAI-PMH
-     * @apiDescription List metadataPrefixes
+     * @apiDescription List metadataPrefixes<br>
+     * <a href='/oai-pmh?verb=ListMetadataFormats' target='_blank'>/oai-pmh?verb=ListMetadataFormats</a>
      * @apiParam {String} verb=ListMetadataFormats
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
@@ -84,7 +86,8 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @api {ListSets} /oai-pmh?verb=ListSets ListSets
      * @apiVersion 1.0.0
      * @apiGroup OAI-PMH
-     * @apiDescription List ConceptSchemes (as OAI-PMH "sets")
+     * @apiDescription List ConceptSchemes (as OAI-PMH "sets")<br>
+     * <a href='/oai-pmh?verb=ListSets' target='_blank'>/oai-pmh?verb=ListSets</a>
      * @apiParam {String} verb=ListSets
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
@@ -118,7 +121,14 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @api {ListRecords} /oai-pmh?verb=ListRecords ListRecords
      * @apiVersion 1.0.0
      * @apiGroup OAI-PMH
-     * @apiDescription List Concepts based on params
+     * @apiDescription List Concepts based on params <br>
+     * <br>
+     * Example request URLs:<br>
+     * <a href='/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf' target='_blank'>/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf</a><br>
+     * <a href='/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf_xl' target='_blank'>/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf_xl</a><br>
+     * <a href='/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01T12:00:00Z' target='_blank'>/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01T12:00:00Z</a><br>
+     * <a href='/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01&until=2011-09-10' target='_blank'>/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&from=2011-09-01&until=2011-09-10</a><br>
+     * <a href='/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&set=4' target='_blank'>/oai-pmh?verb=ListRecords&metadataPrefix=oai_rdf&set=4</a><br>
      * @apiParam {String} verb=ListSets
      * @apiParam {String=oai_rdf, oai_rdf_xl} metadataPrefix
      * @apiParam {String=2011-09-10,2011-09-01T12:00:00Z} [from] Start date for filtering by period
@@ -291,10 +301,14 @@ class OaiPmh_IndexController extends OpenSKOS_Rest_Controller
      * @api {GetRecord} /oai-pmh?verb=GetRecord GetRecord
      * @apiVersion 1.0.0
      * @apiGroup OAI-PMH
-     * @apiDescription Get a specific concept
+     * @apiDescription Get a specific concept <br>
+     * <br>
+     * Example request URLs:<br>
+     * <a href='/oai-pmh?verb=GetRecord&metadataPrefix=oai_rdf&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500' target='_blank'>/oai-pmh?verb=GetRecord&metadataPrefix=oai_rdf&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500</a><br>
+     * <a href='/oai-pmh?verb=GetRecord&metadataPrefix=oai_rdf_xl&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500' target='_blank'>/oai-pmh?verb=GetRecord&metadataPrefix=oai_rdf_xl&identifier=238c8bfb-8915-0379-b52e-0885bfc9e500</a><br>
      * @apiParam {String} verb=GetRecord
      * @apiParam {String=oai_rdf, oai_rdf_xl} metadataPrefix
-     * @apiParam {String} identifier The identifier of the concept
+     * @apiParam {String} identifier The concept identifier
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
