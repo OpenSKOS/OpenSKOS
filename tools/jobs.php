@@ -24,7 +24,8 @@ $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'code|c=s' => 'Tenant code (optional, default is all Tenants)',
     'job|j=i' => 'Job ID (optional, default is all Jobs)',
-    'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme", "all", "noExport". (optional, default is "noExport")'
+    'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme",'
+    . '"all", "noExport". (optional, default is "noExport")'
 );
 
 try {
@@ -222,7 +223,7 @@ switch ($action) {
                             $errorMsg = "Aborting job because: " . $e->getMessage();
                             $job->error($errorMsg)->finish()->save();
                             fwrite(
-                                STDERR, 
+                                STDERR,
                                 $errorMsg . PHP_EOL
                                 . get_class($e) . PHP_EOL
                                 . $e->getTraceAsString() . PHP_EOL
