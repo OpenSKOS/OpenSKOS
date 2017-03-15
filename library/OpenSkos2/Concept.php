@@ -250,8 +250,39 @@ class Concept extends Resource
             }
         }
         
+        $this->setModified($person);
+        
+        $this->handleStatusChange($person, $oldStatus);
+    }
+    
+    /**
+     * Mark the concept as modified.
+     * @param Uri|Person $person
+     */
+    public function setModified($person)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
+        
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
+        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
+    }
+    
+    /**
+     * Handle change in status.
+     * @param Uri|Person $person
+     * @param string $oldStatus
+     */
+    public function handleStatusChange($person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
         
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
@@ -259,15 +290,14 @@ class Concept extends Resource
             $this->unsetProperty(OpenSkos::ACCEPTEDBY);
             $this->unsetProperty(OpenSkos::DATE_DELETED);
             $this->unsetProperty(OpenSkos::DELETEDBY);
-
             switch ($this->getStatus()) {
                 case \OpenSkos2\Concept::STATUS_APPROVED:
                     $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, $personUri);
                     break;
                 case \OpenSkos2\Concept::STATUS_DELETED:
                     $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    $this->addProperty(OpenSkos::DELETEDBY, $personUri);
                     break;
             }
         }
