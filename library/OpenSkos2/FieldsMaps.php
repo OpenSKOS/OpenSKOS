@@ -23,11 +23,13 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\Rdf;
 
 class FieldsMaps {
 
-// Meertens: this class is not used to support old names but to map short names to URI's 
-// in the OpenSKOS2. So that's why the following changes have happened.
+// Meertens: in Meertens branch this class is not used to support old names but to map short names to URI's 
+// in the OpenSKOS2. So that's why the following changes have happened:
 // The Picturae's function  "getOldToProperties" is renamed to "getNamesToProperties"
 // because it is used not for mapping old names to properties but just to map
 // short names to the corresponding property uri's.
@@ -44,6 +46,13 @@ class FieldsMaps {
       'notation' => Skos::NOTATION,
       'inScheme' => Skos::INSCHEME,
       'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
+      'enableStatussesSystem' => OpenSkos::ENABLESTATUSSESSYSTEMS,
+      'disableSearchInOtherTenants' => OpenSkos::DISABLESEARCHINOTERTENANTS,
+      'code' => OpenSkos::CODE,
+      'conceptBaseUri' => OpenSkos::CONCEPTBASEURI,
+      'allow_oai' => OpenSkos::ALLOW_OAI,
+      'webpage' => OpenSkos::WEBPAGE,
+      'OAI_base_uri' => OpenSkos::CONCEPTBASEURI,
       
       'prefLabel' => Skos::PREFLABEL,
       'altLabel' => Skos::ALTLABEL,
@@ -71,6 +80,7 @@ class FieldsMaps {
       
       'topConceptOf' => Skos::TOPCONCEPTOF,
       'member' => Skos::MEMBER,
+      'hasTopConcept' => Skos::HASTOPCONCEPT,
       
       'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
       'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
@@ -78,6 +88,9 @@ class FieldsMaps {
       'dcterms_creator' => DcTerms::CREATOR,
       'dcterms_contributor' => DcTerms::CONTRIBUTOR,
       'dcterms_title' => DcTerms::TITLE,
+      'dcterms_publisher'=>DcTerms::PUBLISHER,
+      'dcterms_license'=>DcTerms::LICENSE,
+      'dcterms_description'=>DcTerms::DESCRIPTION,
       
       'skosXlPrefLabel' => SkosXl::PREFLABEL,
       'skosXlAltLabel' => SkosXl::ALTLABEL,
@@ -92,7 +105,20 @@ class FieldsMaps {
       'contributor' => DcTerms::CONTRIBUTOR,
       'acceptedBy' => OpenSkos::ACCEPTEDBY,
       'deletedBy' => OpenSkos::DELETEDBY,
-    ];
+      
+      'vcard_adr' => vCard::ADR,
+      'vcard_org' => vCard::ORG,
+      'vcard_orgname' => vCard::ORGNAME,
+      'vcard_country'=>vCard::COUNTRY,
+      'vcard_email'=> vCard::EMAIL,
+      'vcard_locality'=>vCard::LOCALITY,
+      'vcard_orgunit'=>vCard::ORGUNIT,
+      'vcard_pcode'=>vCard::PCODE,
+      'vcard_street'=>vCard::STREET,
+      'vcard_url'=>vCard::URL,
+      
+      'rdf_type' => Rdf::TYPE,
+      ];
   }
 
 }

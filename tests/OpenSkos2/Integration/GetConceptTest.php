@@ -60,11 +60,11 @@ class GetConceptTest extends AbstractTest {
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage() . ": " . $response->getMessage());
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
-  
+
   public function testViaPrefLabel3() {
     print "\n" . "Test: get concept-rdf via its prefLabel where 'prefLabel' is a value of the request parameter 'label' ";
     self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$prefLabel. '&label=prefLabel');
+    self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$prefLabel . '&label=prefLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage() . ": " . $response->getMessage());
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
@@ -81,12 +81,12 @@ class GetConceptTest extends AbstractTest {
   public function testViaAltLabel() {
     print "\n" . "Test: get concept-rdf via its altLabel where 'altLabel' is a value of the request parameter 'label'";
     self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$altLabel. '&label=altLabel');
+    self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$altLabel . '&label=altLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
-  
+
   public function testViaAltLabelImplicit2() {
     print "\n" . "Test: get concept-rdf via its altLabel";
     self::$client->resetParameters();
@@ -132,7 +132,7 @@ class GetConceptTest extends AbstractTest {
     $hiddenLabel = 'testHiddenLable_' . $randomn;
     $notation = 'test-xxx-' . $randomn;
     $uuid_2 = self::$uuid . '_xyz';
-    $about = API_BASE_URI . "/" . _SET_CODE . "/" . self::$notation;
+    $about = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
     $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
       '<rdf:Description rdf:about="' . $about . '">' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -223,50 +223,37 @@ class GetConceptTest extends AbstractTest {
     $this->assertionsForHtmlConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
-  /*
-    public function testViaHandleHtml() {
+  public function testViaHandleHtml() {
     print "\n" . "Test: get concept-html via its id. ";
-
-
-    self::$client->setUri(API_BASE_URI. '/find-concepts?id=' . self::$about . '&format=html');
+    self::$client->setUri(API_BASE_URI . '/find-concepts?id=' . self::$about . '&format=html');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsForHtmlConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
-    }
+  }
 
-    /*
-    public function testViaHandleJsonFiltered() {
+  public function testViaHandleJsonFiltered() {
     print "\n" . "Test: get concept-json with filtered fields via it handle ";
-
-
-    self::$client->setUri(API_BASE_URI. '/find-concepts?id=' . self::$about . '&format=json&fl=uuid,uri,prefLabel');
+    self::$client->setUri(API_BASE_URI . '/find-concepts?id=' . self::$about . '&format=json&fl=uuid,uri,prefLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsForJsonConceptFiltered($response, self::$uuid, self::$prefLabel);
-    }
+  }
 
-
-    public function testViaIdJson() {
+  public function testViaIdJson() {
     print "\n" . "Test: get concept-json via its id. ";
-
-
-    self::$client->setUri(API_BASE_URI. '/concept/' . self::$uuid . '.json');
+    self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.json');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
-    $this->assertionsForJsonConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
-    }
+    $this->assertionsForJsonConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
+  }
 
-
-    public function testViaIdJsonP() {
+  public function testViaIdJsonP() {
     print "\n" . "Test: get concept-json via its id. ";
-
-
-    self::$client->setUri(API_BASE_URI. '/concept/' . self::$uuid . '.jsonp&callback=test');
+    self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.jsonp?callback=test');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
-    $this->assertionsForJsonPConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
-    }
-   */
+    $this->assertionsForJsonPConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
+  }
 
   private function assertionsForManyConceptsRows($response, $rows) {
 
@@ -373,7 +360,7 @@ class GetConceptTest extends AbstractTest {
     $lexLabels = $this->getByIndex($h3s, 1)->nodeValue;
     $this->AssertEquals("LexicalLabels", $lexLabels);
 
-    
+
     $h4s = $dom->query('h4');
     $altLabelName = $this->getByIndex($h4s, 0)->nodeValue;
     $this->AssertEquals("skos:altLabel", trim($altLabelName));
@@ -407,8 +394,13 @@ class GetConceptTest extends AbstractTest {
     return $json;
   }
 
-  private function assertionsForJsonPConcept($response, $uuid, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme) {
-    $json = $this->asseryionsForJason($response, $uuid, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme);
+  private function assertionsForJsonPConcept($response, $uuid, $prefLabel, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme) {
+    $jsonp = $response->getBody();
+    $json = substr($jsonp, strlen("test("), strlen($jsonp) - strlen("test(") - strlen(");"));
+    $array = json_decode($json, true);
+    $this->assertEquals($uuid, $array["uuid"]);
+    $this->assertEquals($altLabel, $array["altLabel@nl"][0]);
+    $this->assertEquals($prefLabel, $array["prefLabel@nl"]);
   }
 
 }

@@ -33,7 +33,7 @@ class JsonResponse extends ResultSetResponse
      */
     public function getResponse()
     {
-        return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
+       return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
     }
     
     /**
@@ -61,7 +61,7 @@ class JsonResponse extends ResultSetResponse
     { 
         $docs = [];
         foreach ($this->result->getResources() as $resource) {
-            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
+           $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
             $docs[] = $nResource;
         }
         return $docs;

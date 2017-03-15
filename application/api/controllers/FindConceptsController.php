@@ -234,7 +234,7 @@ class Api_FindConceptsController extends AbstractController {
     }
   }
 
-  // Meertens:  Guys, when do you need that id_prefix: why ID prefix is not a part of ID
+  // Meertens:  Guys, when do you use this method.
   /**
    * Get concept id
    *

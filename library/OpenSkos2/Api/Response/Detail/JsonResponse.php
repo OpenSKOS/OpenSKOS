@@ -36,4 +36,5 @@ class JsonResponse extends DetailResponse
         $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
         return new \Zend\Diactoros\Response\JsonResponse($body);
     }
+    
 }

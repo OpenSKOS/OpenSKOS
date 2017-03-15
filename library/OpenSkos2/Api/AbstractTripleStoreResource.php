@@ -46,7 +46,7 @@ abstract class AbstractTripleStoreResource {
     if (empty($queryparams['key'])) {
       throw new ApiException('No user key specified', 412);
     }
-    
+
     $user = $this->getUserByKey($queryparams['key']);
     $params = $queryparams;
     $params['user'] = $user;
@@ -149,15 +149,20 @@ abstract class AbstractTripleStoreResource {
           $format = "rdf";
         }
       }
+      if (isset($params['fl'])) {
+        $propertiesList = $this->fieldsListToProperties($params['fl']);
+      } else {
+        $propertiesList = [];
+      }
       switch ($format) {
         case 'json':
-          $response = (new DetailJsonResponse($resource, []))->getResponse();
+           $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
           break;
         case 'jsonp':
-          $response = (new DetailJsonpResponse($resource, $params['callback'], []))->getResponse();
+           $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
           break;
         case 'rdf':
-          $response = (new DetailRdfResponse($resource, []))->getResponse();
+          $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
           break;
         default:
           throw new ApiException('Invalid context: ' . $context, 400);
@@ -270,7 +275,7 @@ abstract class AbstractTripleStoreResource {
       }
       $this->manager->delete(new Uri($uri), $this->manager->getResourceType());
       $xml = (new DataRdf($resourceObject))->transform();
-      $status =   202;
+      $status = 202;
       if ($this->manager->getResourceType() !== Skos::CONCEPT) {
         $status = 200;
       }
@@ -402,7 +407,7 @@ abstract class AbstractTripleStoreResource {
       $response = (new Response($stream, $status, ['Location' => $uri]))
         ->withHeader('Content-Type', $format . '; charset="utf-8"');
     } else {
-       $response = (new Response($stream, $status))
+      $response = (new Response($stream, $status))
         ->withHeader('Content-Type', $format . '; charset="utf-8"');
     }
     return $response;

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -25,194 +25,186 @@ use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\vCard;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\Uri;
 
-require_once dirname(__FILE__) .'/../../config.inc.php';
+require_once dirname(__FILE__) . '/../../config.inc.php';
+
 /**
  * Transform Resource to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible
  */
-
 // Meertens: changes of 16/01/2017 are present (previois changes were from 12/03/2016) 
-class DataArray
-{
-    /**
-     * @var Resource
-     */
-    private $resource;
-    
-    /**
-     * @var array
-     */
-    private $propertiesList;
-    
-    /**
-     * @param Resource $resource
-     * @param array $propertiesList Properties to serialize.
-     */
-    public function __construct(RdfResource $resource, $propertiesList = null)
-    {
-        $this->resource = $resource;
-        $this->propertiesList = $propertiesList;
-    }
-    
-    /**
-     * Transform the
-     *
-     * @return array
-     */
-    // TODO: refactor to use transform, which is more universal
-    public function transformConcept()
-    {
-        $resource = $this->resource;
-        
-        /* @var $resource Resource */
-        $newResource = [];
-        if ($this->doIncludeProperty('uri')) {
-            $newResource['uri'] = $resource->getUri();
-        }
-        
-        foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
-            if (!$this->doIncludeProperty($prop['uri'])) {
-                continue;
-            }
-            
-            if ($resource->isPropertyEmpty($prop['uri'])) {
-                continue;
-            }
-            
-            $newResource = $this->getPropertyValue(
-                $resource->getProperty($prop['uri']),
-                $field,
-                $prop,
-                $newResource
-            );
-        }
-        return $newResource;
-    }
-    
-     public function transform()
-    {
-        $newResource = $this->transformRecursive($this->resource);
-        return $newResource;
-    }
-    public function transformRecursive(RdfResource $rdfresource) {
-        $newResource = [];
-        $newResource['uri'] = $rdfresource->getUri();
-        foreach ($rdfresource->getProperties() as $field => $properties) {
-            
-            if (!$this->doIncludeProperty($field)) {
-                continue;
-            }
-           
-            if (OMIT_JSON_REFICES) {
-                $parts = RdfNamespace::splitUri($field);
-                $short = $parts[1];
-            } else {
-                $short = RdfNamespace::shorten($field);
-            }
-            $newResource = $this->getPropertyValue($properties, $short, array('repeatable' => false), $newResource);
-        }
-        return $newResource;
+class DataArray {
+
+  /**
+   * @var Resource
+   */
+  private $resource;
+
+  /**
+   * @var array
+   */
+  private $propertiesList;
+
+  /**
+   * @param Resource $resource
+   * @param array $propertiesList Properties to serialize.
+   */
+  public function __construct(RdfResource $resource, $propertiesList = null) {
+    $this->resource = $resource;
+    $this->propertiesList = $propertiesList;
+  }
+
+  /**
+   * Transform the
+   *
+   * @return array
+   */
+  // TODO: refactor to use transform, which is more universal
+  public function transform() {
+    $resource = $this->resource;
+
+    /* @var $resource Resource */
+    $newResource = [];
+    if ($this->doIncludeProperty('uri')) {
+      $newResource['uri'] = $resource->getUri();
     }
 
-    /**
-     * Should the property be included in the serialized data.
-     * @param string $property
-     * @return bool
-     */
-    protected function doIncludeProperty($property)
-    {
-        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+    foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
+      if (!$this->doIncludeProperty($prop['uri'])) {
+        continue;
+      }
+
+      if ($resource->isPropertyEmpty($prop['uri'])) {
+        continue;
+      }
+
+      $newResource = $this->getPropertyValue(
+        $resource->getProperty($prop['uri']), $field, $prop, $newResource
+      );
     }
-    
-    /**
-     * Get data from property
-     *
-     * @param array $prop
-     * @param array $settings
-     * #param string $field field name to map
-     * @param array $resource
-     * @return array
-     */
-    private function getPropertyValue(array $prop, $field, $settings, $resource)
-    {
-        foreach ($prop as $val) {
-            if ($val instanceof RdfResource) {
-                $resource[$field] = $this->transformRecursive($val);
-                continue;
-            }
+    return $newResource;
+  }
 
-            // Some values only have a URI but not getValue or getLanguage
-            if ($val instanceof Uri && !method_exists($val, 'getLanguage')) {
-                //var_dump($resource);
-                if ($settings['repeatable'] === true) {
-                    $resource[$field][] = $val->getUri();
-                } else {
-                    //var_dump($resource);
-                    $resource[$field] = $val->getUri();
-                }
-                continue;
-            }
+  /**
+   * Should the property be included in the serialized data.
+   * @param string $property
+   * @return bool
+   */
+  protected function doIncludeProperty($property) {
+    return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+  }
 
-            $value = $val->getValue();
+  /**
+   * Get data from property
+   *
+   * @param array $prop
+   * @param array $settings
+   * #param string $field field name to map
+   * @param array $resource
+   * @return array
+   */
+  private function getPropertyValue(array $prop, $field, $settings, $resource) {
+    foreach ($prop as $val) {
 
-            if ($value instanceof DateTime) {
-                $value = $value->format(DATE_W3C);
-            }
-
-            if ($value === null || $value === '') {
-                continue;
-            }
-            $lang = $val->getLanguage();
-            $langField = $field;
-            if (!empty($lang)) {
-                $langField .= '@' . $lang;
-            }
-            
-            if ($settings['repeatable'] === true) {
-                $resource[$langField][] = $value;
-            } else {
-                $resource[$langField] = $value;
-            }
+      if ($val instanceof RdfResource) {
+        if (count($val->getProperties()) > 0) {
+          if ($settings['repeatable']) {
+            $resource[$field][] = (new DataArray($val))->transform();
+          } else {
+            $resource[$field] = (new DataArray($val))->transform();
+          }
+          continue;
         }
-        
-        return $resource;
-    }
-    
-    /**
-     * Gets map of fields to properties. Including info for if a field is repeatable.
-     * @return array
-     */
-    public static function getFieldsPlusIsRepeatableMap()
-    {
-        $notRepeatable = [
-            DcTerms::CREATOR,
-            DcTerms::DATESUBMITTED,
-            DcTerms::DATEACCEPTED,
-            DcTerms::MODIFIED,
-            DcTerms::TITLE,
-            OpenSkos::ACCEPTEDBY,
-            OpenSkos::DELETEDBY,
-            OpenSkos::DATE_DELETED,
-            OpenSkos::STATUS,
-            OpenSkos::TENANT,
-            OpenSkos::SET,
-            OpenSkos::UUID,
-            OpenSkos::TOBECHECKED,
-            Skos::PREFLABEL,
-        ];
-        
-        $map = [];
-        // Olha: it is obsolete after successful migration
-        //foreach (FieldsMaps::getOldToProperties() as $field => $property) {
-        foreach (FieldsMaps::getNamesToProperties() as $field => $property) {
-            $map[$field] = [
-                'uri' => $property,
-                'repeatable' => !in_array($property, $notRepeatable),
-            ];
+      }
+
+      // Some values only have a URI but not getValue or getLanguage
+      if ($val instanceof Uri && !method_exists($val, 'getLanguage')) {
+        if ($settings['repeatable']) {
+          $resource[$field][] = $val->getUri();
+        } else {
+          $resource[$field] = $val->getUri();
         }
-        return $map;
+        continue;
+      }
+
+      $value = $val->getValue();
+      if ($value instanceof DateTime) {
+        $value = $value->format(DATE_W3C);
+      }
+
+      if ($value === null || $value === '') {
+        continue;
+      }
+
+
+      $lang = $val->getLanguage();
+      $langField = $field;
+      if (!empty($lang)) {
+        $langField .= '@' . $lang;
+      }
+
+      if ($settings['repeatable'] === true) {
+        $resource[$langField][] = $value;
+      } else {
+        $resource[$langField] = $value;
+      }
     }
+    return $resource;
+  }
+
+  /**
+   * Gets map of fields to properties. Including info for if a field is repeatable.
+   * @return array
+   */
+  public static function getFieldsPlusIsRepeatableMap() {
+    $notRepeatable = [
+      DcTerms::CREATOR,
+      DcTerms::DATESUBMITTED,
+      DcTerms::DATEACCEPTED,
+      DcTerms::MODIFIED,
+      DcTerms::TITLE,
+      OpenSkos::ACCEPTEDBY,
+      OpenSkos::DELETEDBY,
+      OpenSkos::DATE_DELETED,
+      OpenSkos::STATUS,
+      OpenSkos::TENANT,
+      OpenSkos::SET,
+      OpenSkos::UUID,
+      OpenSkos::TOBECHECKED,
+      Skos::PREFLABEL,
+      OpenSkos::ENABLESTATUSSESSYSTEMS,
+      OpenSkos::DISABLESEARCHINOTERTENANTS,
+      OpenSkos::ALLOW_OAI,
+      OpenSkos::CONCEPTBASEURI,
+      OpenSkos::CODE,
+      OpenSkos::OAI_BASEURL,
+      OpenSkos::WEBPAGE,
+      Rdf::TYPE,
+      vCard::ADR,
+      vCard::COUNTRY,
+      vCard::EMAIL,
+      vCard::LOCALITY,
+      vCard::NAME_SPACE,
+      vCard::ORG,
+      vCard::ORGNAME,
+      vCard::ORGUNIT,
+      vCard::PCODE,
+      vCard::STREET,
+      vCard::URL,
+    ];
+
+    $map = [];
+    foreach (FieldsMaps::getNamesToProperties() as $field => $property) {
+      $map[$field] = [
+        'uri' => $property,
+        'repeatable' => !in_array($property, $notRepeatable),
+      ];
+    }
+    return $map;
+  }
+
 }
