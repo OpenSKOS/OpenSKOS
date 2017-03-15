@@ -20,9 +20,13 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\InvalidResourceException;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\SkosXl\Label;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -32,6 +36,11 @@ class Collection
      * @var ResourceManager
      */
     protected $resourceManager;
+    
+    /**
+     * @var ConceptManager
+     */
+    protected $conceptManager;
     
     /**
      * @var Tenant
@@ -56,14 +65,19 @@ class Collection
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager, Tenant $tenant = null, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        ResourceManager $resourceManager,
+        ConceptManager $conceptManager,
+        Tenant $tenant = null,
+        LoggerInterface $logger = null
+    ) {
         if ($logger === null) {
             $logger = new NullLogger();
         }
         
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
+        $this->conceptManager = $conceptManager;
         $this->tenant = $tenant;
     }
 
@@ -76,7 +90,7 @@ class Collection
     {
         $errorsFound = false;
         foreach ($resourceCollection as $resource) {
-            $validator = $this->getResourceValidator();
+            $validator = $this->getResourceValidator($resource);
             if (!$validator->validate($resource)) {
                 $errorsFound = true;
                 
@@ -103,12 +117,16 @@ class Collection
     }
     
     /**
-     * Get resource validator
-     *
+     * Get resource validator by resource type
+     * @param Resource $resource
      * @return \OpenSkos2\Validator\Resource
      */
-    private function getResourceValidator()
+    private function getResourceValidator($resource)
     {
+        if ($resource instanceof Concept || $resource instanceof Label) {
+            return new \OpenSkos2\Validator\Resource($this->conceptManager, $this->tenant, $this->logger);
+        }
+        
         return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->tenant, $this->logger);
     }
 }

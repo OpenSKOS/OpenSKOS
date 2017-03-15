@@ -82,7 +82,7 @@ class Command implements LoggerAwareInterface
         $helper->setLogger($this->logger);
         $helper->prepare($resourceCollection);
         
-        $validator = new CollectionValidator($this->resourceManager, $this->tenant);
+        $validator = new CollectionValidator($this->resourceManager, $this->conceptManager, $this->tenant);
         if (!$validator->validate($resourceCollection, $this->logger)) {
             throw new \Exception('Failed validation: ' . PHP_EOL . implode(PHP_EOL, $validator->getErrorMessages()));
         }

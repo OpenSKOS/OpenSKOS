@@ -145,7 +145,7 @@ switch ($action) {
 
             $jobs = $model->fetchAll($select);
         }
-
+        
         if (!count($jobs)) {
             exit(0);
         }
@@ -166,6 +166,7 @@ switch ($action) {
                     ->where('finished IS NULL')
             );
             if (count($busyJobs)) {
+                echo 'There still are busy jobs' . PHP_EOL;
                 exit(0);
             }
 
