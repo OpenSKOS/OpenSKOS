@@ -121,6 +121,12 @@ while ($offset < $total) {
             continue;
         }
         
+        if ($labelManager->askForUri($labelUri) == false) {
+            // Delete only from Solr
+            $solrResourceManager->delete(new OpenSkos2\Rdf\Uri($labelUri));
+            continue;
+        }
+        
         //Get the label from Jena
         /* @var $label OpenSkos2\SkosXl\Label */
         $label = $labelManager->fetchByUri($labelUri);
