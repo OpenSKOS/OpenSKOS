@@ -119,9 +119,13 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         $adr = $doc->createElement('v:adr');
         foreach (array('street-address', 'locality', 'postal-code', 'country-name') as $name) {
             $dbName = preg_replace_callback(
-                    '/\-([a-z])/', create_function(
-                            '$matches', 'return strtoupper($matches[1]);'
-                    ), $name);
+                '/\-([a-z])/',
+                create_function(
+                    '$matches',
+                    'return strtoupper($matches[1]);'
+                ),
+                $name
+            );
             if ($this->$dbName) {
                 $adr->appendChild($doc->createElement('v:' . $name, $data[$dbName]));
             }
