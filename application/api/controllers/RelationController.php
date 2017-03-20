@@ -39,14 +39,14 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
      * Post must be send with Content-Type application/x-www-form-urlencoded
      * or multipart/form-data
      *
-     * Supported relations:
-     * http://www.w3.org/2004/02/skos/core#broader
-     * http://www.w3.org/2004/02/skos/core#narrower
-     * http://www.w3.org/2004/02/skos/core#hasTopConcept
-     * http://www.w3.org/2004/02/skos/core#topConceptOf
-     * http://www.w3.org/2004/02/skos/core#related
-     * http://www.w3.org/2004/02/skos/core#broadMatch
-     * http://www.w3.org/2004/02/skos/core#narrowMatch
+     * Supported relations:<br>
+     * <a href='http://www.w3.org/2004/02/skos/core#broader' target='_blank'>http://www.w3.org/2004/02/skos/core#broader</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#narrower' target='_blank'>http://www.w3.org/2004/02/skos/core#narrower</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#hasTopConcept' target='_blank'>http://www.w3.org/2004/02/skos/core#hasTopConcept</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#topConceptOf' target='_blank'>http://www.w3.org/2004/02/skos/core#topConceptOf</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#related' target='_blank'>http://www.w3.org/2004/02/skos/core#related</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#broadMatch' target='_blank'>http://www.w3.org/2004/02/skos/core#broadMatch</a><br>
+     * <a href='http://www.w3.org/2004/02/skos/core#narrowMatch' target='_blank'>http://www.w3.org/2004/02/skos/core#narrowMatch</a><br>
      *
      * @api {post} /api/relation Add relation to SKOS concept
      * @apiName AddRelationConcept

@@ -81,7 +81,7 @@ $total = getTotal($solrResourceManager, $labelFilter);
 
 if ($OPTS->getOption('verbose')) {
     $timeToCount = microtime(true) - $scriptStart;
-    $logger->info('Time to count labels: ' . $timeToCount . 's');
+    $logger->info('Counted ' . $total . ' labels in ' . $timeToCount . 's');
     $processTime = 0;
 }
 
@@ -96,11 +96,13 @@ $defaultXlLabelParameters = [
     \OpenSkos2\Namespaces\SkosXl::LITERALFORM
 ];
 
+$page = 1;
 $offset = 0;
 $notLinkedLabelsCount = 0;
 $deletedLabelsCount = 0;
 while ($offset < $total) {
 
+    $page++;
     $labelUris = $solrResourceManager->search('*:*', $rows, $offset, $total, $labelSort, $labelFilter);
     $offset = $offset + $rows;
     $labelsToDelete = [];
@@ -118,6 +120,12 @@ while ($offset < $total) {
             '
         )) {
             // Skip labels that are linked to concepts
+            continue;
+        }
+        
+        if ($labelManager->askForUri($labelUri) == false) {
+            // Delete only from Solr
+            $solrResourceManager->delete(new OpenSkos2\Rdf\Uri($labelUri));
             continue;
         }
         
@@ -174,7 +182,7 @@ while ($offset < $total) {
         $processTime = round(microtime(true) - $scriptStart - $timeToCount, 3);
         $count = count($labelsToDelete);
         
-        $logger->debug("Offset: $offset, toDelete: $count, pageTime: $pageTime, processingTime: $processTime");
+        $logger->debug("Page: $page, Offset: $offset, Deleted: $count, pageTime: $pageTime, processingTime: $processTime");
     }
 }
 

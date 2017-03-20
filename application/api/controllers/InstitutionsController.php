@@ -37,13 +37,13 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
      * @apiVersion 1.0.0
      * @apiDescription Fetch all Institutions in this repository
      *
-     * in RDF: /api/institutions
+     * in RDF: <a href='/api/institutions' target='_blank'>/api/institutions</a>
      *
-     * in JSON: /api/institutions?format=json
+     * in JSON: <a href='/api/institutions?format=json' target='_blank'>/api/institutions?format=json</a>
      *
-     * in JSONP: /api/institutions?format=jsonp&callback=myCallback_1234
+     * in JSONP: <a href='/api/institutions?format=jsonp&callback=myCallback_1234' target='_blank'>/api/institutions?format=jsonp&callback=myCallback_1234</a>
      *
-     * in HTML: /api/institutions?format=html
+     * in HTML: <a href='/api/institutions?format=html' target='_blank'>/api/institutions?format=html</a>
      *
      * @api {get} /api/institutions Get institutions details
      * @apiName GetInstitutions
@@ -83,13 +83,13 @@ class Api_InstitutionsController extends OpenSKOS_Rest_Controller
      * @apiVersion 1.0.0
      * @apiDescription Fetch a single Institute from this repository
      *
-     * in RDF: /api/institutions/{id}
+     * in RDF: <a href='/api/institutions/beg' target='_blank'>/api/institutions/beg</a>
      *
-     * in JSON: /api/institutions/{id}.json
+     * in JSON: <a href='/api/institutions/beg.json' target='_blank'>/api/institutions/beg.json</a>
      *
-     * in JSONP: /api/institutions/{id}.jsonp?callback=myCallback_1234
+     * in JSONP: <a href='/api/institutions/beg.jsonp?callback=myCallback_1234' target='_blank'>/api/institutions/beg.jsonp?callback=myCallback_1234</a>
      *
-     * in HTML: /api/institutions/{id}.html
+     * in HTML: <a href='/api/institutions/beg.html' target='_blank'>/api/institutions/beg.html</a>
      *
      * @api {get} /api/institutions/{id} Get institution details
      * @apiName GetInstitution
