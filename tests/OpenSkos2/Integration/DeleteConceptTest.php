@@ -21,7 +21,7 @@ class DeleteConceptTest extends AbstractTest {
   public function testDeleteCandidateByAdmin() {
     print "\n deleting concept with candidate status by admin... \n";
     $this->createTestConcept(API_KEY_EDITOR);
-    $response = $this->delete($this->about, API_KEY_ADMIN);
+    $response = $this->delete($this->about, API_KEY_ADMIN, 'concept');
     $this->AssertEquals(202, $response->getStatus());
     self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
     $checkResponse = self::$client->request('GET');
@@ -31,7 +31,7 @@ class DeleteConceptTest extends AbstractTest {
   public function testDeleteCandidatebyOwner() { // TODO ///
     print "\n deleting concept with candidate status by the owner-deitor... \n";
     $this->createTestConcept(API_KEY_EDITOR);
-    $response = $this->delete($this->about, API_KEY_EDITOR);
+    $response = $this->delete($this->about, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(202, $response->getStatus());
     self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
     $checkResponse = self::$client->request('GET');
@@ -41,15 +41,15 @@ class DeleteConceptTest extends AbstractTest {
   public function testDeleteCandidateByGuest() {
     print "\n deleting concept with candidate status by guest...\n";
     $this->createTestConcept(API_KEY_EDITOR);
-    $response = $this->delete($this->about, API_KEY_GUEST);
+    $response = $this->delete($this->about, API_KEY_GUEST, 'concept');
     $this->AssertEquals(403, $response->getStatus());
   }
 
   public function testDeleteApprovedByAdmin() {
     print "\n deleting concept with approved status by admin ...\n";
     $this->createTestConcept(API_KEY_EDITOR);
-    self::update($this->xml, API_KEY_EDITOR); // updating will make the status "approved" 
-    $response = $this->delete($this->about, API_KEY_ADMIN);
+    self::update($this->xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
+    $response = $this->delete($this->about, API_KEY_ADMIN, 'concept');
     $this->AssertEquals(202, $response->getStatus());
     self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
     $checkResponse = self::$client->request('GET');
@@ -57,10 +57,10 @@ class DeleteConceptTest extends AbstractTest {
   }
   
   public function testDeleteApprovedByOwner() { 
-    print "\n deleting concept with approved status by a the owner-editor ...";
+    print "\n deleting concept with approved status by an owner-editor ...";
     $this->createTestConcept(API_KEY_EDITOR);
-    self::update($this->xml, API_KEY_EDITOR); // updating will make the status "approved" 
-    $response = $this->delete($this->about, API_KEY_EDITOR);
+    self::update($this->xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
+    $response = $this->delete($this->about, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(202, $response->getStatus(), "the owner could not delete their own concept");
   }
 
@@ -68,8 +68,8 @@ class DeleteConceptTest extends AbstractTest {
   public function testDeleteApprovedByGuest() {
     print "\n deleting concept with approved status by a guest ...";
     $this->createTestConcept(API_KEY_EDITOR);
-    self::update($this->xml, API_KEY_EDITOR); // updating will make the status "approved" 
-    $response = $this->delete($this->about, API_KEY_GUEST);
+    self::update($this->xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
+    $response = $this->delete($this->about, API_KEY_GUEST, 'concept');
     $this->AssertEquals(403, $response->getStatus());
   }
 
@@ -105,7 +105,7 @@ class DeleteConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($this->xml, $apikey); // the first attempt to create a concept will geive a concepts with the candidate status
+    $response = self::create($this->xml, $apikey, 'concept'); // the first attempt to create a concept will geive a concepts with the candidate status
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, self::getAbout($response));
     } else {

@@ -7,12 +7,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
   protected static $client;
   protected static $createdconcepts;
 
-  public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdconcepts, API_KEY_ADMIN);
-  }
-  protected static function create($xml, $apikey, $autoGenerateIdentifiers=false) {
+  
+  protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers=false) {
     self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/concept?");
+    self::$client->setUri(API_BASE_URI . "/$resourcetype?");
     $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
@@ -23,9 +21,9 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     return $response;
   }  
   
-  protected static function update($xml, $apikey) {
+  protected static function update($xml, $apikey, $resourcetype) {
     self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/concept?");
+    self::$client->setUri(API_BASE_URI . "/$resourcetype?");
 
     $response = self::$client
       ->setEncType('text/xml')
@@ -37,10 +35,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     return $response;
   }
   
-  protected static  function deleteConcepts($uris, $apikey) {
+  protected static  function deleteConcepts($uris, $apikey, $resourcetype) {
     foreach ($uris as $uri) {
       if ($uri != null) {
-        $response = self::delete($uri, $apikey);
+        $response = self::delete($uri, $apikey, $resourcetype);
         if ($response->getStatus() !== 202) {
            throw new \Exception('delete '.$uri. ' while cleaning up database failed: '. $response->getStatus(). ", ". $response->getMessage() );
         }
@@ -48,9 +46,9 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     }
   }
 
-  protected static  function delete($id, $apikey) {
+  protected static  function delete($id, $apikey, $resourcetype) {
     self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . '/concept');
+    self::$client->setUri(API_BASE_URI . "/$resourcetype");
     $response = self::$client
       ->setParameterGet('tenant', TENANT)
       ->setParameterGet('key', $apikey)

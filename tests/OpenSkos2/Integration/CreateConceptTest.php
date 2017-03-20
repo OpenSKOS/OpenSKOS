@@ -22,11 +22,13 @@ class CreateConceptTest extends AbstractTest {
     self::$createdconcepts = array();
   }
 
-  public function tearDown() {
-    
+ 
+   // delete all created concepts
+  public static function tearDownAfterClass() {
+    self::deleteConcepts(self::$createdconcepts, API_KEY_EDITOR, 'concept');
   }
 
-  public function test01CreateConceptWithoutURIWithDateAccepted2() {
+  public function test01CreateConceptWithoutURIWithDateAccepted() {
 // Create new concept with dateAccepted filled. This should be ignored. 
     print "\n\n test01 ... \n";
     $prefLabel = 'testPrefLable_' . time();
@@ -41,7 +43,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR, true);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
@@ -61,7 +63,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR, true);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
@@ -87,11 +89,11 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:RDF>';
 
 // create the first concept with which we will compare
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
       $xml2 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml);
-      $response2 = self::create($xml2, API_KEY_EDITOR);
+      $response2 = self::create($xml2, API_KEY_EDITOR, 'concept');
       if ($response2->getstatus() === 201) {
         array_push(self::$createdconcepts, $this->getAbout($response2));
       }
@@ -146,7 +148,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
@@ -172,7 +174,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:RDF>';
 
     //var_dump($xml);
-    $response = self::create($xml, API_KEY_EDITOR, false);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept',  false);
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, $about);
     }
@@ -199,13 +201,13 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response0 = self::create($xml0, API_KEY_EDITOR);
+    $response0 = self::create($xml0, API_KEY_EDITOR, 'concept');
     if ($response0->getStatus() === 201) {
       array_push(self::$createdconcepts, $about);
       $xml1 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml0);
       $xml1 = str_replace($about, $anotherAbout, $xml1);
       $xml1 = str_replace('<openskos:uuid>' . $uuid . '</openskos:uuid>', '<openskos:uuid>' . $anotherUUID . '</openskos:uuid>', $xml1);
-      $response1 = self::create($xml1, API_KEY_EDITOR);
+      $response1 = self::create($xml1, API_KEY_EDITOR, 'concept');
       if ($response1->getStatus() === 201) {
         array_push(self::$createdconcepts, $about);
       }
@@ -226,7 +228,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description' .
       '</rdf:RDF>';
 
-    $response = self::create($wrongXml, API_KEY_EDITOR, true);
+    $response = self::create($wrongXml, API_KEY_EDITOR, 'concept',true);
     if ($response->getStatus() == 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
     }
@@ -246,7 +248,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR, true);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
@@ -266,7 +268,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() == 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
     }
@@ -289,13 +291,13 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response0 = self::create($xml0, API_KEY_EDITOR, true);
+    $response0 = self::create($xml0, API_KEY_EDITOR, 'concept', true);
     $this->AssertEquals(201, $response0->getStatus(), $response0->getMessage());
     if ($response0->getStatus() == 201) {
       // we can proceed with the test
       array_push(self::$createdconcepts, $this->getAbout($response0));
       $xml = str_replace('testAltLable_', '_another_testAltLable_', $xml0);
-      $response = self::create($xml, API_KEY_EDITOR, true);
+      $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
       if ($response->getStatus() == 201) {
         array_push(self::$createdconcepts, $this->getAbout($response));
       }
@@ -321,7 +323,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
     }
@@ -342,7 +344,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() == 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
     }
@@ -360,7 +362,7 @@ class CreateConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_GUEST, true);
+    $response = self::create($xml, API_KEY_GUEST, 'concept', true);
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, $this->getAbout($response));
     }

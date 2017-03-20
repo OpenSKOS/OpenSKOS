@@ -44,7 +44,7 @@ class GetConceptTest extends AbstractTest {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-    $response = self::create($xml, API_KEY_EDITOR);
+    $response = self::create($xml, API_KEY_EDITOR, 'concept');
     if ($response->getStatus() === 201) {
       array_push(self::$createdconcepts, self::getAbout($response));
     } else {
@@ -148,7 +148,7 @@ class GetConceptTest extends AbstractTest {
       '</rdf:RDF>';
 
 
-    $response1 = self::create($xml, API_KEY_EDITOR);
+    $response1 = self::create($xml, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(201, $response1->getStatus(), "\n Cannot perform the test because something is wrong with creating the second test concept: " . $response1->getHeader('X-Error-Msg'));
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:testPrefLable*&rows=2');
