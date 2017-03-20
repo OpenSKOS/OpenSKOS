@@ -27,10 +27,12 @@
         <!--<log type="coverage-clover" target="build/logs/clover.xml"/>-->
     </logging>
     <php>
-        <!-- clavas based settings -->
+        <!-- test setting -->
         <const name="API_BASE_URI" value = "http://localhost:89/clavas/public/api"/>
         <const name="TENANT" value="example"/>
-        <const name="API_KEY" value="xxx"/>
+        <const name="API_KEY_ADMIN" value="xxx"/>
+        <const name="API_KEY_EDITOR" value="yyy"/>
+        <const name="API_KEY_GUEST" value="zzz"/>
         <const name="SCHEMA_URI_1" value ="http://openskos.meertens.knaw.nl/Organisations"/>
         <const name="SCHEMA_URI_2" value ="http://openskos.meertens.knaw.nl/Languages"/>
         <const name="SET_CODE" value="clavas:org"/>

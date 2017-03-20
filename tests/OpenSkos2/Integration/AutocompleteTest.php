@@ -39,7 +39,7 @@ class AutocompleteTest extends AbstractTest {
 
     foreach ($letters as $letter) {
       self::$prefix[$i] = self::$prefix[$i - 1] . $letter;
-      $randomn = rand(0, 10000);
+      $randomn = time();
       $prefLabel = self::$labelMap[PREF_LABEL] . self::$prefix[$i] . $randomn;
       $altLabel = self::$labelMap[ALT_LABEL] . self::$prefix[$i] . $randomn;
       $hiddenLabel = self::$labelMap[HID_LABEL] . self::$prefix[$i] . $randomn;
@@ -60,13 +60,13 @@ class AutocompleteTest extends AbstractTest {
         '</rdf:RDF>';
 
       
-      $response0 = self::create($xml);
+      $response0 = self::create($xml, API_KEY_EDITOR);
       if ($response0->getStatus() !== 201) {
         echo 'concept' . $i;
         throw new \Exception("creating a test concept has failed. Status ". $response0 ->getStatus() . ' Message: ' . $response0->getMessage());
       } else { // things went well, but when submitting a concept is status is automatically reset to "candidate";
         // now update to change the status for "approved", otherwise autocomplete would not react
-        $response1 = self::update($xml);
+        $response1 = self::update($xml, API_KEY_EDITOR);
         if ($response1->getStatus() !== 200) {
           throw new \Exception("setting status approved for a test concept has failed. ". " Status ". $response1 ->getStatus() . ' Message: ' . $response1->getMessage());
         }
@@ -80,7 +80,7 @@ class AutocompleteTest extends AbstractTest {
   
   // delete all created concepts
   public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdconcepts);
+    self::deleteConcepts(self::$createdconcepts, API_KEY_EDITOR);
   }
 
 

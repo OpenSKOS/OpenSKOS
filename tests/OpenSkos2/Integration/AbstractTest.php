@@ -8,22 +8,22 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
   protected static $createdconcepts;
 
   public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdconcepts);
+    self::deleteConcepts(self::$createdconcepts, API_KEY_ADMIN);
   }
-  protected static function create($xml, $autoGenerateIdentifiers=false) {
+  protected static function create($xml, $apikey, $autoGenerateIdentifiers=false) {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . "/concept?");
     $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
       ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
+      ->setParameterGet('key', $apikey)
       ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers)
       ->request('POST');
     return $response;
   }  
   
-  protected static function update($xml) {
+  protected static function update($xml, $apikey) {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . "/concept?");
 
@@ -31,16 +31,16 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
       ->setEncType('text/xml')
       ->setRawData($xml)
       ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
+      ->setParameterGet('key', $apikey)
       ->request('PUT');
 
     return $response;
   }
   
-  protected static  function deleteConcepts($uris) {
+  protected static  function deleteConcepts($uris, $apikey) {
     foreach ($uris as $uri) {
       if ($uri != null) {
-        $response = self::delete($uri);
+        $response = self::delete($uri, $apikey);
         if ($response->getStatus() !== 202) {
            throw new \Exception('delete '.$uri. ' while cleaning up database failed: '. $response->getStatus(). ", ". $response->getMessage() );
         }
@@ -48,12 +48,12 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     }
   }
 
-  protected static  function delete($id) {
+  protected static  function delete($id, $apikey) {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/concept');
     $response = self::$client
       ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', API_KEY)
+      ->setParameterGet('key', $apikey)
       ->setParameterGet('id', $id)
       ->request('DELETE');
     return $response;

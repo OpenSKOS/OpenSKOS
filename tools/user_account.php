@@ -146,7 +146,7 @@ switch ($action) {
       'eppn' => $OPTS->eppn,
       'apikey' => $OPTS->apikey,
       'type' => OpenSKOS_Db_Table_Users::USER_TYPE_API,
-      'role' => OpenSKOS_Db_Table_Users::USER_DEFAULT_ROLE,
+      'role' => $OPTS->role,
     ))->save();
 
     //add  user-info to triple store

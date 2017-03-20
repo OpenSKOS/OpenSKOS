@@ -37,7 +37,7 @@ require 'Zend/Console/Getopt.php';
 $opts = array(
     'help|?' => 'Print this usage message',
     'env|e=s' => 'The environment to use (defaults to "production")',
-    'epic=s' => 'Epic is enabled or not), true/false',
+    'epic=s' => 'Epic is enabled or not, true/false',
     'uri=s' => 'tenant uri',
     'uuid=s' => 'tenant uuid',
     'code=s' => 'Tenant code (required)',
