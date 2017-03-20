@@ -83,35 +83,35 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      *
      * Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "dood":
      *
-     * /api/autocomplete/dood
+     * <a href='/api/autocomplete/dood' target='_blank'>/api/autocomplete/dood</a>
      *
      * This method returns all labels, including hiddenLabels and altLabels. This means it is possible that the service returns labels that do not match your pattern.
      *
      * Get only lexical labels with languagecode "nl" in JSON format, with a word in one of the lexical labels starting with "dood":
      *
-     * /api/autocomplete/dood?lang=nl
+     * <a href='/api/autocomplete/dood?lang=nl' target='_blank'>/api/autocomplete/dood?lang=nl</a>
      *
      * Get all lexical labels in JSON format, with a word in one in the prefLabels starting with "dood":
      *
-     * /api/autocomplete/dood?searchLabel=prefLabel
+     * <a href='/api/autocomplete/dood?searchLabel=prefLabel' target='_blank'>/api/autocomplete/dood?searchLabel=prefLabel</a>
      *
      * Get only prefLabels in JSON format, with a word in one in the labels starting with "dood":
      *
-     * /api/autocomplete/dood?returnLabel=prefLabel
+     * <a href='/api/autocomplete/dood?returnLabel=prefLabel' target='_blank'>/api/autocomplete/dood?returnLabel=prefLabel</a>
      *
      * Once the user selects a label from the autocomplete list, you have to lookup the matching Concept.
      * You can do this by querying the find API with the selected label, for example if the user selects the label "Dantons Dood":
      *
-     * /api/find-concepts?q=prefLabel:"Dantons Dood"&fl=uri
+     * <a href='/api/find-concepts?q=prefLabel:"Dantons Dood"&fl=uri' target='_blank'>/api/find-concepts?q=prefLabel:"Dantons Dood"&fl=uri</a>
      *
      * Please note: in the second call to the find API, it's possible the API returns multiple concepts. You should implement methods to handle this!
      *
      * The following requests are possible:
      *
-     * /api/autocomplete/something
+     * <a href='/api/autocomplete/something' target='_blank'>/api/autocomplete/something</a>
      *
      * Must have a term in the path from the request:
-     * /api/autocomplete/something
+     * <a href='/api/autocomplete/something' target='_blank'>/api/autocomplete/something</a>
      *
      * Can use parameters searchLabel, returnLabel and lang
      *
