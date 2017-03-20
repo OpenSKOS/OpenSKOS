@@ -56,8 +56,8 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 
 
-/* @var $resourceManager \OpenSkos2\Rdf\ResourceManager */
-$resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManager');
+/* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
+$resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManagerWithSearch');
 
 /* @var $conceptManager \OpenSkos2\ConceptManager */
 $conceptManager = $diContainer->make('OpenSkos2\ConceptManager');
