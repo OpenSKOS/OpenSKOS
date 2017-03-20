@@ -133,11 +133,11 @@ class Concept
             'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
 
-        // tenant
+        /* @var $tenant Tenant */
         $tenant = null;
         if (isset($params['tenant'])) {
             $tenant = $this->getTenantFromParams($params);
-            $options['tenants'] = [$tenant->code];
+            $options['tenants'] = [$tenant->getCode()];
         }
         
         // collection -> set in OpenSKOS 2
@@ -209,7 +209,8 @@ class Concept
     {
         $concept = $this->getConcept($uuid);
         
-        $tenant = $concept->getInstitution();
+        //TODO: make tenant openskos2tenant
+        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution());
 
         $params = $request->getQueryParams();
         
@@ -249,7 +250,7 @@ class Concept
     
     /**
      * Get a list of label exclude properties based on tenant configuration and request XL param
-     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param Tenant $tenant
      * @param \Zend\Diactoros\ServerRequest $request
      */
     public function getExcludeProperties($tenant, $request)
@@ -327,24 +328,23 @@ class Concept
             $params = $this->getParams($request);
 
             $tenant = $this->getTenantFromParams($params);
-            $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
 
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUserFromParams($params);
 
-            $this->resourceEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
             
-            $this->checkConceptXl($concept, $openSkos2Tenant);
+            $this->checkConceptXl($concept, $tenant);
 
             $concept->ensureMetadata(
-                $tenant->code,
+                $tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson(),
                 $this->conceptManager->getLabelManager(),
                 $existingConcept->getStatus()
             );
 
-            $this->validate($concept, $openSkos2Tenant);
+            $this->validate($concept, $tenant);
 
             $this->conceptManager->replaceAndCleanRelations($concept);
         } catch (ApiException $ex) {
@@ -382,9 +382,8 @@ class Concept
             }
 
             $user = $this->getUserFromParams($params);
-            $tenant = $this->getTenantFromParams($params);
 
-            $this->resourceEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
 
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
@@ -399,7 +398,7 @@ class Concept
      * @return boolean Returns TRUE only if XL labels are enabled and requested
      * @throws Zend_Controller_Exception when XL labels are requested but are not configured for tenant
      * @param \Zend\Diactoros\ServerRequest $request
-     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param Tenant $tenant
      */
     public function useXlLabels($tenant, $request)
     {
@@ -412,7 +411,7 @@ class Concept
         if ($xlParam === false) {
             return false;
         } else {
-            if ($tenant !== null && $tenant->toArray()['enableSkosXl'] === '1') {
+            if ($tenant !== null && $tenant->getEnableSkosXl() === true) {
                 return true;
             } else {
                 if ($tenant === null) {
@@ -530,22 +529,21 @@ class Concept
         $params = $this->getParams($request);
 
         $tenant = $this->getTenantFromParams($params);
-        $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
         $collection = $this->getCollection($params, $tenant, $resource);
         $user = $this->getUserFromParams($params);
 
         if ($resource instanceof \OpenSkos2\Concept) {
-            $this->checkConceptXl($resource, $openSkos2Tenant);
+            $this->checkConceptXl($resource, $tenant);
             
             $resource->ensureMetadata(
-                $openSkos2Tenant->getCode(),
+                $tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson(),
                 $this->conceptManager->getLabelManager()
             );
         } else {
             $resource->ensureMetadata(
-                $openSkos2Tenant->getCode(),
+                $tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson()
             );
@@ -554,12 +552,12 @@ class Concept
         $autoGenerateUri = $this->checkConceptIdentifiers($request, $resource);
         if ($autoGenerateUri) {
             $resource->selfGenerateUri(
-                $openSkos2Tenant,
+                $tenant,
                 $this->conceptManager
             );
         }
 
-        $this->validate($resource, $openSkos2Tenant);
+        $this->validate($resource, $tenant);
 
         if ($resource instanceof \OpenSkos2\Concept) {
             $this->conceptManager->insert($resource);
@@ -700,7 +698,7 @@ class Concept
 
     /**
      * @param $params
-     * @param \OpenSKOS_Db_Table_Row_Tenant|null $tenant
+     * @param Tenant|null $tenant
      * @return OpenSKOS_Db_Table_Row_Collection
      * @throws InvalidArgumentException
      */
@@ -711,7 +709,7 @@ class Concept
         }
         $code = $params['collection'];
         $model = new \OpenSKOS_Db_Table_Collections();
-        $collection = $model->findByCode($code, $tenant);
+        $collection = $model->findByCode($code, $tenant->getCode());
         if (null === $collection) {
             throw new InvalidArgumentException(
                 'No such collection `'.$code.'` in this tenant.',
@@ -797,7 +795,7 @@ class Concept
 
     /**
      * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_Tenant
+     * @return Tenant
      * @throws InvalidArgumentException
      */
     private function getTenantFromParams($params)
@@ -806,7 +804,9 @@ class Concept
             throw new InvalidArgumentException('No tenant specified', 400);
         }
 
-        return $this->getTenant($params['tenant']);
+        $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($this->getTenant($params['tenant']));
+        
+        return $openSkos2Tenant;
     }
 
     /**
