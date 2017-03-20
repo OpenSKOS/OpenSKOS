@@ -217,7 +217,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
     public function getUserHistory()
     {
-        $conceptsManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
+        $conceptsManager = $this->getDI()->get('OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($this->getUserHistoryUris());
     }
 
@@ -300,7 +300,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     public function getConceptsSelection()
     {
         $selection = $this->getConceptsSelectionUris();
-        $conceptsManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
+        $conceptsManager = $this->getDI()->get('OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($selection);
     }
 

@@ -77,7 +77,6 @@ class OpenSKOS_Form extends Zend_Form
     
     /**
      * Get dependency injection container
-     * 
      * @return \DI\Container
      */
     protected function getDI()

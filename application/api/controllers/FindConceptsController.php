@@ -37,23 +37,27 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @apiDescription Find a SKOS Concept
      * The following requests are possible
      *
-     * /api/find-concepts?q=doood
+     * <a href='/api/find-concepts?q=doood' target='_blank'>/api/find-concepts?q=doood</a>
      *
-     * /api/find-concepts?q=do*
+     * <a href='/api/find-concepts?q=do*' target='_blank'>/api/find-concepts?q=do*</a>
      *
-     * /api/find-concepts?q=prefLabel:dood
+     * <a href='/api/find-concepts?q=prefLabel:dood' target='_blank'>/api/find-concepts?q=prefLabel:dood</a>
      *
-     * /api/find-concepts?q=do* status:approved
+     * <a href='/api/find-concepts?q=do* status:approved' target='_blank'>/api/find-concepts?q=do* status:approved</a>
      *
-     * /api/find-concepts?q=prefLabel:do*&rows=0
+     * <a href='/api/find-concepts?q=prefLabel:do*&rows=0' target='_blank'>/api/find-concepts?q=prefLabel:do*&rows=0</a>
      *
-     * /api/find-concepts?q=prefLabel@nl:doo
+     * <a href='/api/find-concepts?q=prefLabel@nl:doo' target='_blank'>/api/find-concepts?q=prefLabel@nl:doo</a>
      *
-     * /api/find-concepts?q=prefLabel@nl:do*
+     * <a href='/api/find-concepts?q=prefLabel@nl:do*' target='_blank'>/api/find-concepts?q=prefLabel@nl:do*</a>
      *
-     * /api/find-concepts?q=do*&tenant=beng&collection=gtaa
+     * <a href='/api/find-concepts?q=do*&tenant=beng&collection=gtaa' target='_blank'>/api/find-concepts?q=do*&tenant=beng&collection=gtaa</a>
      *
-     * /api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten
+     * <a href='/api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten' target='_blank'>/api/find-concepts?q=do*&scheme=http://data.cultureelerfgoed.nl/semnet/objecten</a>
+     *
+     * Skos-XL labels can be fetched instead of simple labels for each of the valid requests by specifying the xl and tenant parameters
+     *
+     * <a href='/api/find-concepts?q=do*&xl=1&tenant=pic' target='_blank'>/api/find-concepts?q=do*&xl=1&tenant=pic</a>
      *
      * @api {get} /api/find-concepts Find a concept
      * @apiName FindConcepts
@@ -123,15 +127,21 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      * @apiDescription Return a specific concept
      * The following requests are valid
      *
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf (rdf format)
+     * <a href='/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf' target='_blank'>/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.rdf (rdf format)</a>
      *
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html (html format)
+     * <a href='/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html' target='_blank'>/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.html (html format)</a>
      *
-     * /api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json (json format)
+     * <a href='/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json' target='_blank'>/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json (json format)</a>
      *
-     * /api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)
+     * <a href='/api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test' target='_blank'>/api/concept/82c2614c-3859-ed11-4e55-e993c06fd9fe.jsonp&callback=test (jsonp format)</a>
      *
-     * /api/concept/?id=http://example.com/1 (rdf format)
+     * <a href='/api/concept/?id=http://example.com/1' target='_blank'>/api/concept/?id=http://example.com/1 (rdf format)</a>
+     *
+     * Skos-XL labels can be fetched instead of simple labels for each of the valid requests by specifying the xl parameter
+     *
+     * <a href='/api/concept/?id=http://example.com/1?xl=1' target='_blank'>/api/concept/?id=http://example.com/1?xl=1</a>
+     *
+     * <a href='/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json?xl=1' target='_blank'>/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json?xl=1</a>
      *
      * @api {get} /api/concept/{id}.rdf Get concept detail
      * @apiName GetConcept
@@ -184,16 +194,30 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
 
         $id = $this->getId();
 
+        /* @var $apiConcept OpenSkos2\Api\Concept */
         $apiConcept = $this->getDI()->make('OpenSkos2\Api\Concept');
         $context = $this->_helper->contextSwitch()->getCurrentContext();
 
+        $request = $this->getPsrRequest();
+        
         // Exception for html use ZF 1 easier with linking in the view
         if ('html' === $context) {
-            $this->view->concept = $apiConcept->getConcept($id);
+            /* @var $concept \OpenSkos2\Concept */
+            $concept = $apiConcept->getConcept($id);
+
+            $useXlLabels = $apiConcept->useXlLabels(
+                \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution()),
+                $request
+            );
+            if ($useXlLabels === true) {
+                $concept->loadFullXlLabels($this->getConceptManager()->getLabelManager());
+            }
+            
+            $this->view->useXlLabels = $useXlLabels;
+            $this->view->concept = $concept;
             return $this->renderScript('concept/get.phtml');
         }
 
-        $request = $this->getPsrRequest();
         $response = $apiConcept->getConceptResponse($request, $id, $context);
         $this->emitResponse($response);
     }

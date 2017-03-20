@@ -51,8 +51,13 @@ class FormatFactory
      * @return \OpenSkos2\Export\Serialiser\Format\Xml
      * @throws \RuntimeException
      */
-    public static function create($format, $propertiesToSerialise = [], $namespaces = [], $maxDepth = 1)
-    {
+    public static function create(
+        $format,
+        $propertiesToSerialise = [],
+        $namespaces = [],
+        $maxDepth = 1,
+        $excludeProperties = []
+    ) {
         // @TODO Allow all easyrdf formats.
         switch ($format) {
             case self::FORMAT_CSV:
@@ -70,6 +75,7 @@ class FormatFactory
         
         // @TODO not all require properties, namespaces and max depth. Validate what is required and what not.
         $formatObject->setPropertiesToSerialise($propertiesToSerialise);
+        $formatObject->setExcludePropertiesList($excludeProperties);
         $formatObject->setNamespaces($namespaces);
         $formatObject->setMaxDepth($maxDepth);
         

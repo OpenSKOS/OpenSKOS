@@ -24,7 +24,7 @@ use OpenSkos2\Namespaces\SkosXl;
     <?php $addOrEdit = $this->isCreate ? 'addLabel' : 'editLabel'?>
     window.parent.Editor.Label.<?= $addOrEdit?>(
         '<?= $this->label->getUri();?>',
-        '<?= $this->label->getProperty(SkosXl::LITERALFORM)[0]->getValue();?>',
+        '<?= addslashes($this->label->getProperty(SkosXl::LITERALFORM)[0]->getValue());?>',
         '<?= $this->label->getProperty(SkosXl::LITERALFORM)[0]->getLanguage();?>'
     );
     window.parent.SqueezeBox.close();

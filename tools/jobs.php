@@ -24,7 +24,8 @@ $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'code|c=s' => 'Tenant code (optional, default is all Tenants)',
     'job|j=i' => 'Job ID (optional, default is all Jobs)',
-    'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme", "all", "noExport". (optional, default is "noExport")'
+    'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme",'
+    . '"all", "noExport". (optional, default is "noExport")'
 );
 
 try {
@@ -144,7 +145,7 @@ switch ($action) {
 
             $jobs = $model->fetchAll($select);
         }
-
+        
         if (!count($jobs)) {
             exit(0);
         }
@@ -165,6 +166,7 @@ switch ($action) {
                     ->where('finished IS NULL')
             );
             if (count($busyJobs)) {
+                echo 'There still are busy jobs' . PHP_EOL;
                 exit(0);
             }
 
@@ -222,7 +224,7 @@ switch ($action) {
                             $errorMsg = "Aborting job because: " . $e->getMessage();
                             $job->error($errorMsg)->finish()->save();
                             fwrite(
-                                STDERR, 
+                                STDERR,
                                 $errorMsg . PHP_EOL
                                 . get_class($e) . PHP_EOL
                                 . $e->getTraceAsString() . PHP_EOL
@@ -233,7 +235,7 @@ switch ($action) {
                     }
 
                     $model = new OpenSKOS_Db_Table_Jobs(); // Gets new DB object to prevent connection time out.
-                    $job = $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
+                    $model->find($job->id)->current(); // Gets new DB object to prevent connection time out.
 
                     $job->finish()->save();
 
@@ -289,7 +291,7 @@ switch ($action) {
                         $userModel = new OpenSKOS_Db_Table_Users();
                         $user = $userModel->find($job['user'])[0];
 
-                        $conceptsManager = $diContainer->get('\OpenSkos2\ConceptManager');
+                        $conceptsManager = $diContainer->get('OpenSkos2\ConceptManager');
                         $conceptsManager->deleteSoftInScheme($scheme, $user->getFoafPerson());
 
                         // Clears the schemes cache after an icon is assigned.

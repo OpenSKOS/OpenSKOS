@@ -18,21 +18,23 @@
  */
 namespace OpenSkos2;
 
-use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
+use OpenSkos2\Person;
 use OpenSkos2\ConceptManager;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
 
 class Concept extends Resource
 {
@@ -74,9 +76,14 @@ class Concept extends Resource
             Skos::TOPCONCEPTOF,
         ],
         'LexicalLabels' => [
+            Skos::PREFLABEL,
             Skos::ALTLABEL,
             Skos::HIDDENLABEL,
-            Skos::PREFLABEL,
+        ],
+        'SkosXlLabels' => [
+            SkosXl::PREFLABEL,
+            SkosXl::ALTLABEL,
+            SkosXl::HIDDENLABEL,
         ],
         'Notations' => [
             Skos::NOTATION,
@@ -113,6 +120,12 @@ class Concept extends Resource
             Skos::RELATEDMATCH,
         ],
     );
+    
+    public static $labelsMap = [
+        SkosXl::PREFLABEL => Skos::PREFLABEL,
+        SkosXl::ALTLABEL => Skos::ALTLABEL,
+        SkosXl::HIDDENLABEL => Skos::HIDDENLABEL,
+    ];
 
     /**
      * Resource constructor.
@@ -211,17 +224,56 @@ class Concept extends Resource
     }
     
     /**
+     * Does the concept has any xl labels in it.
+     * @return boolean
+     */
+    public function hasXlLabels()
+    {
+        foreach (self::$classes['SkosXlLabels'] as $predicate) {
+            if (!$this->isPropertyEmpty($predicate)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Does the concept has any xl labels in it.
+     * @return boolean
+     */
+    public function hasSimpleLabels()
+    {
+        foreach (self::$classes['LexicalLabels'] as $predicate) {
+            if (!$this->isPropertyEmpty($predicate)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param string $tenantCode
      * @param Uri $set
      * @param Uri $person
+     * @param LabelManager $labelManager
      * @param string , optional $oldStatus
      */
-    public function ensureMetadata($tenantCode, $set, Uri $person, $oldStatus = null)
-    {
+    public function ensureMetadata(
+        $tenantCode,
+        $set,
+        Uri $person,
+        LabelManager $labelManager,
+        $oldStatus = null,
+        $forceCreationOfXl = false
+    ) {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
+        
+        $personUri = new Uri($person->getUri());
         
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
@@ -241,7 +293,7 @@ class Concept extends Resource
         
         // Do not consider dcterms:creator if we have dc:creator
         if (!$this->hasProperty(Dc::CREATOR)) {
-            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
+            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $personUri;
         }
         
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -253,6 +305,10 @@ class Concept extends Resource
         $this->setModified($person);
         
         $this->handleStatusChange($person, $oldStatus);
+        
+        // Create all asserted labels
+        $labelHelper = new Concept\LabelHelper($labelManager);
+        $labelHelper->assertLabels($this, $forceCreationOfXl);
     }
     
     /**
@@ -304,92 +360,36 @@ class Concept extends Resource
     }
     
     /**
-     * Generate notation unique per tenant. Based on tenant notations sequence.
-     * @return string
-     */
-    public function selfGenerateNotation(Tenant $tenant, ConceptManager $conceptManager)
-    {
-        // @TODO Move that and uri generate to separate class.
-        // @TODO A raise condition is possible. The validation will fail in that case - so should not be problem.
-        
-        $notation = 1;
-        
-        $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
-        if (!empty($maxNumericNotation)) {
-            $notation = $maxNumericNotation + 1;
-        }
-        
-        $this->addProperty(
-            Skos::NOTATION,
-            new Literal($notation)
-        );
-    }
-    
-    /**
      * Generates an uri for the concept.
      * Requires a URI from to an openskos collection
-     *
      * @return string
      */
     public function selfGenerateUri(Tenant $tenant, ConceptManager $conceptManager)
     {
-        // @TODO Move this and notation generate to separate class.
+        $identifierHelper = new Concept\IdentifierHelper($tenant, $conceptManager);
         
-        if (!$this->isBlankNode()) {
-            throw new UriGenerationException(
-                'The concept already has an uri. Can not generate new one.'
-            );
-        }
+        $uri = $identifierHelper->generateUri($this);
         
-        if ($this->isPropertyEmpty(OpenSkos::SET)) {
-            throw new UriGenerationException(
-                'Property openskos:set (collection) is required to generate concept uri.'
-            );
-        }
-        
-        if ($this->isPropertyEmpty(Skos::NOTATION) && $tenant->isNotationAutoGenerated()) {
-            $this->selfGenerateNotation($tenant, $conceptManager);
-        }
-        
-        if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = self::assembleUri(
-                $this->getPropertySingleValue(OpenSkos::SET)
-            );
-        } else {
-            $uri = self::assembleUri(
-                $this->getPropertySingleValue(OpenSkos::SET),
-                $this->getProperty(Skos::NOTATION)[0]->getValue()
-            );
-        }
-        
-        if ($conceptManager->askForUri($uri, true)) {
-            throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
-            );
-        }
-        
-        $this->setUri($uri);
         return $uri;
     }
     
     /**
-     * Generates concept uri from collection and notation
-     * @param string $setUri
-     * @param string $firstNotation, optional. New uuid will be used if empty
-     * @return string
+     * Loads the XL labels and replaces the default URI value with the full resource
+     * @param LabelManager $labelManager
      */
-    protected function assembleUri($setUri, $firstNotation = null)
+    public function loadFullXlLabels($labelManager)
     {
-        $separator = '/';
-        
-        $setUri = rtrim($setUri, $separator);
-        
-        if (empty($firstNotation)) {
-            $uri = $setUri . $separator . Uuid::uuid4();
-        } else {
-            $uri = $setUri . $separator . $firstNotation;
+        foreach (Concept::$classes['SkosXlLabels'] as $xlLabelPredicate) {
+            $fullXlLabels = [];
+            foreach ($this->getProperty($xlLabelPredicate) as $xlLabel) {
+                if ($xlLabel instanceof Label) {
+                    $fullXlLabels[] = $xlLabel;
+                } else {
+                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabel);
+                }
+            }
+
+            $this->setProperties($xlLabelPredicate, $fullXlLabels);
         }
-        
-        return $uri;
     }
 }

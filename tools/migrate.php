@@ -70,7 +70,12 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
-$resourceManager->setIsNoCommitMode(true);
+
+/**
+ * @var $conceptManager \OpenSkos2\ConceptManager
+ */
+$conceptManager = $diContainer->make('\OpenSkos2\ConceptManager');
+$conceptManager->setIsNoCommitMode(true);
 
 $logger = new \Monolog\Logger("Logger");
 $logLevel = \Monolog\Logger::INFO;
@@ -454,7 +459,11 @@ do {
 
         // Insert
         if ($isValid && !$isDryRun) {
-            insertResource($resourceManager, $resource);
+            if ($resource instanceof OpenSkos2\Concept) {
+                insertResource($conceptManager, $resource);
+            } else {
+                insertResource($resourceManager, $resource);
+            }
         }
     }
 } while ($counter < $total && isset($data['response']['docs']));

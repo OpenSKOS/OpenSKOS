@@ -31,8 +31,7 @@ class Namespaces
      */
     protected static $additionalNamespaces = [
         'openskos' => OpenSkos::NAME_SPACE,
-//         Temporary disable skos xl
-//        'skosxl' => SkosXl::NAME_SPACE,
+        'skosxl' => SkosXl::NAME_SPACE,
         'dc' => Dc::NAME_SPACE, // Very important for distinguishing dcterms and dc prefixes.
     ];
     
@@ -58,8 +57,7 @@ class Namespaces
             'dc' => \OpenSkos2\Namespaces\Dc::NAME_SPACE,
             'dcterms' => \OpenSkos2\Namespaces\DcTerms::NAME_SPACE,
             'skos' => \OpenSkos2\Namespaces\Skos::NAME_SPACE,
-//            Temporary disable skos xl
-//            'skosxl' => \OpenSkos2\Namespaces\SkosXl::NAME_SPACE,
+            'skosxl' => \OpenSkos2\Namespaces\SkosXl::NAME_SPACE,
             'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
         ];
     }

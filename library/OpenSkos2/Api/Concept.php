@@ -24,7 +24,6 @@ use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Rdf;
 use OpenSKOS_Db_Table_Row_Collection;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
@@ -35,6 +34,7 @@ use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
@@ -74,7 +74,7 @@ class Concept
      * @var \OpenSkos2\Search\Autocomplete
      */
     private $searchAutocomplete;
-
+    
     /**
      * Amount of concepts to return
      *
@@ -133,13 +133,13 @@ class Concept
             'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
 
-        // tenant
+        /* @var $tenant Tenant */
         $tenant = null;
         if (isset($params['tenant'])) {
             $tenant = $this->getTenantFromParams($params);
-            $options['tenants'] = [$tenant->code];
+            $options['tenants'] = [$tenant->getCode()];
         }
-
+        
         // collection -> set in OpenSKOS 2
         if (isset($params['collection'])) {
             $collection = $this->getCollection($params, $tenant);
@@ -157,7 +157,7 @@ class Concept
         }
 
         $concepts = $this->searchAutocomplete->search($options, $total);
-
+        
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {
@@ -165,16 +165,29 @@ class Concept
         } else {
             $propertiesList = [];
         }
+        
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        
+        if ($this->useXlLabels($tenant, $request) === true) {
+            foreach ($concepts as $concept) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            }
+        }
 
         switch ($context) {
             case 'json':
-                $response = (new JsonResponse($result, $propertiesList))->getResponse();
+                $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
+                $response = (new JsonpResponse(
+                    $result,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
-                $response = (new RdfResponse($result, $propertiesList))->getResponse();
+                $response = (new RdfResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
@@ -195,30 +208,60 @@ class Concept
     public function getConceptResponse(ServerRequestInterface $request, $uuid, $context)
     {
         $concept = $this->getConcept($uuid);
+        
+        //TODO: make tenant openskos2tenant
+        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution());
 
         $params = $request->getQueryParams();
-
+        
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-
+        
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        
+        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+            $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+        
         switch ($context) {
             case 'json':
-                $response = (new DetailJsonResponse($concept, $propertiesList))->getResponse();
+                $response = (new DetailJsonResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new DetailJsonpResponse($concept, $params['callback'], $propertiesList))->getResponse();
+                $response = (new DetailJsonpResponse(
+                    $concept,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
-                $response = (new DetailRdfResponse($concept, $propertiesList))->getResponse();
+                $response = (new DetailRdfResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
 
         return $response;
+    }
+    
+    /**
+     * Get a list of label exclude properties based on tenant configuration and request XL param
+     * @param Tenant $tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     */
+    public function getExcludeProperties($tenant, $request)
+    {
+        $useXlLabels = $this->useXlLabels($tenant, $request);
+                
+        if ($useXlLabels === true) {
+            return \OpenSkos2\Concept::$classes['LexicalLabels'];
+        } else {
+            return \OpenSkos2\Concept::$classes['SkosXlLabels'];
+        }
     }
 
     /**
@@ -245,10 +288,10 @@ class Concept
         if ($concept->isDeleted()) {
             throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
-
+        
         return $concept;
     }
-
+    
     /**
      * Create the concept
      *
@@ -273,8 +316,13 @@ class Concept
      */
     public function update(ServerRequestInterface $request)
     {
+        $concept = $this->getConceptFromRequest($request);
+        
+        if (!$this->manager->askForUri((string)$concept->getUri())) {
+            return $this->getErrorResponse(404, 'Concept not found try insert');
+        }
+        
         try {
-            $concept = $this->getConceptFromRequest($request);
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
 
             $params = $this->getParams($request);
@@ -284,12 +332,15 @@ class Concept
             $collection = $this->getCollection($params, $tenant);
             $user = $this->getUserFromParams($params);
 
-            $this->resourceEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
+            
+            $this->checkConceptXl($concept, $tenant);
 
             $concept->ensureMetadata(
-                $tenant->code,
+                $tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson(),
+                $this->conceptManager->getLabelManager(),
                 $existingConcept->getStatus()
             );
 
@@ -298,12 +349,9 @@ class Concept
             $this->conceptManager->replaceAndCleanRelations($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
-            return $this->getErrorResponse(404, 'Concept not found try insert');
         }
 
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml);
+        return $this->getSuccessResponse($this->loadResourceToRdf($concept));
     }
 
     /**
@@ -334,17 +382,68 @@ class Concept
             }
 
             $user = $this->getUserFromParams($params);
-            $tenant = $this->getTenantFromParams($params);
 
-            $this->resourceEditAllowed($concept, $tenant, $user);
+            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
 
             $this->manager->deleteSoft($concept);
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
 
-        $xml = (new \OpenSkos2\Api\Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml, 202);
+        return $this->getSuccessResponse($this->loadResourceToRdf($concept), 202);
+    }
+
+    /**
+     * Check if the requested label format conforms to the tenant configuration
+     * @return boolean Returns TRUE only if XL labels are enabled and requested
+     * @throws Zend_Controller_Exception when XL labels are requested but are not configured for tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     * @param Tenant $tenant
+     */
+    public function useXlLabels($tenant, $request)
+    {
+        if (empty($request->getQueryParams()['xl'])) {
+            return false;
+        }
+        
+        $xlParam = filter_var($request->getQueryParams()['xl'], FILTER_VALIDATE_BOOLEAN);
+        
+        if ($xlParam === false) {
+            return false;
+        } else {
+            if ($tenant !== null && $tenant->getEnableSkosXl() === true) {
+                return true;
+            } else {
+                if ($tenant === null) {
+                    throw new \Zend_Controller_Exception(
+                        'SKOS-XL labels are requested, but tenant is not defined',
+                        501
+                    );
+                } else {
+                    throw new \Zend_Controller_Exception(
+                        'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
+                        501
+                    );
+                }
+            }
+        }
+    }
+    
+    /**
+     * Loads the resource from the db and transforms it to rdf.
+     * @param Resource $resource
+     * @return string
+     */
+    protected function loadResourceToRdf(Resource $resource)
+    {
+        $loadedResource = $this->manager->fetchByUri($resource->getUri());
+        
+        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($loadedResource->getInstitution());
+        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
+            $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+        
+        return (new Transform\DataRdf($loadedResource))->transform();
     }
 
     /**
@@ -393,14 +492,14 @@ class Concept
     /**
      * Applies all validators to the concept.
      * @param \OpenSkos2\Concept $concept
-     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param Tenant $tenant
      * @throws InvalidArgumentException
      */
-    protected function validate(\OpenSkos2\Concept $concept, \OpenSKOS_Db_Table_Row_Tenant $tenant)
+    protected function validate(\OpenSkos2\Concept $concept, Tenant $tenant)
     {
         $validator = new ResourceValidator(
-            $this->manager,
-            new Tenant($tenant->code)
+            $this->conceptManager,
+            $tenant
         );
 
 
@@ -408,7 +507,7 @@ class Concept
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
     }
-
+    
     /**
      * Handle the action of creating the concept
      *
@@ -418,11 +517,11 @@ class Concept
      */
     private function handleCreate(ServerRequestInterface $request)
     {
-        $concept = $this->getConceptFromRequest($request);
+        $resource = $this->getConceptFromRequest($request);
 
-        if (!$concept->isBlankNode() && $this->manager->askForUri((string)$concept->getUri())) {
+        if (!$resource->isBlankNode() && $this->manager->askForUri((string)$resource->getUri())) {
             throw new InvalidArgumentException(
-                'The concept with uri ' . $concept->getUri() . ' already exists. Use PUT instead.',
+                'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.',
                 400
             );
         }
@@ -430,29 +529,70 @@ class Concept
         $params = $this->getParams($request);
 
         $tenant = $this->getTenantFromParams($params);
-        $collection = $this->getCollection($params, $tenant, $concept);
+        $collection = $this->getCollection($params, $tenant, $resource);
         $user = $this->getUserFromParams($params);
 
-        $concept->ensureMetadata(
-            $tenant->code,
-            $collection->getUri(),
-            $user->getFoafPerson()
-        );
+        if ($resource instanceof \OpenSkos2\Concept) {
+            $this->checkConceptXl($resource, $tenant);
+            
+            $resource->ensureMetadata(
+                $tenant->getCode(),
+                $collection->getUri(),
+                $user->getFoafPerson(),
+                $this->conceptManager->getLabelManager()
+            );
+        } else {
+            $resource->ensureMetadata(
+                $tenant->getCode(),
+                $collection->getUri(),
+                $user->getFoafPerson()
+            );
+        }
 
-        $autoGenerateUri = $this->checkConceptIdentifiers($request, $concept);
+        $autoGenerateUri = $this->checkConceptIdentifiers($request, $resource);
         if ($autoGenerateUri) {
-            $concept->selfGenerateUri(
-                new Tenant($tenant->code),
+            $resource->selfGenerateUri(
+                $tenant,
                 $this->conceptManager
             );
         }
 
-        $this->validate($concept, $tenant);
+        $this->validate($resource, $tenant);
 
-        $this->manager->insert($concept);
+        if ($resource instanceof \OpenSkos2\Concept) {
+            $this->conceptManager->insert($resource);
+        } else {
+            $this->manager->insert($resource);
+        }
 
-        $rdf = (new Transform\DataRdf($concept))->transform();
-        return $this->getSuccessResponse($rdf, 201);
+        return $this->getSuccessResponse($this->loadResourceToRdf($resource), 201);
+    }
+    
+    /**
+     * Check if there are both xl labels and simple labels.
+     * @param \OpenSkos2\Concept $concept
+     * @param Tenant $tenant
+     * @throws InvalidArgumentException
+     */
+    protected function checkConceptXl(\OpenSkos2\Concept $concept, Tenant $tenant)
+    {
+        if ($tenant->getEnableSkosXl()) {
+            if ($concept->hasSimpleLabels()) {
+                throw new InvalidArgumentException(
+                    'The concept contains simple labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with xl labels.',
+                    400
+                );
+            }
+        } else {
+            if ($concept->hasXlLabels()) {
+                throw new InvalidArgumentException(
+                    'The concept contains xl labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with simple labels.',
+                    400
+                );
+            }
+        }
     }
 
     /**
@@ -487,20 +627,18 @@ class Concept
     {
         $doc = $this->getDomDocumentFromRequest($request);
 
-        $descriptions = $doc->documentElement->getElementsByTagNameNS(Rdf::NAME_SPACE, 'Description');
-        if ($descriptions->length != 1) {
-            throw new InvalidArgumentException(
-                'Expected exactly one '
-                . '/rdf:RDF/rdf:Description, got '.$descriptions->length,
-                412
-            );
-        }
-
         // remove the api key
         $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
 
-        $resource = (new Text($doc->saveXML()))->getResources();
-
+        $resource = (new Text($doc->saveXML()))->getResources(\OpenSkos2\Concept::$classes['SkosXlLabels']);
+        
+        if ($resource->count() != 1) {
+            throw new InvalidArgumentException(
+                'Expected exactly one concept, got ' . $resource->count(),
+                412
+            );
+        }
+        
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
             throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
         }
@@ -560,7 +698,7 @@ class Concept
 
     /**
      * @param $params
-     * @param \OpenSKOS_Db_Table_Row_Tenant|null $tenant
+     * @param Tenant|null $tenant
      * @return OpenSKOS_Db_Table_Row_Collection
      * @throws InvalidArgumentException
      */
@@ -571,7 +709,7 @@ class Concept
         }
         $code = $params['collection'];
         $model = new \OpenSKOS_Db_Table_Collections();
-        $collection = $model->findByCode($code, $tenant);
+        $collection = $model->findByCode($code, $tenant->getCode());
         if (null === $collection) {
             throw new InvalidArgumentException(
                 'No such collection `'.$code.'` in this tenant.',
@@ -657,7 +795,7 @@ class Concept
 
     /**
      * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_Tenant
+     * @return Tenant
      * @throws InvalidArgumentException
      */
     private function getTenantFromParams($params)
@@ -666,7 +804,9 @@ class Concept
             throw new InvalidArgumentException('No tenant specified', 400);
         }
 
-        return $this->getTenant($params['tenant']);
+        $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($this->getTenant($params['tenant']));
+        
+        return $openSkos2Tenant;
     }
 
     /**

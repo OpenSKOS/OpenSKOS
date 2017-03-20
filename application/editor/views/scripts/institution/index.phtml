@@ -24,21 +24,28 @@
 <div>
 	<div id="collection-form">
 		<?php echo $this->tenant->getForm()?>
-        <div class="help">
-            <ul>
-                <li>
-                    <div class="field">Enable the statuses system for concepts:</div>
-                    <div class="help-text">
-                        <ul>
-                            <li>This allows having "candidate", "approved", "obsolete" and other concepts.</li>
-                            <li>Checking/unchecking the checkbox will not update any statuses of concepts.</li>
-                            <li>When <strong>unchecked</strong> all edited and created concepts get the status approved. All searches search for any status.</li>
-                            <li>When <strong>checked</strong> all options for statuses (in search and create/edit) will appear.</li>
-                            <li>Status "DELETED" and deleted concepts are not affected from this option.</li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
+        <div class="decorator-helptext" id="decorator-helptext-statuses">
+            <div class="help-text-title">Enable the statuses system for concepts:</div>
+            <div class="help-text-content">
+                <ul>
+                    <li>This allows having "candidate", "approved", "obsolete" and other concepts.</li>
+                    <li>Checking/unchecking the checkbox will not update any statuses of concepts.</li>
+                    <li>When <strong>unchecked</strong> all edited and created concepts get the status approved. All searches search for any status.</li>
+                    <li>When <strong>checked</strong> all options for statuses (in search and create/edit) will appear.</li>
+                    <li>Status "DELETED" and deleted concepts are not affected from this option.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="decorator-helptext" id="decorator-helptext-skosxl">
+            <div class="help-text-title">Checking this option will allow you to use SKOS-XL labels instead of simple value labels:</div>
+            <div class="help-text-content">
+                <ul>
+                    <li>If this option is enabled SKOS-XL labels will replace the current simple labels -
+                        Only SKOS-XL labels will be available in the editor. Current values will be preserved.</li>
+                    <li>You will be able to revert to the old simple value labels any time later on.</li>
+                    <li>SKOS-XL labels can be used as Preferred, Alternative and Hidden labels.</li>
+                </ul>
+            </div>
         </div>
 	</div>
 	<div id="collection-stats" class="box">

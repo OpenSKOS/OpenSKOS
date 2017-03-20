@@ -19,8 +19,11 @@
 
 namespace OpenSkos2\Solr;
 
+use OpenSkos2\Rdf\Uri;
 use Solarium\Client;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\ResourceCollection;
+use Solarium\QueryType\Update\Query\Query as UpdateQuery;
 
 class ResourceManager
 {
@@ -66,21 +69,60 @@ class ResourceManager
 
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
-     * @throws type
+     * @throws \Exception
      */
     public function insert(Resource $resource)
     {
         $update = $this->solr->createUpdate();
-        $doc = $update->createDocument();
-        $convert = new \OpenSkos2\Solr\Document($resource, $doc);
-        $resourceDoc = $convert->getDocument();
-
-        $update->addDocument($resourceDoc);
+        
+        $this->addResourceToUpdate($resource, $update);
 
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
         }
 
+        $this->updateWithRetries($update);
+    }
+    
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insertCollection(ResourceCollection $resourceCollection)
+    {
+        $update = $this->solr->createUpdate();
+        
+        foreach ($resourceCollection as $resource) {
+            $this->addResourceToUpdate($resource, $update);
+        }
+        
+        if (!$this->getIsNoCommitMode()) {
+            $update->addCommit(true);
+        }
+
+        $this->updateWithRetries($update);
+    }
+    
+    /**
+     * Adds the rdf resource to update.
+     * @param \Solarium\QueryType\Update\Query\Query $update
+     */
+    protected function addResourceToUpdate(Resource $resource, UpdateQuery $update)
+    {
+        $doc = $update->createDocument();
+        $convert = new \OpenSkos2\Solr\Document($resource, $doc);
+        $resourceDoc = $convert->getDocument();
+        
+        $update->addDocument($resourceDoc);
+    }
+    
+    /**
+     * Sometimes solr update fails with timeout. So we update with retrying...
+     * @param \Solarium\QueryType\Update\Query\Query $update
+     * @throws \Exception
+     */
+    protected function updateWithRetries(UpdateQuery $update)
+    {
         // Sometimes solr update fails with timeout.
         $exception = null;
         $tries = 0;
@@ -102,7 +144,7 @@ class ResourceManager
     /**
      * @param Resource $uri
      */
-    public function delete(\OpenSkos2\Rdf\Uri $uri)
+    public function delete(Uri $uri)
     {
         // delete resource in solr
         $update = $this->solr->createUpdate();
@@ -127,27 +169,37 @@ class ResourceManager
      * @param array $sorts
      * @return array Array of uris
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
+    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null, array $filterQueries = null)
     {
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
                 ->setFields(['uri'])
                 ->setQuery($query);
-
+        
         if (!empty($sorts)) {
             $select->setSorts($sorts);
+        }
+        
+        if (!empty($filterQueries)) {
+            if (!is_array($filterQueries)) {
+                throw new OpenSkos2\Exception\InvalidArgumentException('Filter queries must be array.');
+            }
+            
+            foreach ($filterQueries as $key => $value) {
+                $select->addFilterQuery($select->createFilterQuery($key)->setQuery($value));
+            }
         }
 
         $solrResult = $this->solr->select($select);
 
         $numFound = $solrResult->getNumFound();
-
+        
         $uris = [];
         foreach ($solrResult as $doc) {
             $uris[] = $doc->uri;
         }
-
+        
         return $uris;
     }
 

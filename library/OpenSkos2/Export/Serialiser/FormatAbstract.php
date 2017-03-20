@@ -23,7 +23,6 @@ use OpenSkos2\Rdf\Resource;
 
 abstract class FormatAbstract
 {
-    // @TODO Not all formats care for the properties to serialise
     /**
      * Array of properties to be serialised.
      * @var array
@@ -42,6 +41,12 @@ abstract class FormatAbstract
      * @var int
      */
     protected $maxDepth = 1;
+    
+    /**
+     * @var array
+     * @TODO this is not fully implemented everywhere
+     */
+    protected $excludePropertiesList;
     
     /**
      * Gets the array of properties to be serialised.
@@ -96,7 +101,23 @@ abstract class FormatAbstract
     {
         $this->maxDepth = $maxDepth;
     }
+    
+    /**
+     * @return array
+     */
+    public function getExcludePropertiesList()
+    {
+        return $this->excludePropertiesList;
+    }
 
+    /**
+     * @param array $excludePropertiesList
+     */
+    public function setExcludePropertiesList($excludePropertiesList)
+    {
+        $this->excludePropertiesList = $excludePropertiesList;
+    }
+    
     /**
      * Creates the header of the output.
      * @return string

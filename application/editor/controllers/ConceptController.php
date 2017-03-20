@@ -28,6 +28,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
 
@@ -43,15 +44,19 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         $this->_helper->_layout->setLayout('editor_central_content');
 
-        $form = Editor_Forms_Concept::getInstance(null, $this->_tenant);
+        $form = Editor_Forms_Concept::getInstance(null, $this->getOpenSkosDbTableRowTenant());
+        
+        $labelHelper = $this->getDI()->get('\OpenSkos2\Concept\LabelHelper');
         
         $form->populate(
             Editor_Forms_Concept_ConceptToForm::getNewConceptFormData(
                 $this->getInitialLanguage(),
-                $this->getRequest()->getParam('label')
+                $this->getRequest()->getParam('label'),
+                $this->getOpenSkos2Tenant(),
+                $labelHelper
             )
         );
-         
+        
         $this->view->form = $form->setAction(
             $this->getFrontController()->getRouter()->assemble(array('controller' => 'concept', 'action' => 'save'))
         );
@@ -107,7 +112,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $concept = $this->_getConcept();
         
-        $form = Editor_Forms_Concept::getInstance($concept);
+        $form = Editor_Forms_Concept::getInstance($concept, $this->getOpenSkosDbTableRowTenant());
         
         if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
@@ -137,13 +142,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         
         $validator = new ResourceValidator(
             $this->getConceptManager(),
-            $this->getTenant()
+            $this->getOpenSkos2Tenant()
         );
         
         if ($validator->validate($concept)) {
             if ($form->getIsCreate()) {
                 $concept->selfGenerateUri(
-                    $this->getTenant(),
+                    $this->getOpenSkos2Tenant(),
                     $this->getConceptManager()
                 );
             }
@@ -174,12 +179,13 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         if (!empty($user)) {
             $user->updateUserHistory($concept->getUri());
         }
-
+        
         $this->view->assign('currentConcept', $concept);
         $this->view->assign('personManager', $this->getDI()->get('\OpenSkos2\PersonManager'));
         $this->view->assign('conceptManager', $this->getConceptManager());
         $this->view->assign('conceptSchemes', $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll());
         $this->view->assign('footerData', $this->_generateFooter($concept));
+        $this->view->assign('tenant', $this->getOpenSkos2Tenant());
     }
 
     public function deleteAction()
@@ -399,6 +405,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                     foreach ($concept->getProperty($userProperty) as $user) {
                         if ($user instanceof Uri && $personManager->askForUri($user)) {
                             $usersNames[] = $personManager->fetchByUri($user)->getCaption();
+                        } elseif ($user instanceof Uri) {
+                            $usersNames[] = $user->getUri();
                         } else {
                             $usersNames[] = $user->getValue();
                         }
@@ -512,19 +520,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
      */
     protected function getConceptManager()
     {
-        return $this->getDI()->get('\OpenSkos2\ConceptManager');
+        return $this->getDI()->get('OpenSkos2\ConceptManager');
     }
-    
-    /**
-     * @return OpenSkos2\Tenant
-     */
-    protected function getTenant()
-    {
-        return new OpenSkos2\Tenant(
-            $this->getCurrentUser()->tenant
-        );
-    }
-    
+        
     /**
      * Checks if the browser language is supported and returns it. If not supported - gets the first one.
      * @return string
