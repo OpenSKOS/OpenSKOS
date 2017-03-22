@@ -90,7 +90,7 @@ class EasyRdf
 
         foreach ($resource->propertyUris() as $propertyUri) {
             // We already have the rdf type proprty from the resource creation. No need to put it again.
-            if ($propertyUri === Rdf::TYPE) {
+            if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
                 continue;
             }
             
