@@ -14,7 +14,7 @@ class GetConceptTest extends AbstractTest {
   private static $about;
 
   public static function setUpBeforeClass() {
-    self::$createdconcepts = array();
+    self::$createdresources = array();
     self::$client = new \Zend_Http_Client();
     self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -46,7 +46,7 @@ class GetConceptTest extends AbstractTest {
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept');
     if ($response->getStatus() === 201) {
-      array_push(self::$createdconcepts, self::getAbout($response));
+      array_push(self::$createdresources, self::getAbout($response));
     } else {
       throw new \Exception('Cannot create test concept: ' . $response->getStatus() . " with the message " . $response->getMessage());
     }

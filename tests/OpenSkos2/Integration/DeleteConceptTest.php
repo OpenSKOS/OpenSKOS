@@ -74,7 +74,7 @@ class DeleteConceptTest extends AbstractTest {
   }
 
   private function createTestConcept($apikey) {
-    self::$createdconcepts = array();
+    self::$createdresources = array();
     self::$client = new \Zend_Http_Client();
     self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -107,7 +107,7 @@ class DeleteConceptTest extends AbstractTest {
 
     $response = self::create($this->xml, $apikey, 'concept'); // the first attempt to create a concept will geive a concepts with the candidate status
     if ($response->getStatus() === 201) {
-      array_push(self::$createdconcepts, self::getAbout($response));
+      array_push(self::$createdresources, self::getAbout($response));
     } else {
       throw new \Exception('Cannot create test concept: ' . $response->getStatus() . " with the message " . $response->getMessage());
     }

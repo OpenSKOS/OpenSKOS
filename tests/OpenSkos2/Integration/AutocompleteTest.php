@@ -23,7 +23,7 @@ class AutocompleteTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdconcepts = array();
+    self::$createdresources = array();
     self::$labelMap = array(
       PREF_LABEL => PREF_LABEL . "_",
       ALT_LABEL => ALT_LABEL . "_",
@@ -71,7 +71,7 @@ class AutocompleteTest extends AbstractTest {
           throw new \Exception("setting status approved for a test concept has failed. ". " Status ". $response1 ->getStatus() . ' Message: ' . $response1->getMessage());
         }
       }
-      array_push(self::$createdconcepts, $about);
+      array_push(self::$createdresources, $about);
       echo $i;
       $i++;
     }
@@ -80,7 +80,7 @@ class AutocompleteTest extends AbstractTest {
   
   // delete all created concepts
   public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdconcepts, API_KEY_EDITOR, 'concept');
+    self::deleteConcepts(self::$createdresources, API_KEY_EDITOR, 'concept');
   }
 
 
