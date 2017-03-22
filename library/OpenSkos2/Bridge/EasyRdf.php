@@ -20,6 +20,7 @@
 namespace OpenSkos2\Bridge;
 
 use EasyRdf\Graph;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Collection;
 use OpenSkos2\CollectionCollection;
 use OpenSkos2\SkosXl\Label;
@@ -88,6 +89,11 @@ class EasyRdf
         );
 
         foreach ($resource->propertyUris() as $propertyUri) {
+            // We already have the rdf type proprty from the resource creation. No need to put it again.
+            if ($propertyUri === Rdf::TYPE) {
+                continue;
+            }
+            
             foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
                 if ($propertyValue instanceof \EasyRdf\Literal) {
                     $openskosResource->addProperty(

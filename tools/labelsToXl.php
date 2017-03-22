@@ -27,6 +27,7 @@ require dirname(__FILE__) . '/autoload.inc.php';
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'debug' => 'Show debug info.',
+    'modified|m=s' => 'Process only those modified after that date.',
 ];
 
 try {
@@ -52,10 +53,6 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
     $logLevel
 ));
 
-
-
-
-
 /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
 $resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManagerWithSearch');
 
@@ -65,13 +62,22 @@ $conceptManager = $diContainer->make('OpenSkos2\ConceptManager');
 /* @var $labelHelper OpenSkos2\Concept\LabelHelper */
 $labelHelper = $diContainer->make('OpenSkos2\Concept\LabelHelper');
 
+$query = '-status:deleted';
+
+$modifiedSince = $OPTS->getOption('modified');
+if (!empty($modifiedSince)) {
+    $query .= ' AND d_modified:[' . $modifiedSince .  ' TO *]';
+}
+
 $offset = 0;
 $limit = 200;
 $counter = 0;
 do {
     try {
-        $concepts = $conceptManager->search('-status:deleted', $limit, $offset);
+        $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
 
+        $logger->info('Total: ' . $numFound);
+        
         if ($concepts->count() > 0) {
             $deleteResources = new \OpenSkos2\Rdf\ResourceCollection([]);
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);

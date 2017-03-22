@@ -25,6 +25,7 @@ $options = [
     'env|e=s'   => 'The environment to use (defaults to "production")',
     'uri|u=s'   => 'Index single uri e.g -u http://data.beeldengeluid.nl/gtaa/356512',
     'verbose|v' => 'Verbose',
+    'modified|m=s' => 'Index only those modified after that date.',
     'help|h'    => 'Show this help',
 ];
 
@@ -68,7 +69,9 @@ $resourceTypes = [
     \OpenSkos2\SkosXl\Label::TYPE
 ];
 
-$sparqlWhere = getSparqlWhereClause($resourceTypes);
+$modifiedSince = $OPTS->getOption('modified');
+
+$sparqlWhere = getSparqlWhereClause($resourceTypes, $modifiedSince);
 
 if (empty($uri)) {
     $total = getTotal($resourceManager, $sparqlWhere);
@@ -99,12 +102,18 @@ if ($uri) {
 $solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
 $solrResourceManager->setIsNoCommitMode(true);
 
-$solrResourceManager->search('*:*', 0, 0, $solrTotal);
-$logger->info('Total in Solr: ' . $solrTotal);
-$logger->info('Start deleting from Solr');
-$deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger, $scriptStart);
+if (empty($modifiedSince)) {
+    // Handle deleting from solr.
+    $solrResourceManager->search('*:*', 0, 0, $solrTotal);
+    $logger->info('Total in Solr: ' . $solrTotal);
+    $logger->info('Start deleting from Solr');
+    $deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger, $scriptStart);
+} else {
+    // @TODO implement -m option for solr as well. Not needed for now.
+    $logger->info('Modified option is set, so we wont check deleted for now.');
+}
 
-$logger->info('Start commiting to Solr: ' . $deleted);
+$logger->info('Start indexing to Solr');
 // Update all resources from Jena to Solr
 $offset = 0;
 while ($offset < $total) {
@@ -135,14 +144,19 @@ while ($offset < $total) {
 }
 
 $logger->debug('Total in Jena: ' . $total);
-$logger->debug('Total in Solr: ' . $solrTotal);
-$logger->debug('Deleted from Solr: ' . $deleted);
-$logger->info("Done!");
 
-if ($solrTotal != ($total + $deleted)) {
-    $logger->notice('There is mismatch between deleted, solr total and indexed counts. Maybe something went wrong.');
-    $logger->notice('Should be solrTotal = indexed + deleted');
+if (isset($solrTotal)) {
+    $logger->debug('Total in Solr: ' . $solrTotal);
+    $logger->debug('Deleted from Solr: ' . $deleted);
+    if ($solrTotal != ($total + $deleted)) {
+        $logger->notice(
+            'There is mismatch between deleted, solr total and indexed counts. Maybe something went wrong.'
+        );
+        $logger->notice('Should be solrTotal = indexed + deleted');
+    }
 }
+
+$logger->info("Done!");
 
 /**
  * Get total amount of concepts
@@ -168,7 +182,7 @@ function getTotal(\OpenSkos2\Rdf\ResourceManagerWithSearch $resourceManager, $sp
     return $total;
 }
 
-function getSparqlWhereClause($resourceTypes)
+function getSparqlWhereClause($resourceTypes, $modifiedSince = null)
 {
     $whereClause = '';
     
@@ -177,6 +191,13 @@ function getSparqlWhereClause($resourceTypes)
             $whereClause .= ' UNION ';
         }
         $whereClause .= '{?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <' . $resourceType . '> }';
+    }
+    
+    if (!empty($modifiedSince)) {
+        $whereClause .= '
+            ?subject <http://purl.org/dc/terms/modified> ?timeModified
+            FILTER (?timeModified > \'' . $modifiedSince . '\'^^xsd:dateTime)
+        ';
     }
     
     return $whereClause;
