@@ -86,7 +86,10 @@ class Document
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
         SkosXl::LITERALFORM => ['a_skosXlLiteralForm'],
-        Rdf::TYPE => ['s_rdfType']
+        Rdf::TYPE => ['s_rdfType'],
+        SkosXl::PREFLABEL => ['s_prefLabelXl'],
+        SkosXl::ALTLABEL => ['s_altLabelXl'],
+        SkosXl::HIDDENLABEL => ['s_hiddenLabelXl']
     ];
 
     /**
