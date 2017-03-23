@@ -115,46 +115,46 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     return json_decode($parameters, true);
   }
 
-  protected function testAllResources($resourcetype) {
+  protected function allResources($resourcetype) {
     print "\n Test: get all $resourcetype in default format ... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype", 'text/xml');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsXMLRDFResources($response);
   }
 
-  protected function testAllResourcesJson($resourcetype) {
+  protected function allResourcesJson($resourcetype) {
     print "\n Test: get all $resourcetype in json ... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype?format=json", 'application/json');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $json = $response->getBody();
     $resources = json_decode($json, true);
-    $this->assertionsJsonResources($resources);
+    $this->assertionsJsonResources($resources["response"]);
   }
 
-  protected function testAllResourcesJsonP($resourcetype) {
+  protected function allResourcesJsonP($resourcetype) {
     print "\n Test: get all $resourcetype in jsonp ... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype?format=jsonp&callback=" . CALLBACK_NAME, 'application/json');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $jsonP = $response->getBody();
     $resources = $this->jsonP_decode_parameters($jsonP, CALLBACK_NAME);
-    $this->assertionsJsonResources($resources);
+    $this->assertionsJsonResources($resources["response"]);
   }
 
-  protected function testAllResourcesRDFXML($resourcetype) {
+  protected function allResourcesRDFXML($resourcetype) {
     print "\n Test: get all $resourcetype rdf/xml explicit... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype?format=rdf", 'text/xml');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsXMLRDFResources($response);
   }
 
-  protected function testAllResourcesHTML($resourcetype) {
+  protected function allResourcesHTML($resourcetype) {
     print "\n Test: get all $resourcetype html... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype?format=html", 'text/html');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsHTMLAllResources($response);
   }
 
-  protected function testResource($resourcetype, $id) {
+  protected function resource($resourcetype, $id) {
     print "\n Test: get a $resourcetype in default format ... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype/$id", 'text/xml');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
@@ -163,7 +163,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     $this->assertionsXMLRDFResource($dom, 0);
   }
 
-  protected function testResourceJson($resourcetype, $id) {
+  protected function resourceJson($resourcetype, $id) {
     print "\n Test: get a $resourcetype in json ... ";
     $response = $this->getResource(API_BASE_URI . "/$resourcetype/$id.json", 'application/json');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
@@ -172,18 +172,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     $this->assertionsJsonResource($resource, 0);
   }
 
-  protected function testResourceJsonP($resourcetype, $id) {
+  protected function resourceJsonP($resourcetype, $id) {
     print "\n Test: get a $resourcetype in jsonp ... ";
-    $response = $this->getResource(API_BASE_URI . "$resourcetype/$id.jsonp?callback" . CALLBACK_NAME, 'application/json');
+    $response = $this->getResource(API_BASE_URI . "/$resourcetype/$id.jsonp?callback=" . CALLBACK_NAME, 'application/json');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $json = $response->getBody();
     $resource = $this->jsonP_decode_parameters($json, CALLBACK_NAME);
     $this->assertionsJsonResource($resource);
   }
 
-  protected function testResourceHTML($resourcetype, $id) {
+  protected function resourceHTML($resourcetype, $id) {
     print "\n Test: get a $resourcetype in html ... ";
-    $response = $this->getResource(API_BASE_URI . "$resourcetype/$id.html", 'text/html');
+    $response = $this->getResource(API_BASE_URI . "/$resourcetype/$id.html", 'text/html');
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentHTML($response->getBody());
@@ -209,5 +209,28 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
  
   protected function assertionsHTMLResource(\Zend_Dom_Query $dom, $i) {
   }
+  
+  protected function getResource($requestString, $contentType) {
+    print "\n $requestString \n";
+    self::$client->resetParameters();
+
+    self::$client->setUri($requestString);
+    self::$client->setConfig(array(
+      'maxredirects' => 0,
+      'timeout' => 30));
+
+    self::$client->SetHeaders(array(
+      'Accept' => 'text/html,application/xhtml+xml,application/xml',
+      'Content-Type' => $contentType,
+      'Accept-Language' => 'nl,en-US,en',
+      'Accept-Encoding' => 'gzip, deflate',
+      'Connection' => 'keep-alive')
+    );
+    echo $requestString;
+    $response = self::$client->request(\Zend_Http_Client::GET);
+
+    return $response;
+  }
+
 
 }

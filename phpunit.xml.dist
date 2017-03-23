@@ -36,5 +36,8 @@
         <const name="SCHEMA_URI_1" value ="http://openskos.meertens.knaw.nl/Organisations"/>
         <const name="SCHEMA_URI_2" value ="http://openskos.meertens.knaw.nl/Languages"/>
         <const name="SET_CODE" value="clavas:org"/>
+        <const name="TENANT_NAME" value="example.com"/>
+        <const name="NUMBER_INSTITUTIONS" value="2"/>
+        <const name="CALLBACK_NAME" value="abc"/>
     </php>
 </phpunit>
