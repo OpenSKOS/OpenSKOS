@@ -44,6 +44,7 @@ class GetInstitutionTest extends AbstractTest {
       <vcard:orgname>test-tenant</vcard:orgname>
     </vcard:ORG>
     <openskos:code>test</openskos:code>
+    <openskos:uuid>'.$uuid.'</openskos:uuid>
   </rdf:Description>
 </rdf:RDF>';
     self::create($xml_inst, API_KEY_ADMIN, '/institution', true);
@@ -51,7 +52,7 @@ class GetInstitutionTest extends AbstractTest {
     if ($response_inst->getStatus() === 201) {
       $this->test_institution = $instURI;
     } else {
-      throw new Exception('Creating test institutions hosting a testing set failed: '. $response->getMessage());
+      throw new Exception('Creating test institutions hosting a testing set failed: '. $response_inst->getMessage());
     }
     
     
@@ -61,10 +62,10 @@ class GetInstitutionTest extends AbstractTest {
 xmlns:dcterms = "http://purl.org/dc/terms/"
 xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     <rdf:Description>
-        <openskos:code>set-test</openskos:code>
-        <dcterms:title xml:lang="en">Set Test</dcterms:title>
+        <openskos:code>test-set</openskos:code>
+        <dcterms:title xml:lang="en">Test Set</dcterms:title>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
-        <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_2b46e792-a4e9-4edb-821c-d2cc78e3f1bf"></dcterms:publisher>
+        <dcterms:publisher rdf:resource="'.$this->test_institution.'""></dcterms:publisher>
         <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens"/>
         <openskos:allow_oai>true</openskos:allow_oai>
         <openskos:conceptBaseUri>http://example.com/set-example</openskos:conceptBaseUri>
@@ -84,72 +85,65 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     self::delete($this->test_institution, API_KEY_ADMIN, '/institution');
   }
  
-  public function testAllInstitutions() {
-    $this->allResources('institution');
+  public function testAllSets() {
+    $this->allResources('set');
   }
 
-  public function testAllInstitutionsJson() {
-    $this->allResourcesJson('institution');
-  }
-/*
-  public function testAllInstitutionsJsonP() {
-   $this->allResourcesJsonP('institution');
-  }
-*/
-  public function testAllInstitutionsRDFXML() {
-    $this->allResourcesRDFXML('institution');
+  public function testAllSetsJson() {
+    $this->allResourcesJson('set');
   }
 
-  public function testAllInstitutionsHTML() {
-    $this->allResourcesHTML('institution');
+  public function testAllSetsJsonP() {
+   $this->allResourcesJsonP('set');
+  }
+  
+  public function testAllISetsRDFXML() {
+    $this->allResourcesRDFXML('set');
   }
 
-  public function testInstitution() {
-    $this->resource('institution', 'test');
+  public function testAllSetsHTML() {
+    $this->allResourcesHTML('set');
   }
 
-  public function testInstitutionJson() {
-    $this->resourceJson('institution', 'test');
+  public function testSet() {
+    $this->resource('set', 'test-set');
   }
 
-  public function testInstitutionJsonP() {
-    $this->resourceJsonP('institution', 'test');
+  public function testSetJson() {
+    $this->resourceJson('set', 'test-set');
   }
 
- public function testInstitutionHTML() {
-   $this->resourceHTML('institution', 'test');
+  public function testSetJsonP() {
+    $this->resourceJsonP('set', 'test-set');
+  }
+
+ public function testSetHTML() {
+   $this->resourceHTML('set', 'test-set');
   }
 
   ////////////////////////////////////
-  protected function assertionsJsonResource($institution) {
-    $this->assertEquals("test", $institution["code"]);
-    $this->assertEquals("test-tenant", $institution["vcard_org"]["vcard_orgname"]);
-    $this->assertEquals("info@test.nl", $institution["vcard_email"]);
+  protected function assertionsJsonResource($set) {
+    $this->assertEquals("test-set", $set["code"]);
+    $this->assertEquals($this->test_institution, $set["dcterms_publisher"]);
   }
 
-  protected function assertionsJsonResources($institutions) {
-    $this->assertEquals(NUMBER_INSTITUTIONS, count($institutions["docs"]));
-    $this->assertionsJsonResource($institutions["docs"][0]);
+  protected function assertionsJsonResources($sets) {
+    $this->assertEquals(NUMBER_SETS, count($sets["docs"]));
+    $this->assertionsJsonResource($sets["docs"][0]);
   }
 
   protected function assertionsXMLRDFResource(\Zend_Dom_Query $dom) {
     $results1 = $dom->query('openskos:code');
-    $results2 = $dom->query('vcard:orgname');
-    $results3 = $dom->query('vcard:EMAIL');
-    $this->AssertEquals("test", $results1->current()->nodeValue);
-    $this->AssertEquals("test-tenant", $results2->current()->nodeValue);
-    $this->AssertEquals("info@test.nl", $results3->current()->nodeValue);
+    $results2 = $dom->query('dcterms:publisher');
+    $this->AssertEquals("test-set", $results1->current()->nodeValue);
+    $this->AssertEquals($this->test_institution, $results2->current()->nodeValue);
   }
 
   protected function assertionsXMLRDFResources($response) {
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentXML($response->getBody());
     $results1 = $dom->query('rdf:Description');
-    $this->assertEquals(NUMBER_INSTITUTIONS, count($results1));
-    $namespaces = array(
-            "vcard" => "http://www.w3.org/2006/vcard/ns#" 
-        );
-    $dom->registerXpathNamespaces($namespaces);
+    $this->assertEquals(NUMBER_SETS, count($results1));
     $this->assertionsXMLRDFResource($dom);
   }
 
@@ -166,7 +160,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     $this->AssertEquals("code:", $codeItem);
 
     $codeValue = $this->getByIndex($codeValueQuery, count($codeQuery)-2)->nodeValue;
-    $this->AssertEquals("test", $codeValue);
+    $this->AssertEquals("test-set", $codeValue);
 
     $this->AssertEquals(3, count($formats));
   }
@@ -174,12 +168,12 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
   protected function assertionsHTMLAllResources($response) {
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentHTML($response->getBody());
-    $institutions = $dom->query('ul > li > a > strong'); // fetches institutions and formats together
-    $this->AssertEquals(NUMBER_INSTITUTIONS, count($institutions));
-    $title = $this->getByIndex($institutions, 1)->nodeValue;
-    $this->AssertEquals('test-tenant', $title);
-    $list = $dom->query('ul > li > a'); // fetches institutions and formats together
-    $this->AssertEquals(2, count($list) - NUMBER_INSTITUTIONS);
+    $sets = $dom->query('ul > li > a > strong'); 
+    $this->AssertEquals(NUMBER_SETS, count($sets));
+    $title = $this->getByIndex($sets, 1)->nodeValue;
+    $this->AssertEquals('Test SEt', $title);
+    $list = $dom->query('ul > li > a'); 
+    $this->AssertEquals(2, count($list) - NUMBER_SETS);
   }
   
   

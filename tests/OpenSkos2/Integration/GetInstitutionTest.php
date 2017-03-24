@@ -59,11 +59,11 @@ class GetInstitutionTest extends AbstractTest {
   public function testAllInstitutionsJson() {
     $this->allResourcesJson('institution');
   }
-/*
+
   public function testAllInstitutionsJsonP() {
    $this->allResourcesJsonP('institution');
   }
-*/
+
   public function testAllInstitutionsRDFXML() {
     $this->allResourcesRDFXML('institution');
   }
@@ -134,7 +134,7 @@ class GetInstitutionTest extends AbstractTest {
     $this->AssertEquals("code:", $codeItem);
 
     $codeValue = $this->getByIndex($codeValueQuery, count($codeQuery)-2)->nodeValue;
-    $this->AssertEquals("test", $codeValue);
+    $this->AssertEquals("test-set", $codeValue);
 
     $this->AssertEquals(3, count($formats));
   }
@@ -142,13 +142,12 @@ class GetInstitutionTest extends AbstractTest {
   protected function assertionsHTMLAllResources($response) {
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentHTML($response->getBody());
-    $institutions = $dom->query('ul > li > a > strong'); // fetches institutions and formats together
+    $institutions = $dom->query('ul > li > a > strong'); 
     $this->AssertEquals(NUMBER_INSTITUTIONS, count($institutions));
     $title = $this->getByIndex($institutions, 1)->nodeValue;
     $this->AssertEquals('test-tenant', $title);
-    $list = $dom->query('ul > li > a'); // fetches institutions and formats together
+    $list = $dom->query('ul > li > a'); 
     $this->AssertEquals(2, count($list) - NUMBER_INSTITUTIONS);
   }
-  
   
 }
