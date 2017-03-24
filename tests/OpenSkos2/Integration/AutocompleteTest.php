@@ -80,7 +80,7 @@ class AutocompleteTest extends AbstractTest {
   
   // delete all created concepts
   public static function tearDownAfterClass() {
-    self::deleteConcepts(self::$createdresources, API_KEY_EDITOR, 'concept');
+    self::deleteResources(self::$createdresources, API_KEY_EDITOR, 'concept');
   }
 
 

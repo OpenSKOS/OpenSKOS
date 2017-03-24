@@ -36,7 +36,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     return $response;
   }
 
-  protected static function deleteConcepts($uris, $apikey, $resourcetype) {
+  protected static function deleteResources($uris, $apikey, $resourcetype) {
     foreach ($uris as $uri) {
       if ($uri != null) {
         $response = self::delete($uri, $apikey, $resourcetype);

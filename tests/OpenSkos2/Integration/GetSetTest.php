@@ -5,6 +5,8 @@ namespace Tests\OpenSkos2\Integration;
 require_once 'AbstractTest.php';
 
 class GetInstitutionTest extends AbstractTest {
+  
+  private $test_institution;
 
   public static function setUpBeforeClass() {
     self::$client = new \Zend_Http_Client();
@@ -19,11 +21,14 @@ class GetInstitutionTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    $xml = '<?xml version="1.0" encoding="utf-8" ?>
+    
+    $uuid = uniqid();
+    $instURI = API_BASE_URI . "/institution/". $uuid;
+    $xml_inst = '<?xml version="1.0" encoding="utf-8" ?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:openskos="http://openskos.org/xmlns#"
          xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
-  <rdf:Description>
+  <rdf:Description rdf:about="'.$instURI.'">
     <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
     <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
     <vcard:ADR rdf:parseType="Resource">
@@ -41,7 +46,33 @@ class GetInstitutionTest extends AbstractTest {
     <openskos:code>test</openskos:code>
   </rdf:Description>
 </rdf:RDF>';
-    $response = self::create($xml, API_KEY_ADMIN, '/institution', true);
+    self::create($xml_inst, API_KEY_ADMIN, '/institution', true);
+    $response_inst = self::create($xml_inst, API_KEY_ADMIN, '/institution', true);
+    if ($response_inst->getStatus() === 201) {
+      $this->test_institution = $instURI;
+    } else {
+      throw new Exception('Creating test institutions hosting a testing set failed: '. $response->getMessage());
+    }
+    
+    
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:openskos = "http://openskos.org/xmlns#"
+xmlns:dcterms = "http://purl.org/dc/terms/"
+xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
+    <rdf:Description>
+        <openskos:code>set-test</openskos:code>
+        <dcterms:title xml:lang="en">Set Test</dcterms:title>
+        <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
+        <dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_2b46e792-a4e9-4edb-821c-d2cc78e3f1bf"></dcterms:publisher>
+        <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens"/>
+        <openskos:allow_oai>true</openskos:allow_oai>
+        <openskos:conceptBaseUri>http://example.com/set-example</openskos:conceptBaseUri>
+        <openskos:webpage rdf:resource="http://ergens"/>
+    </rdf:Description>
+</rdf:RDF>';
+    self::create($xml, API_KEY_ADMIN, '/set', true);
+    $response = self::create($xml, API_KEY_ADMIN, '/set', true);
     if ($response->getStatus() === 201) {
       array_push(self::$createdresources, $this->getAbout($response));
     }
@@ -49,7 +80,8 @@ class GetInstitutionTest extends AbstractTest {
 
   // delete all created resources
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresources, API_KEY_ADMIN, '/institution');
+    self::deleteResources(self::$createdresources, API_KEY_ADMIN, '/set');
+    self::delete($this->test_institution, API_KEY_ADMIN, '/institution');
   }
  
   public function testAllInstitutions() {
