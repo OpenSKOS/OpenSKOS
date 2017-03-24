@@ -41,9 +41,9 @@ class GetInstitutionTest extends AbstractTest {
     <openskos:code>test</openskos:code>
   </rdf:Description>
 </rdf:RDF>';
-    $response = self::create($xml, API_KEY_ADMIN, '/institution', true);
+    $response = self::create($xml, API_KEY_ADMIN, 'institution', true);
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresources, self::getAbout($response));
     }
   }
 
@@ -52,6 +52,7 @@ class GetInstitutionTest extends AbstractTest {
     self::deleteResources(self::$createdresources, API_KEY_ADMIN, '/institution');
   }
  
+  
   public function testAllInstitutions() {
     $this->allResources('institution');
   }
@@ -134,7 +135,7 @@ class GetInstitutionTest extends AbstractTest {
     $this->AssertEquals("code:", $codeItem);
 
     $codeValue = $this->getByIndex($codeValueQuery, count($codeQuery)-2)->nodeValue;
-    $this->AssertEquals("test-set", $codeValue);
+    $this->AssertEquals("test", $codeValue);
 
     $this->AssertEquals(3, count($formats));
   }

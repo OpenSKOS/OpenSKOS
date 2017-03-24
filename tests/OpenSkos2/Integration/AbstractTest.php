@@ -40,9 +40,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     foreach ($uris as $uri) {
       if ($uri != null) {
         $response = self::delete($uri, $apikey, $resourcetype);
-        if ($response->getStatus() !== 202) {
-          throw new \Exception('delete ' . $uri . ' while cleaning up database failed: ' . $response->getStatus() . ", " . $response->getMessage());
-        }
       }
     }
   }
@@ -53,8 +50,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     $response = self::$client
       ->setParameterGet('tenant', TENANT)
       ->setParameterGet('key', $apikey)
-      ->setParameterGet('id', $id)
+      ->setParameterGet('uri', $id)
       ->request('DELETE');
+    if ($response->getStatus() !== 200) {
+      throw new \Exception('delete ' . $id . ' while cleaning up database failed: ' . $response->getStatus() . ", " . $response->getMessage());
+    }
     return $response;
   }
 
@@ -192,24 +192,29 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
   ////////////////////////////////////
   protected function assertionsXMLRDFResources($response) {
+    
   }
 
   protected function assertionsJsonResources($resource) {
+    
   }
 
   protected function assertionsHTMLAllResources($response) {
+    
   }
 
   protected function assertionsXMLRDFResource(\Zend_Dom_Query $dom) {
+    
   }
 
   protected function assertionsJsonResource($resource) {
+    
   }
 
- 
   protected function assertionsHTMLResource(\Zend_Dom_Query $dom, $i) {
+    
   }
-  
+
   protected function getResource($requestString, $contentType) {
     print "\n $requestString \n";
     self::$client->resetParameters();
@@ -231,6 +236,5 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
     return $response;
   }
-
 
 }

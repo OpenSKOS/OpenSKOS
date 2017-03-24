@@ -14,6 +14,16 @@ class DeleteConceptTest extends AbstractTest {
   private $xml;
   private $about;
 
+  protected static function delete($id, $apikey, $resourcetype) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/$resourcetype");
+    $response = self::$client
+      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('key', $apikey)
+      ->setParameterGet('id', $id)
+      ->request('DELETE');
+    return $response;
+  }
   
   public static function tearDownAfterClass() {
   }

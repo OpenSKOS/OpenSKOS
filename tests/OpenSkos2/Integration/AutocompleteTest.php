@@ -1,13 +1,24 @@
 <?php
 
 namespace Tests\OpenSkos2\Integration;
-require_once 'AbstractTest.php';
 
+require_once 'AbstractTest.php';
 
 class AutocompleteTest extends AbstractTest {
 
   private static $prefix;
   private static $labelMap;
+
+  protected static function delete($id, $apikey, $resourcetype) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/$resourcetype");
+    $response = self::$client
+      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('key', $apikey)
+      ->setParameterGet('id', $id)
+      ->request('DELETE');
+    return $response;
+  }
 
   // static:   is a demand of the PHPunit test library
   public static function setUpBeforeClass() {
@@ -59,16 +70,16 @@ class AutocompleteTest extends AbstractTest {
         '</rdf:Description>' .
         '</rdf:RDF>';
 
-      
+
       $response0 = self::create($xml, API_KEY_EDITOR, 'concept');
       if ($response0->getStatus() !== 201) {
         echo 'concept' . $i;
-        throw new \Exception("creating a test concept has failed. Status ". $response0 ->getStatus() . ' Message: ' . $response0->getMessage());
+        throw new \Exception("creating a test concept has failed. Status " . $response0->getStatus() . ' Message: ' . $response0->getMessage());
       } else { // things went well, but when submitting a concept is status is automatically reset to "candidate";
         // now update to change the status for "approved", otherwise autocomplete would not react
         $response1 = self::update($xml, API_KEY_EDITOR, 'concept');
         if ($response1->getStatus() !== 200) {
-          throw new \Exception("setting status approved for a test concept has failed. ". " Status ". $response1 ->getStatus() . ' Message: ' . $response1->getMessage());
+          throw new \Exception("setting status approved for a test concept has failed. " . " Status " . $response1->getStatus() . ' Message: ' . $response1->getMessage());
         }
       }
       array_push(self::$createdresources, $about);
@@ -77,12 +88,10 @@ class AutocompleteTest extends AbstractTest {
     }
   }
 
-  
   // delete all created concepts
   public static function tearDownAfterClass() {
     self::deleteResources(self::$createdresources, API_KEY_EDITOR, 'concept');
   }
-
 
   public function testAutocompleteInLoopNoParams() {
     print "\n testAutocomplete in loop ";
@@ -92,7 +101,7 @@ class AutocompleteTest extends AbstractTest {
       $word = self::$labelMap[PREF_LABEL] . self::$prefix[$i];
       $response = $this->autocomplete($word, "");
       if ($response->getStatus() != 200) {
-        throw new Excpetion('Failure: '. $response);
+        throw new Excpetion('Failure: ' . $response);
       }
       $this->AssertEquals(200, $response->getStatus());
       $json = $response->getBody();
@@ -103,14 +112,13 @@ class AutocompleteTest extends AbstractTest {
     }
   }
 
-  
   public function testAutocompleteSearchAltLabel() {
     print "\n testAutocomplete search alt Label \n";
     $word = self::$labelMap[ALT_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     //print "\n $word \n";
     $response = $this->autocomplete($word, "?searchLabel=altLabel");
     if ($response->getStatus() != 200) {
-      throw new Excpetion('Failure: '. $response, 'autocomplete on word ' . $word);
+      throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $word);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
@@ -124,7 +132,7 @@ class AutocompleteTest extends AbstractTest {
     $searchword = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // should not occur in alt labels
     $response = $this->autocomplete($searchword, "?searchLabel=altLabel");
     if ($response->getStatus() != 200) {
-      throw new Excpetion('Failure: '. $response, 'autocomplete on word ' . $searchword);
+      throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $searchword);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
@@ -138,7 +146,7 @@ class AutocompleteTest extends AbstractTest {
     $returnword = self::$labelMap[ALT_LABEL] . self::$prefix[1]; // altLabel_<someuuid>a.
     $response = $this->autocomplete($searchword, "?returnLabel=altLabel");
     if ($response->getStatus() != 200) {
-      throw new Exception('Failure:'.$response, 'autocomplete on word ' . $searchword);
+      throw new Exception('Failure:' . $response, 'autocomplete on word ' . $searchword);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
@@ -154,7 +162,7 @@ class AutocompleteTest extends AbstractTest {
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?lang=nl");
     if ($response->getStatus() != 200) {
-      throw new Exception('Failure: '.$response, 'autocomplete on word ' . $word . "?lang=nl");
+      throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=nl");
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
@@ -168,7 +176,7 @@ class AutocompleteTest extends AbstractTest {
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?lang=en");
     if ($response->getStatus() != 200) {
-      throw new Exception('Failure: '.$response, 'autocomplete on word ' . $word . "?lang=en (does not exists)");
+      throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=en (does not exists)");
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
@@ -181,19 +189,18 @@ class AutocompleteTest extends AbstractTest {
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?format=html");
     if ($response->getStatus() != 200) {
-      throw new Exception('Failure:'.$response, 'autocomplete on word ' . $word . "?format=html");
+      throw new Exception('Failure:' . $response, 'autocomplete on word ' . $word . "?format=html");
     }
     $this->AssertEquals(200, $response->getStatus());
     // todo: add some chek when it becomes clear how the output looks like
   }
-  
+
   private function autocomplete($word, $parameterString) {
-        self::$client ->resetParameters();
-        $uri = API_BASE_URI . '/autocomplete/' . $word .  $parameterString;
-        self::$client ->setUri($uri);
-        $response = self::$client -> request(\Zend_Http_Client::GET);
-        return $response;
-    }
-  
-  
+    self::$client->resetParameters();
+    $uri = API_BASE_URI . '/autocomplete/' . $word . $parameterString;
+    self::$client->setUri($uri);
+    $response = self::$client->request(\Zend_Http_Client::GET);
+    return $response;
+  }
+
 }

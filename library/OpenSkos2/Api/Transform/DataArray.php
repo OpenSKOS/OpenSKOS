@@ -163,6 +163,8 @@ class DataArray {
   public static function getFieldsPlusIsRepeatableMap() {
     $notRepeatable = [
       DcTerms::CREATOR,
+      DcTerms::PUBLISHER,
+      DcTerms::LICENSE,
       DcTerms::DATESUBMITTED,
       DcTerms::DATEACCEPTED,
       DcTerms::MODIFIED,

@@ -13,6 +13,17 @@ class GetConceptTest extends AbstractTest {
   private static $uuid;
   private static $about;
 
+  protected static function delete($id, $apikey, $resourcetype) {
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/$resourcetype");
+    $response = self::$client
+      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('key', $apikey)
+      ->setParameterGet('id', $id)
+      ->request('DELETE');
+    return $response;
+  }
+  
   public static function setUpBeforeClass() {
     self::$createdresources = array();
     self::$client = new \Zend_Http_Client();
