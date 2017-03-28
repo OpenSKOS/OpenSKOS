@@ -124,16 +124,16 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
      *
      * in RDF: <a href='/api/collections' target='_blank'>/api/collections</a>
      *
-     * in JSON: <a href='/api/collections/{id}?format=json' target='_blank'>/api/collections/{id}?format=json</a>
+     * in JSON: <a href='/api/collections/mi:gtaa?format=json' target='_blank'>/api/collections/{institution_code:collection_code}?format=json</a>
      *
-     * in JSONP: <a href='/api/collections/{id}?format=jsonp&callback=myCallback_1234' target='_blank'>/api/collections/{id}?format=jsonp&callback=myCallback_1234</a>
+     * in JSONP: <a href='/api/collections/mi:gtaa?format=jsonp&callback=myCallback_1234' target='_blank'>/api/collections/{institution_code:collection_code}?format=jsonp&callback=myCallback_1234</a>
      *
-     * in HTML: <a href='/api/collections/{id}?format=html' target='_blank'>/api/collections/{id}?format=html</a>
+     * in HTML: <a href='/api/collections/mi:gtaa?format=html' target='_blank'>/api/collections/{institution_code:collection_code}?format=html</a>
      *
      * @api {get} /api/collections/{id} Get collection details
      * @apiName GetCollection
      * @apiGroup Collections
-     * @apiParam id {String} Collection/set code
+     * @apiParam id {String} <institution_code>:<collection_code>
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
