@@ -9,17 +9,6 @@ class AutocompleteTest extends AbstractTest {
   private static $prefix;
   private static $labelMap;
 
-  protected static function delete($id, $apikey, $resourcetype) {
-    self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/$resourcetype");
-    $response = self::$client
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', $apikey)
-      ->setParameterGet('id', $id)
-      ->request('DELETE');
-    return $response;
-  }
-
   // static:   is a demand of the PHPunit test library
   public static function setUpBeforeClass() {
 
@@ -34,7 +23,7 @@ class AutocompleteTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdresources = array();
+    self::$createdresourses = array();
     self::$labelMap = array(
       PREF_LABEL => PREF_LABEL . "_",
       ALT_LABEL => ALT_LABEL . "_",
@@ -82,7 +71,7 @@ class AutocompleteTest extends AbstractTest {
           throw new \Exception("setting status approved for a test concept has failed. " . " Status " . $response1->getStatus() . ' Message: ' . $response1->getMessage());
         }
       }
-      array_push(self::$createdresources, $about);
+      array_push(self::$createdresourses, $about);
       echo $i;
       $i++;
     }
@@ -90,7 +79,7 @@ class AutocompleteTest extends AbstractTest {
 
   // delete all created concepts
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresources, API_KEY_EDITOR, 'concept');
+    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
   }
 
   public function testAutocompleteInLoopNoParams() {

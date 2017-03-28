@@ -36,6 +36,7 @@
         <const name="SCHEMA_URI_1" value ="http://openskos.meertens.knaw.nl/Organisations"/>
         <const name="SCHEMA_URI_2" value ="http://openskos.meertens.knaw.nl/Languages"/>
         <const name="SET_CODE" value="clavas:org"/>
+        <const name="TENANT_CODE" value="example"/>
         <const name="TENANT_NAME" value="example.com"/>
         <const name="TENANT_URI" value="http://mertens/knaw/formalorganization_bd9df26b-313c-445a-ab4e-3467b0429494"/>
         <const name="NUMBER_INSTITUTIONS" value="2"/> <!-- 1 of clavas-meertens and 1 test institution "on the fly" -->

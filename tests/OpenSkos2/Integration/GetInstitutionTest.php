@@ -7,6 +7,8 @@ require_once 'AbstractTest.php';
 class GetInstitutionTest extends AbstractTest {
 
   public static function setUpBeforeClass() {
+    
+    self::$createdresourses = array();
     self::$client = new \Zend_Http_Client();
     self::$client->setConfig(array(
       'maxredirects' => 0,
@@ -43,13 +45,13 @@ class GetInstitutionTest extends AbstractTest {
 </rdf:RDF>';
     $response = self::create($xml, API_KEY_ADMIN, 'institution', true);
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, self::getAbout($response));
+      array_push(self::$createdresourses, self::getAbout($response));
     }
   }
 
   // delete all created resources
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresources, API_KEY_ADMIN, '/institution');
+    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, '/institution');
   }
  
   
@@ -124,20 +126,29 @@ class GetInstitutionTest extends AbstractTest {
 
   protected function assertionsHTMLResource(\Zend_Dom_Query $dom, $i) {
     $header2 = $dom->query('h2');
-    $codeQuery = $dom->query('dl > dt');
-    $codeValueQuery = $dom->query('dl > dd');
+    $items = $dom->query('dl > dt');
+    $values = $dom->query('dl > dd');
     $formats = $dom->query('ul > li > a');
 
     $title = $this->getByIndex($header2, $i)->nodeValue;
     $this->AssertEquals('test-tenant', $title);
 
-    $codeItem = $this->getByIndex($codeQuery, count($codeQuery)-2)->nodeValue;
-    $this->AssertEquals("code:", $codeItem);
-
-    $codeValue = $this->getByIndex($codeValueQuery, count($codeQuery)-2)->nodeValue;
-    $this->AssertEquals("test", $codeValue);
-
+    $i = 0;
+    $j = 0;
+    foreach ($items as $item) {
+      if ($item->nodeValue === "code:") {
+        $this->AssertEquals("test", $this->getbyIndex($values, $j)->nodeValue);
+        $i++;
+      }
+      if ($item->nodeValue === "type:") {
+        $this->AssertEquals("http://www.w3.org/ns/org#FormalOrganization", $this->getbyIndex($values, $j)->nodeValue);
+        $i++;
+      }
+      $j++;
+    }
+    $this->AssertEquals(2, $i);
     $this->AssertEquals(3, count($formats));
+  
   }
 
   protected function assertionsHTMLAllResources($response) {

@@ -7,7 +7,7 @@ require_once 'AbstractTest.php';
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
   protected static $client;
-  protected static $createdresources;
+  protected static $createdresourses;
 
   protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers = false) {
     self::$client->resetParameters();
@@ -15,7 +15,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('tenant', TENANT_CODE)
       ->setParameterGet('key', $apikey)
       ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers)
       ->request('POST');
@@ -29,7 +29,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
     $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('tenant', TENANT_CODE)
       ->setParameterGet('key', $apikey)
       ->request('PUT');
 
@@ -38,24 +38,52 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
   protected static function deleteResources($uris, $apikey, $resourcetype) {
     foreach ($uris as $uri) {
-      if ($uri != null) {
         $response = self::delete($uri, $apikey, $resourcetype);
-      }
     }
   }
 
-  protected static function delete($id, $apikey, $resourcetype) {
-    self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/$resourcetype");
-    $response = self::$client
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', $apikey)
-      ->setParameterGet('uri', $id)
-      ->request('DELETE');
-    if ($response->getStatus() !== 200) {
-      throw new \Exception('delete ' . $id . ' while cleaning up database failed: ' . $response->getStatus() . ", " . $response->getMessage());
+  protected static function delete($id, $apikey, $resoursetype) {
+    $id_name="uri";
+    if ($resoursetype === 'concept') {
+      $id_name="id";
     }
+    self::$client->resetParameters();
+    self::$client->setUri(API_BASE_URI . "/$resoursetype");
+    $response = self::$client
+      ->setParameterGet('tenant', TENANT_CODE)
+      ->setParameterGet('key', $apikey)
+      ->setParameterGet($id_name, $id)
+      ->request('DELETE');
+   
     return $response;
+  }
+
+  protected function createTestConcept($apikey){
+    $randomn = time();
+    $prefLabel = 'testPrefLable_' . $randomn;
+    $altLabel = 'testAltLable_' . $randomn;
+    $hiddenLabel = 'testHiddenLable_' . $randomn;
+    $notation = 'test-xxx-' . $randomn;
+    $uuid = uniqid() . $randomn;
+    $about = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
+    $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
+      '<rdf:Description rdf:about="' . $about . '">' .
+      '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
+      '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
+      '<skos:altLabel xml:lang="nl">' . $altLabel . '</skos:altLabel>' .
+      '<skos:hiddenLabel xml:lang="nl">' . $hiddenLabel . '</skos:hiddenLabel>' .
+      '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
+      '<skos:notation>' . $notation . '</skos:notation>' .
+      '<skos:topConceptOf rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:definition xml:lang="nl">integration test get concept</skos:definition>' .
+      '</rdf:Description>' .
+      '</rdf:RDF>';
+
+
+    $response = self::create($xml, $apikey, 'concept');
+    $retVal = array('xml'=>$xml, 'prefLabel'=>$prefLabel, 'altLabel'=>$altLabel, 'hiddenLabel'=>$hiddenLabel, 'uuid'=>$uuid,'about'=>$about, 'notation'=>$notation, 'response'=>$response);
+    return $retVal;
   }
 
   protected function getAbout($response) {
@@ -236,5 +264,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
     return $response;
   }
-
+  
+  
 }

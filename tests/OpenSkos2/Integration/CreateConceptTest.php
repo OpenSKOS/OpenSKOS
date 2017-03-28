@@ -6,18 +6,8 @@ require_once 'AbstractTest.php';
 
 class CreateConceptTest extends AbstractTest {
   
-  protected static function delete($id, $apikey, $resourcetype) {
-    self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/$resourcetype");
-    $response = self::$client
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', $apikey)
-      ->setParameterGet('id', $id)
-      ->request('DELETE');
-    return $response;
-  }
-
-  protected function setUp() {
+  
+  public function setUp() {
     self::$client = new \Zend_Http_Client();
     self::$client->setConfig(array(
       'maxredirects' => 0,
@@ -30,13 +20,13 @@ class CreateConceptTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdresources = array();
+    self::$createdresourses = array();
   }
 
  
-   // delete all created concepts
-  public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresources, API_KEY_EDITOR, 'concept');
+   // delete all created in this test concepts
+  public function tearDown() {
+    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
   }
 
   public function test01CreateConceptWithoutURIWithDateAccepted() {
@@ -58,7 +48,7 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
   }
 
@@ -78,7 +68,7 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
   }
 
@@ -102,11 +92,11 @@ class CreateConceptTest extends AbstractTest {
 // create the first concept with which we will compare
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
       $xml2 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml);
       $response2 = self::create($xml2, API_KEY_EDITOR, 'concept');
       if ($response2->getstatus() === 201) {
-        array_push(self::$createdresources, $this->getAbout($response2));
+        array_push(self::$createdresourses, $this->getAbout($response2));
       }
       $this->AssertEquals(400, $response2->getStatus(), $response2->getMessage());
     } else {
@@ -131,12 +121,12 @@ class CreateConceptTest extends AbstractTest {
     $response = self::$client
       ->setEncType('text/xml')
       ->setRawData($xml)
-      ->setParameterGet('tenant', TENANT)
+      ->setParameterGet('tenant', TENANT_CODE)
       ->setParameterGet('autoGenerateIdentifiers', true)
       ->request('POST');
 
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
   }
@@ -162,7 +152,7 @@ class CreateConceptTest extends AbstractTest {
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
       $this->CheckCreatedConcept($response);
     }
   }
@@ -187,7 +177,7 @@ class CreateConceptTest extends AbstractTest {
     //var_dump($xml);
     $response = self::create($xml, API_KEY_EDITOR, 'concept',  false);
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, $about);
+      array_push(self::$createdresourses, $about);
     }
     $this->AssertEquals(400, $response->getStatus(), "This test fails becauseBeG instists that skos:notation is compulsory. In general there may be zero notations, or more than one natotation ");
   }
@@ -214,13 +204,13 @@ class CreateConceptTest extends AbstractTest {
 
     $response0 = self::create($xml0, API_KEY_EDITOR, 'concept');
     if ($response0->getStatus() === 201) {
-      array_push(self::$createdresources, $about);
+      array_push(self::$createdresourses, $about);
       $xml1 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml0);
       $xml1 = str_replace($about, $anotherAbout, $xml1);
       $xml1 = str_replace('<openskos:uuid>' . $uuid . '</openskos:uuid>', '<openskos:uuid>' . $anotherUUID . '</openskos:uuid>', $xml1);
       $response1 = self::create($xml1, API_KEY_EDITOR, 'concept');
       if ($response1->getStatus() === 201) {
-        array_push(self::$createdresources, $about);
+        array_push(self::$createdresourses, $about);
       }
       $this->AssertEquals(400, $response1->getStatus(), $response1->getMessage());
     } else {
@@ -241,7 +231,7 @@ class CreateConceptTest extends AbstractTest {
 
     $response = self::create($wrongXml, API_KEY_EDITOR, 'concept',true);
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
   }
@@ -262,7 +252,7 @@ class CreateConceptTest extends AbstractTest {
     $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
       $this->CheckCreatedConcept($response);
     }
   }
@@ -281,7 +271,7 @@ class CreateConceptTest extends AbstractTest {
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
@@ -306,11 +296,11 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response0->getStatus(), $response0->getMessage());
     if ($response0->getStatus() == 201) {
       // we can proceed with the test
-      array_push(self::$createdresources, $this->getAbout($response0));
+      array_push(self::$createdresourses, $this->getAbout($response0));
       $xml = str_replace('testAltLable_', '_another_testAltLable_', $xml0);
       $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
       if ($response->getStatus() == 201) {
-        array_push(self::$createdresources, $this->getAbout($response));
+        array_push(self::$createdresourses, $this->getAbout($response));
       }
       $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
     } else {
@@ -336,7 +326,7 @@ class CreateConceptTest extends AbstractTest {
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
@@ -357,7 +347,7 @@ class CreateConceptTest extends AbstractTest {
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
@@ -375,7 +365,7 @@ class CreateConceptTest extends AbstractTest {
 
     $response = self::create($xml, API_KEY_GUEST, 'concept', true);
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, $this->getAbout($response));
+      array_push(self::$createdresourses, $this->getAbout($response));
     }
     $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');
   }

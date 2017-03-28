@@ -12,20 +12,10 @@ class GetConceptTest extends AbstractTest {
   private static $notation;
   private static $uuid;
   private static $about;
-
-  protected static function delete($id, $apikey, $resourcetype) {
-    self::$client->resetParameters();
-    self::$client->setUri(API_BASE_URI . "/$resourcetype");
-    $response = self::$client
-      ->setParameterGet('tenant', TENANT)
-      ->setParameterGet('key', $apikey)
-      ->setParameterGet('id', $id)
-      ->request('DELETE');
-    return $response;
-  }
+  private static $xml;
   
   public static function setUpBeforeClass() {
-    self::$createdresources = array();
+    self::$createdresourses = array();
     self::$client = new \Zend_Http_Client();
     self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -34,33 +24,23 @@ class GetConceptTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    // create a test concept
-    $randomn = time();
-    self::$prefLabel = 'testPrefLable_' . $randomn;
-    self::$altLabel = 'testAltLable_' . $randomn;
-    self::$hiddenLabel = 'testHiddenLable_' . $randomn;
-    self::$notation = 'test-xxx-' . $randomn;
-    self::$uuid = uniqid() . uniqid();
-    self::$about = API_BASE_URI . "/" . SET_CODE . "/" . self::$notation;
-    $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
-      '<rdf:Description rdf:about="' . self::$about . '">' .
-      '<skos:prefLabel xml:lang="nl">' . self::$prefLabel . '</skos:prefLabel>' .
-      '<skos:altLabel xml:lang="nl">' . self::$altLabel . '</skos:altLabel>' .
-      '<skos:hiddenLabel xml:lang="nl">' . self::$hiddenLabel . '</skos:hiddenLabel>' .
-      '<openskos:uuid>' . self::$uuid . '</openskos:uuid>' .
-      '<skos:notation>' . self::$notation . '</skos:notation>' .
-      '<skos:topConceptOf rdf:resource="' . SCHEMA_URI_1 . '"/>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
-      '<skos:definition xml:lang="nl">integration test get concept</skos:definition>' .
-      '</rdf:Description>' .
-      '</rdf:RDF>';
-
-    $response = self::create($xml, API_KEY_EDITOR, 'concept');
-    if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, self::getAbout($response));
+    $result = self::createTestConcept(API_KEY_EDITOR);
+    if ($result['response']->getStatus() === 201) {
+        self::$prefLabel = $result['prefLabel'];
+        self::$altLabel = $result['altLabel'];
+        self::$hiddenLabel = $result['hiddenLabel'];
+        self::$notation= $result['notation'];
+        self::$uuid= $result['uuid'];
+        self::$about = $result['about'];
+        self::$xml = $result['xml'];
+        array_push(self::$createdresourses, self::$about);
     } else {
-      throw new \Exception('Cannot create test concept: ' . $response->getStatus() . " with the message " . $response->getMessage());
+      throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . '; ' . $result['response']->getMessage());
     }
+  }
+  
+  public static function tearDownAfterClass() {
+    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
   }
 
   public function testViaPrefLabel2() {
@@ -68,25 +48,27 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:' . self::$prefLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage() . ": " . $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
+  
   public function testViaPrefLabel3() {
     print "\n" . "Test: get concept-rdf via its prefLabel where 'prefLabel' is a value of the request parameter 'label' ";
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$prefLabel . '&label=prefLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage() . ": " . $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
+  
   public function testViaPrefLabelImplicit2() {
     print "\n" . "Test: get concept-rdf via its prefLabel, without saying that this is a pref label";
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$prefLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
   }
 
   public function testViaAltLabel() {
@@ -94,7 +76,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$altLabel . '&label=altLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -103,7 +85,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$altLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -112,7 +94,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=' . self::$hiddenLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -121,7 +103,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:testPrefLable*');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForManyConcepts($response);
   }
 
@@ -130,7 +112,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:testPrefLable*&rows=1');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForManyConceptsRows($response, 1);
   }
 
@@ -161,10 +143,11 @@ class GetConceptTest extends AbstractTest {
 
     $response1 = self::create($xml, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(201, $response1->getStatus(), "\n Cannot perform the test because something is wrong with creating the second test concept: " . $response1->getHeader('X-Error-Msg'));
+    array_push(self::$createdresourses, $about);
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:testPrefLable*&rows=2');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForManyConceptsRows($response, 2);
   }
 
@@ -173,7 +156,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel@nl:' . self::$prefLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -182,7 +165,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel@en:' . self::$prefLabel);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForManyConceptsZeroResults($response);
   }
 
@@ -194,7 +177,7 @@ class GetConceptTest extends AbstractTest {
     if ($response->getStatus() != 200) {
       print "\n " . $response->getMessage();
     }
-    $this->AssertEquals(200, $response->getStatus());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForManyConcepts($response);
   }
 
@@ -203,7 +186,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$about);
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -212,6 +195,10 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid);
     $response = self::$client->request(\Zend_Http_Client::GET);
+    if ($response->getStatus() !== 200) {
+      var_dump(API_BASE_URI . '/concept/' . self::$uuid);
+      var_dump($response->getHeader("X-Error-Msg"));
+    }
     $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
@@ -221,7 +208,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.rdf');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -230,7 +217,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.html');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForHtmlConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -238,7 +225,7 @@ class GetConceptTest extends AbstractTest {
     print "\n" . "Test: get concept-html via its id. ";
     self::$client->setUri(API_BASE_URI . '/find-concepts?id=' . self::$about . '&format=html');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForHtmlConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
   }
 
@@ -246,7 +233,7 @@ class GetConceptTest extends AbstractTest {
     print "\n" . "Test: get concept-json with filtered fields via it handle ";
     self::$client->setUri(API_BASE_URI . '/find-concepts?id=' . self::$about . '&format=json&fl=uuid,uri,prefLabel');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForJsonConceptFiltered($response, self::$uuid, self::$prefLabel);
   }
 
@@ -254,7 +241,7 @@ class GetConceptTest extends AbstractTest {
     print "\n" . "Test: get concept-json via its id. ";
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.json');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForJsonConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
   }
 
@@ -262,7 +249,7 @@ class GetConceptTest extends AbstractTest {
     print "\n" . "Test: get concept-json via its id. ";
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.jsonp?callback=test');
     $response = self::$client->request(\Zend_Http_Client::GET);
-    $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+    $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
     $this->assertionsForJsonPConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
   }
 
@@ -313,7 +300,7 @@ class GetConceptTest extends AbstractTest {
     $dom->setDocumentXML($xml);
 
     $results1 = $dom->queryXpath('/rdf:RDF/rdf:Description');
-    $this->AssertEquals(1, count($results1));
+    $this->AssertEquals(1, count($results1), self::$prefLabel. "\n".self::$xml. "\n");
     $this->AssertStringStartsWith(API_BASE_URI . "/" . SET_CODE, $results1->current()->getAttribute('rdf:about'));
 
     $results2 = $dom->query('rdf:type');
@@ -413,5 +400,5 @@ class GetConceptTest extends AbstractTest {
     $this->assertEquals($altLabel, $array["altLabel@nl"][0]);
     $this->assertEquals($prefLabel, $array["prefLabel@nl"]);
   }
-
+  
 }

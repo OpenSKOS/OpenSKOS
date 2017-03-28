@@ -422,9 +422,6 @@ class Concept extends AbstractTripleStoreResource {
   private function preEditChecksRels(PsrServerRequestInterface $request, $params, $toBeDeleted) {
 
     $body = $request->getParsedBody();
-    if (!isset($body['key'])) {
-      throw new ApiException('Missing key in the request body', 400);
-    }
     if (!isset($body['concept'])) {
       throw new ApiException('Missing concept', 400);
     }
@@ -465,12 +462,10 @@ class Concept extends AbstractTripleStoreResource {
       $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
     }
 
-    $user = $this->getUserByKey($body['key']);
-
     $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-    $this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $concept); // throws an exception if not allowed
+    $this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $concept); // throws an exception if not allowed
     $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-    $this->authorisationManager->resourceEditAllowed($user, $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
+    $this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
 
     return $body;
   }

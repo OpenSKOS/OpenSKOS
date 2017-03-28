@@ -8,7 +8,7 @@ class GetInstitutionTest extends AbstractTest {
 
   public static function setUpBeforeClass() {
 
-    self::$createdresources = array();
+    self::$createdresourses = array();
 
     self::$client = new \Zend_Http_Client();
     self::$client->setConfig(array(
@@ -42,7 +42,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
   </rdf:RDF>';
     $response = self::create($xml, API_KEY_ADMIN, 'set', true);
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresources, self::getAbout($response));
+      array_push(self::$createdresourses, self::getAbout($response));
     } else {
       var_dump($response);
     }
@@ -50,7 +50,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
   // delete all created resources
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresources, API_KEY_ADMIN, 'set');
+    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'set');
   }
 
   public function testAllSets() {
