@@ -46,7 +46,8 @@ $opts = array(
     'enableStatussesSystem=s' => 'enable Statusses System',
     'email=s' => 'Admin email (required when creating a tenant)',
     'password=s' => 'Password for the Admin account',
-    'apikey=s' => 'Api key for the Admin account'
+    'apikey=s' => 'Api key for the Admin account',
+    'eppn=s' => 'eppn for the admin'
 );
 $OPTS = new Zend_Console_Getopt($opts);
 
@@ -182,6 +183,7 @@ switch ($action) {
             'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
             'tenant' => $OPTS->code,
             'apikey' => $OPTS->apikey,
+            'eppn' => $OPTS->eppn,
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
