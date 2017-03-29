@@ -26,6 +26,7 @@ $options = [
     'uri|u=s'   => 'Index single uri e.g -u http://data.beeldengeluid.nl/gtaa/356512',
     'verbose|v' => 'Verbose',
     'modified|m=s' => 'Index only those modified after that date.',
+    'skipDeleted|s' => 'Skip check of deleted files.',
     'help|h'    => 'Show this help',
 ];
 
@@ -84,11 +85,8 @@ $logger->info('Total in Jena: ' . $total);
 $rows = 500;
 
 if ($uri) {
-    
     $fetchResources = "DESCRIBE <$uri>";
-    
 } else {
-    
     $fetchResources = "
         DESCRIBE ?subject
         WHERE {
@@ -102,15 +100,24 @@ if ($uri) {
 $solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
 $solrResourceManager->setIsNoCommitMode(true);
 
-if (empty($modifiedSince)) {
+$doDeleteFromSolr = true;
+
+if (!empty($modifiedSince)) {
+    $logger->info('Modified option is set, so we wont check deleted for now.');
+    $doDeleteFromSolr = false;
+}
+
+if ($OPTS->getOption('skipDeleted')) {
+    $logger->info('Option skip deleted is set so we wont check deleted for now.');
+    $doDeleteFromSolr = false;
+}
+
+if ($doDeleteFromSolr) {
     // Handle deleting from solr.
     $solrResourceManager->search('*:*', 0, 0, $solrTotal);
     $logger->info('Total in Solr: ' . $solrTotal);
     $logger->info('Start deleting from Solr');
     $deleted = removeDeletedResourcesFromSolr($solrResourceManager, $resourceManager, $logger, $scriptStart);
-} else {
-    // @TODO implement -m option for solr as well. Not needed for now.
-    $logger->info('Modified option is set, so we wont check deleted for now.');
 }
 
 $logger->info('Start indexing to Solr');
