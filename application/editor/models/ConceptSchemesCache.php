@@ -180,11 +180,14 @@ class Editor_Models_ConceptSchemesCache
         $sortedSchemes = new ConceptSchemeCollection();
         
         // The preferred order from the ini
-        $orderedCollections = [
-            'http://openskos/api/collections/pic:gtaa' => [],
-            'http://openskos/api/collections/pic:man' => [],//nongtaa
-            'http://openskos/api/collections/pic:expired' => []
-        ];
+        $orderedCollections = [];
+        
+        $editorConfig = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        if (!empty($editorConfig['schemeOrder']['collections'])) {
+            foreach ($editorConfig['schemeOrder']['collections'] as $collectionUri) {
+                $orderedCollections[$collectionUri] = [];
+            }
+        }
         
         foreach ($schemes as $scheme) {
             /* @var $scheme ConceptScheme */
