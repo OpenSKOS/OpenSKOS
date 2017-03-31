@@ -28,6 +28,7 @@ $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Process only those modified after that date.',
+    'skipDone|s' => 'Skip concepts which are done.',
 ];
 
 try {
@@ -64,6 +65,13 @@ $labelHelper = $diContainer->make('OpenSkos2\Concept\LabelHelper');
 
 $query = '-status:deleted';
 
+// Should concepts which have pref label xl already be skipped.
+$skipDone = $OPTS->getOption('skipDone');
+if (!empty($skipDone)) {
+    $query .= ' AND -s_prefLabelXl:*';
+}
+
+// Process only concpets modified after the specified date.
 $modifiedSince = $OPTS->getOption('modified');
 if (!empty($modifiedSince)) {
     $query .= ' AND d_modified:[' . $modifiedSince .  ' TO *]';
@@ -122,7 +130,12 @@ do {
         );
     }
     
-    $offset += $limit;
+    if (!empty($skipDone)) {
+        $offset = 0; // if we skip done we need to work without pagination
+    } else {
+        $offset += $limit;
+    }
+    
     $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 
