@@ -27,6 +27,8 @@ use DI\Container;
 
 require 'autoload.inc.php';
 require 'Zend/Console/Getopt.php';
+require_once 'utils_functions.php';
+
 
 $opts = array(
   'help|?' => 'Print this usage message',
@@ -64,28 +66,6 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $model = new OpenSKOS_Db_Table_Users();
         
-
-if (null === $OPTS->code) {
-  fwrite(STDERR, "missing required `code` argument\n");
-  exit(1);
-}
-
-if (null === $OPTS->adminkey) {
-  fwrite(STDERR, "missing required `adminkey` argument\n");
-  exit(1);
-} else {
-  $admin = $resourceManager->fetchRowWithRetries($model, 'apikey = ' . $model->getAdapter()->quote($OPTS->adminkey) . ' '
-    . 'AND tenant = ' . $model->getAdapter()->quote($OPTS->code)
-  );
-  if (null === $admin) {
-    fwrite(STDERR, 'There is no user with the key ' . $OPTS->adminkey . ' in the tenant with the code '.$OPTS->code."\n");
-     exit(1);
-  }
-  if ($admin->role !== OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR) {
-    fwrite(STDERR, "The user with the key ". $OPTS->adminkey . ' is not the administrator of the tenant with the code '.$OPTS->code."\n");
-     exit(1);
-  }
-}
 
 function user_with_parameter_exists($parametername, $parametervalue, $tenantcode, $model, $resManager){
    $rows = $resManager->fetchRowWithRetries($model, $parametername .' = ' . $model->getAdapter()->quote($parametervalue) . ' '
@@ -133,11 +113,15 @@ if (null === $OPTS->apikey) {
   user_with_parameter_exists('apikey', $OPTS->apikey, $OPTS->code, $model, $resourceManager);
 }
 
+
+check_if_admin($OPTS->code, $OPTS->adminkey, $resourceManager, $model);
+
+
+
 fwrite(STDOUT, "\n\n\n Strating add-user script \n ");
 switch ($action) {
   case 'create':
-  var_dump($OPTS->eppn);
-    // create user
+   // create user
     $model->createRow(array(
       'email' => $OPTS->email,
       'name' => $OPTS->name,
