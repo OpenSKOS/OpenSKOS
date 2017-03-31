@@ -65,6 +65,19 @@ For "external" types use this syntax:
 You can define multiple instances by using a different key (in the above example
 the key `example1` is used).
 
+1.2.2 ConceptScheme ordering
+-------------------------------------------------------------------------------
+The application.ini allows you to change the order in which concept schemes are listed everywhere.
+The scheme order is made in this sequence:
+ - group the schemes according to their collection
+ - order the groups by the desired collection order
+ - sort the schemes inside each group alphabetically
+
+The collection order can be set in the ini by setting the editor.schemeOrder.collections[]="<collectionUri>"
+All unlisted collections will be ordered after the listed ones.
+All listed collections that re not present in the DB will be skipped.
+In this way the ini supports collection ordering for more than 1 instances.
+
 2. Webserver with PHP support
 ===============================================================================
 You can install your favourite webserver with PHP support.
