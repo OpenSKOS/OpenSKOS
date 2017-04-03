@@ -74,5 +74,5 @@ switch ($action) {
 
 exit(0);
 
-// php set.php --tenant=example --key=xxx --code=set01 --title=testset01 --oaibaseuri=http://set01 --allowoai=true --conceptbaseuri=http://set01/set01abc create
+// php set.php --tenant=example --key=xxx --code=set01 --title=testset01 --license=http://creativecommons.org/licenses/by/4.0/ --oaibaseuri=http://set01  --allowoai=true --conceptbaseuri=http://set01/set01abc --uuid=set01abc --uri=https://set01/set01abc --webpage=http://set01/page create  
    

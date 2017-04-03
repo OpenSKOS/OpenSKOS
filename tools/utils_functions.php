@@ -19,17 +19,17 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /* VOORBEELD!!!!
  * Run the file as :  php tenant.php --epic=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
  */
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
-
 
 function check_if_admin($tenant_code, $key, $resourceManager, $user_model) {
 
@@ -57,52 +57,65 @@ function check_if_admin($tenant_code, $key, $resourceManager, $user_model) {
   }
 }
 
- 
 function set_property_with_check(&$resource, $property, $val, $isURI = false, $isBOOL = false, $lang = null) {
-    if ($isURI) {
-        if (isset($val)) {
-            if (trim($val) !== '') {
-                $resource->setProperty($property, new Uri($val));
-            }
-        }
-        return;
-    };
-
-    if ($isBOOL) {
-        if (isset($val)) {
-            if (strtolower(strtolower($val)) === 'y' || strtolower($val) === "yes") {
-                $val = 'true';
-            }
-            if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
-                $val = 'false';
-            }
-            $resource->setProperty($property, new Literal($val, null, Literal::TYPE_BOOL));
-        } else {
-            // default value is 'false'
-            $resource->setProperty($property, new Literal('false', null, Literal::TYPE_BOOL));
-        }
-        return;
+  if ($isURI) {
+    if (isset($val)) {
+      if (trim($val) !== '') {
+        $resource->setProperty($property, new Uri($val));
+      }
     }
+    return;
+  };
 
-    // the property must be a literal
-    if ($lang == null) {
-        $resource->setProperty($property, new Literal($val));
+  if ($isBOOL) {
+    if (isset($val)) {
+      if (strtolower(strtolower($val)) === 'y' || strtolower($val) === "yes") {
+        $val = 'true';
+      }
+      if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
+        $val = 'false';
+      }
+      $resource->setProperty($property, new Literal($val, null, Literal::TYPE_BOOL));
     } else {
-        $resource->setProperty($property, new Literal($val, $lang));
-    };
+      // default value is 'false'
+      $resource->setProperty($property, new Literal('false', null, Literal::TYPE_BOOL));
+    }
+    return;
+  }
+
+  // the property must be a literal
+  if ($lang == null) {
+    $resource->setProperty($property, new Literal($val));
+  } else {
+    $resource->setProperty($property, new Literal($val, $lang));
+  };
 }
 
-
-
 function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $lang, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page) {
+  $count_sets = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
+  if ($count_sets > 0) {
+    fwrite(STDERR, 'There set with uri ' . $uri . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", Dcmi::DATASET));
+  if ($count_sets > 0) {
+    fwrite(STDERR, 'There set with uuid ' . $uuid . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::CODE, "'".$code."'", Dcmi::DATASET));
+  if ($count_sets > 0) {
+    fwrite(STDERR, 'There set with code ' . $code . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  
   $setResource = new Set();
   $setResource->setUri($uri);
   set_property_with_check($setResource, OpenSkos::CODE, $code);
-  set_property_with_check($setResource, OpenSkos::CODE, $uuid);
-  
+  set_property_with_check($setResource, OpenSkos::UUID, $uuid);
+
   $publisherURI = $resourceManager->fetchInstitutionUriByCode($tenant_code);
   if ($publisherURI === null) {
-    throw new Exception("Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in ath tripl store.");
+    throw new Exception("Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.");
   } else {
     var_dump("PublisherURI: " . $publisherURI . "\n");
   }
@@ -119,6 +132,3 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   $resourceManager->insert($setResource);
   return $uri;
 }
-
-
-
