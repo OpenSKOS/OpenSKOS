@@ -27,9 +27,11 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
+use OpenSkos2\ConceptScheme;
 
 function check_if_admin($tenant_code, $key, $resourceManager, $user_model) {
 
@@ -91,20 +93,20 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
   };
 }
 
-function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $lang, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page) {
+function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page) {
   $count_sets = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
   if ($count_sets > 0) {
-    fwrite(STDERR, 'There set with uri ' . $uri . "' already exists in the triple store.\n");
+    fwrite(STDERR, 'The set with uri ' . $uri . "' already exists in the triple store.\n");
     exit(1);
   }
   $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", Dcmi::DATASET));
   if ($count_sets > 0) {
-    fwrite(STDERR, 'There set with uuid ' . $uuid . "' already exists in the triple store.\n");
+    fwrite(STDERR, 'The set with uuid ' . $uuid . "' already exists in the triple store.\n");
     exit(1);
   }
   $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::CODE, "'".$code."'", Dcmi::DATASET));
   if ($count_sets > 0) {
-    fwrite(STDERR, 'There set with code ' . $code . "' already exists in the triple store.\n");
+    fwrite(STDERR, 'The set with code ' . $code . "' already exists in the triple store.\n");
     exit(1);
   }
   
@@ -115,12 +117,13 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
 
   $publisherURI = $resourceManager->fetchInstitutionUriByCode($tenant_code);
   if ($publisherURI === null) {
-    throw new Exception("Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.");
+    fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.\n");
+    exit(1);
   } else {
     var_dump("PublisherURI: " . $publisherURI . "\n");
   }
   set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-  set_property_with_check($setResource, DcTerms::TITLE, $title, false, false, $lang);
+  set_property_with_check($setResource, DcTerms::TITLE, $title, false, false);
   if ($description !== NULL) {
     set_property_with_check($setResource, DcTerms::DESCRIPTION, $description);
   }
@@ -130,5 +133,39 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   set_property_with_check($setResource, OpenSkos::ALLOW_OAI, $allow_oai, false, true);
   set_property_with_check($setResource, OpenSkos::CONCEPTBASEURI, $concep_base_uri, true);
   $resourceManager->insert($setResource);
+  return $uri;
+}
+
+function insert_conceptscheme($setUri, $resourceManager, $uri, $uuid, $title, $description) {
+  $count = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".Skos::CONCEPTSCHEME.">");
+  if ($count > 0) {
+    fwrite(STDERR, 'The schema with uri ' . $uri . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  $count = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", Skos::CONCEPTSCHEME));
+  if ($count > 0) {
+    fwrite(STDERR, 'The schema with uuid ' . $uuid . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  $count = count($resourceManager->fetchSubjectWithPropertyGiven(DcTerms::TITLE, "'".$title."'", Skos::CONCEPTSCHEME));
+  if ($count > 0) {
+    fwrite(STDERR, 'The schema with title ' . $title . "' already exists in the triple store.\n");
+    exit(1);
+  }
+  
+  $schemaResource = new ConceptScheme();
+  $schemaResource->setUri($uri);
+  set_property_with_check($schemaResource, OpenSkos::UUID, $uuid);
+  $count_set = $resourceManager->countTriples("<".$setUri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
+  if ($count_set <1) {
+    fwrite(STDERR, "The set with the uri " . $setUri . " has not been found in the triple store.\n");
+    exit(1);
+  }
+  set_property_with_check($schemaResource, OpenSKOS::SET, $setUri, true);
+  set_property_with_check($schemaResource, DcTerms::TITLE, $title, false, false);
+  if ($description !== NULL) {
+    set_property_with_check($schemaResource, DcTerms::DESCRIPTION, $description);
+  }
+  $resourceManager->insert($schemaResource);
   return $uri;
 }

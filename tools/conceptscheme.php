@@ -1,6 +1,7 @@
 <?php
 
 
+
 require 'autoload.inc.php';
 require 'Zend/Console/Getopt.php';
 require_once 'utils_functions.php';
@@ -9,14 +10,9 @@ $opts = array(
   'help|?' => 'Print this usage message',
   'tenant=s' => 'tenants code',
   'key=s' => 'Api key for the Admin account',
-  'code=s' => 'sets code',
-  'title=s' => 'set title',
-  'description=s' => 'set description',
-  'oaibaseuri=s' => 'OAI base URI',
-  'conceptbaseuri=s' => 'Concept base Uri',
-  'allowoai=s' => 'allow oai',
-  'webpage=s' => 'web page',
-  'license=s' => 'license',
+  'setUri=s' => 'set Uri',
+  'title=s' => 'schema title',
+  'description=s' => 'schema description',
   'uuid=s' => "uuid",
   'uri=s' => "uri",
 );
@@ -42,7 +38,7 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $model = new OpenSKOS_Db_Table_Users();
 
-$must_params = ['tenant', 'key', 'code', 'title', 'oaibaseuri', 'conceptbaseuri', 'allowoai', 'webpage', 'license', 'uuid', 'uri'];
+$must_params = ['tenant', 'key', 'uri', 'uuid', 'title', 'setUri'];
 foreach ($must_params as $name) {
   if (null === $OPTS->$name) {
     fwrite(STDERR, "missing required `" . $name . "` argument\n");
@@ -56,10 +52,10 @@ fwrite(STDOUT, "\n\n\n Strating script ... \n ");
 switch ($action) {
   case 'create':
 
-    //create set
-    insert_set($OPTS->tenant, $resourceManager, $OPTS->uri, $OPTS->uuid, $OPTS->code, $OPTS->title, $OPTS->lang, $OPTS->license, $OPTS->description, $OPTS->conceptbaseuri, $OPTS->oaibaseuri, $OPTS->allowoai, $OPTS->webpage);
-    fwrite(STDOUT, 'A set has been created in the triple store with this uri: ' . $OPTS->uri . "\n");
-    fwrite(STDOUT, 'To check: try GET <baseuri>/api/set?id=' . $OPTS->uri . "\n");
+    //create concept scheme
+    insert_conceptscheme($OPTS->setUri, $resourceManager, $OPTS->uri, $OPTS->uuid, $OPTS->title, $OPTS->description);
+    fwrite(STDOUT, 'A concept scheme  has been created in the triple store with this uri: ' . $OPTS->uri . "\n");
+    fwrite(STDOUT, 'To check: try GET <baseuri>/api/conceptscheme?id=' . $OPTS->uri . "\n");
 
     break;
   default:
@@ -69,5 +65,5 @@ switch ($action) {
 
 exit(0);
 
-// php set.php --tenant=example --key=xxx --code=set01 --title=testset01 --license=http://creativecommons.org/licenses/by/4.0/ --oaibaseuri=http://set01  --allowoai=true --conceptbaseuri=http://set01/set01abc --uuid=set01abc --uri=https://set01/set01abc --webpage=http://set01/page create  
+// php conceptscheme.php --tenant=example --key=xxx --setUri=https://set01/set01abc --uri=https://schema01/ --description="test schema" --uuid=schema01abc  --title=testschema01  create  
    
