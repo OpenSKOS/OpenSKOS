@@ -52,7 +52,7 @@ if ($OPTS->help) {
 
 
 $args = $OPTS->getRemainingArgs();
-$action = $args[count($args)-1];
+$action = $args[count($args) - 1];
 
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
@@ -65,63 +65,49 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $model = new OpenSKOS_Db_Table_Users();
-        
 
-function user_with_parameter_exists($parametername, $parametervalue, $tenantcode, $model, $resManager){
-   $rows = $resManager->fetchRowWithRetries($model, $parametername .' = ' . $model->getAdapter()->quote($parametervalue) . ' '
+function user_with_parameter_exists($parametername, $parametervalue, $tenantcode, $model, $resManager) {
+  $rows = $resManager->fetchRowWithRetries($model, $parametername . ' = ' . $model->getAdapter()->quote($parametervalue) . ' '
     . 'AND tenant = ' . $model->getAdapter()->quote($tenantcode)
   );
   if (null !== $rows) {
-    fwrite(STDERR, 'There are already registered users withe the '. $parametername  .' set to '. $parametervalue . ' in the tenant with the code '.$tenantcode. "\n");
+    fwrite(STDERR, 'There are already registered users withe the ' . $parametername . ' set to ' . $parametervalue . ' in the tenant with the code ' . $tenantcode . "\n");
     exit(1);
   }
-};
-
-
-if (null === $OPTS->name) {
-  fwrite(STDERR, "missing required `name` argument\n");
-  exit(1);
-} else {
-  user_with_parameter_exists('name', $OPTS->name, $OPTS->code, $model, $resourceManager);
 }
 
-if (null === $OPTS->eppn) {
-  fwrite(STDERR, "missing required `eppn` argument\n");
-  exit(1);
-} else {
-  user_with_parameter_exists('eppn', $OPTS->eppn, $OPTS->code, $model, $resourceManager);
+function user_with_password_exists($password, $tenantcode, $model, $resManager) {
+  $hash = MD5($password);
+  $rows = $resManager->fetchRowWithRetries($model, 'password = ' . $model->getAdapter()->quote($hash) . ' AND tenant = ' . $model->getAdapter()->quote($tenantcode)
+  );
+  if (null !== $rows) {
+    fwrite(STDERR, "Cannot create a user with this password.\n");
+    exit(1);
+  }
 }
 
-if (null === $OPTS->email) {
-  fwrite(STDERR, "missing required `email` argument\n");
-  exit(1);
-} else {
-  user_with_parameter_exists('email', $OPTS->email, $OPTS->code, $model, $resourceManager);
-}
+;
 
-if (null === $OPTS->password) {
-  fwrite(STDERR, "missing required `password` argument\n");
-  exit(1);
-} else {
-  user_with_parameter_exists('password', $OPTS->password, $OPTS->code, $model, $resourceManager);
+$must_params = ['name', 'eppn', 'email', 'password', 'apikey'];
+foreach ($must_params as $name) {
+  if (null === $OPTS->$name) {
+    fwrite(STDERR, "missing required `" . $name . "` argument\n");
+    exit(1);
+  } else {
+    if ($name !== 'password') {
+      user_with_parameter_exists($name, $OPTS->$name, $OPTS->code, $model, $resourceManager);
+    } else {
+      user_with_password_exists($OPTS->password, $OPTS->code, $model, $resourceManager);
+    }
+  }
 }
-
-if (null === $OPTS->apikey) {
-  fwrite(STDERR, "missing required `apikey` argument\n");
-  exit(1);
-} else {
-  user_with_parameter_exists('apikey', $OPTS->apikey, $OPTS->code, $model, $resourceManager);
-}
-
 
 check_if_admin($OPTS->code, $OPTS->adminkey, $resourceManager, $model);
-
-
 
 fwrite(STDOUT, "\n\n\n Strating add-user script \n ");
 switch ($action) {
   case 'create':
-   // create user
+    // create user
     $model->createRow(array(
       'email' => $OPTS->email,
       'name' => $OPTS->name,
