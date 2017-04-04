@@ -86,7 +86,6 @@ function user_with_password_exists($password, $tenantcode, $model, $resManager) 
   }
 }
 
-;
 
 $must_params = ['name', 'eppn', 'email', 'password', 'apikey'];
 foreach ($must_params as $name) {

@@ -32,6 +32,7 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
 use OpenSkos2\ConceptScheme;
+use OpenSkos2\SkosCollection;
 
 function check_if_admin($tenant_code, $key, $resourceManager, $user_model) {
 
@@ -136,36 +137,46 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   return $uri;
 }
 
-function insert_conceptscheme($setUri, $resourceManager, $uri, $uuid, $title, $description) {
-  $count = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".Skos::CONCEPTSCHEME.">");
+function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri, $uuid, $title, $description, $rdftype) {
+  $count = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".$rdftype.">");
   if ($count > 0) {
-    fwrite(STDERR, 'The schema with uri ' . $uri . "' already exists in the triple store.\n");
+    fwrite(STDERR, "The resource of type $rdftype with the uri   $uri   already exists in the triple store.\n");
     exit(1);
   }
-  $count = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", Skos::CONCEPTSCHEME));
+  $count = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", $rdftype));
   if ($count > 0) {
-    fwrite(STDERR, 'The schema with uuid ' . $uuid . "' already exists in the triple store.\n");
+    fwrite(STDERR, "The resource of type $rdftype with the uuid   $uuid   already exists in the triple store.\n");
     exit(1);
   }
-  $count = count($resourceManager->fetchSubjectWithPropertyGiven(DcTerms::TITLE, "'".$title."'", Skos::CONCEPTSCHEME));
+  $count = count($resourceManager->fetchSubjectWithPropertyGiven(DcTerms::TITLE, "'".$title."'", $rdftype));
   if ($count > 0) {
-    fwrite(STDERR, 'The schema with title ' . $title . "' already exists in the triple store.\n");
+    fwrite(STDERR, "The resource of type $rdftype with the title   $title   already exists in the triple store.\n");
     exit(1);
   }
   
-  $schemaResource = new ConceptScheme();
-  $schemaResource->setUri($uri);
-  set_property_with_check($schemaResource, OpenSkos::UUID, $uuid);
+  switch ($rdftype) {
+  case Skos::CONCEPTSCHEME:
+    $resource = new ConceptScheme();
+    break;
+  case Skos::SKOSCOLLECTION:
+    $resource = new SkosCollection();
+    break;
+  default:
+    fwrite(STDERR, "`rdftype` can be set to either uri of scheme-type or the uri for skos-collection-type\n");
+    exit(1);
+}
+  $resource->setUri($uri);
+  set_property_with_check($resource, OpenSkos::UUID, $uuid);
   $count_set = $resourceManager->countTriples("<".$setUri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
   if ($count_set <1) {
-    fwrite(STDERR, "The set with the uri " . $setUri . " has not been found in the triple store.\n");
+    fwrite(STDERR, "The set with the uri $setUri has not been found in the triple store.\n");
     exit(1);
   }
-  set_property_with_check($schemaResource, OpenSKOS::SET, $setUri, true);
-  set_property_with_check($schemaResource, DcTerms::TITLE, $title, false, false);
+  set_property_with_check($resource, OpenSKOS::SET, $setUri, true);
+  set_property_with_check($resource, DcTerms::TITLE, $title, false, false);
   if ($description !== NULL) {
-    set_property_with_check($schemaResource, DcTerms::DESCRIPTION, $description);
+    set_property_with_check($resource, DcTerms::DESCRIPTION, $description);
   }
-  $resourceManager->insert($schemaResource);
+  $resourceManager->insert($resource);
   return $uri;
 }
