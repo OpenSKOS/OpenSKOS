@@ -8,6 +8,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
   protected static $client;
   protected static $createdresourses;
+  private static $resourceManager;
 
   protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers = false) {
     self::$client->resetParameters();
@@ -38,14 +39,22 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
   protected static function deleteResources($uris, $apikey, $resourcetype) {
     foreach ($uris as $uri) {
-        $response = self::delete($uri, $apikey, $resourcetype);
+      $response = self::delete($uri, $apikey, $resourcetype);
     }
   }
+  
+  protected static function deleteResourcesViaResourceManager($uris, $rdftype) {
+    foreach ($uris as $uri) {
+      self::$resourceManager->delete($uri, $rdftype);
+    }
+  }
+  
+ 
 
   protected static function delete($id, $apikey, $resoursetype) {
-    $id_name="uri";
+    $id_name = "uri";
     if ($resoursetype === 'concept') {
-      $id_name="id";
+      $id_name = "id";
     }
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . "/$resoursetype");
@@ -54,11 +63,58 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
       ->setParameterGet('key', $apikey)
       ->setParameterGet($id_name, $id)
       ->request('DELETE');
-   
+
     return $response;
   }
 
-  protected function createTestConcept($apikey){
+  protected static function createTestSet($apikey) {
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:openskos = "http://openskos.org/xmlns#"
+xmlns:dcterms = "http://purl.org/dc/terms/"
+xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
+    <rdf:Description rdf:about="' . SET_URI . '">
+        <openskos:code>' . SET_CODE . '</openskos:code>
+        <openskos:uuid>' . SET_UUID . '</openskos:uuid>
+        <dcterms:title xml:lang="en">' . SET_TITLE . '</dcterms:title>
+        <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>
+        <dcterms:publisher rdf:resource="' . TENANT_URI . '"></dcterms:publisher>
+        <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens"/>
+        <openskos:allow_oai>true</openskos:allow_oai>
+        <openskos:conceptBaseUri>http://example.com/collection-example</openskos:conceptBaseUri>
+        <openskos:webpage rdf:resource="http://set-ergens"/>
+    </rdf:Description>
+</rdf:RDF>';
+    $response = self::create($xml, $apikey, 'set');
+    return $response;
+  }
+
+  private static function createTestSchema($apikey, $schema_uri, $schema_uuid, $schema_title, $set_uri) {
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:openskos = "http://openskos.org/xmlns#"
+xmlns:dcterms = "http://purl.org/dc/terms/">
+    <rdf:Description rdf:about="' . $schema_uri . '">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/> 
+        <dcterms:title  xml:lang="en">' . $schema_title . '</dcterms:title>
+        <openskos:set rdf:resource="' . $set_uri . '"/>
+        <openskos:uuid>' . $schema_uuid . '</openskos:uuid>
+    </rdf:Description>
+</rdf:RDF>
+';
+    $response = self::create($xml, $apikey, 'conceptscheme');
+    return $response;
+  }
+
+  protected static function createTestSchema1($apikey) {
+    return self::createTestSchema($apikey, SCHEMA1_URI, SCHEMA1_UUID, SCHEMA1_TITLE, SET_URI);
+  }
+
+  protected static function createTestSchema2($apikey) {
+    return self::createTestSchema($apikey, SCHEMA2_URI, SCHEMA2_UUID, SCHEMA2_TITLE, SET_URI);
+  }
+
+  protected function createTestConcept($apikey) {
     $randomn = time();
     $prefLabel = 'testPrefLable_' . $randomn;
     $altLabel = 'testAltLable_' . $randomn;
@@ -80,9 +136,8 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
       '</rdf:Description>' .
       '</rdf:RDF>';
 
-
     $response = self::create($xml, $apikey, 'concept');
-    $retVal = array('xml'=>$xml, 'prefLabel'=>$prefLabel, 'altLabel'=>$altLabel, 'hiddenLabel'=>$hiddenLabel, 'uuid'=>$uuid,'about'=>$about, 'notation'=>$notation, 'response'=>$response);
+    $retVal = array('xml' => $xml, 'prefLabel' => $prefLabel, 'altLabel' => $altLabel, 'hiddenLabel' => $hiddenLabel, 'uuid' => $uuid, 'about' => $about, 'notation' => $notation, 'response' => $response);
     return $retVal;
   }
 
@@ -264,6 +319,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase {
 
     return $response;
   }
-  
-  
+
+
 }

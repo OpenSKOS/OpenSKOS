@@ -285,8 +285,7 @@ class Concept extends AbstractTripleStoreResource {
       if ($concept->isDeleted()) {
         throw new NotFoundException('Concept already deleted :' . $id, 410);
       }
-      var_dump($params['user']);
-      var_dump($concept);
+      
       $this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenantcode'], $concept);
       $this->manager->deleteSoft($concept);
     } catch (Exception $e) {

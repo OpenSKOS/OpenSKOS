@@ -592,7 +592,6 @@ class ResourceManager
     public function countTriples($subject, $prop, $object) {
         
         $query = 'SELECT (COUNT(*) as ?COUNT) WHERE { ' . $subject.  '  '. $prop.  '  '. $object. ' . }';
-        //var_dump($query);
         $result = $this->query($query);
         $retVal = $result[0]->COUNT->getValue();
         return $retVal;
@@ -638,6 +637,7 @@ class ResourceManager
         }
         $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
         $result = $this->query($query);
+        //var_dump($query);
         $retVal = $this -> makeListOfPrimitiveResults($result, 'subject');
         return $retVal;
     }
