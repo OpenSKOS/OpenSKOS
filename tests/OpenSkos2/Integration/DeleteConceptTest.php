@@ -16,7 +16,6 @@ class DeleteConceptTest extends AbstractTest {
   
 
  public function setUp() {
-    self::$createdresourses = array();
     self::$client = new \Zend_Http_Client();
     self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -34,16 +33,15 @@ class DeleteConceptTest extends AbstractTest {
         self::$uuid= $result['uuid'];
         self::$about = $result['about'];
         self::$xml = $result['xml'];
-        array_push(self::$createdresourses, self::$about);
     } else {
-      self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
+      shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
       throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . '; ' . $result['response']->getMessage());
     }
   }
   
     // delete all created in this test concepts (clean garbage)
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
+    shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
   }
   
 
@@ -51,7 +49,7 @@ class DeleteConceptTest extends AbstractTest {
     print "\n deleting concept with candidate status by admin... \n";
     $response = self::delete(self::$about, API_KEY_ADMIN, 'concept');
     $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
+    self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
     $checkResponse = self::$client->request('GET');
     $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
   }
@@ -60,7 +58,7 @@ class DeleteConceptTest extends AbstractTest {
     print "\n deleting concept with candidate status by the owner-deitor... \n";
     $response = self::delete(self::$about, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
+    self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
     $checkResponse = self::$client->request('GET');
     $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
   }
@@ -76,7 +74,7 @@ class DeleteConceptTest extends AbstractTest {
     self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
     $response = self::delete(self::$about, API_KEY_ADMIN, 'concept');
     $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    self::$client->setUri(API_BASE_URI . '/concept?id=' . $this->uuid);
+    self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
     $checkResponse = self::$client->request('GET');
     $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
   }

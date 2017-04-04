@@ -24,7 +24,6 @@ class AutocompleteTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdresourses = array();
     self::$labelMap = array(
       PREF_LABEL => PREF_LABEL . "_",
       ALT_LABEL => ALT_LABEL . "_",
@@ -32,7 +31,7 @@ class AutocompleteTest extends AbstractTest {
       NOTATION => NOTATION . "_",
     );
 
-    
+
     // create test concepts
 
     $letters = range('a', 'z');
@@ -73,7 +72,6 @@ class AutocompleteTest extends AbstractTest {
           throw new \Exception("setting status approved for a test concept has failed. " . " Status " . $response1->getStatus() . ' Message: ' . $response1->getHeader("X-error-msg"));
         }
       }
-      array_push(self::$createdresourses, $about);
       echo $i;
       $i++;
     }
@@ -81,7 +79,7 @@ class AutocompleteTest extends AbstractTest {
 
   // delete all created concepts, schemata and 
   public static function tearDownAfterClass() {
-    shell_exec("php /../tools/delete_concepts.php --key=".API_KEY_ADMIN." --tenant=".TENANT_CODE. "  delete");
+    shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
   }
 
   public function testAutocompleteInLoopNoParams() {
@@ -103,90 +101,88 @@ class AutocompleteTest extends AbstractTest {
     }
   }
 
-  
-    public function testAutocompleteSearchAltLabel() {
+  public function testAutocompleteSearchAltLabel() {
     print "\n testAutocomplete search alt Label \n";
     $word = self::$labelMap[ALT_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     //print "\n $word \n";
     $response = $this->autocomplete($word, "?searchLabel=altLabel");
     if ($response->getStatus() != 200) {
-    throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $word);
+      throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $word);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
     //var_dump($json);
     $arrayjson = json_decode($json, true);
     $this->AssertEquals(26, count($arrayjson));
-    }
+  }
 
-    public function testAutocompleteSearchAltLabelWithNoOccurences() {
+  public function testAutocompleteSearchAltLabelWithNoOccurences() {
     print "\n testAutocomplete search alt Label";
     $searchword = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // should not occur in alt labels
     $response = $this->autocomplete($searchword, "?searchLabel=altLabel");
     if ($response->getStatus() != 200) {
-    throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $searchword);
+      throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $searchword);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
     $arrayjson = json_decode($json, true);
     $this->AssertEquals(0, count($arrayjson));
-    }
+  }
 
-    public function testAutocompleteReturnAltLabel() {
+  public function testAutocompleteReturnAltLabel() {
     print "\n testAutocomplete return alt Label";
     $searchword = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel_<someuuid>a.
     $returnword = self::$labelMap[ALT_LABEL] . self::$prefix[1]; // altLabel_<someuuid>a.
     $response = $this->autocomplete($searchword, "?returnLabel=altLabel");
     if ($response->getStatus() != 200) {
-    throw new Exception('Failure:' . $response, 'autocomplete on word ' . $searchword);
+      throw new Exception('Failure:' . $response, 'autocomplete on word ' . $searchword);
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
     $arrayjson = json_decode($json, true);
     $this->AssertEquals(26, count($arrayjson));
     for ($i = 0; $i < count($arrayjson); $i++) {
-    $this->assertStringStartsWith($returnword, $arrayjson[$i]);
+      $this->assertStringStartsWith($returnword, $arrayjson[$i]);
     }
-    }
+  }
 
-    public function testAutocompleteLangNL() {
+  public function testAutocompleteLangNL() {
     print "\n testAutocomplete search pref Label";
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?lang=nl");
     if ($response->getStatus() != 200) {
-    throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=nl");
+      throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=nl");
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
     $arrayjson = json_decode($json, true);
     $this->AssertEquals(26, count($arrayjson));
-    }
+  }
 
-    // to do: make more advanced test with "en" non-zero occurences or so
-    public function testAutocompleteLangEN() {
+  // to do: make more advanced test with "en" non-zero occurences or so
+  public function testAutocompleteLangEN() {
     print "\n testAutocomplete search pref Label";
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?lang=en");
     if ($response->getStatus() != 200) {
-    throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=en (does not exists)");
+      throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=en (does not exists)");
     }
     $this->AssertEquals(200, $response->getStatus());
     $json = $response->getBody();
     $arrayjson = json_decode($json, true);
     $this->AssertEquals(0, count($arrayjson));
-    }
+  }
 
-    public function testAutocompleteFormatHTML() {
+  public function testAutocompleteFormatHTML() {
     print "\n testAutocomplete search pref Label";
     $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
     $response = $this->autocomplete($word, "?format=html");
     if ($response->getStatus() != 200) {
-    throw new Exception('Failure:' . $response, 'autocomplete on word ' . $word . "?format=html");
+      throw new Exception('Failure:' . $response, 'autocomplete on word ' . $word . "?format=html");
     }
     $this->AssertEquals(200, $response->getStatus());
     // todo: add some chek when it becomes clear how the output looks like
-    }
-  
+  }
 
   private function autocomplete($word, $parameterString) {
     self::$client->resetParameters();

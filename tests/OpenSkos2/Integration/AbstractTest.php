@@ -130,8 +130,8 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
       '<skos:hiddenLabel xml:lang="nl">' . $hiddenLabel . '</skos:hiddenLabel>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
-      '<skos:topConceptOf rdf:resource="' . SCHEMA_URI_1 . '"/>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:topConceptOf rdf:resource="' . SCHEMA1_URI . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<skos:definition xml:lang="nl">integration test get concept</skos:definition>' .
       '</rdf:Description>' .
       '</rdf:RDF>';

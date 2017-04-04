@@ -48,13 +48,13 @@ function delete_all_concepts($resourceManager) {
     $resourceManager->deleteReferencesToObject($concept);
   }
 }
-
+var_dump("1");
 switch ($action) {
   case 'delete':
     if ($OPTS->uri == null) {
       delete_all_concepts($resourceManager);
       fwrite(STDOUT, "all concepts are deleted.\n");
-    
+  
     } else {
       fwrite(STDERR, "deleting a concept by its uri is not implemented yet\n");
       exit(1);

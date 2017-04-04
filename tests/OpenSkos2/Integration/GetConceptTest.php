@@ -15,7 +15,6 @@ class GetConceptTest extends AbstractTest {
   private static $xml;
   
   public static function setUpBeforeClass() {
-    self::$createdresourses = array();
     self::$client = new \Zend_Http_Client();
     self::$client->SetHeaders(array(
       'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -33,14 +32,13 @@ class GetConceptTest extends AbstractTest {
         self::$uuid= $result['uuid'];
         self::$about = $result['about'];
         self::$xml = $result['xml'];
-        array_push(self::$createdresourses, self::$about);
     } else {
       throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . '; ' . $result['response']->getMessage());
     }
   }
   
   public static function tearDownAfterClass() {
-    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
+    shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
   }
 
   public function testViaPrefLabel2() {
@@ -134,8 +132,8 @@ class GetConceptTest extends AbstractTest {
       '<skos:hiddenLabel xml:lang="nl">' . $hiddenLabel . '</skos:hiddenLabel>' .
       '<openskos:uuid>' . $uuid_2 . '</openskos:uuid>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
-      '<skos:topConceptOf rdf:resource="' . SCHEMA_URI_1 . '"/>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:topConceptOf rdf:resource="' . SCHEMA1_URI . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<skos:definition xml:lang="nl">integration test get concept</skos:definition>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
@@ -143,7 +141,6 @@ class GetConceptTest extends AbstractTest {
 
     $response1 = self::create($xml, API_KEY_EDITOR, 'concept');
     $this->AssertEquals(201, $response1->getStatus(), "\n Cannot perform the test because something is wrong with creating the second test concept: " . $response1->getHeader('X-Error-Msg'));
-    array_push(self::$createdresourses, $about);
     self::$client->resetParameters();
     self::$client->setUri(API_BASE_URI . '/find-concepts?q=prefLabel:testPrefLable*&rows=2');
     $response = self::$client->request(\Zend_Http_Client::GET);
@@ -242,7 +239,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.json');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    $this->assertionsForJsonConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
+    $this->assertionsForJsonConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA1_URI, SCHEMA1_URI);
   }
 
   public function testViaIdJsonP() {
@@ -250,7 +247,7 @@ class GetConceptTest extends AbstractTest {
     self::$client->setUri(API_BASE_URI . '/concept/' . self::$uuid . '.jsonp?callback=test');
     $response = self::$client->request(\Zend_Http_Client::GET);
     $this->AssertEquals(200, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    $this->assertionsForJsonPConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA_URI_1, SCHEMA_URI_1);
+    $this->assertionsForJsonPConcept($response, self::$uuid, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, SCHEMA1_URI, SCHEMA1_URI);
   }
 
   private function assertionsForManyConceptsRows($response, $rows) {

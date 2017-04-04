@@ -20,13 +20,12 @@ class CreateConceptTest extends AbstractTest {
       'Accept-Encoding' => 'gzip, deflate',
       'Connection' => 'keep-alive')
     );
-    self::$createdresourses = array();
   }
 
  
    // delete all created in this test concepts
   public function tearDown() {
-    self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'concept');
+    shell_exec("php ".SOURCE_DIR."/tools/concept.php --key=".API_KEY_ADMIN." --tenant=".TENANT_CODE. "  delete");
   }
 
   public function test01CreateConceptWithoutURIWithDateAccepted() {
@@ -40,7 +39,7 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<dcterms:dateAccepted>' . $dateAccepted . '</dcterms:dateAccepted>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
@@ -48,10 +47,10 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
-      array_push(self::$createdresourses, $this->getAbout($response));
     }
   }
 
+  
   public function test02CreateConceptWithoutUriWithoutDateAccepted() {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
     print "\n\n test02 ... \n";
@@ -60,7 +59,7 @@ class CreateConceptTest extends AbstractTest {
     $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
       '<rdf:Description>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
@@ -68,7 +67,6 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() === 201) {
       $this->CheckCreatedConcept($response);
-      array_push(self::$createdresourses, $this->getAbout($response));
     }
   }
 
@@ -84,7 +82,7 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description rdf:about="' . $conceptURI . '">' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
@@ -92,12 +90,8 @@ class CreateConceptTest extends AbstractTest {
 // create the first concept with which we will compare
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     if ($response->getStatus() === 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
       $xml2 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml);
       $response2 = self::create($xml2, API_KEY_EDITOR, 'concept');
-      if ($response2->getstatus() === 201) {
-        array_push(self::$createdresourses, $this->getAbout($response2));
-      }
       $this->AssertEquals(400, $response2->getStatus(), $response2->getMessage());
     } else {
       $this->AssertEquals(201, $response->getStatus(), 'Fialure while creating the first concept. Status: ' . $response->getStatus() . "\n " . $response->getMessage());
@@ -112,7 +106,7 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description>' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
@@ -125,9 +119,6 @@ class CreateConceptTest extends AbstractTest {
       ->setParameterGet('autoGenerateIdentifiers', true)
       ->request('POST');
 
-    if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
   }
 
@@ -144,7 +135,7 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
@@ -152,7 +143,6 @@ class CreateConceptTest extends AbstractTest {
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
       $this->CheckCreatedConcept($response);
     }
   }
@@ -169,16 +159,13 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description rdf:about="' . $about . '">' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     //var_dump($xml);
     $response = self::create($xml, API_KEY_EDITOR, 'concept',  false);
-    if ($response->getStatus() === 201) {
-      array_push(self::$createdresourses, $about);
-    }
     $this->AssertEquals(400, $response->getStatus(), "This test fails becauseBeG instists that skos:notation is compulsory. In general there may be zero notations, or more than one natotation ");
   }
 
@@ -197,21 +184,17 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response0 = self::create($xml0, API_KEY_EDITOR, 'concept');
     if ($response0->getStatus() === 201) {
-      array_push(self::$createdresourses, $about);
       $xml1 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml0);
       $xml1 = str_replace($about, $anotherAbout, $xml1);
       $xml1 = str_replace('<openskos:uuid>' . $uuid . '</openskos:uuid>', '<openskos:uuid>' . $anotherUUID . '</openskos:uuid>', $xml1);
       $response1 = self::create($xml1, API_KEY_EDITOR, 'concept');
-      if ($response1->getStatus() === 201) {
-        array_push(self::$createdresourses, $about);
-      }
       $this->AssertEquals(400, $response1->getStatus(), $response1->getMessage());
     } else {
       $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getMessage());
@@ -225,14 +208,11 @@ class CreateConceptTest extends AbstractTest {
     $wrongXml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
       '<rdf:Description>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description' .
       '</rdf:RDF>';
 
     $response = self::create($wrongXml, API_KEY_EDITOR, 'concept',true);
-    if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
   }
 
@@ -245,14 +225,13 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description>' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
     $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
     if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
       $this->CheckCreatedConcept($response);
     }
   }
@@ -265,14 +244,11 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description>' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
-    if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
 
@@ -288,7 +264,7 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<skos:altLabel xml:lang="nl">' . $altLabel . '</skos:altLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
@@ -296,12 +272,8 @@ class CreateConceptTest extends AbstractTest {
     $this->AssertEquals(201, $response0->getStatus(), $response0->getMessage());
     if ($response0->getStatus() == 201) {
       // we can proceed with the test
-      array_push(self::$createdresourses, $this->getAbout($response0));
       $xml = str_replace('testAltLable_', '_another_testAltLable_', $xml0);
       $response = self::create($xml, API_KEY_EDITOR, 'concept',  true);
-      if ($response->getStatus() == 201) {
-        array_push(self::$createdresourses, $this->getAbout($response));
-      }
       $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
     } else {
       $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getMessage());
@@ -319,15 +291,12 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
       '<skos:inScheme  rdf:resource="http://meertens/scheme/example1"/>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<skos:notation>' . $notation . '</skos:notation>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
-    if ($response->getStatus() === 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
 
@@ -340,15 +309,12 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description>' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '<openskos:uuid>' . $uuid . '</openskos:uuid>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response = self::create($xml, API_KEY_EDITOR, 'concept') ;
-    if ($response->getStatus() == 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
   }
 
@@ -359,21 +325,17 @@ class CreateConceptTest extends AbstractTest {
       '<rdf:Description>' .
       '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
       '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
-      '<skos:inScheme  rdf:resource="' . SCHEMA_URI_1 . '"/>' .
+      '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
       '</rdf:Description>' .
       '</rdf:RDF>';
 
     $response = self::create($xml, API_KEY_GUEST, 'concept', true);
-    if ($response->getStatus() === 201) {
-      array_push(self::$createdresourses, $this->getAbout($response));
-    }
     $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');
   }
 
   private function CheckCreatedConcept($response) {
     $dom = new \Zend_Dom_Query();
     $dom->setDocumentXML($response->getBody());
-
     $elem = $dom->queryXpath('/rdf:RDF');
     $this->assertEquals($elem->current()->nodeType, XML_ELEMENT_NODE, 'The root node of the response is not an element');
 
