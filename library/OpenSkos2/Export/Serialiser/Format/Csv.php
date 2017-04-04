@@ -20,11 +20,26 @@
 namespace OpenSkos2\Export\Serialiser\Format;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
 class Csv extends FormatAbstract
 {
+    /**
+     * @var ConceptManager
+     */
+    protected $conceptManager;
+    
+    /**
+     * @param ConceptManager $conceptManager
+     */
+    public function __construct($conceptManager = null)
+    {
+        parent::__construct();
+        $this->conceptManager = $conceptManager;
+    }
+    
     /**
      * Gets the array of properties to be serialised.
      * @return array
@@ -85,11 +100,15 @@ class Csv extends FormatAbstract
             if ($property == 'uri') { // @TODO Something more clean?
                 $resourceData[$property] = $resource->getUri();
             } elseif ($resource->hasProperty($property)) {
-                $values = $resource->getProperty($property);
-                if (count($values) > 1) {
-                    $resourceData[$property] = implode(';', $values);
+                if (in_array($property, $this->conceptPredicates)) {
+                    $resourceData[$property] = $this->getConceptCaptions($resource, $property);
                 } else {
-                    $resourceData[$property] = (string)$values[0];
+                    $values = $resource->getProperty($property);
+                    if (count($values) > 1) {
+                        $resourceData[$property] = implode(';', $values);
+                    } else {
+                        $resourceData[$property] = (string)$values[0];
+                    }
                 }
             } else {
                 $resourceData[$property] = '';
@@ -112,5 +131,38 @@ class Csv extends FormatAbstract
         $result = stream_get_contents($streamHandle);
         fclose($streamHandle);
         return $result;
+    }
+    
+    /**
+     * Get the captions of all concepts linked with the property
+     * @param Resource $resource
+     * @param type $property
+     */
+    protected function getConceptCaptions(Resource $resource, $property)
+    {
+        if ($this->conceptManager === null) {
+            throw new Exception('Concept manager is null');
+        }
+        
+        if (!$this->conceptManager instanceof ConceptManager) {
+            throw new Exception(
+                'Concept manager expected to be of type ConceptManager but is instead '
+                . get_class($this->conceptManager)
+            );
+        }
+        
+        $captions = [];
+        
+        foreach ($resource->getProperty($property) as $conceptUri) {
+            $captions[] = $this->conceptManager->fetchByUri($conceptUri)->getCaption();
+        }
+        
+        if (count($captions) === 0) {
+            return '';
+        } elseif (count($captions) === 1) {
+            return $captions[0];
+        } else {
+            return implode(';', $captions);
+        }
     }
 }

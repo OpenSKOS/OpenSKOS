@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Export;
 
-use OpenSkos2\Tenant;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Export\Serialiser\FormatFactory;
@@ -39,15 +38,15 @@ class Command
     protected $searchAutocomplete;
 
     /**
-     * @param ConceptManager $conceptManager
      * @param Autocomplete $searchAutocomplete
+     * @param ConceptManager $conceptManager
      */
     public function __construct(
-        ConceptManager $conceptManager,
-        Autocomplete $searchAutocomplete
+        Autocomplete $searchAutocomplete,
+        ConceptManager $conceptManager
     ) {
-        $this->conceptManager = $conceptManager;
         $this->searchAutocomplete = $searchAutocomplete;
+        $this->conceptManager = $conceptManager;
     }
     
     /**
@@ -67,7 +66,8 @@ class Command
             $message->getPropertiesToExport(),
             $this->conceptManager->fetchNamespaces(),
             $message->getMaxDepth(),
-            $excludeProperties
+            $excludeProperties,
+            $this->conceptManager
         );
         
         $serialiser = new Serialiser(
