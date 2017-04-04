@@ -57,7 +57,8 @@ switch ($action) {
   case 'create':
 
     //create set
-    insert_set($OPTS->tenant, $resourceManager, $OPTS->uri, $OPTS->uuid, $OPTS->code, $OPTS->title, $OPTS->lang, $OPTS->license, $OPTS->description, $OPTS->conceptbaseuri, $OPTS->oaibaseuri, $OPTS->allowoai, $OPTS->webpage);
+    //function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page) {
+    insert_set($OPTS->tenant, $resourceManager, $OPTS->uri, $OPTS->uuid, $OPTS->code, $OPTS->title, $OPTS->license, $OPTS->description, $OPTS->conceptbaseuri, $OPTS->oaibaseuri, $OPTS->allowoai, $OPTS->webpage);
     fwrite(STDOUT, 'A set has been created in the triple store with this uri: ' . $OPTS->uri . "\n");
     fwrite(STDOUT, 'To check: try GET <baseuri>/api/set?id=' . $OPTS->uri . "\n");
 

@@ -6,6 +6,10 @@ require 'autoload.inc.php';
 require 'Zend/Console/Getopt.php';
 require_once 'utils_functions.php';
 
+
+fwrite(STDOUT, "\n\n\n Strating script ... \n ");
+
+
 $opts = array(
   'help|?' => 'Print this usage message',
   'tenant=s' => 'tenants code',
@@ -61,7 +65,6 @@ switch ($OPTS->restype) {
     exit(1);
 }
 
-fwrite(STDOUT, "\n\n\n Strating script ... \n ");
 switch ($action) {
   case 'create':
 
@@ -72,7 +75,7 @@ switch ($action) {
 
     break;
   default:
-    fwrite(STDERR, "unkown action `{$action}`\n");
+    fwrite(STDERR, "unkown (not yet implemented) action `{$action}`\n");
     exit(1);
 }
 
