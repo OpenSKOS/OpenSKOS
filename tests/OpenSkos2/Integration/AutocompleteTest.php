@@ -69,6 +69,7 @@ class AutocompleteTest extends AbstractTest {
         // now update to change the status for "approved", otherwise autocomplete would not react
         $response1 = self::update($xml, API_KEY_EDITOR, 'concept');
         if ($response1->getStatus() !== 200) {
+          shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
           throw new \Exception("setting status approved for a test concept has failed. " . " Status " . $response1->getStatus() . ' Message: ' . $response1->getHeader("X-error-msg"));
         }
       }
@@ -77,7 +78,7 @@ class AutocompleteTest extends AbstractTest {
     }
   }
 
-  // delete all created concepts, schemata and 
+  // delete all created concepts
   public static function tearDownAfterClass() {
     shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
   }

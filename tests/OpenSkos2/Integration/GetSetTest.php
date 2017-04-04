@@ -104,7 +104,8 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     $results1 = $dom->query('openskos:code');
     $results2 = $dom->query('dcterms:publisher');
     $this->AssertEquals("test-set", $results1->current()->nodeValue);
-    $this->AssertEquals($this->test_institution, $results2->current()->nodeValue);
+    $this->AssertEquals(TENANT_URI, $results2->current()->getAttribute('rdf:resource'));
+   
   }
 
   protected function assertionsXMLRDFResources($response) {
