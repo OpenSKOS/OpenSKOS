@@ -29,6 +29,7 @@ use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\RelationTypeManager;
 use OpenSkos2\FieldsMaps;
@@ -149,6 +150,26 @@ class Concept extends AbstractTripleStoreResource {
 
       if (isset($params['setUri'])) {
         $options['set'] = explode(' ', trim($params['setUri']));
+      } else {
+        $setcodes = null;
+        if (isset($params['set'])) {
+          $setcodes = explode(' ', trim($params['set']));
+        } else {
+          if (isset($params['collection'])) {
+            $setcodes = explode(' ', trim($params['collection']));
+          }
+        }
+        if ($setcodes !== null) {
+          $options['set'] = array();
+          foreach ($setcodes as $setcode) {
+            $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
+            if ($setUri === null) {
+              throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
+            } else {
+              $options['set'][]=$setUri;
+            }
+          }
+        }
       }
 
       $tenantCodes = [];
@@ -286,7 +307,7 @@ class Concept extends AbstractTripleStoreResource {
       if ($concept->isDeleted()) {
         throw new NotFoundException('Concept already deleted :' . $id, 410);
       }
-      
+
       $this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenantcode'], $concept);
       $this->manager->deleteSoft($concept);
     } catch (Exception $e) {

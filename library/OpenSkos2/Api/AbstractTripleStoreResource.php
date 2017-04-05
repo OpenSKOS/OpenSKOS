@@ -70,9 +70,18 @@ abstract class AbstractTripleStoreResource {
     }
 
     if ($this->manager->getResourceType() === Concept::TYPE) {
-      if (empty($queryparams['set'])) {
+      $params['seturi'] = $this->fetchSetUri($queryparams);
+      if ($params['seturi'] == null) {
+        throw new ApiException('No set (former collection) specified', 412);
+      }
+    }
+    return $params;
+  }
+  
+  protected function fetchSetUri($queryparams){
+    if (empty($queryparams['set'])) {
         if (empty($queryparams['collection'])) {
-          throw new ApiException('No set (former collection) specified', 412);
+          return null;
         } else {
           $setcode = $queryparams['collection'];
         }
@@ -83,10 +92,8 @@ abstract class AbstractTripleStoreResource {
       if ($setUri === null) {
         throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
       } else {
-        $params['seturi'] = $setUri;
+        return  $setUri;
       }
-    }
-    return $params;
   }
 
   /* Returns a map, mapping resource's titles to the resource's Uri
