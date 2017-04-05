@@ -46,8 +46,8 @@
         <const name="SCHEMA2_UUID" value="scheme02abc"/>
         <const name="SCHEMA1_TITLE" value="test scheme 01"/>
         <const name="SCHEMA2_TITLE" value="test scheme 02"/>
-        <const name="NUMBER_INSTITUTIONS" value="1"/>
-        <const name="NUMBER_SETS" value="1"/>
+        <const name="NUMBER_INSTITUTIONS" value="2"/> <!-- for testing get-institutions one institution is added -->
+        <const name="NUMBER_SETS" value="2"/> <!-- for testing get-sets one set is added -->
         <const name="CALLBACK_NAME" value="abc"/>
         <const name="PREF_LABEL" value="prefLabel"/>
         <const name="ALT_LABEL" value="altLabel"/>

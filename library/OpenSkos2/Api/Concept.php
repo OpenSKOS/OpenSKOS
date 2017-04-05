@@ -28,6 +28,7 @@ use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\Tenant;
 use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\RelationTypeManager;
 use OpenSkos2\FieldsMaps;
@@ -161,7 +162,7 @@ class Concept extends AbstractTripleStoreResource {
 
       if (count($tenantCodes) > 0) {
         foreach ($tenantCodes as $tenantcode) {
-          $tenantUri = $this->manager->fetchInstitutionUriByCode($tenantcode);
+          $tenantUri = $this->manager->fetchUriByCode($tenantcode, Tenant::TYPE);
           if ($tenantUri === null) {
             throw new ApiException('The tenant referred by code ' . $tenantcode . ' does not exist in the triple store. ', 400);
           };
@@ -296,8 +297,8 @@ class Concept extends AbstractTripleStoreResource {
     return $this->getSuccessResponse($xml, 202);
   }
 
-  protected function validate($resourceObject, $isForUpdate, $tenanturi) {
-    parent::validate($resourceObject, $isForUpdate, $tenanturi);
+  protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi) {
+    parent::validate($resourceObject, $isForUpdate, $tenanturi, $seturi);
     $this->checkRelationsInConcept($resourceObject);
   }
 

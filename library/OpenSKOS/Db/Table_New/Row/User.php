@@ -19,6 +19,9 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Tenant;
+
 class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 {
 
@@ -450,7 +453,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
             $tenantcode=$this['tenant'];
-            $tenanturi = $resourceManager->fetchInstitutionUriByCode($tenantcode);
+            $tenanturi = $resourceManager->fetchUriByCode($tenantcode, Tenant::TYPE);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
             
             $resourceManager->insert($person);

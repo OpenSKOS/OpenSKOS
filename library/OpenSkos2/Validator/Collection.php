@@ -33,6 +33,7 @@ class Collection
      */
     protected $resourceManager;
     protected $tenantUri;
+    protected $setUri;
     protected $isForUpdate;
     protected $referenceCheckOn;
     /**
@@ -55,7 +56,7 @@ class Collection
      */
     //public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
     
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $referencecheckOn, LoggerInterface $logger = null)
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referencecheckOn, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $logger = new NullLogger();
@@ -64,6 +65,7 @@ class Collection
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
         $this->tenantUri = $tenantUri;
+        $this->setUri = $setUri;
         $this->isForUpdate = $isForUpdate;
         $this -> referenceCheckOn = $referencecheckOn;
     }
@@ -112,6 +114,6 @@ class Collection
      */
     private function getResourceValidator()
     {
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->referenceCheckOn, $this->logger);
+        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->setUri, $this->referenceCheckOn, $this->logger);
     }
 }

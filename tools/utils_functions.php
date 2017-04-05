@@ -28,6 +28,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
@@ -118,7 +119,7 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   set_property_with_check($setResource, OpenSkos::CODE, $code);
   set_property_with_check($setResource, OpenSkos::UUID, $uuid);
 
-  $publisherURI = $resourceManager->fetchInstitutionUriByCode($tenant_code);
+  $publisherURI = $resourceManager->fetchUriByCode($tenant_code, Org::FORMALORG);
   if ($publisherURI === null) {
     fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.\n");
     exit(1);

@@ -35,6 +35,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $resurceType;
     protected $isForUpdate;
     protected $tenantUri;
+    protected $setUri;
     protected $referenceCheckOn;
     /**
      * @var array
@@ -58,6 +59,10 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     
     public function setTenant($tenantUri) {
         $this->tenantUri = $tenantUri;
+    }
+    
+     public function setSet($setUri) {
+        $this->setUri = $setUri;
     }
 
     /**
@@ -226,6 +231,19 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return ($errorsBeforeCheck===$errorsAfterCheck);
     }
     
+    private function isSetCoinsideWithSetRequestParameter(RdfResource $resource) {
+        $setUris = $resource->getProperty(OpenSkos::SET);
+        $errorsBeforeCheck = count($this->errorMessages);
+        foreach ($setUris as $setURI) {
+            if ($setURI->getUri() !== $this->setUri) {
+                $this->errorMessages[] = "The resource " .$resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not coinside with the set announced by request parameter with $this->setUri  ";
+            }
+        }
+        $errorsAfterCheck = count($this->errorMessages);
+        return ($errorsBeforeCheck===$errorsAfterCheck);
+    }
+    
+    
     private function refersToSetOfCurrentTenant(RdfResource $resource, $referenceName, $referenceType) {
         $referenceUris = $resource->getProperty($referenceName);
         $errorsBeforeCheck = count($this->errorMessages);
@@ -245,9 +263,11 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $firstRound = $this->validateProperty($resource, Skos::INSCHEME, true, false, false, false, Skos::CONCEPTSCHEME);
         if ($firstRound) {
             if (ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
-                return true;
+                return  $this->isSetCoinsideWithSetRequestParameter($resource);
             } else {
-                return $this->refersToSetOfCurrentTenant($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
+                $coinside = $this->isSetCoinsideWithSetRequestParameter($resource);
+                $correcttenant= $this->refersToSetOfCurrentTenant($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
+                return ($coinside && $correcttenant);
             }
         } else {
             return false;

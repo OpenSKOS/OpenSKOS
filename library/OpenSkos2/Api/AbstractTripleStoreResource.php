@@ -6,6 +6,8 @@ use DOMDocument;
 use Exception;
 use OpenSkos2\Preprocessor;
 use OpenSkos2\Tenant;
+use OpenSkos2\Set;
+use OpenSkos2\Concept;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Converter\Text;
@@ -56,7 +58,7 @@ abstract class AbstractTripleStoreResource {
         throw new ApiException('No tenant specified', 412);
       }
       $params['tenantcode'] = $queryparams['tenant'];
-      $tenantUri = $this->manager->fetchInstitutionUriByCode($params['tenant']);
+      $tenantUri = $this->manager->fetchUriByCode($params['tenant'], Tenant::TYPE);
       if ($tenantUri === null) {
         throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. ', 400);
       }
@@ -65,6 +67,24 @@ abstract class AbstractTripleStoreResource {
     } else {
       $params['tenantcode'] = 'undefined';
       $params['tenanturi'] = 'undefined';
+    }
+
+    if ($this->manager->getResourceType() === Concept::TYPE) {
+      if (empty($queryparams['set'])) {
+        if (empty($queryparams['collection'])) {
+          throw new ApiException('No set (former collection) specified', 412);
+        } else {
+          $setcode = $queryparams['collection'];
+        }
+      } else {
+        $setcode = $queryparams['set'];
+      }
+      $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
+      if ($setUri === null) {
+        throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
+      } else {
+        $params['seturi'] = $setUri;
+      }
     }
     return $params;
   }
@@ -156,10 +176,10 @@ abstract class AbstractTripleStoreResource {
       }
       switch ($format) {
         case 'json':
-           $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
+          $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
           break;
         case 'jsonp':
-           $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
+          $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
           break;
         case 'rdf':
           $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
@@ -198,7 +218,7 @@ abstract class AbstractTripleStoreResource {
       $params = $this->getQueryParams($request);
       $resourceObject = $this->getResourceObjectFromRequestBody($request);
       if (!$this->authorisationManager->resourceCreationAllowed($params['user'], $params['tenantcode'], $resourceObject)) {
-        throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' . $$params['user']->role . '"', 403);
+        throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' . $params['user']->role . '"', 403);
       }
       if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
         throw new ApiException(
@@ -213,7 +233,7 @@ abstract class AbstractTripleStoreResource {
         $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['user']->getFoafPerson()->getUri());
       }
       $preprocessedResource = $preprocessor->forCreation($resourceObject, $params, $autoGenerateUri);
-      $this->validate($preprocessedResource, false, $params['tenanturi']);
+      $this->validate($preprocessedResource, false, $params['tenanturi'], $params['seturi']);
       $this->manager->insert($preprocessedResource);
       $savedResource = $this->manager->fetchByUri($preprocessedResource->getUri());
       $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -239,7 +259,7 @@ abstract class AbstractTripleStoreResource {
       }
       $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params);
       if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $preprocessedResource)) {
-        $this->validate($preprocessedResource, true, $params['tenanturi']);
+        $this->validate($preprocessedResource, true, $params['tenanturi'],$params['seturi']);
         $this->manager->replace($preprocessedResource);
         $savedResource = $this->manager->fetchByUri($uri);
         $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -369,8 +389,8 @@ abstract class AbstractTripleStoreResource {
   }
 
   // override in the concrete class when necessary
-  protected function validate($resourceObject, $isForUpdate, $tenanturi) {
-    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, true);
+  protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi) {
+    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi,true);
     if (!$validator->validate($resourceObject)) {
       throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
     } else {

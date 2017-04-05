@@ -93,6 +93,7 @@ class Resource {
   protected $isForUpdate;
   protected $referenceCheckOn;
   protected $tenantUri;
+  protected $setUri;
 
   /**
    * Holds all error messages
@@ -113,7 +114,7 @@ class Resource {
    * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
    * @param LoggerInterface $logger
    */
-  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $referencecheckOn, LoggerInterface $logger = null) {
+  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referencecheckOn, LoggerInterface $logger = null) {
     if ($logger === null) {
       $this->logger = new NullLogger();
     } else {
@@ -123,7 +124,9 @@ class Resource {
     $this->resourceManager = $resourceManager;
     $this->isForUpdate = $isForUpdate;
     $this->tenantUri = $tenantUri;
+    $this->setUri = $setUri;
     $this->referenceCheckOn = $referencecheckOn;
+    
   }
 
   /**
@@ -299,6 +302,7 @@ class Resource {
       $validator->setResourceManager($this->resourceManager);
       $validator->setFlagIsForUpdate($this->isForUpdate);
       $validator->setTenant($this->tenantUri);
+      $validator->setSet($this->setUri);
     }
     return $validators;
   }

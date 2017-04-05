@@ -994,8 +994,8 @@ class ResourceManager
     
     
     
-    public function fetchInstitutionUriByCode($code) {
-        $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', Org::FORMALORG);
+    public function fetchUriByCode($code, $typeUri) {
+        $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', $typeUri);
         if (count($tenants) < 1) {
             return null;
         } else {

@@ -259,7 +259,7 @@ function insert_set($code, $collectionMySQL, $resourceManager, $defaultLicense, 
     $uri = $setResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Dcmi::DATASET, 'setcode' => $code]);
     set_property_with_check($setResource, OpenSkos::CODE, $code);
 
-    $publisherURI = $resourceManager->fetchInstitutionUriByCode($collectionMySQL['tenant']);
+    $publisherURI = $resourceManager->fetchUriByCode($collectionMySQL['tenant'], Org::FORMALORG);
     if ($publisherURI === null) {
         throw new Exception("Something went terribly worng: the tenant with the code " . $collectionMySQL['tenant'] . " has not been inserted in the triple store before now.");
     } else {
