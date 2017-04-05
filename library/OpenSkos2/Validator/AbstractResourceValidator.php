@@ -258,14 +258,29 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $errorsAfterCheck = count($this->errorMessages);
         return ($errorsBeforeCheck===$errorsAfterCheck);
     }
+    
+    private function refersToRequestParameterSet(RdfResource $resource, $referenceName, $referenceType) {
+        $referenceUris = $resource->getProperty($referenceName);
+        $errorsBeforeCheck = count($this->errorMessages);
+        foreach ($referenceUris as $uri) {
+            try {
+                $refResource = $this->resourceManager->fetchByUri($uri->getUri(), $referenceType); //throws an exception if something is wrong
+                $this->isSetCoinsideWithSetRequestParameter($refResource);
+            } catch (\Exception $e) {
+                $this->errorMessages[] = $e->getMessage();
+            }
+        }
+        $errorsAfterCheck = count($this->errorMessages);
+        return ($errorsBeforeCheck===$errorsAfterCheck);
+    }
 
     protected function validateInScheme(RdfResource $resource) {
         $firstRound = $this->validateProperty($resource, Skos::INSCHEME, true, false, false, false, Skos::CONCEPTSCHEME);
         if ($firstRound) {
             if (ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
-                return  $this->isSetCoinsideWithSetRequestParameter($resource);
+                return  $this->refersToRequestParameterSet($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
             } else {
-                $coinside = $this->isSetCoinsideWithSetRequestParameter($resource);
+                $coinside = $this->refersToRequestParameterSet($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
                 $correcttenant= $this->refersToSetOfCurrentTenant($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME);
                 return ($coinside && $correcttenant);
             }

@@ -66,6 +66,8 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} key A valid API key
+     * @apiParam {String} set A set's code
+     * @apiParam {String} collection Obsolete parameter for backward compatibility. A set's code
      * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) and uuid will be automatically generated.
      *                                           If uri exists in the xml and autoGenerateIdentifiers is true then an error will be thrown.
      *                                           If the parameter set to false then the xml must contain uri (rdf:about) and uuid.
@@ -109,6 +111,11 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
+     * 
+     * @apiError MissingTenant No set (former tenant collection) specified
+     * @apiErrorExample MissingSet
+     *   HTTP/1.1 412 Precondition Failed
+     *   No set (former tenant collection) specified
      * 
      * @apiError ConceptExists The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
      * @apiErrorExample ConceptExists
