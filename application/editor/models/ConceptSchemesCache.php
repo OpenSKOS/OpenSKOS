@@ -100,7 +100,6 @@ class Editor_Models_ConceptSchemesCache
     public function fetchAll()
     {
         $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
-        $schemes = false;
         if ($schemes === false) {
             $schemes = $this->sortSchemes(
                 $this->manager->fetch(
