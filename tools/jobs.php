@@ -187,6 +187,7 @@ switch ($action) {
                     $importer = new \OpenSkos2\Import\Command(
                         $resourceManager,
                         $diContainer->get('OpenSkos2\ConceptManager'),
+                        $diContainer->get('OpenSkos2\PersonManager'),
                         new \OpenSkos2\Tenant(
                             $job->getCollection()->getTenant()['code']
                         )
