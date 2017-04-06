@@ -21,6 +21,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\PersonManager;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 
@@ -40,7 +41,8 @@ class Editor_Forms_Concept_FormToConcept
         Concept &$concept,
         $formData,
         ConceptSchemeManager $schemeManager,
-        OpenSKOS_Db_Table_Row_User $user
+        OpenSKOS_Db_Table_Row_User $user,
+        PersonManager $personManager
     ) {
         $oldStatus = $concept->getStatus();
         
@@ -48,7 +50,7 @@ class Editor_Forms_Concept_FormToConcept
         self::flatPropertiesToConcept($concept, $formData);
         self::multiValuedNoLangPropertiesToConcept($concept, $formData);
         self::resourcesToConcept($concept, $formData);
-        self::metadataToConcept($concept, $schemeManager, $user, $oldStatus);
+        self::metadataToConcept($concept, $schemeManager, $user, $oldStatus, $personManager);
     }
     
     /**
@@ -177,12 +179,14 @@ class Editor_Forms_Concept_FormToConcept
      * @param OpenSKOS_Db_Table_Row_User $user
      * @param ConceptSchemeManager $schemeManager
      * @param type $oldStatus
+     * @param PersonManager $personManager A person manager :)
      */
     protected static function metadataToConcept(
         Concept &$concept,
         ConceptSchemeManager $schemeManager,
         OpenSKOS_Db_Table_Row_User $user,
-        $oldStatus
+        $oldStatus,
+        PersonManager $personManager
     ) {
         // Get concept set from the first scheme
         $setUri = null;
@@ -196,6 +200,7 @@ class Editor_Forms_Concept_FormToConcept
             $user->tenant,
             $setUri,
             $user->getFoafPerson(),
+            $personManager,
             $oldStatus
         );
     }

@@ -86,7 +86,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 $concept,
                 $this->getRequest()->getPost(),
                 $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
-                OpenSKOS_Db_Table_Users::fromIdentity()
+                OpenSKOS_Db_Table_Users::fromIdentity(),
+                $this->getDI()->get('\OpenSkos2\PersonManager')
             );
         }
         
@@ -132,7 +133,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $concept,
             $form->getValues(),
             $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
-            OpenSKOS_Db_Table_Users::fromIdentity()
+            OpenSKOS_Db_Table_Users::fromIdentity(),
+            $this->getDI()->get('\OpenSkos2\PersonManager')
         );
         
         $validator = new ResourceValidator(

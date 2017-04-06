@@ -52,10 +52,10 @@ $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
-
+$personManager = $diContainer->get('OpenSkos2\PersonManager');
 $tenant = new \OpenSkos2\Tenant($OPTS->tenant);
 
-$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $tenant);
+$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
 $importer->setLogger($logger);
 $message = new \OpenSkos2\Import\Message(
     $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'), true, OpenSKOS_Concept_Status::CANDIDATE,
