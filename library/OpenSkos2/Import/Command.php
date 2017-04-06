@@ -24,6 +24,7 @@ use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\PersonManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Import\Command\CollectionHelper;
 use OpenSkos2\Validator\Collection as CollectionValidator;
@@ -43,6 +44,11 @@ class Command implements LoggerAwareInterface
      * @var ConceptManager
      */
     private $conceptManager;
+    
+    /**
+     * @var PersonManager
+     */
+    private $personManager;
 
     /**
      * @var Tenant
@@ -52,15 +58,19 @@ class Command implements LoggerAwareInterface
     /**
      * Command constructor.
      * @param ResourceManager $resourceManager
+     * @param ConceptManager $conceptManager
+     * @param PersonManager $personManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
     public function __construct(
         ResourceManager $resourceManager,
         ConceptManager $conceptManager,
+        PersonManager $personManager,
         Tenant $tenant = null
     ) {
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
+        $this->personManager = $personManager;
         $this->tenant = $tenant;
     }
 
@@ -76,6 +86,7 @@ class Command implements LoggerAwareInterface
         $helper = new CollectionHelper(
             $this->resourceManager,
             $this->conceptManager,
+            $this->personManager,
             $this->tenant,
             $message
         );

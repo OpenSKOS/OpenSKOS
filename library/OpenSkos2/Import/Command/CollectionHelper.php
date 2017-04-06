@@ -27,6 +27,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\PersonManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Import\Message;
 use OpenSkos2\Rdf\ResourceCollection;
@@ -46,6 +47,11 @@ class CollectionHelper implements LoggerAwareInterface
      * @var ConceptManager
      */
     private $conceptManager;
+    
+    /**
+     * @var PersonManager
+     */
+    private $personManager;
 
     /**
      * @var Tenant
@@ -66,11 +72,13 @@ class CollectionHelper implements LoggerAwareInterface
     public function __construct(
         ResourceManager $resourceManager,
         ConceptManager $conceptManager,
+        PersonManager $personManager,
         Tenant $tenant,
         Message $message
     ) {
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
+        $this->personManager = $personManager;
         $this->tenant = $tenant;
         $this->message = $message;
     }
@@ -164,6 +172,7 @@ class CollectionHelper implements LoggerAwareInterface
             $this->message->getSetUri(),
             $this->message->getUser(),
             $this->conceptManager->getLabelManager(),
+            $this->personManager,
             $alreadyExists ? $currentVersion->getStatus(): null,
             true
         );

@@ -36,6 +36,7 @@ use OpenSkos2\Api\Exception\InvalidPredicateException;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\PersonManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Tenant as Tenant;
@@ -57,16 +58,23 @@ class Concept
     /**
      * Resource manager
      *
-     * @var \OpenSkos2\Rdf\ResourceManager
+     * @var ResourceManager
      */
     private $manager;
 
     /**
      * Concept manager
      *
-     * @var \OpenSkos2\ConceptManager
+     * @var ConceptManager
      */
     private $conceptManager;
+    
+    /**
+     * Person manager
+     *
+     * @var PersonManager
+     */
+    private $personManager;
 
     /**
      * Search autocomplete
@@ -84,18 +92,20 @@ class Concept
 
     /**
      *
-     * @param \OpenSkos2\Rdf\ResourceManager $manager
-     * @param \OpenSkos2\ConceptManager $conceptManager
+     * @param ResourceManager $manager
+     * @param ConceptManager $conceptManager
      * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
      */
     public function __construct(
         ResourceManager $manager,
         ConceptManager $conceptManager,
-        \OpenSkos2\Search\Autocomplete $searchAutocomplete
+        \OpenSkos2\Search\Autocomplete $searchAutocomplete,
+        PersonManager $personManager
     ) {
         $this->manager = $manager;
         $this->conceptManager = $conceptManager;
         $this->searchAutocomplete = $searchAutocomplete;
+        $this->personManager = $personManager;
     }
 
     /**
@@ -341,6 +351,7 @@ class Concept
                 $collection->getUri(),
                 $user->getFoafPerson(),
                 $this->conceptManager->getLabelManager(),
+                $this->personManager,
                 $existingConcept->getStatus()
             );
 

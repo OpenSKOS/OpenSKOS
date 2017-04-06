@@ -56,24 +56,34 @@ class EchoLogger extends \Psr\Log\AbstractLogger
 
 // Test...
 
-$xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:dc="http://purl.org/dc/terms/"
+$xml = '
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms="http://purl.org/dc/terms/"
          xmlns:openskos="http://openskos.org/xmlns#">
-<rdf:Description rdf:about="http://testing/6">
+
+  <rdf:Description rdf:about="http://openskos/api/collections/pic:gtaa/666">
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
-    <skos:prefLabel xml:lang="nl">Testing6</skos:prefLabel>
-    <skos:notation>6</skos:notation>
-    <openskos:tenant>beng</openskos:tenant>
-    <openskos:toBeChecked>1</openskos:toBeChecked>
-    
-    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
-    <skos:topConceptOf rdf:resource="http://data.beeldengeluid.nl/gtaa/Persoonsnamen"/>
-    <skos:narrower rdf:resource="http://testing/3"/>
-    <skos:narrower rdf:resource="http://testing/1"/>
+    <openskos:toBeChecked>0</openskos:toBeChecked>
+    <openskos:status>candidate</openskos:status>
+    <skos:altLabel xml:lang="nl">Six Six Six</skos:altLabel>
+    <skos:altLabel xml:lang="nl">Six.Six.Six</skos:altLabel>
+    <skos:notation>666</skos:notation>
+    <skos:prefLabel xml:lang="nl">SixSixSix</skos:prefLabel>
+
+    <skos:inScheme rdf:resource="http://openskos/api/collections/pic:gtaa/cs3"/>
+    <dcterms:creator>amitsev</dcterms:creator>
+
   </rdf:Description>
-  </rdf:RDF>
+</rdf:RDF>
 ';
+
+// <dc:creator>amitsev</dc:creator>
+// <dcterms:creator rdf:resource="http://openskos/api/users/741f13be-1b4a-4f7f-b590-8bddf57845db"/>
+
+// <dc:creator>maldimirov</dc:creator>
+// <dcterms:creator rdf:resource="http://openskos/api/users/24efcec8-4c28-46d9-ab5f-3bcb13bc8761"/>
 
 
 //$xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -99,11 +109,13 @@ $client = new Zend_Http_Client('http://openskos/api/concept', array(
 $response = $client
     ->setEncType('text/xml')
     ->setRawData($xml)
-    ->setParameterGet('tenant', 'beng')
-    ->setParameterGet('collection', 'mycol')
-    ->setParameterGet('key', 'alexandar')
+    ->setParameterGet('tenant', 'pic')
+    ->setParameterGet('collection', 'gtaa')
+    ->setParameterGet('key', 'maldimirov')
     ->setParameterGet('autoGenerateIdentifiers', false)
-    ->request('POST');
+    ->request('PUT');
+
+echo PHP_EOL . $response->getBody() . PHP_EOL;
 
 if ($response->isSuccessful()) {
     echo 'Concept created';
