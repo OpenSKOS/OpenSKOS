@@ -66,7 +66,7 @@ $check_concept_references = null;
 echo "First round. (The referecne from a concept to another concept via relations is not be validated.) \n";
 
 
-$message = new \OpenSkos2\Import\Message(
+$message = new \OpenSkos2\Import\Message( // Do not include references to concepts, NoUpdate Mode 
   $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
 
@@ -77,12 +77,12 @@ echo "The following " . count($not_valid_resource_uris) . " resources are not va
 foreach ($not_valid_resource_uris as $uri) {
   echo "\n " . $uri;
 }
-echo "First round is finished. The second round: the references to the non-valid concepts from other concepts via relations will be removed.\n";
+echo "First round is finished. The second round: the references to the non-valid concepts from other concepts via relations will be removed. UpdateMode\n";
 
-$message2 = new \OpenSkos2\Import\Message(
-  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
+$message2 = new \OpenSkos2\Import\Message(// Include references to concepts, Update Mode 
+  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, false, false, 'en', false, false
 );
 
-echo "Done";
+echo "Done\n";
 
 //php skos2openskos.php --setUri=http://hdl.handle.net/11148/backendname_dataset_f120d4f4-afd6-4554-a8bc-ba3c045e1005 --userUri=http://host/clavas/public/api/users/e1926046-8b5f-4342-ad2d-7145302757ff --file=clavas-organisations.xml

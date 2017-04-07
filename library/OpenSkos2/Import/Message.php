@@ -57,6 +57,11 @@ class Message
      * @var bool Don't import records that already exist
      */
     private $noUpdates;
+    
+     /**
+     * @var bool Include references to concepts (set to false while first running of the import script, when nt concept are imported)
+     */
+    private $includeConceptReferences;
 
     /**
      * @var bool
@@ -75,6 +80,7 @@ class Message
      * @param Uri $setUri
      * @param bool $ignoreIncomingStatus
      * @param string $importedConceptStatus
+     * @param string $includeConceptReferences
      * @param bool $noUpdates
      * @param bool $toBeChecked
      * @param string $fallbackLanguage
@@ -87,7 +93,7 @@ class Message
         $setUri,
         $ignoreIncomingStatus,
         $importedConceptStatus,
-        $checkConceptReferences,
+        $includeConceptReferences,
         $noUpdates = false,
         $toBeChecked = false,
         $fallbackLanguage = null,
@@ -98,7 +104,7 @@ class Message
         $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
-        $this->checkConceptReferences=$checkConceptReferences;
+        $this->includeConceptReferences=$includeConceptReferences;
         $this->noUpdates = $noUpdates; // create mode
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
@@ -187,8 +193,8 @@ class Message
         return $this->user;
     }
     
-    public function getCheckConceptReferences()
+    public function getIncludeConceptReferences()
     {
-        return $this->checkConceptReferences;
+        return $this->includeConceptReferences;
     }
 }
