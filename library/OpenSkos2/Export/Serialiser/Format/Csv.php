@@ -157,6 +157,8 @@ class Csv extends FormatAbstract
             $captions[] = $this->conceptManager->fetchByUri($conceptUri)->getCaption();
         }
         
+        sort($captions, SORT_FLAG_CASE);
+        
         if (count($captions) === 0) {
             return '';
         } elseif (count($captions) === 1) {
