@@ -550,7 +550,8 @@ class Concept
                 $tenant->getCode(),
                 $collection->getUri(),
                 $user->getFoafPerson(),
-                $this->conceptManager->getLabelManager()
+                $this->conceptManager->getLabelManager(),
+                $this->personManager
             );
         } else {
             $resource->ensureMetadata(
