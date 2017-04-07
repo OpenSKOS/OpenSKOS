@@ -170,11 +170,17 @@ class Rtf extends FormatAbstract
                     $resource->getUri()
                 );
             } elseif (in_array($predicate, $this->conceptPredicates)) {
+                // Sort the related concepts alphabetically
+                $sortedConcepts = [];
                 foreach ($resource->getProperty($predicate) as $conceptUri) {
-                    $resourceData['fields'][] = $this->constructRtfFieldData(
+                    $sortedConcepts[$this->getConceptCaption($conceptUri)] = $this->constructRtfFieldData(
                         $predicate,
                         $this->getConceptCaption($conceptUri)
                     );
+                }
+                ksort($sortedConcepts, SORT_FLAG_CASE);
+                foreach ($sortedConcepts as $caption => $rtfFieldData) {
+                    $resourceData['fields'][] = $rtfFieldData;
                 }
             } else {
                 foreach ($resource->getProperty($predicate) as $property) {
