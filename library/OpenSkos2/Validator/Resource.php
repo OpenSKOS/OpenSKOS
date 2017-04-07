@@ -20,13 +20,13 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\ConceptScheme;
+use OpenSkos2\RelationType;
 use OpenSkos2\Set;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Tenant;
-use OpenSkos2\RelationType;
 use OpenSkos2\Validator\Concept\CycleBroaderAndNarrower;
 use OpenSkos2\Validator\Concept\CycleInBroader;
 use OpenSkos2\Validator\Concept\CycleInNarrower;
@@ -35,39 +35,40 @@ use OpenSkos2\Validator\Concept\DuplicateNarrower;
 use OpenSkos2\Validator\Concept\DuplicateRelated;
 use OpenSkos2\Validator\Concept\InScheme;
 use OpenSkos2\Validator\Concept\InSkosCollection;
-use OpenSkos2\Validator\Concept\SingleStatus;
-use OpenSkos2\Validator\Concept\SinglePrefLabel;
+use OpenSkos2\Validator\Concept\ReferencesForConceptRelations;
 use OpenSkos2\Validator\Concept\RelatedToSelf;
 use OpenSkos2\Validator\Concept\RequriedPrefLabel;
+use OpenSkos2\Validator\Concept\SinglePrefLabel;
+use OpenSkos2\Validator\Concept\SingleStatus;
+use OpenSkos2\Validator\Concept\TopConceptOf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
 use OpenSkos2\Validator\Concept\UniqueUuid;
-use OpenSkos2\Validator\Concept\TopConceptOf;
+use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
+use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
+use OpenSkos2\Validator\ConceptScheme\HasTopConcept as SchemaHasTopConcept;
+use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
+use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
+use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
+use OpenSkos2\Validator\Relation\Creator as RelationCreator;
+use OpenSkos2\Validator\Relation\Description as RelationDescription;
+use OpenSkos2\Validator\Relation\Title as RelationTitle;
+use OpenSkos2\Validator\Set\License;
 use OpenSkos2\Validator\Set\OpenskosAllowOAI;
+use OpenSkos2\Validator\Set\OpenskosCode as SetOpenskosCode;
 use OpenSkos2\Validator\Set\OpenskosConceptBaseUri;
 use OpenSkos2\Validator\Set\OpenskosOAIBaseUri;
+use OpenSkos2\Validator\Set\OpenskosUuid as SetOpenskosUuid;
 use OpenSkos2\Validator\Set\OpenskosWebPage;
 use OpenSkos2\Validator\Set\Publisher;
-use OpenSkos2\Validator\Set\License;
-use OpenSkos2\Validator\Set\OpenskosCode as SetOpenskosCode;
-use OpenSkos2\Validator\Set\OpenskosUuid as SetOpenskosUuid;
-use OpenSkos2\Validator\Set\Type as SetType;
 use OpenSkos2\Validator\Set\Title as SetTitle;
+use OpenSkos2\Validator\Set\Type as SetType;
 use OpenSkos2\Validator\SkosCollection\Creator as SkosCollCreator;
-use OpenSkos2\Validator\SkosCollection\InSet as SkosCollInSet;
-use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
 use OpenSkos2\Validator\SkosCollection\Description as SkosCollDescription;
-use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
+use OpenSkos2\Validator\SkosCollection\InSet as SkosCollInSet;
 use OpenSkos2\Validator\SkosCollection\Member as SkosCollMember;
-use OpenSkos2\Validator\Relation\Creator as RelationCreator;
-use OpenSkos2\Validator\Relation\Title as RelationTitle;
-use OpenSkos2\Validator\Relation\Description as RelationDescription;
-use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
-use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
-use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
-use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
-use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
-use OpenSkos2\Validator\ConceptScheme\HasTopConcept as SchemaHasTopConcept;
+use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
+use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
 use OpenSkos2\Validator\Tenant\OpenskosCode;
 use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
 use OpenSkos2\Validator\Tenant\OpenskosEnableStatussesSystem;
@@ -295,6 +296,9 @@ class Resource {
       new RelatedToSelf(),
       new TopConceptOf($this->referenceCheckOn)
     ];
+    if ($this->conceptReferenceCheckOn) {
+      $validators[]=new ReferencesForConceptRelations($this->referenceCheckOn);
+    }
     $validators = $this->refineValidators($validators);
     return $validators;
   }

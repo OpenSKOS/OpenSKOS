@@ -87,6 +87,7 @@ class Message
         $setUri,
         $ignoreIncomingStatus,
         $importedConceptStatus,
+        $checkConceptReferences,
         $noUpdates = false,
         $toBeChecked = false,
         $fallbackLanguage = null,
@@ -97,6 +98,7 @@ class Message
         $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
+        $this->checkConceptReferences=$checkConceptReferences;
         $this->noUpdates = $noUpdates; // create mode
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
@@ -183,5 +185,10 @@ class Message
     public function getUser()
     {
         return $this->user;
+    }
+    
+    public function getCheckConceptReferences()
+    {
+        return $this->checkConceptReferences;
     }
 }
