@@ -405,7 +405,7 @@ class Concept extends Resource
      * @param Person $person
      * @param PersonManager $personManager
      */
-    protected function resolveCreator(Person $person, PersonManager $personManager)
+    public function resolveCreator(Person $person, PersonManager $personManager)
     {
         $dcCreator = $this->getProperty(Dc::CREATOR);
         $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
