@@ -397,7 +397,7 @@ abstract class AbstractTripleStoreResource {
 
   // override in the concrete class when necessary
   protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi) {
-    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi,true);
+    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi,true, true);
     if (!$validator->validate($resourceObject)) {
       throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
     } else {

@@ -92,6 +92,7 @@ class Resource {
    */
   protected $isForUpdate;
   protected $referenceCheckOn;
+  protected $conceptReferenceCheckOn;
   protected $tenantUri;
   protected $setUri;
 
@@ -114,7 +115,7 @@ class Resource {
    * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
    * @param LoggerInterface $logger
    */
-  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referencecheckOn, LoggerInterface $logger = null) {
+  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referenceCheckOn, $conceptReferenceCheckOn, LoggerInterface $logger = null) {
     if ($logger === null) {
       $this->logger = new NullLogger();
     } else {
@@ -125,7 +126,8 @@ class Resource {
     $this->isForUpdate = $isForUpdate;
     $this->tenantUri = $tenantUri;
     $this->setUri = $setUri;
-    $this->referenceCheckOn = $referencecheckOn;
+    $this->referenceCheckOn = $referenceCheckOn;
+    $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
     
   }
 
@@ -303,7 +305,8 @@ class Resource {
       $validator->setFlagIsForUpdate($this->isForUpdate);
       $validator->setTenant($this->tenantUri);
       $validator->setSet($this->setUri);
-    }
+      $validator->setConceptReferenceCheckOn($this->conceptReferenceCheckOn);
+     }
     return $validators;
   }
 

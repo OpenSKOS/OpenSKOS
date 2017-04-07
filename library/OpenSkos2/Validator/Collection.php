@@ -114,6 +114,6 @@ class Collection
      */
     private function getResourceValidator()
     {
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->setUri, $this->referenceCheckOn, $this->logger);
+        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->setUri, $this->referenceCheckOn, $this->conceptReferenceCheckOn, $this->logger);
     }
 }
