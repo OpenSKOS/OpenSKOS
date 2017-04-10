@@ -284,6 +284,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
                 $userForSearch = OpenSKOS_Db_Table_Users::requireById($searchFormData['user']);
                 $userSearchOptions = $userForSearch->getSearchOptions($user['id'] != $userForSearch['id']);
+                $userSearchOptions['sorts'] = ['sort_s_prefLabel' => 'asc'];
                 $export->set(
                     'searchOptions',
                     Editor_Forms_Search::mergeSearchOptions($searchFormData, $userSearchOptions)
