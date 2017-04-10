@@ -179,6 +179,8 @@ class Serialiser
         do {
             $resources = $this->fetchResources($start, $step, $hasMore);
             
+            $resources->sortByPredicate(\OpenSkos2\Namespaces\Skos::PREFLABEL);
+            
             foreach ($resources as $resource) {
                 if ($resource instanceof Concept && $this->tenant->getEnableSkosXl()) {
                     $resource->loadFullXlLabels($this->conceptManager->getLabelManager());
