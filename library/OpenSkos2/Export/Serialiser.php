@@ -189,6 +189,8 @@ class Serialiser
         do {
             $resources = $this->fetchResources($start, $step, $hasMore);
             
+            $resources->sortByPredicate(\OpenSkos2\Namespaces\Skos::PREFLABEL);
+            
             foreach ($resources as $resource) {
                 fwrite($streamHandle, $this->format->printResource($resource));
             }
