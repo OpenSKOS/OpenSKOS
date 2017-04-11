@@ -24,6 +24,8 @@ require dirname(__FILE__) . '/bootstrap.inc.php';
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
+$solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
+
 $model = new OpenSKOS_Db_Table_Users();
 
 $must_params = ['tenant', 'key'];
@@ -44,17 +46,29 @@ function delete_all_concepts($resourceManager) {
   $conceptURIs = $resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
   $concepts = $resourceManager->fetchByUris($conceptURIs, Skos::CONCEPT);
   foreach ($concepts as $concept) {
-    $resourceManager->delete($concept, Skos::CONCEPT);
+    $resourceManager->delete($concept, Skos::CONCEPT); // should also clean solr according to the code, but it does not. Possible reason: dependency injection does not work well.
     $resourceManager->deleteReferencesToObject($concept);
   }
 }
-var_dump("1");
+
+
+function delete_all_concepts_solr($solrResourceManager) {
+  $conceptURIs = $solrResourceManager->search("*:*",50000000);
+  foreach ($conceptURIs as $conceptURI) {
+    $solrResourceManager->delete(new \OpenSkos2\Rdf\Uri($conceptURI));
+  }
+}
+
+
+
 switch ($action) {
   case 'delete':
     if ($OPTS->uri == null) {
       delete_all_concepts($resourceManager);
-      fwrite(STDOUT, "all concepts are deleted.\n");
-  
+      fwrite(STDOUT, "all concepts are deleted from the triple store, now: clean up solr.\n");
+      delete_all_concepts_solr($solrResourceManager);
+      fwrite(STDOUT, "all concepts are deleted from solr.\n");
+      
     } else {
       fwrite(STDERR, "deleting a concept by its uri is not implemented yet\n");
       exit(1);
