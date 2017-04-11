@@ -97,6 +97,11 @@ class RdfResponse extends ResultSetResponse
     private function moveNodesFromResource(\DOMElement $resource)
     {
         $skosResource = $resource->childNodes->item(1);
+        
+        if (empty($skosResource->childNodes)) {
+            return;
+        }
+        
         foreach ($skosResource->childNodes as $child) {
             $skosResource->parentNode->appendChild($child->cloneNode(true));
         }
