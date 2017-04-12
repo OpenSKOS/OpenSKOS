@@ -24,16 +24,24 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
     public function testCreateWithoutXML()
     {
         $request = (new \Zend\Diactoros\ServerRequest());
-        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+        $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
                 ->disableOriginalConstructor()
                 ->getMock();
-        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
+        $resourceManagerMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
                      ->disableOriginalConstructor()
                      ->getMock();
         $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
                      ->disableOriginalConstructor()
                      ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
+        $personManagerMock = $this->getMockBuilder('\OpenSkos2\PersonManager')
+                     ->disableOriginalConstructor()
+                     ->getMock();
+        $concept = new \OpenSkos2\Api\Concept(
+            $resourceManagerMock,
+            $conceptManagerMock,
+            $autocompleteMock,
+            $personManagerMock
+        );
         $response = $concept->create($request);
         
         $this->assertEquals(400, $response->getStatusCode());
@@ -43,16 +51,24 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
     public function testCreateWithoutTenant()
     {
         $request = $this->getRequest();
-        $conceptMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+        $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
                             ->disableOriginalConstructor()
                             ->getMock();
-        $resourceMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
+        $resourceManagerMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
                              ->disableOriginalConstructor()
                              ->getMock();
         $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
                                  ->disableOriginalConstructor()
                                  ->getMock();
-        $concept = new \OpenSkos2\Api\Concept($resourceMock, $conceptMock, $autocompleteMock);
+        $personManagerMock = $this->getMockBuilder('\OpenSkos2\PersonManager')
+                     ->disableOriginalConstructor()
+                     ->getMock();
+        $concept = new \OpenSkos2\Api\Concept(
+            $resourceManagerMock,
+            $conceptManagerMock,
+            $autocompleteMock,
+            $personManagerMock
+        );
         $response = $concept->create($request);
         
         $this->assertEquals(400, $response->getStatusCode());
