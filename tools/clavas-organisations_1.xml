@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcr="http://www.isocat.org/ns/dcr.rdf#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:openskos="http://openskos.org/xmlns#">
+   <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations">
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+        <dcterms:title xml:lang="en">OpenSKOS-CLARIN Organizations</dcterms:title>
+        <dcterms:description xml:lang="en">Organization Vocabulary, bootstrapped by manual curation from the list of VLO organization names (http://www.clarin.eu/vlo).</dcterms:description>
+    </rdf:Description>
+  <rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/0ff575c3-d012-4407-a1b5-c80e0bd09f04">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Longmans, Green and Company</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Longmans, Green &amp; Co.</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Longman, Green &amp; Co</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Longman, Green and Co</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Longmans, Green &amp; Co</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Longmans, Green and Company</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Longmans, Green</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/a7167762-c530-400f-948b-7e21e7b476a1">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Phonetics Laboratory, University of California</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Phonetics Laboratory, University of California</skos:altLabel>
+	     <skos:broader rdf:resource="http://openskos.meertens.knaw.nl/Organisations/2f64b661-0941-41aa-b650-136693612c48"/>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/2ad344b4-2ddc-4df0-9253-6fba24eb545c">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Gulbis</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/a58c9f0a-0a71-405b-93ab-88aabf145c63">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Stirling University</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Stirling University, UK</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/888f284c-66d0-40b9-9094-a6f919667bab">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Izd. Upr-nija Kavkazskago uchebnago okruga</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/cd9b96e3-582a-48e0-8087-98009dc0541d">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="es">Imprenta Calderon</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/ca0d55a1-cb41-4d98-ba84-7012191a89f4">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Polygoon</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/ec19b0fc-e69d-4cfd-aebc-42486e321989">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">California University Press</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/02b54adc-b328-4fe3-9181-bbf1f50f1804">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Shivaji University</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/a655b426-d543-4555-9717-f0b6fe7da47a">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Steiner</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/9607035d-4443-4e28-b6f0-b036a62b5414">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Il Mulino</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/57ad8eef-b12c-4258-8396-29bdec6ed36c">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="ca">Institut Universitari de Lingüística Aplicada</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Institut Universitari de Lingüística Aplicada / Instituto Cervantes</skos:altLabel>
+	     <skos:altLabel xml:lang="en">Institut Universitari de Lingüística Aplicada, Universitat Pompeu Fabra</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/ef378fd8-62eb-4843-b7e0-e66a512c6ee9">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="id">Universitas Cenderawasih</skos:prefLabel>
+	     <skos:altLabel xml:lang="en"/>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/15b1a6e0-e501-41e1-890d-f45e004f9102">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="es">Universidad Austral de Chile Ediciones</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/d64874e1-2a84-4c85-afcd-bab958118e17">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Pergamon Press</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Pergamon Press</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/8eaa9eba-3be0-4737-a656-e2c3a21bb9ed">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">André Deutsch</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/f13d8af3-1c14-4b33-925c-f2aa2790a851">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">University of South Africa Press</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/20d92a6d-576a-4ad0-a02f-4328e2d3ec3b">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">University of Idaho Press</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/ded5f7a1-5505-4274-8da8-d824ac5c9c75">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Institut für Finnougristik &amp; Uralistik, University of Hamburg</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">University of Hamburg, Institut für Finnougristik/Uralistik</skos:altLabel>
+	     <skos:editorialNote xml:lang="en">Both German and English</skos:editorialNote>
+	     <skos:broader rdf:resource="http://openskos.meertens.knaw.nl/Organisations/479c6928-3261-40ab-8e81-0c5724f9d732"/>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/176b6f3f-efaf-4c80-8476-a45ec322d709">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">BOS</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Boeddhistische Omroep Stichting</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/d0da1d98-c77c-4c9e-93d3-5fbe3c192932">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">The English Universities Press</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">The English Universities Press Ltd.</skos:altLabel>
+	     <skos:altLabel xml:lang="en">The English Universities Press Ltd</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/0d272c77-2da4-49d2-8855-f699a2f22318">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Bộ Giáo-dục Xuât-Bản</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/60b04348-61e5-462c-af4a-78a4e9799147">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Spectrum</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/05c812f1-191a-4570-940d-ba1bd50d3938">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Copenhagen Business School</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/12b5c4ba-6b91-4f6f-9a67-e053a5cfe339">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">University of Malta</skos:prefLabel>
+	     <skos:editorialNote xml:lang="en">Automatically constructed from imported hierarchy</skos:editorialNote>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/165012e0-366c-4291-9859-57aee5716c4e">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Verona Fathers</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/6d296563-698f-42fe-98e1-574dbaffea5d">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Magadanskoe knizhnoe izd-vo</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/c9b3d30e-6800-45b0-9c7b-a3727b9d9151">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">University of Natal</skos:prefLabel>
+	     <skos:editorialNote xml:lang="en">Automatically constructed from imported hierarchy</skos:editorialNote>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/9e73ea19-0adc-49ee-8aa0-162ac8df74e0">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Academy of Sciences at Latvia</skos:prefLabel>
+	     <skos:altLabel xml:lang="en">Academy of Sciences of Latvia</skos:altLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/4dd74e2d-6263-46bd-a118-2b5136a58c8c">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Lancaster University</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/d3e9713a-2576-43ab-9ee2-039a29001b6d">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Hoocąk Waaziija Haci Language Division</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/8c127cd5-4a29-4b10-b9f8-7b309fa560b9">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Charles Scribner's Sons </skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description><rdf:Description xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="http://openskos.meertens.knaw.nl/Organisations/a5801062-efd1-45fd-bf45-70c7dadceda2">
+	     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	     <skos:prefLabel xml:lang="en">Højskolebladet</skos:prefLabel>
+	     <skos:inScheme rdf:resource="http://openskos.meertens.knaw.nl/Organisations"/>
+   </rdf:Description>
+</rdf:RDF>

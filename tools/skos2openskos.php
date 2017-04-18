@@ -54,6 +54,7 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+
 $user = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
 
 $logger = new \Monolog\Logger("Logger");
@@ -65,7 +66,21 @@ $check_concept_references = null;
 
 echo "First round. (The referecne from a concept to another concept via relations is not be validated.) \n";
 
-
+ /** Recall Message's constructor parameters to see what is going on
+   /**
+   * Message constructor.
+   * @param $user
+   * @param $file
+   * @param Uri $setUri
+   * @param bool $ignoreIncomingStatus
+   * @param string $importedConceptStatus
+   * @param bool $isRemovingDanglingConceptReferencesRound
+   * @param bool $noUpdates
+   * @param bool $toBeChecked
+   * @param string $fallbackLanguage
+   * @param bool $clearSet
+   * @param bool $deleteSchemes
+   */
 $message = new \OpenSkos2\Import\Message( // Do not include references to concepts, NoUpdate Mode 
   $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
@@ -77,12 +92,18 @@ echo "The following " . count($not_valid_resource_uris) . " resources are not va
 foreach ($not_valid_resource_uris as $uri) {
   echo "\n " . $uri;
 }
-echo "First round is finished. The second round: the references to the non-valid concepts from other concepts via relations will be removed. UpdateMode\n";
+echo "\n First round is finished. The second round: the references to the non-valid concepts from other concepts via relations will be removed before submitting a concept for update. UpdateMode\n";
 
 $message2 = new \OpenSkos2\Import\Message(// Include references to concepts, Update Mode 
-  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, false, false, 'en', false, false
+  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
 );
-
+$not_valid_resource_uris2 = $importer->handle($message2);
+$elapsed2 = time() - $old_time;
+echo "\n time elapsed since start of the import : " . $elapsed2 . "\n";
+echo "The following " . count($not_valid_resource_uris2) . " resources are not valid and not imported in the second round import: \n";
+foreach ($not_valid_resource_uris2 as $uri) {
+  echo "\n " . $uri;
+}
 echo "Done\n";
 
 //php skos2openskos.php --setUri=http://hdl.handle.net/11148/backendname_dataset_f120d4f4-afd6-4554-a8bc-ba3c045e1005 --userUri=http://host/clavas/public/api/users/e1926046-8b5f-4342-ad2d-7145302757ff --file=clavas-organisations.xml

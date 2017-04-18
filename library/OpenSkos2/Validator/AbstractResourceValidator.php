@@ -37,12 +37,21 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   protected $tenantUri;
   protected $setUri;
   protected $referenceCheckOn;
-  protected $conceptReferenceCheckOn;
-
+  
   /**
    * @var array
    */
   protected $errorMessages = [];
+  /**
+   * @var array
+   */
+  protected $warningMessages = [];
+
+  /**
+   * @var array
+   */
+  protected $danglingReferences = [];
+  
 
   public function setResourceManager($resourceManager) {
     if ($resourceManager === null) {
@@ -66,8 +75,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
     $this->setUri = $setUri;
   }
 
-  public function setConceptReferenceCheckOn($flag) {
-    $this->conceptReferenceCheckOn = $flag;
+  public function setDeleteDanglingConceptRelatonReferences($flag) {
+    $this->deleteDanglingConceptRelatonReferences = $flag;
   }
 
   /**
@@ -77,15 +86,31 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   abstract public function validate(RdfResource $resource); // switcher
 
   /**
-   * @return string
+   * @return string[]
    */
   public function getErrorMessages() {
 
     return $this->errorMessages;
   }
+  
+   /**
+   * @return string[]
+   */
+  public function getWarningMessages() {
+
+    return $this->warningMessages;
+  }
+  
+   /**
+   * @return string[]
+   */
+  public function getDanglingReferences() {
+
+    return $this->danglingReferences;
+  }
+
 
   protected function validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique, $type = null) {
-    $this->errorMessages = [];
     $val = $resource->getProperty($propertyUri);
 
     if (count($val) < 1) {
@@ -153,15 +178,11 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   }
 
   // the resource referred by the uri must exist in the triple store, 
-  private function existenceCheck($uri, $rdfType) {
+  protected function existenceCheck($uri, $rdfType) {
     if (!$this->referenceCheckOn) {
       return [];
     }
-    // used in migration script: concepts may refer to other concepts, and we switch  this check when migrationg concepts
-    // the concepts must be udpated in the next round of migration with the full check  
-    if ($rdfType === Skos::CONCEPT && !$this->conceptReferenceCheckOn) {
-      return [];
-    }
+  
     $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
     if (!$exists) {
       return ['The resource (of type ' . $rdfType . ') referred by  uri ' . $uri->getUri() . ' is not found. '];

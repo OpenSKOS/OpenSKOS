@@ -23,10 +23,14 @@ use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractConceptValidator extends AbstractResourceValidator
+
 {
-   function __construct($referencecheckOn=true){
+   protected $softConceptRelationValidation;  // if set to true then the absense of the referred concept is not treated as an error but the warning is issued and the absent concept is added to the list of absent resources
+
+   function __construct($referencecheckOn=true, $softConceptRelationValidation=false){
        $this -> resourceType = Concept::TYPE;
-       $this->referenceCheckOn=$referencecheckOn; 
+       $this->referenceCheckOn=$referencecheckOn;
+       $this->softConceptRelationValidation=$softConceptRelationValidation; 
     }
     
     public function validate(RdfResource $resource)

@@ -93,7 +93,7 @@ class Resource {
    */
   protected $isForUpdate;
   protected $referenceCheckOn;
-  protected $conceptReferenceCheckOn;
+  protected $softConceptRelationValidation;
   protected $tenantUri;
   protected $setUri;
 
@@ -103,6 +103,20 @@ class Resource {
    * @var array
    */
   private $errorMessages = [];
+  
+   /**
+   * Holds all warning messages
+   *
+   * @var array
+   */
+  private $warningMessages = [];
+  
+    /**
+   * Holds all dangling references
+   *
+   * @var array
+   */
+  private $danglingReferences = [];
 
   /**
    * Logger
@@ -116,7 +130,7 @@ class Resource {
    * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
    * @param LoggerInterface $logger
    */
-  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referenceCheckOn, $conceptReferenceCheckOn, LoggerInterface $logger = null) {
+  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null) {
     if ($logger === null) {
       $this->logger = new NullLogger();
     } else {
@@ -128,7 +142,7 @@ class Resource {
     $this->tenantUri = $tenantUri;
     $this->setUri = $setUri;
     $this->referenceCheckOn = $referenceCheckOn;
-    $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
+    $this->softConceptRelationValidation = $softConceptRelationValidation;
     
   }
 
@@ -150,6 +164,23 @@ class Resource {
   public function getErrorMessages() {
     return $this->errorMessages;
   }
+  
+    /**
+   * Get warning messages
+   *
+   * @return array
+   */
+  public function getWarningMessages() {
+    return $this->warningMessages;
+  }
+  
+   /**
+   * @return string[]
+   */
+  public function getDanglingReferences() {
+
+    return $this->danglingReferences;
+  }
 
   /**
    * Apply the validators to the resource.
@@ -166,6 +197,12 @@ class Resource {
       }
       foreach ($validator->getErrorMessages() as $message) {
         $this->errorMessages[] = $message;
+      }
+      foreach ($validator->getWarningMessages() as $message) {
+        $this->warningMessages[] = "Validator's WARNING: $message. \n";
+      }
+       foreach ($validator->getDanglingReferences() as $ref) {
+        $this->danglingReferences[] = $ref;
       }
       $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
       $this->logger->error(implode(', ', $validator->getErrorMessages()));
@@ -294,11 +331,9 @@ class Resource {
       new CycleInBroader(),
       new CycleInNarrower(),
       new RelatedToSelf(),
-      new TopConceptOf($this->referenceCheckOn)
+      new TopConceptOf($this->referenceCheckOn),
+      new ReferencesForConceptRelations($this->referenceCheckOn, $this->softConceptRelationValidation)
     ];
-    if ($this->conceptReferenceCheckOn) {
-      $validators[]=new ReferencesForConceptRelations($this->referenceCheckOn);
-    }
     $validators = $this->refineValidators($validators);
     return $validators;
   }
@@ -309,7 +344,6 @@ class Resource {
       $validator->setFlagIsForUpdate($this->isForUpdate);
       $validator->setTenant($this->tenantUri);
       $validator->setSet($this->setUri);
-      $validator->setConceptReferenceCheckOn($this->conceptReferenceCheckOn);
      }
     return $validators;
   }
