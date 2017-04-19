@@ -41,7 +41,12 @@ class JsonResponse extends DetailResponse {
     foreach ($vals as $val){
       $body[$fieldname][] = (new DataArray($val))->transform();
     }
-    return new \Zend\Diactoros\Response\JsonResponse($body);
+    if (BACKWARD_COMPATIBLE) {
+      $correctedBody = $this->backwardCompatibilityMap($body);
+    } else {
+      $correctedBody = $body;
+    }
+    return new \Zend\Diactoros\Response\JsonResponse($correctedBody);
   }
 
 }

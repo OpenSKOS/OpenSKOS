@@ -12,6 +12,7 @@ define('USER', 'user');
 define('GUEST', 'guest');
 
 //
+define('BACKWARD_COMPATIBLE', false);
 define('MAXIMAL_ROWS', 5000);
 define('MAXIMAL_TIME_LIMIT', 240); //sec
 define('NORMAL_TIME_LIMIT', 30); // sec

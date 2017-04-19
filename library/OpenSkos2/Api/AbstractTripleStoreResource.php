@@ -192,10 +192,18 @@ abstract class AbstractTripleStoreResource {
 
       switch ($format) {
         case 'json':
-          $response = (new DetailJsonResponse($resource, $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
+          if ($this->manager->getResourceType() === Tenant::TYPE) {
+            $response = (new DetailJsonResponse($resource, $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
+          } else {
+            $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
+          }
           break;
         case 'jsonp':
-          $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
+          if ($this->manager->getResourceType() === Tenant::TYPE) {
+            $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
+          } else {
+            $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
+          }
           break;
         case 'rdf':
           $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
