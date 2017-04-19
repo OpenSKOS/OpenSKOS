@@ -4,32 +4,35 @@ namespace OpenSkos2\Api;
 
 use DOMDocument;
 use Exception;
-use OpenSkos2\Preprocessor;
-use OpenSkos2\Tenant;
-use OpenSkos2\Set;
-use OpenSkos2\Concept;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Api\Transform\DataRdf;
-use OpenSkos2\Converter\Text;
-use OpenSkos2\Namespaces;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Validator\Resource as ResourceValidator;
-use OpenSKOS_Db_Table_Row_User;
-use OpenSKOS_Db_Table_Users;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
+use OpenSkos2\Api\ResourceResultSet;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Api\ResourceResultSet;
+use OpenSkos2\Api\Transform\DataArray;
+use OpenSkos2\Api\Transform\DataRdf;
+use OpenSkos2\Bridge\EasyRdf;
+use OpenSkos2\Concept;
+use OpenSkos2\Converter\Text;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Preprocessor;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Set;
+use OpenSkos2\Tenant;
+use OpenSkos2\Validator\Resource as ResourceValidator;
+use OpenSKOS_Db_Table_Row_User;
+use OpenSKOS_Db_Table_Users;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\Stream;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
 
@@ -77,23 +80,23 @@ abstract class AbstractTripleStoreResource {
     }
     return $params;
   }
-  
-  protected function fetchSetUri($queryparams){
+
+  protected function fetchSetUri($queryparams) {
     if (empty($queryparams['set'])) {
-        if (empty($queryparams['collection'])) {
-          return null;
-        } else {
-          $setcode = $queryparams['collection'];
-        }
+      if (empty($queryparams['collection'])) {
+        return null;
       } else {
-        $setcode = $queryparams['set'];
+        $setcode = $queryparams['collection'];
       }
-      $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
-      if ($setUri === null) {
-        throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
-      } else {
-        return  $setUri;
-      }
+    } else {
+      $setcode = $queryparams['set'];
+    }
+    $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
+    if ($setUri === null) {
+      throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
+    } else {
+      return $setUri;
+    }
   }
 
   /* Returns a map, mapping resource's titles to the resource's Uri
@@ -116,8 +119,8 @@ abstract class AbstractTripleStoreResource {
         foreach ($index as $concept) {
           $spec = $this->manager->fecthTenantSpec($concept);
           foreach ($spec as $tenant_and_set) {
-            $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
-            $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
+            $concept->addProperty(OpenSkos::SET, new Uri($tenant_and_set['seturi']));
+            $concept->addProperty(OpenSkos::TENANT, new Uri($tenant_and_set['tenanturi']));
           }
         }
       } else {
@@ -181,12 +184,18 @@ abstract class AbstractTripleStoreResource {
       } else {
         $propertiesList = [];
       }
+
+      if (($format === 'json' || $format === 'jsonp') && $this->manager->getResourceType() === Tenant::TYPE) {
+        $setsGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
+        $setsResourceCollection = EasyRdf::graphToResourceCollection($setsGraph);
+      }
+
       switch ($format) {
         case 'json':
-          $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
+          $response = (new DetailJsonResponse($resource, $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
           break;
         case 'jsonp':
-          $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
+          $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
           break;
         case 'rdf':
           $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
@@ -211,8 +220,8 @@ abstract class AbstractTripleStoreResource {
       if ($rdfType === Skos::CONCEPT) {
         $spec = $this->manager->fetchTenantSpec($resource);
         foreach ($spec as $tenant_and_set) {
-          $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
-          $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
+          $resource->addProperty(OpenSkos::SET, new Uri($tenant_and_set['seturi']));
+          $resource->addProperty(OpenSkos::TENANT, new Uri($tenant_and_set['tenanturi']));
         }
       };
       return $resource;
@@ -266,7 +275,7 @@ abstract class AbstractTripleStoreResource {
       }
       $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params);
       if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $preprocessedResource)) {
-        $this->validate($preprocessedResource, true, $params['tenanturi'],$params['seturi']);
+        $this->validate($preprocessedResource, true, $params['tenanturi'], $params['seturi']);
         $this->manager->replace($preprocessedResource);
         $savedResource = $this->manager->fetchByUri($uri);
         $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -397,7 +406,7 @@ abstract class AbstractTripleStoreResource {
 
   // override in the concrete class when necessary
   protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi) {
-    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi,true, true);
+    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi, true, true);
     if (!$validator->validate($resourceObject)) {
       throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
     } else {

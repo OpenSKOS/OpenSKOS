@@ -1,0 +1,69 @@
+{
+    "code": "beng",
+    "name": "Nederlands Instituut voor Beeld en Geluid",
+    "organisationUnit": "Afdeling Metadatabeheer",
+    "website": "http:\/\/www.beeldengeluid.nl",
+    "email": "thesaurus@beeldengeluid.nl",
+    "streetAddress": "Media Park, Sumatralaan 45",
+    "locality": "Hilversum",
+    "postalCode": "1851RW",
+    "countryName": "Nederland",
+    "disableSearchInOtherTenants": null,
+    "enableStatusesSystem": "1",
+    "enableSkosXl": "1",
+    "collections": [{
+            "id": "4",
+            "uri": "http:\/\/accept.openskos.beeldengeluid.nl.pictura-dp.nl\/api\/collections\/beng:gtaa",
+            "code": "gtaa",
+            "tenant": "beng",
+            "dc_title": "Gemeenschappelijke Thesaurus Audiovisuele Archieven",
+            "dc_description": "De GTAA wordt gebruikt voor de beschrijving van audiovisuele collecties.",
+            "website": "http:\/\/data.beeldengeluid.nl",
+            "license_name": "Open Database License (ODbL) v1.0",
+            "license_url": "http:\/\/opendatacommons.org\/licenses\/odbl\/1.0\/",
+            "OAI_baseURL": "",
+            "allow_oai": "N",
+            "conceptsBaseUrl": "http:\/\/data.beeldengeluid.nl\/gtaa"
+        }, {
+            "id": "5",
+            "uri": "http:\/\/accept.openskos.beeldengeluid.nl.pictura-dp.nl\/api\/collections\/beng:nongtaa",
+            "code": "nongtaa",
+            "tenant": "beng",
+            "dc_title": "Beeld en Geluid Thesaurus assen voor intern gebruik",
+            "dc_description": "In gebruik voor iMMix vanuit GTAA: \r\nGenre, GeografischeNamen, Namen, Persoonsnamen, Onderwerpen, OnderwerpenBenG\r\n\r\nIn gebruik in iMMix, niet in GTAA:\r\nProductie, Zendgemachtigde, Doelgroep, \r\nTaal, Zender, Muziekstijl, Nationaliteit\r\n",
+            "website": "",
+            "license_name": "Open Database License (ODbL) v1.0",
+            "license_url": "http:\/\/opendatacommons.org\/licenses\/odbl\/1.0\/",
+            "OAI_baseURL": "",
+            "allow_oai": "N",
+            "conceptsBaseUrl": "http:\/\/data.beeldengeluid.nl\/nongtaa"
+        }, {
+            "id": "7",
+            "uri": "http:\/\/data.beeldengeluid.nl\/expired",
+            "code": "expired",
+            "tenant": "beng",
+            "dc_title": "Vervallen Assen",
+            "dc_description": "De vervallen assen worden nog geraadpleegd, maar niet meer onderhouden. ",
+            "website": "",
+            "license_name": "Open Database License (ODbL) v1.0",
+            "license_url": "http:\/\/opendatacommons.org\/licenses\/odbl\/1.0\/",
+            "OAI_baseURL": "",
+            "allow_oai": "Y",
+            "conceptsBaseUrl": "http:\/\/data.beeldengeluid.nl\/expired"
+        }, {
+            "id": "8",
+            "uri": "http:\/\/accept.openskos.beeldengeluid.nl.pictura-dp.nl\/api\/collections\/beng:nonmatch",
+            "code": "nonmatch",
+            "tenant": "beng",
+            "dc_title": "test collection for non matching terms immix",
+            "dc_description": "",
+            "website": "",
+            "license_name": "Open Database License (ODbL) v1.0",
+            "license_url": "http:\/\/opendatacommons.org\/licenses\/odbl\/1.0\/",
+            "OAI_baseURL": "",
+            "allow_oai": "N",
+            "conceptsBaseUrl": "http:\/\/data.beeldengeluid.nl\/nonmatch"
+        }]
+}
+
+

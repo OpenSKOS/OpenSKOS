@@ -1,0 +1,38 @@
+{
+    "uri": "http://example.com",
+    "uuid": "example",
+    "enableStatussesSystem": "true",
+    "disableSearchInOtherTenants": "true",
+    "code": "example",
+    "vcard_adr": "http://node-adr-4c33a594-51de-450b-b6ad-b0ae87dcec2f",
+    "vcard_org": {
+        "uri": "http://node-org-9f58c105-8eb5-4e78-90fe-23d979181f1f",
+        "vcard_orgname": "example.com"
+    },
+    "rdf_type": "http://www.w3.org/ns/org#FormalOrganization",
+    "sets": [{
+            "uri": "http://hdl/clavas-lang/set",
+            "uuid": "clavas-lang-set",
+            "code": "clavas-lang",
+            "conceptBaseUri": "http://clavas-lang/test",
+            "allow_oai": "true",
+            "webpage": "http://clavas-lang/page",
+            "OAI_base_uri": "http://clavas-lang/test",
+            "dcterms_title": "Clavas Languages",
+            "dcterms_publisher": "http://example.com",
+            "dcterms_license": "http://creativecommons.org/licenses/by/4.0/",
+            "rdf_type": "http://purl.org/dc/dcmitype#Dataset"
+        }, {
+            "uri": "http://htdl/clavas-org/set",
+            "uuid": "clavas-org-set",
+            "code": "clavas-org",
+            "conceptBaseUri": "http://clavas-org/test",
+            "allow_oai": "true",
+            "webpage": "http://clavas-org/page",
+            "OAI_base_uri": "http://clavas-org/test",
+            "dcterms_title": "Clavas Organisations",
+            "dcterms_publisher": "http://example.com",
+            "dcterms_license": "http://creativecommons.org/licenses/by/4.0/",
+            "rdf_type": "http://purl.org/dc/dcmitype#Dataset"
+        }]
+}

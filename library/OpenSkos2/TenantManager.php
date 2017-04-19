@@ -50,6 +50,14 @@ class TenantManager extends ResourceManager
 
         return [];
     }
+    
+    
+    public function fetchSetsForTenantUri($tenantUri) {
+        $query='DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <'.DcTerms::PUBLISHER.'> <'.$tenantUri.'>. } }';
+        $response = $this->query($query);
+        return $response;
+    }
+
 
     // used only for html output
     private function arrangeTripleStoreSets($response) {
