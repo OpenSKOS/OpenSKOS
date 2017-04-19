@@ -56,6 +56,9 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
     if (isset($newStyleBody["vcard_email"])) {
       $oldStyleBodyArray["email"] = $newStyleBody["vcard_email"];
     }
+    if (isset($newStyleBody["vcard_url"])) {
+      $oldStyleBodyArray["webpage"] = $newStyleBody["vcard_url"];
+    }
     if (isset($newStyleBody["vcard_adr"]["vcard_street"])) {
       $oldStyleBodyArray["streetAddress"] = $newStyleBody["vcard_adr"]["vcard_street"];
     }

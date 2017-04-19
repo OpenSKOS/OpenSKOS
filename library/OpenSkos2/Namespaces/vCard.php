@@ -28,7 +28,7 @@ class vCard
     
     const ORGUNIT = 'http://www.w3.org/2006/vcard/ns#orgunit';
     
-    const URL = 'http://www.w3.org/2006/vcard/ns#url';
+    const URL = 'http://www.w3.org/2006/vcard/ns#URL';
     
     const EMAIL = 'http://www.w3.org/2006/vcard/ns#EMAIL';
     

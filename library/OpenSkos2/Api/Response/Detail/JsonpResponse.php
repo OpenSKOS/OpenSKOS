@@ -60,7 +60,12 @@ class JsonpResponse extends DetailResponse {
     foreach ($vals as $val) {
       $body[$fieldname][] = (new DataArray($val))->transform();
     }
-    $response = self::produceJsonPResponse($body, $this->callback);
+    if (BACKWARD_COMPATIBLE) {
+      $correctedBody = $this->backwardCompatibilityMap($body);
+    } else {
+      $correctedBody = $body;
+    }
+    $response = self::produceJsonPResponse($correctedBody, $this->callback);
     return $response;
   }
 

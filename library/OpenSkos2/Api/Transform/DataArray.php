@@ -72,16 +72,15 @@ class DataArray {
     if ($this->doIncludeProperty('uri')) {
       $newResource['uri'] = $resource->getUri();
     }
-
+  
     foreach (self::getFieldsPlusIsRepeatableMap() as $field => $prop) {
+     
       if (!$this->doIncludeProperty($prop['uri'])) {
         continue;
       }
-
-      if ($resource->isPropertyEmpty($prop['uri'])) {
+     if ($resource->isPropertyEmpty($prop['uri'])) {
         continue;
       }
-
       $newResource = $this->getPropertyValue(
         $resource->getProperty($prop['uri']), $field, $prop, $newResource
       );
