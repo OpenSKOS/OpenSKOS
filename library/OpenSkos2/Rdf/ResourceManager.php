@@ -60,6 +60,13 @@ class ResourceManager
      */
     public function insert(Resource $resource)
     {
+        if ($this->askForUri($resource->getUri())) {
+            throw new ResourceAlreadyExistsException(
+                'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+                . 'It may be with status:deleted.'
+            );
+        }
+        
         // Put type if we have it and it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
@@ -74,6 +81,15 @@ class ResourceManager
      */
     public function insertCollection(ResourceCollection $resourceCollection)
     {
+        foreach ($resourceCollection as $resource) {
+            if ($this->askForUri($resource->getUri())) {
+                throw new ResourceAlreadyExistsException(
+                    'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+                    . 'It may be with status:deleted.'
+                );
+            }
+        }
+        
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
 
