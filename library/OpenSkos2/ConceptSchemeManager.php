@@ -26,6 +26,7 @@ use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 
 class ConceptSchemeManager extends ResourceManager
 {
@@ -34,6 +35,32 @@ class ConceptSchemeManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = ConceptScheme::TYPE;
+    
+    /**
+     * Soft delete resource , sets the openskos:status to deleted
+     * and add a delete date.
+     *
+     * Be careful you need to add the full resource as it will be deleted and added again
+     * do not only give a uri or part of the graph
+     *
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Uri $user
+     */
+    public function deleteSoft(Resource $resource, Uri $user = null)
+    {
+        $this->delete($resource);
+        
+        $resource->setUri(rtrim($resource->getUri(), '/') . '/deleted');
+        
+        $resource->setProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_DELETED));
+        $resource->setProperty(OpenSkos::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+
+        if ($user) {
+            $resource->setProperty(OpenSkos::DELETEDBY, $user);
+        }
+
+        $this->replace($resource);
+    }
 
     /**
      * Get all scheme's by collection URI

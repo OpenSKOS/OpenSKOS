@@ -116,15 +116,11 @@ class ResourceManager
      */
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
-        $resource->unsetProperty(OpenSkosNamespace::STATUS);
-        $status = new Literal(Resource::STATUS_DELETED);
-        $resource->addProperty(OpenSkosNamespace::STATUS, $status);
-
-        $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
-        $resource->addProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+        $resource->setProperty(OpenSkosNamespace::STATUS, new Literal(Resource::STATUS_DELETED));
+        $resource->setProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
 
         if ($user) {
-            $resource->unsetProperty(OpenSkosNamespace::DELETEDBY, $user);
+            $resource->setProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
 
         $this->replace($resource);
