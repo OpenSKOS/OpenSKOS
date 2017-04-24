@@ -17,8 +17,8 @@ class Publisher extends AbstractSetValidator
        $tenantUris = $resource ->getProperty(DcTerms::PUBLISHER);
        $errorsBeforeSecondRound = count($this->errorMessages);
        foreach ($tenantUris as $tenantUri) {
-           if ($tenantUri->getUri() !== $this->tenantUri) {
-              $this->errorMessages[]="The given publisher " . $tenantUri->getUri()."  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri ". $this->tenantUri . "." ;
+           if ($tenantUri->getUri() !== $this->tenant->getUri()) {
+              $this->errorMessages[]="The given publisher " . $tenantUri->getUri()."  does not correspond to the tenant code given in the parameter request which refers to the tenant with uri ". $this->tenant->getUri() . "." ;
            }
        }
        $errorsAfterSecondRound = count($this->errorMessages);

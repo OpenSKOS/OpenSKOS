@@ -28,18 +28,16 @@ class Preprocessor {
     $this->userUri = $userUri;
   }
 
-  public function forCreation(Resource $resourceObject, $params, $autoGenerateUuidUriWhenAbsent) {
+  public function forCreation(Resource $resourceObject, $autoGenerateUri, $tenant, $set) {
 
     $preprocessed = $resourceObject;
-    $preprocessed->addMetadata($this->userUri, $params, null);
+    $preprocessed->addMetadata(null, $this->userUri, $tenant, $set);
 
     if ($this->resourceType === Skos::CONCEPTSCHEME || $this->resourceType === Skos::SKOSCOLLECTION) {
       $sets = $preprocessed->getProperty(OpenSkos::SET);
       if (count($sets) < 1) {
         throw new ApiException('The set (former known as tenant collection) of the resource is not given', 400);
-      } else {
-        $params['seturi'] = $sets[0]->getUri();
-      }
+      } 
       $preprocessed->unsetProperty(OpenSkos::TENANT);
     }
 
@@ -48,34 +46,13 @@ class Preprocessor {
       $preprocessed->unsetProperty(OpenSkos::TENANT);
     }
 
-    if ($autoGenerateUuidUriWhenAbsent) {
-      $params['type'] = $this->resourceType;
-      if ($this->resourceType === Skos::CONCEPT) {
-        $notations = $preprocessed->getProperty(Skos::NOTATION);
-        if (count($notations) === 0) {
-          $params['notation'] = null;
-        } else {
-          $params['notation'] = $notations[0];
-        }
-        if (!isset($params['seturi'])) {
-          $schemes = $preprocessed->getProperty(Skos::INSCHEME);
-          if (count($schemes) > 0) {
-            $schemeUri = $schemes[0]->getUri();
-            $setUri = $this->manager->fetchObjectForSubjectAndProperty($schemeUri, OpenSkos::SET);
-            if (count($setUri) > 0) {
-              $params['seturi'] = $setUri[0];
-            } else {
-              $params['seturi'] = 'undefined';
-            }
-          }
-        }
-      }
-      $preprocessed->selfGenerateUuidAndUriWhenAbsent($this->manager, $params);
-    };
+    if ($autoGenerateUri) {
+      $preprocessed->selfGenerateUri($this->manager, $tenant, $set);
+    }
     return $preprocessed;
   }
 
-  public function forUpdate(Resource $resourceObject, $params) {
+  public function forUpdate(Resource $resourceObject, $tenant, $set) {
 
     $uri = $resourceObject->getUri();
     $existingResource = $this->manager->fetchByUri($uri, $this->resourceType);
@@ -98,7 +75,7 @@ class Preprocessor {
     if ($this->resourceType === Skos::CONCEPTSCHEME || $this->resourceType === Skos::SKOSCOLLECTION) {
       $preprocessed->unsetProperty(OpenSkos::TENANT);
     }
-    $preprocessed->addMetadata($this->userUri, $params, $existingResource);
+    $preprocessed->addMetadata($existingResource, $this->userUri, $tenant, $set);
     return $preprocessed;
   }
 

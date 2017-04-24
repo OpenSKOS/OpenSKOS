@@ -12,10 +12,8 @@ use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Api\Transform\DataArray;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Bridge\EasyRdf;
-use OpenSkos2\Concept;
 use OpenSkos2\Converter\Text;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Dcmi;
@@ -26,6 +24,7 @@ use OpenSkos2\Preprocessor;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
 use OpenSkos2\Tenant;
+use OpenSkos2\RelationType;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use OpenSKOS_Db_Table_Users;
@@ -46,7 +45,8 @@ abstract class AbstractTripleStoreResource {
     return $this->manager;
   }
 
-  protected function getQueryParams(ServerRequestInterface $request) {
+  // used in POST and PUT requests
+  protected function fetchUserTenantSetViaRequestParameters(ServerRequestInterface $request) {
     $queryparams = $request->getQueryParams();
     if (empty($queryparams['key'])) {
       throw new ApiException('No user key specified', 412);
@@ -60,28 +60,28 @@ abstract class AbstractTripleStoreResource {
       if (!isset($queryparams['tenant']) || empty($queryparams['tenant'])) {
         throw new ApiException('No tenant specified', 412);
       }
-      $params['tenantcode'] = $queryparams['tenant'];
-      $tenantUri = $this->manager->fetchUriByCode($params['tenant'], Tenant::TYPE);
-      if ($tenantUri === null) {
+      $tenant = $this->manager->fetchByCode($queryparams['tenant'], Tenant::TYPE);
+      if ($tenant === null) {
         throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. ', 400);
       }
-      $params['tenantcode'] = $params['tenant'];
-      $params['tenanturi'] = $tenantUri;
+      $params['tenant'] = $tenant;
     } else {
-      $params['tenantcode'] = 'undefined';
-      $params['tenanturi'] = 'undefined';
+      $params['tenant'] = null;
     }
 
-    if ($this->manager->getResourceType() === Concept::TYPE) {
-      $params['seturi'] = $this->fetchSetUri($queryparams);
-      if ($params['seturi'] == null) {
-        throw new ApiException('No set (former collection) specified', 412);
+    $resourceType=$this->manager->getResourceType();
+    if ($resourceType !== Tenant::TYPE && $resourceType !== Set::TYPE && $resourceType !== RelationType::TYPE) {
+      $params['set'] = $this->fetchSet($queryparams);
+      if ($params['set'] == null) {
+        throw new ApiException("No set (former collection) specified, posting $resourceType", 412);
       }
+    } else {
+      $params['set'] = null;
     }
     return $params;
   }
 
-  protected function fetchSetUri($queryparams) {
+  protected function fetchSet($queryparams) {
     if (empty($queryparams['set'])) {
       if (empty($queryparams['collection'])) {
         return null;
@@ -91,12 +91,8 @@ abstract class AbstractTripleStoreResource {
     } else {
       $setcode = $queryparams['set'];
     }
-    $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
-    if ($setUri === null) {
-      throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
-    } else {
-      return $setUri;
-    }
+    $set = $this->manager->fetchByCode($setcode, Set::TYPE);
+    return $set;
   }
 
   /* Returns a map, mapping resource's titles to the resource's Uri
@@ -237,27 +233,42 @@ abstract class AbstractTripleStoreResource {
   }
 
   public function create(ServerRequestInterface $request) {
-
     try {
-      $params = $this->getQueryParams($request);
+      // validate and fetch user, tenant and set
+      $params = $this->fetchUserTenantSetViaRequestParameters($request);
+      
+      // validate and fetch the xml for POST
       $resourceObject = $this->getResourceObjectFromRequestBody($request);
-      if (!$this->authorisationManager->resourceCreationAllowed($params['user'], $params['tenantcode'], $resourceObject)) {
+      
+      // validate authorisation situation
+      if (!$this->authorisationManager->resourceCreationAllowed($params['user'], $params['tenant'], $resourceObject)) {
         throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' . $params['user']->role . '"', 403);
       }
+      
+      // check if the uri mentioned in the body exists
       if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
         throw new ApiException(
         'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.', 400
         );
       }
 
+      // fecth autoGenerateIdentifiers parameter and if uri and uuid must/not-must in this case
       $autoGenerateUri = $this->checkResourceIdentifiers($request, $resourceObject);
+      
+      // prepare preprocessor 
       if ($this->manager->getResourceType() === Tenant::TYPE) {
         $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), null);
       } else {
         $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['user']->getFoafPerson()->getUri());
       }
-      $preprocessedResource = $preprocessor->forCreation($resourceObject, $params, $autoGenerateUri);
-      $this->validate($preprocessedResource, false, $params['tenanturi'], $params['seturi']);
+      
+      //preprocess (fill in creator, data, status, autooGenerateIdentifiers)
+      $preprocessedResource = $preprocessor->forCreation($resourceObject, $autoGenerateUri, $params['tenant'], $params['set']);
+      
+      // validate
+      $this->validate($preprocessedResource, false, $params['tenant'], $params['set']);
+      
+      // create
       $this->manager->insert($preprocessedResource);
       $savedResource = $this->manager->fetchByUri($preprocessedResource->getUri());
       $rdf = (new DataRdf($savedResource, true, []))->transform();
@@ -269,27 +280,32 @@ abstract class AbstractTripleStoreResource {
 
   public function update(ServerRequestInterface $request) {
     try {
+      // validate and fetch user, tenant and set
+      $params = $this->fetchUserTenantSetViaRequestParameters($request);
+      
+      // validate and fetch the xml for PUPT
       $resourceObject = $this->getResourceObjectFromRequestBody($request);
       if ($resourceObject->isBlankNode()) {
         throw new ApiException("Missed uri (rdf:about)!", 400);
       }
-      $params = $this->getQueryParams($request);
-
-      $uri = $resourceObject->getUri();
+      
+      // preprocess
       if ($this->manager->getResourceType() === Tenant::TYPE) {
         $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), null);
       } else {
         $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['user']->getFoafPerson()->getUri());
       }
-      $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params);
-      if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $preprocessedResource)) {
-        $this->validate($preprocessedResource, true, $params['tenanturi'], $params['seturi']);
+      $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params['tenant'], $params['set']);
+      
+      // check authorisation, validate and update
+      if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenant'], $preprocessedResource)) {
+        $this->validate($preprocessedResource, true, $params['tenant'], $params['set']);
         $this->manager->replace($preprocessedResource);
-        $savedResource = $this->manager->fetchByUri($uri);
+        $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
         $rdf = (new DataRdf($savedResource, true, []))->transform();
         return $this->getSuccessResponse($rdf);
       } else {
-        throw new ApiException('You do not have rights to edit resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenantcode'], 403);
+        throw new ApiException('You do not have rights to edit resource ' . $resourceObject->getUri() . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
       }
     } catch (Exception $e) {
       return $this->getErrorResponseFromException($e);
@@ -298,7 +314,7 @@ abstract class AbstractTripleStoreResource {
 
   public function delete(ServerRequestInterface $request) {
     try {
-      $params = $this->getQueryParams($request);
+      $params = $this->fetchUserTenantSetViaRequestParameters($request);
       if (empty($params['uri'])) {
         throw new ApiException('Missing uri parameter', 400);
       }
@@ -309,8 +325,8 @@ abstract class AbstractTripleStoreResource {
         throw new ApiException('The resource is not found by uri :' . $uri, 404);
       }
 
-      if (!$this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenantcode'], $resourceObject)) {
-        throw new ApiException('You do not have rights to delete resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenantcode'], 403);
+      if (!$this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenant'], $resourceObject)) {
+        throw new ApiException('You do not have rights to delete resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
       }
 
       $canBeDeleted = $this->deletionManager->canBeDeleted($uri, $this->manager);
@@ -374,27 +390,31 @@ abstract class AbstractTripleStoreResource {
   }
 
   protected function checkResourceIdentifiers($request, $resourceObject) {
-    $params = $this->getQueryParams($request);
+    $params = $request->getQueryParams();
+    
     $autoGenerateIdentifiers = false;
     if (!empty($params['autoGenerateIdentifiers'])) {
       $autoGenerateIdentifiers = filter_var(
         $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
       );
     }
+    
     $uuid = $resourceObject->getProperty(OpenSkos::UUID);
+      
     if ($autoGenerateIdentifiers) {
       if (!$resourceObject->isBlankNode()) {
         throw new ApiException(
         'Parameter autoGenerateIdentifiers is set to true, but the provided '
         . 'xml already contains uri (rdf:about).', 400
         );
-      };
+      }
+      
       if (count($uuid) > 0) {
         throw new ApiException(
         'Parameter autoGenerateIdentifiers is set to true, but the provided '
         . 'xml  already contains uuid.', 400
         );
-      };
+      }
     } else {
       // Is uri missing
       if ($resourceObject->isBlankNode()) {
@@ -406,15 +426,15 @@ abstract class AbstractTripleStoreResource {
         throw new ApiException(
         'OpenSkos:uuid is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
         );
-      };
+      }
     }
 
     return $autoGenerateIdentifiers;
   }
 
   // override in the concrete class when necessary
-  protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi) {
-    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenanturi, $seturi, true, true);
+  protected function validate($resourceObject, $isForUpdate, $tenant, $set) {
+    $validator = new ResourceValidator($this->manager, $isForUpdate, $tenant, $set, true, true);
     if (!$validator->validate($resourceObject)) {
       throw new ApiException(implode(' ', $validator->getErrorMessages()), 400);
     } else {
@@ -440,7 +460,7 @@ abstract class AbstractTripleStoreResource {
     if (strtolower($user->active) !== 'y') {
       throw new ApiException('Your user account is blocked', 401);
     }
-
+         
     return $user;
   }
 

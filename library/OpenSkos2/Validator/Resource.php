@@ -50,9 +50,9 @@ use OpenSkos2\Validator\ConceptScheme\HasTopConcept as SchemaHasTopConcept;
 use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
 use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
 use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
-use OpenSkos2\Validator\Relation\Creator as RelationCreator;
-use OpenSkos2\Validator\Relation\Description as RelationDescription;
-use OpenSkos2\Validator\Relation\Title as RelationTitle;
+use OpenSkos2\Validator\RelationType\Creator as RelationTypeCreator;
+use OpenSkos2\Validator\RelationType\Description as RelationTypeDescription;
+use OpenSkos2\Validator\RelationType\Title as RelationTypeTitle;
 use OpenSkos2\Validator\Set\License;
 use OpenSkos2\Validator\Set\OpenskosAllowOAI;
 use OpenSkos2\Validator\Set\OpenskosCode as SetOpenskosCode;
@@ -94,8 +94,8 @@ class Resource {
   protected $isForUpdate;
   protected $referenceCheckOn;
   protected $softConceptRelationValidation;
-  protected $tenantUri;
-  protected $setUri;
+  protected $tenant;
+  protected $set;
 
   /**
    * Holds all error messages
@@ -130,7 +130,7 @@ class Resource {
    * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
    * @param LoggerInterface $logger
    */
-  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null) {
+  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null) {
     if ($logger === null) {
       $this->logger = new NullLogger();
     } else {
@@ -139,8 +139,8 @@ class Resource {
 
     $this->resourceManager = $resourceManager;
     $this->isForUpdate = $isForUpdate;
-    $this->tenantUri = $tenantUri;
-    $this->setUri = $setUri;
+    $this->tenant = $tenant;
+    $this->set = $set;
     $this->referenceCheckOn = $referenceCheckOn;
     $this->softConceptRelationValidation = $softConceptRelationValidation;
     
@@ -236,9 +236,8 @@ class Resource {
       return $this->getTenantValidators();
     }
     if ($resource instanceof RelationType) {
-      return $this->getRelationValidators();
+      return $this->getRelationTypeValidators();
     }
-    return [];
   }
 
   /**
@@ -271,11 +270,11 @@ class Resource {
     return $validators;
   }
 
-  private function getRelationValidators() {
+  private function getRelationTypeValidators() {
     $validators = [
-      new RelationTitle(),
-      new RelationDescription(),
-      new RelationCreator($this->referenceCheckOn)
+      new RelationTypeTitle(),
+      new RelationTypeDescription(),
+      new RelationTypeCreator($this->referenceCheckOn)
     ];
     $validators = $this->refineValidators($validators);
     return $validators;
@@ -342,8 +341,8 @@ class Resource {
     foreach ($validators as $validator) {
       $validator->setResourceManager($this->resourceManager);
       $validator->setFlagIsForUpdate($this->isForUpdate);
-      $validator->setTenant($this->tenantUri);
-      $validator->setSet($this->setUri);
+      $validator->setTenant($this->tenant);
+      $validator->setSet($this->set);
      }
     return $validators;
   }

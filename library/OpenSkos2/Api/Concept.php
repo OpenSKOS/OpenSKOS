@@ -293,7 +293,7 @@ class Concept extends AbstractTripleStoreResource {
 
   public function delete(PsrServerRequestInterface $request) {
     try {
-      $params = $this->getQueryParams($request);
+      $params = $this->fetchUserTenantSetViaRequestParameters($request);
       if (!isset($params['id'])) {
         throw new InvalidArgumentException('Missing id parameter', 412);
       }
@@ -405,7 +405,7 @@ class Concept extends AbstractTripleStoreResource {
    * @return Response
    */
   public function addRelationTriple(PsrServerRequestInterface $request) {
-    $params = $this->getQueryParams($request);
+    $params = $this->fetchUserTenantSetViaRequestParameters($request);
     try {
       $body = $this->preEditChecksRels($request, $params, false);
       $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
@@ -426,7 +426,7 @@ class Concept extends AbstractTripleStoreResource {
    */
   public function deleteRelationTriple(PsrServerRequestInterface $request) {
     try {
-      $params = $this->getQueryParams($request); // sets tenant info
+      $params = $this->fetchUserTenantSetViaRequestParameters($request); // sets tenant info
       $body = $this->preEditChecksRels($request, $params, true);
       $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
     } catch (Exception $e) {

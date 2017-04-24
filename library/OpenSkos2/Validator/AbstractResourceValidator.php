@@ -34,14 +34,15 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   protected $resourceManager;
   protected $resurceType;
   protected $isForUpdate;
-  protected $tenantUri;
-  protected $setUri;
+  protected $tenant;
+  protected $set;
   protected $referenceCheckOn;
-  
+
   /**
    * @var array
    */
   protected $errorMessages = [];
+
   /**
    * @var array
    */
@@ -51,7 +52,6 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
    * @var array
    */
   protected $danglingReferences = [];
-  
 
   public function setResourceManager($resourceManager) {
     if ($resourceManager === null) {
@@ -67,12 +67,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
     $this->isForUpdate = $isForUpdate;
   }
 
-  public function setTenant($tenantUri) {
-    $this->tenantUri = $tenantUri;
+  public function setTenant($tenant) {
+    $this->tenant = $tenant;
   }
 
-  public function setSet($setUri) {
-    $this->setUri = $setUri;
+  public function setSet($set) {
+    $this->set = $set;
   }
 
   public function setDeleteDanglingConceptRelatonReferences($flag) {
@@ -92,16 +92,16 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
 
     return $this->errorMessages;
   }
-  
-   /**
+
+  /**
    * @return string[]
    */
   public function getWarningMessages() {
 
     return $this->warningMessages;
   }
-  
-   /**
+
+  /**
    * @return string[]
    */
   public function getDanglingReferences() {
@@ -109,10 +109,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
     return $this->danglingReferences;
   }
 
-
   protected function validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique, $type = null) {
     $val = $resource->getProperty($propertyUri);
-
     if (count($val) < 1) {
       if ($isRequired) {
         $this->errorMessages[] = $propertyUri . ' is required for all resources of this type.';
@@ -148,7 +146,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   }
 
   private function uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value) {
-    $errorMessages = ['The resource of type ' . $resource->getType()->getURi() . ' with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered.'];
+    $errorMessages = ['The resource of type ' . $resource->getType()->getUri() . ' with the property ' . $propertyUri . ' set to ' . $value . ' has been already registered.'];
     if (count($otherResourceUris) > 0) {
       if ($this->isForUpdate) { // for update
         if (count($otherResourceUris) > 1) {
@@ -182,7 +180,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
     if (!$this->referenceCheckOn) {
       return [];
     }
-  
+
     $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
     if (!$exists) {
       return ['The resource (of type ' . $rdfType . ') referred by  uri ' . $uri->getUri() . ' is not found. '];
@@ -238,9 +236,21 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
 
   protected function validateInSet(RdfResource $resource) {
+    // set can be derived from the resource parameter, passed to $set
     $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
     if ($firstRound) {
-      return $this->isSetOfCurrentTenant($resource);
+      $secondRound = $this->isSetOfCurrentTenant($resource);
+      if ($secondRound) {
+        $setURIs = $resource->getProperty(OpenSkos::SET);
+        $setURI = $setURIs[0]->getUri();
+        if ($this->set->getUri() !== $setURI) {
+          $this->errorMessages[] = "The set given in the resource parameter by code " . $this->set->getCode() . " does not coninside with the set given in the reqiest body by the reference " . $setURI;
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
@@ -253,8 +263,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
       $set = $this->resourceManager->fetchByUri($setURI->getUri(), Dcmi::DATASET);
       $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
       $tenantUri = $tenantUris[0]->getUri();
-      if ($tenantUri !== $this->tenantUri) {
-        $this->errorMessages[] = "The resource " . $resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not belong to the user's tenant " . $this->tenantUri . ", but to the tenant " . $tenantUri . ".";
+      if ($tenantUri !== $this->tenant->getUri()) {
+        $this->errorMessages[] = "The resource " . $resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not belong to the user's tenant " . $this->tenant->getUri() . ", but to the tenant " . $tenantUri . ".";
       }
     }
     $errorsAfterCheck = count($this->errorMessages);
@@ -265,8 +275,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
     $setUris = $resource->getProperty(OpenSkos::SET);
     $errorsBeforeCheck = count($this->errorMessages);
     foreach ($setUris as $setURI) {
-      if ($setURI->getUri() !== $this->setUri) {
-        $this->errorMessages[] = "The resource " . $resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not coinside with the set announced by request parameter with $this->setUri  ";
+      if ($setURI->getUri() !== $this->set->getUri()) {
+        $this->errorMessages[] = "The resource " . $resource->getUri() . " attempts to access the set  " . $setURI->getUri() . ", which does not coinside with the set announced by request parameter with " . $this->set->getUri();
       }
     }
     $errorsAfterCheck = count($this->errorMessages);
@@ -304,7 +314,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface {
   }
 
   protected function validateInScheme(RdfResource $resource) {
-    $retVal = $this->validateInSchemeOrInCollection($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME, false);
+    $retVal = $this->validateInSchemeOrInCollection($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME, true);
     return $retVal;
   }
 

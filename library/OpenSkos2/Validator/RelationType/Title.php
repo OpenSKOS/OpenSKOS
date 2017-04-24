@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\Validator\Relation;
+namespace OpenSkos2\Validator\RelationType;
 
 use OpenSkos2\RelationType;
 use OpenSkos2\Validator\AbstractRelationTypeValidator;

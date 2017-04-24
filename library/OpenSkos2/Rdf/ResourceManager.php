@@ -665,7 +665,7 @@ class ResourceManager
         $term = $value->getValue();
         $types = $resource ->getProperty(RdfNamespace::TYPE);
         $rdfType=$types[0]->getUri();
-        if ($rdfType=== Concept::TYPE) { // solr request, works only for skos and open-skos properties
+        if ($rdfType=== Concept::TYPE && $property !== OpenSkosNamespace::UUID) { // solr request, works only for skos and open-skos properties
             $split = explode("#", $property);
             $field = $split[1];
             $solrQuery = 's_' . $field . ':"' . $term.'"';

@@ -32,8 +32,8 @@ class Collection
      * @var ResourceManager
      */
     protected $resourceManager;
-    protected $tenantUri;
-    protected $setUri;
+    protected $tenant;
+    protected $set;
     protected $isForUpdate;
     protected $referenceCheckOn;
     /**
@@ -54,9 +54,7 @@ class Collection
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    //public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, LoggerInterface $logger = null)
-    
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenantUri, $setUri, $referencecheckOn, LoggerInterface $logger = null)
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referencecheckOn, LoggerInterface $logger = null)
     {
         if ($logger === null) {
             $logger = new NullLogger();
@@ -64,8 +62,8 @@ class Collection
         
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
-        $this->tenantUri = $tenantUri;
-        $this->setUri = $setUri;
+        $this->tenant = $tenant;
+        $this->set = $set;
         $this->isForUpdate = $isForUpdate;
         $this -> referenceCheckOn = $referencecheckOn;
     }
@@ -114,6 +112,6 @@ class Collection
      */
     private function getResourceValidator()
     {
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenantUri, $this->setUri, $this->referenceCheckOn, $this->conceptReferenceCheckOn, $this->logger);
+        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenant, $this->set, $this->referenceCheckOn, $this->conceptReferenceCheckOn, $this->logger);
     }
 }

@@ -22,6 +22,8 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 
 class Person extends Resource
 {
@@ -49,6 +51,6 @@ class Person extends Resource
     }
     
     // override for a concerete resources
-    public function addMetadata($userUri, $params, $existingResource) {
+    public function addMetadata($existingResource, $userUri, Tenant $tenant, Set $set) {
     }
 }

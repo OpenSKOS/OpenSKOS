@@ -1,11 +1,10 @@
 <?php
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 
 namespace OpenSkos2;
 
@@ -15,49 +14,43 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 
-class SkosCollection extends Resource
-{
-    const TYPE = Skos::SKOSCOLLECTION;
+class SkosCollection extends Resource {
 
-    public function __construct($uri = null) {
-        parent::__construct($uri);
-        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
-    }
-    
-    // how to add get property-reference attribute??
-    
-    public function getTitle()
-    {
-        if ($this->hasProperty(DcTerms::TITLE)) {
-            return (string)$this->getPropertySingleValue(DcTerms::TITLE);
-        } else {
-            return null;
-        }
-        
-    }
-    
-    
-    
-   public function getDescription()
-    {
-        if ($this->hasProperty(DcTerms::DESCRIPTION)) {
-            return (string)$this->getPropertySingleValue(DcTerms::DESCRIPTION);
-        } else {
-            return null;
-        }
-    }
-    
-     
-    public function addMetadata($userUri, $params, $existingResource) {
-        parent::addMetadata($userUri, $params, $existingResource);
-        $setUri = $this->deriveSetUri($params, $existingResource);
-        if ($setUri !== null) { // othewrise it is either set in *this* or not derivable
-            $this->setProperty(OpenSkos::SET, $setUri);
-        }
+  const TYPE = Skos::SKOSCOLLECTION;
 
+  public function __construct($uri = null) {
+    parent::__construct($uri);
+    $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+  }
+
+  // how to add get property-reference attribute??
+
+  public function getTitle() {
+    if ($this->hasProperty(DcTerms::TITLE)) {
+      return (string) $this->getPropertySingleValue(DcTerms::TITLE);
+    } else {
+      return null;
     }
+  }
+
+  public function getDescription() {
+    if ($this->hasProperty(DcTerms::DESCRIPTION)) {
+      return (string) $this->getPropertySingleValue(DcTerms::DESCRIPTION);
+    } else {
+      return null;
+    }
+  }
+
+  public function addMetadata($existingScheme, $userUri, Tenant $tenant, Set $set) {
+    parent::addMetadata($existingScheme, $userUri, $tenant, $set);
+    if ($this->isPropertyEmpty(OpenSkos::SET)) {
+      $this->setProperty(OpenSkos::SET, $set);
+    }
+  }
 
 }

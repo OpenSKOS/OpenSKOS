@@ -48,7 +48,7 @@ class RelationType extends AbstractTripleStoreResource {
     }
     
     public function ListRelatedConceptPairs($request) {
-        $params=$request->getQueryParams();
+        $params=$request->fetchUserTenantSetViaRequestParameters();
         $relType = $params['id'];
         $sourceSchemata = null;
         $targetSchemata = null;
@@ -74,7 +74,7 @@ class RelationType extends AbstractTripleStoreResource {
     
 
     public function findRelatedConcepts($request, $uri, $format) {
-        $params=$request->getQueryParams();
+        $params=$request->fetchUserTenantSetViaRequestParameters();
         $relType = $params['id'];
         if (isset($params['inScheme'])) {
             $schema = $params['inScheme'];
