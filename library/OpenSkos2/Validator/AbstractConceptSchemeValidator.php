@@ -7,12 +7,13 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractConceptSchemeValidator extends AbstractResourceValidator
 {
-   
-    function __construct($referencecheckOn=true){
-       $this -> resourceType = ConceptScheme::TYPE;
-       $this->referenceCheckOn=$referencecheckOn; 
+
+    public function __construct($referencecheckOn = true)
+    {
+        $this->resourceType = ConceptScheme::TYPE;
+        $this->referenceCheckOn = $referencecheckOn;
     }
-    
+
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof ConceptScheme) {
@@ -20,6 +21,6 @@ abstract class AbstractConceptSchemeValidator extends AbstractResourceValidator
         }
         return false;
     }
-    
+
     abstract protected function validateSchema(ConceptScheme $schema);
 }

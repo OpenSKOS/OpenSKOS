@@ -21,13 +21,15 @@ namespace OpenSkos2\Export\Serialiser;
 
 class FormatFactory
 {
-    /**#@+
+    /*     * #@+
      * All possible formats
      */
+
     const FORMAT_XML = 'xml';
     const FORMAT_CSV = 'csv';
     const FORMAT_RTF = 'rtf';
-    /**#@-*/
+
+    /*     * #@- */
 
     /**
      * Gets supported formats.
@@ -43,7 +45,7 @@ class FormatFactory
 
         return $formats;
     }
-    
+
     /**
      * @param string $format
      * @param array $propertiesToSerialise
@@ -67,12 +69,12 @@ class FormatFactory
             default:
                 throw new \RuntimeException('Not supported format "' . $this->format . '"');
         }
-        
+
         // @TODO not all require properties, namespaces and max depth. Validate what is required and what not.
         $formatObject->setPropertiesToSerialise($propertiesToSerialise);
         $formatObject->setNamespaces($namespaces);
         $formatObject->setMaxDepth($maxDepth);
-        
+
         return $formatObject;
     }
 }

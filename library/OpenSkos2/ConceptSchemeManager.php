@@ -29,16 +29,19 @@ use OpenSkos2\Rdf\Uri;
 
 class ConceptSchemeManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = ConceptScheme::TYPE;
 
-     //TODO: check conditions when it can be deleted
-    public function CanBeDeleted($uri){
+    //TODO: check conditions when it can be deleted
+    public function canBeDeleted($uri)
+    {
         return parent::CanBeDeleted($uri);
     }
+
     /**
      * Get all scheme's by set URI
      *
@@ -57,7 +60,7 @@ class ConceptSchemeManager extends ResourceManager
                 SELECT ?subject ?title ?uuid
                 WHERE {
                     ?subject rdf:type skos:ConceptScheme;
-                    <' . OpenSkos::SET .  '> ' . $escaped . ';
+                    <' . OpenSkos::SET . '> ' . $escaped . ';
                     dcterms:title ?title;
                     openskos:uuid ?uuid;
             ';
@@ -96,7 +99,4 @@ class ConceptSchemeManager extends ResourceManager
 
         return $retVal;
     }
-    
-   
-   
 }

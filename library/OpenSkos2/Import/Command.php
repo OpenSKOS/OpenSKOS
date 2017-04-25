@@ -47,218 +47,224 @@ require_once dirname(__FILE__) . '/../../../tools/Logging.php';
 
 
 
-class Command implements LoggerAwareInterface {
+class Command implements LoggerAwareInterface
+{
 
-  use LoggerAwareTrait;
+    use LoggerAwareTrait;
 
-  /**
-   * @var ResourceManager
-   */
-  private $resourceManager;
-  private $black_list;
+    /**
+     * @var ResourceManager
+     */
+    private $resourceManager;
+    private $black_list;
 
-  /**
-   * Command constructor.
-   * @param ResourceManager $resourceManager
-   * @param String $tenantUri optional If specified - tenant specific validation can be made.
-   */
-  public function __construct(
-  ResourceManager $resourceManager
-  ) {
-    $this->resourceManager = $resourceManager;
-  }
-
-  public function handle(Message $message) {
-    $this->black_list = [];
-    
-    if ($message->isRemovingDanglingConceptReferencesRound($message)) {
-      return $this->handleRemovingDanglingConceptReferencesRound($message);
-    } else {
-      return $this->handleWithoutRemovingDanglingReferences($message);
-    }
-  }
-
-  private function handleWithoutRemovingDanglingReferences(Message $message) {
-
-    $file = new File($message->getFile());
-    $resourceCollection = $file->getResources();
-
-    $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
-    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-    if (count($tenantUris) < 1) {
-      throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
-    };
-    $tenantUri = $tenantUris[0]->getUri();
-
-    //** Some purging stuff from the original picturae code
-    if ($message->getClearSet()) {
-      $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
-    }
-
-    if ($message->getDeleteSchemes()) {
-      $conceptSchemes = [];
-      foreach ($resourceCollection as $resourceToInsert) {
-        foreach ($resourceToInsert->getProperty(Skos::INSCHEME) as $scheme) {
-          /** @var $scheme Uri */
-          $conceptSchemes[$scheme->getUri()] = $scheme;
-        }
-      }
-      foreach ($conceptSchemes as $scheme) {
-        $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
-        $this->resourceManager->delete($scheme, Skos::CONCEPTSCHEME);
-      }
-    }
-    // ***
-    foreach ($resourceCollection as $resourceToInsert) {
-      $params['seturi'] = $message->getSetUri();
-      $uri = $resourceToInsert->getUri();
-
-      $types = $resourceToInsert->getProperty(Rdf::TYPE);
-
-      if (count($types) < 1) {
-        throw new \Exception("The resource " . $uri . " does not have rdf-type. ");
-      }
-      $type = $types[0]->getUri();
-      $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser());
-
-      $exists = $this->resourceManager->resourceExists($uri, $type);
-      if ($exists) {
-        $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
-        if ($message->getNoUpdates()) {
-          var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
-          $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
-          continue;
-        } else {
-          $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
-          $isForUpdates = true;
-          if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
-            $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
-            $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
-          }
-        }
-      } else { // adding a new resource
-        $autoGenerateIdentifiers = true;
-        $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
-        $isForUpdates = false;
-        $currentVersion = null;
-      }
-
-      $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
-      $valid = $validator->validate($preprocessedResource);
-      if (!$valid) {
-        $this->handleNotValidResource($uri, $type, $validator, $preprocessedResource);
-        continue;
-      }
-      $this->handleWarnings($uri, $validator);
-      if ($preprocessedResource instanceof Concept) {
-        $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
-      }
-      if ($currentVersion !== null) {
-        $this->resourceManager->delete($currentVersion);
-      }
-      $this->resourceManager->insert($preprocessedResource);
-      var_dump($preprocessedResource->getUri() . " has been inserted.");
-    }
-    return $this->black_list;
-  }
-
-  private function handleRemovingDanglingConceptReferencesRound(Message $message) {
-    $conceptURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<'.Skos::CONCEPT.'>');
-    $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
-    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-    if (count($tenantUris) < 1) {
-      throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
-    }
-    $tenantUri = $tenantUris[0]->getUri();
-    foreach ($conceptURIs as $uri) {
-      $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
-      $isForUpdates = true;
-      $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
-      $valid = $validator->validate($currentVersion);
-      $preprocessedResource = $this->removeDanglingConeptRelationReferences($currentVersion, $validator->getDanglingReferences());
-      if (!$valid) {
-        $this->handleNotValidResource($uri, Skos::CONCEPT, $validator, $preprocessedResource);
-        continue;
-      }
-      $this->handleWarnings($uri, $validator);
-      $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
-      $this->resourceManager->insert($preprocessedResource);
-      var_dump($preprocessedResource->getUri() . " has been updated.");
-    }
-    return $this->black_list;
-  }
-
-  function specialConceptImportLogic($message, $concept, $currentVersion) {
-    if ($message->getIgnoreIncomingStatus()) {
-      $concept->unsetProperty(OpenSkos::STATUS);
-    }
-
-    if ($message->getToBeChecked()) {
-      $concept->addProperty(OpenSkos::TOBECHECKED, new Literal(true, null, Literal::TYPE_BOOL));
-    }
-
-    if ($message->getImportedConceptStatus() &&
-      (!$concept->hasProperty(OpenSkos::STATUS))
+    /**
+     * Command constructor.
+     * @param ResourceManager $resourceManager
+     * @param String $tenantUri optional If specified - tenant specific validation can be made.
+     */
+    public function __construct(
+        ResourceManager $resourceManager
     ) {
-      $concept->addProperty(OpenSkos::STATUS, new Literal($message->getImportedConceptStatus())
-      );
+        $this->resourceManager = $resourceManager;
     }
 
-    $langProperties = \OpenSkos2\Rdf\Resource::getLanguagedProperties();
-    if ($message->getFallbackLanguage()) {
-      foreach ($concept->getProperties() as $predicate => $properties) {
-        foreach ($properties as $property) {
-          if (in_array($predicate, $langProperties) && $property instanceof Literal && $property->getLanguage() === null) {
-            $property->setLanguage($message->getFallbackLanguage());
-          }
+    public function handle(Message $message)
+    {
+        $this->black_list = [];
+
+        if ($message->isRemovingDanglingConceptReferencesRound($message)) {
+            return $this->handleRemovingDanglingConceptReferencesRound($message);
+        } else {
+            return $this->handleWithoutRemovingDanglingReferences($message);
         }
-      }
     }
-    return $concept;
-  }
 
-  private function handleNotValidResource($uri, $type, $validator, $preprocessedResource) {
-    $this->black_list[] = $uri;
-    foreach ($validator->getErrorMessages() as $errorMessage) {
-      var_dump($errorMessage);
-      \Tools\Logging::var_logger("The followig resource has not been added due to the validation error " . $errorMessage, $preprocessedResource->getUri(), ERROR_LOG);
-    }
-    var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
-    $this->resourceManager->delete($preprocessedResource, $type); //remove garbage - 1
-    $this->resourceManager->deleteReferencesToObject($preprocessedResource); //remove garbage - 2
-  }
+    private function handleWithoutRemovingDanglingReferences(Message $message)
+    {
 
-  private function handleWarnings($uri, $validator) {
-    foreach ($validator->getWarningMessages() as $warning) {
-      var_dump($warning);
-      \Tools\Logging::var_logger($warning, $uri, ERROR_LOG);
-    }
-  }
+        $file = new File($message->getFile());
+        $resourceCollection = $file->getResources();
 
-  private function removeDanglingConeptRelationReferences($preprocessedResource, $danglings) {
-    $properties = $preprocessedResource->getProperties();
-    foreach ($properties as $property => $values) {
-      if (is_array($values)) {
-        $checked_values = [];
-        foreach ($values as $value) {
-          if ($values instanceof \OpenSkos2\Rdf\Uri) {
-            if (!in_array($value->getUri(), $danglings)) {
-              $checked_values[] = $value;
+        $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
+        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+        if (count($tenantUris) < 1) {
+            throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
+        };
+        $tenantUri = $tenantUris[0]->getUri();
+
+        //** Some purging stuff from the original picturae code
+        if ($message->getClearSet()) {
+            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
+        }
+
+        if ($message->getDeleteSchemes()) {
+            $conceptSchemes = [];
+            foreach ($resourceCollection as $resourceToInsert) {
+                foreach ($resourceToInsert->getProperty(Skos::INSCHEME) as $scheme) {
+                    /** @var $scheme Uri */
+                    $conceptSchemes[$scheme->getUri()] = $scheme;
+                }
             }
-          } else {
-            $checked_values[] = $value;
-          }
+            foreach ($conceptSchemes as $scheme) {
+                $this->resourceManager->deleteBy([Skos::INSCHEME => $scheme]);
+                $this->resourceManager->delete($scheme, Skos::CONCEPTSCHEME);
+            }
         }
-        $preprocessedResource->setProperties($property, $checked_values);
-      } else {
-        if ($values instanceof \OpenSkos2\Rdf\Uri) {
-          if (in_array($values->getUri(), $danglings)) {
-            $preprocessedResource->unsetProperty($property);
-          }
-        }
-      }
-    }
-    return $preprocessedResource;
-  }
+        // ***
+        foreach ($resourceCollection as $resourceToInsert) {
+            $params['seturi'] = $message->getSetUri();
+            $uri = $resourceToInsert->getUri();
 
+            $types = $resourceToInsert->getProperty(Rdf::TYPE);
+
+            if (count($types) < 1) {
+                throw new \Exception("The resource " . $uri . " does not have rdf-type. ");
+            }
+            $type = $types[0]->getUri();
+            $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser());
+
+            $exists = $this->resourceManager->resourceExists($uri, $type);
+            if ($exists) {
+                $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
+                if ($message->getNoUpdates()) {
+                    var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
+                    $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
+                    continue;
+                } else {
+                    $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
+                    $isForUpdates = true;
+                    if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
+                        $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
+                        $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
+                    }
+                }
+            } else { // adding a new resource
+                $autoGenerateIdentifiers = true;
+                $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
+                $isForUpdates = false;
+                $currentVersion = null;
+            }
+
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
+            $valid = $validator->validate($preprocessedResource);
+            if (!$valid) {
+                $this->handleNotValidResource($uri, $type, $validator, $preprocessedResource);
+                continue;
+            }
+            $this->handleWarnings($uri, $validator);
+            if ($preprocessedResource instanceof Concept) {
+                $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
+            }
+            if ($currentVersion !== null) {
+                $this->resourceManager->delete($currentVersion);
+            }
+            $this->resourceManager->insert($preprocessedResource);
+            var_dump($preprocessedResource->getUri() . " has been inserted.");
+        }
+        return $this->black_list;
+    }
+
+    private function handleRemovingDanglingConceptReferencesRound(Message $message)
+    {
+        $conceptURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>');
+        $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
+        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+        if (count($tenantUris) < 1) {
+            throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
+        }
+        $tenantUri = $tenantUris[0]->getUri();
+        foreach ($conceptURIs as $uri) {
+            $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
+            $isForUpdates = true;
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
+            $valid = $validator->validate($currentVersion);
+            $preprocessedResource = $this->removeDanglingConeptRelationReferences($currentVersion, $validator->getDanglingReferences());
+            if (!$valid) {
+                $this->handleNotValidResource($uri, Skos::CONCEPT, $validator, $preprocessedResource);
+                continue;
+            }
+            $this->handleWarnings($uri, $validator);
+            $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
+            $this->resourceManager->insert($preprocessedResource);
+            var_dump($preprocessedResource->getUri() . " has been updated.");
+        }
+        return $this->black_list;
+    }
+
+    private function specialConceptImportLogic($message, $concept, $currentVersion)
+    {
+        if ($message->getIgnoreIncomingStatus()) {
+            $concept->unsetProperty(OpenSkos::STATUS);
+        }
+
+        if ($message->getToBeChecked()) {
+            $concept->addProperty(OpenSkos::TOBECHECKED, new Literal(true, null, Literal::TYPE_BOOL));
+        }
+
+        if ($message->getImportedConceptStatus() &&
+            (!$concept->hasProperty(OpenSkos::STATUS))
+        ) {
+            $concept->addProperty(OpenSkos::STATUS, new Literal($message->getImportedConceptStatus()));
+        }
+
+        $langProperties = \OpenSkos2\Rdf\Resource::getLanguagedProperties();
+        if ($message->getFallbackLanguage()) {
+            foreach ($concept->getProperties() as $predicate => $properties) {
+                foreach ($properties as $property) {
+                    if (in_array($predicate, $langProperties) && $property instanceof Literal && $property->getLanguage() === null) {
+                        $property->setLanguage($message->getFallbackLanguage());
+                    }
+                }
+            }
+        }
+        return $concept;
+    }
+
+    private function handleNotValidResource($uri, $type, $validator, $preprocessedResource)
+    {
+        $this->black_list[] = $uri;
+        foreach ($validator->getErrorMessages() as $errorMessage) {
+            var_dump($errorMessage);
+            \Tools\Logging::var_logger("The followig resource has not been added due to the validation error " . $errorMessage, $preprocessedResource->getUri(), ERROR_LOG);
+        }
+        var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
+        $this->resourceManager->delete($preprocessedResource, $type); //remove garbage - 1
+        $this->resourceManager->deleteReferencesToObject($preprocessedResource); //remove garbage - 2
+    }
+
+    private function handleWarnings($uri, $validator)
+    {
+        foreach ($validator->getWarningMessages() as $warning) {
+            var_dump($warning);
+            \Tools\Logging::var_logger($warning, $uri, ERROR_LOG);
+        }
+    }
+
+    private function removeDanglingConeptRelationReferences($preprocessedResource, $danglings)
+    {
+        $properties = $preprocessedResource->getProperties();
+        foreach ($properties as $property => $values) {
+            if (is_array($values)) {
+                $checked_values = [];
+                foreach ($values as $value) {
+                    if ($values instanceof \OpenSkos2\Rdf\Uri) {
+                        if (!in_array($value->getUri(), $danglings)) {
+                            $checked_values[] = $value;
+                        }
+                    } else {
+                        $checked_values[] = $value;
+                    }
+                }
+                $preprocessedResource->setProperties($property, $checked_values);
+            } else {
+                if ($values instanceof \OpenSkos2\Rdf\Uri) {
+                    if (in_array($values->getUri(), $danglings)) {
+                        $preprocessedResource->unsetProperty($property);
+                    }
+                }
+            }
+        }
+        return $preprocessedResource;
+    }
 }

@@ -24,20 +24,21 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractTenantValidator extends AbstractResourceValidator
 {
-   function __construct($referencecheckOn=true){
-       $this -> resourceType = Tenant::TYPE;
-       $this->referenceCheckOn=$referencecheckOn; 
+
+    public function __construct($referencecheckOn = true)
+    {
+        $this->resourceType = Tenant::TYPE;
+        $this->referenceCheckOn = $referencecheckOn;
     }
-    
+
     public function validate(RdfResource $resource)
     {
-        
+
         if ($resource instanceof Tenant) {
             return $this->validateTenant($resource);
         }
         return false;
     }
 
-   
     abstract protected function validateTenant(Tenant $tenant);
 }

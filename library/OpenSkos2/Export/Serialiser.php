@@ -27,41 +27,42 @@ use OpenSkos2\Search\Autocomplete;
 
 class Serialiser
 {
+
     /**
      * Holds the number of concepts that can be exported at a time.
      * @var int
      */
     const EXPORT_STEP = 1000;
-    
+
     /**
      * The resource manager to use for fetching the resources to serialise.
      * @var ResourceManager
      */
     protected $resourceManager;
-    
+
     /**
      * List of uris to export. Leave empty if search options are used (concepts only)
      * @var array
      */
     protected $uris;
-    
+
     /**
      * The options to use to fetch resources from the search autocomplete (concepts only).
      * @var array
      */
     protected $searchOptions;
-    
+
     /**
      * @var FormatAbstract
      */
     protected $format;
-    
+
     /**
      * Searcher for when search options are provided.
      * @var \OpenSkos2\Search\Autocomplete
      */
     protected $searchAutocomplete;
-    
+
     /**
      * Gets the list of uris to export. Leave empty if search options are used (concepts only)
      * @return array
@@ -97,7 +98,7 @@ class Serialiser
     {
         $this->searchOptions = $searchOptions;
     }
-    
+
     /**
      * Gets searcher for when search options are provided.
      * @return OpenSkos2\Search\Autocomplete
@@ -118,7 +119,7 @@ class Serialiser
     {
         $this->searchAutocomplete = $searchAutocomplete;
     }
-    
+
     /**
      * Gets the resource manager to use for fetching the resources to serialise.
      * @return ResourceManager
@@ -148,7 +149,7 @@ class Serialiser
     {
         $this->format = $format;
     }
-    
+
     /**
      * Writes to string with the specified settings.
      * @return string
@@ -162,7 +163,7 @@ class Serialiser
         fclose($streamHandle);
         return $result;
     }
-    
+
     /**
      * Writes the serialised objects to file.
      *
@@ -174,7 +175,7 @@ class Serialiser
         $this->writeToStream($streamHandle);
         fclose($streamHandle);
     }
-    
+
     /**
      * Exports to the specified stream.
      * @param long $streamHandle
@@ -182,23 +183,23 @@ class Serialiser
     public function writeToStream($streamHandle)
     {
         fwrite($streamHandle, $this->format->printHeader());
-        
+
         $step = self::EXPORT_STEP;
         $start = 0;
         $hasMore = false;
         do {
             $resources = $this->fetchResources($start, $step, $hasMore);
-            
+
             foreach ($resources as $resource) {
                 fwrite($streamHandle, $this->format->printResource($resource));
             }
-        
+
             $start += $step;
         } while ($hasMore);
-        
+
         fwrite($streamHandle, $this->format->printFooter());
     }
-    
+
     /**
      * Fetches chunk of resources to serialise.
      * @param int $start
@@ -213,13 +214,13 @@ class Serialiser
             $options['start'] = $start;
             $options['rows'] = $step;
             $collection = $this->getSearchAutocomplete()->search($options, $numFound);
-            
+
             $hasMore = ($start + $step) < $numFound;
         } elseif (!empty($this->uris)) {
             $collection = $this->getResourceManager()->fetchByUris($this->uris);
             $hasMore = false;
         }
-        
+
         return $collection;
     }
 }

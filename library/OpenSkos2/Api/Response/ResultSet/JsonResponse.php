@@ -26,6 +26,7 @@ use OpenSkos2\Api\Response\ResultSetResponse;
  */
 class JsonResponse extends ResultSetResponse
 {
+
     /**
      * Get response
      *
@@ -33,9 +34,9 @@ class JsonResponse extends ResultSetResponse
      */
     public function getResponse()
     {
-       return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
+        return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
     }
-    
+
     /**
      * Gets the response data.
      * @return array
@@ -58,10 +59,10 @@ class JsonResponse extends ResultSetResponse
      * @return array
      */
     protected function getDocs()
-    { 
+    {
         $docs = [];
         foreach ($this->result->getResources() as $resource) {
-           $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
+            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
             $docs[] = $nResource;
         }
         return $docs;

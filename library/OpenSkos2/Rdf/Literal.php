@@ -23,8 +23,8 @@ use OpenSkos2\Exception\InvalidResourceException;
 
 class Literal implements Object
 {
+
     const TYPE_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
-    
     const TYPE_BOOL = "http://www.w3.org/2001/XMLSchema#bool";
 
     /**
@@ -98,11 +98,12 @@ class Literal implements Object
     /*
      * @return string
      */
+
     public function getType()
     {
         return $this->type;
     }
-    
+
     /**
      * @param string $type
      * @return self
@@ -124,7 +125,7 @@ class Literal implements Object
         if ($this->getValue() instanceof \DateTime) {
             return $this->getValue()->format('c');
         } else {
-            return (string)$this->getValue();
+            return (string) $this->getValue();
         }
     }
 }

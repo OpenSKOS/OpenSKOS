@@ -9,15 +9,18 @@ use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
 
-class Deletion {
-    
+class Deletion
+{
+
     private $resourceManager;
-    
-    public function __construct($manager) {
+
+    public function __construct($manager)
+    {
         $this->resourceManager = $manager;
     }
-    
-    public function canBeDeleted($uri) {
+
+    public function canBeDeleted($uri)
+    {
         $type = $this->resourceManager->getResourceType();
         switch ($type) {
             case Concept::TYPE:
@@ -27,7 +30,7 @@ class Deletion {
             case Set::TYPE:
                 return $this->setCanBeDeleted($uri);
             case Tenant::TYPE:
-                return $this->tenantCanBeDeleted($uri);  
+                return $this->tenantCanBeDeleted($uri);
             case SkosCollection::TYPE:
                 return $this->skosCollectionCanBeDeleted($uri);
             case RelationType::TYPE:
@@ -37,39 +40,43 @@ class Deletion {
         }
     }
 
-    
-    private function canBeDeletedBasic($uri) {
+    private function canBeDeletedBasic($uri)
+    {
         $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
         $references = $this->resourceManager->query($query);
         return (($references[0]->COUNT->getValue()) < 1);
     }
 
-    private function conceptCanBeDeleted($uri) {
-        // the lowerst-level resource, 
+    private function conceptCanBeDeleted($uri)
+    {
+        // the lowerst-level resource,
         // can be always deleted if authorisation rights allow (checked in another place)
         // but with taking crae that the corresponding relations are cleaned
         return true;
     }
 
-    private function conceptSchemeCanBeDeleted($uri) {
+    private function conceptSchemeCanBeDeleted($uri)
+    {
         return $this->canBeDeletedBasic($uri);
     }
 
-    private function tenantCanBeDeleted($uri) {
+    private function tenantCanBeDeleted($uri)
+    {
         return $this->canBeDeletedBasic($uri);
     }
 
-    private function setCanBeDeleted($uri) {
+    private function setCanBeDeleted($uri)
+    {
         return $this->canBeDeletedBasic($uri);
     }
 
-    private function skosCollectionCanBeDeleted($uri) {
+    private function skosCollectionCanBeDeleted($uri)
+    {
         return $this->canBeDeletedBasic($uri);
     }
 
-    private function relationCanBeDeleted($uri) {
+    private function relationCanBeDeleted($uri)
+    {
         return $this->canBeDeletedBasic($uri);
     }
-
-}   
-
+}

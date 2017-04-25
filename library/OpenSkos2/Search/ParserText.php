@@ -21,19 +21,19 @@ namespace OpenSkos2\Search;
 
 class ParserText
 {
+
     /**
      * Holds the format in which the dates in the options must be.
      * @var string
      */
     const OPTIONS_DATE_FORMAT = 'dd/MM/yyyy';
-    
+
     /**
      * Holds the regular expression for splitting the search text for search by text.
      *
      * @var string
      */
     const SEARCH_TEXT_SPLIT_REGEX = '/[\s]+/';
-    
 
     /**
      * Holds an array of the chars which if are contained in the text field it will be considered query.
@@ -41,8 +41,6 @@ class ParserText
      * @var array
      */
     private $operatorsDeterminingTextAsQuery = ['AND', 'OR', 'NOT', '&&', '||'];
-    
-    
 
     /**
      * Holds the regular expression for characters that are part of the solr syntax and needs escaping.
@@ -51,8 +49,6 @@ class ParserText
      */
     //!NOTE "\" must be first in the list.
     private $charsToEscape = array('\\', ' ', '+', '-', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', ':');
-    
-    
 
     /**
      * Escapes chars that are part of solr syntax.
@@ -67,7 +63,7 @@ class ParserText
         }
         return $text;
     }
-    
+
     /**
      * Fix "@nl" to "_nl"
      * @param string $searchText
@@ -96,7 +92,7 @@ class ParserText
 
         return false;
     }
-    
+
     /**
      * Checks the search text if it contains search based on fields
      * @param string $searchText
@@ -106,7 +102,7 @@ class ParserText
     {
         return preg_match('/(^|\s)[^"]*[a-z_]+:"?[^"]*"?(\s|$)/i', $searchText) === 1;
     }
-    
+
     /**
      * Checks if the search text is fully quoted - like "Koomen, Theo"
      * @param string $searchText
@@ -116,7 +112,7 @@ class ParserText
     {
         return preg_match('/^".*"$/', $searchText) === 1;
     }
-    
+
     /**
      * Is the search a wildcard search. Containing ? or *
      * @param string $searchText
@@ -126,7 +122,7 @@ class ParserText
     {
         return stripos($searchText, '*') !== false || stripos($searchText, '?') !== false;
     }
-    
+
     /**
      * Builds query for date period - like created_timestamp:[{startDate} TO {endDate}].
      * @param string $field The field to search by.
@@ -153,7 +149,7 @@ class ParserText
         }
         return $field . ':[' . $startDate . ' TO ' . $endDate . ']';
     }
-    
+
     /**
      * Converts the given date into a solr date (ISO 8601)
      * @return string The solr date
@@ -166,8 +162,7 @@ class ParserText
             $parsedDate = new \Zend_Date($date, self::OPTIONS_DATE_FORMAT);
             $timestamp = $parsedDate->toString('U');
         }
-        
+
         return gmdate('Y-m-d\TH:i:s.z\Z', $timestamp);
     }
-  
 }

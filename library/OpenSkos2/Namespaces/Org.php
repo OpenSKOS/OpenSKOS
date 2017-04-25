@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -20,8 +21,7 @@ namespace OpenSkos2\Namespaces;
 
 class Org
 {
+
     const NAME_SPACE = 'http://www.w3.org/ns/org#';
-    
     const FORMALORG = 'http://www.w3.org/ns/org#FormalOrganization';
-    
 }

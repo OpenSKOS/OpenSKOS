@@ -16,17 +16,16 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\MyInstitutionModules\RelationTypes;
 
-require_once dirname(__FILE__) .'/config.inc.php';
+require_once dirname(__FILE__) . '/config.inc.php';
 
 class RelationManager extends ResourceManager
 {
-   
-    
     
 }

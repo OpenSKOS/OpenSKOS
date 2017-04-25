@@ -21,14 +21,14 @@ namespace OpenSkos2\Export;
 
 class Message
 {
+
     protected $format;
     protected $maxDepth;
     protected $outputFilePath;
     protected $propertiesToExport;
-    
     protected $searchOptions;
     protected $uris;
-    
+
     public function getFormat()
     {
         return $this->format;
@@ -48,7 +48,7 @@ class Message
     {
         return $this->propertiesToExport;
     }
-    
+
     public function setFormat($format)
     {
         $this->format = $format;

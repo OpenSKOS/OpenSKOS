@@ -22,11 +22,11 @@ namespace OpenSkos2\Validator\SkosCollection;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Validator\AbstractSkosCollectionValidator;
 
-class InSet extends AbstractSkosCollectionValidator 
+class InSet extends AbstractSkosCollectionValidator
 {
-    
+
     protected function validateSkosCollection(SkosCollection $resource)
     {
-      return $this->validateInSet($resource);
+        return $this->validateInSet($resource);
     }
 }

@@ -7,8 +7,9 @@ use OpenSkos2\Validator\AbstractConceptSchemeValidator;
 
 class Title extends AbstractConceptSchemeValidator
 {
+
     protected function validateSchema(ConceptScheme $resource)
     {
-       return $this->validateTitle($resource);
+        return $this->validateTitle($resource);
     }
 }

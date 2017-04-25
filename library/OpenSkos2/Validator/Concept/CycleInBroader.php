@@ -28,7 +28,6 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 class CycleInBroader extends AbstractConceptValidator
 {
 
-    
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
      * but was not supported in OpenSKOS this validator provides a way to restrict it in a similar way
@@ -47,7 +46,7 @@ class CycleInBroader extends AbstractConceptValidator
         $uri = new Uri($concept->getUri());
 
         $query = '?broader skos:broader+ ' . (new NTriple())->serialize($uri) . PHP_EOL
-                . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
+            . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
 
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic broader relation detected for concept: {$concept->getUri()}";

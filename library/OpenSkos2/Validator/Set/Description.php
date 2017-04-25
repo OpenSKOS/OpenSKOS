@@ -7,8 +7,9 @@ use OpenSkos2\Validator\AbstractSetValidator;
 
 class Description extends AbstractSetValidator
 {
-   protected function validateSet(Set $resource)
+
+    protected function validateSet(Set $resource)
     {
-       return $this->validateDescription($resource);
+        return $this->validateDescription($resource);
     }
 }

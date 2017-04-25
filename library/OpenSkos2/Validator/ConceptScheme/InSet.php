@@ -24,8 +24,9 @@ use OpenSkos2\Validator\AbstractConceptSchemeValidator;
 
 class InSet extends AbstractConceptSchemeValidator
 {
+
     protected function validateSchema(ConceptScheme $resource)
     {
-      return $this->validateInSet($resource);
+        return $this->validateInSet($resource);
     }
 }

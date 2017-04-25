@@ -25,6 +25,7 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class RequriedPrefLabel extends AbstractConceptValidator
 {
+
     /**
      * Ensure the preflabel does not already exists in the scheme
      * @param Concept $concept

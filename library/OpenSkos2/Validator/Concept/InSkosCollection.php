@@ -22,10 +22,11 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
-class InSkosCollection extends AbstractConceptValidator{
-    
-     protected function validateConcept(Concept $concept)
+class InSkosCollection extends AbstractConceptValidator
+{
+
+    protected function validateConcept(Concept $concept)
     {
-      return $this->validateInSkosCollection($concept);
+        return $this->validateInSkosCollection($concept);
     }
 }

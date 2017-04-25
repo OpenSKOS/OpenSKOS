@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -20,5 +21,5 @@ namespace OpenSkos2\Exception;
 
 class InvalidArgumentException extends OpenSkosException
 {
-
+    
 }

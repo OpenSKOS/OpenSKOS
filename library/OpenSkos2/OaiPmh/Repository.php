@@ -28,7 +28,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Search\ParserText;
@@ -204,11 +204,11 @@ class Repository implements InterfaceRepository
     public function listSets()
     {
         $oaisets = $this->getOaiSets();
-        
+
         if (count($oaisets) < 1) {
             throw new \Exception("No sets with enabled oai.");
         }
-        
+
         $items = [];
         $tenantAdded = [];
         foreach ($oaisets as $row) {
@@ -279,11 +279,11 @@ class Repository implements InterfaceRepository
      */
     public function listRecords($metadataFormat = null, DateTime $from = null, DateTime $until = null, $set = null)
     {
-        
+
         $pSet = $this->parseSet($set);
 
         //\Tools\Logging::var_error_log(" pSet: ", $pSet , APPLICATION_BASE_PATH.'/data/debug.txt');
-        
+
         $concepts = $this->getConcepts(
             $this->limit,
             0,
@@ -317,7 +317,7 @@ class Repository implements InterfaceRepository
 
         $pSet = $this->parseSet($params['set']);
 
-        $cursor = (int)$params['offset'];
+        $cursor = (int) $params['offset'];
 
         $concepts = $this->getConcepts(
             $this->limit,
@@ -419,7 +419,7 @@ class Repository implements InterfaceRepository
     private function parseSet($set)
     {
         $arrSet = explode(':', $set);
-        
+
         $return = [];
 
         $tenantURI = null;
@@ -428,7 +428,7 @@ class Repository implements InterfaceRepository
             if (count($tenants) > 0) {
                 $tenantURI = $tenants[0];
             } else {
-                throw new \Exception('A tenant with the code '. $arrSet[0]. " is not found in the triple store" );
+                throw new \Exception('A tenant with the code ' . $arrSet[0] . " is not found in the triple store");
             }
         }
         $return['tenant'] = $tenantURI;
@@ -439,24 +439,24 @@ class Repository implements InterfaceRepository
             if (count($sets) > 0) {
                 $setURI = $sets[0];
             } else {
-                throw new \Exception('A set with the code '. $arrSet[1]. " is not found in the triple store" );
+                throw new \Exception('A set with the code ' . $arrSet[1] . " is not found in the triple store");
             }
         }
 
         $return['set'] = $setURI;
         $conceptSchemeURI = null;
-        
+
         if (!empty($arrSet[2])) {
             $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $arrSet[2] . '"', Skos::CONCEPTSCHEME);
             if (count($conceptSchemes) > 0) {
                 $conceptSchemeURI = $conceptSchemes[0];
             } else {
-                throw new \Exception('A concept scheme with the uuid '. $arrSet[2]. " is not found in the triple store" );
+                throw new \Exception('A concept scheme with the uuid ' . $arrSet[2] . " is not found in the triple store");
             }
         }
 
         $return['conceptScheme'] = $conceptSchemeURI;
-        
+
         return $return;
     }
 
@@ -465,7 +465,8 @@ class Repository implements InterfaceRepository
      *
      * @return OaiSet[]
      */
-    private function getOaiSets() {
+    private function getOaiSets()
+    {
         $sets = $this->setManager->fetchAllSets('true');
         $retVal = [];
         foreach ($sets as $set) {
@@ -490,14 +491,15 @@ class Repository implements InterfaceRepository
         return $retVal;
     }
 
-    private function fetchTenantSpecDataViaUri($tenantUri, $resourceManager) {
+    private function fetchTenantSpecDataViaUri($tenantUri, $resourceManager)
+    {
         $retVal = [];
         $tenant = $resourceManager->findResourceById($tenantUri, Tenant::TYPE);
         $retVal['tenant_code'] = $tenant->getCode()->getValue();
-        $orgElements = $tenant->getProperty(vCard::ORG);
+        $orgElements = $tenant->getProperty(VCard::ORG);
         if (count($orgElements) > 0) {
             $orgElement = $orgElements[0];
-            $names = $orgElement->getProperty(vCard::ORGNAME);
+            $names = $orgElement->getProperty(VCard::ORGNAME);
             if (count($names) > 0) {
                 $retVal['tenant_title'] = $names[0];
             } else {
@@ -631,7 +633,7 @@ class Repository implements InterfaceRepository
         //Meertens: the scheme is already an Uri.
         // obtaining Uri of the scheme from its uuid happens in parseSet.
         if (!empty($scheme)) {
-                $searchOptions['scheme'] = [$scheme];
+            $searchOptions['scheme'] = [$scheme];
         }
 
         if (!empty($from) || !empty($till)) {

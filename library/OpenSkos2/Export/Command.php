@@ -25,11 +25,12 @@ use OpenSkos2\Search\Autocomplete;
 
 class Command
 {
+
     /**
      * @var ResourceManager
      */
     private $resourceManager;
-    
+
     /**
      * Searcher for when search options are provided.
      * @var \OpenSkos2\Search\Autocomplete
@@ -45,7 +46,7 @@ class Command
         $this->resourceManager = $resourceManager;
         $this->searchAutocomplete = $searchAutocomplete;
     }
-    
+
     /**
      * Writes the export file.
      * @param Message $message
@@ -58,11 +59,11 @@ class Command
             $this->resourceManager->fetchNamespaces(),
             $message->getMaxDepth()
         );
-        
+
         $serialiser = new Serialiser(
             $format
         );
-        
+
         $searchOptions = $message->getSearchOptions();
         if (!empty($searchOptions)) {
             $serialiser->setSearchOptions($searchOptions);
@@ -71,7 +72,7 @@ class Command
             $serialiser->setUris($message->getUris());
             $serialiser->setResourceManager($this->resourceManager);
         }
-        
+
         if ($message->getOutputFilePath()) {
             $serialiser->writeToFile($message->getOutputFilePath());
         } else {

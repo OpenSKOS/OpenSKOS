@@ -7,9 +7,9 @@ use OpenSkos2\Validator\AbstractSkosCollectionValidator;
 
 class Creator extends AbstractSkosCollectionValidator
 {
-  
+
     protected function validateSkosCollection(SkosCollection $resource)
     {
-       return $this->validateCreator($resource);
+        return $this->validateCreator($resource);
     }
 }

@@ -63,7 +63,7 @@ trait ApiResponseTrait
         $model = new OpenSKOS_Db_Table_Tenants();
         $tenant = $model->find($tenantCode)->current();
         if (null === $tenant) {
-            throw new InvalidArgumentException('No such tenant: `'.$tenantCode.'`', 404);
+            throw new InvalidArgumentException('No such tenant: `' . $tenantCode . '`', 404);
         }
         return $tenant;
     }
@@ -100,11 +100,10 @@ trait ApiResponseTrait
      * @param OpenSKOS_Db_Table_Row_User $user
      * @throws UnauthorizedException
      */
-    
     // Meertens: we do not use this method.
     // we have moved resourceEditingAllowed methods to the MyInstitutionModules directory
     // so that the developers of the given institution can adjust it for their own requirements
-    // alos, there are different authorisation requirements for different sorts of resources 
+    // alos, there are different authorisation requirements for different sorts of resources
     // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)
     public function resourceEditAllowed(
         Resource $resource,
@@ -115,12 +114,12 @@ trait ApiResponseTrait
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
 
-       $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
-        // Meertens: the code above will not work for us, because in our implementation 
+        $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
+        // Meertens: the code above will not work for us, because in our implementation
         // TENANT property is only for sets. For the other resources (schemata, collections, concepts) it is derived
-       // moreover, it is a reference uri, not code literal
- 
-        if ($tenantcode !== (string)$resourceTenant) {
+        // moreover, it is a reference uri, not code literal
+
+        if ($tenantcode !== (string) $resourceTenant) {
             throw new UnauthorizedException(
                 'User has tenant '
                 . $user->code
@@ -132,6 +131,4 @@ trait ApiResponseTrait
 
         return true;
     }
-    
-   
 }

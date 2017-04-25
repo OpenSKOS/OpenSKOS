@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -28,6 +28,7 @@ use Psr\Log\NullLogger;
 
 class Collection
 {
+
     /**
      * @var ResourceManager
      */
@@ -36,13 +37,14 @@ class Collection
     protected $set;
     protected $isForUpdate;
     protected $referenceCheckOn;
+
     /**
      * Holds all error messages
      *
      * @var array
      */
     private $errorMessages = [];
-    
+
     /**
      * Logger
      *
@@ -59,13 +61,13 @@ class Collection
         if ($logger === null) {
             $logger = new NullLogger();
         }
-        
+
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
         $this->tenant = $tenant;
         $this->set = $set;
         $this->isForUpdate = $isForUpdate;
-        $this -> referenceCheckOn = $referencecheckOn;
+        $this->referenceCheckOn = $referencecheckOn;
     }
 
     /**
@@ -82,7 +84,7 @@ class Collection
             if (!$valid) {
                 $this->errorMessages[] = array_merge($this->errorMessages[], $valid->getErrorMessages());
                 $errorsFound = true;
-                
+
                 $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
                     . implode(', ', $validator->getErrorMessages());
             }
@@ -91,10 +93,10 @@ class Collection
         if ($errorsFound) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Get error messages
      *
@@ -104,7 +106,7 @@ class Collection
     {
         return $this->errorMessages;
     }
-    
+
     /**
      * Get resource validator
      *

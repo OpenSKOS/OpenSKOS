@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
@@ -23,6 +24,6 @@ use Openskos2\Set;
 
 class SetCollection extends ResourceCollection
 {
-    
+
     protected $resourceType = Set::TYPE;
 }

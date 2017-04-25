@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -22,6 +23,7 @@ use EasyRdf\Resource;
 
 class OpenSkosAsDescriptions extends OpenSkos
 {
+
     /**
      * @param Resource $res
      * @return string

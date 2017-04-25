@@ -7,8 +7,9 @@ use OpenSkos2\Set;
 
 class Title extends AbstractSetValidator
 {
+
     protected function validateSet(Set $resource)
     {
-       return $this->validateTitle($resource);
+        return $this->validateTitle($resource);
     }
 }

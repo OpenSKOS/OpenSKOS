@@ -10,6 +10,6 @@ class Type extends AbstractTenantValidator
     
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateType($resource);
+        return $this->validateType($resource);
     }
 }

@@ -74,277 +74,290 @@ use OpenSkos2\Validator\Tenant\OpenskosDisableSearchInOtherTenants;
 use OpenSkos2\Validator\Tenant\OpenskosEnableStatussesSystem;
 use OpenSkos2\Validator\Tenant\OpenskosUuid;
 use OpenSkos2\Validator\Tenant\Type;
-use OpenSkos2\Validator\Tenant\vCardAdress;
-use OpenSkos2\Validator\Tenant\vCardEmail;
-use OpenSkos2\Validator\Tenant\vCardOrg;
-use OpenSkos2\Validator\Tenant\vCardURL;
+use OpenSkos2\Validator\Tenant\VCardAdress;
+use OpenSkos2\Validator\Tenant\VCardEmail;
+use OpenSkos2\Validator\Tenant\VCardOrg;
+use OpenSkos2\Validator\Tenant\VCardUrl;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class Resource {
+class Resource
+{
 
-  /**
-   * @var ResourceManager
-   */
-  protected $resourceManager;
-
-  /**
-   * @var boolean
-   */
-  protected $isForUpdate;
-  protected $referenceCheckOn;
-  protected $softConceptRelationValidation;
-  protected $tenant;
-  protected $set;
-
-  /**
-   * Holds all error messages
-   *
-   * @var array
-   */
-  private $errorMessages = [];
-  
-   /**
-   * Holds all warning messages
-   *
-   * @var array
-   */
-  private $warningMessages = [];
-  
     /**
-   * Holds all dangling references
-   *
-   * @var array
-   */
-  private $danglingReferences = [];
+     * @var ResourceManager
+     */
+    protected $resourceManager;
 
-  /**
-   * Logger
-   *
-   * @var LoggerInterface
-   */
-  private $logger;
-
-  /**
-   * @param ResourceManager          $resourceManager
-   * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
-   * @param LoggerInterface $logger
-   */
-  public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null) {
-    if ($logger === null) {
-      $this->logger = new NullLogger();
-    } else {
-      $this->logger = $logger;
-    }
-
-    $this->resourceManager = $resourceManager;
-    $this->isForUpdate = $isForUpdate;
-    $this->tenant = $tenant;
-    $this->set = $set;
-    $this->referenceCheckOn = $referenceCheckOn;
-    $this->softConceptRelationValidation = $softConceptRelationValidation;
-    
-  }
-
-  /**
-   * Validate the resource
-   *
-   * @param RdfResource $resource
-   * @return boolean
-   */
-  public function validate(RdfResource $resource) {
-    return $this->applyValidators($resource);
-  }
-
-  /**
-   * Get error messages
-   *
-   * @return array
-   */
-  public function getErrorMessages() {
-    return $this->errorMessages;
-  }
-  
     /**
-   * Get warning messages
-   *
-   * @return array
-   */
-  public function getWarningMessages() {
-    return $this->warningMessages;
-  }
-  
-   /**
-   * @return string[]
-   */
-  public function getDanglingReferences() {
+     * @var boolean
+     */
+    protected $isForUpdate;
+    protected $referenceCheckOn;
+    protected $softConceptRelationValidation;
+    protected $tenant;
+    protected $set;
 
-    return $this->danglingReferences;
-  }
+    /**
+     * Holds all error messages
+     *
+     * @var array
+     */
+    private $errorMessages = [];
 
-  /**
-   * Apply the validators to the resource.
-   * @param RdfResource $resource
-   * @return boolean True if validators are not failing
-   */
-  protected function applyValidators(RdfResource $resource) {
-    $errorsFound = false;
-    /** @var ValidatorInterface $validator */
-    foreach ($this->getValidators($resource) as $validator) {
-      $valid = $validator->validate($resource);
-      if ($valid) {
-        continue;
-      }
-      foreach ($validator->getErrorMessages() as $message) {
-        $this->errorMessages[] = $message;
-      }
-      foreach ($validator->getWarningMessages() as $message) {
-        $this->warningMessages[] = "Validator's WARNING: $message. \n";
-      }
-       foreach ($validator->getDanglingReferences() as $ref) {
-        $this->danglingReferences[] = $ref;
-      }
-      $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
-      $this->logger->error(implode(', ', $validator->getErrorMessages()));
+    /**
+     * Holds all warning messages
+     *
+     * @var array
+     */
+    private $warningMessages = [];
 
-      $errorsFound = true;
+    /**
+     * Holds all dangling references
+     *
+     * @var array
+     */
+    private $danglingReferences = [];
+
+    /**
+     * Logger
+     *
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @param ResourceManager          $resourceManager
+     * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
+    {
+        if ($logger === null) {
+            $this->logger = new NullLogger();
+        } else {
+            $this->logger = $logger;
+        }
+
+        $this->resourceManager = $resourceManager;
+        $this->isForUpdate = $isForUpdate;
+        $this->tenant = $tenant;
+        $this->set = $set;
+        $this->referenceCheckOn = $referenceCheckOn;
+        $this->softConceptRelationValidation = $softConceptRelationValidation;
     }
 
-    return !$errorsFound;
-  }
-
-  /**
-   * Get validators based on the type of resource
-   *
-   * @param RdfResource $resource
-   * @return array
-   */
-  private function getValidators(RdfResource $resource) {
-    if ($resource instanceof Concept) {
-      return $this->getConceptValidators();
+    /**
+     * Validate the resource
+     *
+     * @param RdfResource $resource
+     * @return boolean
+     */
+    public function validate(RdfResource $resource)
+    {
+        return $this->applyValidators($resource);
     }
-    if ($resource instanceof ConceptScheme) {
-      return $this->getSchemaValidators();
+
+    /**
+     * Get error messages
+     *
+     * @return array
+     */
+    public function getErrorMessages()
+    {
+        return $this->errorMessages;
     }
-    if ($resource instanceof SkosCollection) {
-      return $this->getSkosCollectionValidators();
+
+    /**
+     * Get warning messages
+     *
+     * @return array
+     */
+    public function getWarningMessages()
+    {
+        return $this->warningMessages;
     }
-    if ($resource instanceof Set) {
-      return $this->getSetValidators();
+
+    /**
+     * @return string[]
+     */
+    public function getDanglingReferences()
+    {
+
+        return $this->danglingReferences;
     }
-    if ($resource instanceof Tenant) {
-      return $this->getTenantValidators();
+
+    /**
+     * Apply the validators to the resource.
+     * @param RdfResource $resource
+     * @return boolean True if validators are not failing
+     */
+    protected function applyValidators(RdfResource $resource)
+    {
+        $errorsFound = false;
+        /** @var ValidatorInterface $validator */
+        foreach ($this->getValidators($resource) as $validator) {
+            $valid = $validator->validate($resource);
+            if ($valid) {
+                continue;
+            }
+            foreach ($validator->getErrorMessages() as $message) {
+                $this->errorMessages[] = $message;
+            }
+            foreach ($validator->getWarningMessages() as $message) {
+                $this->warningMessages[] = "Validator's WARNING: $message. \n";
+            }
+            foreach ($validator->getDanglingReferences() as $ref) {
+                $this->danglingReferences[] = $ref;
+            }
+            $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
+            $this->logger->error(implode(', ', $validator->getErrorMessages()));
+
+            $errorsFound = true;
+        }
+
+        return !$errorsFound;
     }
-    if ($resource instanceof RelationType) {
-      return $this->getRelationTypeValidators();
+
+    /**
+     * Get validators based on the type of resource
+     *
+     * @param RdfResource $resource
+     * @return array
+     */
+    private function getValidators(RdfResource $resource)
+    {
+        if ($resource instanceof Concept) {
+            return $this->getConceptValidators();
+        }
+        if ($resource instanceof ConceptScheme) {
+            return $this->getSchemaValidators();
+        }
+        if ($resource instanceof SkosCollection) {
+            return $this->getSkosCollectionValidators();
+        }
+        if ($resource instanceof Set) {
+            return $this->getSetValidators();
+        }
+        if ($resource instanceof Tenant) {
+            return $this->getTenantValidators();
+        }
+        if ($resource instanceof RelationType) {
+            return $this->getRelationTypeValidators();
+        }
     }
-  }
 
-  /**
-   * Return all validators for a schema or Skos:collection
-   * @return ResourceValidator[]
-   */
-  private function getSchemaValidators() {
-    $validators = [
-      new SchemaInSet($this->referenceCheckOn),
-      new SchemaTitle(),
-      new SchemaDescription(),
-      new SchemaCreator($this->referenceCheckOn),
-      new SchemaUuid(),
-      new SchemaHasTopConcept($this->referenceCheckOn)
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    /**
+     * Return all validators for a schema or Skos:collection
+     * @return ResourceValidator[]
+     */
+    private function getSchemaValidators()
+    {
+        $validators = [
+            new SchemaInSet($this->referenceCheckOn),
+            new SchemaTitle(),
+            new SchemaDescription(),
+            new SchemaCreator($this->referenceCheckOn),
+            new SchemaUuid(),
+            new SchemaHasTopConcept($this->referenceCheckOn)
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function getSkosCollectionValidators() {
-    $validators = [
-      new SkosCollInSet($this->referenceCheckOn),
-      new SkosCollTitle(),
-      new SkosCollDescription(),
-      new SkosCollCreator($this->referenceCheckOn),
-      new SkosCollUuid(),
-      new SkosCollMember($this->referenceCheckOn)
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    private function getSkosCollectionValidators()
+    {
+        $validators = [
+            new SkosCollInSet($this->referenceCheckOn),
+            new SkosCollTitle(),
+            new SkosCollDescription(),
+            new SkosCollCreator($this->referenceCheckOn),
+            new SkosCollUuid(),
+            new SkosCollMember($this->referenceCheckOn)
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function getRelationTypeValidators() {
-    $validators = [
-      new RelationTypeTitle(),
-      new RelationTypeDescription(),
-      new RelationTypeCreator($this->referenceCheckOn)
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    private function getRelationTypeValidators()
+    {
+        $validators = [
+            new RelationTypeTitle(),
+            new RelationTypeDescription(),
+            new RelationTypeCreator($this->referenceCheckOn)
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function getSetValidators() {
-    $validators = [
-      new License(),
-      new OpenskosAllowOAI(),
-      new SetOpenskosCode(),
-      new OpenskosConceptBaseUri(),
-      new SetOpenskosUuid(),
-      new OpenskosOAIBaseUri(),
-      new OpenskosWebPage(),
-      new Publisher($this->referenceCheckOn),
-      new SetTitle(),
-      new SetType()
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    private function getSetValidators()
+    {
+        $validators = [
+            new License(),
+            new OpenskosAllowOAI(),
+            new SetOpenskosCode(),
+            new OpenskosConceptBaseUri(),
+            new SetOpenskosUuid(),
+            new OpenskosOAIBaseUri(),
+            new OpenskosWebPage(),
+            new Publisher($this->referenceCheckOn),
+            new SetTitle(),
+            new SetType()
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function getTenantValidators() {
-    $validators = [
-      new OpenskosCode(),
-      new OpenskosUuid(),
-      new Type(),
-      new OpenskosDisableSearchInOtherTenants(),
-      new OpenskosEnableStatussesSystem(),
-      new vCardAdress(),
-      new vCardEmail(),
-      new vCardURL(),
-      new vCardOrg()
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    private function getTenantValidators()
+    {
+        $validators = [
+            new OpenskosCode(),
+            new OpenskosUuid(),
+            new Type(),
+            new OpenskosDisableSearchInOtherTenants(),
+            new OpenskosEnableStatussesSystem(),
+            new VCardAdress(),
+            new VCardEmail(),
+            new VCardUrl(),
+            new VCardOrg()
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function getConceptValidators() {
-    $validators = [
-      new InScheme($this->referenceCheckOn),
-      new InSkosCollection($this->referenceCheckOn),
-      new SingleStatus(),
-      new SinglePrefLabel(),
-      new UniqueNotation(),
-      new RequriedPrefLabel(),
-      new UniquePreflabelInScheme(),
-      new UniqueUuid(),
-      new DuplicateBroader(),
-      new DuplicateNarrower(),
-      new DuplicateRelated(),
-      new CycleBroaderAndNarrower(),
-      new CycleInBroader(),
-      new CycleInNarrower(),
-      new RelatedToSelf(),
-      new TopConceptOf($this->referenceCheckOn),
-      new ReferencesForConceptRelations($this->referenceCheckOn, $this->softConceptRelationValidation)
-    ];
-    $validators = $this->refineValidators($validators);
-    return $validators;
-  }
+    private function getConceptValidators()
+    {
+        $validators = [
+            new InScheme($this->referenceCheckOn),
+            new InSkosCollection($this->referenceCheckOn),
+            new SingleStatus(),
+            new SinglePrefLabel(),
+            new UniqueNotation(),
+            new RequriedPrefLabel(),
+            new UniquePreflabelInScheme(),
+            new UniqueUuid(),
+            new DuplicateBroader(),
+            new DuplicateNarrower(),
+            new DuplicateRelated(),
+            new CycleBroaderAndNarrower(),
+            new CycleInBroader(),
+            new CycleInNarrower(),
+            new RelatedToSelf(),
+            new TopConceptOf($this->referenceCheckOn),
+            new ReferencesForConceptRelations($this->referenceCheckOn, $this->softConceptRelationValidation)
+        ];
+        $validators = $this->refineValidators($validators);
+        return $validators;
+    }
 
-  private function refineValidators($validators) {
-    foreach ($validators as $validator) {
-      $validator->setResourceManager($this->resourceManager);
-      $validator->setFlagIsForUpdate($this->isForUpdate);
-      $validator->setTenant($this->tenant);
-      $validator->setSet($this->set);
-     }
-    return $validators;
-  }
-
+    private function refineValidators($validators)
+    {
+        foreach ($validators as $validator) {
+            $validator->setResourceManager($this->resourceManager);
+            $validator->setFlagIsForUpdate($this->isForUpdate);
+            $validator->setTenant($this->tenant);
+            $validator->setSet($this->set);
+        }
+        return $validators;
+    }
 }

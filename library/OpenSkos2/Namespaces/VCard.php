@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,28 +19,18 @@
 
 namespace OpenSkos2\Namespaces;
 
-class vCard
+class VCard
 {
+
     const NAME_SPACE = 'http://www.w3.org/2006/vcard/ns#';
-    
     const ORG = 'http://www.w3.org/2006/vcard/ns#ORG';
-    
     const ORGNAME = 'http://www.w3.org/2006/vcard/ns#orgname';
-    
     const ORGUNIT = 'http://www.w3.org/2006/vcard/ns#orgunit';
-    
     const URL = 'http://www.w3.org/2006/vcard/ns#URL';
-    
     const EMAIL = 'http://www.w3.org/2006/vcard/ns#EMAIL';
-    
     const ADR = 'http://www.w3.org/2006/vcard/ns#ADR';
-    
     const STREET = 'http://www.w3.org/2006/vcard/ns#Street';
-    
     const LOCALITY = 'http://www.w3.org/2006/vcard/ns#Locality';
-    
     const PCODE = 'http://www.w3.org/2006/vcard/ns#Pcode';
-    
     const COUNTRY = 'http://www.w3.org/2006/vcard/ns#Country';
-    
 }

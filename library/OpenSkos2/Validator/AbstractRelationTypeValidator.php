@@ -24,12 +24,13 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractRelationTypeValidator extends AbstractResourceValidator
 {
-   
-    function __construct($referencecheckOn=true){
-       $this -> resourceType = RelationType::TYPE;
-       $this->referenceCheckOn=$referencecheckOn; 
+
+    public function __construct($referencecheckOn = true)
+    {
+        $this->resourceType = RelationType::TYPE;
+        $this->referenceCheckOn = $referencecheckOn;
     }
-    
+
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof RelationType) {
@@ -39,6 +40,4 @@ abstract class AbstractRelationTypeValidator extends AbstractResourceValidator
     }
 
     abstract protected function validateRelation(RelationType $ur);
-    
-    
 }

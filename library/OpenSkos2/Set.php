@@ -27,42 +27,46 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 
-class Set extends Resource {
+class Set extends Resource
+{
 
-  const TYPE = Dcmi::DATASET;
+    const TYPE = Dcmi::DATASET;
 
-  public function __construct($uri = null) {
-    parent::__construct($uri);
-    $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
-  }
-
-  public function getTenantUri() {
-    $tenants = $this->getProperty(DcTerms::PUBLISHER);
-    if (count($tenants) < 1) {
-      return null;
-    } else {
-      return $tenants[0];
+    public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-  }
 
-  public function addMetadata($existingSet, $userUri, Tenant $tenant, $set) {
-    $metadata = [];
-    if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
-      $metadata = [DcTerms::PUBLISHER => $tenant];
+    public function getTenantUri()
+    {
+        $tenants = $this->getProperty(DcTerms::PUBLISHER);
+        if (count($tenants) < 1) {
+            return null;
+        } else {
+            return $tenants[0];
+        }
     }
-    if ($existingSet !== null) {
-      if (count($this->getProperty(OpenSkos::UUID)) < 1) {
-        $metadata = [OpenSkos::UUID => $existingSet->getUuid()];
-      }
-    }
-    foreach ($metadata as $property => $defaultValue) {
-      $this->setProperty($property, $defaultValue);
-    }
-  }
 
-  // TODO: discuss the rules for generating Uri's for non-concepts
-  protected function assembleUri($uuid, Tenant $tenant, $set) {
-    return $tenant->getUri() . "/" . $uuid;
-  }
+    public function addMetadata($existingSet, $userUri, Tenant $tenant, $set)
+    {
+        $metadata = [];
+        if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
+            $metadata = [DcTerms::PUBLISHER => $tenant];
+        }
+        if ($existingSet !== null) {
+            if (count($this->getProperty(OpenSkos::UUID)) < 1) {
+                $metadata = [OpenSkos::UUID => $existingSet->getUuid()];
+            }
+        }
+        foreach ($metadata as $property => $defaultValue) {
+            $this->setProperty($property, $defaultValue);
+        }
+    }
 
+    // TODO: discuss the rules for generating Uri's for non-concepts
+    protected function assembleUri($uuid, Tenant $tenant, $set)
+    {
+        return $tenant->getUri() . "/" . $uuid;
+    }
 }

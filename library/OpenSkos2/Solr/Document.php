@@ -32,7 +32,6 @@ use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 /**
  * Get a solr document from a skos concept resource
  */
-
 // Meertens:
 // -- removed OpenSkos::MODIFIEDBY, Dc::CONTRIBUTOR, Dc::CREATOR.
 // -- added  OpenSkos:INSKOSKCOLLECTION,OpenSkos:DELTEDBY,OpenSkos:DATEDELETED
@@ -40,6 +39,7 @@ use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 // -- The Picturae's changes starting from 28/10/2016 are taken
 class Document
 {
+
     /**
      * @var Resource
      */
@@ -62,7 +62,6 @@ class Document
      *
      * @var array
      */
-    
     protected $mapping = [
         Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel', 'sort_s_prefLabel'],
         Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel', 'sort_s_altLabel'],
@@ -72,10 +71,10 @@ class Document
         Skos::CHANGENOTE => ['t_changeNote', 'a_changeNote'],
         Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote'],
         Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote'],
-        Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote'],
-        Skos::NOTATION =>   ['s_notation', 't_notation', 'a_notation'],
-        Skos::INSCHEME =>   ['s_inScheme', 'inScheme'],
-        OpenSkos::INSKOSCOLLECTION =>   ['s_inSkosCollection', 'inSkosCollection'],
+        Skos::SCOPENOTE => ['t_scopeNote', 'a_scopeNote'],
+        Skos::NOTATION => ['s_notation', 't_notation', 'a_notation'],
+        Skos::INSCHEME => ['s_inScheme', 'inScheme'],
+        OpenSkos::INSKOSCOLLECTION => ['s_inSkosCollection', 'inSkosCollection'],
         OpenSkos::STATUS => ['s_status'],
         OpenSkos::SET => ['s_set'],
         OpenSkos::TENANT => ['s_tenant'],
@@ -88,7 +87,6 @@ class Document
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
         OpenSkos::DELETEDBY => ['s_deletedBy'],
         OpenSkos::DATE_DELETED => ['d_dateDeleted']
-      
     ];
 
     /**
@@ -111,10 +109,10 @@ class Document
     {
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
-        
-         // Index bare SKOS and OpenSKOs fields via their standart map to SKOS and OpenSKOS predicates
+
+        // Index bare SKOS and OpenSKOs fields via their standart map to SKOS and OpenSKOS predicates
         $predicateToField = array_flip(FieldsMaps::getNamesToProperties());
-       
+
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();
 
@@ -126,7 +124,7 @@ class Document
             // Explicitly mapped fields
             $fields = $this->mapping[$predicate];
 
-             // bare (non-"_"-prefixed) fields
+            // bare (non-"_"-prefixed) fields
             if (isset($predicateToField[$predicate])) {
                 $fields[] = $predicateToField[$predicate];
             }
@@ -322,7 +320,7 @@ class Document
                     }
                     break;
                 case Literal::TYPE_BOOL:
-                    return (bool)$value->getValue();
+                    return (bool) $value->getValue();
                 default:
                     return $value->getValue();
             }

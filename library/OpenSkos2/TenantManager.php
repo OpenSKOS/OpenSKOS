@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
@@ -25,21 +26,21 @@ use OpenSkos2\Tenant;
 
 class TenantManager extends ResourceManager
 {
-  
+
     protected $resourceType = Tenant::TYPE;
-   
-    public function fetchNameUri() {
+
+    public function fetchNameUri()
+    {
         $result = $this->fetchTenantNameUri();
         return $result;
     }
-    
-    
-    
+
     // used only for HTML representation
-    public function fetchSetsForTenant($code) {
+    public function fetchSetsForTenant($code)
+    {
         $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
-                . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-                . ' ?seturi  ?p ?o .}';
+            . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+            . ' ?seturi  ?p ?o .}';
         $response = $this->query($query);
         if ($response !== null) {
             if (count($response) > 0) {
@@ -50,44 +51,43 @@ class TenantManager extends ResourceManager
 
         return [];
     }
-    
-    
-    public function fetchSetsForTenantUri($tenantUri) {
-        $query='DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <'.DcTerms::PUBLISHER.'> <'.$tenantUri.'>. } }';
+
+    public function fetchSetsForTenantUri($tenantUri)
+    {
+        $query = 'DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <' . DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
         $response = $this->query($query);
         return $response;
     }
 
-
     // used only for html output
-    private function arrangeTripleStoreSets($response) {
+    private function arrangeTripleStoreSets($response)
+    {
         $retVal = [];
         foreach ($response as $triple) {
-            $seturi = $triple -> seturi->getUri();
+            $seturi = $triple->seturi->getUri();
             if (!array_key_exists($seturi, $retVal)) {
-                $retVal[$seturi]=[];
+                $retVal[$seturi] = [];
             };
-            switch ($triple -> p) {
+            switch ($triple->p) {
                 case DcTerms::TITLE:
-                    $retVal[$seturi]['dcterms_title']=$triple->o->getValue();
+                    $retVal[$seturi]['dcterms_title'] = $triple->o->getValue();
                     continue;
                 case DcTerms::DESCRIPTION:
-                    $retVal[$seturi]['dcterms_description']=$triple->o->getValue();
+                    $retVal[$seturi]['dcterms_description'] = $triple->o->getValue();
                     continue;
                 case OpenSkos::WEBPAGE:
-                    $retVal[$seturi]['openskos_webpage']=$triple->o->getUri();
+                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getUri();
                     continue;
                 case OpenSkos::CODE:
-                    $retVal[$seturi]['openskos_code']=$triple->o->getValue();
-                    continue; 
-                case OpenSkos::UUID:
-                    $retVal[$seturi]['openskos_uuid']=$triple->o->getValue();
+                    $retVal[$seturi]['openskos_code'] = $triple->o->getValue();
                     continue;
-                default: continue;
+                case OpenSkos::UUID:
+                    $retVal[$seturi]['openskos_uuid'] = $triple->o->getValue();
+                    continue;
+                default:
+                    continue;
             }
         }
         return $retVal;
-        
     }
-   
 }

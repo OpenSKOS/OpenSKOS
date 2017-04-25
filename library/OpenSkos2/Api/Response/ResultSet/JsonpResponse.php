@@ -24,6 +24,7 @@ namespace OpenSkos2\Api\Response\ResultSet;
  */
 class JsonpResponse extends JsonResponse
 {
+
     /**
      * JSONP Callback
      * @var string
@@ -53,8 +54,8 @@ class JsonpResponse extends JsonResponse
         $stream->write(
             $this->callback . '(' . json_encode($this->getResponseData()) . ');'
         );
-        
+
         return (new \Zend\Diactoros\Response($stream))
-            ->withHeader('Content-Type', 'application/javascript');
+                ->withHeader('Content-Type', 'application/javascript');
     }
 }

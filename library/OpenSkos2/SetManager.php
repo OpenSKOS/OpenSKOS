@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
@@ -29,37 +30,43 @@ use OpenSKOS_Db_Table_Collections;
 
 class SetManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = Set::TYPE;
-    
-      //TODO: check conditions when it can be deleted
-    public function CanBeDeleted($uri){
+
+    //TODO: check conditions when it can be deleted
+    public function canBeDeleted($uri)
+    {
         return parent::CanBeDeleted($uri);
     }
-    
-    public function fetchAllSets($allowOAI){
+
+    public function fetchAllSets($allowOAI)
+    {
         $query = 'DESCRIBE ?s {'
-                . 'select ?s where {?s <http://openskos.org/xmlns#allow_oai>  "'.$allowOAI.'"^^xsd:bool .} }';
-        $sets = $this -> fetchQuery($query);
-        return $sets;        
+            . 'select ?s where {?s <http://openskos.org/xmlns#allow_oai>  "' . $allowOAI . '"^^xsd:bool .} }';
+        $sets = $this->fetchQuery($query);
+        return $sets;
     }
-    
-    public function getUrisMap($tenantCode){
-        $query='DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE { ?subject ?predicate ?object . ?subject <'.OpenSkos::TENANT .'> ?tenantURI . ?tenantURI <'.OpenSkos::CODE.'> "'. $tenantCode. '".} }';
+
+    public function getUrisMap($tenantCode)
+    {
+        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE { ?subject ?predicate ?object . ?subject <' . OpenSkos::TENANT . '> ?tenantURI . ?tenantURI <' . OpenSkos::CODE . '> "' . $tenantCode . '".} }';
         $result = $this->query($query);
         $sets = EasyRdf::graphToResourceCollection($result, $this->getResourceType());
         $retVal = [];
         foreach ($sets as $set) {
-          $retVal[$set->getUri()] = $set;  
+            $retVal[$set->getUri()] = $set;
         }
         return $retVal;
     }
-      // used only for HTML output
-    public function fetchInstitutionCodeByUri($uri) {
-        $query = 'SELECT ?code WHERE { <'.$uri.'>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' . Rdf::TYPE . '> <'. Org::FORMALORG .'> .}';
+
+    // used only for HTML output
+    public function fetchInstitutionCodeByUri($uri)
+    {
+        $query = 'SELECT ?code WHERE { <' . $uri . '>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' . Rdf::TYPE . '> <' . Org::FORMALORG . '> .}';
         $codes = $this->query($query);
         if (count($codes) < 1) {
             return null;
@@ -67,16 +74,14 @@ class SetManager extends ResourceManager
             return $codes[0];
         }
     }
-    
-   
-   
-  
-     // used only for HTML representation
-     public function fetchInhabitantsForSet($setUri, $rdfType) {
+
+    // used only for HTML representation
+    public function fetchInhabitantsForSet($setUri, $rdfType)
+    {
 
         $query = "SELECT ?uri ?uuid WHERE  { ?uri  <" . OpenSkos::SET . "> <" . $setUri . "> ."
-                . ' ?uri  <' . Rdf::TYPE . '> <' . $rdfType . '> .'
-                . ' ?uri  <' . OpenSkos::UUID . '> ?uuid .}';
+            . ' ?uri  <' . Rdf::TYPE . '> <' . $rdfType . '> .'
+            . ' ?uri  <' . OpenSkos::UUID . '> ?uuid .}';
 
         $retVal = [];
         $response = $this->query($query);
@@ -88,14 +93,15 @@ class SetManager extends ResourceManager
         return $retVal;
     }
 
-    public function translateMySqlCollectionToRdfSet($collectionMySQL) {
+    public function translateMySqlCollectionToRdfSet($collectionMySQL)
+    {
         $setResource = new Set();
         if (!isset($collectionMySQL['uri'])) {
             $setResource->setUri('http://unset_uri_in_mysqldatabase');
         } else {
             $setResource->setUri($collectionMySQL['uri']);
         }
-        
+
         $this->setLiteralWithEmptinessCheck($setResource, OpenSkos::CODE, $collectionMySQL['code']);
         $this->setLiteralWithEmptinessCheck($setResource, DcTerms::PUBLISHER, $collectionMySQL['tenant']);
         $this->setLiteralWithEmptinessCheck($setResource, DcTerms::TITLE, $collectionMySQL['dc_title']);
@@ -106,15 +112,16 @@ class SetManager extends ResourceManager
         $this->setUriWithEmptinessCheck($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl']);
         return $setResource;
     }
-    
-    public function fetchFromMySQL($params) {
+
+    public function fetchFromMySQL($params)
+    {
         $model = new OpenSKOS_Db_Table_Collections();
         $select = $model->select();
-        if ($params['allow_oai']==='true') {
-                    $select->where('allow_oai=?', 'Y');
+        if ($params['allow_oai'] === 'true') {
+            $select->where('allow_oai=?', 'Y');
         };
-        if ($params['allow_oai']==='false') {
-                    $select->where('allow_oai=?', 'N');
+        if ($params['allow_oai'] === 'false') {
+            $select->where('allow_oai=?', 'N');
         };
         $mysqlres = $model->fetchAll($select);
         $index = new SetCollection();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -24,11 +25,12 @@ use OpenSkos2\Exception\OpenSkosException;
 
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 {
+
     const OPTION_RENDER_ITEMS_ONLY = 'renderItemsOnly';
-    
+
     protected $objects = [];
     private $outputtedResources = array();
-        
+
     public function serialise($graph, $format, array $options = array())
     {
         parent::checkSerialiseParams($graph, $format);
@@ -39,7 +41,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             );
         }
 
-        
+
         // store of namespaces to be appended to the rdf:RDF tag
         $this->prefixes = array('rdf' => true);
 
@@ -70,19 +72,19 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             if (strlen($namespaceStr)) {
                 $namespaceStr .= "\n        ";
             }
-  
-           
+
+
             if (strlen($prefix) === 0) {
-                $namespaceStr .= ' xmlns="'.htmlspecialchars($url).'"';
+                $namespaceStr .= ' xmlns="' . htmlspecialchars($url) . '"';
             } else {
-                $namespaceStr .= ' xmlns:'.$prefix.'="'.htmlspecialchars($url).'"';
+                $namespaceStr .= ' xmlns:' . $prefix . '="' . htmlspecialchars($url) . '"';
             }
         }
         //var_dump($this->prefixes);
-        
+
         if (empty($options[self::OPTION_RENDER_ITEMS_ONLY])) {
-            return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n".
-            "<rdf:RDF". $namespaceStr . ">\n" . implode("\n", $this->objects) . "\n</rdf:RDF>\n";
+            return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" .
+                "<rdf:RDF" . $namespaceStr . ">\n" . implode("\n", $this->objects) . "\n</rdf:RDF>\n";
         } else {
             return implode(PHP_EOL, $this->objects);
         }
@@ -99,12 +101,11 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
      */
     protected function rdfxmlResource($res, $showNodeId, $depth = 1)
     {
-        $resXml = $this-> rdfxmlResourceRecursive($res, $showNodeId, $depth, null);
+        $resXml = $this->rdfxmlResourceRecursive($res, $showNodeId, $depth, null);
         $this->objects[] = $resXml;
     }
 
-    
-       private function rdfxmlResourceRecursive($res, $showNodeId, $depth, $type)
+    private function rdfxmlResourceRecursive($res, $showNodeId, $depth, $type)
     {
         //var_dump($type);
         // Keep track of the resources we have already serialised
@@ -119,7 +120,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         if (count($properties) === 0) {
             return "";
         }
-        
+
         if ($type) {
             $this->addPrefix($type);
         } else {
@@ -139,23 +140,23 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
         if ($res instanceof \EasyRdf\Container) {
             foreach ($res as $item) {
-                $xmlString .= $this->rdfxmlObject('rdf:li', $item, $depth+1);
+                $xmlString .= $this->rdfxmlObject('rdf:li', $item, $depth + 1);
             }
         } else {
             foreach ($properties as $property) {
                 $short = \EasyRdf\RdfNamespace::shorten($property, true);
                 if ($short) {
                     $this->addPrefix($short);
-                    
+
                     $objects = $res->all("<$property>");
-                     foreach ($objects as $object) {
+                    foreach ($objects as $object) {
                         if ($object instanceof \EasyRdf\Resource) {
                             $recResult = $this->rdfxmlResourceRecursive($object, $showNodeId, $depth + 1, $short);
                             if ($recResult !== "") {
-                            $xmlString .= $recResult;
+                                $xmlString .= $recResult;
                             } else {
                                 // this resource is given by reference and should be treated as a leaf
-                                 $xmlString .= $this->rdfxmlObject($short, $object, $depth + 1);
+                                $xmlString .= $this->rdfxmlObject($short, $object, $depth + 1);
                             }
                         } else {
                             $xmlString .= $this->rdfxmlObject($short, $object, $depth + 1);
@@ -163,7 +164,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                     }
                 } else {
                     throw new OpenSkosException(
-                        "It is not possible to serialse the property ".
+                        "It is not possible to serialse the property " .
                         "'$property' to RDF/XML."
                     );
                 }
@@ -172,7 +173,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         $xmlString .= "$indent</$type>\n";
         return str_replace('dc11:subject', 'dc:subject', $xmlString);
     }
-    
+
     /**
      * Protected method to serialise an object node into an XML object
      * @ignore
@@ -191,19 +192,19 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             $alreadyOutput = isset($this->outputtedResources[$obj->getUri()]);
 
             $tag = "{$indent}<{$property}";
-            
+
             if ($obj->isBNode()) {
                 if ($alreadyOutput or $rpcount > 1 or $pcount == 0) {
-                    $tag .= " rdf:nodeID=\"".htmlspecialchars($obj->getBNodeId()).'"';
+                    $tag .= " rdf:nodeID=\"" . htmlspecialchars($obj->getBNodeId()) . '"';
                 }
             } else {
 //                if ($rpcount != 1 or $pcount == 0) { //  if ($alreadyOutput or $rpcount != 1 or $pcount == 0) {
-                    $tag .= " rdf:resource=\"".htmlspecialchars($obj->getURI()).'"';
+                $tag .= " rdf:resource=\"" . htmlspecialchars($obj->getURI()) . '"';
 //                }
             }
 
             if ($alreadyOutput == false and $rpcount == 1 and $pcount > 0) {
-                $xml = $this->rdfxmlResource($obj, true, $depth+1); // it was false;
+                $xml = $this->rdfxmlResource($obj, true, $depth + 1); // it was false;
 //                if ($xml) {
 //                    return "$tag>$xml$indent</$property>\n\n";
 //                } else {
@@ -212,7 +213,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             } //else {
 
 
-                return $tag."/>\n";
+            return $tag . "/>\n";
             //}
         } elseif (is_object($obj) and $obj instanceof Literal) {
             $atrributes = "";
@@ -226,8 +227,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                     $atrributes .= " rdf:datatype=\"$datatype\"";
                 }
             } elseif ($obj->getLang()) {
-                $atrributes .= ' xml:lang="'.
-                    htmlspecialchars($obj->getLang()).'"';
+                $atrributes .= ' xml:lang="' .
+                    htmlspecialchars($obj->getLang()) . '"';
             }
 
             // Escape the value
@@ -238,11 +239,11 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             return "{$indent}<{$property}{$atrributes}>{$value}</{$property}>\n";
         } else {
             throw new OpenSkosException(
-                "Unable to serialise object to xml: ".getType($obj)
+                "Unable to serialise object to xml: " . getType($obj)
             );
         }
     }
-    
+
     /**
      * @param Resource $res
      * @return string

@@ -236,7 +236,7 @@ class API_RelationtypeController extends AbstractController {
 // lists all pairs of concepts in relation type with $params['id']
       $request = $this->getPsrRequest();
       $api = $this->getDI()->make($this->fullNameResourceClass);
-      $response = $api->ListRelatedConceptPairs($request);
+      $response = $api->listRelatedConceptPairs($request);
       $this->emitResponse($response);
     } else {
       $conceptUri = $this->getParam('conceptUri');

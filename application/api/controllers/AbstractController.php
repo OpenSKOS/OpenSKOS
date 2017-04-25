@@ -2,7 +2,7 @@
 
 
 use EasyRdf\RdfNamespace;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\VCard;
 
 abstract class AbstractController extends OpenSKOS_Rest_Controller
 
@@ -63,8 +63,8 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     private function preparePropertiesForHTML($resource) {
         $props = $resource->getProperties();
         $retVal = [];
-        $shortADR = RdfNamespace::shorten(vCard::ADR);
-        $shortORG = RdfNamespace::shorten(vCard::ORG);
+        $shortADR = RdfNamespace::shorten(VCard::ADR);
+        $shortORG = RdfNamespace::shorten(VCard::ORG);
         foreach ($props as $propname => $vals) {
             $shortName = RdfNamespace::shorten($propname);
             if ($shortName !== $shortADR && $shortName !== $shortORG) {

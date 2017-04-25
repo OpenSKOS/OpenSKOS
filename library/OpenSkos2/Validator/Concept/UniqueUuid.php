@@ -24,14 +24,13 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class UniqueUuid extends AbstractConceptValidator
 {
-    
+
     /**
      * @param Concept $concept
      * @return bool
      */
     protected function validateConcept(Concept $concept)
     {
-       return $this->validateUUID($concept);
-               
+        return $this->validateUUID($concept);
     }
 }

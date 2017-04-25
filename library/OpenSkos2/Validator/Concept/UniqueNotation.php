@@ -25,16 +25,16 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class UniqueNotation extends AbstractConceptValidator
 {
-    
+
     /**
      * @param Concept $concept
      * @return bool
      */
-    protected function validateConcept(Concept $concept) {
+    protected function validateConcept(Concept $concept)
+    {
         if ($concept->isPropertyEmpty(Skos::NOTATION)) {
             return true;
         }
         return $this->validateProperty($concept, Skos::NOTATION, false, true, false, true);
     }
-
 }

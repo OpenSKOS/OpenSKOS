@@ -8,10 +8,10 @@ use OpenSkos2\Validator\AbstractSetValidator;
 
 class OpenskosOAIBaseUri extends AbstractSetValidator
 {
+
     protected function validateSet(Set $resource)
     {
-       //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
-       return $this->validateProperty($resource, OpenSkos::OAI_BASEURL, false, true, false, false);
-       
+        //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
+        return $this->validateProperty($resource, OpenSkos::OAI_BASEURL, false, true, false, false);
     }
 }

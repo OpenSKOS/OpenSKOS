@@ -1,9 +1,9 @@
 <?php
 
 define('BACKEND_NAME', 'ccr');
-define('APPLICATION_BASE_PATH', '/app/'.BACKEND_NAME);
-define('COMMON_APPLICATION_INI', '/app/'.BACKEND_NAME.'/application/configs/application.ini');
-define('ERROR_LOG', '/app/'.BACKEND_NAME.'/data/ValidationErrors.txt');
+define('APPLICATION_BASE_PATH', '/app/' . BACKEND_NAME);
+define('COMMON_APPLICATION_INI', '/app/' . BACKEND_NAME . '/application/configs/application.ini');
+define('ERROR_LOG', '/app/' . BACKEND_NAME . '/data/ValidationErrors.txt');
 
 // roles //
 define('ROOT', 'your string');

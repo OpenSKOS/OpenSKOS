@@ -8,8 +8,9 @@ use OpenSkos2\Namespaces\OpenSkos;
 
 class OpenskosConceptBaseUri extends AbstractSetValidator
 {
+
     protected function validateSet(Set $resource)
     {
-      return $this->validateProperty($resource, OpenSkos::CONCEPTBASEURI, false, true, false, false);
+        return $this->validateProperty($resource, OpenSkos::CONCEPTBASEURI, false, true, false, false);
     }
 }

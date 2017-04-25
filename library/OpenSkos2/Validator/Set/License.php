@@ -8,10 +8,9 @@ use OpenSkos2\Namespaces\DcTerms;
 
 class License extends AbstractSetValidator
 {
-    
+
     protected function validateSet(Set $resource)
     {
-       return $this->validateProperty($resource,  DcTerms::LICENSE, true, false, false, false);
-       
+        return $this->validateProperty($resource, DcTerms::LICENSE, true, false, false, false);
     }
 }

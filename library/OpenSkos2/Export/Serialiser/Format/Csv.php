@@ -25,6 +25,7 @@ use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
 class Csv extends FormatAbstract
 {
+
     /**
      * Gets the array of properties to be serialised.
      * @return array
@@ -39,7 +40,7 @@ class Csv extends FormatAbstract
         }
         return $this->propertiesToSerialise;
     }
-    
+
     /**
      * Creates the header of the output.
      * @return string
@@ -51,7 +52,7 @@ class Csv extends FormatAbstract
             array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $this->getPropertiesToSerialise())
         );
     }
-    
+
     /**
      * Serialises a single resource.
      * @return string
@@ -60,7 +61,7 @@ class Csv extends FormatAbstract
     {
         return $this->stringPutCsv($this->prepareResourceDataForCsv($resource));
     }
-    
+
     /**
      * Creates the footer of the output.
      * @return string
@@ -69,7 +70,7 @@ class Csv extends FormatAbstract
     {
         return '';
     }
-    
+
     /**
      * Prepare concept data for exporting in csv format.
      *
@@ -89,7 +90,7 @@ class Csv extends FormatAbstract
                 if (count($values) > 1) {
                     $resourceData[$property] = implode(';', $values);
                 } else {
-                    $resourceData[$property] = (string)$values[0];
+                    $resourceData[$property] = (string) $values[0];
                 }
             } else {
                 $resourceData[$property] = '';
@@ -98,7 +99,7 @@ class Csv extends FormatAbstract
 
         return $resourceData;
     }
-    
+
     /**
      * Puts csv in string.
      * @param array $data

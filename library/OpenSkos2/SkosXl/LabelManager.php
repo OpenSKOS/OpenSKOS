@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2\SkosXl;
 
 use OpenSkos2\Rdf\ResourceManager;
@@ -24,18 +25,19 @@ use OpenSkos2\Namespaces\SkosXl;
 
 class LabelManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = Label::TYPE;
-    
+
     public function autoComplete($query, $language, $limit = 15)
     {
         // @TODO Implement
-        
+
         $labelsAll = $this->fetch();
-        
+
         $labels = [];
         foreach ($labelsAll as $label) {
             $literalForm = $label->getPropertyFlatValue(SkosXl::LITERALFORM, $language);
@@ -43,7 +45,7 @@ class LabelManager extends ResourceManager
                 $labels[] = $label;
             }
         }
-        
+
         uasort(
             $labels,
             function (Label $label1, Label $label2) use ($language) {
@@ -53,7 +55,7 @@ class LabelManager extends ResourceManager
                 );
             }
         );
-        
+
         return new LabelCollection(array_slice($labels, 0, $limit));
     }
 }

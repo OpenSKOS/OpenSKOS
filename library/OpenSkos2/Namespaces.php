@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
@@ -24,6 +25,7 @@ use \EasyRdf\RdfNamespace;
 
 class Namespaces
 {
+
     /**
      * List of some additional namespaces used in the library.
      * @var array
@@ -34,7 +36,7 @@ class Namespaces
 //        'skosxl' => SkosXl::NAME_SPACE,
         'dc' => Dc::NAME_SPACE, // Very important for distinguishing dcterms and dc prefixes.
     ];
-    
+
     /**
      * Gets list of additional namespaces which are not commonly used. (not used in EasyRdf)
      * @return array [prefix => namespace]
@@ -43,7 +45,7 @@ class Namespaces
     {
         return self::$additionalNamespaces;
     }
-    
+
     /**
      * Gets list of namespaces normally used in concept's rdf format.
      * @return array [prefix => namespace]
@@ -62,7 +64,7 @@ class Namespaces
             'openskos' => \OpenSkos2\Namespaces\OpenSkos::NAME_SPACE,
         ];
     }
-    
+
     /**
      * Makes http://openskos.org/xmlns#status to be openskos:status
      * @param string $property
@@ -73,7 +75,7 @@ class Namespaces
         foreach (self::$additionalNamespaces as $prefix => $uri) {
             \EasyRdf\RdfNamespace::set($prefix, $uri);
         }
-        
+
         $shortName = RdfNamespace::shorten($property);
         if (empty($shortName)) {
             return $property;
@@ -81,7 +83,7 @@ class Namespaces
             return $shortName;
         }
     }
-    
+
     /**
      * Makes openskos:status to be http://openskos.org/xmlns#status
      * If not possible - return the same string
@@ -93,11 +95,12 @@ class Namespaces
         foreach (self::$additionalNamespaces as $prefix => $uri) {
             \EasyRdf\RdfNamespace::set($prefix, $uri);
         }
-        
+
         return RdfNamespace::expand($shortProperty);
     }
-    
-    public static function mapRdfTypeToClassName($type){
+
+    public static function mapRdfTypeToClassName($type)
+    {
         if ($type) {
             switch ($type) {
                 case Concept::TYPE:

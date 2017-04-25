@@ -9,6 +9,6 @@ class OpenskosUuid extends AbstractTenantValidator
 {
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateUUID($resource);
+        return $this->validateUUID($resource);
     }
 }

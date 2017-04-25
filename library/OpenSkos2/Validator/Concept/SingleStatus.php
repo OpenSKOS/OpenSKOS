@@ -25,8 +25,8 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class SingleStatus extends AbstractConceptValidator
 {
-    
-     /**
+
+    /**
      * @param Concept $concept
      * @return bool
      */
@@ -38,8 +38,8 @@ class SingleStatus extends AbstractConceptValidator
             return false;
         }
         if (count($statusses) < 1) {
-             $this->errorMessages[] = ' An obligatory field status is absent. ';
-             return false;
+            $this->errorMessages[] = ' An obligatory field status is absent. ';
+            return false;
         }
         if (count($statusses) > 0) {
             $status = $statusses[0]->getValue();
@@ -50,5 +50,4 @@ class SingleStatus extends AbstractConceptValidator
         }
         return true;
     }
-    
 }

@@ -34,7 +34,7 @@ use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
@@ -43,11 +43,10 @@ use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
 //require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-require_once dirname(__FILE__) .'/../config.inc.php';
+require_once dirname(__FILE__) . '/../config.inc.php';
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
-
 // Mertens: 
 // -- for refactored "fetchByUri" and "fecthByUuid" the corresponding versions of picturae (23,21/11/2016) cannot be taken,
 // see the comment inside the body of "fetchByUuid". Complaint "something went very wrong" is thrown now
@@ -56,6 +55,7 @@ require_once dirname(__FILE__) .'/../config.inc.php';
 
 class ResourceManager
 {
+
     /**
      * @var Client
      */
@@ -68,11 +68,11 @@ class ResourceManager
      */
     protected $resourceType = null;
 
-
-     /** 
-      * @var \OpenSkos2\Solr\ResourceManager
-      */
+    /**
+     * @var \OpenSkos2\Solr\ResourceManager
+     */
     protected $solrResourceManager;
+
     public function getResourceType()
     {
         return $this->resourceType;
@@ -114,7 +114,7 @@ class ResourceManager
      */
     public function insert(Resource $resource)
     {
-       // Put type if we have it and it is missing.
+        // Put type if we have it and it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
@@ -125,8 +125,8 @@ class ResourceManager
         // however to spead up search we add set and tenant to solr description of the concept
         if ($resource->getType()->getUri() == Skos::CONCEPT) {
             $set_and_tenant = $this->fetchTenantSpec($resource);
-            if (count($set_and_tenant)<1) {
-                var_dump('Cannot fetch tenant for the concept '. $resource->getUri());
+            if (count($set_and_tenant) < 1) {
+                var_dump('Cannot fetch tenant for the concept ' . $resource->getUri());
             }
             foreach ($set_and_tenant as $spec) {
                 $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
@@ -134,7 +134,6 @@ class ResourceManager
             }
             $this->solrResourceManager->insert($resource);
         }
-        
     }
 
     /**
@@ -178,20 +177,18 @@ class ResourceManager
     /**
      * @param Uri $resource
      */
-    public function delete(Uri $resource, $rdfType=null)
+    public function delete(Uri $resource, $rdfType = null)
     {
-       $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
         if ($rdfType === Skos::CONCEPT) {
             $this->solrResourceManager->delete($resource);
         }
     }
-   
-     public function deleteReferencesToObject(Uri $resource)
+
+    public function deleteReferencesToObject(Uri $resource)
     {
         $this->client->update("DELETE WHERE {?subject ?predicate  <{$resource->getUri()}> }");
     }
-  
-   
 
     /**
      * @todo Keep SOLR in sync
@@ -227,54 +224,54 @@ class ResourceManager
         $query .= PHP_EOL . '}';
         $this->client->update($query);
     }
-    
+
     public function fetchResourceFilters()
     {
-        $query='SELECT DISTINCT ?uri  ?title ?type WHERE '
-                . '{ {?uri <'.DcTerms::TITLE.'> ?title . ?uri <' .RdfNamespace::TYPE . '> ?type . '
-          . 'FILTER ( ?type = <'.Skos::SKOSCOLLECTION.'> || ?type = <'.Skos::CONCEPTSCHEME.'> || ?type = <'.Dcmi::DATASET.'>  ) } '
-          . ' UNION { ?uri <' .RdfNamespace::TYPE . '> ?type . '
-          . ' ?uri <' .vCard::ORG . '> ?node . ?node <' .vCard::ORGNAME . '> ?title '
-          . ' FILTER ( ?type = <'.Org::FORMALORG.'>)} } ';
+        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+            . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . Skos::SKOSCOLLECTION . '> || ?type = <' . Skos::CONCEPTSCHEME . '> || ?type = <' . Dcmi::DATASET . '>  ) } '
+            . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
+            . ' FILTER ( ?type = <' . Org::FORMALORG . '>)} } ';
         $response = $this->query($query);
         $retVal = [];
         $retVal[Skos::SKOSCOLLECTION] = [];
         $retVal[Skos::CONCEPTSCHEME] = [];
         $retVal[Dcmi::DATASET] = [];
         $retVal[Org::FORMALORG] = [];
-        foreach($response as $descr) {
-            $spec=[];
-            $spec['uri']=$descr->uri->getUri();
-            $spec['title']=$descr->title->getValue();
-            $retVal[$descr->type->getUri()][]=$spec;
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['uri'] = $descr->uri->getUri();
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
         }
-        return $retVal;  
+        return $retVal;
     }
-    
+
     public function fetchResourceFiltersForRelations()
     {
-        $query='SELECT DISTINCT ?uri  ?title ?type WHERE '
-                . ' {?uri <'.DcTerms::TITLE.'> ?title . ?uri <' .RdfNamespace::TYPE . '> ?type . '
-          . 'FILTER ( ?type = <'.Owl::OBJECT_PROPERTY.'> || ?type = <'.Skos::CONCEPTSCHEME.'> )} ';
+        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+            . ' {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . Owl::OBJECT_PROPERTY . '> || ?type = <' . Skos::CONCEPTSCHEME . '> )} ';
         $response = $this->query($query);
         $retVal = [];
         $retVal[Owl::OBJECT_PROPERTY] = [];
         $retVal[Skos::CONCEPTSCHEME] = [];
-        foreach($response as $descr) {
-            $spec=[];
-            $spec['uri']=$descr->uri->getUri();
-            $spec['title']=$descr->title->getValue();
-            $retVal[$descr->type->getUri()][]=$spec;
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['uri'] = $descr->uri->getUri();
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
         }
         $skosrels = Skos::getSkosConceptConceptRelations();
         $len = strlen(Skos::NAME_SPACE);
-        foreach($skosrels as $skosrel) {
-            $spec=[];
-            $spec['uri']=$skosrel;
-            $spec['title']='skos:'.substr($skosrel, $len);
-            $retVal[Owl::OBJECT_PROPERTY][]=$spec;
+        foreach ($skosrels as $skosrel) {
+            $spec = [];
+            $spec['uri'] = $skosrel;
+            $spec['title'] = 'skos:' . substr($skosrel, $len);
+            $retVal[Owl::OBJECT_PROPERTY][] = $spec;
         }
-        return $retVal;  
+        return $retVal;
     }
 
     /**
@@ -284,46 +281,44 @@ class ResourceManager
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUuid($uuid, $resType=null)
+    public function fetchByUuid($uuid, $resType = null)
     {
-      // Meertens: The request below using FILTER NOT EXIST is necessary because  institutions have "nested" structure,
-      // that is they have sub-elements (address and institution description) which have internal node id-s and are rdf-s on itself.
-      // The difference between them and regular rdf resources is that they do not have types
-      
-    
-        $query='DESCRIBE ?subject ?object '
-                . '{SELECT DISTINCT ?subject  ?object WHERE '
-                . '{ ?subject <'.OpenSkosNameSpace::UUID.'> "'.$uuid.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+        // Meertens: The request below using FILTER NOT EXIST is necessary because  institutions have "nested" structure,
+        // that is they have sub-elements (address and institution description) which have internal node id-s and are rdf-s on itself.
+        // The difference between them and regular rdf resources is that they do not have types
+
+
+        $query = 'DESCRIBE ?subject ?object '
+            . '{SELECT DISTINCT ?subject  ?object WHERE '
+            . '{ ?subject <' . OpenSkosNameSpace::UUID . '> "' . $uuid . '". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <' . RdfNamespace::TYPE . '> ?type } } }';
         $result = $this->fetchBy($query, $uuid, $resType);
         return $result;
-        
+
         /* picturae version:
-        $prefixes = [
-            'openskos' => OpenSkosNamespace::NAME_SPACE,
-        ];
+          $prefixes = [
+          'openskos' => OpenSkosNamespace::NAME_SPACE,
+          ];
 
-        $lit = new \OpenSkos2\Rdf\Literal($uuid);
-        $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe('?subject')
-            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
-        $data = $this->fetchQuery($query);
+          $lit = new \OpenSkos2\Rdf\Literal($uuid);
+          $qb = new \Asparagus\QueryBuilder($prefixes);
+          $query = $qb->describe('?subject')
+          ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
+          $data = $this->fetchQuery($query);
 
-        if (count($data) == 0) {
-            throw new ResourceNotFoundException(
-                'The requested resource with openskos::uuid <' . $uuid . '> was not found.'
-            );
-        }
+          if (count($data) == 0) {
+          throw new ResourceNotFoundException(
+          'The requested resource with openskos::uuid <' . $uuid . '> was not found.'
+          );
+          }
 
-        if (count($data) > 1) {
-            throw new \RuntimeException(
-                'Something went very wrong. The requested resource with uuid <' . $uuid . '> was found more than once.'
-            );
-        }
+          if (count($data) > 1) {
+          throw new \RuntimeException(
+          'Something went very wrong. The requested resource with uuid <' . $uuid . '> was found more than once.'
+          );
+          }
 
-        return $data[0];
+          return $data[0];
          * */
-         
-        
     }
 
     /**
@@ -331,52 +326,54 @@ class ResourceManager
      * @param string $uri
      * @return Resource
      */
-    public function fetchByUri($uri, $resType=null)
-    { 
-        $query='DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<'.$uri.'>) .  FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+    public function fetchByUri($uri, $resType = null)
+    {
+        $query = 'DESCRIBE ?subject ?object {SELECT DISTINCT ?subject  ?object WHERE { ?subject ?predicate ?object . FILTER (?subject=<' . $uri . '>) .  FILTER NOT EXISTS { ?object <' . RdfNamespace::TYPE . '> ?type } } }';
         $result = $this->fetchBy($query, $uri, $resType);
         return $result;
     }
-    
+
     /*
      * Fetch resource by code
      *
      * @param string $code
      * @return Resource
      */
-    public function fetchByCode($code, $resType=null)
+
+    public function fetchByCode($code, $resType = null)
     {
-        $query='DESCRIBE ?subject ?object '
-                . '{SELECT DISTINCT ?subject  ?object WHERE '
-                . '{ ?subject <'.OpenSkosNamespace::CODE.'> "'.$code.'". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <'.RdfNamespace::TYPE.'> ?type } } }';
+        $query = 'DESCRIBE ?subject ?object '
+            . '{SELECT DISTINCT ?subject  ?object WHERE '
+            . '{ ?subject <' . OpenSkosNamespace::CODE . '> "' . $code . '". ?subject ?predicate ?object . FILTER NOT EXISTS { ?object <' . RdfNamespace::TYPE . '> ?type } } }';
         $result = $this->fetchBy($query, $code, $resType);
         return $result;
     }
-    
-    private function fetchBy($query, $reference, $resType = null) {
+
+    private function fetchBy($query, $reference, $resType = null)
+    {
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
         $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
-        
+
         if (count($resources) === 0) {
             if ($resType === null) {
                 $resType = "not given. ";
             }
             throw new ApiException('The requested resource ' . $reference . ' of type ' . $resType . ' was not found in the triple store.', 404);
-
         }
         if (count($resources) > 1) {
-            throw new ApiException('Something went very wrong. The requested resource <' . $reference . '> is found more than 1 time.', 500
-            );
+            throw new ApiException('Something went very wrong. The requested resource <' . $reference . '> is found more than 1 time.', 500);
         }
 
         return $resources[0];
     }
-    public function fetchSubjectTypePropertyForObject($objectUri) {
+
+    public function fetchSubjectTypePropertyForObject($objectUri)
+    {
         $query = 'SELECT ?subject  ?type ?property WHERE '
-                . '{  ?subject <' . RdfNamespace::TYPE . '> ?type . ?subject ?property <' . $objectUri . '> .}';
+            . '{  ?subject <' . RdfNamespace::TYPE . '> ?type . ?subject ?property <' . $objectUri . '> .}';
         $result = $this->query($query);
         return $result;
     }
@@ -386,23 +383,23 @@ class ResourceManager
      * @param string[] $uris
      * @return ResourceCollection
      */
-    public function fetchByUris($uris, $resType=null)
+    public function fetchByUris($uris, $resType = null)
     {
         /*
-        DESCRIBE ?subject
-        WHERE {
-                ?subject ?predicate ?object .
-                FILTER (
-                    ?subject = <http://data.beeldengeluid.nl/gtaa/135633>
-                    || ?subject = <http://data.beeldengeluid.nl/gtaa/350064>
-                )
-        }
-        */
-        
+          DESCRIBE ?subject
+          WHERE {
+          ?subject ?predicate ?object .
+          FILTER (
+          ?subject = <http://data.beeldengeluid.nl/gtaa/135633>
+          || ?subject = <http://data.beeldengeluid.nl/gtaa/350064>
+          )
+          }
+         */
+
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
-        
+
         $resources = EasyRdf::createResourceCollection($resType);
 
         if (!empty($uris)) {
@@ -411,7 +408,7 @@ class ResourceManager
                 foreach ($urisChunk as $uri) {
                     $filters[] = '?subject = ' . $this->valueToTurtle(new Uri($uri));
                 }
-               
+
                 $query = new QueryBuilder();
                 $query->describe('?subject')
                     ->where('?subject', '?predicate', '?object')
@@ -420,11 +417,10 @@ class ResourceManager
                 if (!empty($resType)) {
                     $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $resType . '>');
                 }
-                
+
                 foreach ($this->fetchQuery($query) as $resource) {
                     $resources->append($resource);
                 }
-                
             }
 
             // Keep the ordering of the passed uris.
@@ -465,24 +461,24 @@ class ResourceManager
      * @param bool $ignoreDeleted Do not fetch resources which have openskos:status deleted.
      * @return ResourceCollection
      */
-    public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false, $resType=null)
+    public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false, $resType = null)
     {
         /*
-        DESCRIBE ?subject {
-            SELECT DISTINCT ?subject
-            WHERE {
-                ?subject ?predicate ?object
-            }
-            ORDER BY ?subject
-            LIMIT 10
-            OFFSET 0
-        }
-        */
-       
-      
-       $newpatterns[RdfNamespace::TYPE] = null;
-       if ($resType === null) {
-           $resType = $this->resourceType;
+          DESCRIBE ?subject {
+          SELECT DISTINCT ?subject
+          WHERE {
+          ?subject ?predicate ?object
+          }
+          ORDER BY ?subject
+          LIMIT 10
+          OFFSET 0
+          }
+         */
+
+
+        $newpatterns[RdfNamespace::TYPE] = null;
+        if ($resType === null) {
+            $resType = $this->resourceType;
             if (!empty($resType)) {
                 $newPatterns[RdfNamespace::TYPE] = new Uri($resType);
             }
@@ -490,20 +486,20 @@ class ResourceManager
             $newPatterns[RdfNamespace::TYPE] = $resType;
         };
         if ($newPatterns[RdfNamespace::TYPE] !== null) {
-          if ($newPatterns[RdfNamespace::TYPE] ->getUri() === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
+            if ($newPatterns[RdfNamespace::TYPE]->getUri() === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);
             }
         };
-       
-        
+
+
         $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
 
         $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
         $where .= '?subject ?property ?object . ';
-        
+
 
         if ($ignoreDeleted) {
             $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
@@ -548,7 +544,7 @@ class ResourceManager
         // @TODO Picturae's remark: Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
 
         return Namespaces::getRdfConceptNamespaces();
-        
+
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
 
@@ -588,21 +584,23 @@ class ResourceManager
 
         return $result->count->getValue();
     }
-    
-    public function countTriples($subject, $prop, $object) {
-        
-        $query = 'SELECT (COUNT(*) as ?COUNT) WHERE { ' . $subject.  '  '. $prop.  '  '. $object. ' . }';
+
+    public function countTriples($subject, $prop, $object)
+    {
+
+        $query = 'SELECT (COUNT(*) as ?COUNT) WHERE { ' . $subject . '  ' . $prop . '  ' . $object . ' . }';
         $result = $this->query($query);
         $retVal = $result[0]->COUNT->getValue();
         return $retVal;
     }
-    
-    public function resourceExists($id, $rdfType) {
-        
+
+    public function resourceExists($id, $rdfType)
+    {
+
         if ($rdfType == Concept::TYPE) {
             if ($id !== null && isset($id)) {
                 if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
-                    $query = 'uri:"' . $id.'"';
+                    $query = 'uri:"' . $id . '"';
                 } else {
                     $query = 'uuid:' . $id;
                 }
@@ -628,52 +626,52 @@ class ResourceManager
             }
         }
     }
-    
-    
-    public function fetchSubjectWithPropertyGiven($propertyUri, $value, $rdfType=null) {
+
+    public function fetchSubjectWithPropertyGiven($propertyUri, $value, $rdfType = null)
+    {
         $typeFilter = "";
         if (isset($rdfType)) {
-            $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
+            $typeFilter = ' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
-        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . '. $typeFilter. '}';
+        $query = 'SELECT DISTINCT ?subject WHERE { ?subject  <' . $propertyUri . '> ' . $value . ' . ' . $typeFilter . '}';
         $result = $this->query($query);
         //var_dump($query);
-        $retVal = $this -> makeListOfPrimitiveResults($result, 'subject');
+        $retVal = $this->makeListOfPrimitiveResults($result, 'subject');
         return $retVal;
     }
-    
-    
-    public function fetchSubjectUriForUriRdfObject($resource, $property, $value){
+
+    public function fetchSubjectUriForUriRdfObject($resource, $property, $value)
+    {
         $uri = $value->getUri();
-        $types = $resource ->getProperty(RdfNamespace::TYPE);
-        $rdfType=$types[0]->getUri();
+        $types = $resource->getProperty(RdfNamespace::TYPE);
+        $rdfType = $types[0]->getUri();
         if ($rdfType === Concept::TYPE) {
             $split = explode("#", $property);
             $field = $split[1];
-            $solrQuery = 's_'.$field. ':"'. $uri.'"';
-            $docs = $this -> solrResourceManager -> search($solrQuery);
+            $solrQuery = 's_' . $field . ':"' . $uri . '"';
+            $docs = $this->solrResourceManager->search($solrQuery);
             return $this->makeUriListFromSolrResponse($docs);
         } else {
-            $retVal=$this->fetchSubjectWithPropertyGiven($property, '<'.$uri.'>', $rdfType);
+            $retVal = $this->fetchSubjectWithPropertyGiven($property, '<' . $uri . '>', $rdfType);
             return $retVal;
         }
-        
     }
-   
-    public function fetchSubjectUriForLiteralRdfObject($resource, $property, $value) {
+
+    public function fetchSubjectUriForLiteralRdfObject($resource, $property, $value)
+    {
         $language = $value->getLanguage();
         $term = $value->getValue();
-        $types = $resource ->getProperty(RdfNamespace::TYPE);
-        $rdfType=$types[0]->getUri();
-        if ($rdfType=== Concept::TYPE && $property !== OpenSkosNamespace::UUID) { // solr request, works only for skos and open-skos properties
+        $types = $resource->getProperty(RdfNamespace::TYPE);
+        $rdfType = $types[0]->getUri();
+        if ($rdfType === Concept::TYPE && $property !== OpenSkosNamespace::UUID) { // solr request, works only for skos and open-skos properties
             $split = explode("#", $property);
             $field = $split[1];
-            $solrQuery = 's_' . $field . ':"' . $term.'"';
+            $solrQuery = 's_' . $field . ':"' . $term . '"';
             if ($field === 'prefLabel' || $field === 'altLabel' || $field === 'hiddenLabel' || $field = 'notation') {
                 $schemes = $resource->getProperty(Skos::INSCHEME);
                 $n = count($schemes);
                 if ($n > 0) {
-                   $solrSchemes = ' AND inScheme:(';
+                    $solrSchemes = ' AND inScheme:(';
                     if ($n > 1) {
                         for ($i = 0; $i < $n - 1; $i++) {
                             $solrSchemes.= '"' . $schemes[$i]->getUri() . '" OR ';
@@ -685,7 +683,7 @@ class ResourceManager
             }
             $docs = $this->solrResourceManager->search($solrQuery);
             return $this->makeUriListFromSolrResponse($docs);
-        } else { // triple store request 
+        } else { // triple store request
             if ($language !== null && $language !== '') {
                 $completeValue = '"' . $term . '"@' . $language;
             } else {
@@ -696,74 +694,81 @@ class ResourceManager
         }
     }
 
-    private function makeUriListFromSolrResponse($docs) {
+    private function makeUriListFromSolrResponse($docs)
+    {
         $retVal = [];
         foreach ($docs as $doc) {
-            $retVal[]=$doc;
+            $retVal[] = $doc;
         }
         return $retVal;
     }
 
-    public function fetchObjectsWithProperty($propertyUri, $rdfType=null) {
+    public function fetchObjectsWithProperty($propertyUri, $rdfType = null)
+    {
         $typeFilter = "";
         if (isset($rdfType)) {
-            $typeFilter =' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
+            $typeFilter = ' ?subject <' . RdfNamespace::TYPE . '> <' . $rdfType . '> . ';
         }
-        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . '. $typeFilter. '}';
+        $query = 'SELECT DISTINCT ?object WHERE { ?subject  <' . $propertyUri . '> ?object . ' . $typeFilter . '}';
 
         $result = $this->query($query);
         $retVal = $this->makeListOfPrimitiveResults($result, 'object');
         return $retVal;
     }
-    
-    public function fetchObjectForSubjectAndProperty($subjectUri, $propertyUri) {
-        
-        $query = 'SELECT DISTINCT ?object WHERE { <'. $subjectUri .'> <' . $propertyUri . '> ?object . }';
+
+    public function fetchObjectForSubjectAndProperty($subjectUri, $propertyUri)
+    {
+
+        $query = 'SELECT DISTINCT ?object WHERE { <' . $subjectUri . '> <' . $propertyUri . '> ?object . }';
 
         $result = $this->query($query);
         $retVal = $this->makeListOfPrimitiveResults($result, 'object');
         return $retVal;
     }
-    
-    public function fetchUsersInstitution($userUri) {
-        $query = 'SELECT DISTINCT ?object WHERE { <' .$userUri.'>  <' . Foaf::ORGANISATION . '> ?object . }';
+
+    public function fetchUsersInstitution($userUri)
+    {
+        $query = 'SELECT DISTINCT ?object WHERE { <' . $userUri . '>  <' . Foaf::ORGANISATION . '> ?object . }';
         $result = $this->query($query);
-        if (count($result)>0){
+        if (count($result) > 0) {
             $retVal = $result[0]->object->getUri();
         } else {
-            $retVal=null;
+            $retVal = null;
         }
         return $retVal;
     }
-   
 
-    private function makeListOfPrimitiveResults($sparqlQueryResult, $triplePart) {
+    private function makeListOfPrimitiveResults($sparqlQueryResult, $triplePart)
+    {
         $items = [];
         foreach ($sparqlQueryResult as $resource) {
-            $className=get_class($resource->$triplePart);
+            $className = get_class($resource->$triplePart);
             if ('EasyRdf\Literal' === $className) {
-                $items[] = $resource->$triplePart-> getValue();
+                $items[] = $resource->$triplePart->getValue();
             } else {
-                $items[] = $resource->$triplePart -> getUri();
+                $items[] = $resource->$triplePart->getUri();
             }
         }
         return $items;
     }
-    
-    protected function makeNameUriMap($sparqlQueryResult) {
+
+    protected function makeNameUriMap($sparqlQueryResult)
+    {
         $items = [];
         foreach ($sparqlQueryResult as $resource) {
             $uri = $resource->uri->getUri();
             $name = $resource->name->getValue();
-            $items[$name]=$uri;
+            $items[$name] = $uri;
         }
         return $items;
     }
-    
+
     /* Returns a map, mapping resource's titles to the resource's Uri
      * Works for set, schema, skos colllection, user relation definition
      */
-    public function fetchNameUri() {
+
+    public function fetchNameUri()
+    {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . DcTerms::TITLE . '> ?name .  ?uri  <' . RdfNamespace::TYPE . '> <' . $this->getResourceType() . '> .}';
         $response = $this->query($query);
         $result = $this->makeNameUriMap($response);
@@ -866,9 +871,9 @@ class ResourceManager
         }
         $result = $this->query($query);
         if ($resType === null) {
-           $resType =   $this->resourceType;
+            $resType = $this->resourceType;
         }
-        $retVal= EasyRdf::graphToResourceCollection($result, $resType);
+        $retVal = EasyRdf::graphToResourceCollection($result, $resType);
         return $retVal;
     }
 
@@ -991,10 +996,9 @@ class ResourceManager
 
         return $query;
     }
-    
-    
-    
-    public function fetchUriByCode($code, $typeUri) {
+
+    public function fetchUriByCode($code, $typeUri)
+    {
         $tenants = $this->fetchSubjectWithPropertyGiven(OpenSkosNamespace::CODE, '"' . $code . '"', $typeUri);
         if (count($tenants) < 1) {
             return null;
@@ -1002,52 +1006,53 @@ class ResourceManager
             return $tenants[0];
         }
     }
-    
-  
-     public function fetchRelationUris(){ // all relations, not only concept-concept relations
-         $skosrels = Skos::getSkosRelations();
-         $userrels = array_values($this->fetchNameUri());
-         $result = array_merge($skosrels, $userrels);
-         return $result;
+
+    public function fetchRelationUris()
+    {
+ // all relations, not only concept-concept relations
+        $skosrels = Skos::getSkosRelations();
+        $userrels = array_values($this->fetchNameUri());
+        $result = array_merge($skosrels, $userrels);
+        return $result;
     }
-    
-      
-    public function getNonSKOSRelationTypes() {
-        $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <'. Owl::OBJECT_PROPERTY. '> . }';
+
+    public function getNonSKOSRelationTypes()
+    {
+        $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <' . Owl::OBJECT_PROPERTY . '> . }';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, APPLICATION_BASE_PATH.'/data/Logger.txt');
         $resource = $this->query($sparqlQuery);
-        $result =[];
+        $result = [];
         foreach ($resource as $value) {
-            $result[] = $value -> rel ->getUri();
+            $result[] = $value->rel->getUri();
         }
         return $result;
     }
-     
-    
-   public function fetchRowWithRetries($model, $query) {
-    $tries = 0;
-    $maxTries = 3;
-    do {
-        try {
-            return $model->fetchRow($query);
-        } catch (\Exception $exception) {
-            echo 'retry mysql connect' . PHP_EOL;
-            // Reconnect
-            $model->getAdapter()->closeConnection();
-            $modelClass = get_class($model);
-            $model = new $modelClass();
-            $tries ++;
-        }
-    } while ($tries < $maxTries);
 
-    if ($exception) {
-        throw $exception;
+    public function fetchRowWithRetries($model, $query)
+    {
+        $tries = 0;
+        $maxTries = 3;
+        do {
+            try {
+                return $model->fetchRow($query);
+            } catch (\Exception $exception) {
+                echo 'retry mysql connect' . PHP_EOL;
+                // Reconnect
+                $model->getAdapter()->closeConnection();
+                $modelClass = get_class($model);
+                $model = new $modelClass();
+                $tries ++;
+            }
+        } while ($tries < $maxTries);
+
+        if ($exception) {
+            throw $exception;
+        }
     }
 
-   }
-   
-   // used only for HTML output
-    public function getResourceSearchID($resourceReference, $resourceType) {
+    // used only for HTML output
+    public function getResourceSearchID($resourceReference, $resourceType)
+    {
         if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
             $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
             $response2 = $this->query($query);
@@ -1062,70 +1067,72 @@ class ResourceManager
             return $response1[0]->uuid->getValue();
         }
 
-       
+
         throw new ApiException("The resource with the reference " . $resourceReference . " is not found. ");
     }
 
     // used only for HTML output
-    public function getSetTitle($reference) {
+    public function getSetTitle($reference)
+    {
         $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" . $reference . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" . RdfNamespace::TYPE . "> <" . Dcmi::DATASET . "> . }";
         $response = $this->query($query);
         if ($response !== null & count($response) > 0) {
             return $response[0]->name->getValue();
-        } 
-        
+        }
+
         $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . DcTerms::TITLE . '> ?name .  <' . $reference . '>  <' . RdfNamespace::TYPE . '> <' . Dcmi::DATASET . '> .}';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
             return $response1[0]->name->getValue();
         }
-        
     }
 
     // used only for HTML output
-    public function getTenantNameByCode($code) {
-        
-        $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $code . "' . ?tenanturi <" . vCard::ORG . "> ?org . ?org <" . vCard::ORGNAME . "> ?name . }";
+    public function getTenantNameByCode($code)
+    {
+
+        $query = "SELECT ?name WHERE { ?tenanturi <" . OpenSkosNamespace::CODE . "> '" . $code . "' . ?tenanturi <" . VCard::ORG . "> ?org . ?org <" . VCard::ORGNAME . "> ?name . }";
         $response2 = $this->query($query);
         if ($response2 !== null & count($response2) > 0) {
             return $response2[0]->name->getValue();
         };
-
     }
+
     // used only for HTML representation to list concepts withit a schema, a set or a skos-collection
-    public function listConceptsForCluster($clusterID, $clusterType) {
+    public function listConceptsForCluster($clusterID, $clusterType)
+    {
         if ($clusterType === OpenSkosNamespace::SET) { // search on code
-            $query = 'SELECT DISTINCT ?uri ?uuid ' 
-             . ' WHERE  { ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> . '
+            $query = 'SELECT DISTINCT ?uri ?uuid '
+                . ' WHERE  { ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> . '
                 . ' ?uri  <' . Skos::INSCHEME . '> ?x . '
                 . ' ?uri  <' . OpenSkosNamespace::UUID . '> ?uuid . '
                 . ' ?x  <' . OpenSkosNamespace::SET . '> <' . $clusterID . '> . }'
-; 
-       
+            ;
         } else {
-           $query = 'SELECT ?uri ?uuid ' 
-             . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterID . '> .'
+            $query = 'SELECT ?uri ?uuid '
+                . ' WHERE  {  ?uri  <' . $clusterType . '> <' . $clusterID . '> .'
                 . ' ?uri  <' . RdfNamespace::TYPE . '> <' . Skos::CONCEPT . '> . '
                 . ' ?uri  <' . OpenSkosNamespace::UUID . '> ?uuid .}'
-                ; 
+            ;
         }
         $result = $this->query($query);
-        $retval=[];
+        $retval = [];
         foreach ($result as $concept) {
             $retval[$concept->uri->getUri()] = trim($concept->uuid->getValue());
         }
         return $retval;
     }
 
-   // output is a list of related concepts, used in both managers: relation and concept.
-      public function fetchRelatedConcepts($uri, $relationType, $isTarget, $conceptScheme = null) {
-        
-          if ($isTarget) {
+    // output is a list of related concepts, used in both managers: relation and concept.
+    public function fetchRelatedConcepts($uri, $relationType, $isTarget, $conceptScheme = null)
+    {
+
+        if ($isTarget) {
             $startQuery = 'DESCRIBE ?subject {SELECT DISTINCT ?subject   WHERE { ?subject <' . $relationType . '> <' . $uri . '> . ';
             if ($conceptScheme == null) {
                 $endQuery = '} }';
             } else {
-                $endQuery = '  <'.$uri.'> <' . Skos::INSCHEME . '> <' . $conceptScheme . '>. } }';
+                $endQuery = '  <' . $uri . '> <' . Skos::INSCHEME . '> <' . $conceptScheme . '>. } }';
             }
         } else {
             $startQuery = 'DESCRIBE ?object {SELECT DISTINCT ?object   WHERE { <' . $uri . '> <' . $relationType . '> ?object . ';
@@ -1136,23 +1143,26 @@ class ResourceManager
             }
         };
 
-        $relatedConcepts = $this->fetchQuery($startQuery.$endQuery, Concept::TYPE);
+        $relatedConcepts = $this->fetchQuery($startQuery . $endQuery, Concept::TYPE);
         return $relatedConcepts;
     }
 
-    public function setUriWithEmptinessCheck(&$resource, $property, $val) {
+    public function setUriWithEmptinessCheck(&$resource, $property, $val)
+    {
         if ($val !== null && $val !== '') {
             $resource->setProperty($property, new \OpenSkos2\Rdf\Uri($val));
         };
     }
 
-    public function setLiteralWithEmptinessCheck(&$resource, $property, $val) {
+    public function setLiteralWithEmptinessCheck(&$resource, $property, $val)
+    {
         if ($val !== null && $val !== '') {
             $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val));
         };
     }
-    
-    public function setBooleanLiteralWithEmptinessCheck(&$resource, $property, $val) {
+
+    public function setBooleanLiteralWithEmptinessCheck(&$resource, $property, $val)
+    {
         if ($val === null) {
             $resource->setProperty($property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
             return;
@@ -1168,9 +1178,10 @@ class ResourceManager
         }
         $resource->setProperty($property, new \OpenSkos2\Rdf\Literal($val, null, \OpenSkos2\Rdf\Literal::TYPE_BOOL));
     }
-    
+
     // Id is either an URI or uuid, or, for user concevinece, code for tenants and sets
-    public function findResourceById($id, $resourceType) {
+    public function findResourceById($id, $resourceType)
+    {
         if ($id !== null && isset($id)) {
             if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
                 $resource = $this->fetchByUri($id, $resourceType);
@@ -1185,7 +1196,7 @@ class ResourceManager
                             throw new ApiException('The resource of type ' . $resourceType . ' with the id/uri/code ' . $id . ' cannot be found (detailed reasons : ' . $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')', 404);
                         }
                     } else {
-                       throw new ApiException('The resource of type ' . $resourceType . ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' . $ex->getMessage() .  ')', 404); 
+                        throw new ApiException('The resource of type ' . $resourceType . ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' . $ex->getMessage() . ')', 404);
                     }
                 }
             }
@@ -1196,17 +1207,19 @@ class ResourceManager
         }
     }
 
-    public function fetchTenantNameUri() {
-        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?name . }';
+    public function fetchTenantNameUri()
+    {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . VCard::ORG . '> ?org . ?org <' . VCard::ORGNAME . '> ?name . }';
         $response = $this->query($query);
         $result = $this->makeNameUriMap($response);
         return $result;
     }
-    
-    public function augmentResourceWithTenant($resource) {
+
+    public function augmentResourceWithTenant($resource)
+    {
         if ($resource !== null) {
             $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
-            $rdfType= $rdfTypes[0]->getUri();
+            $rdfType = $rdfTypes[0]->getUri();
             if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION && $rdfType !== Dcmi::DATASET) {
                 throw new \Exception("The method augmentResourceWithTenant can be used only for concept schemata, skos collections and sets. ");
             }
@@ -1221,10 +1234,11 @@ class ResourceManager
         return $resource;
     }
 
-    private function fetchTenantUriViaSet($resource) {
-        $rdfTypes = $resource ->getProperty(RdfNamespace::TYPE);
-        $rdfType= $rdfTypes[0]->getUri();
-            
+    private function fetchTenantUriViaSet($resource)
+    {
+        $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
+        $rdfType = $rdfTypes[0]->getUri();
+
         if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION) {
             throw new \Exception("The method fetchTenantUriViaSet can be used only for concept chemata and skos collections. ");
         }
@@ -1238,36 +1252,33 @@ class ResourceManager
                         return $tenantUris[0];
                     }
                 } catch (ApiException $ex) {
-                    
                 }
             }
         }
         return null;
     }
 
-   
-    public function fetchTenantSpec($concept){
-        $uri = $concept ->getUri();
+    public function fetchTenantSpec($concept)
+    {
+        $uri = $concept->getUri();
         $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
-                . '<' . $uri.'> <'.Skos::INSCHEME.'> ?schemauri . ?schemauri <' .OpenSkosNamespace::SET.'> ?seturi . ?seturi <'.  DcTerms::PUBLISHER.'> ?tenanturi .'
-                .'?seturi <'.OpenSkosNamespace::CODE.'> ?setcode .'
-                 .'?seturi <'.  DcTerms::TITLE.'> ?settitle .'
-                . '?tenanturi  <' . vCard::ORG . '> ?org . ?org <' . vCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .}';
-    
+            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . ?schemauri <' . OpenSkosNamespace::SET . '> ?seturi . ?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+            . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
+            . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
+            . '?tenanturi  <' . VCard::ORG . '> ?org . ?org <' . VCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .}';
+
         $response = $this->query($query);
         $retVal = [];
-        foreach($response as $descr) {
-            $spec=[];
-            $spec['tenanturi']=$descr->tenanturi->getUri();
-            $spec['tenantname']=$descr->tenantname->getValue();
-            $spec['tenantcode']=$descr->tenantcode->getValue();
-            $spec['seturi'] = $descr ->seturi->getUri();
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['tenanturi'] = $descr->tenanturi->getUri();
+            $spec['tenantname'] = $descr->tenantname->getValue();
+            $spec['tenantcode'] = $descr->tenantcode->getValue();
+            $spec['seturi'] = $descr->seturi->getUri();
             $spec['setcode'] = $descr->setcode->getValue();
             $spec['settitle'] = $descr->settitle->getValue();
-            $retVal[]=$spec;
+            $retVal[] = $spec;
         }
-        return $retVal;  
+        return $retVal;
     }
-    
-    
 }

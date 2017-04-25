@@ -46,7 +46,7 @@ class CycleInNarrower extends AbstractConceptValidator
         $uri = new Uri($concept->getUri());
 
         $query = '?narrower skos:narrower+ ' . (new NTriple())->serialize($uri) . PHP_EOL
-                . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($narrowerTerms) . '))';
+            . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($narrowerTerms) . '))';
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic narrower relation detected for concept: {$concept->getUri()}";
 

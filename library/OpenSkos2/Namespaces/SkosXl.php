@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -25,8 +26,8 @@ namespace OpenSkos2\Namespaces;
  */
 class SkosXl
 {
+
     const NAME_SPACE = 'http://www.w3.org/2008/05/skos-xl#';
-    
     const LABEL = 'http://www.w3.org/2008/05/skos-xl#Label';
     const ALTLABEL = 'http://www.w3.org/2008/05/skos-xl#altLabel';
     const HIDDENLABEL = 'http://www.w3.org/2008/05/skos-xl#hiddenLabel';

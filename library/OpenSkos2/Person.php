@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Rdf;
@@ -27,8 +28,9 @@ use OpenSkos2\Set;
 
 class Person extends Resource
 {
+
     const TYPE = Foaf::PERSON;
-    
+
     /**
      * Resource constructor.
      * @param string $uri
@@ -38,7 +40,7 @@ class Person extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-    
+
     /**
      * Gets name of person
      * @param string $language
@@ -49,8 +51,10 @@ class Person extends Resource
     {
         return $this->getPropertyFlatValue(Foaf::NAME, $language);
     }
-    
+
     // override for a concerete resources
-    public function addMetadata($existingResource, $userUri, Tenant $tenant, Set $set) {
+    public function addMetadata($existingResource, $userUri, Tenant $tenant, Set $set)
+    {
+        
     }
 }

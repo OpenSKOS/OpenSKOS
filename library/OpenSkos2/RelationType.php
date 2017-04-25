@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
@@ -29,15 +30,13 @@ require_once dirname(__FILE__) . '/config.inc.php';
 
 class RelationType extends Resource
 {
+
     const TYPE = Owl::OBJECT_PROPERTY;
-    
-   
-     public function __construct($uri = null)
+
+    public function __construct($uri = null)
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
         $this->addProperty(Rdfs::SUBPROPERTY_OF, new Uri(Skos::RELATED));
     }
-    
-    
 }

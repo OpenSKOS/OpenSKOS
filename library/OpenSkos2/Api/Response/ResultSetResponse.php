@@ -24,6 +24,7 @@ namespace OpenSkos2\Api\Response;
  */
 abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
+
     /**
      * @var \OpenSkos2\Api\ResourceResultSet
      */
@@ -33,7 +34,7 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
      * @var []
      */
     protected $propertiesList;
-    
+
     /**
      *
      * @param \OpenSkos2\Api\ResourceResultSet $result

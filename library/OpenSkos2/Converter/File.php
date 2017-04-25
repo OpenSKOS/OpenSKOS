@@ -24,6 +24,7 @@ use OpenSkos2\Rdf\ResourceCollection;
 
 class File
 {
+
     /**
      * @var string
      */
@@ -37,7 +38,6 @@ class File
     {
         $this->fileName = $fileName;
     }
-
 
     /**
      * @return ResourceCollection

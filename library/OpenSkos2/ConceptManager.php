@@ -33,8 +33,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\MyInstitutionModules\RelationTypes;
 use OpenSkos2\Api\Exception\ApiException;
 
-
-require_once dirname(__FILE__) .'/config.inc.php';
+require_once dirname(__FILE__) . '/config.inc.php';
 require_once dirname(__FILE__) . '/../../tools/Logging.php';
 
 // Mertens: the difference is in handling relations.
@@ -44,11 +43,11 @@ require_once dirname(__FILE__) . '/../../tools/Logging.php';
 // also the code for these methods is different (refactored)
 // An auxiliary method deleteRelationsWhereObject is replaced with more generic deleteMatchingTriples
 // which is implemented in the prent class ResourceManager
-
 // Mertens: the changes introduced by Picturae starting from 11/11/2016 are taken.
 
 class ConceptManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
@@ -56,25 +55,25 @@ class ConceptManager extends ResourceManager
     protected $resourceType = Concept::TYPE;
 
     // uses and overrides the parent's method
-    public function findResourceById($id, $resourceType) {
+    public function findResourceById($id, $resourceType)
+    {
         $concept = parent::findResourceById($id, $resourceType);
         if ($concept->isDeleted()) {
             throw new ApiException('Resource with id ' . $id . ' is deleted', 410);
         }
         return $concept;
     }
-    
+
     /**
      * Deletes and then inserts the resource.
      * For concepts also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
-    
     public function replaceAndCleanRelations(Concept $concept)
     {
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
-        foreach ($this -> fetchRelationUris() as $relationType) {
+        foreach ($this->fetchRelationUris() as $relationType) {
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
         parent::replace($concept);
@@ -109,10 +108,10 @@ class ConceptManager extends ResourceManager
             $filter .= 'lang(?returnLabel) = "' . $lang . '"';
         }
         $query->filter($filter);
-       
+
         $result = $this->query($query);
         $items = [];
-        $i=0;
+        $i = 0;
         foreach ($result as $literal) {
             $items[$i] = $literal->returnLabel->getValue();
             $i++;
@@ -128,11 +127,11 @@ class ConceptManager extends ResourceManager
     public function askForPrefLabel($prefLabel)
     {
         return $this->askForMatch([
-            [
-                'predicate' => Skos::PREFLABEL,
-                'value' => new Literal($prefLabel),
-                'ignoreLanguage' => true
-            ]
+                [
+                    'predicate' => Skos::PREFLABEL,
+                    'value' => new Literal($prefLabel),
+                    'ignoreLanguage' => true
+                ]
         ]);
     }
 
@@ -148,7 +147,7 @@ class ConceptManager extends ResourceManager
         do {
             $concepts = $this->fetch(
                 [
-                    Skos::INSCHEME => $scheme,
+                Skos::INSCHEME => $scheme,
                 ],
                 $start,
                 $step
@@ -185,9 +184,9 @@ class ConceptManager extends ResourceManager
      * @param array $sorts
      * @return ConceptCollection
      */
-    public function search($query, $rows=MAXIMAL_ROWS, $start = 0, &$numFound=0, $sorts = null)
+    public function search($query, $rows = MAXIMAL_ROWS, $start = 0, &$numFound = 0, $sorts = null)
     {
-       return $this->fetchByUris(
+        return $this->fetchByUris(
             $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
@@ -266,8 +265,8 @@ class ConceptManager extends ResourceManager
 
         return $now;
     }
-    
-     /**
+
+    /**
      * Delete relations between two skos concepts.
      * Deletes in both directions (narrower and broader for example).
      * @param string $subjectUri
@@ -277,7 +276,7 @@ class ConceptManager extends ResourceManager
      */
     public function deleteRelationTriple($subjectUri, $relationType, $objectUri)
     {
-        
+
         $this->deleteMatchingTriples(
             new Uri($subjectUri),
             $relationType,
@@ -289,10 +288,9 @@ class ConceptManager extends ResourceManager
             $inverses[$relationType],
             new Uri($subjectUri)
         );
-        
     }
-  
-        /**
+
+    /**
      * Add relations to a skos concept
      *
      * @param string $uri
@@ -310,37 +308,34 @@ class ConceptManager extends ResourceManager
         }
 
         $graph = new \EasyRdf\Graph();
-        
+
         if (!is_array($uris)) {
             $uris = [$uris];
         }
         foreach ($uris as $related) {
             $graph->addResource($uri, $relationType, $related);
         }
-        
+
         $this->client->insert($graph);
     }
-    
-   // all concepts from transitive closure for $conceptsUri;
+
+    // all concepts from transitive closure for $conceptsUri;
     private function getClosure($conceptUri, $relationUri)
     {
-        $query = 'select ?trans where {<'. $conceptUri . '>  <' .$relationUri.'>+ ' . '  ?trans . }';
-        $response = $this ->query($query);
+        $query = 'select ?trans where {<' . $conceptUri . '>  <' . $relationUri . '>+ ' . '  ?trans . }';
+        $response = $this->query($query);
         $retVal = array();
-        $i=0;
+        $i = 0;
         foreach ($response as $key => $value) {
-            $retVal[$i] = $value -> trans -> getUri();
+            $retVal[$i] = $value->trans->getUri();
             $i++;
         }
         return $retVal;
     }
-    
-    
-    
-    
-    
+
     // a relation is invalid if it (possibly with its inverse) creates transitive link of a concept or related concept to itself
-    public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri) {
+    public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
+    {
         $closure = $this->getClosure($relatedConceptUri, $relationUri);
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
@@ -360,14 +355,15 @@ class ConceptManager extends ResourceManager
         }
         return false;
     }
-    
-    public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri) {
+
+    public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
+    {
         $count = $this->countTriples('<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>');
         if ($count > 0) {
             $relation[] = $conceptUri;
             $relation[] = $relationUri;
             $relation[] = $relatedConceptUri;
-            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, APPLICATION_BASE_PATH.'/data/info.log');
+            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, APPLICATION_BASE_PATH . '/data/info.log');
             return false;
         }
 
@@ -378,11 +374,10 @@ class ConceptManager extends ResourceManager
                 $relation[] = $conceptUri;
                 $relation[] = $relationUri;
                 $relation[] = $relatedConceptUri;
-                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, APPLICATION_BASE_PATH.'/data/info.log');
+                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, APPLICATION_BASE_PATH . '/data/info.log');
                 throw new ApiException('Concepts have not been updated because of attempt to add a relation which is in the transitive closure.', 400);
             }
         };
         return false;
     }
-  
 }

@@ -49,7 +49,6 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
             }
         }
         return true;
- 
     }
 
     /**
@@ -72,15 +71,15 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
         $escapedScheme = $ntriple->serialize($scheme);
 
         $query = '
-                ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
-                ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme . ' .
-                ?subject <'.OpenSkos::STATUS .'> ?status
+                ?subject <' . Skos::PREFLABEL . '> ' . $escapedLabel . ' .
+                ?subject <' . Skos::INSCHEME . '> ' . $escapedScheme . ' .
+                ?subject <' . OpenSkos::STATUS . '> ?status
                 FILTER(
                     ?subject != ' . $ntriple->serialize($concept) . '
                         && (
-                            ?status = \''.Concept::STATUS_CANDIDATE.'\' 
-                            || ?status = \''.Concept::STATUS_APPROVED.'\'
-                            || ?status = \''.Concept::STATUS_REDIRECTED.'\'
+                            ?status = \'' . Concept::STATUS_CANDIDATE . '\' 
+                            || ?status = \'' . Concept::STATUS_APPROVED . '\'
+                            || ?status = \'' . Concept::STATUS_REDIRECTED . '\'
                         )
                 )';
 

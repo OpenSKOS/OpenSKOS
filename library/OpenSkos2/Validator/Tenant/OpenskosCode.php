@@ -9,6 +9,6 @@ class OpenskosCode extends AbstractTenantValidator
 {
     protected function validateTenant(Tenant $resource)
     {
-       return $this->validateOpenskosCode($resource);
+        return $this->validateOpenskosCode($resource);
     }
 }

@@ -19,38 +19,42 @@ use OpenSkos2\Set;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 
-class SkosCollection extends Resource {
+class SkosCollection extends Resource
+{
 
-  const TYPE = Skos::SKOSCOLLECTION;
+    const TYPE = Skos::SKOSCOLLECTION;
 
-  public function __construct($uri = null) {
-    parent::__construct($uri);
-    $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
-  }
-
-  // how to add get property-reference attribute??
-
-  public function getTitle() {
-    if ($this->hasProperty(DcTerms::TITLE)) {
-      return (string) $this->getPropertySingleValue(DcTerms::TITLE);
-    } else {
-      return null;
+    public function __construct($uri = null)
+    {
+        parent::__construct($uri);
+        $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-  }
 
-  public function getDescription() {
-    if ($this->hasProperty(DcTerms::DESCRIPTION)) {
-      return (string) $this->getPropertySingleValue(DcTerms::DESCRIPTION);
-    } else {
-      return null;
+    // how to add get property-reference attribute??
+
+    public function getTitle()
+    {
+        if ($this->hasProperty(DcTerms::TITLE)) {
+            return (string) $this->getPropertySingleValue(DcTerms::TITLE);
+        } else {
+            return null;
+        }
     }
-  }
 
-  public function addMetadata($existingScheme, $userUri, Tenant $tenant, Set $set) {
-    parent::addMetadata($existingScheme, $userUri, $tenant, $set);
-    if ($this->isPropertyEmpty(OpenSkos::SET)) {
-      $this->setProperty(OpenSkos::SET, $set);
+    public function getDescription()
+    {
+        if ($this->hasProperty(DcTerms::DESCRIPTION)) {
+            return (string) $this->getPropertySingleValue(DcTerms::DESCRIPTION);
+        } else {
+            return null;
+        }
     }
-  }
 
+    public function addMetadata($existingScheme, $userUri, Tenant $tenant, Set $set)
+    {
+        parent::addMetadata($existingScheme, $userUri, $tenant, $set);
+        if ($this->isPropertyEmpty(OpenSkos::SET)) {
+            $this->setProperty(OpenSkos::SET, $set);
+        }
+    }
 }

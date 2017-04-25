@@ -23,10 +23,10 @@ use OpenSkos2\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\Namespaces\Skos;
 
-class TopConceptOf extends AbstractConceptValidator 
+class TopConceptOf extends AbstractConceptValidator
 {
     protected function validateConcept(Concept $concept)
     {
-      return $this->validateProperty($concept, Skos::TOPCONCEPTOF, false, false, false, false, Skos::CONCEPTSCHEME);
+        return $this->validateProperty($concept, Skos::TOPCONCEPTOF, false, false, false, false, Skos::CONCEPTSCHEME);
     }
 }

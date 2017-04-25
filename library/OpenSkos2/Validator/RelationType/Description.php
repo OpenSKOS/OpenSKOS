@@ -7,8 +7,9 @@ use OpenSkos2\Validator\AbstractRelationTypeValidator;
 
 class Description extends AbstractRelationTypeValidator
 {
-   protected function validateRelation(RelationType $resource)
+
+    protected function validateRelation(RelationType $resource)
     {
-       return $this->validateDescription($resource);
+        return $this->validateDescription($resource);
     }
 }

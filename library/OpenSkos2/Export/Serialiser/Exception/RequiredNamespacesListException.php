@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -25,4 +26,5 @@ use OpenSkos2\Exception\OpenSkosException;
  */
 class RequiredNamespacesListException extends OpenSkosException
 {
+    
 }

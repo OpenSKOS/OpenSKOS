@@ -23,26 +23,26 @@ use OpenSkos2\Rdf\Resource;
 
 abstract class FormatAbstract
 {
+
     // @TODO Not all formats care for the properties to serialise
     /**
      * Array of properties to be serialised.
      * @var array
      */
     protected $propertiesToSerialise = [];
-    
     // @TODO Not all formats need the namespaces
     /**
      * Array of namespaces which are used in the collection which will be serialised.
      * @var array
      */
     protected $namespaces = [];
-    
+
     /**
      * Max depth to export. Used for rtf format.
      * @var int
      */
     protected $maxDepth = 1;
-    
+
     /**
      * Gets the array of properties to be serialised.
      * @return array
@@ -60,7 +60,7 @@ abstract class FormatAbstract
     {
         $this->propertiesToSerialise = $propertiesToSerialise;
     }
-    
+
     /**
      * Gets array of namespaces which are used in the collection which will be serialised.
      * @var array
@@ -78,7 +78,7 @@ abstract class FormatAbstract
     {
         $this->namespaces = $namespaces;
     }
-    
+
     /**
      * Gets max depth to export. Used for rtf format.
      * @return int
@@ -102,13 +102,13 @@ abstract class FormatAbstract
      * @return string
      */
     abstract public function printHeader();
-    
+
     /**
      * Serialises a single resource.
      * @return string
      */
     abstract public function printResource(Resource $resource);
-    
+
     /**
      * Creates the footer of the output.
      * @return string

@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
@@ -23,6 +24,7 @@ use OpenSkos2\Tenant;
 
 class TenantCollection extends ResourceCollection
 {
+
     /**
      * What is the basic resource for this collection.
      * @var string NULL means any resource.

@@ -26,6 +26,7 @@ use OpenSkos2\Api\Response\DetailResponse;
  */
 class RdfResponse extends DetailResponse
 {
+
     /**
      * Get response
      *

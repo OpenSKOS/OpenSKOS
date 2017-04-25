@@ -7,8 +7,9 @@ use OpenSkos2\Validator\AbstractSetValidator;
 
 class OpenskosUuid extends AbstractSetValidator
 {
+
     protected function validateSet(Set $resource)
     {
-       return $this->validateUUID($resource);
+        return $this->validateUUID($resource);
     }
 }

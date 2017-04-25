@@ -27,6 +27,7 @@ use OpenSkos2\Rdf\ResourceCollection;
  */
 class Text
 {
+
     /**
      * @var string
      */
@@ -43,7 +44,7 @@ class Text
     /**
      * @return ResourceCollection
      */
-    public function getResources($type=null)
+    public function getResources($type = null)
     {
         $graph = new Graph();
         $graph->parse($this->string);

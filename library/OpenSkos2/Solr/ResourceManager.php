@@ -26,6 +26,7 @@ use OpenSkos2\Rdf\Resource;
 
 class ResourceManager
 {
+
     /**
      * @var Client
      */
@@ -128,12 +129,12 @@ class ResourceManager
      * @return array Array of uris
      */
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
-    { 
+    {
         $select = $this->solr->createSelect();
         $select->setStart($start)
-                ->setRows($rows)
-                ->setFields(['uri'])
-                ->setQuery($query);
+            ->setRows($rows)
+            ->setFields(['uri'])
+            ->setQuery($query);
 
         if (!empty($sorts)) {
             $select->setSorts($sorts);

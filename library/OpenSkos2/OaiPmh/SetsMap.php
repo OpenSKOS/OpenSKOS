@@ -22,7 +22,6 @@ namespace OpenSkos2\OaiPmh;
 use \OpenSkos2\ConceptSchemeManager;
 use \OpenSkos2\SetManager;
 
-
 // Meertens: 
 // -- we have setManager class, with sets inhabiting the triple store.
 // As a result we have removed table "collections" from the MySql, the class OpenSKOS_Db_Table_Collections
@@ -30,22 +29,24 @@ use \OpenSkos2\SetManager;
 // -- Picturae's changes starting from 22/11/2016 are taken modulo setModel -> setManager replacement 
 // (see the previous item).
 
-
 /**
  * Used to get tenant:set:schema sets.
  */
 class SetsMap
 {
+
     /**
      *
      * @var ConceptSchemeManager
      */
     protected $schemeManager;
+
     /**
      *
      * @var SetSchemeManager
      */
     protected $setManager;
+
     /**
      * Stores map from tenants to sets.
      * @var array
@@ -104,7 +105,7 @@ class SetsMap
         }
         if (!isset($this->setsToSchemes[$tenantCode][$setUri])) {
             $allSchemes = $this->schemeManager->getSchemeBySetUri($setUri);
-            
+
             foreach ($allSchemes as $scheme) {
                 $this->setsToSchemes[$tenantCode][$setUri][$scheme->getUri()] = $scheme;
             }
@@ -117,11 +118,10 @@ class SetsMap
             }
         }
         return $schemes;
-    
     }
-    
-    public function fetchTenantSpecData($concept){
+
+    public function fetchTenantSpecData($concept)
+    {
         return $this->setManager->fetchTenantSpec($concept);
     }
-            
 }

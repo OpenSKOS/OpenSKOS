@@ -23,19 +23,20 @@ use OpenSkos2\MyInstitutionModules\Authorisation;
 use OpenSkos2\MyInstitutionModules\Deletion;
 use OpenSkos2\RelationManager;
 
-require_once dirname(__FILE__) .'/../config.inc.php';
+require_once dirname(__FILE__) . '/../config.inc.php';
 
-class Relation extends AbstractTripleStoreResource {
+class Relation extends AbstractTripleStoreResource
+{
 
-    
     public function __construct(RelationManager $manager)
     {
         $this->manager = $manager;
         $this->authorisationManager = new Authorisation($manager);
         $this->deletionManager = new Deletion($manager);
     }
-    
-    public function mapNameSearchID() {
-        return [];// implement when relation instances become stand-alone resources
-    }   
+
+    public function mapNameSearchID()
+    {
+        return []; // implement when relation instances become stand-alone resources
+    }
 }

@@ -23,7 +23,7 @@
 
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Tenant;
 use OpenSkos2\Rdf\Literal;
 use Rhumsaa\Uuid\Uuid;
@@ -121,7 +121,7 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
         exit(1);
     }
     
-    $insts = $resourceManager->fetchSubjectWithPropertyGiven(vCard::ORGNAME, '"' . $name . '"');
+    $insts = $resourceManager->fetchSubjectWithPropertyGiven(VCard::ORGNAME, '"' . $name . '"');
     if (count($insts) > 0) {
         fwrite(STDERR, "A institution with the name " . $name . " has been already registered in the triple store. \n");
         exit(1);
@@ -143,9 +143,9 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
 
     $tenantResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($code));
     $organisation = new \OpenSkos2\Rdf\Resource('http://node-org-'. Uuid::uuid4());
-    $resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGNAME, $name);
+    $resourceManager->setLiteralWithEmptinessCheck($organisation, VCard::ORGNAME, $name);
     //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
-    $tenantResource->setProperty(vCard::ORG, $organisation);
+    $tenantResource->setProperty(VCard::ORG, $organisation);
     //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
     //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
 
@@ -154,7 +154,7 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, "");
-    $tenantResource->setProperty(vCard::ADR, $adress);
+    $tenantResource->setProperty(VCard::ADR, $adress);
 
     $resourceManager->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::DISABLESEARCHINOTERTENANTS, $disableSearchInOtherTenants);
     $resourceManager->setBooleanLiteralWithEmptinessCheck($tenantResource, OpenSkos::ENABLESTATUSSESSYSTEMS, $enableStatussesSystem);

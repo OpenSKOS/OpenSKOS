@@ -26,17 +26,18 @@ use OpenSkos2\Rdf\Resource;
  * Transform Resource to a RDF string.
  * Provide backwards compatibility to the API output from OpenSKOS 1 as much as possible
  */
-
 // Meertens: this class is used not only for concepts but for the other resources represented in triple store,
 // Therefore we do not have a private variable "concept", but we have "resource" instead.
 // Picturae's changes after 26/10/2016 are present.
 
 class DataRdf
 {
+
     /**
      * @var Resource
      */
     private $resource;
+
     /**
      * @var bool
      */

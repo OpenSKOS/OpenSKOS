@@ -22,7 +22,7 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
-class InScheme extends AbstractConceptValidator 
+class InScheme extends AbstractConceptValidator
 {
     protected function validateConcept(Concept $concept)
     {

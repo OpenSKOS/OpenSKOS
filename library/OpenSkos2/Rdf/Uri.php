@@ -19,10 +19,9 @@
 
 namespace OpenSkos2\Rdf;
 
-
-
 class Uri implements Object, ResourceIdentifier
 {
+
     /**
      * @var string
      */
@@ -35,8 +34,8 @@ class Uri implements Object, ResourceIdentifier
     public function __construct($value)
     {
         // Null values where allowed from the start some functionality depends on it like createing new graphs :(
-      // _:genid appears in the new graphs as well :(((
-       if ($value !== null && (substr($value, 0, 7)!== '_:genid') && !filter_var($value, FILTER_VALIDATE_URL)) {
+        // _:genid appears in the new graphs as well :(((
+        if ($value !== null && (substr($value, 0, 7) !== '_:genid') && !filter_var($value, FILTER_VALIDATE_URL)) {
             throw new Exception\InvalidUriException('Invalid URI: ' . $value);
         }
 

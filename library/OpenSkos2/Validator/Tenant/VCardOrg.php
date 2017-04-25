@@ -3,25 +3,26 @@
 namespace OpenSkos2\Validator\Tenant;
 
 use OpenSkos2\Tenant as Tenant;
-use OpenSkos2\Namespaces\vCard;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Validator\AbstractTenantValidator;
 
-class vCardOrg extends AbstractTenantValidator
+class VCardOrg extends AbstractTenantValidator
 {
-    
-    protected function validateTenant(Tenant $resource) {
-        $orgCheck = $resource->getProperty(vCard::ORG);
+
+    protected function validateTenant(Tenant $resource)
+    {
+        $orgCheck = $resource->getProperty(VCard::ORG);
         $this->errorMessages = [];
         if ($orgCheck === null) {
-            $this->errorMessages[] = 'Wrong xml: there is no element for  ' . vCard::ORG;
+            $this->errorMessages[] = 'Wrong xml: there is no element for  ' . VCard::ORG;
         } else {
             if (count($orgCheck) === 0) {
-                $this->errorMessages[] = 'Wrong xml: there is empty element of type  ' . vCard::ORG . ' that has to contain at least institution name.';
+                $this->errorMessages[] = 'Wrong xml: there is empty element of type  ' . VCard::ORG . ' that has to contain at least institution name.';
             } else {
                 if (count($orgCheck) > 1) {
-                    $this->errorMessages[] = 'Wrong xml: there are too many elements of type  ' . vCard::ORG . '. There must be only one.';
+                    $this->errorMessages[] = 'Wrong xml: there are too many elements of type  ' . VCard::ORG . '. There must be only one.';
                 } else {
-                    $names = $orgCheck[0]->getProperty(vCard::ORGNAME);
+                    $names = $orgCheck[0]->getProperty(VCard::ORGNAME);
                     if (count($names) === 0) {
                         $this->errorMessages[] = "The institution's name is not given. ";
                     } else {
@@ -46,5 +47,4 @@ class vCardOrg extends AbstractTenantValidator
         }
         return (count($this->errorMessages) === 0);
     }
-
 }

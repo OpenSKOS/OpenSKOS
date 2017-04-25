@@ -8,8 +8,9 @@ use OpenSkos2\Namespaces\OpenSkos;
 
 class OpenskosAllowOAI extends AbstractSetValidator
 {
+
     protected function validateSet(Set $resource)
     {
-      return $this->validateProperty($resource, OpenSkos::ALLOW_OAI, true, true, true, false);
+        return $this->validateProperty($resource, OpenSkos::ALLOW_OAI, true, true, true, false);
     }
 }
