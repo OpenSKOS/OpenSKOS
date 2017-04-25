@@ -48,7 +48,7 @@ class Set extends Resource
         }
     }
 
-    public function addMetadata($existingSet, $userUri, Tenant $tenant, $set)
+    public function addMetadata($existingSet, $userUri, $tenant, $set)
     {
         $metadata = [];
         if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
@@ -65,7 +65,7 @@ class Set extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($uuid, Tenant $tenant, $set)
+    protected function assembleUri($baseUri, $tenant, $set, $uuid, $notation)
     {
         return $tenant->getUri() . "/" . $uuid;
     }

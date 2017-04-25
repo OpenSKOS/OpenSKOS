@@ -625,7 +625,7 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        $uri = $this->assembleUri($uuid, $tenant, $set);
+        $uri = $this->assembleUri(null, $tenant, $set, $uuid, null);
 
 
         if ($manager->askForUri($uri, true)) {
@@ -640,7 +640,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($uuid, $tenant, Set $set)
+    protected function assembleUri($baseUri, $tenant, $set, $uuid, $notation)
     {
         return $set->getUri() . "/" . $uuid;
     }

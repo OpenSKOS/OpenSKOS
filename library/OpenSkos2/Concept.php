@@ -184,7 +184,7 @@ class Concept extends Resource
         );
     }
 
-    public function selfGenerateUri(ResourceManager $manager, Tenant $tenant, Set $set)
+    public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
 
         if (EPICHandleProxy::enabled() && EPIC_IS_ON) {
@@ -215,11 +215,15 @@ class Concept extends Resource
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::assembleUri(
                 $conceptBaseUri,
+                $tenant,
+                $set,
                 $uuid
             );
         } else {
             $uri = self::assembleUri(
                 $conceptBaseUri,
+                $tenant,
+                $set,
                 $uuid,
                 $this->getProperty(Skos::NOTATION)[0]->getValue()
             );
@@ -242,7 +246,7 @@ class Concept extends Resource
      * @param string $firstNotation, optional. New uuid will be used if empty
      * @return string
      */
-    protected function assembleUri($conceptBaseUri, $uuid, $firstNotation = null)
+    protected function assembleUri($conceptBaseUri, $tenant, $set, $uuid, $firstNotation)
     {
         $separator = '/';
 
