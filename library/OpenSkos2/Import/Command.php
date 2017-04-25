@@ -20,6 +20,8 @@
 namespace OpenSkos2\Import;
 
 use OpenSkos2\Concept;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
@@ -86,12 +88,14 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources();
 
-        $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
+        $set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
+        
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
             throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
-        };
+        }
         $tenantUri = $tenantUris[0]->getUri();
+        $tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
 
         //** Some purging stuff from the original picturae code
         if ($message->getClearSet()) {
@@ -111,11 +115,12 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($scheme, Skos::CONCEPTSCHEME);
             }
         }
-        // ***
+        
+        
+        
         foreach ($resourceCollection as $resourceToInsert) {
-            $params['seturi'] = $message->getSetUri();
+            
             $uri = $resourceToInsert->getUri();
-
             $types = $resourceToInsert->getProperty(Rdf::TYPE);
 
             if (count($types) < 1) {
@@ -132,21 +137,23 @@ class Command implements LoggerAwareInterface
                     $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
                     continue;
                 } else {
-                    $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $params);
+                    $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $tenant, $set);
                     $isForUpdates = true;
                     if ($currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
                         $dateSubm = $currentVersion->getProperty(DcTerms::DATESUBMITTED);
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
-            } else { // adding a new resource
-                $autoGenerateIdentifiers = true;
-                $preprocessedResource = $preprocessor->forCreation($resourceToInsert, $params, $autoGenerateIdentifiers);
+            } else { 
+                // autoGenerateIdentifiers is set to false because: 
+                // uri's are supposed to be given in the input file and uuid's will be added when necessary while preprocessing
+                $preprocessedResource = $preprocessor->forCreation($resourceToInsert, false, $tenant, $set);
                 $isForUpdates = false;
                 $currentVersion = null;
             }
 
-            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
+            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenant, $set, true, true);
             $valid = $validator->validate($preprocessedResource);
             if (!$valid) {
                 $this->handleNotValidResource($uri, $type, $validator, $preprocessedResource);
@@ -174,10 +181,13 @@ class Command implements LoggerAwareInterface
             throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
         }
         $tenantUri = $tenantUris[0]->getUri();
+        $tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
+        
         foreach ($conceptURIs as $uri) {
             $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
             $isForUpdates = true;
-            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenantUri, $message->getSetUri()->getUri(), true, true);
+            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
+            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenant, $set, true, true);
             $valid = $validator->validate($currentVersion);
             $preprocessedResource = $this->removeDanglingConeptRelationReferences($currentVersion, $validator->getDanglingReferences());
             if (!$valid) {

@@ -29,6 +29,7 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
 use OpenSkos2\Tenant;
@@ -108,7 +109,7 @@ class Concept extends Resource
     }
 
     // $existingConcept is null when a concept is created, otherwise it is non-null for "update"
-    public function addMetadata($existingConcept, $userUri, Tenant $tenant, Set $set)
+    public function addMetadata($existingConcept, $userUri, $tenant, $set)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
@@ -183,7 +184,7 @@ class Concept extends Resource
         );
     }
 
-    public function selfGenerateUri(ConceptManager $manager, Tenant $tenant, Set $set)
+    public function selfGenerateUri(ResourceManager $manager, Tenant $tenant, Set $set)
     {
 
         if (EPICHandleProxy::enabled() && EPIC_IS_ON) {

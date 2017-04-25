@@ -131,6 +131,8 @@ class Resource
      * @param Tenant                   $tenant optional If specified - tenant specific validation can be made.
      * @param LoggerInterface $logger
      */
+    
+    
     public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
     {
         if ($logger === null) {

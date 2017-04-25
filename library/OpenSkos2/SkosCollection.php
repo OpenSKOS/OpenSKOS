@@ -50,7 +50,7 @@ class SkosCollection extends Resource
         }
     }
 
-    public function addMetadata($existingScheme, $userUri, Tenant $tenant, Set $set)
+    public function addMetadata($existingScheme, $userUri, $tenant, $set)
     {
         parent::addMetadata($existingScheme, $userUri, $tenant, $set);
         if ($this->isPropertyEmpty(OpenSkos::SET)) {

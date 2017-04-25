@@ -10,9 +10,11 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Api\Exception\ApiException;
+use Rhumsaa\Uuid\Uuid;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 
@@ -51,6 +53,12 @@ class Preprocessor
 
         if ($autoGenerateUri) {
             $preprocessed->selfGenerateUri($this->manager, $tenant, $set);
+        } else {
+            $uuids = $preprocessed->getProperty(OpenSkos::UUID);
+            if (count($uuids) < 1) {
+                $uuid = Uuid::uuid4();
+                $preprocessed->setProperty(OpenSkos::UUID, new Literal($uuid));
+            }
         }
         return $preprocessed;
     }

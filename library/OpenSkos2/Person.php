@@ -53,7 +53,7 @@ class Person extends Resource
     }
 
     // override for a concerete resources
-    public function addMetadata($existingResource, $userUri, Tenant $tenant, Set $set)
+    public function addMetadata($existingResource, $userUri, $tenant, $set)
     {
         
     }

@@ -514,7 +514,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // override for a concerete resources when necessary
-    public function addMetadata($existingResource, $userUri, Tenant $tenant, $set)
+    public function addMetadata($existingResource, $userUri, $tenant, $set)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
@@ -640,7 +640,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($uuid, Tenant $tenant, Set $set)
+    protected function assembleUri($uuid, $tenant, Set $set)
     {
         return $set->getUri() . "/" . $uuid;
     }
