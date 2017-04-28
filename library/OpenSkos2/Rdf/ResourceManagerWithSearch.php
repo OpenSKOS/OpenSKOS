@@ -19,7 +19,7 @@
 
 namespace OpenSkos2\Rdf;
 
-use EasyRdf\Sparql\Client;
+use OpenSkos2\EasyRdf\Sparql\Client;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 use OpenSkos2\Rdf\ResourceManager;
@@ -82,6 +82,18 @@ class ResourceManagerWithSearch extends ResourceManager
     {
         parent::insertCollection($resourceCollection);
         $this->solrResourceManager->insertCollection($resourceCollection);
+    }
+    
+    /**
+     * Deletes and then inserts the resourse.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function replace(Resource $resource)
+    {
+        parent::replace($resource);
+        
+        $this->solrResourceManager->delete($resource);
+        $this->solrResourceManager->insert($resource);
     }
 
     /**

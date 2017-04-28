@@ -72,10 +72,22 @@ class ConceptManager extends ResourceManagerWithSearch
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }
+    
+    /**
+     * Deletes and then inserts the resourse.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function replace(Resource $resource)
+    {
+        parent::replace($resource);
+        
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
+    }
 
     /**
-     * Deletes and then inserts the resource.
-     * For concepts also deletes all relations for which the concept is object.
+     * Deletes and then inserts the concept.
+     * Also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
     public function replaceAndCleanRelations(Concept $concept)
@@ -83,7 +95,7 @@ class ConceptManager extends ResourceManagerWithSearch
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
         $this->deleteRelationsWhereObject($concept);
-        parent::replace($concept);
+        $this->replace($concept);
     }
 
     /**

@@ -20,7 +20,7 @@
 namespace OpenSkos2\Rdf;
 
 use EasyRdf\Http;
-use EasyRdf\Sparql\Client;
+use OpenSkos2\EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
@@ -67,7 +67,7 @@ class ResourceManager
             );
         }
         
-        // Put type if we have it and it is missing.
+        // Set rdf:type if we have it and if it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
@@ -99,9 +99,10 @@ class ResourceManager
      */
     public function replace(Resource $resource)
     {
-        // @TODO Danger if insert fails. Need transaction or something.
-        $this->delete($resource);
-        $this->insert($resource);
+        $this->client->replace(
+            $resource->getUri(),
+            EasyRdf::resourceToGraph($resource)
+        );
     }
 
     /**
