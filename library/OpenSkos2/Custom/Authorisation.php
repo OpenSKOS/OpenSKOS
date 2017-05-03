@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\MyInstitutionModules;
+namespace OpenSkos2\Custom;
 
 use OpenSKOS_Db_Table_Row_User;
 use OpenSkos2\Concept;
@@ -11,7 +11,7 @@ use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 
-class Authorisation
+class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 {
 
     private $resourceManager;

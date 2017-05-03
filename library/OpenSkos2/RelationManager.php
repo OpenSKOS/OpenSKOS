@@ -20,8 +20,6 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\MyInstitutionModules\RelationTypes;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\MyInstitutionModules;
+namespace OpenSkos2\Custom;
 
 use \Exception;
 

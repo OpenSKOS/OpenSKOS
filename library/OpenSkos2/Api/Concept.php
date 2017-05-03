@@ -31,7 +31,6 @@ use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Set;
 use OpenSkos2\Concept as ConceptResource;
-use OpenSkos2\RelationTypeManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
@@ -41,9 +40,8 @@ use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
-use OpenSkos2\MyInstitutionModules\Authorisation;
-use OpenSkos2\MyInstitutionModules\Deletion;
-use OpenSkos2\MyInstitutionModules\RelationTypes;
+use OpenSkos2\Authorisation;
+use OpenSkos2\Deletion;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
@@ -85,8 +83,8 @@ class Concept extends AbstractTripleStoreResource
     {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
-        $this->authorisationManager = new Authorisation($manager);
-        $this->deletionManager = new Deletion($manager);
+        $this->authorisation = new Authorisation($manager);
+        $this->deletion = new Deletion($manager);
     }
 
     /**
@@ -313,7 +311,7 @@ class Concept extends AbstractTripleStoreResource
                 throw new NotFoundException('Concept already deleted :' . $id, 410);
             }
 
-            $this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenantcode'], $concept);
+            $this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $concept);
             $this->manager->deleteSoft($concept);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -329,18 +327,18 @@ class Concept extends AbstractTripleStoreResource
         $this->checkRelationsInConcept($resourceObject);
     }
 
-// also, throws an exception when a poperty is not from a standar namespace and not a custom (user-defined) relation
+// also, throws an exception when a poperty is not from a standard namespace and not a custom relation
     private function checkRelationsInConcept(ConceptResource $concept)
     {
-        $userDefinedRelUris = array_values(RelationTypes::$myrelations);
-        $registeredRelationUris = array_values($this->manager->getNonSKOSRelationTypes());
-        $allRelationUris = array_values(RelationTypeManager::fetchConceptConceptRelationsNameUri());
+        $customRelUris = array_values($this->manager->getCustomRelationTypes());
+        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
+        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
         $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {
             if (in_array($property, $allRelationUris)) { // is a relation
-// if it is a user-defined, it must be registered
-                if (in_array($property, $userDefinedRelUris)) { // is a user-defined relation
+// if it is a custom relation, it must be registered
+                if (in_array($property, $customRelUris)) { // is a user-defined relation
                     if (!in_array($property, $registeredRelationUris)) {
                         throw new ApiException('The relation  ' . $property . '  is not registered in the triple store. ', 400);
                     }
@@ -477,12 +475,12 @@ class Concept extends AbstractTripleStoreResource
             throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 404);
         }
 
-        $userDefinedRelUris = array_values(RelationTypes::$myrelations);
-        $registeredRelationUris = array_values($this->manager->getNonSKOSRelationTypes());
-        $allRelationUris = array_values(RelationTypeManager::fetchConceptConceptRelationsNameUri());
+        $customRelUris = array_values($this->manager->getCustomRelationTypes());
+        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
+        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
         if (in_array($body['type'], $allRelationUris)) { // is a concept-concept relation
 // if it is a user-defined relation type, it must be registered as a resource
-            if (in_array($body['type'], $userDefinedRelUris)) { // is a user-defined relation
+            if (in_array($body['type'], $customRelUris)) { // is a user-defined relation
                 if (!in_array($body['type'], $registeredRelationUris)) {
                     throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 404);
                 }
@@ -498,9 +496,9 @@ class Concept extends AbstractTripleStoreResource
         }
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $concept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed($params['user'], $params['tenantcode'], $concept); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisationManager->resourceEditAllowed($params['user'], $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed($params['user'], $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
 
         return $body;
     }

@@ -39,8 +39,8 @@ abstract class AbstractTripleStoreResource
 {
 
     protected $manager;
-    protected $authorisationManager;
-    protected $deletionManager;
+    protected $authorisation;
+    protected $deletion;
 
     public function getManager()
     {
@@ -135,13 +135,13 @@ abstract class AbstractTripleStoreResource
             $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
             switch ($params['context']) {
                 case 'json':
-                    $response = (new JsonResponse($result, []))->getResponse();
+                    $response = (new JsonResponse($result, $rdfType, []))->getResponse();
                     break;
                 case 'jsonp':
-                    $response = (new JsonpResponse($result, $params['callback'], []))->getResponse();
+                    $response = (new JsonpResponse($result, $rdfType, $params['callback'], []))->getResponse();
                     break;
                 case 'rdf':
-                    $response = (new RdfResponse($result, []))->getResponse();
+                    $response = (new RdfResponse($result, $rdfType, []))->getResponse();
                     break;
                 default:
                     throw new ApiException('Invalid context: ' . $params['context'], 400);
@@ -190,27 +190,25 @@ abstract class AbstractTripleStoreResource
             }
 
             if (($format === 'json' || $format === 'jsonp') && $this->manager->getResourceType() === Tenant::TYPE) {
-                $setsGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
-                $setsResourceCollection = EasyRdf::graphToResourceCollection($setsGraph);
+                $fieldname = 'sets';
+                $extrasGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
+                $extras = EasyRdf::graphToResourceCollection($extrasGraph);
+            } else {
+                $fieldname=null;
+                $extras = [];
             }
+            
+            $rdfType= $this->manager->getResourceType();
 
             switch ($format) {
                 case 'json':
-                    if ($this->manager->getResourceType() === Tenant::TYPE) {
-                        $response = (new DetailJsonResponse($resource, $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
-                    } else {
-                        $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
-                    }
+                    $response = (new DetailJsonResponse($resource, $rdfType, $propertiesList, $fieldname, $extras))->getResponse();
                     break;
                 case 'jsonp':
-                    if ($this->manager->getResourceType() === Tenant::TYPE) {
-                        $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getExtendedResponse('sets', $setsResourceCollection);
-                    } else {
-                        $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
-                    }
+                   $response = (new DetailJsonpResponse($resource, $rdfType, $params['callback'], $propertiesList, $fieldname, $extras))->getResponse();
                     break;
                 case 'rdf':
-                    $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
+                    $response = (new DetailRdfResponse($resource, $rdfType, $propertiesList))->getResponse();
                     break;
                 default:
                     throw new ApiException('Invalid context: ' . $context, 400);
@@ -251,8 +249,8 @@ abstract class AbstractTripleStoreResource
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
 
             // validate authorisation situation
-            if (!$this->authorisationManager->resourceCreationAllowed($params['user'], $params['tenant'], $resourceObject)) {
-                throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenantcode'] . '. Your role is "' . $params['user']->role . '"', 403);
+            if (!$this->authorisation->resourceCreationAllowed($params['user'], $params['tenant'], $resourceObject)) {
+                throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenant'] . '. Your role is "' . $params['user']->role . '"', 403);
             }
 
             // check if the uri mentioned in the body exists
@@ -310,7 +308,7 @@ abstract class AbstractTripleStoreResource
             $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params['tenant'], $params['set']);
 
             // check authorisation, validate and update
-            if ($this->authorisationManager->resourceEditAllowed($params['user'], $params['tenant'], $preprocessedResource)) {
+            if ($this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $preprocessedResource)) {
                 $this->validate($preprocessedResource, true, $params['tenant'], $params['set']);
                 $this->manager->replace($preprocessedResource);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -338,11 +336,11 @@ abstract class AbstractTripleStoreResource
                 throw new ApiException('The resource is not found by uri :' . $uri, 404);
             }
 
-            if (!$this->authorisationManager->resourceDeleteAllowed($params['user'], $params['tenant'], $resourceObject)) {
+            if (!$this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $resourceObject)) {
                 throw new ApiException('You do not have rights to delete resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
             }
 
-            $canBeDeleted = $this->deletionManager->canBeDeleted($uri, $this->manager);
+            $canBeDeleted = $this->deletion->canBeDeleted($uri, $this->manager);
             if (!$canBeDeleted) {
                 throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
             }

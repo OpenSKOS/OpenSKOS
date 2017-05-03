@@ -101,7 +101,7 @@ trait ApiResponseTrait
      * @throws UnauthorizedException
      */
     // Meertens: we do not use this method.
-    // we have moved resourceEditingAllowed methods to the MyInstitutionModules directory
+    // we have moved resourceEditingAllowed methods to the Custom directory
     // so that the developers of the given institution can adjust it for their own requirements
     // alos, there are different authorisation requirements for different sorts of resources
     // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)

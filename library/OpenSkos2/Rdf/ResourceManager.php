@@ -72,12 +72,14 @@ class ResourceManager
      * @var \OpenSkos2\Solr\ResourceManager
      */
     protected $solrResourceManager;
+    protected $customRelationTypes;
 
     public function getResourceType()
     {
         return $this->resourceType;
     }
 
+   
     /**
      * Use that if inserting a large amount of resources.
      * Call commit at the end.
@@ -106,6 +108,11 @@ class ResourceManager
     {
         $this->client = $client;
         $this->solrResourceManager = $solrResourceManager;
+        if (DEFAULT_RELATIONTYPES) {
+            $this->customRelationTypes = null;
+        } else {
+            $this->customRelationTypes = new OpenSkos2\Custom\RelationTypes();
+        }
     }
 
     /**
@@ -1016,7 +1023,7 @@ class ResourceManager
         return $result;
     }
 
-    public function getNonSKOSRelationTypes()
+    public function getTripleStoreRegisteredCustomRelationTypes()
     {
         $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <' . Owl::OBJECT_PROPERTY . '> . }';
         //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, APPLICATION_BASE_PATH.'/data/Logger.txt');
@@ -1233,6 +1240,7 @@ class ResourceManager
         }
         return $resource;
     }
+    
 
     private function fetchTenantUriViaSet($resource)
     {
@@ -1280,5 +1288,73 @@ class ResourceManager
             $retVal[] = $spec;
         }
         return $retVal;
+    }
+    
+    public function getCustomRelationTypes()
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getCustomRelationTypes();
+        }
+    }
+
+    public function getCustomInverses()
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getInverses();
+        }
+    }
+
+    public function getCustomTransitives()
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getTransitives();
+        }
+    }
+
+    public function setCustomRelationTypes($relationtypes)
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return;
+        } else {
+            $this->customRelationTypes->setRelationTypes($relationtypes);
+        }
+    }
+
+    public function setCustomInverses($inverses)
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return;
+        } else {
+            $this->customRelationTypes->setInverses($inverses);
+        }
+    }
+
+    public function setCustomTransitives($transitives)
+    {
+        if (DEFAULT_RELATIONTYPES) {
+            return;
+        } else {
+            $this->customRelationTypes->setTransitives($transitives);
+        }
+    }
+    
+    public function fetchConceptConceptRelationsNameUri()
+    {
+        $uris = Skos::getSkosConceptConceptRelations();
+        $skosrels = [];
+        foreach ($uris as $uri) {
+            $border = strrpos($uri, "#");
+            $name = 'skos:' . substr($uri, $border + 1);
+            $skosrels[$name] = $uri;
+        }
+        $userrels =  $this->getCustomRelationTypes();
+        $result = array_merge($skosrels, $userrels);
+        return $result;
     }
 }

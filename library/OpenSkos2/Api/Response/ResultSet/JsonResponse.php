@@ -20,6 +20,7 @@
 namespace OpenSkos2\Api\Response\ResultSet;
 
 use OpenSkos2\Api\Response\ResultSetResponse;
+use OpenSkos2\Api\Response\BackwardCompatibility;
 
 /**
  * Provide the json output for find-* api
@@ -61,10 +62,19 @@ class JsonResponse extends ResultSetResponse
     protected function getDocs()
     {
         $docs = [];
+        $backwardComatibility = new BackwardCompatibility();
         foreach ($this->result->getResources() as $resource) {
             $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
-            $docs[] = $nResource;
+
+            if (BACKWARD_COMPATIBLE) {
+                $nResourceCorrected = $backwardComatibility->backwardCompatibilityMap($nResource, $this->resourceType);
+            } else {
+                $nResourceCorrected = $nResource;
+            }
+
+            $docs[] = $nResourceCorrected;
         }
         return $docs;
     }
+
 }

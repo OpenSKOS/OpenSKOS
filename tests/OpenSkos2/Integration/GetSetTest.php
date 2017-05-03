@@ -90,14 +90,14 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
   }
 
   ////////////////////////////////////
-  protected function assertionsJsonResource($set) {
+  protected function assertionsJsonResource($set, $isSingleResourceCheck) {
     $this->assertEquals("test-set", $set["code"]);
     $this->assertEquals(TENANT_URI, $set["dcterms_publisher"]);
   }
 
   protected function assertionsJsonResources($sets) {
     $this->assertEquals(NUMBER_SETS, count($sets["docs"]));
-    $this->assertionsJsonResource($sets["docs"][0]);
+    $this->assertionsJsonResource($sets["docs"][0], false);
   }
 
   protected function assertionsXMLRDFResource(\Zend_Dom_Query $dom) {

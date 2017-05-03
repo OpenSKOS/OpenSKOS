@@ -27,8 +27,8 @@ use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\MyInstitutionModules\Authorisation;
-use OpenSkos2\MyInstitutionModules\Deletion;
+use OpenSkos2\Authorisation;
+use OpenSkos2\Deletion;
 
 require_once dirname(__FILE__) . '/../config.inc.php';
 
@@ -38,8 +38,8 @@ class RelationType extends AbstractTripleStoreResource
     public function __construct(RelationTypeManager $manager)
     {
         $this->manager = $manager;
-        $this->authorisationManager = new Authorisation($manager);
-        $this->deletionManager = new Deletion($manager);
+        $this->authorisation = new Authorisation($manager);
+        $this->deletion = new Deletion($manager);
     }
 
     public function mapNameSearchID()

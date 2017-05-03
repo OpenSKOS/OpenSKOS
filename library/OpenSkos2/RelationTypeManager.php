@@ -21,7 +21,6 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\MyInstitutionModules\RelationTypes;
 
 require_once dirname(__FILE__) . '/config.inc.php';
 
@@ -34,20 +33,7 @@ class RelationTypeManager extends ResourceManager
      */
     protected $resourceType = RelationType::TYPE;
 
-    public static function fetchConceptConceptRelationsNameUri()
-    {
-        $uris = Skos::getSkosConceptConceptRelations();
-        $skosrels = [];
-        foreach ($uris as $uri) {
-            $border = strrpos($uri, "#");
-            $name = 'skos:' . substr($uri, $border + 1);
-            $skosrels[$name] = $uri;
-        }
-        $userrels = RelationTypes::$myrelations;
-        $result = array_merge($skosrels, $userrels);
-        return $result;
-    }
-
+    
     public function fetchAllConceptConceptRelationsOfType($relationType, $sourceSchemata, $targetSchemata)
     {
         $rels = [];
@@ -63,7 +49,7 @@ class RelationTypeManager extends ResourceManager
             $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr = "";
-        $existingRelations = array_merge(Skos::getSkosConceptConceptRelations(), $this->getNonSKOSRelationTypes());
+        $existingRelations = array_merge(Skos::getSkosConceptConceptRelations(), $this->getTripleStoreRegisteredCustomRelationTypes());
 
         if (count($rels) > 0) {
             if (in_array($rels[0], $existingRelations)) {
@@ -142,4 +128,7 @@ class RelationTypeManager extends ResourceManager
         }
         return $result;
     }
+    
+   
+
 }

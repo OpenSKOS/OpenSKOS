@@ -22,7 +22,7 @@ namespace OpenSkos2\Rdf;
 use DateTime;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\MyInstitutionModules\EPICHandleProxy;
+use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;

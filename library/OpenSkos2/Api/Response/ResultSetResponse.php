@@ -34,15 +34,18 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
      * @var []
      */
     protected $propertiesList;
+    
+    protected $resourceType;
 
     /**
      *
      * @param \OpenSkos2\Api\ResourceResultSet $result
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $propertiesList = null)
+    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $rdfType=null, $propertiesList = null)
     {
         $this->result = $result;
         $this->propertiesList = $propertiesList;
+        $this->resourceType=$rdfType; 
     }
 }

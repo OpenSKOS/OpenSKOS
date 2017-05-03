@@ -19,13 +19,12 @@
 
 namespace OpenSkos2\Api\Response\Detail;
 
-use OpenSkos2\Api\Response\DetailResponse;
-use OpenSkos2\Api\Transform\DataArray;
+use OpenSkos2\Api\Response\Detail\JsonResponse;
 
 /**
  * Provide the json output for find-* api
  */
-class JsonpResponse extends DetailResponse
+class JsonpResponse extends JsonResponse
 {
 
     /**
@@ -39,10 +38,9 @@ class JsonpResponse extends DetailResponse
      * @param string $callback
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Rdf\Resource $resource, $callback, $propertiesList = null)
+    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $callback, $propertiesList, $extraField, $extraVals)
     {
-        $this->resource = $resource;
-        $this->propertiesList = $propertiesList;
+        parent::__construct($resource, $rdfType, $propertiesList, $extraField, $extraVals);
         $this->callback = $callback;
     }
 
@@ -51,25 +49,11 @@ class JsonpResponse extends DetailResponse
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
+ 
     public function getResponse()
     {
-        $body = (new DataArray($this->resource, $this->propertiesList))->transform();
-        $response = self::produceJsonPResponse($body, $this->callback);
-        return $response;
-    }
-
-    public function getExtendedResponse($fieldname, $vals)
-    {
-        $body = (new DataArray($this->resource, $this->propertiesList))->transform();
-        foreach ($vals as $val) {
-            $body[$fieldname][] = (new DataArray($val))->transform();
-        }
-        if (BACKWARD_COMPATIBLE) {
-            $correctedBody = $this->backwardCompatibilityMap($body);
-        } else {
-            $correctedBody = $body;
-        }
-        $response = self::produceJsonPResponse($correctedBody, $this->callback);
+        $data= $this->getResponseData();
+        $response = self::produceJsonPResponse($data, $this->callback);
         return $response;
     }
 

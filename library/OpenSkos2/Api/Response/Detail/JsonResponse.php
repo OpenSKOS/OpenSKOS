@@ -20,6 +20,7 @@
 namespace OpenSkos2\Api\Response\Detail;
 
 use OpenSkos2\Api\Response\DetailResponse;
+use OpenSkos2\Api\Response\BackwardCompatibility;
 use OpenSkos2\Api\Transform\DataArray;
 
 /**
@@ -27,7 +28,19 @@ use OpenSkos2\Api\Transform\DataArray;
  */
 class JsonResponse extends DetailResponse
 {
+    
+    protected $extraVals;
+    
+    protected $extraField;
 
+    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $propertiesList, $extraField=null, $extraVals=[])
+    {
+        parent::__construct($resource, $rdfType, $propertiesList);
+        $this->extraField = $extraField;
+        $this->extraVals = $extraVals;
+        
+    }   
+    
     /**
      * Get response
      *
@@ -35,21 +48,27 @@ class JsonResponse extends DetailResponse
      */
     public function getResponse()
     {
-        $body = (new DataArray($this->resource, $this->propertiesList))->transform();
-        return new \Zend\Diactoros\Response\JsonResponse($body);
+        $data=$this->getResponseData();
+        return new \Zend\Diactoros\Response\JsonResponse($data);
     }
-
-    public function getExtendedResponse($fieldname, $vals)
-    {
+    
+    protected function getResponseData() {
         $body = (new DataArray($this->resource, $this->propertiesList))->transform();
-        foreach ($vals as $val) {
-            $body[$fieldname][] = (new DataArray($val))->transform();
+        if ($this->extraField != null) {
+            if (count($this->extraVals) > 0) {
+                foreach ($this->extraVals as $val) {
+                    $body[$this->extraField][] = (new DataArray($val))->transform();
+                }
+            } else {
+                $body[$this->extraField] = [];
+            }
         }
         if (BACKWARD_COMPATIBLE) {
-            $correctedBody = $this->backwardCompatibilityMap($body);
+            $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap($body, $this->resourceType);
         } else {
             $correctedBody = $body;
         }
-        return new \Zend\Diactoros\Response\JsonResponse($correctedBody);
+        return $correctedBody;
     }
+
 }

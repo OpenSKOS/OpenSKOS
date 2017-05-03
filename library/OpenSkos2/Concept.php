@@ -22,7 +22,7 @@ namespace OpenSkos2;
 use Exception;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\MyInstitutionModules\EPICHandleProxy;
+use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
@@ -31,7 +31,6 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 

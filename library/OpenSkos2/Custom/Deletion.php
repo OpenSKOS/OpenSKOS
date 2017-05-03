@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\MyInstitutionModules;
+namespace OpenSkos2\Custom;
 
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptScheme;
@@ -9,7 +9,7 @@ use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
 
-class Deletion
+class Deletion implements \OpenSkos2\Interfaces\Deletion
 {
 
     private $resourceManager;
@@ -51,7 +51,6 @@ class Deletion
     {
         // the lowerst-level resource,
         // can be always deleted if authorisation rights allow (checked in another place)
-        // but with taking crae that the corresponding relations are cleaned
         return true;
     }
 

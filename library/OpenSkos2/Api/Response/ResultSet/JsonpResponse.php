@@ -19,6 +19,8 @@
 
 namespace OpenSkos2\Api\Response\ResultSet;
 
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
+
 /**
  * Provide the jsonp output for find-* api
  */
@@ -36,10 +38,9 @@ class JsonpResponse extends JsonResponse
      * @param string $callback
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $callback, $propertiesList = null)
+    public function __construct(\OpenSkos2\Api\ResourceResultSet $result, $rdfType, $callback, $propertiesList = null)
     {
-        $this->result = $result;
-        $this->propertiesList = $propertiesList;
+        parent::__construct($result, $rdfType, $propertiesList);
         $this->callback = $callback;
     }
 
