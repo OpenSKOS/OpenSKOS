@@ -2,7 +2,7 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-require_once 'AbstractTest.php';
+require_once 'Library/OpenSkos2/config.inc.php';
 
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,10 +20,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey)
-            ->setParameterGet('collection', SET_CODE)
-            ->setParameterGet('set', SET_CODE)
-            ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers)
-            ->request('POST');
+            ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers);
+        if (BACKWARD_COMPATIBLE) {
+            self::$client->setParameterGet('collection', SET_CODE);
+        } else {
+            self::$client->setParameterGet('set', SET_CODE);
+        };
+        $response = self::$client->request('POST');
         return $response;
     }
 
@@ -36,11 +39,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setEncType('text/xml')
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
-            ->setParameterGet('key', $apikey)
-            ->setParameterGet('collection', SET_CODE)
-            ->setParameterGet('set', SET_CODE)
-            ->request('PUT');
-
+            ->setParameterGet('key', $apikey);
+        if (BACKWARD_COMPATIBLE) {
+            self::$client->setParameterGet('collection', SET_CODE);
+        } else {
+            self::$client->setParameterGet('set', SET_CODE);
+        };
+        $response = self::$client->request('PUT');
         return $response;
     }
 
@@ -67,13 +72,15 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resoursetype");
         $response = self::$client
+            ->setParameterGet('id', $id)
             ->setParameterGet('tenant', TENANT_CODE)
-            ->setParameterGet('key', $apikey)
-            ->setParameterGet('collection', SET_CODE)
-            ->setParameterGet('set', SET_CODE)
-            ->setParameterGet($id_name, $id)
-            ->request('DELETE');
-
+            ->setParameterGet('key', $apikey);
+        if (BACKWARD_COMPATIBLE) {
+            self::$client->setParameterGet('collection', SET_CODE);
+        } else {
+            self::$client->setParameterGet('set', SET_CODE);
+        };
+        $response = self::$client->request('DELETE');
         return $response;
     }
 

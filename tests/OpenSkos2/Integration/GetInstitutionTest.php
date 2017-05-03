@@ -89,7 +89,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitutionJson()
     {
-        $this->resourceJson('institution', 'test');
+        //$this->resourceJson('institution', 'test');
         $this->resourceJson('institution', 'example');
     }
 
@@ -109,7 +109,7 @@ class GetInstitutionTest extends AbstractTest
     {
         switch ($institution["code"]) {
             case "test": {
-                    if (BACKWARD_COMP) {
+                    if (BACKWARD_COMPATIBLE) {
                         $this->assertEquals("info@test.nl", $institution["email"]);
                         $this->assertEquals("test-tenant", $institution["name"]);
                     } else {
@@ -119,21 +119,19 @@ class GetInstitutionTest extends AbstractTest
                     break;
                 }
             case "example": {
-                    if (BACKWARD_COMP) {
+                    if (BACKWARD_COMPATIBLE) {
                         if ($singleResourceCheck) {
-                            var_dump($institution["collections"]);
-                            $this->assertEquals("1", count($institution["collections"]));
+                            $this->assertEquals("2", count($institution["collections"]));
                         }
                     } else {
                         if ($singleResourceCheck) {
-                            $this->assertEquals("1", count($institution["sets"]));
+                            $this->assertEquals("2", count($institution["sets"]));
                         }
                     }
                     break;
                 }
-                break;
             default : {
-                    $this->assertEquals(0, 1, "The institution has a code which does not belog to the list of test institutions.");
+                    $this->assertEquals(0, 1, "The institution has a code " . $institution["code"] . " which does not belong to the list of test institutions.");
                 }
         }
     }

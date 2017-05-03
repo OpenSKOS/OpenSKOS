@@ -53,6 +53,5 @@
         <const name="ALT_LABEL" value="altLabel"/>
         <const name="HIDDEN_LABEL" value="hiddenLabel"/>
         <const name="NOTATION" value="notation"/>
-        <const name="BACKWARD_COMP" value="true"/>
     </php>
 </phpunit>

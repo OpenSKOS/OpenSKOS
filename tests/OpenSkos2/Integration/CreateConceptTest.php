@@ -121,9 +121,13 @@ class CreateConceptTest extends AbstractTest
             ->setEncType('text/xml')
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
-            ->setParameterGet('autoGenerateIdentifiers', true)
-            ->request('POST');
-
+            ->setParameterGet('autoGenerateIdentifiers', true);
+         if (BACKWARD_COMPATIBLE) {
+            self::$client->setParameterGet('collection', SET_CODE);
+        } else {
+            self::$client->setParameterGet('set', SET_CODE);
+        };
+        $response = self::$client->request('POST');
         $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
     }
 
@@ -373,5 +377,4 @@ class CreateConceptTest extends AbstractTest
         $dateAccepted = $dom->queryXpath('/rdf:RDF/rdf:Description/dcterms:dateAccepted');
         $this->assertEquals(0, $dateAccepted->count(), "Just created concept cannt have dcterm:dateAccepted set.");
     }
-
 }

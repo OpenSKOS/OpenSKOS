@@ -53,12 +53,20 @@ class BackwardCompatibility
         }
         if (isset($newStyleBody["sets"])) {
             $oldStyleSet = [];
-            $oldStyleBodyArray["collections"] = [];
+            $oldStyleBodyArray["collections"] = array();
             foreach ($newStyleBody["sets"] as $set) {
                 $oldStyleSet["uri"] = $set["uri"];
                 $oldStyleSet["code"] = $set["code"];
                 $oldStyleSet["tenant"] = $set["dcterms_publisher"];
-                $oldStyleSet["dc_title"] = $set["dcterms_title"];
+                if (isset($set["dcterms_title"])) {
+                    $oldStyleSet["dc_title"] = $set["dcterms_title"];
+                } else {
+                    if (isset($set["dcterms_title@en"])) {
+                    $oldStyleSet["dc_title"] = $set["dcterms_title@en"];
+                    } else {
+                       $oldStyleSet["dc_title"]="error in defining set title" ;
+                    }
+                }
                 if (isset($set["dcterms_description"])) {
                     $oldStyleBodyArray["dc_description"] = $set["dcterms_description"];
                 }

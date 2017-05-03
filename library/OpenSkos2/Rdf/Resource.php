@@ -32,8 +32,6 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\RelationType;
-use OpenSkos2\Set;
-use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 use Zend_Controller_Action_Exception;
 
