@@ -16,6 +16,7 @@ define('GUEST', 'your string');
 define('BACKWARD_COMPATIBLE', true);
 define('DEFAULT_AUTHORISATION', true);
 define('DEFAULT_DELETION', true);
+define('DEFAULT_RELATIONTYPES', true);
 define('MAXIMAL_ROWS', 'your number');
 define('MAXIMAL_TIME_LIMIT', 'your number'); //sec
 define('NORMAL_TIME_LIMIT', 'your number'); // sec
