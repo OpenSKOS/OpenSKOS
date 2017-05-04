@@ -11,3 +11,4 @@ public/data/export/*
 /node_modules/
 /public/apidoc/
 /apidoc/
+/library/OpenSkos2/config.inc.php
