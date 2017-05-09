@@ -28,7 +28,7 @@ class CreateConceptTest extends AbstractTest
     {
         shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
     }
-
+/*
     public function test01CreateConceptWithoutURIWithDateAccepted()
     {
 // Create new concept with dateAccepted filled. This should be ignored. 
@@ -266,7 +266,7 @@ class CreateConceptTest extends AbstractTest
         $response = self::create($xml, API_KEY_EDITOR, 'concept');
         $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
     }
-
+  */
     public function test09CreateConceptWithoutUriPrefLabelExists()
     {
         // Create a concept without Uri and prefLabel is not unique within a scheme.
@@ -285,17 +285,19 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response0 = self::create($xml0, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response0->getStatus(), $response0->getMessage());
+        // debug 
+        var_dump($response0->getBody());
         if ($response0->getStatus() == 201) {
             // we can proceed with the test
             $xml = str_replace('testAltLable_', '_another_testAltLable_', $xml0);
             $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-            $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+            $this->AssertEquals(400, $response->getStatus(), $response->getBody());
         } else {
             $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getMessage());
         }
     }
 
+    /*
     public function test10CreateConceptWithoutUriButWithNotationUniquePrefLabel()
     {
         // Create a concept without Uri (no rdf:about), but with notation. prefLabel is unique.
@@ -355,6 +357,8 @@ class CreateConceptTest extends AbstractTest
             $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');
         }
     }
+     * */
+     
 
     private function CheckCreatedConcept($response)
     {

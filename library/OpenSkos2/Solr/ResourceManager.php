@@ -77,7 +77,6 @@ class ResourceManager
         $doc = $update->createDocument();
         $convert = new \OpenSkos2\Solr\Document($resource, $doc);
         $resourceDoc = $convert->getDocument();
-
         $update->addDocument($resourceDoc);
         if (!$this->getIsNoCommitMode()) {
             $update->addCommit(true);
@@ -159,7 +158,6 @@ class ResourceManager
     public function getMaxFieldValue($query, $field)
     {
         // Solarium brakes stat results when we have long int, so we use ordering.
-
         $select = $this->solr->createSelect()
             ->setQuery($query)
             ->setRows(1)
@@ -167,8 +165,11 @@ class ResourceManager
             ->addField($field);
 
         $solrResult = $this->solr->select($select);
-
-        return $solrResult->getIterator()->current()->{$field};
+        if (count($solrResult->getIterator()) > 0) {
+            return $solrResult->getIterator()->current()->{$field};
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -192,4 +193,5 @@ class ResourceManager
         $update->addOptimize();
         return $this->solr->update($update);
     }
+
 }

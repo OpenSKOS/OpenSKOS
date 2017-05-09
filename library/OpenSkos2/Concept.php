@@ -170,13 +170,10 @@ class Concept extends Resource
         // @TODO Move that and uri generate to separate class.
         // @TODO A raise condition is possible. The validation will fail in that case - so should not be problem.
 
-        $notation = 1;
-
+        // Meertens:
+        // this is changed because $maxNumericNotation returns now zero if there is no records in the solr (otherwise there was a crash in solr/resourceManager on empty database with the attempt to ask for current on the empty iterator
         $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
-        if (!empty($maxNumericNotation)) {
-            $notation = $maxNumericNotation + 1;
-        }
-
+        $notation = $maxNumericNotation + 1;
         $this->addProperty(
             Skos::NOTATION,
             new Literal($notation)
@@ -185,7 +182,6 @@ class Concept extends Resource
 
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
-
         if (EPICHandleProxy::enabled() && EPIC_IS_ON) {
             return $this->selfGenerateUriViaEpic($manager);
         }
@@ -219,7 +215,7 @@ class Concept extends Resource
                 $uuid
             );
         } else {
-            $uri = self::assembleUri(
+           $uri = self::assembleUri(
                 $conceptBaseUri,
                 $tenant,
                 $set,

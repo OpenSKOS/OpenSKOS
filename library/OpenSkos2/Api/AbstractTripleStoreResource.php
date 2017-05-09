@@ -241,7 +241,7 @@ abstract class AbstractTripleStoreResource
 
     public function create(ServerRequestInterface $request)
     {
-        try {
+       try {
             // validate and fetch user, tenant and set
             $params = $this->fetchUserTenantSetViaRequestParameters($request);
 

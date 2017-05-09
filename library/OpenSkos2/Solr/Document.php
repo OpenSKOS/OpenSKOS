@@ -27,6 +27,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\FieldsMaps;
+use OpenSkos2\Concept;
 use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 
 /**
@@ -78,6 +79,7 @@ class Document
         OpenSkos::STATUS => ['s_status'],
         OpenSkos::SET => ['s_set'],
         OpenSkos::TENANT => ['s_tenant'],
+        OpenSkos::UUID => ['s_uuid'],
         OpenSkos::TOBECHECKED => ['b_toBeChecked'],
         DcTerms::CREATOR => ['s_creator'],
         DcTerms::DATESUBMITTED => ['d_dateSubmited'],
@@ -138,12 +140,11 @@ class Document
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
-
-        if ($this->resource instanceof Concept) {
+        $rdfType = $this->resource->getType();
+        if ($rdfType->getUri() === Concept::TYPE) {
             $this->addConceptClasses($this->resource, $this->document);
             $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
             $this->document->b_isOrphan = $this->isOrphan();
-
             $this->addMaxNumericNotation();
         }
 

@@ -24,8 +24,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
-use OpenSkos2\Set;
 
 /**
  * Representation of tenant.

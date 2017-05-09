@@ -34,7 +34,6 @@ class Preprocessor
 
     public function forCreation(Resource $resourceObject, $autoGenerateUri, $tenant, $set)
     {
-
         $preprocessed = $resourceObject;
         $preprocessed->addMetadata(null, $this->userUri, $tenant, $set);
 
@@ -90,4 +89,5 @@ class Preprocessor
         $preprocessed->addMetadata($existingResource, $this->userUri, $tenant, $set);
         return $preprocessed;
     }
+
 }

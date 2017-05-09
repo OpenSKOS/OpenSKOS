@@ -200,11 +200,10 @@ class ConceptManager extends ResourceManager
     {
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:' . $tenant->getCode(),
+            'tenant:"' . $tenant->getUri().'"',
             'max_numeric_notation'
         );
-
-        return intval($max);
+       return intval($max);
     }
 
     /**

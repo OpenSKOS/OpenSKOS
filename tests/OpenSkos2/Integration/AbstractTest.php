@@ -15,7 +15,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resourcetype?");
-        $response = self::$client
+        self::$client
             ->setEncType('text/xml')
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
@@ -34,8 +34,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resourcetype?");
-
-        $response = self::$client
+        self::$client
             ->setEncType('text/xml')
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)

@@ -83,7 +83,7 @@ resources.acl.foo=bar
 ; Solr configuration:
 solr.host = localhost
 solr.port = 8983
-solr.context = /solr
+solr.context = /solr/openskos
 
 ; Database configuration:
 ;resources.db.adapter=pdo_mysql
