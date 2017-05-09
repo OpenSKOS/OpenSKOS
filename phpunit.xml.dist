@@ -38,6 +38,7 @@
         <const name="TENANT_NAME" value="test tenant"/>
         <const name="SET_URI" value="http://set01/set01abc"/>
         <const name="SET_CODE" value="set01"/>
+        <const name="SET_PAGE" value="http://set01/page"/>
         <const name="SET_TITLE" value="Test Set 01"/>
         <const name="SET_UUID" value="set01abc"/>
         <const name="SCHEMA1_URI" value="http://scheme01/"/>

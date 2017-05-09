@@ -48,14 +48,18 @@ class GetInstitutionTest extends AbstractTest
         $response = self::create($xml, API_KEY_ADMIN, 'institution', true);
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
+        } else {
+            var_dump($response->getBody());
         }
     }
 
     // delete all created resources
     public static function tearDownAfterClass()
     {
-        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, '/institution');
+        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institution');
     }
+    
+    
 
     public function testAllInstitutions()
     {
@@ -121,11 +125,11 @@ class GetInstitutionTest extends AbstractTest
             case "example": {
                     if (BACKWARD_COMPATIBLE) {
                         if ($singleResourceCheck) {
-                            $this->assertEquals("2", count($institution["collections"]));
+                            $this->assertEquals("1", count($institution["collections"]));
                         }
                     } else {
                         if ($singleResourceCheck) {
-                            $this->assertEquals("2", count($institution["sets"]));
+                            $this->assertEquals("1", count($institution["sets"]));
                         }
                     }
                     break;

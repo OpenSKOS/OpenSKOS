@@ -36,7 +36,7 @@ class DeleteConceptTest extends AbstractTest
             self::$xml = $result['xml'];
         } else {
             shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
-            throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . '; ' . $result['response']->getMessage());
+            throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . "\n " . $result['response']->getMessage(). "\n " . $result['response']->getBody());
         }
     }
 

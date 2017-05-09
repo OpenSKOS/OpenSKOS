@@ -49,14 +49,15 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     }
 
     protected static function deleteResources($uris, $apikey, $resourcetype)
-    {
+    { 
         foreach ($uris as $uri) {
             $response = self::delete($uri, $apikey, $resourcetype);
+            var_dump("\n Cleaning data base: ". $response->getMessage(). "\n");
         }
     }
 
     protected static function deleteResourcesViaResourceManager($uris, $rdftype)
-    {
+    { 
         foreach ($uris as $uri) {
             self::$resourceManager->delete($uri, $rdftype);
         }
@@ -70,8 +71,8 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         }
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resoursetype");
-        $response = self::$client
-            ->setParameterGet('id', $id)
+        self::$client
+            ->setParameterGet($id_name, $id)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
         if (BACKWARD_COMPATIBLE) {
@@ -79,6 +80,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         } else {
             self::$client->setParameterGet('set', SET_CODE);
         };
+        
         $response = self::$client->request('DELETE');
         return $response;
     }
@@ -136,7 +138,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
 
     protected function createTestConcept($apikey)
     {
-        $randomn = time();
+        $randomn = time().uniqid();
         $prefLabel = 'testPrefLable_' . $randomn;
         $altLabel = 'testAltLable_' . $randomn;
         $hiddenLabel = 'testHiddenLable_' . $randomn;
