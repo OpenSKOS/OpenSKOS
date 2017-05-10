@@ -13,7 +13,7 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
         if (DEFAULT_DELETION) {
             $this->resourceManager = $manager;
         } else {
-            $this->customDeletion = new OpenSkos2\Custom\Deletion($manager);
+            $this->customDeletion = new \OpenSkos2\Custom\Deletion($manager);
         }
     }
 

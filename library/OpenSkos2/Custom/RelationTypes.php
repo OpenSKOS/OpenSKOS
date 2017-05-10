@@ -4,7 +4,7 @@ namespace OpenSkos2\Custom;
 
 use OpenSkos2\Namespaces\Skos;
 
-class RelationTypes implements OpenSkos2\Interfaces\CustomRelationTypes
+class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
 {
 
     const FASTER = 'http://menzo.org/xmlns#faster';

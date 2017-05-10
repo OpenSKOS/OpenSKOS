@@ -66,6 +66,7 @@ class AutocompleteTest extends AbstractTest
             $response0 = self::create($xml, API_KEY_EDITOR, 'concept');
             if ($response0->getStatus() !== 201) {
                 echo 'concept' . $i;
+                var_dump($response0->getBody());
                 throw new \Exception("creating a test concept has failed. Status " . $response0->getStatus() . ' Message: ' . $response0->getHeader("X-error-msg"));
             } else { // things went well, but when submitting a concept is status is automatically reset to "candidate";
                 // now update to change the status for "approved", otherwise autocomplete would not react
@@ -106,6 +107,7 @@ class AutocompleteTest extends AbstractTest
         }
     }
 
+    
     public function testAutocompleteSearchAltLabel()
     {
         print "\n testAutocomplete search alt Label \n";

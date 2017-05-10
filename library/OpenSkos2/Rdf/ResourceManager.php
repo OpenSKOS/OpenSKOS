@@ -111,7 +111,7 @@ class ResourceManager
         if (DEFAULT_RELATIONTYPES) {
             $this->customRelationTypes = null;
         } else {
-            $this->customRelationTypes = new OpenSkos2\Custom\RelationTypes();
+            $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
         }
     }
 
@@ -1295,7 +1295,7 @@ class ResourceManager
         if (DEFAULT_RELATIONTYPES) {
             return [];
         } else {
-            return $this->customRelationTypes->getCustomRelationTypes();
+            return $this->customRelationTypes->getRelationTypes();
         }
     }
 
