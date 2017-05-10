@@ -10,6 +10,7 @@ class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
     const FASTER = 'http://menzo.org/xmlns#faster';
     const SLOWER = 'http://menzo.org/xmlns#slower';
     const LONGER = 'http://menzo.org/xmlns#longer';
+    const WARMER = 'http://menzo.org/xmlns#warmer';
 
     protected $relationtypes = array();
     protected $inverses = array();
@@ -20,7 +21,8 @@ class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
         $this->relationtypes = array(
             'menzo:faster' => RelationTypes::FASTER,
             'menzo:slower' => RelationTypes::SLOWER,
-            'menzo:longer' => RelationTypes::LONGER
+            'menzo:longer' => RelationTypes::LONGER,
+            'menzo:warmer' => RelationTypes::WARMER
         );
 
 
@@ -32,6 +34,7 @@ class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
         $this->transitives = array(
             RelationTypes::FASTER => true,
             RelationTypes::SLOWER => true,
+            RelationTypes::WARMER => true,
             Skos::BROADER => false,
             Skos::NARROWER => false
         );

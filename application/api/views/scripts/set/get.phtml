@@ -31,7 +31,7 @@ $setManager = $di->get('OpenSkos2\SetManager');
 $code = $set->getCode();
 $uri = $set->getUri();
 $name = $setManager->getSetTitle($code);
-$this->headTitle($name)
+$this->headTitle($name);
 ?>
 
 
@@ -60,10 +60,10 @@ $this->headTitle($name)
                 <?php if ($key === "webpage" || $key === "conceptBaseUri" || $key === "OAI_baseURL" || $key === "license"): ?>
                     <dd><a rel="external" href="<?php echo $val ?>"><?php echo $val ?></a></dd>
                 <?php endif ?>
-<?php endforeach; ?>
+            <?php endforeach; ?>
         </dl>
 
-<?php $schemata = $setManager->fetchInhabitantsForSet($uri, Skos::CONCEPTSCHEME); ?>
+        <?php $schemata = $setManager->fetchInhabitantsForSet($uri, Skos::CONCEPTSCHEME); ?>
         <h3>Concept Schemes (<?php echo count($schemata); ?>)</h3>
         <ul>
             <?php foreach ($schemata as $key => $value): ?>
@@ -75,7 +75,7 @@ $this->headTitle($name)
             <?php endforeach ?>
         </ul>
 
-<?php $skoscollections = $setManager->fetchInhabitantsForSet($uri, Skos::SKOSCOLLECTION); ?>
+        <?php $skoscollections = $setManager->fetchInhabitantsForSet($uri, Skos::SKOSCOLLECTION); ?>
         <h3>Skos collections (<?php echo count($skoscollections) ?>) </h3>
         <ul>
             <?php foreach ($skoscollections as $key => $value): ?>
@@ -86,7 +86,7 @@ $this->headTitle($name)
                 </li>
             <?php endforeach ?>
         </ul>
- <?php $concepts = $setManager->listConceptsForCluster($uri, OpenSkos::SET); ?>
+        <?php $concepts = $setManager->listConceptsForCluster($uri, OpenSkos::SET); ?>
         <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this set:</h3>
         <ul>
             <?php foreach ($concepts as $key => $value): ?>
@@ -101,10 +101,11 @@ $this->headTitle($name)
 
     <h3>Alternative formats</h3>
     <ul>
-        <li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url()) ?>">JSON</a></li>
-        <li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234' ?>">JSONP</a></li>
-        <li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url()) ?>">RDF</a></li>
+        
+    <li><a class="json" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.json'?>">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.jsonp?callback=myCallBack1234'?>">JSONP</a></li>
+	<li><a class="rdf" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.rdf'?>">RDF</a></li>
     </ul>
 
-   
+
 

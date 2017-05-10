@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,7 +19,6 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -28,64 +28,66 @@ $skosCollection = $this->resource;
 $skosCollectionManager = $di->get('OpenSkos2\SkosCollectionManager');
 $uri = $skosCollection->getUri();
 $name = $skosCollection->getTitle();
-$this->headTitle($name)?>
+$uuid = $skosCollection->getUuid();
+$this->headTitle($name);
+?>
 
 
-<h2><?php echo $this->escape($name)?></h2> 
+<h2><?php echo $this->escape($name) ?></h2> 
 <div class="clear">
-<dl>
-    <?php
-        foreach ($this->resProperties as $key => $val):?>
-         <?php if ($key==="type"):?>
-         <dt><?php echo  $key?>:</dt>
-         <dd><a rel="external" href="<?=$val ?>"><?php echo $val?></a></dd>
-         <?php endif?>
-         <?php if ($key==="set"):
-              $setCode = $skosCollectionManager -> getResourceSearchID($val, Dcmi::DATASET);
-               $setTitle = $skosCollectionManager -> getSetTitle($val);
-             ?>
-         <dt><?php echo  $key?>:</dt>
-         <dd><a href="<?php echo $this->url(array('controller'=>'set', 'id' => $setCode))?>.html"><?php echo $setTitle?></a></dd>
-         <?php endif?>
-           <?php if ($key==="tenant"):
-             $tenantCode = $skosCollectionManager -> getResourceSearchID($val, Org::FORMALORG);
-             $tenantName = $skosCollectionManager -> getTenantNameByCode($tenantCode);
-           ?>
-         <dt><?php echo  $key?>:</dt>
-         <dd><a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $tenantCode))?>.html"><?php echo $tenantName?></a></dd>
-         <?php endif?>
-         <?php if ($key==="description"):?>
-         <dt><?php echo  $key?>:</dt>
-         <dd><?php echo nl2br($val, true)?></dd>
-	<?php endif?>
-         <?php if (($key==="uuid") || ($key==="title") ||  ($key === "acceptedBy") || ($key === "creator") || (($key === "contributor"))):?>
-	 <dt><?php echo  $key?>:</dt>
-         <dd><?php echo $val?></dd>
-	<?php endif?>
-        <?php endforeach;?>
-</dl>
+    <dl>
+        <?php foreach ($this->resProperties as $key => $val): ?>
+            <?php if ($key === "type"): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
+            <?php endif ?>
+            <?php
+            if ($key === "set"):
+                $setCode = $skosCollectionManager->getResourceSearchID($val, Dcmi::DATASET);
+                $setTitle = $skosCollectionManager->getSetTitle($val);
+                ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setCode)) ?>.html"><?php echo $setTitle ?></a></dd>
+            <?php endif ?>
+            <?php
+            if ($key === "tenant"):
+                $tenantCode = $skosCollectionManager->getResourceSearchID($val, Org::FORMALORG);
+                $tenantName = $skosCollectionManager->getTenantNameByCode($tenantCode);
+                ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+            <?php endif ?>
+    <?php if ($key === "description"): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><?php echo nl2br($val, true) ?></dd>
+            <?php endif ?>
+    <?php if (($key === "uuid") || ($key === "title") || ($key === "acceptedBy") || ($key === "creator") || (($key === "contributor"))): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><?php echo $val ?></dd>
+            <?php endif ?>
+<?php endforeach; ?>
+    </dl>
 </div>
 
 <h3>Alternative formats</h3>
 <ul>
-	<li><a class="json" href="<?php echo str_replace('.html', '.json', $this->url())?>">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo str_replace('.html', '.jsonp', $this->url()) . '?callback=myCallback_1234'?>">JSONP</a></li>
-	<li><a class="rdf" href="<?php echo str_replace('.html', '.rdf', $this->url())?>">RDF</a></li>
+    <li><a class="json" href="<?php echo $this->url(['controller' => 'skoscollection', 'id' => $uuid]) . '.json' ?>">JSON</a></li>
+    <li><a class="jsonp" href="<?php echo $this->url(['controller' => 'skoscollection', 'id' => $uuid]) . '.jsonp?callback=myCallBack1234' ?>">JSONP</a></li>
+    <li><a class="rdf" href="<?php echo $this->url(['controller' => 'skoscollection', 'id' => $uuid]) . '.rdf' ?>">RDF</a></li>
 </ul>
 
 <div>
-    <?php
-    $concepts = $skosCollectionManager->listConceptsForCluster($uri, OpenSkos::INSKOSCOLLECTION);?>
-    
+    <?php $concepts = $skosCollectionManager->listConceptsForCluster($uri, OpenSkos::INSKOSCOLLECTION); ?>
+
     <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this skos collection:</h3>
     <?php
-    foreach ($concepts as $key=>$value):
+    foreach ($concepts as $key => $value):
         ?>
         <li>
             <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $value), 'rest') ?>.html">
                 <strong><?php echo $key ?></strong>
             </a>
         </li>
-<?php endforeach ?>
+    <?php endforeach ?>
 </div>
 

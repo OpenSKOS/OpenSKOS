@@ -30,7 +30,6 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\RelationTypes;
 use OpenSkos2\Api\Exception\ApiException;
 
 require_once dirname(__FILE__) . '/config.inc.php';
@@ -341,7 +340,7 @@ class ConceptManager extends ResourceManager
             throw new ApiException('The triple creates transitive link of the source to itself, possibly via inverse relation.', 400);
         }
         // overkill??
-        $inverses = array_merge(Skos::getInverseRelationsMap(),  $this->relationTypes->getInverses());
+        $inverses = array_merge(Skos::getInverseRelationsMap(),  $this->customRelationTypes->getInverses());
         if (array_key_exists($relationUri, $inverses)) {
             $inverseRelUri = $inverses[$relationUri];
             $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
@@ -366,7 +365,7 @@ class ConceptManager extends ResourceManager
             return false;
         }
 
-        $trans =  $this->relationTypes->getTransitives();
+        $trans =  $this->customRelationTypes->getTransitives();
         if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {

@@ -31,6 +31,7 @@ class NamespaceAdmin
         return $retVal;
     }
 
+    // TODO: must be streacter, to avoid typos in standard properties
     public static function isPropertyFromStandardNamespace($property)
     {
         $prefix = self :: getNamespacePrefixCandidate($property);

@@ -285,7 +285,7 @@ class Concept extends AbstractTripleStoreResource
             }
             if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
                 throw new InvalidPredicateException(
-                    'The field "' . $propertyUri . '" from fields list is not recognised.'
+                'The field "' . $propertyUri . '" from fields list is not recognised.'
                 );
             }
         }
@@ -330,33 +330,28 @@ class Concept extends AbstractTripleStoreResource
 // also, throws an exception when a poperty is not from a standard namespace and not a custom relation
     private function checkRelationsInConcept(ConceptResource $concept)
     {
-        $customRelUris = array_values($this->manager->getCustomRelationTypes());
         $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
-        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
+        $standardRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
         $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
+        $allRelationUris = array_merge($registeredRelationUris, $standardRelationUris);
         foreach ($properties as $property) {
-            if (in_array($property, $allRelationUris)) { // is a relation
-// if it is a custom relation, it must be registered
-                if (in_array($property, $customRelUris)) { // is a user-defined relation
-                    if (!in_array($property, $registeredRelationUris)) {
-                        throw new ApiException('The relation  ' . $property . '  is not registered in the triple store. ', 400);
-                    }
-                }
-// cycle-check and duplication check
+            if (in_array($property, $allRelationUris)) {
                 $relatedConcepts = $concept->getProperty($property);
-                foreach ($relatedConcepts as $relConcept) {
+                foreach ($relatedConcepts as $relConceptUri) {
 // check if related concept exists
+                    $relConcept = $relConceptUri->getUri();
                     $exists = $this->manager->resourceExists($relConcept, Skos::CONCEPT);
                     if (!$exists) {
                         throw new ApiException('The related concept  ' . $relConcept . '  does not exist. ', 400);
                     }
+// cycle-check and duplication check
                     $this->manager->relationTripleIsDuplicated($conceptUri, $relConcept, $property);
                     $this->manager->relationTripleCreatesCycle($conceptUri, $relConcept, $property);
                 }
             } else { // not a concept-concept relation, must be from a standard namespace
                 if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
-                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of a concepts and is not a user-defined relation. ', 400);
+                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of concepts and is not a user-defined relation. ', 400);
                 }
             }
         }
@@ -389,7 +384,7 @@ class Concept extends AbstractTripleStoreResource
 
     private function prepareSortFieldForSolr($term)
     {
- // translate field name  to am internal sort-field name
+        // translate field name  to am internal sort-field name
         if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
             return $term;
         }
@@ -502,4 +497,5 @@ class Concept extends AbstractTripleStoreResource
 
         return $body;
     }
+
 }

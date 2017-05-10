@@ -28,7 +28,6 @@ $tenantManager = $di->get('OpenSkos2\TenantManager');
 $code = $tenant->getCode();
 $name = $tenantManager->getTenantNameByCode($code);
 $this->headTitle($name);
-require_once '/app/test/application/api/views/scripts/Util.php';
 ?>
 <h2><?php echo $this->escape($name)?></h2>
 <dl>
@@ -68,7 +67,7 @@ require_once '/app/test/application/api/views/scripts/Util.php';
 </ul>
 <h3>Alternative formats</h3>
 <ul>
-    <li><a class="json" href="<?php echo Util::switchFromHtmlToOtherFormat('json', $this->url())?>">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo Util::switchFromHtmlToOtherFormat('jsonp', $this->url(),'myCallback123')?>">JSONP</a></li>
-	<li><a class="rdf" href="<?php echo Util::switchFromHtmlToOtherFormat('rdf', $this->url())?>">RDF</a></li>
+    <li><a class="json" href="<?php echo $this->url(['controller'=>'institution', 'id'=>$code]).'.json'?>">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url(['controller'=>'institution', 'id'=>$code]).'.jsonp?callback=myCallBack1234'?>">JSONP</a></li>
+	<li><a class="rdf" href="<?php echo $this->url(['controller'=>'institution', 'id'=>$code]).'.rdf'?>">RDF</a></li>
 </ul>
