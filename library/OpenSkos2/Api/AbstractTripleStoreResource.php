@@ -249,7 +249,7 @@ abstract class AbstractTripleStoreResource
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
 
             // validate authorisation situation
-            if (!$this->authorisation->resourceCreationAllowed($params['user'], $params['tenant'], $resourceObject)) {
+            if (!$this->authorisation->resourceCreationAllowed($params['user'], $params['tenant'], $params['set'], $resourceObject)) {
                 throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenant'] . '. Your role is "' . $params['user']->role . '"', 403);
             }
 
@@ -308,7 +308,7 @@ abstract class AbstractTripleStoreResource
             $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params['tenant'], $params['set']);
 
             // check authorisation, validate and update
-            if ($this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $preprocessedResource)) {
+            if ($this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $preprocessedResource)) {
                 $this->validate($preprocessedResource, true, $params['tenant'], $params['set']);
                 $this->manager->replace($preprocessedResource);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
@@ -336,7 +336,7 @@ abstract class AbstractTripleStoreResource
                 throw new ApiException('The resource is not found by uri :' . $uri, 404);
             }
 
-            if (!$this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $resourceObject)) {
+            if (!$this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $params['set'], $resourceObject)) {
                 throw new ApiException('You do not have rights to delete resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
             }
 

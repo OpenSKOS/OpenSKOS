@@ -96,8 +96,7 @@ class Concept extends Resource
     public function hasAnyRelations()
     {
         $relationProperties = array_merge(
-            Resource::$classes['SemanticRelations'],
-            Resource::$classes['MappingProperties']
+            Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']
         );
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {
@@ -169,14 +168,12 @@ class Concept extends Resource
     {
         // @TODO Move that and uri generate to separate class.
         // @TODO A raise condition is possible. The validation will fail in that case - so should not be problem.
-
         // Meertens:
         // this is changed because $maxNumericNotation returns now zero if there is no records in the solr (otherwise there was a crash in solr/resourceManager on empty database with the attempt to ask for current on the empty iterator
         $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
         $notation = $maxNumericNotation + 1;
         $this->addProperty(
-            Skos::NOTATION,
-            new Literal($notation)
+            Skos::NOTATION, new Literal($notation)
         );
     }
 
@@ -191,15 +188,19 @@ class Concept extends Resource
         $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
         if (count($conceptBaseUris) < 1) {
             throw new UriGenerationException(
-                'No concept base uri is given in the set description (you may want to use epic service whch does not require thsi uri)'
+            'No concept base uri is given in the set description (you may want to use epic service whch does not require thsi uri)'
             );
         } else {
-            $conceptBaseUri = $conceptBaseUris[0]->getUri();
+            if ($conceptBaseUris[0] instanceof Uri) {
+                $conceptBaseUri = $conceptBaseUris[0]->getUri();
+            } else {
+                $conceptBaseUri = $conceptBaseUris[0]->getValue();
+            }
         }
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-                'The concept already has an uri. Can not generate new one.'
+            'The concept already has an uri. Can not generate new one.'
             );
         }
 
@@ -209,24 +210,17 @@ class Concept extends Resource
 
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::assembleUri(
-                $conceptBaseUri,
-                $tenant,
-                $set,
-                $uuid
+                    $conceptBaseUri, $tenant, $set, $uuid
             );
         } else {
-           $uri = self::assembleUri(
-                $conceptBaseUri,
-                $tenant,
-                $set,
-                $uuid,
-                $this->getProperty(Skos::NOTATION)[0]->getValue()
+            $uri = self::assembleUri(
+                    $conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue()
             );
         }
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
@@ -255,4 +249,5 @@ class Concept extends Resource
 
         return $uri;
     }
+
 }

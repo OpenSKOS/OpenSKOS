@@ -79,7 +79,6 @@ class ResourceManager
         return $this->resourceType;
     }
 
-   
     /**
      * Use that if inserting a large amount of resources.
      * Call commit at the end.
@@ -535,8 +534,8 @@ class ResourceManager
         // @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
-                return strcmp($resource1->getUri(), $resource2->getUri());
-            }
+            return strcmp($resource1->getUri(), $resource2->getUri());
+        }
         );
 
         return $resources;
@@ -569,7 +568,7 @@ class ResourceManager
 
         if (!$response->isSuccessful()) {
             throw new RuntimeException(
-                'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
+            'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
 
@@ -1016,7 +1015,7 @@ class ResourceManager
 
     public function fetchRelationUris()
     {
- // all relations, not only concept-concept relations
+        // all relations, not only concept-concept relations
         $skosrels = Skos::getSkosRelations();
         $userrels = array_values($this->fetchNameUri());
         $result = array_merge($skosrels, $userrels);
@@ -1240,7 +1239,6 @@ class ResourceManager
         }
         return $resource;
     }
-    
 
     private function fetchTenantUriViaSet($resource)
     {
@@ -1260,6 +1258,7 @@ class ResourceManager
                         return $tenantUris[0];
                     }
                 } catch (ApiException $ex) {
+                    
                 }
             }
         }
@@ -1289,7 +1288,38 @@ class ResourceManager
         }
         return $retVal;
     }
-    
+
+    public function fetchTenantSpecForConceptToAdd($concept)
+    {
+        $properties = [Skos::INSCHEME, OpenSkosNamespace::INSKOSCOLLECTION];
+        $retVal = [];
+
+        for ($i = 0; $i < 1; $i++) {
+            $refs = $concept->getProperty($properties[$i]);
+
+            foreach ($refs as $ref) {
+                $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
+                    . '<' . $ref->getUri() . '> <' . OpenSkosNamespace::SET . '> ?seturi . ?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+                    . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
+                    . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
+                    . '?tenanturi  <' . VCard::ORG . '> ?org . ?org <' . VCard::ORGNAME . '> ?tenantname . ?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .}';
+
+                $response = $this->query($query);
+                foreach ($response as $descr) {
+                    $spec = [];
+                    $spec['tenanturi'] = $descr->tenanturi->getUri();
+                    $spec['tenantname'] = $descr->tenantname->getValue();
+                    $spec['tenantcode'] = $descr->tenantcode->getValue();
+                    $spec['seturi'] = $descr->seturi->getUri();
+                    $spec['setcode'] = $descr->setcode->getValue();
+                    $spec['settitle'] = $descr->settitle->getValue();
+                    $retVal[] = $spec;
+                }
+            }
+        }
+        return $retVal;
+    }
+
     public function getCustomRelationTypes()
     {
         if (DEFAULT_RELATIONTYPES) {
@@ -1343,7 +1373,7 @@ class ResourceManager
             $this->customRelationTypes->setTransitives($transitives);
         }
     }
-    
+
     public function fetchConceptConceptRelationsNameUri()
     {
         $uris = Skos::getSkosConceptConceptRelations();
@@ -1353,8 +1383,9 @@ class ResourceManager
             $name = 'skos:' . substr($uri, $border + 1);
             $skosrels[$name] = $uri;
         }
-        $userrels =  $this->getCustomRelationTypes();
+        $userrels = $this->getCustomRelationTypes();
         $result = array_merge($skosrels, $userrels);
         return $result;
     }
+
 }

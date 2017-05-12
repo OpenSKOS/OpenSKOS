@@ -41,10 +41,12 @@ class RelationinstanceTest extends AbstractTest
                 self::$uuid2 = $result2['uuid'];
                 self::$about2 = $result2['about'];
             } else {
+                var_dump($result2['response']->getBody());
                 self::delete(self::$about1, API_KEY_ADMIN, 'concept'); // delete the first concept
                 throw new \Exception('Cannot create the second test concept: ' . $result2['response']->getStatus() . '; ' . $result2['response']->getMessage());
             }
         } else {
+            var_dump($result1['response']->getBody());
             throw new \Exception('Cannot create the first test concept: ' . $result1['response']->getStatus() . '; ' . $result1['response']->getMessage());
         }
     }

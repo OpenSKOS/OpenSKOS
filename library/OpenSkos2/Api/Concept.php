@@ -311,7 +311,7 @@ class Concept extends AbstractTripleStoreResource
                 throw new NotFoundException('Concept already deleted :' . $id, 410);
             }
 
-            $this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $concept);
+            $this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $params['set'], $concept);
             $this->manager->deleteSoft($concept);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -491,9 +491,9 @@ class Concept extends AbstractTripleStoreResource
         }
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed($params['user'], $params['tenantcode'], $concept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $concept); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed($params['user'], $params['tenantcode'], $relatedConcept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $relatedConcept); // throws an exception if not allowed
 
         return $body;
     }

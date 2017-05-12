@@ -259,7 +259,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
         if ($firstRound) {
             $secondRound = $this->isSetOfCurrentTenant($resource);
-            if ($secondRound) {
+            // third round is removed to authorisation step
+            /*if ($secondRound) {
                 $setURIs = $resource->getProperty(OpenSkos::SET);
                 $setURI = $setURIs[0]->getUri();
                 if ($this->set->getUri() !== $setURI) {
@@ -269,7 +270,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 }
             } else {
                 return false;
-            }
+            }*/
+            return $secondRound;
         } else {
             return false;
         }
@@ -320,22 +322,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return ($errorsBeforeCheck === $errorsAfterCheck);
     }
 
-    private function refersToRequestParameterSet(RdfResource $resource, $referenceName, $referenceType)
-    {
-        $referenceUris = $resource->getProperty($referenceName);
-        $errorsBeforeCheck = count($this->errorMessages);
-        foreach ($referenceUris as $uri) {
-            try {
-                $refResource = $this->resourceManager->fetchByUri($uri->getUri(), $referenceType); //throws an exception if something is wrong
-                $this->isSetCoinsideWithSetRequestParameter($refResource);
-            } catch (\Exception $e) {
-                $this->errorMessages[] = $e->getMessage();
-            }
-        }
-        $errorsAfterCheck = count($this->errorMessages);
-        return ($errorsBeforeCheck === $errorsAfterCheck);
-    }
-
+    
     protected function validateInScheme(RdfResource $resource)
     {
         $retVal = $this->validateInSchemeOrInCollection($resource, Skos::INSCHEME, Skos::CONCEPTSCHEME, true);
@@ -359,11 +346,10 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $firstRound = $this->validateProperty($resource, $property, $must, false, false, false, $rdftype);
         if ($firstRound) {
             if (ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
-                return $this->refersToRequestParameterSet($resource, $property, $rdftype);
+                return true;
             } else {
-                $coinside = $this->refersToRequestParameterSet($resource, $property, $rdftype);
                 $correcttenant = $this->refersToSetOfCurrentTenant($resource, $property, $rdftype);
-                return ($coinside && $correcttenant);
+                return $correcttenant;
             }
         } else {
             return false;

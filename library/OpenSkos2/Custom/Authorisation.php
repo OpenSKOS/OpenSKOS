@@ -9,6 +9,7 @@ use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 
 class Authorisation implements \OpenSkos2\Interfaces\Authorisation
@@ -21,9 +22,16 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $this->resourceManager = $manager;
     }
 
-    public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $resource)
+    public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
         $type = $this->resourceManager->getResourceType();
+
+        if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
+            $setIsValid = $this->checkSet($set, $resource);
+            if (!$setIsValid) {
+                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+            }
+        }
         switch ($type) {
             case Concept::TYPE:
                 return $this->conceptCreationAllowed($user, $tenant, $resource);
@@ -42,11 +50,16 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $resource)
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
-
         $type = $this->resourceManager->getResourceType();
 
+        if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
+            $setIsValid = $this->checkSet($set, $resource);
+            if (!$setIsValid) {
+                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+            }
+        }
         switch ($type) {
             case Concept::TYPE:
                 return $this->conceptEditAllowed($user, $tenant, $resource);
@@ -65,9 +78,16 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $resource)
+    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
         $type = $this->resourceManager->getResourceType();
+
+        if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
+            $setIsValid = $this->checkSet($set, $resource);
+            if (!$setIsValid) {
+                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+            }
+        }
         switch ($type) {
             case Concept::TYPE:
                 return $this->conceptDeleteAllowed($user, $tenant, $resource);
@@ -226,4 +246,39 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     {
         return $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
+
+    private function checkSet($set, $resource)
+    {
+        $setUri = $set->getUri();
+        switch ($resource->getType()->getUri()) {
+            case ConceptScheme::TYPE:
+                $retval = ($setUri === $resource->getProperty(OpenSkos::SET)->getUri() );
+                break;
+            case SkosCollection::TYPE:
+                $retval = ($setUri === $resource->getProperty(OpenSkos::SET)->getUri() );
+                break;
+            case Concept::TYPE:
+                $setUriRef = $this->checkUniqueSet($resource);
+                $retval = ($setUri === $setUriRef);
+                break;
+            default:
+                $retval = TRUE;
+                break;
+        }
+        return $retval;
+    }
+
+    private function checkUniqueSet($concept)
+    {
+        $spec = $this->resourceManager->fetchTenantSpecForConceptToAdd($concept);
+        $setUri = $spec[0]['seturi'];
+        for ($i = 1; $i < count($spec); $i++) {
+            if ($setUri !== $spec[$i]['seturi']) {
+                throw new UnauthorizedException('The concept ' . $concept->getUri() .
+                ' via its schemes belongs to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi'], 500);
+            }
+        }
+        return $setUri;
+    }
+
 }
