@@ -33,8 +33,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 abstract class AbstractTripleStoreResource
 {
 
@@ -73,7 +71,8 @@ abstract class AbstractTripleStoreResource
         }
 
         $resourceType = $this->manager->getResourceType();
-        if ($resourceType !== Tenant::TYPE && $resourceType !== Set::TYPE && $resourceType !== RelationType::TYPE) {
+        if ($resourceType !== Tenant::TYPE && $resourceType !== Set::TYPE && 
+            $resourceType !== RelationType::TYPE) {
             $params['set'] = $this->fetchSet($queryparams);
             if ($params['set'] == null) {
                 throw new ApiException("No set (former collection) specified, posting $resourceType", 412);
@@ -205,7 +204,7 @@ abstract class AbstractTripleStoreResource
                     $response = (new DetailJsonResponse($resource, $rdfType, $propertiesList, $fieldname, $extras))->getResponse();
                     break;
                 case 'jsonp':
-                   $response = (new DetailJsonpResponse($resource, $rdfType, $params['callback'], $propertiesList, $fieldname, $extras))->getResponse();
+                    $response = (new DetailJsonpResponse($resource, $rdfType, $params['callback'], $propertiesList, $fieldname, $extras))->getResponse();
                     break;
                 case 'rdf':
                     $response = (new DetailRdfResponse($resource, $rdfType, $propertiesList))->getResponse();
