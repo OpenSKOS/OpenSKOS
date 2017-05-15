@@ -208,5 +208,4 @@ class GetInstitutionTest extends AbstractTest
         $list = $dom->query('ul > li > a');
         $this->AssertEquals(2, count($list) - NUMBER_INSTITUTIONS);
     }
-
 }

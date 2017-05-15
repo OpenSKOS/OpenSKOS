@@ -4,7 +4,7 @@ namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
 
-class GetInstitutionTest extends AbstractTest
+class GetSetTest extends AbstractTest
 {
 
     public static function setUpBeforeClass()

@@ -63,7 +63,11 @@ abstract class AbstractTripleStoreResource
             }
             $tenant = $this->manager->fetchByCode($queryparams['tenant'], Tenant::TYPE);
             if ($tenant === null) {
-                throw new ApiException('The tenant referred by code ' . $params['tenant'] . ' does not exist in the triple store. ', 400);
+                throw new ApiException(
+                    'The tenant referred by code ' . $params['tenant'] .
+                    ' does not exist in the triple store. ',
+                    400
+                );
             }
             $params['tenant'] = $tenant;
         } else {
@@ -201,13 +205,30 @@ abstract class AbstractTripleStoreResource
 
             switch ($format) {
                 case 'json':
-                    $response = (new DetailJsonResponse($resource, $rdfType, $propertiesList, $fieldname, $extras))->getResponse();
+                    $response = (new DetailJsonResponse(
+                        $resource,
+                        $rdfType,
+                        $propertiesList,
+                        $fieldname,
+                        $extras
+                    ))->getResponse();
                     break;
                 case 'jsonp':
-                    $response = (new DetailJsonpResponse($resource, $rdfType, $params['callback'], $propertiesList, $fieldname, $extras))->getResponse();
+                    $response = (new DetailJsonpResponse(
+                        $resource,
+                        $rdfType,
+                        $params['callback'],
+                        $propertiesList,
+                        $fieldname,
+                        $extras
+                    ))->getResponse();
                     break;
                 case 'rdf':
-                    $response = (new DetailRdfResponse($resource, $rdfType, $propertiesList))->getResponse();
+                    $response = (new DetailRdfResponse(
+                        $resource,
+                        $rdfType,
+                        $propertiesList
+                    ))->getResponse();
                     break;
                 default:
                     throw new ApiException('Invalid context: ' . $context, 400);
@@ -248,8 +269,18 @@ abstract class AbstractTripleStoreResource
             $resourceObject = $this->getResourceObjectFromRequestBody($request);
 
             // validate authorisation situation
-            if (!$this->authorisation->resourceCreationAllowed($params['user'], $params['tenant'], $params['set'], $resourceObject)) {
-                throw new ApiException('You do not have rights to create resource of type ' . $this->getManager()->getResourceType() . " in tenant " . $params['tenant'] . '. Your role is "' . $params['user']->role . '"', 403);
+            if (!$this->authorisation->resourceCreationAllowed(
+                $params['user'],
+                $params['tenant'],
+                $params['set'],
+                $resourceObject
+            )) {
+                throw new ApiException(
+                    'You do not have rights to create resource of type ' .
+                    $this->getManager()->getResourceType() .
+                    " in tenant " . $params['tenant'] . '. Your role is "' . $params['user']->role . '"',
+                    403
+                );
             }
 
             // check if the uri mentioned in the body exists
@@ -267,11 +298,20 @@ abstract class AbstractTripleStoreResource
             if ($this->manager->getResourceType() === Tenant::TYPE) {
                 $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), null);
             } else {
-                $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['user']->getFoafPerson()->getUri());
+                $preprocessor = new Preprocessor(
+                    $this->manager,
+                    $this->manager->getResourceType(),
+                    $params['user']->getFoafPerson()->getUri()
+                );
             }
 
             //preprocess (fill in creator, data, status, autooGenerateIdentifiers)
-            $preprocessedResource = $preprocessor->forCreation($resourceObject, $autoGenerateUri, $params['tenant'], $params['set']);
+            $preprocessedResource = $preprocessor->forCreation(
+                $resourceObject,
+                $autoGenerateUri,
+                $params['tenant'],
+                $params['set']
+            );
 
             // validate
             $this->validate($preprocessedResource, false, $params['tenant'], $params['set']);
@@ -302,19 +342,33 @@ abstract class AbstractTripleStoreResource
             if ($this->manager->getResourceType() === Tenant::TYPE) {
                 $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), null);
             } else {
-                $preprocessor = new Preprocessor($this->manager, $this->manager->getResourceType(), $params['user']->getFoafPerson()->getUri());
+                $preprocessor = new Preprocessor(
+                    $this->manager,
+                    $this->manager->getResourceType(),
+                    $params['user']->getFoafPerson()->getUri()
+                );
             }
             $preprocessedResource = $preprocessor->forUpdate($resourceObject, $params['tenant'], $params['set']);
 
             // check authorisation, validate and update
-            if ($this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $preprocessedResource)) {
+            if ($this->authorisation->resourceEditAllowed(
+                $params['user'],
+                $params['tenant'],
+                $params['set'],
+                $preprocessedResource
+            )) {
                 $this->validate($preprocessedResource, true, $params['tenant'], $params['set']);
                 $this->manager->replace($preprocessedResource);
                 $savedResource = $this->manager->fetchByUri($resourceObject->getUri());
                 $rdf = (new DataRdf($savedResource, true, []))->transform();
                 return $this->getSuccessResponse($rdf);
             } else {
-                throw new ApiException('You do not have rights to edit resource ' . $resourceObject->getUri() . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
+                throw new ApiException(
+                    'You do not have rights to edit resource ' .
+                    $resourceObject->getUri() . '. Your role is "' . $params['user']->role .
+                    '" in tenant ' . $params['tenant']->getCode()->getValue(),
+                    403
+                );
             }
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -335,13 +389,26 @@ abstract class AbstractTripleStoreResource
                 throw new ApiException('The resource is not found by uri :' . $uri, 404);
             }
 
-            if (!$this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $params['set'], $resourceObject)) {
-                throw new ApiException('You do not have rights to delete resource ' . $uri . '. Your role is "' . $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(), 403);
+            if (!$this->authorisation->resourceDeleteAllowed(
+                $params['user'],
+                $params['tenant'],
+                $params['set'],
+                $resourceObject
+            )) {
+                throw new ApiException(
+                    'You do not have rights to delete resource ' . $uri . '. Your role is "' .
+                    $params['user']->role . '" in tenant ' . $params['tenant']->getCode()->getValue(),
+                    403
+                );
             }
 
             $canBeDeleted = $this->deletion->canBeDeleted($uri, $this->manager);
             if (!$canBeDeleted) {
-                throw new ApiException('The resource with the ' . $uri . ' cannot be deleted. Check if there are other resources referring to it. ', 412);
+                throw new ApiException(
+                    'The resource with the ' . $uri .
+                    ' cannot be deleted. Check if there are other resources referring to it. ',
+                    412
+                );
             }
             $this->manager->delete(new Uri($uri), $this->manager->getResourceType());
             $xml = (new DataRdf($resourceObject))->transform();

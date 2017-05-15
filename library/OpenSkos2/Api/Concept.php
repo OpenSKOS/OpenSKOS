@@ -45,8 +45,6 @@ use OpenSkos2\Deletion;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 // Meerens: 
 // -- all concrete resource api classes extends AbstractTripleStoreResource . 
 // This abtsract class contains generic methods for get, create, update and delete for any 
@@ -56,12 +54,15 @@ require_once dirname(__FILE__) . '/../config.inc.php';
 // -- ApiResponseTrait is not used any more.
 // -- Maximal time limit is changed at the begin of "fincConceptMethod" (by the constant set in the config),
 // and set back before the method return.
-// -- Maximal rows are set via the config's constant as well, not via $this->limit as it has been implemented by picturae
+// -- Maximal rows are set via the config's constant as well, 
+// not via $this->limit as it has been implemented by picturae
 // -- 'collection' is replaced by 'set'
-// -- added 'label' to options in findConcepts otherwise $options['label'] in autocomplete->search is useless (also see my e-mail 2/02 question
+// -- added 'label' to options in findConcepts otherwise $options['label'] 
+// in autocomplete->search is useless (also see my e-mail 2/02 question
 // about "where translation prefLabel to t_prefLabel or a_prefLabel happens")
 // 
-//-- added new parameter 'wholeword' to handle switch between whole word search (prefix t_) and the part-of-word search (prefix a_)
+//-- added new parameter 'wholeword' to handle switch between whole word 
+// search (prefix t_) and the part-of-word search (prefix a_)
 // // -- added 'properties' to options otherwise $options['properties'] in autocomplete->search is useless
 
 class Concept extends AbstractTripleStoreResource
@@ -165,7 +166,11 @@ class Concept extends AbstractTripleStoreResource
                     foreach ($setcodes as $setcode) {
                         $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
                         if ($setUri === null) {
-                            throw new ApiException("The set (former known as collection) referred by code  $setcode does not exist in the triple store.", 400);
+                            throw new ApiException(
+                                "The set (former known as collection) referred by code  "
+                                . "$setcode does not exist in the triple store.",
+                                400
+                            );
                         } else {
                             $options['set'][] = $setUri;
                         }
@@ -186,7 +191,11 @@ class Concept extends AbstractTripleStoreResource
                 foreach ($tenantCodes as $tenantcode) {
                     $tenantUri = $this->manager->fetchUriByCode($tenantcode, Tenant::TYPE);
                     if ($tenantUri === null) {
-                        throw new ApiException('The tenant referred by code ' . $tenantcode . ' does not exist in the triple store. ', 400);
+                        throw new ApiException(
+                            'The tenant referred by code ' . $tenantcode .
+                            ' does not exist in the triple store. ',
+                            400
+                        );
                     };
                     $options['tenant'][] = $tenantUri;
                 }
@@ -351,7 +360,11 @@ class Concept extends AbstractTripleStoreResource
                 }
             } else { // not a concept-concept relation, must be from a standard namespace
                 if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
-                    throw new ApiException('The property  ' . $property . '  does not belong to standart properties of concepts and is not a user-defined relation. ', 400);
+                    throw new ApiException(
+                        'The property  ' . $property .
+                        '  does not belong to standart properties of concepts and is not a user-defined relation. ',
+                        400
+                    );
                 }
             }
         }
@@ -375,7 +388,8 @@ class Concept extends AbstractTripleStoreResource
             }
             $sortmap[$sortfield] = $sortorder;
         };
-        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') { // field name is the last and no order after it
+        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') {
+// field name is the last and no order after it
             $sortfield = $this->prepareSortFieldForSolr($sortlist[$l - 1]); // Fix "@nl" to "_nl"
             $sortmap[$sortfield] = 'asc';
         };
@@ -385,7 +399,8 @@ class Concept extends AbstractTripleStoreResource
     private function prepareSortFieldForSolr($term)
     {
         // translate field name  to am internal sort-field name
-        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") { // is already an internal presentation ready for solr, starts with sort_* or *_langcode
+        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") {
+// is already an internal presentation ready for solr, starts with sort_* or *_langcode
             return $term;
         }
         if ($this->isDateField($term)) {
@@ -477,11 +492,19 @@ class Concept extends AbstractTripleStoreResource
 // if it is a user-defined relation type, it must be registered as a resource
             if (in_array($body['type'], $customRelUris)) { // is a user-defined relation
                 if (!in_array($body['type'], $registeredRelationUris)) {
-                    throw new ApiException('The relation  ' . $body['type'] . '  is not registered in the triple store. ', 404);
+                    throw new ApiException(
+                        'The relation  ' . $body['type'] .
+                        '  is not registered in the triple store. ',
+                        404
+                    );
                 }
             }
         } else {
-            throw new ApiException('The relation type ' . $body['type'] . '  is neither a skos concept-concept relation type nor a user-defined relation type. ', 404);
+            throw new ApiException(
+                'The relation type ' . $body['type'] . '  is neither a skos concept-concept '
+                . 'relation type nor a user-defined relation type. ',
+                404
+            );
         }
 
 
@@ -491,9 +514,19 @@ class Concept extends AbstractTripleStoreResource
         }
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $concept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed(
+            $params['user'],
+            $params['tenant'],
+            $params['set'],
+            $concept
+        ); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed($params['user'], $params['tenant'], $params['set'], $relatedConcept); // throws an exception if not allowed
+        $this->authorisation->resourceEditAllowed(
+            $params['user'],
+            $params['tenant'],
+            $params['set'],
+            $relatedConcept
+        ); // throws an exception if not allowed
 
         return $body;
     }

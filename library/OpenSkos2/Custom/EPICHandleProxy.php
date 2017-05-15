@@ -4,8 +4,6 @@ namespace OpenSkos2\Custom;
 
 use \Exception;
 
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 class EPICHandleProxy
 {
 
