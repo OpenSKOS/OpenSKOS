@@ -27,8 +27,6 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\DcTerms;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-
 class ConceptScheme extends Resource
 {
 

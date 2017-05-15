@@ -20,7 +20,6 @@
 namespace OpenSkos2\Api\Transform;
 
 use DateTime;
-use EasyRdf\RdfNamespace;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -84,10 +83,7 @@ class DataArray
                 continue;
             }
             $newResource = $this->getPropertyValue(
-                $resource->getProperty($prop['uri']),
-                $field,
-                $prop,
-                $newResource
+                $resource->getProperty($prop['uri']), $field, $prop, $newResource
             );
         }
         return $newResource;

@@ -32,9 +32,6 @@ use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Api\Exception\ApiException;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-require_once dirname(__FILE__) . '/../../tools/Logging.php';
-
 // Mertens: the difference is in handling relations.
 // We use "addRelationTriple" and "deleteRelationTriple" since old names
 // "addRelation" and "deleteRelation" are related for a resource of Relation type
@@ -52,7 +49,7 @@ class ConceptManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
-    
+
     // uses and overrides the parent's method
     public function findResourceById($id, $resourceType)
     {
@@ -147,9 +144,7 @@ class ConceptManager extends ResourceManager
             $concepts = $this->fetch(
                 [
                 Skos::INSCHEME => $scheme,
-                ],
-                $start,
-                $step
+                ], $start, $step
             );
 
             foreach ($concepts as $concept) {
@@ -186,7 +181,7 @@ class ConceptManager extends ResourceManager
     public function search($query, $rows = MAXIMAL_ROWS, $start = 0, &$numFound = 0, $sorts = null)
     {
         return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
 
@@ -199,10 +194,9 @@ class ConceptManager extends ResourceManager
     {
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:"' . $tenant->getUri().'"',
-            'max_numeric_notation'
+            'tenant:"' . $tenant->getUri() . '"', 'max_numeric_notation'
         );
-       return intval($max);
+        return intval($max);
     }
 
     /**
@@ -276,15 +270,11 @@ class ConceptManager extends ResourceManager
     {
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri),
-            $relationType,
-            new Uri($objectUri)
+            new Uri($subjectUri), $relationType, new Uri($objectUri)
         );
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->relationTypes->getInverses());
         $this->deleteMatchingTriples(
-            new Uri($objectUri),
-            $inverses[$relationType],
-            new Uri($subjectUri)
+            new Uri($objectUri), $inverses[$relationType], new Uri($subjectUri)
         );
     }
 
@@ -301,7 +291,7 @@ class ConceptManager extends ResourceManager
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 
@@ -340,7 +330,7 @@ class ConceptManager extends ResourceManager
             throw new ApiException('The triple creates transitive link of the source to itself, possibly via inverse relation.', 400);
         }
         // overkill??
-        $inverses = array_merge(Skos::getInverseRelationsMap(),  $this->customRelationTypes->getInverses());
+        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
         if (array_key_exists($relationUri, $inverses)) {
             $inverseRelUri = $inverses[$relationUri];
             $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
@@ -365,7 +355,7 @@ class ConceptManager extends ResourceManager
             return false;
         }
 
-        $trans =  $this->customRelationTypes->getTransitives();
+        $trans = $this->customRelationTypes->getTransitives();
         if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {

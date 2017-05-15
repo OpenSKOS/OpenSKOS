@@ -30,8 +30,6 @@ use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Authorisation;
 use OpenSkos2\Deletion;
 
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 class RelationType extends AbstractTripleStoreResource
 {
 
@@ -128,8 +126,7 @@ class RelationType extends AbstractTripleStoreResource
     {
         if ($resourceObject->isBlankNode()) {
             throw new ApiException(
-                'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.',
-                400
+            'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.', 400
             );
         }
         $ttl = $resourceObject->getUri();

@@ -16,7 +16,7 @@ class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
     protected $inverses = array();
     protected $transitives = array();
 
-    public function _construct()
+    public function __construct()
     {
         $this->relationtypes = array(
             'menzo:faster' => RelationTypes::FASTER,
@@ -69,5 +69,4 @@ class RelationTypes implements \OpenSkos2\Interfaces\CustomRelationTypes
     {
         $this->transitives = $transitives;
     }
-
 }

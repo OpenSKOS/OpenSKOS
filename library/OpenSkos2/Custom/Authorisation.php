@@ -264,7 +264,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 $retval = ($setUri === $setUriRef);
                 break;
             default:
-                $retval = TRUE;
+                $retval = true;
                 break;
         }
         return $retval;
@@ -281,5 +281,4 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
         return $setUri;
     }
-
 }

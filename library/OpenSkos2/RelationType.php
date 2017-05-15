@@ -26,8 +26,6 @@ use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-
 class RelationType extends Resource
 {
 

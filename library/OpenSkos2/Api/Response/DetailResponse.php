@@ -18,6 +18,7 @@
  */
 
 namespace OpenSkos2\Api\Response;
+
 /**
  * Provide the json output for find-concepts api
  */
@@ -33,10 +34,7 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
      * @var []
      */
     protected $propertiesList;
-    
     protected $resourceType;
-    
-  
 
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -47,5 +45,5 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
         $this->resourceType = $rdfType;
-    }   
+    }
 }

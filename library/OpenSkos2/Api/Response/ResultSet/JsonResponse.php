@@ -76,5 +76,4 @@ class JsonResponse extends ResultSetResponse
         }
         return $docs;
     }
-
 }

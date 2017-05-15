@@ -35,8 +35,6 @@ use Psr\Log\LoggerAwareTrait;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
 
-require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-
 // Meertens: 
 // -- no need for ConceptManager since import runs also for other resources as well and Resource Manager will do the job.
 // -- Tenant is not a constructor parameter because its Uri is derived from setUri passed via message in "handle".
@@ -65,9 +63,8 @@ class Command implements LoggerAwareInterface
      * @param ResourceManager $resourceManager
      * @param String $tenantUri optional If specified - tenant specific validation can be made.
      */
-    public function __construct(
-        ResourceManager $resourceManager
-    ) {
+    public function __construct(ResourceManager $resourceManager)
+    {
         $this->resourceManager = $resourceManager;
     }
 
@@ -89,7 +86,7 @@ class Command implements LoggerAwareInterface
         $resourceCollection = $file->getResources();
 
         $set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
-        
+
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
             throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
@@ -115,11 +112,11 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($scheme, Skos::CONCEPTSCHEME);
             }
         }
-        
-        
-        
+
+
+
         foreach ($resourceCollection as $resourceToInsert) {
-            
+
             $uri = $resourceToInsert->getUri();
             $types = $resourceToInsert->getProperty(Rdf::TYPE);
 
@@ -144,7 +141,7 @@ class Command implements LoggerAwareInterface
                         $preprocessedResource->setProperty(DcTerms::DATESUBMITTED, $dateSubm[0]);
                     }
                 }
-            } else { 
+            } else {
                 // autoGenerateIdentifiers is set to false because: 
                 // uri's are supposed to be given in the input file and uuid's will be added when necessary while preprocessing
                 $preprocessedResource = $preprocessor->forCreation($resourceToInsert, false, $tenant, $set);
@@ -182,7 +179,7 @@ class Command implements LoggerAwareInterface
         }
         $tenantUri = $tenantUris[0]->getUri();
         $tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
-        
+
         foreach ($conceptURIs as $uri) {
             $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
             $isForUpdates = true;

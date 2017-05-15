@@ -71,7 +71,7 @@ abstract class AbstractTripleStoreResource
         }
 
         $resourceType = $this->manager->getResourceType();
-        if ($resourceType !== Tenant::TYPE && $resourceType !== Set::TYPE && 
+        if ($resourceType !== Tenant::TYPE && $resourceType !== Set::TYPE &&
             $resourceType !== RelationType::TYPE) {
             $params['set'] = $this->fetchSet($queryparams);
             if ($params['set'] == null) {
@@ -193,11 +193,11 @@ abstract class AbstractTripleStoreResource
                 $extrasGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
                 $extras = EasyRdf::graphToResourceCollection($extrasGraph);
             } else {
-                $fieldname=null;
+                $fieldname = null;
                 $extras = [];
             }
-            
-            $rdfType= $this->manager->getResourceType();
+
+            $rdfType = $this->manager->getResourceType();
 
             switch ($format) {
                 case 'json':
@@ -240,7 +240,7 @@ abstract class AbstractTripleStoreResource
 
     public function create(ServerRequestInterface $request)
     {
-       try {
+        try {
             // validate and fetch user, tenant and set
             $params = $this->fetchUserTenantSetViaRequestParameters($request);
 
@@ -255,8 +255,7 @@ abstract class AbstractTripleStoreResource
             // check if the uri mentioned in the body exists
             if (!$resourceObject->isBlankNode() && $this->manager->askForUri((string) $resourceObject->getUri())) {
                 throw new ApiException(
-                    'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.',
-                    400
+                'The resource with uri ' . $resourceObject->getUri() . ' already exists. Use PUT instead.', 400
                 );
             }
 
@@ -361,9 +360,8 @@ abstract class AbstractTripleStoreResource
         $descriptions = $doc->documentElement->getElementsByTagNameNs(Rdf::NAME_SPACE, 'Description');
         if ($descriptions->length != 1) {
             throw new ApiException(
-                'Expected exactly one '
-                . '/rdf:RDF/rdf:Description, got ' . $descriptions->length,
-                412
+            'Expected exactly one '
+            . '/rdf:RDF/rdf:Description, got ' . $descriptions->length, 412
             );
         }
         $typeNode = $doc->createElement("rdf:type");
@@ -395,9 +393,8 @@ abstract class AbstractTripleStoreResource
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
             throw new ApiException(
-                'Recieved RDF-XML is not valid: '
-                . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>',
-                412
+            'Recieved RDF-XML is not valid: '
+            . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 412
             );
         }
         return $doc;
@@ -410,8 +407,7 @@ abstract class AbstractTripleStoreResource
         $autoGenerateIdentifiers = false;
         if (!empty($params['autoGenerateIdentifiers'])) {
             $autoGenerateIdentifiers = filter_var(
-                $params['autoGenerateIdentifiers'],
-                FILTER_VALIDATE_BOOLEAN
+                $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
             );
         }
 
@@ -420,31 +416,27 @@ abstract class AbstractTripleStoreResource
         if ($autoGenerateIdentifiers) {
             if (!$resourceObject->isBlankNode()) {
                 throw new ApiException(
-                    'Parameter autoGenerateIdentifiers is set to true, but the provided '
-                    . 'xml already contains uri (rdf:about).',
-                    400
+                'Parameter autoGenerateIdentifiers is set to true, but the provided '
+                . 'xml already contains uri (rdf:about).', 400
                 );
             }
 
             if (count($uuid) > 0) {
                 throw new ApiException(
-                    'Parameter autoGenerateIdentifiers is set to true, but the provided '
-                    . 'xml  already contains uuid.',
-                    400
+                'Parameter autoGenerateIdentifiers is set to true, but the provided '
+                . 'xml  already contains uuid.', 400
                 );
             }
         } else {
             // Is uri missing
             if ($resourceObject->isBlankNode()) {
                 throw new ApiException(
-                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
-                    400
+                'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             }
             if (count($uuid) === 0) {
                 throw new ApiException(
-                    'OpenSkos:uuid is missing from the xml. You may consider using autoGenerateIdentifiers.',
-                    400
+                'OpenSkos:uuid is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             }
         }

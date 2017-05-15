@@ -14,10 +14,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
-use OpenSkos2\Set;
-
-require_once dirname(__FILE__) . '/config.inc.php';
 
 class SkosCollection extends Resource
 {

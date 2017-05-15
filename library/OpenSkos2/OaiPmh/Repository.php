@@ -145,15 +145,9 @@ class Repository implements InterfaceRepository
      * @param type $description
      */
     public function __construct(
-        ConceptManager $conceptManager,
-        ConceptSchemeManager $schemeManager,
-        Autocomplete $searchAutocomplete,
-        $repositoryName,
-        $baseUrl,
-        array $adminEmails,
-        SetManager $setManager,
-        $description = null
-    ) {
+    ConceptManager $conceptManager, ConceptSchemeManager $schemeManager, Autocomplete $searchAutocomplete, $repositoryName, $baseUrl, array $adminEmails, SetManager $setManager, $description = null
+    )
+    {
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -188,13 +182,7 @@ class Repository implements InterfaceRepository
     public function identify()
     {
         return new ImplementationIdentity(
-            $this->repositoryName,
-            $this->getEarliestDateStamp(),
-            Identity::DELETED_RECORD_PERSISTENT,
-            $this->adminEmails,
-            $this->getGranularity(),
-            null,
-            null
+            $this->repositoryName, $this->getEarliestDateStamp(), Identity::DELETED_RECORD_PERSISTENT, $this->adminEmails, $this->getGranularity(), null, null
         );
     }
 
@@ -285,14 +273,7 @@ class Repository implements InterfaceRepository
         //\Tools\Logging::var_error_log(" pSet: ", $pSet , APPLICATION_BASE_PATH.'/data/debug.txt');
 
         $concepts = $this->getConcepts(
-            $this->limit,
-            0,
-            $from,
-            $until,
-            $pSet['tenant'],
-            $pSet['set'],
-            $pSet['conceptScheme'],
-            $numFound
+            $this->limit, 0, $from, $until, $pSet['tenant'], $pSet['set'], $pSet['conceptScheme'], $numFound
         );
 
         $items = [];
@@ -320,14 +301,7 @@ class Repository implements InterfaceRepository
         $cursor = (int) $params['offset'];
 
         $concepts = $this->getConcepts(
-            $this->limit,
-            $cursor,
-            $params['from'],
-            $params['until'],
-            $pSet['tenant'],
-            $pSet['set'],
-            $pSet['conceptScheme'],
-            $numFound
+            $this->limit, $cursor, $params['from'], $params['until'], $pSet['tenant'], $pSet['set'], $pSet['conceptScheme'], $numFound
         );
 
         $items = [];
@@ -338,11 +312,7 @@ class Repository implements InterfaceRepository
         $token = null;
         if ($numFound > ($cursor + $this->limit)) {
             $token = $this->encodeResumptionToken(
-                $cursor + $this->limit,
-                $params['from'],
-                $params['until'],
-                $params['metadataPrefix'],
-                $params['set']
+                $cursor + $this->limit, $params['from'], $params['until'], $params['metadataPrefix'], $params['set']
             );
         }
 
@@ -379,9 +349,7 @@ class Repository implements InterfaceRepository
 //        );
 
         $formats[] = new ImplementationMetadataFormatType(
-            'oai_rdf',
-            'http://www.openarchives.org/OAI/2.0/rdf.xsd',
-            'http://www.w3.org/2004/02/skos/core#'
+            'oai_rdf', 'http://www.openarchives.org/OAI/2.0/rdf.xsd', 'http://www.w3.org/2004/02/skos/core#'
         );
 
         return $formats;
@@ -553,12 +521,9 @@ class Repository implements InterfaceRepository
      * @return string
      */
     private function encodeResumptionToken(
-        $offset = 0,
-        DateTime $from = null,
-        DateTime $util = null,
-        $metadataPrefix = null,
-        $set = null
-    ) {
+    $offset = 0, DateTime $from = null, DateTime $util = null, $metadataPrefix = null, $set = null
+    )
+    {
         $params = [];
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;
@@ -605,15 +570,9 @@ class Repository implements InterfaceRepository
      * @return \OpenSKOS2\ConceptCollection
      */
     private function getConcepts(
-        $limit = 10,
-        $offset = 0,
-        \DateTime $from = null,
-        \DateTime $till = null,
-        $tenant = null,
-        $set = null,
-        $scheme = null,
-        &$numFound = null
-    ) {
+    $limit = 10, $offset = 0, \DateTime $from = null, \DateTime $till = null, $tenant = null, $set = null, $scheme = null, &$numFound = null
+    )
+    {
         $searchOptions = [
             'start' => $offset,
             'rows' => $limit,
@@ -639,9 +598,7 @@ class Repository implements InterfaceRepository
         if (!empty($from) || !empty($till)) {
             $parser = new ParserText();
             $searchOptions['searchText'] = $parser->buildDatePeriodQuery(
-                'd_modified',
-                $from,
-                $till
+                'd_modified', $from, $till
             );
         } else {
             $searchOptions['searchText'] = '';

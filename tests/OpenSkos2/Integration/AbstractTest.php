@@ -2,8 +2,6 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-require_once 'Library/OpenSkos2/config.inc.php';
-
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 {
 

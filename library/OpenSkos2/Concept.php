@@ -95,9 +95,7 @@ class Concept extends Resource
      */
     public function hasAnyRelations()
     {
-        $relationProperties = array_merge(
-            Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']
-        );
+        $relationProperties = array_merge(Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']);
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {
                 return true;
@@ -209,13 +207,9 @@ class Concept extends Resource
         }
 
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = self::assembleUri(
-                    $conceptBaseUri, $tenant, $set, $uuid
-            );
+            $uri = self::assembleUri( $conceptBaseUri, $tenant, $set, $uuid);
         } else {
-            $uri = self::assembleUri(
-                    $conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue()
-            );
+            $uri = self::assembleUri( $conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue());
         }
 
         if ($manager->askForUri($uri, true)) {
@@ -249,5 +243,4 @@ class Concept extends Resource
 
         return $uri;
     }
-
 }

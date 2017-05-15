@@ -455,8 +455,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (count($values) > 1) {
             throw new OpenSkosException(
-                'Multiple values found for property "' . $property . '" while a single one was requested.'
-                . ' Values ' . implode(', ', $values)
+            'Multiple values found for property "' . $property . '" while a single one was requested.'
+            . ' Values ' . implode(', ', $values)
             );
         }
 
@@ -599,7 +599,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
@@ -619,7 +619,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-                'The concept already has an uri. Can not generate new one.'
+            'The concept already has an uri. Can not generate new one.'
             );
         }
 
@@ -628,7 +628,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use.'
             );
         }
 

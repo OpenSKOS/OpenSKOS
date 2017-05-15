@@ -62,9 +62,9 @@ class BackwardCompatibility
                     $oldStyleSet["dc_title"] = $set["dcterms_title"];
                 } else {
                     if (isset($set["dcterms_title@en"])) {
-                    $oldStyleSet["dc_title"] = $set["dcterms_title@en"];
+                        $oldStyleSet["dc_title"] = $set["dcterms_title@en"];
                     } else {
-                       $oldStyleSet["dc_title"]="error in defining set title" ;
+                        $oldStyleSet["dc_title"] = "error in defining set title";
                     }
                 }
                 if (isset($set["dcterms_description"])) {
@@ -88,5 +88,4 @@ class BackwardCompatibility
         $oldStyleBody = (object) $oldStyleBodyArray;
         return $oldStyleBody;
     }
-
 }

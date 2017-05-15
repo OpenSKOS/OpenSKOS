@@ -49,10 +49,9 @@ class JsonpResponse extends JsonResponse
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
- 
     public function getResponse()
     {
-        $data= $this->getResponseData();
+        $data = $this->getResponseData();
         $response = self::produceJsonPResponse($data, $this->callback);
         return $response;
     }

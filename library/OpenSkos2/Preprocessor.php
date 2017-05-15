@@ -16,8 +16,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Api\Exception\ApiException;
 use Rhumsaa\Uuid\Uuid;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-
 class Preprocessor
 {
 
@@ -89,5 +87,4 @@ class Preprocessor
         $preprocessed->addMetadata($existingResource, $this->userUri, $tenant, $set);
         return $preprocessed;
     }
-
 }

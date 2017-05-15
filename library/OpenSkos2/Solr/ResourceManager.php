@@ -193,5 +193,4 @@ class ResourceManager
         $update->addOptimize();
         return $this->solr->update($update);
     }
-
 }

@@ -23,8 +23,6 @@ use OpenSkos2\Authorisation;
 use OpenSkos2\Deletion;
 use OpenSkos2\RelationManager;
 
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 class Relation extends AbstractTripleStoreResource
 {
 

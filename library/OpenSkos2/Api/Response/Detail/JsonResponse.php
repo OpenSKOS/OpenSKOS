@@ -28,19 +28,17 @@ use OpenSkos2\Api\Transform\DataArray;
  */
 class JsonResponse extends DetailResponse
 {
-    
+
     protected $extraVals;
-    
     protected $extraField;
 
-    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $propertiesList, $extraField=null, $extraVals=[])
+    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $propertiesList, $extraField = null, $extraVals = [])
     {
         parent::__construct($resource, $rdfType, $propertiesList);
         $this->extraField = $extraField;
         $this->extraVals = $extraVals;
-        
-    }   
-    
+    }
+
     /**
      * Get response
      *
@@ -48,11 +46,12 @@ class JsonResponse extends DetailResponse
      */
     public function getResponse()
     {
-        $data=$this->getResponseData();
+        $data = $this->getResponseData();
         return new \Zend\Diactoros\Response\JsonResponse($data);
     }
-    
-    protected function getResponseData() {
+
+    protected function getResponseData()
+    {
         $body = (new DataArray($this->resource, $this->propertiesList))->transform();
         if ($this->extraField != null) {
             if (count($this->extraVals) > 0) {
@@ -70,5 +69,4 @@ class JsonResponse extends DetailResponse
         }
         return $correctedBody;
     }
-
 }

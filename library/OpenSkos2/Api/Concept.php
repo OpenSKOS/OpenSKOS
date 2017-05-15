@@ -497,5 +497,4 @@ class Concept extends AbstractTripleStoreResource
 
         return $body;
     }
-
 }

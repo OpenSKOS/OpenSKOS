@@ -21,8 +21,6 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-
 class RelationManager extends ResourceManager
 {
     

@@ -4,7 +4,6 @@ namespace OpenSkos2;
 
 use OpenSKOS_Db_Table_Row_User;
 
-
 class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 {
 
@@ -46,5 +45,4 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             return $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
         }
     }
-
 }
