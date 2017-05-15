@@ -25,7 +25,7 @@ class GetConceptTest extends AbstractTest
             'Accept-Encoding' => 'gzip, deflate',
             'Connection' => 'keep-alive')
         );
-        $result = $this->createTestConcept(API_KEY_EDITOR);
+        $result = self::createTestConcept(API_KEY_EDITOR);
         if ($result['response']->getStatus() === 201) {
             self::$prefLabel = $result['prefLabel'];
             self::$altLabel = $result['altLabel'];
