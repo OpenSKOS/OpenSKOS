@@ -130,7 +130,7 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     $tenantResource = new Tenant();
     if ($epic === 'true') {
         try {
-        $uri = $tenantResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type'=>Org::FORMALORG, 'tenantcode' => $code]);
+        $uri = $tenantResource->selfGenerateUri($resourceManager, null, null);
         } catch (Exception $ex) {
            fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() ." \n");
            fwrite(STDOUT,  "\n I will use the uri and uuid provided by you \n");
