@@ -327,7 +327,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
         
     }
 
-    protected function assertionsJsonResource($resource, bool $isSingleResource)
+    protected function assertionsJsonResource($resource, $isSingleResource)
     {
         
     }

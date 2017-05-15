@@ -34,8 +34,6 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 
-require_once dirname(__FILE__) . '/config.inc.php';
-
 class Concept extends Resource
 {
 

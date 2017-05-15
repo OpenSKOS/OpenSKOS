@@ -29,8 +29,6 @@ use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Rdf\Uri;
 
-require_once dirname(__FILE__) . '/../../config.inc.php';
-
 /**
  * Transform Resource to a php array with only native values to encode as json output.
  * Provide backwards compatability to the API output from OpenSKOS 1 as much as possible

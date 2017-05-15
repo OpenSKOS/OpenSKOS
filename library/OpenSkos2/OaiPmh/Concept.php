@@ -122,6 +122,5 @@ class Concept implements Record
      */
     public function getAbout()
     {
-        
     }
 }

@@ -206,5 +206,4 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $list = $dom->query('ul > li > a');
         $this->AssertEquals(2, count($list) - NUMBER_SETS);
     }
-
 }
