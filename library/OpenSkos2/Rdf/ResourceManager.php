@@ -42,9 +42,6 @@ use RuntimeException;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
-//require_once dirname(__FILE__) . '/../../../tools/Logging.php';
-require_once dirname(__FILE__) . '/../config.inc.php';
-
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
 // Mertens: 
