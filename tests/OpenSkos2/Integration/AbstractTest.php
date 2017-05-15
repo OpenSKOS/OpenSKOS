@@ -134,7 +134,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
         return self::createTestSchema($apikey, SCHEMA2_URI, SCHEMA2_UUID, SCHEMA2_TITLE, SET_URI);
     }
 
-    protected function createTestConcept($apikey)
+    protected static function createTestConcept($apikey)
     {
         $randomn = time().uniqid();
         $prefLabel = 'testPrefLable_' . $randomn;
