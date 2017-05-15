@@ -144,7 +144,9 @@ class ConceptManager extends ResourceManager
             $concepts = $this->fetch(
                 [
                 Skos::INSCHEME => $scheme,
-                ], $start, $step
+                ],
+                $start,
+                $step
             );
 
             foreach ($concepts as $concept) {
@@ -181,7 +183,7 @@ class ConceptManager extends ResourceManager
     public function search($query, $rows = MAXIMAL_ROWS, $start = 0, &$numFound = 0, $sorts = null)
     {
         return $this->fetchByUris(
-                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
 
@@ -194,7 +196,8 @@ class ConceptManager extends ResourceManager
     {
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:"' . $tenant->getUri() . '"', 'max_numeric_notation'
+            'tenant:"' . $tenant->getUri() . '"',
+            'max_numeric_notation'
         );
         return intval($max);
     }
@@ -270,11 +273,15 @@ class ConceptManager extends ResourceManager
     {
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri), $relationType, new Uri($objectUri)
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
         );
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->relationTypes->getInverses());
         $this->deleteMatchingTriples(
-            new Uri($objectUri), $inverses[$relationType], new Uri($subjectUri)
+            new Uri($objectUri),
+            $inverses[$relationType],
+            new Uri($subjectUri)
         );
     }
 
@@ -291,7 +298,7 @@ class ConceptManager extends ResourceManager
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 

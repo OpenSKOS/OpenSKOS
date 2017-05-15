@@ -534,8 +534,8 @@ class ResourceManager
         // @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
-            return strcmp($resource1->getUri(), $resource2->getUri());
-        }
+                return strcmp($resource1->getUri(), $resource2->getUri());
+            }
         );
 
         return $resources;
@@ -568,7 +568,7 @@ class ResourceManager
 
         if (!$response->isSuccessful()) {
             throw new RuntimeException(
-            'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
+                'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
 
@@ -1258,7 +1258,6 @@ class ResourceManager
                         return $tenantUris[0];
                     }
                 } catch (ApiException $ex) {
-                    
                 }
             }
         }
@@ -1294,7 +1293,6 @@ class ResourceManager
         $properties = [Skos::INSCHEME, OpenSkosNamespace::INSKOSCOLLECTION];
         $retVal = [];
         for ($i = 0; $i < 2; $i++) {
-
             $refs = $concept->getProperty($properties[$i]);
 
             foreach ($refs as $ref) {

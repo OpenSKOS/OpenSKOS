@@ -285,7 +285,7 @@ class Concept extends AbstractTripleStoreResource
             }
             if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
                 throw new InvalidPredicateException(
-                'The field "' . $propertyUri . '" from fields list is not recognised.'
+                    'The field "' . $propertyUri . '" from fields list is not recognised.'
                 );
             }
         }

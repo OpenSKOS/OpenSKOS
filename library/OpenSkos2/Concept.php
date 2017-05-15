@@ -171,7 +171,8 @@ class Concept extends Resource
         $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
         $notation = $maxNumericNotation + 1;
         $this->addProperty(
-            Skos::NOTATION, new Literal($notation)
+            Skos::NOTATION,
+            new Literal($notation)
         );
     }
 
@@ -186,7 +187,7 @@ class Concept extends Resource
         $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
         if (count($conceptBaseUris) < 1) {
             throw new UriGenerationException(
-            'No concept base uri is given in the set description (you may want to use epic service whch does not require thsi uri)'
+                'No concept base uri is given in the set description (you may want to use epic service whch does not require thsi uri)'
             );
         } else {
             if ($conceptBaseUris[0] instanceof Uri) {
@@ -198,7 +199,7 @@ class Concept extends Resource
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-            'The concept already has an uri. Can not generate new one.'
+                'The concept already has an uri. Can not generate new one.'
             );
         }
 
@@ -207,14 +208,14 @@ class Concept extends Resource
         }
 
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = self::assembleUri( $conceptBaseUri, $tenant, $set, $uuid);
+            $uri = self::assembleUri($conceptBaseUri, $tenant, $set, $uuid);
         } else {
-            $uri = self::assembleUri( $conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue());
+            $uri = self::assembleUri($conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue());
         }
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use.'
+                'The generated uri "' . $uri . '" is already in use.'
             );
         }
 

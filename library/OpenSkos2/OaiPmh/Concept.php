@@ -95,7 +95,10 @@ class Concept implements Record
         // $uuid = $concept->getPropertySingleValue(OpenSKOS::UUID);
         $uuid = $concept->getProperty(OpenSKOS::UUID)[0]->getValue();
         return new Header(
-            $uuid, $datestamp, $setSpecs, $concept->isDeleted()
+            $uuid,
+            $datestamp,
+            $setSpecs,
+            $concept->isDeleted()
         );
     }
 

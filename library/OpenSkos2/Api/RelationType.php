@@ -126,7 +126,8 @@ class RelationType extends AbstractTripleStoreResource
     {
         if ($resourceObject->isBlankNode()) {
             throw new ApiException(
-            'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.', 400
+                'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.',
+                400
             );
         }
         $ttl = $resourceObject->getUri();

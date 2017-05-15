@@ -27,5 +27,4 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
             return $this->customDeletion->canBeDeleted($uri);
         }
     }
-
 }

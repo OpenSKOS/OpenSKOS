@@ -83,7 +83,10 @@ class DataArray
                 continue;
             }
             $newResource = $this->getPropertyValue(
-                $resource->getProperty($prop['uri']), $field, $prop, $newResource
+                $resource->getProperty($prop['uri']),
+                $field,
+                $prop,
+                $newResource
             );
         }
         return $newResource;

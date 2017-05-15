@@ -116,7 +116,6 @@ class Command implements LoggerAwareInterface
 
 
         foreach ($resourceCollection as $resourceToInsert) {
-
             $uri = $resourceToInsert->getUri();
             $types = $resourceToInsert->getProperty(Rdf::TYPE);
 
@@ -142,7 +141,7 @@ class Command implements LoggerAwareInterface
                     }
                 }
             } else {
-                // autoGenerateIdentifiers is set to false because: 
+                // autoGenerateIdentifiers is set to false because:
                 // uri's are supposed to be given in the input file and uuid's will be added when necessary while preprocessing
                 $preprocessedResource = $preprocessor->forCreation($resourceToInsert, false, $tenant, $set);
                 $isForUpdates = false;
