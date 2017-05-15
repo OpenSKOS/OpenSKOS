@@ -1293,10 +1293,10 @@ class ResourceManager
     {
         $properties = [Skos::INSCHEME, OpenSkosNamespace::INSKOSCOLLECTION];
         $retVal = [];
-
-        for ($i = 0; $i < 1; $i++) {
+        for ($i = 0; $i < 2; $i++) {
+            
             $refs = $concept->getProperty($properties[$i]);
-
+            
             foreach ($refs as $ref) {
                 $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
                     . '<' . $ref->getUri() . '> <' . OpenSkosNamespace::SET . '> ?seturi . ?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'

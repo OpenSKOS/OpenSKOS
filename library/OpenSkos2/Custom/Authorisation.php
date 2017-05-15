@@ -29,7 +29,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is a concept)', 403);
             }
         }
         switch ($type) {
@@ -57,7 +57,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is concept)', 403);
             }
         }
         switch ($type) {
@@ -85,7 +85,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code' . $set['code'] . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections) if the resource is concept: ' . $spec['setcode'], 403);
+                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is a concept)', 403);
             }
         }
         switch ($type) {
@@ -252,10 +252,12 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $setUri = $set->getUri();
         switch ($resource->getType()->getUri()) {
             case ConceptScheme::TYPE:
-                $retval = ($setUri === $resource->getProperty(OpenSkos::SET)->getUri() );
+                $sets = $resource->getProperty(OpenSkos::SET);
+                $retval = ($setUri === ($sets[0]->getUri()) );
                 break;
             case SkosCollection::TYPE:
-                $retval = ($setUri === $resource->getProperty(OpenSkos::SET)->getUri() );
+                $sets = $resource->getProperty(OpenSkos::SET);
+                $retval = ($setUri === ($sets[0]->getUri()) );
                 break;
             case Concept::TYPE:
                 $setUriRef = $this->checkUniqueSet($resource);
@@ -274,8 +276,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $setUri = $spec[0]['seturi'];
         for ($i = 1; $i < count($spec); $i++) {
             if ($setUri !== $spec[$i]['seturi']) {
-                throw new UnauthorizedException('The concept ' . $concept->getUri() .
-                ' via its schemes belongs to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi'], 500);
+                throw new UnauthorizedException('The concept under submission via its schemes and skos:collections belongs to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi']. ". The concept cannot be submitted. ", 500);
             }
         }
         return $setUri;
