@@ -229,10 +229,14 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         if (!$this->referenceCheckOn) {
             return [];
         }
-
-        $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
-        if (!$exists) {
-            return ['The resource (of type ' . $rdfType . ') referred by  uri ' . $uri->getUri() . ' is not found. '];
+        if ($this->resourceManager !== null) {
+            $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
+            if (!$exists) {
+                return ['The resource (of type ' . $rdfType . ') referred by  uri ' .
+                    $uri->getUri() . ' is not found. '];
+            } else {
+                return [];
+            }
         } else {
             return [];
         }
@@ -266,8 +270,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             } else {
                 if (array_key_exists($lang, $pairs)) {
                     if ($pairs[$lang] !== $val) {
-                        $this->errorMessages[] =
-                            "More than 1 disticht title is given for the language tag " .
+                        $this->errorMessages[] = "More than 1 disticht title is given for the language tag " .
                             $lang . " .";
                     }
                 } else {
@@ -359,7 +362,6 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return ($errorsBeforeCheck === $errorsAfterCheck);
     }
 
-    
     protected function validateInScheme(RdfResource $resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
