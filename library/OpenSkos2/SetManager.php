@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Set;
-use OpenSkos2\Rdf\Literal;
 use OpenSKOS_Db_Table_Collections;
 
 class SetManager extends ResourceManager
@@ -53,7 +52,10 @@ class SetManager extends ResourceManager
 
     public function getUrisMap($tenantCode)
     {
-        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE { ?subject ?predicate ?object . ?subject <' . OpenSkos::TENANT . '> ?tenantURI . ?tenantURI <' . OpenSkos::CODE . '> "' . $tenantCode . '".} }';
+        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE '
+            . '{ ?subject ?predicate ?object . ?subject <' .
+            OpenSkos::TENANT . '> ?tenantURI . ?tenantURI <' . OpenSkos::CODE . '> "' .
+            $tenantCode . '".} }';
         $result = $this->query($query);
         $sets = EasyRdf::graphToResourceCollection($result, $this->getResourceType());
         $retVal = [];
@@ -66,7 +68,8 @@ class SetManager extends ResourceManager
     // used only for HTML output
     public function fetchInstitutionCodeByUri($uri)
     {
-        $query = 'SELECT ?code WHERE { <' . $uri . '>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' . Rdf::TYPE . '> <' . Org::FORMALORG . '> .}';
+        $query = 'SELECT ?code WHERE { <' . $uri . '>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' .
+            Rdf::TYPE . '> <' . Org::FORMALORG . '> .}';
         $codes = $this->query($query);
         if (count($codes) < 1) {
             return null;

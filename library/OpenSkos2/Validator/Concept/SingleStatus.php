@@ -44,7 +44,8 @@ class SingleStatus extends AbstractConceptValidator
         if (count($statusses) > 0) {
             $status = $statusses[0]->getValue();
             if (strtolower($status) !== $status) {
-                $this->errorMessages[] = 'Status ' . $status . ' is not valid since it must be all lowercase: ' . strtolower($status);
+                $this->errorMessages[] = 'Status ' . $status .
+                    ' is not valid since it must be all lowercase: ' . strtolower($status);
                 return false;
             }
         }

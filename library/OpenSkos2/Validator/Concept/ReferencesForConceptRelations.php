@@ -40,7 +40,8 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                                 continue;
                             }
                             if ($this->softConceptRelationValidation) {
-                                $this->warningMessages[] = $messages[0] . " Consult the list of dangling references for correction. ";
+                                $this->warningMessages[] = $messages[0] .
+                                    " Consult the list of dangling references for correction. ";
                                 $this->danglingReferences[] = $value->getUri();
                             } else {
                                 $this->errorMessages[] = $messages[0];

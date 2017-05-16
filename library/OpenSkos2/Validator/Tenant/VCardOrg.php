@@ -17,17 +17,20 @@ class VCardOrg extends AbstractTenantValidator
             $this->errorMessages[] = 'Wrong xml: there is no element for  ' . VCard::ORG;
         } else {
             if (count($orgCheck) === 0) {
-                $this->errorMessages[] = 'Wrong xml: there is empty element of type  ' . VCard::ORG . ' that has to contain at least institution name.';
+                $this->errorMessages[] = 'Wrong xml: there is empty element of type  ' .
+                    VCard::ORG . ' that has to contain at least institution name.';
             } else {
                 if (count($orgCheck) > 1) {
-                    $this->errorMessages[] = 'Wrong xml: there are too many elements of type  ' . VCard::ORG . '. There must be only one.';
+                    $this->errorMessages[] = 'Wrong xml: there are too many elements of type  ' .
+                        VCard::ORG . '. There must be only one.';
                 } else {
                     $names = $orgCheck[0]->getProperty(VCard::ORGNAME);
                     if (count($names) === 0) {
                         $this->errorMessages[] = "The institution's name is not given. ";
                     } else {
                         if (count($names) > 1) {
-                            $this->errorMessages[] = "Multiple institution names are given. There must be only one. I will validate the first one.";
+                            $this->errorMessages[] = "Multiple institution names are given. "
+                                . "There must be only one. I will validate the first one.";
                         }
 
                         $name = $names[0]->getValue();
@@ -35,10 +38,12 @@ class VCardOrg extends AbstractTenantValidator
                         if (array_key_exists($name, $insts)) {
                             if ($this->isForUpdate) {
                                 if ($insts[$name] !== $resource->getUri()) {
-                                    $this->errorMessages[] = 'The institution with the name ' . $name . ' has been already registered in the triple store. ';
+                                    $this->errorMessages[] = 'The institution with the name ' . $name .
+                                        ' has been already registered in the triple store. ';
                                 }
                             } else { //creation, no duplication of names is admissible
-                                $this->errorMessages[] = 'The institution with the name ' . $name . ' has been already registered in the triple store. ';
+                                $this->errorMessages[] = 'The institution with the name ' . $name .
+                                    ' has been already registered in the triple store. ';
                             }
                         }
                     }

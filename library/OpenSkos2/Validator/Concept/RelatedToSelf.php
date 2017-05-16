@@ -38,7 +38,8 @@ class RelatedToSelf extends AbstractConceptValidator
         foreach ($relationFields as $field) {
             foreach ($concept->getProperty($field) as $object) {
                 if ($object->getUri() == $ownUri) {
-                    $this->errorMessages[] = 'The concept can not be related to itself or there is a transitive relation cycle.';
+                    $this->errorMessages[] = 'The concept can not be related to itself or '
+                        . 'there is a transitive relation cycle.';
                     return false;
                 }
             }

@@ -25,8 +25,10 @@ use Solarium\Core\Query\Helper as QueryHelper;
 // Meertens:
 // - 'collection' is not used as key in our version, use 'set' and 'skosCollection' instead
 // Picturae's changes starting from  28/10/2016 are taken.
-// in search $boost variable is moved  up in the loop for labels, otherwise for label with no languages it is not defined.
-//-- added new parameter 'wholeword' to handle switch betwen whole word search (prefix t_) and the part-of-word search (prefix a_)
+// in search $boost variable is moved  up in the loop for labels, otherwise 
+// for label with no languages it is not defined.
+//-- added new parameter 'wholeword' to handle switch betwen whole word search 
+//(prefix t_) and the part-of-word search (prefix a_)
 class Autocomplete
 {
 

@@ -47,7 +47,10 @@ class RelationTypeManager extends ResourceManager
             $tSchemata = explode(",", $targetSchemata);
         }
         $relFilterStr = "";
-        $existingRelations = array_merge(Skos::getSkosConceptConceptRelations(), $this->getTripleStoreRegisteredCustomRelationTypes());
+        $existingRelations = array_merge(
+            Skos::getSkosConceptConceptRelations(),
+            $this->getTripleStoreRegisteredCustomRelationTypes()
+        );
 
         if (count($rels) > 0) {
             if (in_array($rels[0], $existingRelations)) {
@@ -60,7 +63,10 @@ class RelationTypeManager extends ResourceManager
                 if (in_array($rels[$i], $existingRelations)) {
                     $relFilterStr = $relFilterStr . ' || ?rel = <' . $rels[$i] . '>';
                 } else {
-                    throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[$i] . " is not implemented.", 501);
+                    throw new \OpenSkos2\Api\Exception\ApiException(
+                        'Relation ' . $rels[$i] . " is not implemented.",
+                        501
+                    );
                 }
             }
             $relFilterStr = $relFilterStr . " ) ";
@@ -109,8 +115,16 @@ class RelationTypeManager extends ResourceManager
             }
         }
 
-        $sparqlQuery = 'select distinct ?rel ?s_uuid ?s_prefLabel ?s_schema ?s_schema_title ?o_uuid ?o_prefLabel ?o_schema ?o_schema_title where {?s ?rel ?o. ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel. ?s <http://openskos.org/xmlns#uuid> ?s_uuid. ?s <http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?s_schema <http://purl.org/dc/terms/title> ?s_schema_title . ?o <http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel. ?o <http://openskos.org/xmlns#uuid> ?o_uuid. ?o <http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ?o_schema <http://purl.org/dc/terms/title> ?o_schema_title' . $filterStr . '}';
-        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, APPLICATION_BASE_PATH.'/data/Logger.txt');
+        $sparqlQuery = 'select distinct ?rel ?s_uuid ?s_prefLabel ?s_schema ?s_schema_title '
+            . '?o_uuid ?o_prefLabel ?o_schema ?o_schema_title where {?s ?rel ?o. ?s '
+            . '<http://www.w3.org/2004/02/skos/core#prefLabel> ?s_prefLabel. '
+            . '?s <http://openskos.org/xmlns#uuid> ?s_uuid. ?s '
+            . '<http://www.w3.org/2004/02/skos/core#inScheme> ?s_schema . ?s_schema '
+            . '<http://purl.org/dc/terms/title> ?s_schema_title . ?o '
+            . '<http://www.w3.org/2004/02/skos/core#prefLabel> ?o_prefLabel. ?o '
+            . '<http://openskos.org/xmlns#uuid> ?o_uuid. ?o '
+            . '<http://www.w3.org/2004/02/skos/core#inScheme> ?o_schema . ?o_schema '
+            . '<http://purl.org/dc/terms/title> ?o_schema_title' . $filterStr . '}';
         $resource = $this->query($sparqlQuery);
         return $resource;
     }
@@ -119,8 +133,18 @@ class RelationTypeManager extends ResourceManager
     {
         $result = [];
         foreach ($response as $key => $value) {
-            $subject = array("uuid" => $value->s_uuid->getValue(), "prefLabel" => $value->s_prefLabel->getValue(), "lang" => $value->s_prefLabel->getLang(), "schema_title" => $value->s_schema_title->getValue(), "schema_uri" => $value->s_schema->getUri());
-            $object = array("uuid" => $value->o_uuid->getValue(), "prefLabel" => $value->o_prefLabel->getValue(), "lang" => $value->o_prefLabel->getLang(), "schema_title" => $value->o_schema_title->getValue(), "schema_uri" => $value->o_schema->getUri());
+            $subject = array(
+                "uuid" => $value->s_uuid->getValue(),
+                "prefLabel" => $value->s_prefLabel->getValue(),
+                "lang" => $value->s_prefLabel->getLang(),
+                "schema_title" => $value->s_schema_title->getValue(),
+                "schema_uri" => $value->s_schema->getUri());
+            $object = array(
+                "uuid" => $value->o_uuid->getValue(),
+                "prefLabel" => $value->o_prefLabel->getValue(),
+                "lang" => $value->o_prefLabel->getLang(),
+                "schema_title" => $value->o_schema_title->getValue(),
+                "schema_uri" => $value->o_schema->getUri());
             $triple = array("s" => $subject, "p" => $value->rel->getUri(), "o" => $object);
             array_push($result, $triple);
         }

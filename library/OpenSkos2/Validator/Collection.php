@@ -56,8 +56,14 @@ class Collection
      * @param ResourceManager $resourceManager
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referencecheckOn, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        ResourceManager $resourceManager,
+        $isForUpdate,
+        $tenant,
+        $set,
+        $referencecheckOn,
+        LoggerInterface $logger = null
+    ) {
         if ($logger === null) {
             $logger = new NullLogger();
         }
@@ -114,6 +120,14 @@ class Collection
      */
     private function getResourceValidator()
     {
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->isForUpdate, $this->tenant, $this->set, $this->referenceCheckOn, $this->conceptReferenceCheckOn, $this->logger);
+        return new \OpenSkos2\Validator\Resource(
+            $this->resourceManager,
+            $this->isForUpdate,
+            $this->tenant,
+            $this->set,
+            $this->referenceCheckOn,
+            $this->conceptReferenceCheckOn,
+            $this->logger
+        );
     }
 }

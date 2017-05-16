@@ -54,7 +54,8 @@ class TenantManager extends ResourceManager
 
     public function fetchSetsForTenantUri($tenantUri)
     {
-        $query = 'DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <' . DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
+        $query = 'DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <' .
+            DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
         $response = $this->query($query);
         return $response;
     }

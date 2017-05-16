@@ -133,8 +133,15 @@ class Resource
      */
     
     
-    public function __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        ResourceManager $resourceManager,
+        $isForUpdate,
+        $tenant,
+        $set,
+        $referenceCheckOn,
+        $softConceptRelationValidation,
+        LoggerInterface $logger = null
+    ) {
         if ($logger === null) {
             $this->logger = new NullLogger();
         } else {
