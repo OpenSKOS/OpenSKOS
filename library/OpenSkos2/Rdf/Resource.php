@@ -277,7 +277,8 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isPropertyEmpty($predicate)
     {
-        return !isset($this->properties[$predicate]) || $this->properties[$predicate] === null || $this->properties[$predicate] === '';
+        return !isset($this->properties[$predicate]) || $this->properties[$predicate] === null ||
+            $this->properties[$predicate] === '';
     }
 
     /**
@@ -434,7 +435,8 @@ class Resource extends Uri implements ResourceIdentifier
         $languages = [];
         foreach ($this->getProperties() as $property) {
             foreach ($property as $value) {
-                if ($value instanceof Literal && $value->getLanguage() !== null && !isset($languages[$value->getLanguage()])) {
+                if ($value instanceof Literal && $value->getLanguage() !== null &&
+                    !isset($languages[$value->getLanguage()])) {
                     $languages[$value->getLanguage()] = true;
                 }
             }
@@ -535,7 +537,14 @@ class Resource extends Uri implements ResourceIdentifier
             }
             $dateSubmitted = $existingResource->getProperty(DcTerms::DATESUBMITTED);
             if (count($dateSubmitted) !== 0) {
-                $this->setProperty(DcTerms::DATESUBMITTED, new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME));
+                $this->setProperty(
+                    DcTerms::DATESUBMITTED,
+                    new Literal(
+                        $dateSubmitted[0],
+                        null,
+                        Literal::TYPE_DATETIME
+                    )
+                );
             }
         }
     }
@@ -595,7 +604,10 @@ class Resource extends Uri implements ResourceIdentifier
             $handleServerPrefix = $handleServerClient->getPrefix();
             $uri = $handleResolverUrl . $handleServerPrefix . "/" . $uuid;
         } catch (Exception $ex) {
-            throw new Zend_Controller_Action_Exception('Failed to create a PID for the new Object: ' . $ex->getMessage(), 400);
+            throw new Zend_Controller_Action_Exception(
+                'Failed to create a PID for the new Object: ' . $ex->getMessage(),
+                400
+            );
         }
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(

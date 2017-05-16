@@ -80,9 +80,14 @@ class Concept implements Record
         foreach ($specs as $spec) {
             $setSpecs[] = $spec['tenantcode'];
             $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
-            $schemes = $this->setsMap->getSchemes($spec['tenantcode'], $spec['seturi'], $concept->getProperty(Skos::INSCHEME));
+            $schemes = $this->setsMap->getSchemes(
+                $spec['tenantcode'],
+                $spec['seturi'],
+                $concept->getProperty(Skos::INSCHEME)
+            );
             foreach ($schemes as $scheme) {
-                $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'] . ':' . $scheme->getUuid()->getValue();
+                $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'] . ':' .
+                    $scheme->getUuid()->getValue();
             }
         }
 

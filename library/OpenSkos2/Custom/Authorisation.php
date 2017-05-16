@@ -29,7 +29,12 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is a concept)', 403);
+                throw new UnauthorizedException(
+                    'The set code ' . $set->getCode()->getValue() .
+                    ' from resource parameters does not match the set to which the resource refers'
+                    . '(indirectly via schemes and collections if the resource is a concept)',
+                    403
+                );
             }
         }
         switch ($type) {
@@ -57,7 +62,12 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is concept)', 403);
+                throw new UnauthorizedException(
+                    'The set code ' . $set->getCode()->getValue() .
+                    ' from resource parameters does not match the set to which the resource refers'
+                    . '(indirectly via schemes and collections if the resource is concept)',
+                    403
+                );
             }
         }
         switch ($type) {
@@ -85,7 +95,12 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
             $setIsValid = $this->checkSet($set, $resource);
             if (!$setIsValid) {
-                throw new UnauthorizedException('The set code ' . $set->getCode()->getValue() . ' from resource parameters does not match the set to which the resource refers (indirectly via schemes and collections if the resource is a concept)', 403);
+                throw new UnauthorizedException(
+                    'The set code ' . $set->getCode()->getValue() .
+                    ' from resource parameters does not match the set to which the resource refers'
+                    . '(indirectly via schemes and collections if the resource is a concept)',
+                    403
+                );
             }
         }
         switch ($type) {
@@ -106,42 +121,74 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    private function resourceDeleteAllowedBasic(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
-    {
+    private function resourceDeleteAllowedBasic(
+        OpenSKOS_Db_Table_Row_User $user,
+        Tenant $tenant,
+        $resource
+    ) {
         $tenantCode = $tenant->getCode()->getValue();
         if ($user->tenant !== $tenantCode) {
-            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+            throw new UnauthorizedException(
+                'Tenant ' . $tenantCode . ' does not match user given, of tenant ' .
+                $user->tenant,
+                403
+            );
         }
         return ($user->role === ADMINISTRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
-    private function resourceCreationAllowedBasic(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
-    {
+    private function resourceCreationAllowedBasic(
+        OpenSKOS_Db_Table_Row_User $user,
+        Tenant $tenant,
+        $resource
+    ) {
         $tenantCode = $tenant->getCode()->getValue();
         if ($user->tenant !== $tenantCode) {
-            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+            throw new UnauthorizedException(
+                'Tenant ' . $tenantCode .
+                ' does not match user given, of tenant ' . $user->tenant,
+                403
+            );
         }
         return ($user->role === ADMINISTRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
-    private function resourceEditAllowedBasic(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
-    {
+    private function resourceEditAllowedBasic(
+        OpenSKOS_Db_Table_Row_User $user,
+        Tenant $tenant,
+        $resource
+    ) {
         $tenantCode = $tenant->getCode()->getValue();
         if ($user->tenant !== $tenantCode) {
-            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+            throw new UnauthorizedException(
+                'Tenant ' . $tenantCode . ' does not match user given, of tenant ' .
+                $user->tenant,
+                403
+            );
         }
         return ($user->role === ADMINISTRATOR || $user->role === ROOT || $user->role === EDITOR);
     }
 
-    private function conceptCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $conceptToPost)
-    {
+    private function conceptCreationAllowed(
+        OpenSKOS_Db_Table_Row_User $user,
+        Tenant $tenant,
+        $conceptToPost
+    ) {
         $tenantCode = $tenant->getCode()->getValue();
-        // the group of users which can post to certain sets, skos-collections or upon certain schemata, can be limited
+        // the group of users which can post to certain sets,
+        // skos-collections or upon certain schemata, can be limited
         if ($user->tenant !== $tenantCode) {
-            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+            throw new UnauthorizedException(
+                'Tenant ' . $tenantCode . ' does not match user given, of tenant ' .
+                $user->tenant,
+                403
+            );
         }
         if (!($user->role === EDITOR || $user->role === ADMINISTRATOR || $user->role === ROOT)) {
-            throw new UnauthorizedException('Your role ' . $user->role . ' does not give you permission to create concepts ', 403);
+            throw new UnauthorizedException(
+                'Your role ' . $user->role . ' does not give you permission to create concepts ',
+                403
+            );
         }
         return true;
     }
@@ -150,7 +197,11 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     {
         $tenantCode = $tenant->getCode()->getValue();
         if ($user->tenant !== $tenantCode) {
-            throw new UnauthorizedException('Tenant ' . $tenantCode . ' does not match user given, of tenant ' . $user->tenant, 403);
+            throw new UnauthorizedException(
+                'Tenant ' . $tenantCode . ' does not match user given, of tenant ' .
+                $user->tenant,
+                403
+            );
         }
         $spec = $this->resourceManager->fetchTenantSpec($concept);
         if ($spec[0]['tenantcode'] !== $tenantCode) {
@@ -161,7 +212,11 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
         if (!($user->role === ADMINISTRATOR || $user->role === ROOT)) {
             if ($user->uri !== $concept->getCreator()) {
-                throw new UnauthorizedException('Your role ' . $user->role . ' does not give you permission to edit or delete a concept whoich you do not ow.', 403);
+                throw new UnauthorizedException(
+                    'Your role ' . $user->role .
+                    ' does not give you permission to edit or delete a concept whoich you do not ow.',
+                    403
+                );
             }
         }
         return true;
@@ -276,7 +331,12 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $setUri = $spec[0]['seturi'];
         for ($i = 1; $i < count($spec); $i++) {
             if ($setUri !== $spec[$i]['seturi']) {
-                throw new UnauthorizedException('The concept under submission via its schemes and skos:collections belongs to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi']. ". The concept cannot be submitted. ", 500);
+                throw new UnauthorizedException(
+                    'The concept under submission via its schemes and skos:collections belongs '
+                    . 'to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi'].
+                    ". The concept cannot be submitted. ",
+                    500
+                );
             }
         }
         return $setUri;

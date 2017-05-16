@@ -50,8 +50,16 @@ class EPICHandleProxy
             trigger_error("Exception while accessing config members for EPIC handle server.", $ex->getTraceAsString());
         }
 
-        if (!isset(self::$host) or ! isset(self::$username) or ! isset(self::$password) or ! isset(self::$prefix) or ! isset(self::$guidPrefix) or ! isset(self::$resolver)) {
-            trigger_error("EPIC configuration could not be (fully) read. host= " . self::$host . " ,username= " . self::$username . " ,password= " . self::$password . " ,prefix= " . self::$prefix . " ,guidPrefix= " . self::$guidPrefix . " ,resolver= " . self::$resolver . " ,forwardLocationPrefix= " . self::$forwardLocationPrefix, E_USER_ERROR);
+        if (!isset(self::$host) or ! isset(self::$username) or ! isset(self::$password)
+            or ! isset(self::$prefix) or ! isset(self::$guidPrefix) or ! isset(self::$resolver)) {
+            trigger_error(
+                "EPIC configuration could not be (fully) read. host= " .
+                self::$host . " ,username= " . self::$username . " ,password= " .
+                self::$password . " ,prefix= " . self::$prefix . " ,guidPrefix= " .
+                self::$guidPrefix . " ,resolver= " .
+                self::$resolver . " ,forwardLocationPrefix= " . self::$forwardLocationPrefix,
+                E_USER_ERROR
+            );
         }
     }
 
@@ -135,7 +143,8 @@ class EPICHandleProxy
         // Close the cURL resource, and free system resources
         curl_close($curl);
         if ($info['http_code'] != 200) {
-            throw new Exception("unexpected result from handle server, server returned HTTP code :" . $info['http_code']);
+            throw new Exception("unexpected result from handle server,"
+                . "server returned HTTP code :" . $info['http_code']);
         }
         return $output;
     }
@@ -162,7 +171,9 @@ class EPICHandleProxy
         $ch = curl_init();
 
         //Set the headers to complete the request
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'Content-Length: ' . strlen($update_json)));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Accept: application/json', 'Content-Type: application/json',
+            'Content-Length: ' . strlen($update_json)));
 
         //set the PUT Action
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -191,7 +202,10 @@ class EPICHandleProxy
 
         curl_close($ch);
         if ($info['http_code'] != 201) {
-            throw new Exception("unexpected result from handle server, server returned HTTP code :" . $info['http_code']);
+            throw new Exception(
+                "unexpected result from handle server, server returned HTTP code :" .
+                $info['http_code']
+            );
         }
         return $UUID;
     }
@@ -216,7 +230,9 @@ class EPICHandleProxy
         $ch = curl_init();
 
         //Set the headers to complete the request
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'Content-Length: ' . strlen($update_json)));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Accept: application/json', 'Content-Type: application/json',
+            'Content-Length: ' . strlen($update_json)));
 
         //set the PUT Action
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -248,7 +264,10 @@ class EPICHandleProxy
             echo("uuid: " . $UUID . "\n");
             echo("location: " . $location . "\n");
             ob_flush();
-            throw new Exception("unexpected result from handle server, server returned HTTP code :" . $info['http_code']);
+            throw new Exception(
+                "unexpected result from handle server, server returned HTTP code :" .
+                $info['http_code']
+            );
         }
     }
 
@@ -286,7 +305,8 @@ class EPICHandleProxy
         // Close the cURL resource, and free system resources
         curl_close($curl);
         if ($info['http_code'] != 204) {
-            throw new Exception("unexpected result from handle server, server returned HTTP code :" . $info['http_code']);
+            throw new Exception("unexpected result from handle server, "
+                . "server returned HTTP code :" . $info['http_code']);
         }
     }
 

@@ -89,7 +89,10 @@ class Command implements LoggerAwareInterface
 
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
-            throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
+            throw new Exception(
+                "The set " . $message->getSetUri() .
+                " is supplied without a proper publisher (tenant, isntitution). "
+            );
         }
         $tenantUri = $tenantUris[0]->getUri();
         $tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
@@ -129,8 +132,12 @@ class Command implements LoggerAwareInterface
             if ($exists) {
                 $currentVersion = $this->resourceManager->fetchByUri($uri, $type);
                 if ($message->getNoUpdates()) {
-                    var_dump("Skipping resource {$uri}, because it already exists and NoUpdates is set to true. ");
-                    $this->logger->warning("Skipping resource {$uri}, because it already exists and NoUpdates is set to true.");
+                    var_dump("Skipping resource {$uri}, "
+                    . "because it already exists and NoUpdates is set to true. ");
+                    $this->logger->warning(
+                        "Skipping resource {$uri}, because it already exists"
+                        . " and NoUpdates is set to true."
+                    );
                     continue;
                 } else {
                     $preprocessedResource = $preprocessor->forUpdate($resourceToInsert, $tenant, $set);
@@ -142,14 +149,27 @@ class Command implements LoggerAwareInterface
                 }
             } else {
                 // autoGenerateIdentifiers is set to false because:
-                // uri's are supposed to be given in the input file and uuid's will be added when necessary while preprocessing
-                $preprocessedResource = $preprocessor->forCreation($resourceToInsert, false, $tenant, $set);
+                // uri's are supposed to be given in the input file
+                // and uuid's will be added when necessary while preprocessing
+                $preprocessedResource = $preprocessor->forCreation(
+                    $resourceToInsert,
+                    false,
+                    $tenant,
+                    $set
+                );
                 $isForUpdates = false;
                 $currentVersion = null;
             }
 
             // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
-            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenant, $set, true, true);
+            $validator = new ResourceValidator(
+                $this->resourceManager,
+                $isForUpdates,
+                $tenant,
+                $set,
+                true,
+                true
+            );
             $valid = $validator->validate($preprocessedResource);
             if (!$valid) {
                 $this->handleNotValidResource($uri, $type, $validator, $preprocessedResource);
@@ -157,7 +177,11 @@ class Command implements LoggerAwareInterface
             }
             $this->handleWarnings($uri, $validator);
             if ($preprocessedResource instanceof Concept) {
-                $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
+                $preprocessedResource = $this->specialConceptImportLogic(
+                    $message,
+                    $preprocessedResource,
+                    $currentVersion
+                );
             }
             if ($currentVersion !== null) {
                 $this->resourceManager->delete($currentVersion);
@@ -170,11 +194,15 @@ class Command implements LoggerAwareInterface
 
     private function handleRemovingDanglingConceptReferencesRound(Message $message)
     {
-        $conceptURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>');
+        $conceptURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(
+            Rdf::TYPE,
+            '<' . Skos::CONCEPT . '>'
+        );
         $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
-            throw new Exception("The set " . $message->getSetUri() . " is supplied without a proper publisher (tenant, isntitution). ");
+            throw new Exception("The set " . $message->getSetUri() .
+                " is supplied without a proper publisher (tenant, isntitution). ");
         }
         $tenantUri = $tenantUris[0]->getUri();
         $tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
@@ -183,15 +211,29 @@ class Command implements LoggerAwareInterface
             $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
             $isForUpdates = true;
             // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
-            $validator = new ResourceValidator($this->resourceManager, $isForUpdates, $tenant, $set, true, true);
+            $validator = new ResourceValidator(
+                $this->resourceManager,
+                $isForUpdates,
+                $tenant,
+                $set,
+                true,
+                true
+            );
             $valid = $validator->validate($currentVersion);
-            $preprocessedResource = $this->removeDanglingConeptRelationReferences($currentVersion, $validator->getDanglingReferences());
+            $preprocessedResource = $this->removeDanglingConeptRelationReferences(
+                $currentVersion,
+                $validator->getDanglingReferences()
+            );
             if (!$valid) {
                 $this->handleNotValidResource($uri, Skos::CONCEPT, $validator, $preprocessedResource);
                 continue;
             }
             $this->handleWarnings($uri, $validator);
-            $preprocessedResource = $this->specialConceptImportLogic($message, $preprocessedResource, $currentVersion);
+            $preprocessedResource = $this->specialConceptImportLogic(
+                $message,
+                $preprocessedResource,
+                $currentVersion
+            );
             $this->resourceManager->insert($preprocessedResource);
             var_dump($preprocessedResource->getUri() . " has been updated.");
         }
@@ -218,7 +260,8 @@ class Command implements LoggerAwareInterface
         if ($message->getFallbackLanguage()) {
             foreach ($concept->getProperties() as $predicate => $properties) {
                 foreach ($properties as $property) {
-                    if (in_array($predicate, $langProperties) && $property instanceof Literal && $property->getLanguage() === null) {
+                    if (in_array($predicate, $langProperties) &&
+                        $property instanceof Literal && $property->getLanguage() === null) {
                         $property->setLanguage($message->getFallbackLanguage());
                     }
                 }
@@ -232,9 +275,15 @@ class Command implements LoggerAwareInterface
         $this->black_list[] = $uri;
         foreach ($validator->getErrorMessages() as $errorMessage) {
             var_dump($errorMessage);
-            \Tools\Logging::var_logger("The followig resource has not been added due to the validation error " . $errorMessage, $preprocessedResource->getUri(), ERROR_LOG);
+            \Tools\Logging::var_logger(
+                "The followig resource has not been added due "
+                . "to the validation error " . $errorMessage,
+                $preprocessedResource->getUri(),
+                ERROR_LOG
+            );
         }
-        var_dump($preprocessedResource->getUri() . " cannot not been inserted due to the validation error(s) above.");
+        var_dump($preprocessedResource->getUri() .
+            " cannot not been inserted due to the validation error(s) above.");
         $this->resourceManager->delete($preprocessedResource, $type); //remove garbage - 1
         $this->resourceManager->deleteReferencesToObject($preprocessedResource); //remove garbage - 2
     }

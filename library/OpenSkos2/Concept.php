@@ -93,7 +93,10 @@ class Concept extends Resource
      */
     public function hasAnyRelations()
     {
-        $relationProperties = array_merge(Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']);
+        $relationProperties = array_merge(
+            Resource::$classes['SemanticRelations'],
+            Resource::$classes['MappingProperties']
+        );
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {
                 return true;
@@ -151,7 +154,14 @@ class Concept extends Resource
             }
             $dateSubmitted = $existingConcept->getProperty(DcTerms::DATESUBMITTED);
             if (count($dateSubmitted) > 0) {
-                $this->setProperty(DcTerms::DATESUBMITTED, new Literal($dateSubmitted[0], null, Literal::TYPE_DATETIME));
+                $this->setProperty(
+                    DcTerms::DATESUBMITTED,
+                    new Literal(
+                        $dateSubmitted[0],
+                        null,
+                        Literal::TYPE_DATETIME
+                    )
+                );
             }
         }
     }
@@ -163,9 +173,12 @@ class Concept extends Resource
     public function selfGenerateNotation(Tenant $tenant, ConceptManager $conceptManager)
     {
         // @TODO Move that and uri generate to separate class.
-        // @TODO A raise condition is possible. The validation will fail in that case - so should not be problem.
+        // @TODO A raise condition is possible. The validation will fail in that case -
+        // so should not be problem.
         // Meertens:
-        // this is changed because $maxNumericNotation returns now zero if there is no records in the solr (otherwise there was a crash in solr/resourceManager on empty database with the attempt to ask for current on the empty iterator
+        // this is changed because $maxNumericNotation returns now zero if there
+        // is no records in the solr (otherwise there was a crash in solr/resourceManager
+        // on empty database with the attempt to ask for current on the empty iterator
         $maxNumericNotation = $conceptManager->fetchMaxNumericNotationFromIndex($tenant);
         $notation = $maxNumericNotation + 1;
         $this->addProperty(
@@ -185,7 +198,8 @@ class Concept extends Resource
         $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
         if (count($conceptBaseUris) < 1) {
             throw new UriGenerationException(
-                'No concept base uri is given in the set description (you may want to use epic service whch does not require thsi uri)'
+                'No concept base uri is given in the set description '
+                . '(you may want to use epic service whch does not require thsi uri)'
             );
         } else {
             if ($conceptBaseUris[0] instanceof Uri) {
@@ -208,7 +222,13 @@ class Concept extends Resource
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::assembleUri($conceptBaseUri, $tenant, $set, $uuid);
         } else {
-            $uri = self::assembleUri($conceptBaseUri, $tenant, $set, $uuid, $this->getProperty(Skos::NOTATION)[0]->getValue());
+            $uri = self::assembleUri(
+                $conceptBaseUri,
+                $tenant,
+                $set,
+                $uuid,
+                $this->getProperty(Skos::NOTATION)[0]->getValue()
+            );
         }
 
         if ($manager->askForUri($uri, true)) {

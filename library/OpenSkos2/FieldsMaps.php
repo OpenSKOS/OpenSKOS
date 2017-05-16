@@ -35,7 +35,8 @@ class FieldsMaps
 // because it is used not for mapping old names to properties but just to map
 // short names to the corresponding property uri's.
 // Also old field names like 'created_timestamp', 'modified_timestamp' are removed, 
-// everything which deals with old settings is located in the migration script (as far as I remember and have it planned:) ).
+// everything which deals with old settings is located in the migration script
+// (as far as I remember and have it planned:) ).
 // We use 'dcterms_created' and 'dcterms_modified'  insetad of 'created_timestamp' and 'modified_timestamp'
 // the method ResolveOldFields is removed 
     public static function getNamesToProperties()

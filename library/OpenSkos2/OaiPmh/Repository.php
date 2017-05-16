@@ -424,18 +424,27 @@ class Repository implements InterfaceRepository
 
         $tenantURI = null;
         if (!empty($arrSet[0])) {
-            $tenants = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[0] . '"', Org::FORMALORG);
+            $tenants = $this->setManager->fetchSubjectWithPropertyGiven(
+                OpenSkos::CODE,
+                '"' . $arrSet[0] . '"',
+                Org::FORMALORG
+            );
             if (count($tenants) > 0) {
                 $tenantURI = $tenants[0];
             } else {
-                throw new \Exception('A tenant with the code ' . $arrSet[0] . " is not found in the triple store");
+                throw new \Exception('A tenant with the code ' .
+                    $arrSet[0] . " is not found in the triple store");
             }
         }
         $return['tenant'] = $tenantURI;
 
         $setURI = null;
         if (!empty($arrSet[1])) {
-            $sets = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"' . $arrSet[1] . '"', $this->setManager->getResourceType());
+            $sets = $this->setManager->fetchSubjectWithPropertyGiven(
+                OpenSkos::CODE,
+                '"' . $arrSet[1] . '"',
+                $this->setManager->getResourceType()
+            );
             if (count($sets) > 0) {
                 $setURI = $sets[0];
             } else {
@@ -447,11 +456,16 @@ class Repository implements InterfaceRepository
         $conceptSchemeURI = null;
 
         if (!empty($arrSet[2])) {
-            $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $arrSet[2] . '"', Skos::CONCEPTSCHEME);
+            $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(
+                OpenSkos::UUID,
+                '"' . $arrSet[2] . '"',
+                Skos::CONCEPTSCHEME
+            );
             if (count($conceptSchemes) > 0) {
                 $conceptSchemeURI = $conceptSchemes[0];
             } else {
-                throw new \Exception('A concept scheme with the uuid ' . $arrSet[2] . " is not found in the triple store");
+                throw new \Exception('A concept scheme with the uuid ' .
+                    $arrSet[2] . " is not found in the triple store");
             }
         }
 

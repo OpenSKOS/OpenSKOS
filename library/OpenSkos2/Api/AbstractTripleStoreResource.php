@@ -32,6 +32,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
+use OpenSkos2\ConfigOptions;
 
 abstract class AbstractTripleStoreResource
 {
@@ -135,13 +136,23 @@ abstract class AbstractTripleStoreResource
                     }
                 }
             }
-            $result = new ResourceResultSet($index, count($index), 1, MAXIMAL_ROWS);
+            $result = new ResourceResultSet(
+                $index,
+                count($index),
+                1,
+                ConfigOptions::MAXIMAL_ROWS
+            );
             switch ($params['context']) {
                 case 'json':
                     $response = (new JsonResponse($result, $rdfType, []))->getResponse();
                     break;
                 case 'jsonp':
-                    $response = (new JsonpResponse($result, $rdfType, $params['callback'], []))->getResponse();
+                    $response = (new JsonpResponse(
+                        $result,
+                        $rdfType,
+                        $params['callback'],
+                        []
+                    ))->getResponse();
                     break;
                 case 'rdf':
                     $response = (new RdfResponse($result, $rdfType, []))->getResponse();

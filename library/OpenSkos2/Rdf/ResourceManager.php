@@ -41,6 +41,7 @@ use OpenSkos2\Rdf\Literal;
 use RuntimeException;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
+use OpenSkos2\ConfigOptions;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -104,7 +105,7 @@ class ResourceManager
     {
         $this->client = $client;
         $this->solrResourceManager = $solrResourceManager;
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             $this->customRelationTypes = null;
         } else {
             $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
@@ -1317,7 +1318,7 @@ class ResourceManager
 
     public function getCustomRelationTypes()
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return [];
         } else {
             return $this->customRelationTypes->getRelationTypes();
@@ -1326,7 +1327,7 @@ class ResourceManager
 
     public function getCustomInverses()
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return [];
         } else {
             return $this->customRelationTypes->getInverses();
@@ -1335,7 +1336,7 @@ class ResourceManager
 
     public function getCustomTransitives()
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return [];
         } else {
             return $this->customRelationTypes->getTransitives();
@@ -1344,7 +1345,7 @@ class ResourceManager
 
     public function setCustomRelationTypes($relationtypes)
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return;
         } else {
             $this->customRelationTypes->setRelationTypes($relationtypes);
@@ -1353,7 +1354,7 @@ class ResourceManager
 
     public function setCustomInverses($inverses)
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return;
         } else {
             $this->customRelationTypes->setInverses($inverses);
@@ -1362,7 +1363,7 @@ class ResourceManager
 
     public function setCustomTransitives($transitives)
     {
-        if (DEFAULT_RELATIONTYPES) {
+        if (ConfigOptions::DEFAULT_RELATIONTYPES) {
             return;
         } else {
             $this->customRelationTypes->setTransitives($transitives);

@@ -328,13 +328,18 @@ class ConceptManager extends ResourceManager
         return $retVal;
     }
 
-    // a relation is invalid if it (possibly with its inverse) creates transitive link of a concept or related concept to itself
+    // a relation is invalid if it (possibly with its inverse) creates transitive
+    // link of a concept or related concept to itself
     public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
     {
         $closure = $this->getClosure($relatedConceptUri, $relationUri);
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
-            throw new ApiException('The triple creates transitive link of the source to itself, possibly via inverse relation.', 400);
+            throw new ApiException(
+                'The triple creates transitive link of the source to itself, '
+                . 'possibly via inverse relation.',
+                400
+            );
         }
         // overkill??
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
@@ -343,7 +348,10 @@ class ConceptManager extends ResourceManager
             $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
             $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
             if ($transitiveInverse) {
-                throw new ApiException('The triple creates inverse transitive link of the target to itself', 400);
+                throw new ApiException(
+                    'The triple creates inverse transitive link of the target to itself',
+                    400
+                );
             }
             // consistency check: if we want to add aRb, then we must first check if a(-R)^+b, not to have mutually exclusive relations
             // b is not in the inverse closure of a, but this is checked above
@@ -353,12 +361,20 @@ class ConceptManager extends ResourceManager
 
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
-        $count = $this->countTriples('<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>');
+        $count = $this->countTriples(
+            '<' . $conceptUri . '>',
+            '<' . $relationUri . '>',
+            '<' . $relatedConceptUri . '>'
+        );
         if ($count > 0) {
             $relation[] = $conceptUri;
             $relation[] = $relationUri;
             $relation[] = $relatedConceptUri;
-            \Tools\Logging::var_logger("Info: There was an attempt to duplicate a relation: ", $relation, APPLICATION_BASE_PATH . '/data/info.log');
+            \Tools\Logging::var_logger(
+                "Info: There was an attempt to duplicate a relation: ",
+                $relation,
+                APPLICATION_BASE_PATH . '/data/info.log'
+            );
             return false;
         }
 
@@ -369,10 +385,19 @@ class ConceptManager extends ResourceManager
                 $relation[] = $conceptUri;
                 $relation[] = $relationUri;
                 $relation[] = $relatedConceptUri;
-                \Tools\Logging::var_logger("Error: concepts have not been updated because of attempt to add a relation which is in the transitive closure: ", $relation, APPLICATION_BASE_PATH . '/data/info.log');
-                throw new ApiException('Concepts have not been updated because of attempt to add a relation which is in the transitive closure.', 400);
+                \Tools\Logging::var_logger(
+                    "Error: concepts have not been updated because of attempt"
+                    . " to add a relation which is in the transitive closure: ",
+                    $relation,
+                    APPLICATION_BASE_PATH . '/data/info.log'
+                );
+                throw new ApiException(
+                    'Concepts have not been updated because of attempt to add '
+                    . 'a relation which is in the transitive closure.',
+                    400
+                );
             }
-        };
+        }
         return false;
     }
 }

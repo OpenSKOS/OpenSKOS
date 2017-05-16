@@ -2,6 +2,8 @@
 
 namespace OpenSkos2;
 
+use OpenSkos2\ConfigOptions;
+
 class Deletion implements \OpenSkos2\Interfaces\Deletion
 {
 
@@ -10,7 +12,7 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
 
     public function __construct($manager)
     {
-        if (DEFAULT_DELETION) {
+        if (ConfigOptions::DEFAULT_DELETION) {
             $this->resourceManager = $manager;
         } else {
             $this->customDeletion = new \OpenSkos2\Custom\Deletion($manager);
@@ -19,7 +21,7 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
 
     public function canBeDeleted($uri)
     {
-        if (DEFAULT_DELETION) {
+        if (ConfigOptions::DEFAULT_DELETION) {
             $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
             $references = $this->resourceManager->query($query);
             return (($references[0]->COUNT->getValue()) < 1);
