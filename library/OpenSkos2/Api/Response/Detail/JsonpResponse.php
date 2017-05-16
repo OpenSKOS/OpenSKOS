@@ -38,8 +38,14 @@ class JsonpResponse extends JsonResponse
      * @param string $callback
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $callback, $propertiesList, $extraField, $extraVals)
-    {
+    public function __construct(
+        \OpenSkos2\Rdf\Resource $resource,
+        $rdfType,
+        $callback,
+        $propertiesList,
+        $extraField,
+        $extraVals
+    ) {
         parent::__construct($resource, $rdfType, $propertiesList, $extraField, $extraVals);
         $this->callback = $callback;
     }

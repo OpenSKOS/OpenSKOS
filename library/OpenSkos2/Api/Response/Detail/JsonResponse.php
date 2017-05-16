@@ -32,8 +32,13 @@ class JsonResponse extends DetailResponse
     protected $extraVals;
     protected $extraField;
 
-    public function __construct(\OpenSkos2\Rdf\Resource $resource, $rdfType, $propertiesList, $extraField = null, $extraVals = [])
-    {
+    public function __construct(
+        \OpenSkos2\Rdf\Resource $resource,
+        $rdfType,
+        $propertiesList,
+        $extraField = null,
+        $extraVals = []
+    ) {
         parent::__construct($resource, $rdfType, $propertiesList);
         $this->extraField = $extraField;
         $this->extraVals = $extraVals;
@@ -63,7 +68,10 @@ class JsonResponse extends DetailResponse
             }
         }
         if (BACKWARD_COMPATIBLE) {
-            $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap($body, $this->resourceType);
+            $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
+                $body,
+                $this->resourceType
+            );
         } else {
             $correctedBody = $body;
         }

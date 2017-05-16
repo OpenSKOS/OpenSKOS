@@ -90,11 +90,16 @@ class EasyRdf
                 if ($propertyValue instanceof Literal2) {
                     $myResource->addProperty(
                         $propertyUri,
-                        new Literal($propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri())
+                        new Literal(
+                            $propertyValue->getValue(),
+                            $propertyValue->getLang(),
+                            $propertyValue->getDatatypeUri()
+                        )
                     );
                 } elseif ($propertyValue instanceof Resource2) {
                     // recursion
-                    if ((self::getRdfType($propertyValue)) === null) { //a proper subresource, we must/can iterate on it, it does not have proper handles
+                    if ((self::getRdfType($propertyValue)) === null) {
+//a proper subresource, we must/can iterate on it, it does not have proper handles
                         $mySubResource = self::createResource($propertyValue->getUri(), null);
                         self::makeNode($mySubResource, $propertyValue);
                         $myResource->addProperty($propertyUri, $mySubResource);
@@ -256,9 +261,12 @@ class EasyRdf
             if ($rawType instanceof Resource2) {
                 return $rawType->getUri();
             } else {
-                throw new InvalidArgumentException('Xml parsing error. Possible reason: complex elements must be augmented with rdf:parseType="Resource", e.g. <vcard:ORG rdf:parseType="Resource">
-      <vcard:orgname>CLARIN</vcard:orgname>
-            </vcard:ORG>');
+                throw new InvalidArgumentException(
+                    'Xml parsing error. Possible reason: complex elements must be augmented'.
+                    'with rdf:parseType="Resource", e.g. <vcard:ORG rdf:parseType="Resource">'.
+                    '             <vcard:orgname>CLARIN</vcard:orgname>
+                    </vcard:ORG>'
+                );
             }
         } else {
             return null;

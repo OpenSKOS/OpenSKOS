@@ -59,7 +59,11 @@ class RelationType extends AbstractTripleStoreResource
             $targetSchemata = $params['targetSchemata'];
         };
         try {
-            $response = $this->manager->fetchAllConceptConceptRelationsOfType($relType, $sourceSchemata, $targetSchemata);
+            $response = $this->manager->fetchAllConceptConceptRelationsOfType(
+                $relType,
+                $sourceSchemata,
+                $targetSchemata
+            );
             $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
             return $result;
@@ -89,7 +93,10 @@ class RelationType extends AbstractTripleStoreResource
                     if ($params['isTarget'] === 'false') {
                         $isTarget = false;
                     } else {
-                        throw new Exception('Wrong value "' . $params['isTarget'] . '" for parameter isTarget, must be "true" or "false"');
+                        throw new Exception(
+                            'Wrong value "' . $params['isTarget'] . '" for parameter isTarget,'
+                            . ' must be "true" or "false"'
+                        );
                     }
                 }
             } else {
@@ -126,14 +133,19 @@ class RelationType extends AbstractTripleStoreResource
     {
         if ($resourceObject->isBlankNode()) {
             throw new ApiException(
-                'Uri (rdf:about) is missing from the xml. For user relations you must supply it, autogenerateIdentifiers is set to false compulsory.',
+                'Uri (rdf:about) is missing from the xml. For user relations you must supply it,'
+                . ' autogenerateIdentifiers is set to false compulsory.',
                 400
             );
         }
         $ttl = $resourceObject->getUri();
         $hakje = strrpos($ttl, "#");
         if (strpos($ttl, 'http://') !== 0 || !$hakje || ($hakje === strlen($ttl) - 1)) {
-            throw new ApiException('The user-defined relation uri must have the form <namespace>#<name> where <namespace> starts with http:// and name is not empty.', 400);
+            throw new ApiException(
+                'The user-defined relation uri must have the form <namespace>#<name> '
+                . 'where <namespace> starts with http:// and name is not empty.',
+                400
+            );
         }
         // do not generate idenitifers
         return false;

@@ -353,7 +353,9 @@ class ConceptManager extends ResourceManager
                     400
                 );
             }
-            // consistency check: if we want to add aRb, then we must first check if a(-R)^+b, not to have mutually exclusive relations
+            // consistency check: if we want to add aRb,
+            // then we must first check if a(-R)^+b, not to have mutually
+            // exclusive relations
             // b is not in the inverse closure of a, but this is checked above
         }
         return false;

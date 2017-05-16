@@ -36,7 +36,8 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\Preprocessor;
 
 // Meertens: 
-// -- no need for ConceptManager since import runs also for other resources as well and Resource Manager will do the job.
+// -- no need for ConceptManager since import runs also for other resources as well
+// and Resource Manager will do the job.
 // -- Tenant is not a constructor parameter because its Uri is derived from setUri passed via message in "handle".
 // this derivation is not happening in the loop, but only one time, so it should not slow down the import process.
 // -- the following Picturae's change of 21/10/2016 is not taken, because it is not clear where to locate it and why
@@ -161,7 +162,9 @@ class Command implements LoggerAwareInterface
                 $currentVersion = null;
             }
 
-            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
+            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant,
+            // $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface
+            // $logger = null)
             $validator = new ResourceValidator(
                 $this->resourceManager,
                 $isForUpdates,
@@ -210,7 +213,9 @@ class Command implements LoggerAwareInterface
         foreach ($conceptURIs as $uri) {
             $currentVersion = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
             $isForUpdates = true;
-            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant, $set, $referenceCheckOn, $softConceptRelationValidation, LoggerInterface $logger = null)
+            // __construct(ResourceManager $resourceManager, $isForUpdate, $tenant,
+            // $set, $referenceCheckOn, $softConceptRelationValidation,
+            // LoggerInterface $logger = null)
             $validator = new ResourceValidator(
                 $this->resourceManager,
                 $isForUpdates,
