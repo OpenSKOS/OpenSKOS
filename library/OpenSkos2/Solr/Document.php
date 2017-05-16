@@ -22,6 +22,7 @@ namespace OpenSkos2\Solr;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
@@ -140,14 +141,15 @@ class Document
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
-        $rdfType = $this->resource->getType();
-        if ($rdfType->getUri() === Concept::TYPE) {
-            $this->addConceptClasses($this->resource, $this->document);
-            $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
-            $this->document->b_isOrphan = $this->isOrphan();
-            $this->addMaxNumericNotation();
+        if ($this->resource->hasProperty(Rdf::TYPE)) {
+            $rdfType = $this->resource->getType();
+            if ($rdfType->getUri() === Concept::TYPE) {
+                $this->addConceptClasses($this->resource, $this->document);
+                $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
+                $this->document->b_isOrphan = $this->isOrphan();
+                $this->addMaxNumericNotation();
+            }
         }
-
         return $this->document;
     }
 
