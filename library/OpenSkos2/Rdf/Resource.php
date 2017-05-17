@@ -623,7 +623,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
-
+        var_dump()$manager->getResourceType());
         if (EPICHandleProxy::enabled() && ConfigOptions::EPIC_IS_ON) {
             return $this->selfGenerateUriViaEpic($manager);
         }

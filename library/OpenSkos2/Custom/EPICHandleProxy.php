@@ -27,7 +27,7 @@ class EPICHandleProxy
 
     public static function enabled()
     {
-        
+        var_dump(ConfigOptions::BACKEND);
         $ini_array = parse_ini_file('/app/' . ConfigOptions::BACKEND . '/application/configs/application.ini');
         try {
             return isset($ini_array["epic.host"]);
