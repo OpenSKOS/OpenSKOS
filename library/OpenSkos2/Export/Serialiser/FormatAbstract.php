@@ -20,6 +20,7 @@
 namespace OpenSkos2\Export\Serialiser;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Concept;
 
 abstract class FormatAbstract
 {
@@ -42,6 +43,20 @@ abstract class FormatAbstract
      * @var int
      */
     protected $maxDepth = 1;
+    
+    /**
+     * Which resources should be output with their caption instead of their uri
+     * @var array
+     */
+    protected $conceptPredicates;
+    
+    public function __construct()
+    {
+        $this->conceptPredicates = array_merge(
+            Concept::$classes['SemanticRelations'],
+            Concept::$classes['MappingProperties']
+        );
+    }
     
     /**
      * Gets the array of properties to be serialised.
@@ -96,7 +111,7 @@ abstract class FormatAbstract
     {
         $this->maxDepth = $maxDepth;
     }
-
+    
     /**
      * Creates the header of the output.
      * @return string

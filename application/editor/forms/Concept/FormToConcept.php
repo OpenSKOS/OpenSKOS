@@ -18,7 +18,10 @@
  */
 
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptSchemeManager;
+use OpenSkos2\PersonManager;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 
@@ -29,17 +32,17 @@ class Editor_Forms_Concept_FormToConcept
 {
     /**
      * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
-     * @param Concept &$concept
+     * @param Concept $concept
      * @param array $formData
-     * @param OpenSKOS_Db_Table_Row_User $set
+     * @param ConceptSchemeManager $schemeManager
      * @param OpenSKOS_Db_Table_Row_User $user
-     * @return array
      */
     public static function toConcept(
         Concept &$concept,
         $formData,
-        OpenSKOS_Db_Table_Row_Collection $set,
-        OpenSKOS_Db_Table_Row_User $user
+        ConceptSchemeManager $schemeManager,
+        OpenSKOS_Db_Table_Row_User $user,
+        PersonManager $personManager
     ) {
         $oldStatus = $concept->getStatus();
         
@@ -47,7 +50,7 @@ class Editor_Forms_Concept_FormToConcept
         self::flatPropertiesToConcept($concept, $formData);
         self::multiValuedNoLangPropertiesToConcept($concept, $formData);
         self::resourcesToConcept($concept, $formData);
-        self::metadataToConcept($concept, $set, $user, $oldStatus);
+        self::metadataToConcept($concept, $schemeManager, $user, $oldStatus, $personManager);
     }
     
     /**
@@ -58,7 +61,7 @@ class Editor_Forms_Concept_FormToConcept
     protected static function translatedPropertiesToConcept(Concept &$concept, $formData)
     {
         foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
-            if (!self::emptyStringOrNull($formData[$field])) {
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
                 $propertyValues = [];
                 foreach ($formData[$field] as $language => $values) {
                     if (is_string($language)) { // If int - it is a template
@@ -82,7 +85,7 @@ class Editor_Forms_Concept_FormToConcept
     protected static function flatPropertiesToConcept(Concept &$concept, $formData)
     {
         foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
-            if (!self::emptyStringOrNull($formData[$field])) {
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
                 $concept->setProperty($property, new Literal($formData[$field]));
             } else {
                 $concept->unsetProperty($property);
@@ -99,7 +102,7 @@ class Editor_Forms_Concept_FormToConcept
     {
         foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
             $concept->unsetProperty($property);
-            if (!self::emptyStringOrNull($formData[$field])) {
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
                 $values = array_filter(array_map('trim', $formData[$field]));
                 foreach ($values as $value) {
                     $concept->addProperty($property, new Literal($value));
@@ -171,22 +174,33 @@ class Editor_Forms_Concept_FormToConcept
     }
     
     /**
-     * Per scheme relations + mapping properties.
-     * @param Concept &$concept
-     * @param OpenSKOS_Db_Table_Row_Collection $set
+     * Metadata as set, tenant, modified date, creator and etc.
+     * @param Concept $concept
      * @param OpenSKOS_Db_Table_Row_User $user
-     * @param string $oldStatus
+     * @param ConceptSchemeManager $schemeManager
+     * @param type $oldStatus
+     * @param PersonManager $personManager A person manager :)
      */
     protected static function metadataToConcept(
         Concept &$concept,
-        OpenSKOS_Db_Table_Row_Collection $set,
+        ConceptSchemeManager $schemeManager,
         OpenSKOS_Db_Table_Row_User $user,
-        $oldStatus
+        $oldStatus,
+        PersonManager $personManager
     ) {
+        // Get concept set from the first scheme
+        $setUri = null;
+        if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
+            $firstSchemeUri = $concept->getProperty(Skos::INSCHEME)[0];
+            $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
+            $setUri = $firstScheme->getPropertySingleValue(OpenSkos::SET);
+        }
+        
         $concept->ensureMetadata(
             $user->tenant,
-            $set->getUri(),
+            $setUri,
             $user->getFoafPerson(),
+            $personManager,
             $oldStatus
         );
     }

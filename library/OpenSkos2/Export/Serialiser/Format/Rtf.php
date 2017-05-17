@@ -29,10 +29,16 @@ use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\ConceptManager;
 
 // @TODO remove scripts and zend dependency.
 class Rtf extends FormatAbstract
 {
+    /**
+     * @var ConceptManager
+     */
+    protected $conceptManager;
+    
     /**
      * Holds an array of field - title map for the fields when used in rtf export.
      * @var array
@@ -60,12 +66,18 @@ class Rtf extends FormatAbstract
      */
     protected $template;
     
-    public function __construct()
+    /**
+     * @param ConceptManager $conceptManager
+     */
+    public function __construct($conceptManager = null)
     {
+        parent::__construct();
+        
         // @TODO Di
         // @TODO Do we want to be dependent on zend here.
         $this->view = new \Zend_View();
         $this->view->setBasePath(__DIR__);
+        $this->conceptManager = $conceptManager;
         
         $this->template = 'rtf.phtml';
     }
@@ -108,7 +120,7 @@ class Rtf extends FormatAbstract
         $this->view->data = [
             $this->prepareResourceDataForRtf($resource)
         ];
-                
+        
         $this->view
             ->assign('renderHeader', false)
             ->assign('renderBody', true)
@@ -157,6 +169,19 @@ class Rtf extends FormatAbstract
                     $predicate,
                     $resource->getUri()
                 );
+            } elseif (in_array($predicate, $this->conceptPredicates)) {
+                // Sort the related concepts alphabetically
+                $sortedConcepts = [];
+                foreach ($resource->getProperty($predicate) as $conceptUri) {
+                    $sortedConcepts[$this->getConceptCaption($conceptUri)] = $this->constructRtfFieldData(
+                        $predicate,
+                        $this->getConceptCaption($conceptUri)
+                    );
+                }
+                ksort($sortedConcepts, SORT_FLAG_CASE);
+                foreach ($sortedConcepts as $caption => $rtfFieldData) {
+                    $resourceData['fields'][] = $rtfFieldData;
+                }
             } else {
                 foreach ($resource->getProperty($predicate) as $property) {
                     if ($property instanceof Literal) {
@@ -254,7 +279,21 @@ class Rtf extends FormatAbstract
         return '\u' . hexdec(bin2hex(iconv('UTF-8', 'UTF-16BE', $matches[1]))) . '?';
     }
     
-    
+    protected function getConceptCaption($uri)
+    {
+        if ($this->conceptManager === null) {
+            throw new Exception('Concept manager is null');
+        }
+        
+        if (!$this->conceptManager instanceof ConceptManager) {
+            throw new Exception(
+                'Concept manager expected to be of type ConceptManager but is instead '
+                . get_class($this->conceptManager)
+            );
+        }
+        
+        return $this->conceptManager->fetchByUri($uri)->getCaption();
+    }
     
 
     /**

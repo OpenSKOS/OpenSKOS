@@ -38,6 +38,7 @@ $opts = [
     'start|s=s' => 'Start from that record',
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
+    'modified|m=s' => 'Fetch only those modified after that date.',
 ];
 
 try {
@@ -83,9 +84,22 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $tenant = $OPTS->tenant;
 $isDryRun = $OPTS->getOption('dryrun');
+$modifiedSince = $OPTS->getOption('modified');
+
+$queryQuery = 'tenant:"'.$tenant.'"';
+if (!empty($modifiedSince)) {
+    $logger->info('Index only concpets modified (timestamp field) after ' . $modifiedSince);
+    
+    $checkDate = DateTime::createFromFormat(DATE_ATOM, $modifiedSince);
+    if ($checkDate === false) {
+        throw new \Exception('Input date for modified option is not valid iso8601 (for solr)');
+    }
+    
+    $queryQuery .= ' AND timestamp:[' . $modifiedSince . ' TO *]';
+}
 
 $query = [
-    'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
+    'q' => $queryQuery,
     'rows' => 100,
     'wt' => 'json',
 ];
@@ -336,6 +350,14 @@ do {
                 $resource = new \OpenSkos2\ConceptScheme($uri);
                 break;
             case 'Concept':
+                // Fix for notation
+                if (count($doc['notation']) !== 1) {
+                    $logger->notice(
+                        'found double notations in same concept ' . print_r($doc['notation'])
+                        . ' will leave only the first one and import the concept.'
+                    );
+                    $doc['notation'] = [current($doc['notation'])];
+                }
 
                 // Make sure we have a valid uri in all caes.
                 $uri = getConceptUri($uri, $doc, $collectionCache);
@@ -437,6 +459,8 @@ do {
     }
 } while ($counter < $total && isset($data['response']['docs']));
 
+
+$logger->info("Processed in total: $counter");
 $logger->info("Done!");
 
 function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rdf\Resource $resource, $retry = 20) {
@@ -470,7 +494,7 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSk
 
         try {
 
-            return $resourceManager->insert($resource);
+            return $resourceManager->replace($resource);
 
         } catch (\Exception $exc) {
 
@@ -482,7 +506,11 @@ function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSk
 
     } while($tried < $retry);
 
-    throw $exc;
+//    throw $exc;
+    echo PHP_EOL;
+    echo 'failed inserting ' . $retry . ' times ' . PHP_EOL;
+    echo 'last exception is ' . print_r($exc, true) . PHP_EOL;
+    echo PHP_EOL;
 }
 
 /**

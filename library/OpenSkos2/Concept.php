@@ -19,16 +19,20 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Exception\UriGenerationException;
+use OpenSkos2\Exception\OpenSkosException;
+use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\PersonManager;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
@@ -213,10 +217,11 @@ class Concept extends Resource
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param string $tenantCode
      * @param Uri $set
-     * @param Uri $person
+     * @param Person $person
+     * @param PersonManager $personManager
      * @param string , optional $oldStatus
      */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person, $oldStatus = null)
+    public function ensureMetadata($tenantCode, $set, Person $person, PersonManager $personManager, $oldStatus = null)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
@@ -225,15 +230,17 @@ class Concept extends Resource
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             OpenSkos::TENANT => new Literal($tenantCode),
-            OpenSkos::SET => $set,
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::DATESUBMITTED => $nowLiteral(),
         ];
         
-        // Do not consider dcterms:creator if we have dc:creator
-        if (!$this->hasProperty(Dc::CREATOR)) {
-            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
+        if (!empty($set)) {
+            if (!($set instanceof Uri)) {
+                throw new OpenSkosException('The set must be instance of Uri');
+            }
+            // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = $set;
         }
         
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -242,8 +249,41 @@ class Concept extends Resource
             }
         }
         
+        $this->resolveCreator($person, $personManager);
+        
+        $this->setModified($person);
+        
+        $this->handleStatusChange($person, $oldStatus);
+    }
+    
+    /**
+     * Mark the concept as modified.
+     * @param Uri|Person $person
+     */
+    public function setModified($person)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
+        
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
+        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
+    }
+    
+    /**
+     * Handle change in status.
+     * @param Uri|Person $person
+     * @param string $oldStatus
+     */
+    public function handleStatusChange($person, $oldStatus = null)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+        
+        $personUri = new Uri($person->getUri());
         
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
@@ -251,15 +291,14 @@ class Concept extends Resource
             $this->unsetProperty(OpenSkos::ACCEPTEDBY);
             $this->unsetProperty(OpenSkos::DATE_DELETED);
             $this->unsetProperty(OpenSkos::DELETEDBY);
-
             switch ($this->getStatus()) {
                 case \OpenSkos2\Concept::STATUS_APPROVED:
                     $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, $personUri);
                     break;
                 case \OpenSkos2\Concept::STATUS_DELETED:
                     $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    $this->addProperty(OpenSkos::DELETEDBY, $personUri);
                     break;
             }
         }
@@ -353,5 +392,90 @@ class Concept extends Resource
         }
         
         return $uri;
+    }
+    
+    /**
+     * Resolve the creator in all use cases:
+     * - dc:creator is set but dcterms:creator is not
+     * - dcterms:creator is set as Uri
+     * - dcterms:creator is set as literal value
+     * - no creator is set
+     * @param Person $person
+     * @param PersonManager $personManager
+     */
+    protected function resolveCreator(Person $person, PersonManager $personManager)
+    {
+        $dcCreator = $this->getProperty(Dc::CREATOR);
+        $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
+        
+        // Set the creator to the apikey user
+        if (empty($dcCreator) && empty($dcTermsCreator)) {
+            $this->setCreator(null, $person);
+            return;
+        }
+        
+        // Check if the dc:Creator is Uri or Literal
+        if (!empty($dcCreator) && empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+            
+            if ($dcCreator instanceof Literal) {
+                $dcTermsCreator = $personManager->fetchByName($dcCreator->getValue());
+            } elseif ($dcCreator instanceof Uri) {
+                $dcTermsCreator = $dcCreator;
+                $dcCreator = null;
+            } else {
+                throw Exception('dc:Creator is not Literal nor Uri. Something is very wrong.');
+            }
+            
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+
+        // Check if the dcTerms:Creator is Uri or Literal
+        if (empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcTermsCreator = $dcTermsCreator[0];
+            
+            if ($dcTermsCreator instanceof Literal) {
+                $dcCreator = $dcTermsCreator;
+                $dcTermsCreator = $personManager->fetchByName($dcTermsCreator->getValue());
+            } elseif ($dcTermsCreator instanceof Uri) {
+                // We are ok with this use case even if the Uri is not present in our system
+            } else {
+                throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
+            }
+            
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+        
+        // Resolve conflicting dc:Creator and dcTerms:Creator values
+        if (!empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+            $dcTermsCreator = $dcTermsCreator[0];
+            try {
+                $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
+            } catch (ResourceNotFoundException $err) {
+                // We cannot find the resource so just leave values as they are
+                $dcTermsCreatorName = null;
+            }
+            
+            if (!empty($dcTermsCreatorName) && $dcTermsCreatorName[0]->getValue() !== $dcCreator->getValue()) {
+                throw new OpenSkosException('dc:Creator and dcTerms:Creator names do not match.');
+            }
+            
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+    }
+    
+    protected function setCreator($dcCreator, $dcTermsCreator)
+    {
+        if (!empty($dcCreator)) {
+            $this->setProperty(Dc::CREATOR, $dcCreator);
+        }
+        
+        if (!empty($dcTermsCreator)) {
+            $this->setProperty(DcTerms::CREATOR, $dcTermsCreator);
+        }
     }
 }

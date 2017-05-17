@@ -69,4 +69,58 @@ class ResourceCollection extends \ArrayObject
         }
         return null;
     }
+    
+    /**
+     * Appends other collection to this one.
+     * @param \OpenSkos2\Rdf\ResourceCollection $otherCollection
+     */
+    public function merge(ResourceCollection $otherCollection)
+    {
+        foreach ($otherCollection as $resource) {
+            $this->append($resource);
+        }
+    }
+    
+    /**
+     * Sort the collection alphabetically by the given predicate values
+     * @param string $predicate
+     */
+    public function sortByPredicate($predicate)
+    {
+        $sortedArrays = [
+            'sortedByLiteralProperty' => [],
+            'sortedByUriProperty' => [],
+            'sortedByResourceCaption' => []
+        ];
+        
+        // Analyse and arrange resoruces in separate sorted arrays
+        foreach ($this->getArrayCopy() as $key => $resource) {
+            /* @var $resource Resource */
+            if ($resource->hasProperty($predicate)) {
+                $object = $resource->getProperty($predicate)[0];
+                
+                if ($object instanceof Literal) {
+                    $sortedArrays['sortedByLiteralProperty'][$object->getValue()] = $resource;
+                } elseif ($object instanceof Uri) {
+                    // TODO: try to use some literal form property to object to the sortedByLiteralProperty array
+                    $sortedArrays['sortedByUriProperty'][$object->getUri()] = $resource;
+                } else {
+                    // This values type is unsortable at the moment
+                    $sortedArrays['sortedByResourceCaption'][$resource->getCaption()] = $resource;
+                }
+            } else {
+                $sortedArrays['sortedByResourceCaption'][$resource->getCaption()] = $resource;
+            }
+
+            $this->offsetUnset($key);
+        }
+        
+        // Actual sorting of resources by arrays
+        foreach ($sortedArrays as $sortedArray) {
+            ksort($sortedArray, SORT_FLAG_CASE);
+            foreach ($sortedArray as $resource) {
+                $this->append($resource);
+            }
+        }
+    }
 }

@@ -85,8 +85,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             Editor_Forms_Concept_FormToConcept::toConcept(
                 $concept,
                 $this->getRequest()->getPost(),
-                $this->getSet(),
-                OpenSKOS_Db_Table_Users::fromIdentity()
+                $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
+                OpenSKOS_Db_Table_Users::fromIdentity(),
+                $this->getDI()->get('\OpenSkos2\PersonManager')
             );
         }
         
@@ -131,8 +132,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
         Editor_Forms_Concept_FormToConcept::toConcept(
             $concept,
             $form->getValues(),
-            $this->getSet(),
-            OpenSKOS_Db_Table_Users::fromIdentity()
+            $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'),
+            OpenSKOS_Db_Table_Users::fromIdentity(),
+            $this->getDI()->get('\OpenSkos2\PersonManager')
         );
         
         $validator = new ResourceValidator(
@@ -276,6 +278,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
                 $userForSearch = OpenSKOS_Db_Table_Users::requireById($searchFormData['user']);
                 $userSearchOptions = $userForSearch->getSearchOptions($user['id'] != $userForSearch['id']);
+                $userSearchOptions['sorts'] = ['sort_s_prefLabel' => 'asc'];
                 $export->set(
                     'searchOptions',
                     Editor_Forms_Search::mergeSearchOptions($searchFormData, $userSearchOptions)
@@ -319,33 +322,27 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $user = $this->getCurrentUser();
             $concepts = $user->getConceptsSelection();
 
+            $this->getConceptManager()->setIsNoCommitMode(true);
+            
+            /* @var $concept \OpenSkos2\Concept */
             foreach ($concepts as $key => $concept) {
-
-                $oldData = $concept->getData();
-
                 // It is not allowed to edit concepts of different tenants.
-                if ($oldData['tenant'] != $user->tenant) {
+                if ($concept->getTenant() != $user->tenant) {
                     continue;
                 }
-
-                // The real update data...
-                $updateExtraData['status'] = $status;
-
-                $updateExtraData['modified_by'] = $user->id;
-                $updateExtraData['modified_timestamp'] = date("Y-m-d\TH:i:s\Z");
-
-                if ($oldData['status'] != OpenSKOS_Concept_Status::APPROVED &&
-                        $status == OpenSKOS_Concept_Status::APPROVED) {
-                    $updateExtraData['approved_by'] = $user->id;
-                    $updateExtraData['approved_timestamp'] = date("Y-m-d\TH:i:s\Z");
-                }
-
-                // The actual update...
-                $doCommit = ($key == (count($concepts) - 1)); // Commit only on the last concept.
-
-                $concept = new Editor_Models_Concept($concept);
-                $concept->update(array(), $updateExtraData, $doCommit, true);
+                
+                $currentStatus = $concept->getStatus();
+                $person = $user->getFoafPerson();
+                
+                $concept->setModified($person);
+                $concept->setProperty(OpenSkos::STATUS, new Literal($status));
+                $concept->handleStatusChange($person, $currentStatus);
+                
+                $this->getConceptManager()->replace($concept);
             }
+            
+            $this->getConceptManager()->commit();
+            $this->getConceptManager()->setIsNoCommitMode(false);
         }
 
         $this->getHelper('json')->sendJson(array('status' => 'ok'));
@@ -544,21 +541,5 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $initialLanguage = key($editorOptions['languages']);
         }
         return $initialLanguage;
-    }
-    
-    /**
-     * @return OpenSKOS_Db_Table_Row_Collection
-     */
-    private function getSet()
-    {
-        // @TODO Where to get that from!!! First concept scheme again?
-        
-        $code = 'gtaa';
-        $model = new \OpenSKOS_Db_Table_Collections();
-        $set = $model->findByCode($code, $this->getCurrentUser()->tenant);
-        if (null === $set) {
-            throw new InvalidArgumentException('No such collection: `'.$code.'`', 404);
-        }
-        return $set;
     }
 }

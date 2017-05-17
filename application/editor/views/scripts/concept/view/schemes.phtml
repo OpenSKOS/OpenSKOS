@@ -29,7 +29,7 @@ $conceptSchemes = $diContainer->get('Editor_Models_ConceptSchemesCache')->fetchA
             $scheme = $conceptSchemes->findByUri($schemeUri);
             if (!empty($scheme)) {
                 $imgTitle = $scheme->getCaption();
-                $iconPath = OpenSkos2\ConceptScheme::buildIconPath($scheme->getUri());
+                $iconPath = $scheme->getIconPath();
             }
         ?>
         <?php if (!empty($iconPath)): ?>
