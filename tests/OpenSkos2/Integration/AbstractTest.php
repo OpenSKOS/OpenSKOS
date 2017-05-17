@@ -2,6 +2,8 @@
 
 namespace Tests\OpenSkos2\Integration;
 
+use OpenSkos2\ConfigOptions;
+
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -19,7 +21,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey)
             ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers);
-        if (BACKWARD_COMPATIBLE) {
+        if (ConfigOptions::BACKWARD_COMPATIBLE) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -37,7 +39,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (BACKWARD_COMPATIBLE) {
+        if (ConfigOptions::BACKWARD_COMPATIBLE) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -73,7 +75,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet($id_name, $id)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (BACKWARD_COMPATIBLE) {
+        if (ConfigOptions::BACKWARD_COMPATIBLE) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

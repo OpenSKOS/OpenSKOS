@@ -32,6 +32,7 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\RelationType;
+use OpenSkos2\ConfigOptions;
 use Rhumsaa\Uuid\Uuid;
 use Zend_Controller_Action_Exception;
 
@@ -168,7 +169,7 @@ class Resource extends Uri implements ResourceIdentifier
         if (isset($values[0])) {
             return $values[0];
         } else {
-            return new Literal(UNKNOWN);
+            return new Literal(ConfigOptions::UNKNOWN);
         }
     }
 
@@ -531,7 +532,7 @@ class Resource extends Uri implements ResourceIdentifier
             }
             $creators = $existingResource->getProperty(DcTerms::CREATOR);
             if (count($creators) === 0) {
-                $this->setProperty(DcTerms::CREATOR, new Literal(UNKNOWN));
+                $this->setProperty(DcTerms::CREATOR, new Literal(ConfigOptions::UNKNOWN));
             } else {
                 $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
@@ -623,7 +624,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
 
-        if (EPICHandleProxy::enabled() && EPIC_IS_ON) {
+        if (EPICHandleProxy::enabled() && ConfigOptions::EPIC_IS_ON) {
             return $this->selfGenerateUriViaEpic($manager);
         }
 

@@ -29,6 +29,7 @@ use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Authorisation;
 use OpenSkos2\Deletion;
+use OpenSkos2\ConfigOptions;
 
 class RelationType extends AbstractTripleStoreResource
 {
@@ -104,7 +105,12 @@ class RelationType extends AbstractTripleStoreResource
             }
             $concepts = $this->manager->fetchRelatedConcepts($uri, $relType, $isTarget, $schema);
 
-            $result = new ResourceResultSet($concepts, $concepts->count(), 0, MAXIMAL_ROWS);
+            $result = new ResourceResultSet(
+                $concepts,
+                $concepts->count(),
+                0,
+                ConfigOptions::MAXIMAL_ROWS
+            );
             switch ($format) {
                 case 'json':
                     $response = (new JsonResponse($result, []))->getResponse();

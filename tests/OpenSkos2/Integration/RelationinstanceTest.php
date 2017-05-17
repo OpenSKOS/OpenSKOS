@@ -3,6 +3,7 @@
 namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
+use OpenSkos2\ConfigOptions;
 
 class RelationinstanceTest extends AbstractTest
 {
@@ -89,7 +90,7 @@ class RelationinstanceTest extends AbstractTest
             ->setRawData($body)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', API_KEY_EDITOR);
-        if (BACKWARD_COMPATIBLE) {
+        if (ConfigOptions::BACKWARD_COMPATIBLE) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

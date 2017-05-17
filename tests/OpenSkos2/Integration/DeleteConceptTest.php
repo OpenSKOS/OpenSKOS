@@ -2,6 +2,8 @@
 
 namespace Tests\OpenSkos2\Integration;
 
+use OpenSkos2\ConfigOptions;
+
 require_once 'AbstractTest.php';
 
 class DeleteConceptTest extends AbstractTest
@@ -68,7 +70,7 @@ class DeleteConceptTest extends AbstractTest
 
     public function testDeleteCandidateByGuest()
     {
-        if (!DEFAULT_AUTHORISATION) {
+        if (!ConfigOptions::DEFAULT_AUTHORISATION) {
             print "\n deleting concept with candidate status by guest...\n";
             $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
             $this->AssertEquals(403, $response->getStatus(), $response->getHeader("X-Error-Msg"));
@@ -99,7 +101,7 @@ class DeleteConceptTest extends AbstractTest
         print "\n deleting concept with approved status by a guest ...";
         self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
         $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
-        if (DEFAULT_AUTHORISATION) {
+        if (ConfigOptions::DEFAULT_AUTHORISATION) {
             $this->AssertEquals(202, $response->getStatus(), $response->getMessage());
         } else {
             $this->AssertEquals(403, $response->getStatus(), $response->getHeader("X-Error-Msg"));

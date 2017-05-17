@@ -3,6 +3,7 @@
 namespace OpenSkos2\Custom;
 
 use \Exception;
+use OpenSkos2\ConfigOptions;
 
 class EPICHandleProxy
 {
@@ -26,7 +27,8 @@ class EPICHandleProxy
 
     public static function enabled()
     {
-        $ini_array = parse_ini_file(COMMON_APPLICATION_INI);
+        
+        $ini_array = parse_ini_file('/app/' . ConfigOptions::BACKEND . '/application/configs/application.ini');
         try {
             return isset($ini_array["epic.host"]);
         } catch (Exception $ex) {
@@ -36,7 +38,7 @@ class EPICHandleProxy
 
     protected function __construct()
     {
-        $ini_array = parse_ini_file(COMMON_APPLICATION_INI);
+        $ini_array = parse_ini_file('/app/' . ConfigOptions::BACKEND . '/application/configs/application.ini');
 
         try {
             self::$host = $ini_array["epic.host"];

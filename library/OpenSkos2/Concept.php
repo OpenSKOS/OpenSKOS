@@ -148,7 +148,7 @@ class Concept extends Resource
 
             $creators = $existingConcept->getProperty(DcTerms::CREATOR);
             if (count($creators) < 1) {
-                $this->setProperty(DcTerms::CREATOR, new Literal(UNKNOWN));
+                $this->setProperty(DcTerms::CREATOR, new Literal(ConfigOptions::UNKNOWN));
             } else {
                 $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
@@ -189,7 +189,7 @@ class Concept extends Resource
 
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
-        if (EPICHandleProxy::enabled() && EPIC_IS_ON) {
+        if (EPICHandleProxy::enabled() && ConfigOptions::EPIC_IS_ON) {
             return $this->selfGenerateUriViaEpic($manager);
         }
 

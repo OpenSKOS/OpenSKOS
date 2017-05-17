@@ -26,6 +26,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\ConfigOptions;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 
@@ -232,13 +233,13 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
   $tenantResource = new \OpenSkos2\Tenant();
   $uri = $tenantResource->selfGenerateUuidAndUriWhenAbsent($resourceManager, ['type' => Org::FORMALORG, 'tenantcode' => $code]);
   set_property_with_check($tenantResource, OpenSkos::CODE, $code);
-  $organisation = new \OpenSkos2\Rdf\Resource(URI_PREFIX . '/node-org-' . Uuid::uuid4());
+  $organisation = new \OpenSkos2\Rdf\Resource(ConfigOptions::URI_PREFIX . '/node-org-' . Uuid::uuid4());
   set_property_with_check($organisation, VCard::ORGNAME, $tenantMySQL['name']);
   set_property_with_check($organisation, VCard::ORGUNIT, $tenantMySQL['organisationUnit']);
   $tenantResource->setProperty(VCard::ORG, $organisation);
   set_property_with_check($tenantResource, OpenSkos::WEBPAGE, $tenantMySQL['website'], true);
   set_property_with_check($tenantResource, VCard::EMAIL, $tenantMySQL['email']);
-  $adress = new \OpenSkos2\Rdf\Resource(URI_PREFIX . 'node-adr-' . Uuid::uuid4());
+  $adress = new \OpenSkos2\Rdf\Resource(ConfigOptions::URI_PREFIX . 'node-adr-' . Uuid::uuid4());
   set_property_with_check($adress, VCard::STREET, $tenantMySQL['streetAddress']);
   set_property_with_check($adress, VCard::LOCALITY, $tenantMySQL['locality']);
   set_property_with_check($adress, VCard::PCODE, $tenantMySQL['postalCode']);
@@ -710,7 +711,10 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $setUri, $default
       } else {
         foreach ($validator->getErrorMessages() as $errorMessage) {
           var_dump($errorMessage);
-          \Tools\Logging::var_logger("The followig resource has not been added due to the validation error " . $errorMessage, $resource->getUri(), ERROR_LOG);
+          \Tools\Logging::var_logger(
+              "The followig resource has not been added due to the validation error " .
+              $errorMessage, $resource->getUri(),
+              '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);
         }
         $resourceManager->delete($resource); //remove garbage - 1
         $resourceManager->deleteReferencesToObject($resource); //remove garbage - 2

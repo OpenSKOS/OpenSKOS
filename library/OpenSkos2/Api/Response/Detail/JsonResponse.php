@@ -67,7 +67,7 @@ class JsonResponse extends DetailResponse
                 $body[$this->extraField] = [];
             }
         }
-        if (BACKWARD_COMPATIBLE) {
+        if (\OpenSkos2\ConfigOptions::BACKWARD_COMPATIBLE) {
             $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
                 $body,
                 $this->resourceType

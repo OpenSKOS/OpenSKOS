@@ -54,7 +54,5 @@
         <const name="ALT_LABEL" value="altLabel"/>
         <const name="HIDDEN_LABEL" value="hiddenLabel"/>
         <const name="NOTATION" value="notation"/>
-        <const name="BACKWARD_COMPATIBLE" value="false"/>
-        <const name="DEFAULT_AUTHORISATION" value="false"/>
     </php>
 </phpunit>

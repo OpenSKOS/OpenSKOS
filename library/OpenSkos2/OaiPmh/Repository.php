@@ -282,8 +282,6 @@ class Repository implements InterfaceRepository
 
         $pSet = $this->parseSet($set);
 
-        //\Tools\Logging::var_error_log(" pSet: ", $pSet , APPLICATION_BASE_PATH.'/data/debug.txt');
-
         $concepts = $this->getConcepts(
             $this->limit,
             0,

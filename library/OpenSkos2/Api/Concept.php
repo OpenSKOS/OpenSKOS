@@ -32,6 +32,7 @@ use OpenSkos2\Tenant;
 use OpenSkos2\Set;
 use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\FieldsMaps;
+use OpenSkos2\ConfigOptions;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -104,7 +105,7 @@ class Concept extends AbstractTripleStoreResource
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
         try {
-            set_time_limit(MAXIMAL_TIME_LIMIT);
+            set_time_limit(ConfigOptions::MAXIMAL_TIME_LIMIT);
             $params = $request->getQueryParams();
 
 // offset
@@ -114,8 +115,8 @@ class Concept extends AbstractTripleStoreResource
             }
 
 // limit
-            $limit = MAXIMAL_ROWS;
-            if (isset($params['rows']) && $params['rows'] < MAXIMAL_ROWS) {
+            $limit = ConfigOptions::MAXIMAL_ROWS;
+            if (isset($params['rows']) && $params['rows'] < ConfigOptions::MAXIMAL_ROWS) {
                 $limit = (int) $params['rows'];
             }
 
@@ -252,7 +253,7 @@ class Concept extends AbstractTripleStoreResource
                 default:
                     throw new InvalidArgumentException('Invalid context: ' . $context);
             }
-            set_time_limit(NORMAL_TIME_LIMIT);
+            set_time_limit(ConfigOptions::NORMAL_TIME_LIMIT);
             return $response;
         } catch (Exception $ex) {
             return $this->getErrorResponseFromException($ex);

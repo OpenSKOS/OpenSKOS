@@ -28,6 +28,7 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\ConfigOptions;
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
@@ -395,7 +396,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         $firstRound = $this->validateProperty($resource, $property, $must, false, false, false, $rdftype);
         if ($firstRound) {
-            if (ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
+            if (ConfigOptions::ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
                 return true;
             } else {
                 $correcttenant = $this->refersToSetOfCurrentTenant($resource, $property, $rdftype);

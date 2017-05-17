@@ -4,6 +4,8 @@ namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
 
+use OpenSkos2\ConfigOptions;
+
 class GetInstitutionTest extends AbstractTest
 {
 
@@ -113,7 +115,7 @@ class GetInstitutionTest extends AbstractTest
     {
         switch ($institution["code"]) {
             case "test": {
-                    if (BACKWARD_COMPATIBLE) {
+                    if (ConfigOptions::BACKWARD_COMPATIBLE) {
                         $this->assertEquals("info@test.nl", $institution["email"]);
                         $this->assertEquals("test-tenant", $institution["name"]);
                     } else {
@@ -123,7 +125,7 @@ class GetInstitutionTest extends AbstractTest
                     break;
                 }
             case "example": {
-                    if (BACKWARD_COMPATIBLE) {
+                    if (ConfigOptions::BACKWARD_COMPATIBLE) {
                         if ($singleResourceCheck) {
                             $this->assertEquals("1", count($institution["collections"]));
                         }

@@ -1048,7 +1048,6 @@ class ResourceManager
     public function getTripleStoreRegisteredCustomRelationTypes()
     {
         $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <' . Owl::OBJECT_PROPERTY . '> . }';
-        //\Tools\Logging::var_error_log(" Query \n", $sparqlQuery, APPLICATION_BASE_PATH.'/data/Logger.txt');
         $resource = $this->query($sparqlQuery);
         $result = [];
         foreach ($resource as $value) {

@@ -19,21 +19,27 @@
 
 namespace OpenSkos2\Import;
 
+use Exception;
 use OpenSkos2\Concept;
-use OpenSkos2\Tenant;
-use OpenSkos2\Set;
+use OpenSkos2\ConfigOptions;
 use OpenSkos2\Converter\File;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Preprocessor;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Set;
+use OpenSkos2\Tenant;
+use OpenSkos2\Validator\Resource as ResourceValidator;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use OpenSkos2\Validator\Resource as ResourceValidator;
-use OpenSkos2\Preprocessor;
+use SebastianBergmann\RecursionContext\Exception as Exception2;
+use Tools\Logging;
 
 // Meertens: 
 // -- no need for ConceptManager since import runs also for other resources as well
@@ -90,7 +96,7 @@ class Command implements LoggerAwareInterface
 
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
-            throw new Exception(
+            throw new Exception2(
                 "The set " . $message->getSetUri() .
                 " is supplied without a proper publisher (tenant, isntitution). "
             );
@@ -100,7 +106,7 @@ class Command implements LoggerAwareInterface
 
         //** Some purging stuff from the original picturae code
         if ($message->getClearSet()) {
-            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
+            $this->resourceManager->deleteBy([OpenSkos::SET => $message->getSetUri()]);
         }
 
         if ($message->getDeleteSchemes()) {
@@ -124,7 +130,7 @@ class Command implements LoggerAwareInterface
             $types = $resourceToInsert->getProperty(Rdf::TYPE);
 
             if (count($types) < 1) {
-                throw new \Exception("The resource " . $uri . " does not have rdf-type. ");
+                throw new Exception("The resource " . $uri . " does not have rdf-type. ");
             }
             $type = $types[0]->getUri();
             $preprocessor = new Preprocessor($this->resourceManager, $type, $message->getUser());
@@ -204,7 +210,7 @@ class Command implements LoggerAwareInterface
         $set = $this->resourceManager->fetchByUri($message->getSetUri(), Dcmi::DATASET);
         $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
         if (count($tenantUris) < 1) {
-            throw new Exception("The set " . $message->getSetUri() .
+            throw new Exception2("The set " . $message->getSetUri() .
                 " is supplied without a proper publisher (tenant, isntitution). ");
         }
         $tenantUri = $tenantUris[0]->getUri();
@@ -261,7 +267,7 @@ class Command implements LoggerAwareInterface
             $concept->addProperty(OpenSkos::STATUS, new Literal($message->getImportedConceptStatus()));
         }
 
-        $langProperties = \OpenSkos2\Rdf\Resource::getLanguagedProperties();
+        $langProperties = Resource::getLanguagedProperties();
         if ($message->getFallbackLanguage()) {
             foreach ($concept->getProperties() as $predicate => $properties) {
                 foreach ($properties as $property) {
@@ -280,11 +286,11 @@ class Command implements LoggerAwareInterface
         $this->black_list[] = $uri;
         foreach ($validator->getErrorMessages() as $errorMessage) {
             var_dump($errorMessage);
-            \Tools\Logging::var_logger(
+            Logging::var_logger(
                 "The followig resource has not been added due "
                 . "to the validation error " . $errorMessage,
                 $preprocessedResource->getUri(),
-                ERROR_LOG
+                '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG
             );
         }
         var_dump($preprocessedResource->getUri() .
@@ -297,7 +303,7 @@ class Command implements LoggerAwareInterface
     {
         foreach ($validator->getWarningMessages() as $warning) {
             var_dump($warning);
-            \Tools\Logging::var_logger($warning, $uri, ERROR_LOG);
+            Logging::var_logger($warning, $uri, '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);
         }
     }
 
@@ -308,7 +314,7 @@ class Command implements LoggerAwareInterface
             if (is_array($values)) {
                 $checked_values = [];
                 foreach ($values as $value) {
-                    if ($values instanceof \OpenSkos2\Rdf\Uri) {
+                    if ($values instanceof Uri) {
                         if (!in_array($value->getUri(), $danglings)) {
                             $checked_values[] = $value;
                         }
@@ -318,7 +324,7 @@ class Command implements LoggerAwareInterface
                 }
                 $preprocessedResource->setProperties($property, $checked_values);
             } else {
-                if ($values instanceof \OpenSkos2\Rdf\Uri) {
+                if ($values instanceof Uri) {
                     if (in_array($values->getUri(), $danglings)) {
                         $preprocessedResource->unsetProperty($property);
                     }
