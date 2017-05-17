@@ -90,6 +90,6 @@ class Tenant extends Resource
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri($baseUri, $tenant, $set, $uuid, $notation)
     {
-        return APPLICATION_PATH . "/" . $uuid;
+        return "http://".APPLICATION_PATH . "/" . $uuid;
     }
 }
