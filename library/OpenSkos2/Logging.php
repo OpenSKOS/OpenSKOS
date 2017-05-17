@@ -1,5 +1,7 @@
 <?php
-namespace Tools;
+
+namespace OpenSkos2;
+
 class Logging {
     
      public static function var_logger($message, $object, $fileName){

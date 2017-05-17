@@ -106,4 +106,4 @@ foreach ($not_valid_resource_uris2 as $uri) {
 }
 echo "Done\n";
 
-//php skos2openskos.php --setUri=http://hdl.handle.net/11148/backendname_dataset_f120d4f4-afd6-4554-a8bc-ba3c045e1005 --userUri=http://host/clavas/public/api/users/e1926046-8b5f-4342-ad2d-7145302757ff --file=clavas-organisations.xml
+//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/a8db78a0-7b51-4914-a4a3-11d268d339ff --file=clavas-organisations.xml

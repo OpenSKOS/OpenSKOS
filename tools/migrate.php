@@ -17,8 +17,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 require dirname(__FILE__) . '/autoload.inc.php';
-require_once 'Logging.php';
 
+use OpenSkos2\Logging;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -711,7 +711,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $setUri, $default
       } else {
         foreach ($validator->getErrorMessages() as $errorMessage) {
           var_dump($errorMessage);
-          \Tools\Logging::var_logger(
+          Logging::var_logger(
               "The followig resource has not been added due to the validation error " .
               $errorMessage, $resource->getUri(),
               '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);

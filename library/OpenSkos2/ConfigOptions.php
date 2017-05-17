@@ -22,6 +22,6 @@ class ConfigOptions
     const ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES=true;
     const EPIC_IS_ON = true;
     
-    const BACKEND = 'backend_name';
+    const BACKEND = 'clavas';
     const ERROR_LOG = '/data/ValidationErrors.txt';
 }

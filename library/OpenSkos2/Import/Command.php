@@ -21,6 +21,7 @@ namespace OpenSkos2\Import;
 
 use Exception;
 use OpenSkos2\Concept;
+use OpenSkos2\Logging;
 use OpenSkos2\ConfigOptions;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\Dcmi;
@@ -39,7 +40,6 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use SebastianBergmann\RecursionContext\Exception as Exception2;
-use Tools\Logging;
 
 // Meertens: 
 // -- no need for ConceptManager since import runs also for other resources as well
