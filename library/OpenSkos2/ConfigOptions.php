@@ -5,10 +5,10 @@ namespace OpenSkos2;
 class ConfigOptions
 {
 
-    const BACKWARD_COMPATIBLE = false;
-    const DEFAULT_AUTHORISATION = false;
-    const DEFAULT_DELETION = false;
-    const DEFAULT_RELATIONTYPES = false;
+    const BACKWARD_COMPATIBLE = true;
+    const DEFAULT_AUTHORISATION = true;
+    const DEFAULT_DELETION = true;
+    const DEFAULT_RELATIONTYPES = true;
     const MAXIMAL_ROWS = 500;
     const MAXIMAL_TIME_LIMIT = 120;
     const NORMAL_TIME_LIMIT = 30;
@@ -22,6 +22,6 @@ class ConfigOptions
     const ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES=true;
     const EPIC_IS_ON = true;
     
-    const BACKEND = 'test';
+    const BACKEND = 'backend_name';
     const ERROR_LOG = '/data/ValidationErrors.txt';
 }
