@@ -378,7 +378,7 @@ class ConceptManager extends ResourceManager
             $relation[] = $conceptUri;
             $relation[] = $relationUri;
             $relation[] = $relatedConceptUri;
-            \OpenSkos2\Logging::var_logger(
+            \OpenSkos2\Logging::varLogger(
                 "Info: There was an attempt to duplicate a relation: ",
                 $relation,
                 '/app/'. ConfigOptions::BACKEND . '/data/info.log'
@@ -393,7 +393,7 @@ class ConceptManager extends ResourceManager
                 $relation[] = $conceptUri;
                 $relation[] = $relationUri;
                 $relation[] = $relatedConceptUri;
-                \OpenSkos2\Logging::var_logger(
+                \OpenSkos2\Logging::varLogger(
                     "Error: concepts have not been updated because of attempt"
                     . " to add a relation which is in the transitive closure: ",
                     $relation,

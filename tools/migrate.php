@@ -711,7 +711,7 @@ function run_round($doc, $resourceManager, $tenantUri, $class, $setUri, $default
       } else {
         foreach ($validator->getErrorMessages() as $errorMessage) {
           var_dump($errorMessage);
-          Logging::var_logger(
+          Logging::varLogger(
               "The followig resource has not been added due to the validation error " .
               $errorMessage, $resource->getUri(),
               '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);

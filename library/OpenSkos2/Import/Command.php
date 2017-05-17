@@ -286,7 +286,7 @@ class Command implements LoggerAwareInterface
         $this->black_list[] = $uri;
         foreach ($validator->getErrorMessages() as $errorMessage) {
             var_dump($errorMessage);
-            Logging::var_logger(
+            Logging::varLogger(
                 "The followig resource has not been added due "
                 . "to the validation error " . $errorMessage,
                 $preprocessedResource->getUri(),
@@ -303,7 +303,7 @@ class Command implements LoggerAwareInterface
     {
         foreach ($validator->getWarningMessages() as $warning) {
             var_dump($warning);
-            Logging::var_logger($warning, $uri, '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);
+            Logging::varLogger($warning, $uri, '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);
         }
     }
 
