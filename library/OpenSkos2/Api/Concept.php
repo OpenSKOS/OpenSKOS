@@ -219,6 +219,13 @@ class Concept
     {
         $concept = $this->getConcept($uuid);
         
+        if (!($concept instanceof \OpenSkos2\Concept || $concept instanceof \OpenSkos2\ConceptScheme)) {
+            throw new InvalidArgumentException(
+                'The requested resource was found, but is not supported by the api.',
+                400
+            );
+        }
+        
         //TODO: make tenant openskos2tenant
         $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution());
 
@@ -232,7 +239,8 @@ class Concept
         
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
         
-        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+        if ($concept instanceof \OpenSkos2\Concept
+                && $excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
             $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
         }
         
