@@ -39,12 +39,6 @@ use OpenSkos2\Rdf\Uri;
 class EasyRdf
 {
     /**
-     * Map of resources already added as children for toOpenskosResource
-     * @var array
-     */
-    protected static $alreadyAddedAsChild = [];
-    
-    /**
      * @param \EasyRdf\Graph $graph to $read
      * @param string $expectedType If expected type is set, a collection of that type will be enforced.
      * @param array $allowedChildrenTypes , optional For example skos xl
@@ -54,13 +48,14 @@ class EasyRdf
     {
         $collection = self::createResourceCollection($expectedType);
 
+        $alreadyAddedAsChild = [];
         foreach ($graph->resources() as $resource) {
-            if (isset(self::$alreadyAddedAsChild[$resource->getUri()])) {
+            if (isset($alreadyAddedAsChild[$resource->getUri()])) {
                 // We skip resources which are part of other resource
                 continue;
             }
             
-            $openskosResource = self::toOpenskosResource($resource, $allowedChildrenTypes);
+            $openskosResource = self::toOpenskosResource($resource, $allowedChildrenTypes, $alreadyAddedAsChild);
 
             if ($openskosResource === false) {
                 // Filter out resources which are not fully described.
@@ -73,7 +68,7 @@ class EasyRdf
         return $collection;
     }
     
-    protected static function toOpenskosResource($resource, $allowedChildrenTypes = [])
+    protected static function toOpenskosResource($resource, $allowedChildrenTypes, &$alreadyAddedAsChild)
     {
         /** @var $resource \EasyRdf\Resource */
         $type = $resource->get('rdf:type');
@@ -107,9 +102,9 @@ class EasyRdf
                 } elseif ($propertyValue instanceof \EasyRdf\Resource) {
                     // Check if it is an allowed fully described child resource.
                     if (in_array($propertyUri, $allowedChildrenTypes)) {
-                        $childResource = self::toOpenskosResource($propertyValue);
+                        $childResource = self::toOpenskosResource($propertyValue, [], $alreadyAddedAsChild);
                         if ($childResource !== false) {
-                            self::$alreadyAddedAsChild[$childResource->getUri()] = true;
+                            $alreadyAddedAsChild[$childResource->getUri()] = true;
                             $openskosResource->addProperty($propertyUri, $childResource);
                             continue;
                         }
