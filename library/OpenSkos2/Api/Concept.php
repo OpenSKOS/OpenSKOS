@@ -221,7 +221,7 @@ class Concept
         
         if (!($concept instanceof \OpenSkos2\Concept || $concept instanceof \OpenSkos2\ConceptScheme)) {
             throw new InvalidArgumentException(
-                'The requested resource was found, but is not supported by the api.',
+                'The requested resource was found, but is not supported by this endpoint - "concept/get".',
                 400
             );
         }

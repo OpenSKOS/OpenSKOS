@@ -139,7 +139,7 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
      *
      * Skos-XL labels can be fetched instead of simple labels for each of the valid requests by specifying the xl parameter
      *
-     * <a href='/api/concept/?id=http://example.com/1?xl=1' target='_blank'>/api/concept/?id=http://example.com/1?xl=1</a>
+     * <a href='/api/concept/?id=http://example.com/1&xl=1' target='_blank'>/api/concept/?id=http://example.com/1&xl=1</a>
      *
      * <a href='/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json?xl=1' target='_blank'>/api/concept/1b345c95-7256-4bb2-86f6-7c9949bd37ac.json?xl=1</a>
      *
