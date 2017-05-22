@@ -22,7 +22,6 @@ namespace OpenSkos2;
 use Exception;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
@@ -32,6 +31,7 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Tenant;
+use OpenSkos2\Custom\UriGeneration;
 use Rhumsaa\Uuid\Uuid;
 
 class Concept extends Resource
@@ -148,7 +148,7 @@ class Concept extends Resource
 
             $creators = $existingConcept->getProperty(DcTerms::CREATOR);
             if (count($creators) < 1) {
-                $this->setProperty(DcTerms::CREATOR, new Literal(ConfigOptions::UNKNOWN));
+                $this->setProperty(DcTerms::CREATOR, new Literal(Roles::UNKNOWN));
             } else {
                 $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
@@ -189,26 +189,14 @@ class Concept extends Resource
 
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
-        if (EPICHandleProxy::enabled() && ConfigOptions::EPIC_IS_ON) {
-            return $this->selfGenerateUriViaEpic($manager);
+        $init = $manager->getInitArray();
+        if (!$init["custom.default_urigenerate"]) {
+            $customGen = new UriGeneration();
+            return $customGen->selfGenerateUri($manager, $this);
         }
 
         $uuid = Uuid::uuid4();
-
-        $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
-        if (count($conceptBaseUris) < 1) {
-            throw new UriGenerationException(
-                'No concept base uri is given in the set description '
-                . '(you may want to use epic service whch does not require thsi uri)'
-            );
-        } else {
-            if ($conceptBaseUris[0] instanceof Uri) {
-                $conceptBaseUri = $conceptBaseUris[0]->getUri();
-            } else {
-                $conceptBaseUri = $conceptBaseUris[0]->getValue();
-            }
-        }
-
+       
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
                 'The concept already has an uri. Can not generate new one.'
@@ -220,14 +208,14 @@ class Concept extends Resource
         }
 
         if ($this->isPropertyEmpty(Skos::NOTATION)) {
-            $uri = self::assembleUri($conceptBaseUri, $tenant, $set, $uuid);
+            $uri = $this->assembleUri($tenant, $set, $uuid, $init);
         } else {
-            $uri = self::assembleUri(
-                $conceptBaseUri,
+            $uri = $this->assembleUri(
                 $tenant,
                 $set,
                 $uuid,
-                $this->getProperty(Skos::NOTATION)[0]->getValue()
+                $this->getProperty(Skos::NOTATION)[0]->getValue(),
+                $init
             );
         }
 
@@ -248,8 +236,23 @@ class Concept extends Resource
      * @param string $firstNotation, optional. New uuid will be used if empty
      * @return string
      */
-    protected function assembleUri($conceptBaseUri, $tenant, $set, $uuid, $firstNotation)
+    protected function assembleUri($tenant, $set, $uuid, $firstNotation, $init)
     {
+        $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
+        if (count($conceptBaseUris) < 1) {
+            throw new UriGenerationException(
+                'No concept base uri is given in the set description '
+                . '(you may want to use epic service whch does not require thsi uri)'
+            );
+        } else {
+            if ($conceptBaseUris[0] instanceof Uri) {
+                $conceptBaseUri = $conceptBaseUris[0]->getUri();
+            } else {
+                $conceptBaseUri = $conceptBaseUris[0]->getValue();
+            }
+        }
+
+        
         $separator = '/';
 
         $baseUri = rtrim($conceptBaseUri, $separator);

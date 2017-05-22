@@ -3,7 +3,8 @@
 namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
-use OpenSkos2\ConfigOptions;
+
+use OpenSkos2\Roles;
 
 class RelationinstanceTest extends AbstractTest
 {
@@ -15,13 +16,11 @@ class RelationinstanceTest extends AbstractTest
     private static $uuid2;
     private static $about2;
 
-    public static function setUpBeforeClass()
-    {
-        
-    }
-
+    
     public function setUp()
     {
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();
         self::$client->SetHeaders(array(
@@ -90,7 +89,7 @@ class RelationinstanceTest extends AbstractTest
             ->setRawData($body)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', API_KEY_EDITOR);
-        if (ConfigOptions::BACKWARD_COMPATIBLE) {
+        if (self::$init["custom.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

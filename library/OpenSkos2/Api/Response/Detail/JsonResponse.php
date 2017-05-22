@@ -31,6 +31,7 @@ class JsonResponse extends DetailResponse
 
     protected $extraVals;
     protected $extraField;
+    protected $init;
 
     public function __construct(
         \OpenSkos2\Rdf\Resource $resource,
@@ -42,6 +43,7 @@ class JsonResponse extends DetailResponse
         parent::__construct($resource, $rdfType, $propertiesList);
         $this->extraField = $extraField;
         $this->extraVals = $extraVals;
+        $this->init = parse_ini_file(__DIR__ . '/../../../../../application/configs/application.ini');
     }
 
     /**
@@ -67,7 +69,7 @@ class JsonResponse extends DetailResponse
                 $body[$this->extraField] = [];
             }
         }
-        if (\OpenSkos2\ConfigOptions::BACKWARD_COMPATIBLE) {
+        if (self::$init["custom.backward_compatible"]) {
             $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
                 $body,
                 $this->resourceType

@@ -35,7 +35,7 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
      */
     protected $propertiesList;
     protected $resourceType;
-
+    protected $init;
     /**
      *
      * @param \OpenSkos2\Api\ResourceResultSet $result
@@ -46,5 +46,6 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
         $this->result = $result;
         $this->propertiesList = $propertiesList;
         $this->resourceType = $rdfType;
+        $this->init = parse_ini_file(__DIR__ . '/../../../../application/configs/application.ini');
     }
 }

@@ -9,7 +9,7 @@ use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 
@@ -135,8 +135,8 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === ConfigOptions::ADMINISTRATOR ||
-            $user->role === ConfigOptions::ROOT || $user->role === ConfigOptions::EDITOR);
+        return ($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR);
     }
 
     private function resourceCreationAllowedBasic(
@@ -152,9 +152,9 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === ConfigOptions::ADMINISTRATOR ||
-            $user->role === ConfigOptions::ROOT ||
-            $user->role === ConfigOptions::EDITOR);
+        return ($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT ||
+            $user->role === Roles::EDITOR);
     }
 
     private function resourceEditAllowedBasic(
@@ -170,9 +170,9 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === ConfigOptions::ADMINISTRATOR ||
-            $user->role === ConfigOptions::ROOT ||
-            $user->role === ConfigOptions::EDITOR);
+        return ($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT ||
+            $user->role === Roles::EDITOR);
     }
 
     private function conceptCreationAllowed(
@@ -190,9 +190,9 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        if (!($user->role === ConfigOptions::EDITOR ||
-            $user->role === ConfigOptions::ADMINISTRATOR ||
-            $user->role === ConfigOptions::ROOT)) {
+        if (!($user->role === Roles::EDITOR ||
+            $user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT)) {
             throw new UnauthorizedException(
                 'Your role ' . $user->role . ' does not give you permission to create concepts ',
                 403
@@ -218,8 +218,8 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             ' which does not correspond to the request-s tenant  ' . $tenantCode, 403);
         }
 
-        if (!($user->role === ConfigOptions::ADMINISTRATOR ||
-            $user->role === ConfigOptions:: ROOT)) {
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles:: ROOT)) {
             if ($user->uri !== $concept->getCreator()) {
                 throw new UnauthorizedException(
                     'Your role ' . $user->role .
@@ -268,17 +268,17 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === ConfigOptions::ADMINISTRATOR || $user->role === ConfigOptions::ROOT);
+        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
     }
 
     private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === ConfigOptions::ADMINISTRATOR || $user->role === ConfigOptions::ROOT);
+        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
     }
 
     private function tenantDeleteAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === ConfigOptions::ADMINISTRATOR || $user->role === ConfigOptions::ROOT);
+        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
     }
 
     private function skosCollectionCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)

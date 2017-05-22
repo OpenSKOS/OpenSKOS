@@ -2,7 +2,7 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 require_once 'AbstractTest.php';
 
@@ -11,6 +11,8 @@ class CreateConceptTest extends AbstractTest
 
     public function setUp()
     {
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$client = new \Zend_Http_Client();
         self::$client->setConfig(array(
             'maxredirects' => 0,
@@ -124,7 +126,7 @@ class CreateConceptTest extends AbstractTest
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('autoGenerateIdentifiers', true);
-         if (ConfigOptions::BACKWARD_COMPATIBLE) {
+         if (self::$init["custom.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -352,7 +354,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_GUEST, 'concept', true);
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        if (self::$init["custom.default_authorisation"]) {
             $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
         } else {
             $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');

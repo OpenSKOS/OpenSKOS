@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
 
 class Set extends Resource
 {
@@ -65,8 +64,8 @@ class Set extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($baseUri, $tenant, $set, $uuid, $notation)
+    protected function assembleUri($tenant, $set, $uuid, $notation, $init)
     {
-        return $tenant->getUri() . "/" . $uuid;
+        return $tenant->getUri() . "" . $uuid;
     }
 }

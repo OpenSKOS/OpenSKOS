@@ -4,14 +4,15 @@ namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
 
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 class GetInstitutionTest extends AbstractTest
 {
 
     public static function setUpBeforeClass()
     {
-
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();
         self::$client->setConfig(array(
@@ -60,8 +61,6 @@ class GetInstitutionTest extends AbstractTest
     {
         self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institution');
     }
-    
-    
 
     public function testAllInstitutions()
     {
@@ -115,7 +114,7 @@ class GetInstitutionTest extends AbstractTest
     {
         switch ($institution["code"]) {
             case "test": {
-                    if (ConfigOptions::BACKWARD_COMPATIBLE) {
+                    if (self::$init["custom.backward_compatible"]) {
                         $this->assertEquals("info@test.nl", $institution["email"]);
                         $this->assertEquals("test-tenant", $institution["name"]);
                     } else {
@@ -125,7 +124,7 @@ class GetInstitutionTest extends AbstractTest
                     break;
                 }
             case "example": {
-                    if (ConfigOptions::BACKWARD_COMPATIBLE) {
+                    if (self::$init["custom.backward_compatible"]) {
                         if ($singleResourceCheck) {
                             $this->assertEquals("1", count($institution["collections"]));
                         }
@@ -210,4 +209,5 @@ class GetInstitutionTest extends AbstractTest
         $list = $dom->query('ul > li > a');
         $this->AssertEquals(2, count($list) - NUMBER_INSTITUTIONS);
     }
+
 }

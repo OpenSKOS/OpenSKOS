@@ -9,7 +9,8 @@ class GetSetTest extends AbstractTest
 
     public static function setUpBeforeClass()
     {
-
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$createdresourses = array();
 
         self::$client = new \Zend_Http_Client();

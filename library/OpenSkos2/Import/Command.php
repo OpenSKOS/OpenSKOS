@@ -22,7 +22,7 @@ namespace OpenSkos2\Import;
 use Exception;
 use OpenSkos2\Concept;
 use OpenSkos2\Logging;
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\DcTerms;
@@ -64,6 +64,8 @@ class Command implements LoggerAwareInterface
      */
     private $resourceManager;
     private $black_list;
+    private $init;
+    private $errorLog;
 
     /**
      * Command constructor.
@@ -73,12 +75,14 @@ class Command implements LoggerAwareInterface
     public function __construct(ResourceManager $resourceManager)
     {
         $this->resourceManager = $resourceManager;
+        $this->init = $resourceManager->getInitArray();
+        $this->erroLog = '../../../'.$this->init["custom.error_log"];
     }
 
     public function handle(Message $message)
     {
         $this->black_list = [];
-
+       
         if ($message->isRemovingDanglingConceptReferencesRound($message)) {
             return $this->handleRemovingDanglingConceptReferencesRound($message);
         } else {
@@ -290,7 +294,7 @@ class Command implements LoggerAwareInterface
                 "The followig resource has not been added due "
                 . "to the validation error " . $errorMessage,
                 $preprocessedResource->getUri(),
-                '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG
+                $this->errorLog
             );
         }
         var_dump($preprocessedResource->getUri() .
@@ -303,7 +307,7 @@ class Command implements LoggerAwareInterface
     {
         foreach ($validator->getWarningMessages() as $warning) {
             var_dump($warning);
-            Logging::varLogger($warning, $uri, '/app/'.ConfigOptions::BACKEND.ConfigOptions::ERROR_LOG);
+            Logging::varLogger($warning, $uri, $this->errorLog);
         }
     }
 

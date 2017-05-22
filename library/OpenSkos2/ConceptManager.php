@@ -31,7 +31,7 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 // Mertens: the difference is in handling relations.
 // We use "addRelationTriple" and "deleteRelationTriple" since old names
@@ -183,7 +183,7 @@ class ConceptManager extends ResourceManager
      */
     public function search(
         $query,
-        $rows = ConfigOptions::MAXIMAL_ROWS,
+        $rows,
         $start = 0,
         &$numFound = 0,
         $sorts = null
@@ -381,7 +381,7 @@ class ConceptManager extends ResourceManager
             \OpenSkos2\Logging::varLogger(
                 "Info: There was an attempt to duplicate a relation: ",
                 $relation,
-                '/app/'. ConfigOptions::BACKEND . '/data/info.log'
+                $this->infoLog
             );
             return false;
         }
@@ -397,7 +397,7 @@ class ConceptManager extends ResourceManager
                     "Error: concepts have not been updated because of attempt"
                     . " to add a relation which is in the transitive closure: ",
                     $relation,
-                    '/app/'. ConfigOptions::BACKEND . '/data/info.log'
+                    $this->infoLog
                 );
                 throw new ApiException(
                     'Concepts have not been updated because of attempt to add '

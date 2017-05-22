@@ -29,7 +29,7 @@ use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Authorisation;
 use OpenSkos2\Deletion;
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 class RelationType extends AbstractTripleStoreResource
 {
@@ -87,6 +87,8 @@ class RelationType extends AbstractTripleStoreResource
             $schema = null;
         }
         try {
+            $init =  $this->manager->getInitArray();
+            
             if (isset($params['isTarget'])) {
                 if ($params['isTarget'] === 'true') {
                     $isTarget = true;
@@ -109,7 +111,7 @@ class RelationType extends AbstractTripleStoreResource
                 $concepts,
                 $concepts->count(),
                 0,
-                ConfigOptions::MAXIMAL_ROWS
+                $init["custom.maximal_rows"]
             );
             switch ($format) {
                 case 'json':

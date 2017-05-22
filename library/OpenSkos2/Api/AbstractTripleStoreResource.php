@@ -32,7 +32,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 abstract class AbstractTripleStoreResource
 {
@@ -118,7 +118,7 @@ abstract class AbstractTripleStoreResource
 
         try {
             $index = $this->fetchDetailedList($params);
-
+            $init =  $this->manager->getInitArray();
             // augmenting with tenants and sets when necessary
             $rdfType = $this->manager->getResourceType();
             if ($rdfType === Skos::CONCEPT) {
@@ -140,7 +140,7 @@ abstract class AbstractTripleStoreResource
                 $index,
                 count($index),
                 1,
-                ConfigOptions::MAXIMAL_ROWS
+                $init["custom.maximal_rows"]
             );
             switch ($params['context']) {
                 case 'json':

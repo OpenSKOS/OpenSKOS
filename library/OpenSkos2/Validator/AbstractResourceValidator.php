@@ -28,7 +28,6 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\ConfigOptions;
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
@@ -54,7 +53,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
      * @var array
      */
     protected $danglingReferences = [];
-
+    
+    
     public function setResourceManager($resourceManager)
     {
         if ($resourceManager === null) {
@@ -86,7 +86,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         $this->set = $set;
     }
-
+    
     public function setDeleteDanglingConceptRelatonReferences($flag)
     {
         $this->deleteDanglingConceptRelatonReferences = $flag;
@@ -302,7 +302,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
         if ($firstRound) {
             $secondRound = $this->isSetOfCurrentTenant($resource);
-            return $secondRound;
+            if ($this->set == null) {
+                return $secondRound;
+            } else {
+                $thirdRound = $this->isSetCoinsideWithSetRequestParameter($resource);
+                return $thirdRound;
+            }
         } else {
             return false;
         }
@@ -396,7 +401,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         $firstRound = $this->validateProperty($resource, $property, $must, false, false, false, $rdftype);
         if ($firstRound) {
-            if (ConfigOptions::ALLOWED_CONCEPTS_FOR_OTHER_TENANT_SCHEMES) {
+            $init = $this->resourceManager->getInitArray();
+            if ($init["custom.allowed_concepts_for_other_tenant_schemes"]) {
                 return true;
             } else {
                 $correcttenant = $this->refersToSetOfCurrentTenant($resource, $property, $rdftype);

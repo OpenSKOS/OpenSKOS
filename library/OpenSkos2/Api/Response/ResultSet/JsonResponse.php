@@ -21,7 +21,6 @@ namespace OpenSkos2\Api\Response\ResultSet;
 
 use OpenSkos2\Api\Response\ResultSetResponse;
 use OpenSkos2\Api\Response\BackwardCompatibility;
-use OpenSkos2\ConfigOptions;
 
 /**
  * Provide the json output for find-* api
@@ -67,7 +66,7 @@ class JsonResponse extends ResultSetResponse
         foreach ($this->result->getResources() as $resource) {
             $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
 
-            if (ConfigOptions::BACKWARD_COMPATIBLE) {
+            if (self::$init["custom.backward_compatible"]) {
                 $nResourceCorrected = $backwardComatibility->backwardCompatibilityMap($nResource, $this->resourceType);
             } else {
                 $nResourceCorrected = $nResource;

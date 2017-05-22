@@ -2,7 +2,7 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-use OpenSkos2\ConfigOptions;
+use OpenSkos2\Roles;
 
 require_once 'AbstractTest.php';
 
@@ -19,6 +19,8 @@ class DeleteConceptTest extends AbstractTest
 
     public function setUp()
     {
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$client = new \Zend_Http_Client();
         self::$client->SetHeaders(array(
             'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -70,7 +72,7 @@ class DeleteConceptTest extends AbstractTest
 
     public function testDeleteCandidateByGuest()
     {
-        if (!ConfigOptions::DEFAULT_AUTHORISATION) {
+        if (!self::$init["custom.default_authorisation"]) {
             print "\n deleting concept with candidate status by guest...\n";
             $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
             $this->AssertEquals(403, $response->getStatus(), $response->getHeader("X-Error-Msg"));
@@ -101,7 +103,7 @@ class DeleteConceptTest extends AbstractTest
         print "\n deleting concept with approved status by a guest ...";
         self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
         $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        if (self::$init["custom.default_authorisation"]) {
             $this->AssertEquals(202, $response->getStatus(), $response->getMessage());
         } else {
             $this->AssertEquals(403, $response->getStatus(), $response->getHeader("X-Error-Msg"));

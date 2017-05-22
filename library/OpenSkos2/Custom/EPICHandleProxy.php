@@ -3,7 +3,6 @@
 namespace OpenSkos2\Custom;
 
 use \Exception;
-use OpenSkos2\ConfigOptions;
 
 class EPICHandleProxy
 {
@@ -16,6 +15,7 @@ class EPICHandleProxy
     private static $guidPrefix;
     private static $resolver;
     private static $forwardLocationPrefix;
+    private static $init;
 
     public static function getInstance()
     {
@@ -27,9 +27,9 @@ class EPICHandleProxy
 
     public static function enabled()
     {
-        $ini_array = parse_ini_file('/app/' . ConfigOptions::BACKEND . '/application/configs/application.ini');
+        self::$init = parse_ini_file(__DIR__.'/../../../application/configs/application.ini');
         try {
-            return isset($ini_array["epic.host"]);
+            return isset(self::$init["epic.host"]);
         } catch (Exception $ex) {
             trigger_error("Exception while accessing config members for EPIC handle server.", $ex->getTraceAsString());
         }
@@ -37,16 +37,14 @@ class EPICHandleProxy
 
     protected function __construct()
     {
-        $ini_array = parse_ini_file('/app/' . ConfigOptions::BACKEND . '/application/configs/application.ini');
-
         try {
-            self::$host = $ini_array["epic.host"];
-            self::$username = $ini_array["epic.username"];
-            self::$password = $ini_array["epic.password"];
-            self::$prefix = $ini_array["epic.prefix"];
-            self::$guidPrefix = $ini_array["epic.guid.prefix"];
-            self::$resolver = $ini_array["epic.resolver"];
-            self::$forwardLocationPrefix = $ini_array["epic.forwardLocationPrefix"];
+            self::$host = self::$init["epic.host"];
+            self::$username = self::$init["epic.username"];
+            self::$password = self::$init["epic.password"];
+            self::$prefix = self::$init["epic.prefix"];
+            self::$guidPrefix = self::$init["epic.guid.prefix"];
+            self::$resolver = self::$init["epic.resolver"];
+            self::$forwardLocationPrefix = self::$init["epic.forwardLocationPrefix"];
         } catch (Exception $ex) {
             trigger_error("Exception while accessing config members for EPIC handle server.", $ex->getTraceAsString());
         }

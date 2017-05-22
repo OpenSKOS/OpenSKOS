@@ -14,7 +14,8 @@ class AutocompleteTest extends AbstractTest
     public static function setUpBeforeClass()
     {
 
-
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        
         self::$client = new \Zend_Http_Client();
         self::$client->setConfig(array(
             'maxredirects' => 0,
@@ -107,7 +108,6 @@ class AutocompleteTest extends AbstractTest
         }
     }
 
-    
     public function testAutocompleteSearchAltLabel()
     {
         print "\n testAutocomplete search alt Label \n";

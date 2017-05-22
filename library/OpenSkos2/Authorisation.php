@@ -3,16 +3,18 @@
 namespace OpenSkos2;
 
 use OpenSKOS_Db_Table_Row_User;
-use OpenSkos2\ConfigOptions;
 
 class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 {
 
     private $customAuthorisation;
+    private $defaultOn;
 
     public function __construct($manager)
     {
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        $init = $manager->getInitArray();
+        $this->defaultOn = $init["custom.default_authorisation"];
+        if ($this->defaultOn) {
             $this->customAuthorisation = null;
         } else {
             $this->customAuthorisation = new \OpenSkos2\Custom\Authorisation($manager);
@@ -21,7 +23,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        if ($this->defaultOn) {
             return true;
         } else {
             return $this->customAuthorisation->resourceCreationAllowed($user, $tenant, $set, $resource);
@@ -31,7 +33,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
 
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        if ($this->defaultOn) {
             return true;
         } else {
             return $this->customAuthorisation->resourceEditAllowed($user, $tenant, $set, $resource);
@@ -40,7 +42,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
-        if (ConfigOptions::DEFAULT_AUTHORISATION) {
+        if ($this->defaultOn) {
             return true;
         } else {
             return $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);

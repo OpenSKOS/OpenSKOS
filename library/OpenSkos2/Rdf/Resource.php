@@ -20,9 +20,10 @@
 namespace OpenSkos2\Rdf;
 
 use DateTime;
+use OpenSkos2\Roles;
+use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -32,8 +33,8 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\RelationType;
-use OpenSkos2\ConfigOptions;
 use Rhumsaa\Uuid\Uuid;
+use OpenSkos2\Custom\UriGeneration;
 use Zend_Controller_Action_Exception;
 
 // Meertens: Picturae changes starting from 22/11/2016 are taken
@@ -169,7 +170,7 @@ class Resource extends Uri implements ResourceIdentifier
         if (isset($values[0])) {
             return $values[0];
         } else {
-            return new Literal(ConfigOptions::UNKNOWN);
+            return new Literal(Roles::UNKNOWN);
         }
     }
 
@@ -532,7 +533,7 @@ class Resource extends Uri implements ResourceIdentifier
             }
             $creators = $existingResource->getProperty(DcTerms::CREATOR);
             if (count($creators) === 0) {
-                $this->setProperty(DcTerms::CREATOR, new Literal(ConfigOptions::UNKNOWN));
+                $this->setProperty(DcTerms::CREATOR, new Literal(Roles::UNKNOWN));
             } else {
                 $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }
@@ -592,41 +593,16 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-    protected function selfGenerateUriViaEpic(ResourceManager $manager)
-    {
-        $uuid = Uuid::uuid4();
-        $handleServerClient = EPICHandleProxy::getInstance();
-        $forwardLocationPrefix = $handleServerClient->getForwardLocationPrefix();
-        try {
-            $handleServerGUIDPrefix = $handleServerClient->getGuidPrefix();
-            $uuid = $handleServerGUIDPrefix . $uuid;
-            $handleServerClient->createNewHandleWithGUID($forwardLocationPrefix . $uuid, $uuid);
-            $handleResolverUrl = $handleServerClient->getResolver();
-            $handleServerPrefix = $handleServerClient->getPrefix();
-            $uri = $handleResolverUrl . $handleServerPrefix . "/" . $uuid;
-        } catch (Exception $ex) {
-            throw new Zend_Controller_Action_Exception(
-                'Failed to create a PID for the new Object: ' . $ex->getMessage(),
-                400
-            );
-        }
-        if ($manager->askForUri($uri, true)) {
-            throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
-            );
-        }
-
-        $this->setUri($uri);
-        $this->setProperty(OpenSkos::UUID, new Literal($uuid));
-        return $uri;
-    }
+   
 
     public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
     {
-        if (EPICHandleProxy::enabled() && ConfigOptions::EPIC_IS_ON) {
-            return $this->selfGenerateUriViaEpic($manager);
+        $init = $manager->getInitArray();
+        if (!$init["custom.default_urigenerate"]) {
+            $customGen = new UriGeneration();
+            return $customGen->selfGenerateUri($manager, $this);
         }
-
+        
         $uuid = Uuid::uuid4();
 
         if (!$this->isBlankNode()) {
@@ -635,7 +611,8 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-        $uri = $this->assembleUri(null, $tenant, $set, $uuid, null);
+
+        $uri = $this->assembleUri($tenant, $set, $uuid, null, $init);
 
 
         if ($manager->askForUri($uri, true)) {
@@ -650,7 +627,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($baseUri, $tenant, $set, $uuid, $notation)
+    protected function assembleUri($tenant, $set, $uuid, $notation, $init)
     {
         return $set->getUri() . "/" . $uuid;
     }

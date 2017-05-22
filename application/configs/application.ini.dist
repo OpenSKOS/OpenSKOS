@@ -145,6 +145,21 @@ oAuth2.google.clientSecret = "@google-client-secret@"
 api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
+
+; customize applicaton
+custom.backward_compatible = true
+custom.default_authorisation = true
+custom.default_deletion = true
+custom.default_relationtypes = true
+custom.default_urigenerate = true
+custom.allowed_concepts_for_other_tenant_schemes = true
+custom.error_log = 'data/ValidationErrors.txt'
+custom.info_log = 'data/info.txt'
+custom.maximal_rows = 500
+custom.maximal_time_limit = 120
+custom.normal_time_limit = 30
+custom.backend = backend_name
+
 [staging : production]
 phpSettings.display_startup_errors = 1
 phpSettings.display_errors = 1

@@ -2,14 +2,13 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-use OpenSkos2\ConfigOptions;
-
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 {
 
     protected static $client;
     protected static $createdresourses;
     private static $resourceManager;
+    protected static $init;
 
     protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers = false)
     {
@@ -21,7 +20,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey)
             ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers);
-        if (ConfigOptions::BACKWARD_COMPATIBLE) {
+        if (self::$init["custom.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -39,7 +38,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (ConfigOptions::BACKWARD_COMPATIBLE) {
+        if (self::$init["custom.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -75,7 +74,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet($id_name, $id)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (ConfigOptions::BACKWARD_COMPATIBLE) {
+        if (self::$init["custom.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
