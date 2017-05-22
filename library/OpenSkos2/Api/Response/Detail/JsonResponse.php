@@ -69,7 +69,7 @@ class JsonResponse extends DetailResponse
                 $body[$this->extraField] = [];
             }
         }
-        if (self::$init["custom.backward_compatible"]) {
+        if ($this->init["custom.backward_compatible"]) {
             $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
                 $body,
                 $this->resourceType

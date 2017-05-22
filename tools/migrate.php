@@ -853,7 +853,7 @@ do {
         $added = $added + $check;
         $counter++;
     }
-} while ($counter < 100 && isset($data['response']['docs']));
+} while ($counter < $total && isset($data['response']['docs']));
 var_dump('Concepts added: ');
 var_dump($added);
 
