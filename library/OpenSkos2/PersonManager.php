@@ -20,6 +20,8 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Namespaces\Foaf;
 
 class PersonManager extends ResourceManager
 {
@@ -29,4 +31,28 @@ class PersonManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Person::TYPE;
+    
+    /**
+     * Fetches a person by it's name
+     * @param string $name
+     * @return Person | null
+     */
+    public function fetchByName($name)
+    {
+        $result = $this->fetch([
+            Foaf::NAME => new Literal($name)
+        ]);
+
+        if (count($result) == 0) {
+            return null;
+        }
+
+        if (count($result) > 1) {
+            throw new \RuntimeException(
+                'More than 1 users use the name "' . $name . '"'
+            );
+        }
+
+        return $result[0];
+    }
 }

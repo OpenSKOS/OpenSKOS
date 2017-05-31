@@ -31,6 +31,7 @@ use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Set;
 use OpenSkos2\Concept as ConceptResource;
+use OpenSkos2\PersonManager;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Roles;
 use OpenSkos2\Namespaces;
@@ -69,6 +70,32 @@ use Zend\Diactoros\Response;
 class Concept extends AbstractTripleStoreResource
 {
 
+    use \OpenSkos2\Api\Response\ApiResponseTrait;
+
+    const QUERY_DESCRIBE = 'describe';
+    const QUERY_COUNT = 'count';
+
+    /**
+     * Resource manager
+     *
+     * @var ResourceManager
+     */
+    private $manager;
+
+    /**
+     * Concept manager
+     *
+     * @var ConceptManager
+     */
+    private $conceptManager;
+    
+    /**
+     * Person manager
+     *
+     * @var PersonManager
+     */
+    private $personManager;
+
     /**
      * Search autocomplete
      *
@@ -78,15 +105,21 @@ class Concept extends AbstractTripleStoreResource
 
     /**
      *
-     * @param ConceptManager $manager
+     * @param ResourceManager $manager
+     * @param ConceptManager $conceptManager
      * @param Autocomplete $searchAutocomplete
      */
-    public function __construct(ConceptManager $manager, Autocomplete $searchAutocomplete)
-    {
+    public function __construct(
+        ResourceManager $manager,
+        ConceptManager $conceptManager,
+        Autocomplete $searchAutocomplete,
+        PersonManager $personManager
+    ) {
         $this->manager = $manager;
         $this->searchAutocomplete = $searchAutocomplete;
         $this->authorisation = new Authorisation($manager);
         $this->deletion = new Deletion($manager);
+        $this->personManager = $personManager;
     }
 
     /**
@@ -179,6 +212,7 @@ class Concept extends AbstractTripleStoreResource
                     }
                 }
             }
+
 
             $tenantCodes = [];
             if (isset($params['tenant'])) {

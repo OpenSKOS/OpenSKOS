@@ -19,6 +19,7 @@
 
 namespace OpenSkos2\Export;
 
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Export\Serialiser\FormatFactory;
 use OpenSkos2\Search\Autocomplete;
@@ -32,6 +33,11 @@ class Command
     private $resourceManager;
 
     /**
+     * @var ConceptManager
+     */
+    private $conceptManager;
+    
+    /**
      * Searcher for when search options are provided.
      * @var \OpenSkos2\Search\Autocomplete
      */
@@ -41,10 +47,14 @@ class Command
      * Command constructor.
      * @param ResourceManager $resourceManager
      */
-    public function __construct(ResourceManager $resourceManager, Autocomplete $searchAutocomplete)
-    {
+    public function __construct(
+        ResourceManager $resourceManager,
+        Autocomplete $searchAutocomplete,
+        ConceptManager $conceptManager
+    ) {
         $this->resourceManager = $resourceManager;
         $this->searchAutocomplete = $searchAutocomplete;
+        $this->conceptManager = $conceptManager;
     }
 
     /**
@@ -56,8 +66,9 @@ class Command
         $format = FormatFactory::create(
             $message->getFormat(),
             $message->getPropertiesToExport(),
-            $this->resourceManager->fetchNamespaces(),
-            $message->getMaxDepth()
+            $this->conceptManager->fetchNamespaces(),
+            $message->getMaxDepth(),
+            $this->conceptManager
         );
 
         $serialiser = new Serialiser(

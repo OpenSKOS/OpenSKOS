@@ -103,9 +103,9 @@ EditorSearch = new Class({
         }
     },
     search: function () {
-
         clearTimeout(this.delayedSearchTimeoutHandle);
-
+        this.delayedSearchStarted = false;
+        
         this.hideCustomProfileIfNotSelected();
 
         if (!this.searchFromUrl) {
@@ -118,13 +118,20 @@ EditorSearch = new Class({
         this.searchFromUrl = false;
 
         this.appendResults = false; // Each search will remove all old results. They are kept only in case of paging.
+        
         this.searchForm.send();
     },
     delayedSearch: function () {
         clearTimeout(this.delayedSearchTimeoutHandle);
+        this.delayedSearchStarted = true;
         this.delayedSearchTimeoutHandle = this.search.delay(this.delayedSearchDelay);
     },
     searchReady: function (response) {
+        if (this.delayedSearchStarted) {
+            // Other search has started. Wait for it before showing results.
+            return;
+        }
+        
         this.searchResults.getElement('.no-search').hide();
         this.searchResults.getElement('.no-results').hide();
         this.searchResults.getElement('.no-results-no-search-string').hide();

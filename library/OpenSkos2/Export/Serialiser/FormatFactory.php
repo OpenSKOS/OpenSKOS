@@ -50,18 +50,24 @@ class FormatFactory
      * @param string $format
      * @param array $propertiesToSerialise
      * @param array $namespaces
+     * @param \OpenSkos2\ConceptManager $conceptManager
      * @return \OpenSkos2\Export\Serialiser\Format\Xml
      * @throws \RuntimeException
      */
-    public static function create($format, $propertiesToSerialise = [], $namespaces = [], $maxDepth = 1)
-    {
+    public static function create(
+        $format,
+        $propertiesToSerialise = [],
+        $namespaces = [],
+        $maxDepth = 1,
+        $conceptManager = null
+    ) {
         // @TODO Allow all easyrdf formats.
         switch ($format) {
             case self::FORMAT_CSV:
-                $formatObject = new \OpenSkos2\Export\Serialiser\Format\Csv();
+                $formatObject = new \OpenSkos2\Export\Serialiser\Format\Csv($conceptManager);
                 break;
             case self::FORMAT_RTF:
-                $formatObject = new \OpenSkos2\Export\Serialiser\Format\Rtf();
+                $formatObject = new \OpenSkos2\Export\Serialiser\Format\Rtf($conceptManager);
                 break;
             case self::FORMAT_XML:
                 $formatObject = new \OpenSkos2\Export\Serialiser\Format\Xml();

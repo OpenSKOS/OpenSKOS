@@ -54,17 +54,20 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+$personManager = $diContainer->get('OpenSkos2\PersonManager');
 
-$user = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
+$person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
+$tenant = new \OpenSkos2\Tenant($OPTS->tenant);
 
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$importer = new \OpenSkos2\Import\Command($resourceManager);
+$importer = new \OpenSkos2\Import\Command($resourceManager, $person, $personManager, $tenant);
 $importer->setLogger($logger);
+
 $check_concept_references = null;
 
-echo "First round. (The referecne from a concept to another concept via relations is not be validated.) \n";
+echo "First round. (The referecne to a concept via relations, hasTopConcept or member are not validated.) \n";
 
  /** Recall Message's constructor parameters to see what is going on
    /**
@@ -81,7 +84,7 @@ echo "First round. (The referecne from a concept to another concept via relation
    * @param bool $clearSet
    * @param bool $deleteSchemes
    */
-$message = new \OpenSkos2\Import\Message( // Do not include references to concepts, NoUpdate Mode 
+$message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = false
   $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
 
@@ -92,9 +95,9 @@ echo "The following " . count($not_valid_resource_uris) . " resources are not va
 foreach ($not_valid_resource_uris as $uri) {
   echo "\n " . $uri;
 }
-echo "\n First round is finished. The second round: the references to the non-valid concepts from other concepts via relations will be removed before submitting a concept for update. UpdateMode\n";
+echo "\n First round is finished. The second round: the references to the non-valid concepts from other concepts, or concept schemata or skos collections will be removed before submitting a concept for update. UpdateMode\n";
 
-$message2 = new \OpenSkos2\Import\Message(// Include references to concepts, Update Mode 
+$message2 = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = true
   $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
 );
 $not_valid_resource_uris2 = $importer->handle($message2);

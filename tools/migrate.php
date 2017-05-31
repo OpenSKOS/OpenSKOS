@@ -53,6 +53,7 @@ $opts = [
     'setcode=s' => 'the set code from which the schemata are supposed to be from (the other concepts will not migrate)',
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
+    'modified|m=s' => 'Fetch only those modified after that date.',
 ];
 
 try {
@@ -102,12 +103,25 @@ var_dump('tenant: ' . $tenant);
 $isDryRun = $OPTS->dryrun;
 var_dump('dry run : ' . $isDryRun);
 
-// Meertens: Why is that dummy notation necessary? 
-/* $query = [
-  'q' => 'tenant:"'.$tenant.'" AND notation:"86793"',
-  'rows' => 100,
-  'wt' => 'json',
-  ]; */
+$modifiedSince = $OPTS->getOption('modified');
+
+$queryQuery = 'tenant:"'.$tenant.'"';
+if (!empty($modifiedSince)) {
+    $logger->info('Index only concpets modified (timestamp field) after ' . $modifiedSince);
+    
+    $checkDate = DateTime::createFromFormat(DATE_ATOM, $modifiedSince);
+    if ($checkDate === false) {
+        throw new \Exception('Input date for modified option is not valid iso8601 (for solr)');
+    }
+    
+    $queryQuery .= ' AND timestamp:[' . $modifiedSince . ' TO *]';
+}
+
+$query = [
+    'q' => $queryQuery,
+    'rows' => 100,
+    'wt' => 'json',
+];
 
 $endPoint = $OPTS->endpoint . "?q=tenant:$tenant&rows=100&wt=json";
 var_dump($endPoint);
@@ -573,6 +587,7 @@ do {
 } while ($counter < $total && isset($data['response']['docs']));
 
 
+
 $synonym = ['approved_timestamp' => 'dcterms_dateAccepted', 'created_timestamp' => 'dcterms_dateSubmitted', 'modified_timestamp' => 'dcterms_modified'];
 
 function run_round($doc, $resourceManager, $tenantRdf, $class, $setRdf, $default_lang, $synonym, $labelMapping, $mappings, $logger)
@@ -669,7 +684,6 @@ function run_round($doc, $resourceManager, $tenantRdf, $class, $setRdf, $default
                                     }
                                 }
                             }
-
 
                             continue 2;
                         }
@@ -812,6 +826,7 @@ do {
 var_dump('ConceptSchemes added: ');
 var_dump($added);
 
+
 ///////////////////////////////////
 
 var_dump("run SkosCollection round, # documents to process: ");
@@ -836,13 +851,13 @@ var_dump($added);
 
 ///////////////////////
 
-
 var_dump("run Concept round, # documents to process: ");
 var_dump($total);
 if (!empty($OPTS->start)) {
     $counter = $OPTS->start;
 } else {
     $counter = 0;
+
 }
 $added = 0;
 do {

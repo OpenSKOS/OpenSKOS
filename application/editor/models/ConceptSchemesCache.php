@@ -101,14 +101,18 @@ class Editor_Models_ConceptSchemesCache
     {
         $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
         if ($schemes === false) {
-            $schemes = $this->manager->fetch(
-                [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
-                null,
-                null,
-                true
+            $schemes = $this->sortSchemes(
+                $this->manager->fetch(
+                    [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
+                    null,
+                    null,
+                    true
+                )
             );
+            
             $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
         }
+        
         return $schemes;
     }
     
@@ -159,10 +163,53 @@ class Editor_Models_ConceptSchemesCache
                     'caption',
                     DcTerms::TITLE
                 ]);
-                $schemeMeta['iconPath'] = ConceptScheme::buildIconPath($scheme->getPropertyFlatValue(OpenSkos::UUID));
+                $schemeMeta['iconPath'] = $scheme->getIconPath();
                 $result[] = $schemeMeta;
             }
         }
         return $result;
+    }
+    
+    /**
+     * Sorts the schemes by collection first and alphabetically second. Collection sort order is given in the ini.
+     * @param ConceptSchemeCollection $schemes
+     */
+    protected function sortSchemes($schemes)
+    {
+        $sortedSchemes = new ConceptSchemeCollection();
+        
+        // The preferred order from the ini
+        $orderedCollections = [];
+        
+        $editorConfig = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        if (!empty($editorConfig['schemeOrder']['collections'])) {
+            foreach ($editorConfig['schemeOrder']['collections'] as $collectionUri) {
+                $orderedCollections[$collectionUri] = [];
+            }
+        }
+        
+        foreach ($schemes as $scheme) {
+            /* @var $scheme ConceptScheme */
+            $collectionUri = $scheme->getProperty(OpenSkos::SET)[0]->getUri();
+            
+            // Add missing collections to the ordered list
+            if (!array_key_exists($collectionUri, $orderedCollections)) {
+                $orderedCollections[$collectionUri] = [];
+            }
+            
+            // Group the schemes by their collection
+            $orderedCollections[$collectionUri][$scheme->getUri()] = $scheme->getCaption();
+        }
+        
+        // Order by name each collection's schemes
+        foreach ($orderedCollections as $collectionUri => &$collectionSchemes) {
+            natcasesort($collectionSchemes);
+            
+            foreach ($collectionSchemes as $schemeUri => $schemeCaption) {
+                $sortedSchemes->append($schemes->findByUri($schemeUri));
+            }
+        }
+        
+        return $sortedSchemes;
     }
 }
