@@ -31,7 +31,6 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\Roles;
 
 // Mertens: the difference is in handling relations.
 // We use "addRelationTriple" and "deleteRelationTriple" since old names
@@ -145,9 +144,7 @@ class ConceptManager extends ResourceManager
             $concepts = $this->fetch(
                 [
                 Skos::INSCHEME => $scheme,
-                ],
-                $start,
-                $step
+                ], $start, $step
             );
 
             foreach ($concepts as $concept) {
@@ -182,14 +179,11 @@ class ConceptManager extends ResourceManager
      * @return ConceptCollection
      */
     public function search(
-        $query,
-        $rows,
-        $start = 0,
-        &$numFound = 0,
-        $sorts = null
-    ) {
+    $query, $rows, $start = 0, &$numFound = 0, $sorts = null
+    )
+    {
         return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
 
@@ -202,8 +196,7 @@ class ConceptManager extends ResourceManager
     {
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:"' . $tenant->getUri() . '"',
-            'max_numeric_notation'
+            'tenant:"' . $tenant->getUri() . '"', 'max_numeric_notation'
         );
         return intval($max);
     }
@@ -279,15 +272,11 @@ class ConceptManager extends ResourceManager
     {
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri),
-            $relationType,
-            new Uri($objectUri)
+            new Uri($subjectUri), $relationType, new Uri($objectUri)
         );
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->relationTypes->getInverses());
         $this->deleteMatchingTriples(
-            new Uri($objectUri),
-            $inverses[$relationType],
-            new Uri($subjectUri)
+            new Uri($objectUri), $inverses[$relationType], new Uri($subjectUri)
         );
     }
 
@@ -304,7 +293,7 @@ class ConceptManager extends ResourceManager
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 
@@ -342,9 +331,8 @@ class ConceptManager extends ResourceManager
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
             throw new ApiException(
-                'The triple creates transitive link of the source to itself, '
-                . 'possibly via inverse relation.',
-                400
+            'The triple creates transitive link of the source to itself, '
+            . 'possibly via inverse relation.', 400
             );
         }
         // overkill??
@@ -355,8 +343,7 @@ class ConceptManager extends ResourceManager
             $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
             if ($transitiveInverse) {
                 throw new ApiException(
-                    'The triple creates inverse transitive link of the target to itself',
-                    400
+                'The triple creates inverse transitive link of the target to itself', 400
                 );
             }
             // consistency check: if we want to add aRb,
@@ -370,18 +357,14 @@ class ConceptManager extends ResourceManager
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
         $count = $this->countTriples(
-            '<' . $conceptUri . '>',
-            '<' . $relationUri . '>',
-            '<' . $relatedConceptUri . '>'
+            '<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>'
         );
         if ($count > 0) {
             $relation[] = $conceptUri;
             $relation[] = $relationUri;
             $relation[] = $relatedConceptUri;
             \OpenSkos2\Logging::varLogger(
-                "Info: There was an attempt to duplicate a relation: ",
-                $relation,
-                $this->infoLog
+                "Info: There was an attempt to duplicate a relation: ", $relation, $this->infoLog
             );
             return false;
         }
@@ -395,17 +378,43 @@ class ConceptManager extends ResourceManager
                 $relation[] = $relatedConceptUri;
                 \OpenSkos2\Logging::varLogger(
                     "Error: concepts have not been updated because of attempt"
-                    . " to add a relation which is in the transitive closure: ",
-                    $relation,
-                    $this->infoLog
+                    . " to add a relation which is in the transitive closure: ", $relation, $this->infoLog
                 );
                 throw new ApiException(
-                    'Concepts have not been updated because of attempt to add '
-                    . 'a relation which is in the transitive closure.',
-                    400
+                'Concepts have not been updated because of attempt to add '
+                . 'a relation which is in the transitive closure.', 400
                 );
             }
         }
         return false;
     }
+
+    public function isRelationURIValid($relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null)
+    {
+        if ($customRelUris == null) {
+            $customRelUris = array_values($this->getCustomRelationTypes());
+        }
+        if ($registeredRelationUris == null) {
+            $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
+        }
+        if ($allRelationUris == null) {
+            $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
+        }
+        if (in_array($relUri, $allRelationUris)) {
+            if (in_array($relUri, $customRelUris)) {
+                if (!in_array($relUri, $registeredRelationUris)) {
+                    throw new ApiException(
+                    'The relation  ' . $relUri .
+                    '  is not registered in the triple store. ', 404
+                    );
+                }
+            }
+        } else {
+            throw new ApiException(
+            'The relation type ' . $relUri . '  is neither a skos concept-concept '
+            . 'relation type nor a custom relation type. ', 404
+            );
+        }
+    }
+
 }

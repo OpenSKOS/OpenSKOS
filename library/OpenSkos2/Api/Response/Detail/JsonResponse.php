@@ -29,20 +29,19 @@ use OpenSkos2\Api\Transform\DataArray;
 class JsonResponse extends DetailResponse
 {
 
-    protected $extraVals;
-    protected $extraField;
+    protected $auxFiled;
+    protected $auxVals;
     protected $init;
-
+    
     public function __construct(
         \OpenSkos2\Rdf\Resource $resource,
-        $rdfType,
-        $propertiesList,
-        $extraField = null,
-        $extraVals = []
+        $propertiesList=null,
+        $auxField = null,
+        $auxVals = []
     ) {
-        parent::__construct($resource, $rdfType, $propertiesList);
-        $this->extraField = $extraField;
-        $this->extraVals = $extraVals;
+        parent::__construct($resource, $propertiesList);
+        $this->auxField = $auxField;
+        $this->auxVals = $auxVals;
         $this->init = parse_ini_file(__DIR__ . '/../../../../../application/configs/application.ini');
     }
 
@@ -60,19 +59,19 @@ class JsonResponse extends DetailResponse
     protected function getResponseData()
     {
         $body = (new DataArray($this->resource, $this->propertiesList))->transform();
-        if ($this->extraField != null) {
-            if (count($this->extraVals) > 0) {
-                foreach ($this->extraVals as $val) {
-                    $body[$this->extraField][] = (new DataArray($val))->transform();
+        if ($this->auxField != null) {
+            if (count($this->auxVals) > 0) {
+                foreach ($this->auxVals as $val) {
+                    $body[$this->auxField][] = (new DataArray($val))->transform();
                 }
             } else {
-                $body[$this->extraField] = [];
+                $body[$this->auxField] = [];
             }
         }
         if ($this->init["custom.backward_compatible"]) {
             $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
                 $body,
-                $this->resourceType
+                $this->resource->getType()->getUri()
             );
         } else {
             $correctedBody = $body;

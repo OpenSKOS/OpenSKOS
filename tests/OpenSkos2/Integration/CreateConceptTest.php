@@ -2,8 +2,6 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-use OpenSkos2\Roles;
-
 require_once 'AbstractTest.php';
 
 class CreateConceptTest extends AbstractTest
@@ -50,13 +48,13 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         if ($response->getStatus() === 201) {
             $this->CheckCreatedConcept($response);
-        }
+        } 
     }
 
-   
+ /*  
     public function test02CreateConceptWithoutUriWithoutDateAccepted()
     {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
@@ -360,7 +358,7 @@ class CreateConceptTest extends AbstractTest
             $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');
         }
     }
-    
+  */  
 
     private function CheckCreatedConcept($response)
     {

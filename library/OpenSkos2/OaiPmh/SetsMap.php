@@ -122,6 +122,6 @@ class SetsMap
 
     public function fetchTenantSpecData($concept)
     {
-        return $this->setManager->fetchTenantSpec($concept);
+        return $this->setManager->fetchConceptSpec($concept);
     }
 }

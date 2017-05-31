@@ -81,6 +81,16 @@ abstract class OpenSKOS_Rest_Controller extends Zend_Rest_Controller
     {
         return $this->getDI()->get('OpenSkos2\ConceptSchemeManager');
     }
+    
+      /**
+     * Get person manager
+     *
+     * @return \OpenSkos2\PersonManager
+     */
+    public function getPersonManager()
+    {
+        return $this->getDI()->get('OpenSkos2\PersonManager');
+    }
 
     protected function _501($method)
     {

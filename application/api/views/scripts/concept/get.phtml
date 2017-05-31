@@ -31,7 +31,7 @@ $conceptManager = $di->get('OpenSkos2\ConceptManager');
 
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
 $title = $concept->getCaption($lang);
-$tenantspec_s = $conceptManager->fetchTenantSpec($concept);
+$tenantspec_s = $conceptManager->fetchConceptSpec($concept);
 $this->headTitle($title);
 ?>
 <h2><?= $this->escape($title) ?></h2>

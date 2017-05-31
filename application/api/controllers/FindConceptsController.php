@@ -29,7 +29,7 @@ class Api_FindConceptsController extends AbstractController
     public function init()
     {
         parent::init();
-        $this->fullNameResourceClass = 'OpenSkos2\Api\Concept';
+        $this->apiResourceClass = 'OpenSkos2\Api\Concept';
         $this->viewpath = "concept/";
     }
 
@@ -123,6 +123,24 @@ class Api_FindConceptsController extends AbstractController
      */
     public function indexAction()
     {
+         if (null === ($q = $this->getRequest()->getParam('q'))) {
+            $this->getResponse()
+                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+            throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
+        }
+        
+        $this->getHelper('layout')->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true);
+        
+        $concept =$this->getDI()->make('OpenSkos2\Api\Concept');
+        
+        $context = $this->_helper->contextSwitch()->getCurrentContext();
+        $request = $this->getPsrRequest();
+        $response = $concept->findConcepts($request, $context);
+        $this->emitResponse($response);
+        
+        
+        /*
         $format = $this->getRequest()->getParam('format');
         if ($format === 'html') {
             $this->getHelper('layout')->enableLayout();
@@ -137,14 +155,14 @@ class Api_FindConceptsController extends AbstractController
 
             $this->getHelper('layout')->disableLayout();
             $this->_helper->viewRenderer->setNoRender(true);
-
             $concept = $this->getDI()->make('OpenSkos2\Api\Concept');
-
             $context = $this->_helper->contextSwitch()->getCurrentContext();
             $request = $this->getPsrRequest();
             $response = $concept->findConcepts($request, $context);
             $this->emitResponse($response);
         }
+         * */
+         
     }
 
     /**
@@ -238,52 +256,6 @@ class Api_FindConceptsController extends AbstractController
             $this->_501('DELETE');
         } else {
             parent::deleteAction();
-        }
-    }
-
-    // Meertens:  Guys, when do you use this method.
-    /**
-     * Get concept id
-     *
-     * @throws Zend_Controller_Exception
-     * @return string|\OpenSkos2\Rdf\Uri
-     */
-    private function getId()
-    {
-        $id = $this->getRequest()->getParam('id');
-        if (null === $id) {
-            throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
-        }
-
-        if (strpos($id, 'http://') !== false || strpos($id, 'https://') !== false) {
-            return new OpenSkos2\Rdf\Uri($id);
-        }
-
-        /*
-         * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
-         * with this we can create a route in the config ini like this:
-         *
-         * resources.router.routes.route_id.type = "Zend_Controller_Router_Route_Regex"
-         * resources.router.routes.route_id.route = "gtaa\/(\d+)"
-         * resources.router.routes.route_id.defaults.module = "api"
-         * resources.router.routes.route_id.defaults.controller = "concept"
-         * resources.router.routes.route_id.defaults.action = "get"
-         * resources.router.routes.route_id.defaults.id_prefix = "http://data.beeldengeluid.nl/gtaa/"
-         * resources.router.routes.route_id.defaults.format = "html"
-         * resources.router.routes.route_id.map.1 = "id"
-         * resources.router.routes.route_id.reverse = "gtaa/%d"
-         */
-
-        $id_prefix = $this->getRequest()->getParam('id_prefix');
-        if (null !== $id_prefix && \Rhumsaa\Uuid\Uuid::isValid($id)) {
-            $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
-            $id = $id_prefix . $id;
-        }
-
-        $id_prefix = $this->getRequest()->getParam('id_prefix');
-        if (null !== $id_prefix) {
-            $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
-            $id = new OpenSkos2\Rdf\Uri($id_prefix . $id);
         }
     }
 

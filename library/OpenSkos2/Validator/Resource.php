@@ -94,7 +94,7 @@ class Resource
      */
     protected $isForUpdate;
     protected $referenceCheckOn;
-    protected $softConceptRelationValidation;
+    protected $conceptReferenceCheckOn;
     protected $tenant;
     protected $set;
 
@@ -135,11 +135,11 @@ class Resource
     
     public function __construct(
         ResourceManager $resourceManager,
-        $isForUpdate,
         $tenant,
         $set,
+        $isForUpdate,
         $referenceCheckOn,
-        $softConceptRelationValidation,
+        $conceptReferenceCheckOn=true,
         LoggerInterface $logger = null
     ) {
         if ($logger === null) {
@@ -153,7 +153,7 @@ class Resource
         $this->tenant = $tenant;
         $this->set = $set;
         $this->referenceCheckOn = $referenceCheckOn;
-        $this->softConceptRelationValidation = $softConceptRelationValidation;
+        $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
     }
 
     /**
@@ -268,7 +268,7 @@ class Resource
             new SchemaDescription(),
             new SchemaCreator($this->referenceCheckOn),
             new SchemaUuid(),
-            new SchemaHasTopConcept($this->referenceCheckOn)
+            new SchemaHasTopConcept($this->referenceCheckOn, $this->conceptReferenceCheckOn)
         ];
         $validators = $this->refineValidators($validators);
         return $validators;
@@ -282,7 +282,7 @@ class Resource
             new SkosCollDescription(),
             new SkosCollCreator($this->referenceCheckOn),
             new SkosCollUuid(),
-            new SkosCollMember($this->referenceCheckOn)
+            new SkosCollMember($this->referenceCheckOn, $this->conceptReferenceCheckOn)
         ];
         $validators = $this->refineValidators($validators);
         return $validators;
@@ -353,7 +353,7 @@ class Resource
             new CycleInNarrower(),
             new RelatedToSelf(),
             new TopConceptOf($this->referenceCheckOn),
-            new ReferencesForConceptRelations($this->referenceCheckOn, $this->softConceptRelationValidation)
+            new ReferencesForConceptRelations($this->referenceCheckOn, $this->conceptReferenceCheckOn)
         ];
         $validators = $this->refineValidators($validators);
         return $validators;

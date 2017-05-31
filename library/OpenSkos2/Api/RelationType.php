@@ -21,26 +21,26 @@ namespace OpenSkos2\Api;
 
 use Exception;
 use OpenSkos2\Api\Exception\ApiException;
-use OpenSkos2\RelationTypeManager;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Authorisation;
-use OpenSkos2\Deletion;
-use OpenSkos2\Roles;
 
 class RelationType extends AbstractTripleStoreResource
 {
 
-    public function __construct(RelationTypeManager $manager)
+    public function __construct(
+    \OpenSkos2\RelationTypeManager $manager,  
+    \OpenSkos2\PersonManager $personManager)
     {
         $this->manager = $manager;
-        $this->authorisation = new Authorisation($manager);
-        $this->deletion = new Deletion($manager);
+        $this->authorisation = new \OpenSkos2\Authorisation($manager);
+        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->personManager = $personManager;
+        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
     }
-
+  
     public function mapNameSearchID()
     {
         $index = $this->manager->fetchConceptConceptRelationsNameUri();

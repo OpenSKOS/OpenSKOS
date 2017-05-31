@@ -29,174 +29,165 @@ use OpenSkos2\Rdf\Uri;
  */
 class Editor_Forms_Concept_FormToConcept
 {
-/**
- * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
- * @param Concept $concept
- * @param array $formData
- * @param ConceptSchemeManager $schemeManager
- * @param OpenSKOS_Db_Table_Row_User $user
- */
-public static function toConcept(
-Concept &$concept,
- $formData,
- ConceptSchemeManager $schemeManager,
- OpenSKOS_Db_Table_Row_User $user,
- PersonManager $personManager
-) {
-$oldStatus = $concept->getStatus();
 
-self::translatedPropertiesToConcept($concept, $formData);
-self::flatPropertiesToConcept($concept, $formData);
-self::multiValuedNoLangPropertiesToConcept($concept, $formData);
-self::resourcesToConcept($concept, $formData);
-self::metadataToConcept($concept, $schemeManager, $user, $oldStatus, $personManager);
-}
+    /**
+     * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
+     * @param Concept $concept
+     * @param array $formData
+     * @param ConceptSchemeManager $schemeManager
+     * @param OpenSKOS_Db_Table_Row_User $user
+     */
+    public static function toConcept(
+    Concept &$concept, $formData, ConceptSchemeManager $schemeManager, OpenSKOS_Db_Table_Row_User $user, PersonManager $personManager
+    )
+    {
+        $oldStatus = $concept->getStatus();
 
-/**
- * Properties like pref label, alt label etc.
- * @param Concept &$concept
- * @param array $formData
- */
-protected static function translatedPropertiesToConcept(Concept &$concept, $formData)
-{
-foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
-if (isset($formData[$field]) &&!self::emptyStringOrNull($formData[$field])) {
-$propertyValues = [];
-foreach ($formData[$field] as $language => $values) {
-if (is_string($language)) { // If int - it is a template
-foreach ($values as $value) {
-if (!self::emptyStringOrNull($value)) {
-$propertyValues[] = new Literal($value, $language);
-}
-}
-}
-}
-$concept->setProperties($property, $propertyValues);
-}
-}
-}
+        self::translatedPropertiesToConcept($concept, $formData);
+        self::flatPropertiesToConcept($concept, $formData);
+        self::multiValuedNoLangPropertiesToConcept($concept, $formData);
+        self::resourcesToConcept($concept, $formData);
+        self::metadataToConcept($concept, $schemeManager, $user, $oldStatus, $personManager);
+    }
 
-/**
- * Properties like pref label, alt label etc.
- * @param Concept &$concept
- * @param array $formData
- */
-protected static function flatPropertiesToConcept(Concept &$concept, $formData)
-{
-foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
-if (isset($formData[$field]) &&!self::emptyStringOrNull($formData[$field])) {
-$concept->setProperty($property, new Literal($formData[$field]));
-} else {
-$concept->unsetProperty($property);
-}
-}
-}
+    /**
+     * Properties like pref label, alt label etc.
+     * @param Concept &$concept
+     * @param array $formData
+     */
+    protected static function translatedPropertiesToConcept(Concept &$concept, $formData)
+    {
+        foreach (Editor_Forms_Concept::getTranslatedFieldsMap() as $field => $property) {
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
+                $propertyValues = [];
+                foreach ($formData[$field] as $language => $values) {
+                    if (is_string($language)) { // If int - it is a template
+                        foreach ($values as $value) {
+                            if (!self::emptyStringOrNull($value)) {
+                                $propertyValues[] = new Literal($value, $language);
+                            }
+                        }
+                    }
+                }
+                $concept->setProperties($property, $propertyValues);
+            }
+        }
+    }
 
-/**
- * Properties like pref label, alt label etc.
- * @param Concept $concept
- * @param array &$formData
- */
-protected static function multiValuedNoLangPropertiesToConcept(Concept &$concept, $formData)
-{
-foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
-$concept->unsetProperty($property);
-if (isset($formData[$field]) &&!self::emptyStringOrNull($formData[$field])) {
-$values = array_filter(array_map('trim', $formData[$field]));
-foreach ($values as $value) {
-$concept->addProperty($property, new Literal($value));
-}
-}
-}
-}
+    /**
+     * Properties like pref label, alt label etc.
+     * @param Concept &$concept
+     * @param array $formData
+     */
+    protected static function flatPropertiesToConcept(Concept &$concept, $formData)
+    {
+        foreach (Editor_Forms_Concept::getFlatFieldsMap() as $field => $property) {
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
+                $concept->setProperty($property, new Literal($formData[$field]));
+            } else {
+                $concept->unsetProperty($property);
+            }
+        }
+    }
 
-/**
- * Schemes and relations to concept
- * @param Concept &$concept
- * @param array $formData
- */
-protected static function resourcesToConcept(Concept &$concept, $formData)
-{
+    /**
+     * Properties like pref label, alt label etc.
+     * @param Concept $concept
+     * @param array &$formData
+     */
+    protected static function multiValuedNoLangPropertiesToConcept(Concept &$concept, $formData)
+    {
+        foreach (Editor_Forms_Concept::multiValuedNoLangFieldsMap() as $field => $property) {
+            $concept->unsetProperty($property);
+            if (isset($formData[$field]) && !self::emptyStringOrNull($formData[$field])) {
+                $values = array_filter(array_map('trim', $formData[$field]));
+                foreach ($values as $value) {
+                    $concept->addProperty($property, new Literal($value));
+                }
+            }
+        }
+    }
+
+    /**
+     * Schemes and relations to concept
+     * @param Concept &$concept
+     * @param array $formData
+     */
+    protected static function resourcesToConcept(Concept &$concept, $formData)
+    {
 // @TODO Select "asserted only" on update. Else after first update the inferred
 // relations will get explicitly declared (asserted). Then unset can be removed as well.
-self::unsetAllRelations($concept);
+        self::unsetAllRelations($concept);
 
-$fieldToUris = function ($value) {
-$uris = [];
-if (!self::emptyStringOrNull($value)) {
-foreach ($value as $uri) {
-if (!self::emptyStringOrNull($uri)) {
-$uris[] = new Uri($uri);
-}
-}
-}
-return $uris;
-};
+        $fieldToUris = function ($value) {
+            $uris = [];
+            if (!self::emptyStringOrNull($value)) {
+                foreach ($value as $uri) {
+                    if (!self::emptyStringOrNull($uri)) {
+                        $uris[] = new Uri($uri);
+                    }
+                }
+            }
+            return $uris;
+        };
 
-foreach (Editor_Forms_Concept::getResourceBasedFieldsMap() as $field => $property) {
-if (isset($formData[$field])) {
-$concept->setProperties($property, $fieldToUris($formData[$field]));
-} else {
-$concept->unsetProperty($property);
-}
-}
+        foreach (Editor_Forms_Concept::getResourceBasedFieldsMap() as $field => $property) {
+            if (isset($formData[$field])) {
+                $concept->setProperties($property, $fieldToUris($formData[$field]));
+            } else {
+                $concept->unsetProperty($property);
+            }
+        }
 
-self::filterTopConceptOf($concept);
-}
+        self::filterTopConceptOf($concept);
+    }
 
-/**
- * Clear all relations of the concept before setting the relations from the form.
- * This will remove any hidden, inferred relations like boraderTransitive and narrowerTransitive.
- * If the relation does not come from the form - we don't want it.
- * @param Concept $concept
- */
-protected static function unsetAllRelations(Concept &$concept)
-{
-foreach (Skos::getSkosRelations() as $relationType) {
-$concept->unsetProperty($relationType);
-}
-}
+    /**
+     * Clear all relations of the concept before setting the relations from the form.
+     * This will remove any hidden, inferred relations like boraderTransitive and narrowerTransitive.
+     * If the relation does not come from the form - we don't want it.
+     * @param Concept $concept
+     */
+    protected static function unsetAllRelations(Concept &$concept)
+    {
+        foreach (Skos::getSkosRelations() as $relationType) {
+            $concept->unsetProperty($relationType);
+        }
+    }
 
-/**
- * Remove all top concept of for schemes which the concept is not inScheme.
- * @param Concept $concept
- */
-protected static function filterTopConceptOf(Concept &$concept)
-{
-$filteredTopConceptOf = [];
-foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) {
-if ($concept->isTopConceptOf($schemeUri)) {
-$filteredTopConceptOf[] = $schemeUri;
-}
-}
-$concept->setProperties(Skos::TOPCONCEPTOF, $filteredTopConceptOf);
-}
+    /**
+     * Remove all top concept of for schemes which the concept is not inScheme.
+     * @param Concept $concept
+     */
+    protected static function filterTopConceptOf(Concept &$concept)
+    {
+        $filteredTopConceptOf = [];
+        foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) {
+            if ($concept->isTopConceptOf($schemeUri)) {
+                $filteredTopConceptOf[] = $schemeUri;
+            }
+        }
+        $concept->setProperties(Skos::TOPCONCEPTOF, $filteredTopConceptOf);
+    }
 
-/**
-  <<<<<<< HEAD
- * Per scheme relations + mapping properties.
- * @param Concept &$concept
- * @param OpenSKOS_Db_Table_Row_Set $set
-  =======
- * Metadata as set, tenant, modified date, creator and etc.
- * @param Concept $concept
-  >>>>>>> master
- * @param OpenSKOS_Db_Table_Row_User $user
- * @param ConceptSchemeManager $schemeManager
- * @param type $oldStatus
- * @param PersonManager $personManager A person manager :)
- */
-protected static function metadataToConcept(
-Concept &$concept,
- <<<<<<< HEAD
-        OpenSKOS_Db_Table_Row_Set $set,
-=======
-        ConceptSchemeManager $schemeManager,
->>>>>>> master
-        OpenSKOS_Db_Table_Row_User $user,
-        $oldStatus,
-        PersonManager $personManager
-    ) {
+    /**
+      <<<<<<< HEAD
+     * Per scheme relations + mapping properties.
+     * @param Concept &$concept
+     * @param OpenSKOS_Db_Table_Row_Set $set
+      =======
+     * Metadata as set, tenant, modified date, creator and etc.
+     * @param Concept $concept
+      >>>>>>> master
+     * @param OpenSKOS_Db_Table_Row_User $user
+     * @param ConceptSchemeManager $schemeManager
+     * @param type $oldStatus
+     * @param PersonManager $personManager A person manager :)
+     */
+    protected static function metadataToConcept(
+    Concept &$concept, ConceptSchemeManager $schemeManager, OpenSKOS_Db_Table_Row_User $user, $oldStatus, PersonManager $personManager
+    )
+    {
         // Get concept set from the first scheme
         $setUri = null;
         if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
@@ -204,16 +195,12 @@ Concept &$concept,
             $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
             $setUri = $firstScheme->getPropertySingleValue(OpenSkos::SET);
         }
-        
+
         $concept->ensureMetadata(
-            $user->tenant,
-            $setUri,
-            $user->getFoafPerson(),
-            $personManager,
-            $oldStatus
+            $user->tenant, $setUri, $user->getFoafPerson(), $personManager, $oldStatus
         );
     }
-    
+
     /**
      * Checks if the value is empty string or null.
      * @param mixed $value
@@ -223,4 +210,5 @@ Concept &$concept,
     {
         return $value === null || $value === '';
     }
+
 }

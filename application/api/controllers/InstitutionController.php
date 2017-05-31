@@ -7,7 +7,7 @@ class Api_InstitutionController extends AbstractController
     public function init()
     {
        parent::init();
-       $this->fullNameResourceClass = 'OpenSkos2\Api\Tenant';
+       $this->apiResourceClass = 'OpenSkos2\Api\Tenant';
        $this ->viewpath="institution/";
     }
     

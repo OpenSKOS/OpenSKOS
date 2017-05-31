@@ -38,7 +38,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $tenant;
     protected $set;
     protected $referenceCheckOn;
-
+    protected $conceptReferenceCheckOn;
     /**
      * @var array
      */

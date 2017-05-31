@@ -11,6 +11,11 @@ class Member extends AbstractSkosCollectionValidator
 
     protected function validateSkosCollection(SkosCollection $resource)
     {
-        return $this->validateProperty($resource, Skos::MEMBER, false, false, false, false, Skos::CONCEPT);
+        if ($this->conceptReferenceCheckOn) {
+            return $this->validateProperty($resource, Skos::MEMBER, false, false, false, false, Skos::CONCEPT);
+        } else {
+            return true;
+        }
     }
+
 }

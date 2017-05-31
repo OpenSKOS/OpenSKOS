@@ -175,7 +175,7 @@ class Autocomplete
         }
 
         // sets (former tenant collections)
-        if (!empty($options['set'])) {
+        if (!empty($options['sets'])) {
             $solrQuery .= ' AND (';
             $solrQuery .= 's_set:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['set']))
@@ -199,7 +199,7 @@ class Autocomplete
         }
 
         // tenants
-        if (!empty($options['tenant'])) {
+        if (!empty($options['tenants'])) {
             $optionsQueries[] = '('
                 . 's_tenant:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenant']))

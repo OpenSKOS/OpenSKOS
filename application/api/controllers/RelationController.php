@@ -31,7 +31,7 @@ class API_RelationController extends AbstractController {
 
   public function init() {
     parent::init();
-    $this->fullNameResourceClass = 'OpenSkos2\Api\Relation';
+    $this->apiResourceClass = 'OpenSkos2\Api\Relation';
     $this->viewpath = "relation/";
   }
 

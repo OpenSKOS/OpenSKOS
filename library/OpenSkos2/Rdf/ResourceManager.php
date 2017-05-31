@@ -71,7 +71,7 @@ class ResourceManager
      */
     protected $solrResourceManager;
     protected $customRelationTypes;
-    private $init = [];
+    protected $init = [];
     protected $infoLog;
 
     public function getResourceType()
@@ -137,7 +137,7 @@ class ResourceManager
         // they are not submitted to the triple store
         // however to spead up search we add set and tenant to solr description of the concept
         if ($resource->getType()->getUri() == Skos::CONCEPT) {
-            $set_and_tenant = $this->fetchTenantSpec($resource);
+            $set_and_tenant = $this->fetchConceptSpec($resource);
             if (count($set_and_tenant) < 1) {
                 var_dump('Cannot fetch tenant for the concept ' . $resource->getUri());
             }
@@ -378,16 +378,8 @@ class ResourceManager
         }
         $result = $this->query($query);
         $resources = EasyRdf::graphToResourceCollection($result, $resType);
-
         if (count($resources) === 0) {
-            if ($resType === null) {
-                $resType = "not given. ";
-            }
-            throw new ApiException(
-                'The requested resource ' . $reference . ' of type ' .
-                $resType . ' was not found in the triple store.',
-                404
-            );
+            return null;
         }
         if (count($resources) > 1) {
             throw new ApiException(
@@ -1282,7 +1274,9 @@ class ResourceManager
         if ($resource !== null) {
             $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
             $rdfType = $rdfTypes[0]->getUri();
-            if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION && $rdfType !== Dcmi::DATASET) {
+            if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE && 
+                $rdfType !== \OpenSkos2\SkosCollection::TYPE && 
+                $rdfType !==\OpenSkos2\Set::TYPE) {
                 throw new \Exception(
                     "The method augmentResourceWithTenant can be used"
                     . "only for concept schemata, skos collections and sets. "
@@ -1304,7 +1298,7 @@ class ResourceManager
         $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
         $rdfType = $rdfTypes[0]->getUri();
 
-        if ($rdfType !== Skos::CONCEPTSCHEME && $rdfType !== Skos::SKOSCOLLECTION) {
+        if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE && $rdfType !== \OpenSkos2\SkosCollection::TYPE) {
             throw new \Exception(
                 "The method fetchTenantUriViaSet can be used only"
                 . "for concept chemata and skos collections. "
@@ -1314,7 +1308,7 @@ class ResourceManager
             $setUris = $resource->getProperty(OpenSkosNamespace::SET);
             if (count($setUris) > 0) {
                 try {
-                    $set = $this->fetchByUri($setUris[0]->getUri(), Dcmi::DATASET);
+                    $set = $this->fetchByUri($setUris[0]->getUri(), \OpenSkos2\Set::TYPE);
                     $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
                     if (count($tenantUris) > 0) {
                         return $tenantUris[0];
@@ -1326,18 +1320,21 @@ class ResourceManager
         return null;
     }
 
-    public function fetchTenantSpec($concept)
+    public function fetchConceptSpec($concept)
     {
         $uri = $concept->getUri();
-        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
-            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . ?schemauri <' .
-            OpenSkosNamespace::SET . '> ?seturi . ?seturi <' .
-            DcTerms::PUBLISHER . '> ?tenanturi .'
+        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle ?creatorname WHERE { '
+            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . '
+            . '?schemauri <' .OpenSkosNamespace::SET . '> ?seturi . '
+            . '?seturi <' .DcTerms::PUBLISHER . '> ?tenanturi .'
             . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
             . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
-            . '?tenanturi  <' . VCard::ORG . '> ?org . ?org <' .
-            VCard::ORGNAME . '> ?tenantname . ?tenanturi <' .
-            OpenSkosNamespace::CODE . '> ?tenantcode .}';
+            . '?tenanturi  <' . VCard::ORG . '> ?org . '
+            . '?org <' .VCard::ORGNAME . '> ?tenantname . '
+            . '?tenanturi <' .OpenSkosNamespace::CODE . '> ?tenantcode .'
+            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?creatoruri . '
+            . '?creatoruri <'.Foaf::NAME . '> ?creatorname . '
+            . '}';
 
         $response = $this->query($query);
         $retVal = [];
@@ -1349,6 +1346,7 @@ class ResourceManager
             $spec['seturi'] = $descr->seturi->getUri();
             $spec['setcode'] = $descr->setcode->getValue();
             $spec['settitle'] = $descr->settitle->getValue();
+            $spec['creatorname'] = $descr->creatorname->getValue();
             $retVal[] = $spec;
         }
         return $retVal;

@@ -25,7 +25,6 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Row_User;
-use OpenSKOS_Db_Table_Tenants;
 use OpenSKOS_Db_Table_Users;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -55,15 +54,17 @@ trait ApiResponseTrait
      * Get tenant
      *
      * @param string $tenantCode
-     * @return OpenSKOS_Db_Table_Row_Tenant
+     * @param \OpenSkos2\Rdf\ResourceManager $manager
+     * @return \OpenSkos2\Tenant
      * @throws InvalidArgumentException
      */
-    protected function getTenant($tenantCode)
+    protected function getTenant($tenantCode, \OpenSkos2\Rdf\ResourceManager $manager)
     {
-        $model = new OpenSKOS_Db_Table_Tenants();
-        $tenant = $model->find($tenantCode)->current();
+        $tenant = $manager->fetchByCode($tenantCode, \OpenSkos2\Tenant::TYPE);
         if (null === $tenant) {
-            throw new InvalidArgumentException('No such tenant: `' . $tenantCode . '`', 404);
+            throw new InvalidArgumentException(
+            "No such tenant $tenantCode", 404
+            );
         }
         return $tenant;
     }
@@ -106,10 +107,9 @@ trait ApiResponseTrait
     // alos, there are different authorisation requirements for different sorts of resources
     // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)
     public function resourceEditAllowed(
-        Resource $resource,
-        $tenantcode,
-        OpenSKOS_Db_Table_Row_User $user
-    ) {
+    Resource $resource, $tenantcode, OpenSKOS_Db_Table_Row_User $user
+    )
+    {
         if ($user->tenant !== $tenantcode) {
             throw new UnauthorizedException('Tenant does not match user given', 403);
         }
@@ -121,14 +121,14 @@ trait ApiResponseTrait
 
         if ($tenantcode !== (string) $resourceTenant) {
             throw new UnauthorizedException(
-                'User has tenant '
-                . $user->code
-                . ' but resource has tenant '
-                . $resourceTenant,
-                403
+            'User has tenant '
+            . $user->code
+            . ' but resource has tenant '
+            . $resourceTenant, 403
             );
         }
 
         return true;
     }
+
 }

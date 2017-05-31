@@ -211,7 +211,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        $spec = $this->resourceManager->fetchTenantSpec($concept);
+        $spec = $this->resourceManager->fetchConceptSpec($concept);
         if ($spec[0]['tenantcode'] !== $tenantCode) {
             throw new UnauthorizedException('The concept has tenant ' .
             $spec['tenantcode'] .

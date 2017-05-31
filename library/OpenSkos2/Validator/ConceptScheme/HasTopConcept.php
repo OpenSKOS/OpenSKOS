@@ -11,6 +11,11 @@ class HasTopConcept extends AbstractConceptSchemeValidator
 
     protected function validateSchema(ConceptScheme $resource)
     {
-        return $this->validateProperty($resource, Skos::HASTOPCONCEPT, false, false, false, false, Skos::CONCEPT);
+        if ($this->conceptReferenceCheckOn) {
+            return $this->validateProperty($resource, Skos::HASTOPCONCEPT, false, false, false, false, Skos::CONCEPT);
+        } else {
+            return true;
+        }
     }
+
 }

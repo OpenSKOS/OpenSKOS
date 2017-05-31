@@ -7,7 +7,7 @@ class Api_SkoscollectionController extends AbstractController
      public function init()
     {
        parent::init();
-       $this->fullNameResourceClass = 'OpenSkos2\Api\SkosCollection';
+       $this->apiResourceClass = 'OpenSkos2\Api\SkosCollection';
        $this ->viewpath="skoscollection/";
       
     }

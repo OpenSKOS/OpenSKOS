@@ -47,11 +47,16 @@ class Set extends Resource
         }
     }
 
-    public function addMetadata($existingSet, $userUri, $tenant, $set)
+    public function ensureMetadata 
+        ($tenantUri, 
+        $setUri, 
+        \OpenSkos2\Person $person, 
+        \OpenSkos2\PersonManager $personManager, 
+        $existingSet = null)
     {
         $metadata = [];
         if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
-            $metadata = [DcTerms::PUBLISHER => $tenant];
+            $metadata = [DcTerms::PUBLISHER => new Uri($tenantUri)];
         }
         if ($existingSet !== null) {
             if (count($this->getProperty(OpenSkos::UUID)) < 1) {

@@ -33,11 +33,9 @@ use OpenSkos2\Set;
 use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\PersonManager;
 use OpenSkos2\FieldsMaps;
-use OpenSkos2\Roles;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\NamespaceAdmin;
 use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -72,54 +70,29 @@ class Concept extends AbstractTripleStoreResource
 
     use \OpenSkos2\Api\Response\ApiResponseTrait;
 
-    const QUERY_DESCRIBE = 'describe';
-    const QUERY_COUNT = 'count';
-
-    /**
-     * Resource manager
-     *
-     * @var ResourceManager
-     */
-    private $manager;
-
-    /**
-     * Concept manager
-     *
-     * @var ConceptManager
-     */
-    private $conceptManager;
-    
-    /**
-     * Person manager
-     *
-     * @var PersonManager
-     */
-    private $personManager;
-
     /**
      * Search autocomplete
      *
      * @var Autocomplete
      */
-    private $searchAutocomplete;
+    protected $searchAutocomplete;
 
     /**
      *
-     * @param ResourceManager $manager
-     * @param ConceptManager $conceptManager
+     * @param ConceptManager $manager
      * @param Autocomplete $searchAutocomplete
+     * @param PersonManager $personManager
      */
     public function __construct(
-        ResourceManager $manager,
-        ConceptManager $conceptManager,
-        Autocomplete $searchAutocomplete,
-        PersonManager $personManager
-    ) {
+    ConceptManager $manager, Autocomplete $searchAutocomplete, PersonManager $personManager 
+    )
+    {
         $this->manager = $manager;
-        $this->searchAutocomplete = $searchAutocomplete;
-        $this->authorisation = new Authorisation($manager);
-        $this->deletion = new Deletion($manager);
+        $this->authorisation = new \OpenSkos2\Authorisation($manager);
+        $this->deletion = new \OpenSkos2\Deletion($manager);
         $this->personManager = $personManager;
+        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        $this->searchAutocomplete = $searchAutocomplete;
     }
 
     /**
@@ -137,274 +110,168 @@ class Concept extends AbstractTripleStoreResource
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
-        try {
-            $init = $this->manager->getInitArray();
-            set_time_limit($init["custom.maximal_time_limit"]);
-            $params = $request->getQueryParams();
+        set_time_limit($this->init["custom.maximal_time_limit"]);
+
+        $params = $request->getQueryParams();
 
 // offset
-            $start = 0;
-            if (!empty($params['start'])) {
-                $start = (int) $params['start'];
-            }
+        $start = 0;
+        if (!empty($params['start'])) {
+            $start = (int) $params['start'];
+        }
 
 // limit
-            $limit = $init["custom.maximal_rows"];
-            if (isset($params['rows']) && $params['rows'] < $limit) {
-                $limit = (int) $params['rows'];
-            }
-
-
-            $options = [
-                'start' => $start,
-                'rows' => $limit,
-                'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
-            ];
-
-// search query
-            if (isset($params['q'])) {
-                $options['searchText'] = $params['q'];
-            }
-
-            if (isset($params['label'])) {
-                $options['label'] = explode(' ', trim($params['label']));
-            }
-
-            if (isset($params['properties'])) {
-                $options['properties'] = explode(' ', trim($params['properties']));
-            }
-
-            if (isset($params['sorts'])) {
-                $sortmap = $this->prepareSortsForSolr($params['sorts']);
-                $options['sorts'] = $sortmap;
-            }
-
-
-            if (isset($params['skosCollection'])) {
-                $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
-            }
-
-
-            if (isset($params['setUri'])) {
-                $options['set'] = explode(' ', trim($params['setUri']));
-            } else {
-                $setcodes = null;
-                if (isset($params['set'])) {
-                    $setcodes = explode(' ', trim($params['set']));
-                } else {
-                    if (isset($params['collection'])) {
-                        $setcodes = explode(' ', trim($params['collection']));
-                    }
-                }
-                if ($setcodes !== null) {
-                    $options['set'] = array();
-                    foreach ($setcodes as $setcode) {
-                        $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
-                        if ($setUri === null) {
-                            throw new ApiException(
-                                "The set (former known as collection) referred by code  "
-                                . "$setcode does not exist in the triple store.",
-                                400
-                            );
-                        } else {
-                            $options['set'][] = $setUri;
-                        }
-                    }
-                }
-            }
-
-
-            $tenantCodes = [];
-            if (isset($params['tenant'])) {
-                $tenantCodes = explode(' ', trim($params['tenant']));
-            } else { // synomym parameter
-                if (isset($params['tenantUri'])) {
-                    $options['tenant'] = explode(' ', trim($params['tenantUri']));
-                }
-            }
-
-            if (count($tenantCodes) > 0) {
-                foreach ($tenantCodes as $tenantcode) {
-                    $tenantUri = $this->manager->fetchUriByCode($tenantcode, Tenant::TYPE);
-                    if ($tenantUri === null) {
-                        throw new ApiException(
-                            'The tenant referred by code ' . $tenantcode .
-                            ' does not exist in the triple store. ',
-                            400
-                        );
-                    };
-                    $options['tenant'][] = $tenantUri;
-                }
-            }
-
-            if (isset($params['conceptScheme'])) {
-                $options['scheme'] = explode(' ', trim($params['conceptScheme']));
-            } else {
-                if (isset($params['scheme'])) {
-                    $options['scheme'] = explode(' ', trim($params['scheme']));
-                }
-            }
-
-            if (isset($params['status'])) {
-                $options['status'] = explode(' ', trim($params['status']));
-            }
-
-            $options['wholeword'] = false;
-            if (isset($params['wholeword'])) {
-                if ($params['wholeword'] === 'true') {
-                    $options['wholeword'] = true;
-                }
-            }
-
-            $concepts = $this->searchAutocomplete->search($options, $total);
-
-// Meertens: SET abd TENANT are not rdf-properties of a concept not stored directly in the triple store)    
-            foreach ($concepts as $concept) {
-                $spec = $this->manager->fetchTenantSpec($concept);
-                foreach ($spec as $tenant_and_set) {
-                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($tenant_and_set['seturi']));
-                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($tenant_and_set['tenanturi']));
-                }
-            }
-
-
-            $result = new ResourceResultSet($concepts, $total, $start, $limit);
-
-            if (isset($params['fl'])) {
-                $propertiesList = $this->fieldsListToProperties($params['fl']);
-            } else {
-                $propertiesList = [];
-            }
-            switch ($context) {
-                case 'json':
-                    $response = (new JsonResponse($result, $propertiesList))->getResponse();
-                    break;
-                case 'jsonp':
-                    $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
-                    break;
-                case 'rdf':
-                    $response = (new RdfResponse($result, $propertiesList))->getResponse();
-                    break;
-                default:
-                    throw new InvalidArgumentException('Invalid context: ' . $context);
-            }
-            set_time_limit($init["custom.normal_time_limit"]);
-            return $response;
-        } catch (Exception $ex) {
-            return $this->getErrorResponseFromException($ex);
-        }
-    }
-
-    /**
-     * Gets a list (array or string) of fields and try to recognise the properties from it.
-     * @param array $fieldsList
-     * @return array
-     * @throws InvalidPredicateException
-     */
-    protected function fieldsListToProperties($fieldsList)
-    {
-        if (!is_array($fieldsList)) {
-            $fieldsList = array_map('trim', explode(',', $fieldsList));
+        $limit = $this->init["custom.maximal_rows"];
+        if (isset($params['rows']) && $params['rows'] < $limit) {
+            $limit = (int) $params['rows'];
         }
 
-        $propertiesList = [];
-        $fieldsMap = FieldsMaps::getNamesToProperties();
 
-// Tries to search for the field in fields map.
-// If not found there tries to expand it from short property.
-// If not that - just pass it as it is.
-        foreach ($fieldsList as $field) {
-            if (!empty($field)) {
-                if (isset($fieldsMap[$field])) {
-                    $propertiesList[] = $fieldsMap[$field];
-                } else {
-                    $propertiesList[] = Namespaces::expandProperty($field);
-                }
+        $options = [
+            'start' => $start,
+            'rows' => $limit,
+            'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
+        ];
+
+        // tenants
+
+        $tenantCodes = [];
+        if (isset($params['tenant'])) {
+            $tenantCodes = explode(' ', trim($params['tenant']));
+        } else { // synomym parameter
+            if (isset($params['tenantUri'])) {
+                $options['tenants'] = explode(' ', trim($params['tenantUri']));
             }
         }
 
-// Check if we have a nice properties list at the end.
-        foreach ($propertiesList as $propertyUri) {
-            if ($propertyUri == 'uri') {
-                continue;
-            }
-            if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
-                throw new InvalidPredicateException(
-                    'The field "' . $propertyUri . '" from fields list is not recognised.'
-                );
-            }
-        }
-
-        return $propertiesList;
-    }
-
-    public function delete(PsrServerRequestInterface $request)
-    {
-        try {
-            $params = $this->fetchUserTenantSetViaRequestParameters($request);
-            if (!isset($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter', 412);
-            }
-
-            $id = $params['id'];
-            /* @var $concept Concept */
-            $concept = $this->manager->fetchByUri($id);
-            if (!$concept) {
-                throw new NotFoundException('Concept not found by id :' . $id, 404);
-            }
-            if ($concept->isDeleted()) {
-                throw new NotFoundException('Concept already deleted :' . $id, 410);
-            }
-
-            $this->authorisation->resourceDeleteAllowed($params['user'], $params['tenant'], $params['set'], $concept);
-            $this->manager->deleteSoft($concept);
-        } catch (Exception $e) {
-            return $this->getErrorResponseFromException($e);
-        }
-
-        $xml = (new DataRdf($concept))->transform();
-        return $this->getSuccessResponse($xml, 202);
-    }
-
-    protected function validate($resourceObject, $isForUpdate, $tenanturi, $seturi)
-    {
-        parent::validate($resourceObject, $isForUpdate, $tenanturi, $seturi);
-        $this->checkRelationsInConcept($resourceObject);
-    }
-
-// also, throws an exception when a poperty is not from a standard namespace and not a custom relation
-    private function checkRelationsInConcept(ConceptResource $concept)
-    {
-        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
-        $standardRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
-        $conceptUri = $concept->getUri();
-        $properties = array_keys($concept->getProperties());
-        $allRelationUris = array_merge($registeredRelationUris, $standardRelationUris);
-        foreach ($properties as $property) {
-            if (in_array($property, $allRelationUris)) {
-                $relatedConcepts = $concept->getProperty($property);
-                foreach ($relatedConcepts as $relConceptUri) {
-// check if related concept exists
-                    $relConcept = $relConceptUri->getUri();
-                    $exists = $this->manager->resourceExists($relConcept, Skos::CONCEPT);
-                    if (!$exists) {
-                        throw new ApiException('The related concept  ' . $relConcept . '  does not exist. ', 400);
-                    }
-// cycle-check and duplication check
-                    $this->manager->relationTripleIsDuplicated($conceptUri, $relConcept, $property);
-                    $this->manager->relationTripleCreatesCycle($conceptUri, $relConcept, $property);
-                }
-            } else { // not a concept-concept relation, must be from a standard namespace
-                if (!NamespaceAdmin::isPropertyFromStandardNamespace($property)) {
+        if (count($tenantCodes) > 0) {
+            foreach ($tenantCodes as $tenantcode) {
+                $tenantUri = $this->manager->fetchUriByCode($tenantcode, Tenant::TYPE);
+                if ($tenantUri === null) {
                     throw new ApiException(
-                        'The property  ' . $property .
-                        '  does not belong to standart properties of concepts and is not a user-defined relation. ',
-                        400
+                    'The tenant referred by code ' . $tenantcode .
+                    ' does not exist in the triple store. ', 400
                     );
+                };
+                $options['tenants'][] = $tenantUri;
+            }
+        }
+
+
+        // sets (former collections)
+
+        if (isset($params['setUri'])) {
+            $options['set'] = explode(' ', trim($params['setUri']));
+        } else {
+            $setcodes = null;
+            if (isset($params['set'])) {
+                $setcodes = explode(' ', trim($params['set']));
+            } else {
+                if (isset($params['collection'])) {
+                    $setcodes = explode(' ', trim($params['collection']));
+                }
+            }
+            if ($setcodes !== null) {
+                $options['sets'] = array();
+                foreach ($setcodes as $setcode) {
+                    $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
+                    if ($setUri === null) {
+                        throw new ApiException(
+                        "The set (former known as collection) referred by code  "
+                        . "$setcode does not exist in the triple store.", 400
+                        );
+                    } else {
+                        $options['sets'][] = $setUri;
+                    }
                 }
             }
         }
-        return true;
+
+        // concept scheme 
+        if (isset($params['conceptScheme'])) {
+            $options['scheme'] = explode(' ', trim($params['conceptScheme']));
+        } else {
+            if (isset($params['scheme'])) {
+                $options['scheme'] = explode(' ', trim($params['scheme']));
+            }
+        }
+
+        // skos collection
+        if (isset($params['skosCollection'])) {
+            $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
+        }
+
+
+        // search query
+        if (isset($params['q'])) {
+            $options['searchText'] = $params['q'];
+        }
+
+        if (isset($params['label'])) {
+            $options['label'] = explode(' ', trim($params['label']));
+        }
+
+        if (isset($params['properties'])) {
+            $options['properties'] = explode(' ', trim($params['properties']));
+        }
+
+        if (isset($params['sorts'])) {
+            $sortmap = $this->prepareSortsForSolr($params['sorts']);
+            $options['sorts'] = $sortmap;
+        }
+
+        if (isset($params['status'])) {
+            $options['status'] = explode(' ', trim($params['status']));
+        }
+
+        $options['wholeword'] = false;
+        if (isset($params['wholeword'])) {
+            if ($params['wholeword'] === 'true') {
+                $options['wholeword'] = true;
+            }
+        }
+
+        $concepts = $this->searchAutocomplete->search($options, $total);
+
+        foreach ($concepts as $concept) {
+            $specs = $this->manager->fetchConceptSpec($concept);
+            if ($this->init["custom.backward_compatible"]) {
+                foreach ($specs as $spec) {
+                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
+                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
+                    $concept->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
+                }
+            } else {
+                foreach ($specs as $spec) {
+                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($spec['seturi']));
+                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($spec['tenanturi']));
+                }
+            }
+        }
+
+
+        $result = new ResourceResultSet($concepts, $total, $start, $limit);
+
+        if (isset($params['fl'])) {
+            $propertiesList = $this->fieldsListToProperties($params['fl']);
+        } else {
+            $propertiesList = [];
+        }
+        switch ($context) {
+            case 'json':
+                $response = (new JsonResponse($result, $propertiesList))->getResponse();
+                break;
+            case 'jsonp':
+                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
+                break;
+            case 'rdf':
+                $response = (new RdfResponse($result, $propertiesList))->getResponse();
+                break;
+            default:
+                throw new InvalidArgumentException('Invalid context: ' . $context);
+        }
+        set_time_limit($this->init["custom.normal_time_limit"]);
+        return $response;
     }
 
     private function prepareSortsForSolr($sortstring)
@@ -461,9 +328,12 @@ class Concept extends AbstractTripleStoreResource
      */
     public function addRelationTriple(PsrServerRequestInterface $request)
     {
-        $params = $this->fetchUserTenantSetViaRequestParameters($request);
+        $params = $this->getParams($request);
+        $tenant = $this->getTenantFromParams($params);
+        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $set = $this->getSet($params, $tenant);
         try {
-            $body = $this->preEditChecksRels($request, $params, false);
+            $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (ApiException $exc) {
             return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
@@ -482,9 +352,12 @@ class Concept extends AbstractTripleStoreResource
      */
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
+        $params = $this->getParams($request);
+        $tenant = $this->getTenantFromParams($params);
+        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $set = $this->getSet($params, $tenant);
         try {
-            $params = $this->fetchUserTenantSetViaRequestParameters($request); // sets tenant info
-            $body = $this->preEditChecksRels($request, $params, true);
+            $body = $this->preEditChecksRels($request, $user, $tenant, $set, true);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
         } catch (Exception $e) {
             return $this->getErrorResponseFromException($e);
@@ -497,7 +370,7 @@ class Concept extends AbstractTripleStoreResource
         return $response;
     }
 
-    private function preEditChecksRels(PsrServerRequestInterface $request, $params, $toBeDeleted)
+    private function preEditChecksRels(PsrServerRequestInterface $request, $user, $tenant, $set, $toBeDeleted)
     {
 
         $body = $request->getParsedBody();
@@ -521,28 +394,7 @@ class Concept extends AbstractTripleStoreResource
             throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 404);
         }
 
-        $customRelUris = array_values($this->manager->getCustomRelationTypes());
-        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
-        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
-        if (in_array($body['type'], $allRelationUris)) { // is a concept-concept relation
-// if it is a user-defined relation type, it must be registered as a resource
-            if (in_array($body['type'], $customRelUris)) { // is a user-defined relation
-                if (!in_array($body['type'], $registeredRelationUris)) {
-                    throw new ApiException(
-                        'The relation  ' . $body['type'] .
-                        '  is not registered in the triple store. ',
-                        404
-                    );
-                }
-            }
-        } else {
-            throw new ApiException(
-                'The relation type ' . $body['type'] . '  is neither a skos concept-concept '
-                . 'relation type nor a user-defined relation type. ',
-                404
-            );
-        }
-
+        $validURI = $this->manager->isRelationURIValid($body['type']); // throws an exception otherwise
 
         if (!$toBeDeleted) {
             $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
@@ -551,19 +403,14 @@ class Concept extends AbstractTripleStoreResource
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
         $this->authorisation->resourceEditAllowed(
-            $params['user'],
-            $params['tenant'],
-            $params['set'],
-            $concept
+            $user, $tenant, $set, $concept
         ); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
         $this->authorisation->resourceEditAllowed(
-            $params['user'],
-            $params['tenant'],
-            $params['set'],
-            $relatedConcept
+            $user, $tenant, $set, $relatedConcept
         ); // throws an exception if not allowed
 
         return $body;
     }
+
 }

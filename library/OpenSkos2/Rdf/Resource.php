@@ -21,7 +21,6 @@ namespace OpenSkos2\Rdf;
 
 use DateTime;
 use OpenSkos2\Roles;
-use OpenSkos2\Custom\EPICHandleProxy;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces as Namespaces;
@@ -35,7 +34,6 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\RelationType;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Custom\UriGeneration;
-use Zend_Controller_Action_Exception;
 
 // Meertens: Picturae changes starting from 22/11/2016 are taken
 
@@ -515,25 +513,38 @@ class Resource extends Uri implements ResourceIdentifier
         return $result;
     }
 
-    // override for a concerete resources when necessary
-    public function addMetadata($existingResource, $userUri, $tenant, $set)
+    /**
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param string $tenantUri
+     * @param string $setUri
+     * @param \OpenSkos2\Person $person
+     * @param \OpenSkos2\PersonManager $personManager
+     * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
+     * override for a concerete resources when necessary
+     */
+     public function ensureMetadata(
+        $tenantUri, 
+        $setUri, 
+        \OpenSkos2\Person $person, 
+        \OpenSkos2\PersonManager $personManager, 
+        $existingResource = null)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
 
         if ($existingResource === null) { // a completely new resource under creation
-            $this->setProperty(DcTerms::CREATOR, new Uri($userUri));
+            $this->setProperty(DcTerms::CREATOR, $person); // $person must be upcasted to Uri
             $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
         } else {
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($userUri));
+            $this->addProperty(DcTerms::CONTRIBUTOR, $person); // $person must be upcasted to Uri
             if ($this->getType() != RelationType::TYPE) {
                 $this->setProperty(OpenSkos::UUID, $existingResource->getUuid());
             }
             $creators = $existingResource->getProperty(DcTerms::CREATOR);
             if (count($creators) === 0) {
-                $this->setProperty(DcTerms::CREATOR, new Literal(Roles::UNKNOWN));
+                $this->setProperty(DcTerms::CREATOR, new Literal("Unknown"));
             } else {
                 $this->setProperty(DcTerms::CREATOR, $creators[0]);
             }

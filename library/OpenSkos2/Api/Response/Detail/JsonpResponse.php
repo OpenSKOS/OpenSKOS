@@ -40,13 +40,12 @@ class JsonpResponse extends JsonResponse
      */
     public function __construct(
         \OpenSkos2\Rdf\Resource $resource,
-        $rdfType,
         $callback,
         $propertiesList,
-        $extraField,
-        $extraVals
+        $auxField = null,
+        $auxVals = []
     ) {
-        parent::__construct($resource, $rdfType, $propertiesList, $extraField, $extraVals);
+        parent::__construct($resource, $propertiesList, $auxField, $auxVals);
         $this->callback = $callback;
     }
 

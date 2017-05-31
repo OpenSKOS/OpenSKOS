@@ -115,6 +115,7 @@ class Namespaces
                     return "\OpenSkos2\Tenant";
                 case SkosCollection::TYPE:
                     return "\OpenSkos2\SkosCollection";
+                    // TODO: add Relationtype
                 default:
                     return "\OpenSkos2\Rdf\Resource";
             }

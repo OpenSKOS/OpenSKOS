@@ -46,11 +46,18 @@ class SkosCollection extends Resource
         }
     }
 
-    public function addMetadata($existingScheme, $userUri, $tenant, $set)
+    public function ensureMetadata(
+        $tenantUri, 
+        $setUri, 
+        \OpenSkos2\Person $person, 
+        \OpenSkos2\PersonManager $personManager, 
+        $existingSkosCollection = null)
+
     {
-        parent::addMetadata($existingScheme, $userUri, $tenant, $set);
+        parent::ensureMetadata($tenantUri, $setUri, $person, $personManager, $existingSkosCollection);
         if ($this->isPropertyEmpty(OpenSkos::SET)) {
-            $this->setProperty(OpenSkos::SET, $set);
+            $this->setProperty(OpenSkos::SET, new Uri($setUri));
         }
     }
+
 }

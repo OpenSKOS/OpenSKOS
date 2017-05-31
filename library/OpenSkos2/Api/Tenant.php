@@ -2,18 +2,22 @@
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\Api\AbstractTripleStoreResource;
-use OpenSkos2\TenantManager;
-use OpenSkos2\Authorisation;
-use OpenSkos2\Deletion;
-
 class Tenant extends AbstractTripleStoreResource
 {
 
-    public function __construct(TenantManager $manager)
+    /**
+     *
+     * @param \OpenSkos2\TenantManager $manager
+     * @param \OpenSkos2\PersonManager $personManager
+     */
+    public function __construct(
+    \OpenSkos2\TenantManager $manager, \OpenSkos2\PersonManager $personManager)
     {
         $this->manager = $manager;
-        $this->authorisation = new Authorisation($manager);
-        $this->deletion = new Deletion($manager);
+        $this->authorisation = new \OpenSkos2\Authorisation($manager);
+        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->personManager = $personManager;
+        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
     }
+
 }

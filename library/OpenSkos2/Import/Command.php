@@ -21,10 +21,11 @@ namespace OpenSkos2\Import;
 
 use Exception;
 use OpenSkos2\Concept;
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\Set;
 use OpenSkos2\Logging;
 use OpenSkos2\Converter\File;
-use OpenSkos2\Namespaces\Dcmi;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
@@ -82,12 +83,13 @@ class Command implements LoggerAwareInterface
      * @param PersonManager $personManager
      */
     public function __construct(
-    ResourceManager $resourceManager, Person $person, PersonManager $personManager
+    ResourceManager $resourceManager, Person $person, PersonManager $personManager, Tenant $tenant
     )
     {
         $this->resourceManager = $resourceManager;
         $this->personManager = $personManager;
         $this->person = $person;
+        $this->tenant = $tenant;
         $this->init = $resourceManager->getInitArray();
         $this->erroLog = '../../../' . $this->init["custom.error_log"];
     }
@@ -113,16 +115,6 @@ class Command implements LoggerAwareInterface
         $setUri = $message->getSetUri();
         $set = $this->resourceManager->fetchByUri($setUri, Set::TYPE);
 
-        // tenant
-        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-        if (count($tenantUris) < 1) {
-            throw new Exception2(
-            "The set " . $message->getSetUri() .
-            " is supplied without a proper publisher (tenant, isntitution). "
-            );
-        }
-        $tenantUri = $tenantUris[0]->getUri();
-        $this->tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
 
         //** Some purging stuff from the original picturae code
         if ($message->getClearSet()) {
@@ -177,10 +169,10 @@ class Command implements LoggerAwareInterface
 
             if (type === Concept::TYPE) {
                 $resourceToInsert = $this->specialConceptImportLogic(
-                    $message, $tenantUri, $setUri, $existingResource, $resourceToInsert
+                    $message, $setUri, $resourceToInsert, $existingResource
                 );
             } else {
-                $resourceToInsert->ensureMetadata($tenantUri, $setUri, $this->person, $this->personManager, $existingResource);
+                $resourceToInsert->ensureMetadata($this->tenant->getUri(), $setUri, $this->person, $this->personManager, $existingResource);
             }
 
             $validator = new ResourceValidator(
@@ -206,47 +198,58 @@ class Command implements LoggerAwareInterface
     private function handleRemovingDanglingConceptReferencesRound(Message $message)
     {
         $conceptURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(
-            Rdf::TYPE, '<' . Skos::CONCEPT . '>'
+            Rdf::TYPE, '<' . Concept::TYPE . '>'
         );
-        
+
+        $schemeURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(
+            Rdf::TYPE, '<' . ConceptScheme::TYPE . '>'
+        );
+
+        $skoscollectionURIs = $this->resourceManager->fetchSubjectWithPropertyGiven(
+            Rdf::TYPE, '<' . SkosCollection::TYPE . '>'
+        );
+
+        $uris = array();
+        $uris[Concept::TYPE] = $conceptURIs;
+        $uris[ConceptScheme::TYPE] = $schemeURIs;
+        $uris[SkosCollection::TYPE] = $skoscollectionURIs;
+
         // set
         $setUri = $message->getSetUri();
-        $set = $this->resourceManager->fetchByUri($setUri, Dcmi::DATASET);
-        
-        // tenant 
-        $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-        if (count($tenantUris) < 1) {
-            throw new Exception2("The set " . $message->getSetUri() .
-            " is supplied without a proper publisher (tenant, isntitution). ");
-        }
-        $tenantUri = $tenantUris[0]->getUri();
-        $this->tenant = $this->resourceManager->fetchByUri($tenantUri, Tenant::TYPE);
+        $set = $this->resourceManager->fetchByUri($setUri, Set::TYPE);
 
-        foreach ($conceptURIs as $uri) {
-            $concept = $this->resourceManager->fetchByUri($uri, Skos::CONCEPT);
-             $validator = new ResourceValidator(
-                $this->resourceManager, $this->tenant, $set, true, true, true
-            );
-            $valid = $validator->validate($concept);
-            $cleanedConcept = $this->removeDanglingConeptRelationReferences(
-                $concept, $validator->getDanglingReferences()
-            );
-            $valid = $validator->validate($cleanedConcept);
-            if (!$valid) {
-                $this->handleInvalidResource($uri, Concept::TYPE, $validator, $cleanedConcept);
-                continue;
+        foreach ($uris as $type => $refs) {
+            foreach ($refs as $uri) {
+                $resource = $this->resourceManager->fetchByUri($uri, $type);
+                $validator = new ResourceValidator(
+                    $this->resourceManager, $this->tenant, $set, true, true, true
+                );
+                $valid = $validator->validate($resource);
+                $cleanedResource = $this->removeDanglingReferences(
+                    $resource, $validator->getDanglingReferences()
+                );
+                if ($type === Concept::TYPE) {
+                    $cleanedResource = $this->specialConceptImportLogic(
+                        $message, $setUri, $cleanedResource, $resource
+                    );
+                } else {
+                    $cleanedResource->ensureMetadata($this->tenant->getUri(), $setUri, $this->person, $this->personManager, $resource);
+                }
+                $valid = $validator->validate($cleanedResource);
+                if (!$valid) {
+                    $this->handleInvalidResource($uri, $type, $validator, $cleanedResource);
+                    continue;
+                }
+                $this->handleWarnings($uri, $validator);
+
+                $this->resourceManager->insert($cleanedResource);
+                var_dump($cleanedResource->getUri() . " has been updated.");
             }
-            $this->handleWarnings($uri, $validator);
-            $cleanedConcept = $this->specialConceptImportLogic(
-                $message, $cleanedConcept, $concept
-            );
-            $this->resourceManager->insert($cleanedConcept);
-            var_dump($cleanedConcept->getUri() . " has been updated.");
         }
         return $this->black_list;
     }
 
-    private function specialConceptImportLogic($message, $tenantUri, $setUri, $conceptToInsert, $existingConcept)
+    private function specialConceptImportLogic($message, $setUri, $conceptToInsert, $existingConcept)
     {
         if ($message->getIgnoreIncomingStatus()) {
             $conceptToInsert->unsetProperty(OpenSkos::STATUS);
@@ -273,7 +276,7 @@ class Command implements LoggerAwareInterface
                 }
 
                 $conceptToInsert->ensureMetadata(
-                    $tenantUri, $setUri, $this->person, $this->personManager, $existingConcept
+                    $this->tenant->getUri(), $setUri, $this->person, $this->personManager, $existingConcept
                 );
             }
         }
@@ -292,8 +295,8 @@ class Command implements LoggerAwareInterface
         }
         var_dump($resourceToInsert->getUri() .
             " cannot not been inserted due to the validation error(s) above.");
-        $this->resourceManager->delete($resourceToInsert, $type); 
-        $this->resourceManager->deleteReferencesToObject($resourceToInsert); 
+        $this->resourceManager->delete($resourceToInsert, $type);
+        $this->resourceManager->deleteReferencesToObject($resourceToInsert);
     }
 
     private function handleWarnings($uri, $validator)
@@ -304,7 +307,7 @@ class Command implements LoggerAwareInterface
         }
     }
 
-    private function removeDanglingConeptRelationReferences($resource, $danglings)
+    private function removeDanglingReferences($resource, $danglings)
     {
         $properties = $resource->getProperties();
         foreach ($properties as $property => $values) {

@@ -31,7 +31,7 @@ class API_RelationtypeController extends AbstractController {
 
   public function init() {
     parent::init();
-    $this->fullNameResourceClass = 'OpenSkos2\Api\RelationType';
+    $this->apiResourceClass = 'OpenSkos2\Api\RelationType';
     $this->viewpath = "relationtype/";
   }
 
@@ -235,7 +235,7 @@ class API_RelationtypeController extends AbstractController {
     if (isset($members) && ($members === 'true' || $members === "1")) {
 // lists all pairs of concepts in relation type with $params['id']
       $request = $this->getPsrRequest();
-      $api = $this->getDI()->make($this->fullNameResourceClass);
+      $api = $this->getDI()->make($this->apiResourceClass);
       $response = $api->listRelatedConceptPairs($request);
       $this->emitResponse($response);
     } else {
@@ -244,7 +244,7 @@ class API_RelationtypeController extends AbstractController {
 // outputs all concepts-"targets" such that (conceptUri, relation, "target") holds if "isTarget=false" (default)
 // outputs all concepts-"sources" such that ("source", relation, conceptUri) holds if "isTarget=true" 
         $request = $this->getPsrRequest();
-        $api = $this->getDI()->make($this->fullNameResourceClass);
+        $api = $this->getDI()->make($this->apiResourceClass);
         $format = $this->getRequestedFormat();
         $response = $api->findRelatedConcepts($request, $conceptUri, $format);
         $this->emitResponse($response);

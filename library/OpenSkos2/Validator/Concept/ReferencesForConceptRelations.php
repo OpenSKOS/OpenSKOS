@@ -27,30 +27,86 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
 
     protected function validateConcept(Concept $concept)
     {
-        $nonrelationproperties = array_merge(Concept::$classes['ConceptSchemes'], Concept::$classes['SkosCollections']);
-        array_push($nonrelationproperties, \OpenSkos2\Namespaces\DcTerms::CREATOR, \OpenSkos2\Namespaces\Rdf::TYPE);
+        $valid = $this->checkValidityOfRelations($concept);
+        if ($this->conceptReferenceCheckOn) {
+            $init = $this->manager->getInitArray();
+            $strict = $this->strictCheckRelatedConcepts($concept, $init);
+            $soft = $this->softCheckRelatedConcepts($concept, $init);
+        } else {
+            $strict = true;
+        }
+        return $valid && $strict;
+    }
+
+    private function strictCheckRelatedConcepts(Concept $concept, $init)
+    {
+        $errorsBefore = count($this->errorMessages);
+        $toCheck = explode(" ", $init["custom.relations_strict_reference_check"]);
+        for ($i = 0; $i < count($toCheck); $i++) {
+            $toCheck[$i] = trim($toCheck[$i]);
+        }
         $properties = $concept->getProperties();
         foreach ($properties as $key => $values) {
-            if (count($values) > 0) {
-                if ($values[0] instanceof \OpenSkos2\Rdf\Uri) {
-                    if (!in_array($key, $nonrelationproperties)) {
-                        foreach ($values as $value) {
-                            $messages = $this->existenceCheck($value, Concept::TYPE);
-                            if (count($messages) === 0) {
-                                continue;
-                            }
-                            if ($this->softConceptRelationValidation) {
-                                $this->warningMessages[] = $messages[0] .
-                                    " Consult the list of dangling references for correction. ";
-                                $this->danglingReferences[] = $value->getUri();
-                            } else {
-                                $this->errorMessages[] = $messages[0];
-                            }
-                        }
+            if (in_array($key, $toCheck)) {
+                foreach ($values as $value) {
+                    $messages = $this->existenceCheck($value, Concept::TYPE);
+                    if (count($messages) > 0) {
+                        $this->errorMessages[] = implode($messages);
                     }
                 }
             }
         }
-        return (count($this->errorMessages) === 0);
+        return ($errorsBefore === count($this->errorMessages));
+    }
+
+    private function softCheckRelatedConcepts(Concept $concept, $init)
+    {
+        $toCheck = explode(" ", $init["custom.relations_soft_reference_check"]);
+        for ($i = 0; $i < count($toCheck); $i++) {
+            $toCheck[$i] = trim($toCheck[$i]);
+        }
+        $properties = $concept->getProperties();
+        foreach ($properties as $key => $values) {
+            if (in_array($key, $toCheck)) {
+                foreach ($values as $value) {
+                    $messages = $this->existenceCheck($value, Concept::TYPE);
+                    if (count($messages) > 0) {
+                        $this->warningMessages[] = implode($messages) .
+                            " Consult the list of dangling references for correction. ";
+                        $this->danglingReferences[] = $value;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    private function checkValidityOfRelations(Concept $concept)
+    {
+        $errorsBefore = count($this->errorMessages);
+        $customRelUris = array_values($this->getCustomRelationTypes());
+        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
+        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
+        $conceptUri = $concept->getUri();
+        $properties = array_keys($concept->getProperties());
+        foreach ($properties as $property) {
+            if (in_array($property, $allRelationUris)) {
+                try {
+                    $this->resourceManager->isRelationURIValid($property, 
+                        $customRelUris, 
+                        $registeredRelationUris, 
+                        $allRelationUris); // throws an Exception
+                    $relatedConcepts = $concept->getProperty($property);
+                    foreach ($relatedConcepts as $relConceptUri) {
+                        // both throw an exception unless it is ok
+                        $this->resourceManager->relationTripleIsDuplicated($conceptUri, $relConceptUri, $property);
+                        $this->resourceManager->relationTripleCreatesCycle($conceptUri, $relConceptUri, $property);
+                    }
+                } catch (Exception $ex) {
+                    $this->errorMessages[] = $ex->getMessage();
+                }
+            } 
+        }
+        return ($errorsBefore === count($this->errorMessages));
     }
 }

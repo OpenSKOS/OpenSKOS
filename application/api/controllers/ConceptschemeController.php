@@ -8,7 +8,7 @@ class Api_ConceptschemeController extends AbstractController
      public function init()
     {
        parent::init();
-       $this->fullNameResourceClass = 'OpenSkos2\Api\ConceptScheme';
+       $this->apiResourceClass = 'OpenSkos2\Api\ConceptScheme';
        $this ->viewpath="conceptscheme/";
     }
     
