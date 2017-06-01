@@ -13,6 +13,7 @@ use OpenSkos2\Roles;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 
+
 class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 {
 
@@ -40,19 +41,25 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
         switch ($type) {
             case Concept::TYPE:
-                return $this->conceptCreationAllowed($user, $tenant, $resource);
+                $this->conceptCreationAllowed($user, $tenant, $resource);
+                return;
             case ConceptScheme::TYPE:
-                return $this->conceptSchemeCreationAllowed($user, $tenant, $resource);
+                $this->conceptSchemeCreationAllowed($user, $tenant, $resource);
+                return;
             case Set::TYPE:
-                return $this->setCreationAllowed($user, $tenant, $resource);
+                $this->setCreationAllowed($user, $tenant, $resource);
+                return;
             case Tenant::TYPE:
-                return $this->tenantCreationAllowed($user);
+                $this->tenantCreationAllowed($user);
+                return;
             case SkosCollection::TYPE:
-                return $this->skosCollectionCreationAllowed($user, $tenant, $resource);
+                $this->skosCollectionCreationAllowed($user, $tenant, $resource);
+                return;
             case RelationType::TYPE:
-                return $this->relationCreationAllowed($user, $tenant, $resource);
+                $this->relationCreationAllowed($user, $tenant, $resource);
+                return;
             default:
-                return false;
+                throw new InvalidArgumentException('Unknown resource type is passed to the Authorisation checker', 401);
         }
     }
 
@@ -73,19 +80,25 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
         switch ($type) {
             case Concept::TYPE:
-                return $this->conceptEditAllowed($user, $tenant, $resource);
+                $this->conceptEditAllowed($user, $tenant, $resource);
+                return;
             case ConceptScheme::TYPE:
-                return $this->conceptSchemeEditAllowed($user, $tenant, $resource);
+                $this->conceptSchemeEditAllowed($user, $tenant, $resource);
+                return;
             case Set::TYPE:
-                return $this->setEditAllowed($user, $tenant, $resource);
+                $this->setEditAllowed($user, $tenant, $resource);
+                return;
             case Tenant::TYPE:
-                return $this->tenantEditAllowed($user);
+                $this->tenantEditAllowed($user);
+                return;
             case SkosCollection::TYPE:
-                return $this->skosCollectionEditAllowed($user, $tenant, $resource);
+                $this->skosCollectionEditAllowed($user, $tenant, $resource);
+                return;
             case RelationType::TYPE:
-                return $this->relationEditAllowed($user, $tenant, $resource);
+                $this->relationEditAllowed($user, $tenant, $resource);
+                return;
             default:
-                return false;
+                throw new InvalidArgumentException('Unknown resource type is passed to the Authorisation checker', 401);
         }
     }
 
@@ -106,19 +119,25 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
         switch ($type) {
             case Concept::TYPE:
-                return $this->conceptDeleteAllowed($user, $tenant, $resource);
+                $this->conceptDeleteAllowed($user, $tenant, $resource);
+                return;
             case ConceptScheme::TYPE:
-                return $this->conceptSchemeDeleteAllowed($user, $tenant, $resource);
+                $this->conceptSchemeDeleteAllowed($user, $tenant, $resource);
+                return;
             case Set::TYPE:
-                return $this->setDeleteAllowed($user, $tenant, $resource);
+                $this->setDeleteAllowed($user, $tenant, $resource);
+                return;
             case Tenant::TYPE:
-                return $this->tenantDeleteAllowed($user);
+                $this->tenantDeleteAllowed($user);
+                return;
             case SkosCollection::TYPE:
-                return $this->skosCollectionDeleteAllowed($user, $tenant, $resource);
+                $this->skosCollectionDeleteAllowed($user, $tenant, $resource);
+                return;
             case RelationType::TYPE:
-                return $this->relationDeleteAllowed($user, $tenant, $resource);
+                $this->relationDeleteAllowed($user, $tenant, $resource);
+                return;
             default:
-                return false;
+                throw new InvalidArgumentException('Unknown resource type is passed to the Authorisation checker', 401);
         }
     }
 
@@ -135,8 +154,10 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot delete this resource', 403);
+        }
     }
 
     private function resourceCreationAllowedBasic(
@@ -152,9 +173,10 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT ||
-            $user->role === Roles::EDITOR);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot delete this resource', 403);
+        }
     }
 
     private function resourceEditAllowedBasic(
@@ -170,9 +192,10 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return ($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT ||
-            $user->role === Roles::EDITOR);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot delete this resource', 403);
+        }
     }
 
     private function conceptCreationAllowed(
@@ -198,7 +221,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 403
             );
         }
-        return true;
+        
     }
 
     private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $concept)
@@ -233,32 +256,32 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     private function conceptDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $concept)
     {
-        return $this->conceptEditAllowed($user, $tenant, $concept);
+        $this->conceptEditAllowed($user, $tenant, $concept);
     }
 
     private function conceptSchemeCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceCreationAllowedBasic($user, $tenant, $resource);
+        $this->resourceCreationAllowedBasic($user, $tenant, $resource);
     }
 
     private function conceptSchemeEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceEditAllowedBasic($user, $tenant, $resource);
+        $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
     private function conceptSchemeDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
+        $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
 
     private function setCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceCreationAllowedBasic($user, $tenant, $resource);
+        $this->resourceCreationAllowedBasic($user, $tenant, $resource);
     }
 
     private function setEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceEditAllowedBasic($user, $tenant, $resource);
+        $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
     private function setDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
@@ -268,47 +291,56 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     private function tenantCreationAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot create this resource', 403);
+        }
     }
 
     private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot edit this resource', 403);
+        }
     }
 
     private function tenantDeleteAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
-        return ($user->role === Roles::ADMINISTRATOR || $user->role === Roles::ROOT);
+        if (!($user->role === Roles::ADMINISTRATOR ||
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            throw new UnathorisedException('User the the role '.$user->role. ' cannot delete this resource', 403);
+        }
     }
 
     private function skosCollectionCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceCreationAllowedBasic($user, $tenant, $resource);
+        $this->resourceCreationAllowedBasic($user, $tenant, $resource);
     }
 
     private function skosCollectionEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceEditAllowedBasic($user, $tenant, $resource);
+        $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
     private function skosCollectionDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
+        $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
 
     private function relationCreationAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceCreationAllowedBasic($user, $tenant, $resource);
+        $this->resourceCreationAllowedBasic($user, $tenant, $resource);
     }
 
     private function relationEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceEditAllowedBasic($user, $tenant, $resource);
+       $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
     private function relationDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
     {
-        return $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
+        $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
 
     private function checkSet($set, $resource)

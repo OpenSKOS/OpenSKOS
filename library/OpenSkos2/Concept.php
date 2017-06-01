@@ -31,9 +31,7 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
 use OpenSkos2\Custom\UriGeneration;
 use OpenSkos2\PersonManager;
 use Rhumsaa\Uuid\Uuid;
@@ -226,12 +224,12 @@ class Concept extends Resource
         );
     }
 
-    public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
+    public function selfGenerateUri($tenant, $set, ConceptManager $manager)
     {
         $init = $manager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {
             $customGen = new UriGeneration();
-            return $customGen->selfGenerateUri($manager, $this);
+            return $customGen->generateUri($manager, $this);
         }
 
         $uuid = Uuid::uuid4();

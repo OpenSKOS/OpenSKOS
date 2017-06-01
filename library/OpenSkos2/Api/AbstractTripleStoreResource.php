@@ -28,6 +28,7 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use Psr\Http\Message\ResponseInterface;
@@ -167,7 +168,7 @@ abstract class AbstractTripleStoreResource
     }
 
     /**
-     * Update a concept
+     * Update a resource
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -176,20 +177,34 @@ abstract class AbstractTripleStoreResource
     {
         try {
             $params = $this->getParams($request);
-            $tenant = $this->getTenantFromParams($params);
-            $resource = $this->getResourceFromRequest($request, $tenant);
+            
+            $tenantAndSet = $this->getTenantAndSetFromParams($params);
+            
+            $resource = $this->getResourceFromRequest($request, $tenantAndSet['tenant']);
             $existingResource = $this->manager->fetchByUri((string) $resource->getUri());
-            $set = $this->getSet($params, $tenant);
-            $person = $this->getUserFromParams($params)->getFoafPerson();
-            $this->authorisation->resourceEditAllowed($person, $tenant, $set, $resource);
-            $resource->ensureMetadata($tenant->getUri(), $set->getUri(), $person, $this->personManager, $existingResource);
-            $this->validate($resource, $tenant, $set, true);
-            $this->manager->replaceAndCleanRelations($resource);
+            
+            $user = $this->getUserFromParams($params);
+            
+            $this->authorisation->resourceEditAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
+            $resource->ensureMetadata(
+                $tenantAndSet['tenantUri'], 
+                $tenantAndSet['setUri'], 
+                $user->getFoafPerson(), 
+                $this->personManager, 
+                $existingResource);
+            
+            $this->validate($resource, $tenantAndSet['tenant'], $tenantAndSet['set'], true);
+            
+            if ($this->manager->getResourceType() === Concept::TYPE) {
+                $this->manager->replaceAndCleanRelations($resource);
+            }
+            
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         } catch (ResourceNotFoundException $ex) {
             return $this->getErrorResponse(404, 'Resource not found try insert');
         }
+        
         $xml = (new DataRdf($resource))->transform();
         return $this->getSuccessResponse($xml);
     }
@@ -205,32 +220,38 @@ abstract class AbstractTripleStoreResource
     public function delete(ServerRequestInterface $request)
     {
         try {
-            $rdfType = $this->manager->getResourceType();
+            
             $params = $request->getQueryParams();
             if (empty($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter');
             }
+            
             $id = $params['id'];
-            /* @var $resource \OpenSkos2\Resource */
-            $resource = $this->manager->fetchByUri($id);
+            $rdfType = $this->manager->getResourceType();
+            $resource = $this->manager->fetchByUri($id, $rdfType);
             if (!$resource) {
                 throw new NotFoundException('Resource not found by id :' . $id, 404);
             }
+            
+            
             if ($rdfType === Concept::TYPE) {
                 if ($resource->isDeleted()) {
                     throw new NotFoundException('Resource already deleted :' . $id, 410);
                 }
             }
-            $person = $this->getUserFromParams($params)->getFoafPerson();
-            $tenant = $this->getTenantFromParams($params);
-            $set = $this->getSet($params, $tenant);
-            $this->authorisation->resourceDeleteAllowed($person, $tenant, $set, $resource);
-            $this->deletion->canBeDeleted($this->manager); // deletion is blocked for non-concept resources if nthere are references to this resource; deletion for concepts is not blocked; can be customized
+            
+            $user = $this->getUserFromParams($params);
+            $tenantAndSet = $this->getTenantAndSetFromParams($params);
+            
+            $this->authorisation->resourceDeleteAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
+            $this->deletion->canBeDeleted($id); // deletion is blocked for non-concept resources if nthere are references to this resource; deletion for concepts is not blocked; can be customized
+            
             if ($rdfType === Concept::TYPE) {
                 $this->manager->deleteSoft($resource);
             } else {
                 $this->manager->delete($resource);
             }
+            
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
@@ -289,7 +310,11 @@ abstract class AbstractTripleStoreResource
     {
         // the last parameter switches check if the referred within the resource objects do exists in the triple store
         $validator = new ResourceValidator(
-            $this->manager, $tenant, $set, $isForUpdate, true
+            $this->manager, 
+            $tenant, 
+            $set, 
+            $isForUpdate, 
+            true
         );
         if (!$validator->validate($resource)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
@@ -306,40 +331,43 @@ abstract class AbstractTripleStoreResource
     private function handleCreate(ServerRequestInterface $request)
     {
         $params = $this->getParams($request);
-        if ($this->manager->getResourceType() !== Tenant::TYPE) {
-            $tenant = $this->getTenantFromParams($params);
-            $tenantUri = $tenant->getUri();
-            if ($this->manager->getResourceType() !== Set::TYPE) {
-                $set = $this->getSet($params, $tenant);
-                $setUri = $set->getUri();
-            } else {
-                $set = null;
-                $setUri = null;
-            }
-        } else {
-            $tenant = null;
-            $tenantUri = null;
-            $set = null;
-            $setUri = null;
-        }
-        $resource = $this->getResourceFromRequest($request, $tenant);
+        
+        $tenantAndSet = $this->getTenantAndSetFromParams($params);
+        
+        $resource = $this->getResourceFromRequest($request, $tenantAndSet['tenant']);
+        
         if (!$resource->isBlankNode() && $this->manager->askForUri((string) $resource->getUri())) {
             throw new InvalidArgumentException(
             'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
             );
         }
+        
         $person = $this->getUserFromParams($params)->getFoafPerson();
+        
         $resource->ensureMetadata(
-            $tenantUri, $setUri, $person, $this->personManager
+            $tenantAndSet['tenantUri'], 
+            $tenantAndSet['setUri'], 
+            $person, 
+            $this->personManager
         );
+        
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
+        
         if ($autoGenerateUri) {
             $resource->selfGenerateUri(
-                $this->manager, $tenant, $set
+                $tenantAndSet['tenant'], 
+                $tenantAndSet['set'],
+                $this->manager 
             );
         }
-        $this->validate($resource, $tenant, $set, false);
+        $this->validate(
+            $resource, 
+            $tenantAndSet['tenant'], 
+            $tenantAndSet['set'], 
+            false);
+        
         $this->manager->insert($resource);
+        
         $rdf = (new DataRdf($resource))->transform();
         return $this->getSuccessResponse($rdf, 201);
     }
@@ -410,7 +438,9 @@ abstract class AbstractTripleStoreResource
     private function getResourceFromRequest(ServerRequestInterface $request, $tenant)
     {
         $doc = $this->getDomDocumentFromRequest($request);
+        
         $descriptions = $doc->documentElement->getElementsByTagNameNS(Rdf::NAME_SPACE, 'Description');
+        
         if ($descriptions->length != 1) {
             throw new InvalidArgumentException(
             'Expected exactly one '
@@ -419,9 +449,10 @@ abstract class AbstractTripleStoreResource
         }
         // remove the api key
         $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
+        
         $resources = (new Text($doc->saveXML()))->getResources();
-        /** @var $resource * */
         $resource = $resources[0];
+        
         $rdfType = $this->manager->getResourceType();
         $className = Namespaces::mapRdfTypeToClassName($rdfType);
         if (!isset($resource) || !$resource instanceof $className) {
@@ -435,8 +466,7 @@ abstract class AbstractTripleStoreResource
                 $resource->addUniqueProperty(OpenSkos::TENANT, new Uri($xmlTenant));
             }
             // If there still is no tenant add it from the query params
-            $params = $request->getQueryParams();
-            if (!$resource->getTenant() && isset($params['tenant'])) {
+            if (!$resource->getTenant()) {
                 $resource->addUniqueProperty(OpenSkos::TENANT, $tenant); // $tenant must be upcasted to Uri-type
             }
             if (!$resource->getTenant()) {
@@ -476,7 +506,8 @@ abstract class AbstractTripleStoreResource
     /**
      * @param $params
      * @param Tenant $tenant
-     * @return Set * @throws InvalidArgumentException
+     * @return Set
+     * @throws InvalidArgumentException
      */
     private function getSet($params, $tenant)
     {
@@ -499,9 +530,9 @@ abstract class AbstractTripleStoreResource
                 "No such $setName `$code`", 404
                 );
             }
-            $tenantsOfSet = $set->getProperty(OpenSkos::TENANT);
-            if (count($tenantsOfSets) === 1) {
-                if ($tenantsOfSets[0]->getUri() !== $tenant->getUri()) {
+            $publishers = $set->getProperty(DcTerms::PUBLISHER);
+            if (count($publishers) === 1) {
+                if ($publishers[0]->getUri() !== $tenant->getUri()) {
                     throw new InvalidArgumentException(
                     "No such $setName `$code` in this tenant.", 404
                     );
@@ -517,6 +548,11 @@ abstract class AbstractTripleStoreResource
         }
     }
 
+     /**
+     * Removed getErrorResponse function definition because it is already declared in ApiResponseTrait
+     */
+    
+    
     /**
      * Get success response
      *
@@ -533,6 +569,7 @@ abstract class AbstractTripleStoreResource
         return $response;
     }
 
+   
     /**
      * Check if we need to generate or not concept identifiers (uri).
      * Validates any existing identifiers.
@@ -545,6 +582,7 @@ abstract class AbstractTripleStoreResource
     private function checkResourceIdentifiers(ServerRequestInterface $request, $resource)
     {
         $params = $request->getQueryParams();
+        
         // We return if an uri must be autogenerated
         $autoGenerateIdentifiers = false;
         if (!empty($params['autoGenerateIdentifiers'])) {
@@ -552,6 +590,7 @@ abstract class AbstractTripleStoreResource
                 $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
             );
         }
+        
         if ($autoGenerateIdentifiers) {
             if (!$resource->isBlankNode()) {
                 throw new InvalidArgumentException(
@@ -567,6 +606,7 @@ abstract class AbstractTripleStoreResource
                 );
             }
         }
+        
         return $autoGenerateIdentifiers;
     }
 
@@ -597,11 +637,12 @@ abstract class AbstractTripleStoreResource
         return $this->getUserByKey($params['key']);
     }
 
+    
     public function getResourceListResponse($params)
     {
         try {
             $index = $this->getResourceList($params);
-            $init = $this->manager->getInitArray();
+            
             // augmenting with tenants and sets when necessary
             $rdfType = $this->manager->getResourceType();
             if ($rdfType === Concept::TYPE) {
@@ -613,9 +654,14 @@ abstract class AbstractTripleStoreResource
                     }
                 }
             }
+            
             $result = new ResourceResultSet(
-                $index, count($index), 1, $init["custom.maximal_rows"]
+                $index, 
+                count($index),
+                1,
+                $this->init["custom.maximal_rows"]
             );
+            
             switch ($params['context']) {
                 case 'json':
                     $response = (new JsonResponse($result, $rdfType, []))->getResponse();
@@ -656,6 +702,31 @@ abstract class AbstractTripleStoreResource
     {
         $index = $this->manager->fetchNameUri();
         return $index;
+    }
+
+    private function getTenantAndSetFromParams($params)
+    {
+        if ($this->manager->getResourceType() !== Tenant::TYPE) {
+            $tenant = $this->getTenantFromParams($params);
+            $tenantUri = $tenant->getUri();
+            if ($this->manager->getResourceType() !== Set::TYPE) {
+                $set = $this->getSet($params, $tenant);
+                $setUri = $set->getUri();
+            } else {
+                $set = null;
+                $setUri = null;
+            }
+        } else {
+            $tenant = null;
+            $tenantUri = null;
+            $set = null;
+            $setUri = null;
+        }
+        $retVal = [];
+        $retVal['tenant'] = $tenant;
+        $retVal['tenantUri'] = $tenantUri;
+        $retVal['set'] = $set;
+        $retVal['setUri'] = $setUri;
     }
 
 }

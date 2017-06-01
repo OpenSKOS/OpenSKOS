@@ -251,7 +251,7 @@ function insert_tenant($code, $tenantMySQL, $resourceManager, $enableStatussesSy
 
     $tenantResource = new \OpenSkos2\Tenant();
     // selfGenerateUri(ResourceManager $manager, $tenant, $set)
-    $uri = $tenantResource->selfGenerateUri($resourceManager, null, null);
+    $uri = $tenantResource->selfGenerateUri(null, null, $resourceManager);
     var_dump("Generated Uri for the tenant: ". $uri. "\n ");
     set_property_with_check($tenantResource, OpenSkos::CODE, $code);
     $organisation = new \OpenSkos2\Rdf\Resource($baseUri . 'node-org-' . Uuid::uuid4());
@@ -282,7 +282,7 @@ function insert_set($code, $collectionMySQL, $resourceManager, $tenant, $default
 {
     var_dump("Inserting the set (former collection) ... \n");
     $setResource = new \OpenSkos2\Set();
-    $uri = $setResource->selfGenerateUri($resourceManager, $tenant, null);
+    $uri = $setResource->selfGenerateUri($tenant, null, $resourceManager);
     var_dump("An uri $uri  is generated for the set. \n");
     
     set_property_with_check($setResource, OpenSkos::CODE, $code);

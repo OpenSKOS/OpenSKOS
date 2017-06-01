@@ -2,6 +2,8 @@
 
 namespace OpenSkos2;
 
+use OpenSkos2\Api\Exception\InvalidArgumentException;
+
 class Deletion implements \OpenSkos2\Interfaces\Deletion
 {
 
@@ -22,17 +24,18 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
 
     public function canBeDeleted($uri)
     {
+        $allowed = true;
         if ($this->defaultOn) {
             if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
                 $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
                 $references = $this->resourceManager->query($query);
-                return (($references[0]->COUNT->getValue()) < 1);
-            } else {
-                return true; // but clean references for concepts
+                if (($references[0]->COUNT->getValue()) >0) {
+                   throw new InvalidArgumentException('The resource cannot be deleted because there are other resources referring to it within this storage', 401); 
+                }
             }
         } else {
-            return $this->customDeletion->canBeDeleted($uri);
-        }
+            $this->customDeletion->canBeDeleted($uri);
+        }      
     }
 
 }

@@ -23,29 +23,24 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     public function resourceCreationAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
-        if ($this->defaultOn) {
-            return true;
-        } else {
-            return $this->customAuthorisation->resourceCreationAllowed($user, $tenant, $set, $resource);
+        if (!$this->defaultOn) {
+            $this->customAuthorisation->resourceCreationAllowed($user, $tenant, $set, $resource);
         }
     }
 
     public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
 
-        if ($this->defaultOn) {
-            return true;
-        } else {
-            return $this->customAuthorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+        if (!$this->defaultOn) {
+            $this->customAuthorisation->resourceEditAllowed($user, $tenant, $set, $resource);
         }
     }
 
     public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
     {
-        if ($this->defaultOn) {
-            return true;
-        } else {
-            return $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+        if (!$this->defaultOn) {
+            $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
         }
     }
+
 }

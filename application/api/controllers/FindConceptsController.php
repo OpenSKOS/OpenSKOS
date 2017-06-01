@@ -138,31 +138,6 @@ class Api_FindConceptsController extends AbstractController
         $request = $this->getPsrRequest();
         $response = $concept->findConcepts($request, $context);
         $this->emitResponse($response);
-        
-        
-        /*
-        $format = $this->getRequest()->getParam('format');
-        if ($format === 'html') {
-            $this->getHelper('layout')->enableLayout();
-            return $this->renderScript('concept/index.phtml');
-        } else {
-            if (null === ($q = $this->getRequest()->getParam('q'))) {
-
-                $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
-                throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
-            }
-
-            $this->getHelper('layout')->disableLayout();
-            $this->_helper->viewRenderer->setNoRender(true);
-            $concept = $this->getDI()->make('OpenSkos2\Api\Concept');
-            $context = $this->_helper->contextSwitch()->getCurrentContext();
-            $request = $this->getPsrRequest();
-            $response = $concept->findConcepts($request, $context);
-            $this->emitResponse($response);
-        }
-         * */
-         
     }
 
     /**
@@ -227,10 +202,7 @@ class Api_FindConceptsController extends AbstractController
      *   &lt;/rdf:RDF>
      *
      */
-    public function getAction()
-    {
-        parent::getAction();
-    }
+    
 
     public function postAction()
     {

@@ -606,19 +606,19 @@ class Resource extends Uri implements ResourceIdentifier
 
    
 
-    public function selfGenerateUri(ResourceManager $manager, $tenant, $set)
+    public function selfGenerateUri($tenant, $set, ResourceManager $manager)
     {
         $init = $manager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {
             $customGen = new UriGeneration();
-            return $customGen->selfGenerateUri($manager, $this);
+            return $customGen->generateUri($manager, $this);
         }
         
         $uuid = Uuid::uuid4();
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-                'The concept already has an uri. Can not generate new one.'
+                'The resource already has an uri. Can not generate new one.'
             );
         }
 
@@ -633,7 +633,9 @@ class Resource extends Uri implements ResourceIdentifier
         }
 
         $this->setUri($uri);
+        
         $this->setProperty(OpenSkos::UUID, new Literal($uuid));
+        
         return $uri;
     }
 

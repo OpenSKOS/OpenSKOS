@@ -11,7 +11,7 @@ use Rhumsaa\Uuid\Uuid;
 class UriGeneration implements \OpenSkos2\Interfaces\UriGeneration
 {
 
-    public function selfGenerateUri($manager, $resource)
+    public function generateUri($manager, $resource)
     {
         if (EPICHandleProxy::enabled()) {
             $uuid = Uuid::uuid4();
@@ -41,7 +41,7 @@ class UriGeneration implements \OpenSkos2\Interfaces\UriGeneration
             return $uri;
         } else {
             throw new UriGenerationException(
-                'Epic is not enabled, chnage custom parameter'
+                'Epic is not enabled, change custom parameter'
             );
         }
     }

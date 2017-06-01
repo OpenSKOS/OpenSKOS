@@ -12,7 +12,7 @@ namespace OpenSkos2\Api;
 class SkosCollection extends AbstractTripleStoreResource
 {
 public function __construct(
-    \OpenSkos2\Skoscollection $manager,  
+    \OpenSkos2\SkosCollectionManager $manager,  
     \OpenSkos2\PersonManager $personManager)
     {
         $this->manager = $manager;
