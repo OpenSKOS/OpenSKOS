@@ -348,7 +348,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         if ($this->hasProperty(DcTerms::CREATOR)) {
             $tmp = current($this->getProperty(DcTerms::CREATOR));
-            if ($tmp instanceof Literal) { // literal value for UNKNOWN
+            if ($tmp instanceof Literal) { // literal value for UNKNOWN only
                 return $tmp->getValue();
             } else {
                 if ($tmp instanceof Uri) {
@@ -534,11 +534,11 @@ class Resource extends Uri implements ResourceIdentifier
         };
 
         if ($existingResource === null) { // a completely new resource under creation
-            $this->setProperty(DcTerms::CREATOR, $person); // $person must be upcasted to Uri
+            $this->setProperty(DcTerms::CREATOR, new Uri($person->getUri())); 
             $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
         } else {
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-            $this->addProperty(DcTerms::CONTRIBUTOR, $person); // $person must be upcasted to Uri
+            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($person->getUri()));
             if ($this->getType() != RelationType::TYPE) {
                 $this->setProperty(OpenSkos::UUID, $existingResource->getUuid());
             }

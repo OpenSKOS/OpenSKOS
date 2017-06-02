@@ -8,6 +8,7 @@ use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
+use OpenSkos2\Api\Exception\InvalidArgumentException;
 
 class Deletion implements \OpenSkos2\Interfaces\Deletion
 {
@@ -24,58 +25,68 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
         $type = $this->resourceManager->getResourceType();
         switch ($type) {
             case Concept::TYPE:
-                return $this->conceptCanBeDeleted($uri);
+                $this->conceptCanBeDeleted($uri);
+                break;
             case ConceptScheme::TYPE:
-                return $this->conceptSchemeCanBeDeleted($uri);
+                $this->conceptSchemeCanBeDeleted($uri);
+                break;
             case Set::TYPE:
-                return $this->setCanBeDeleted($uri);
+                $this->setCanBeDeleted($uri);
+                break;
             case Tenant::TYPE:
-                return $this->tenantCanBeDeleted($uri);
+                $this->tenantCanBeDeleted($uri);
+                break;
             case SkosCollection::TYPE:
-                return $this->skosCollectionCanBeDeleted($uri);
+                $this->skosCollectionCanBeDeleted($uri);
+                break;
             case RelationType::TYPE:
-                return $this->relationCanBeDeleted($uri);
+                $this->relationCanBeDeleted($uri);
+                break;
             default:
-                return false;
+                $this->canBeDeletedBAsic($uri);
         }
     }
 
     private function canBeDeletedBasic($uri)
     {
-        $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
-        $references = $this->resourceManager->query($query);
-        return (($references[0]->COUNT->getValue()) < 1);
+         if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
+            $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
+            $references = $this->resourceManager->query($query);
+            if (($references[0]->COUNT->getValue()) > 0) {
+                throw new InvalidArgumentException('The resource cannot be deleted because there are other resources referring to it within this storage', 401);
+            }
+        }
     }
 
     private function conceptCanBeDeleted($uri)
     {
         // the lowerst-level resource,
         // can be always deleted if authorisation rights allow (checked in another place)
-        return true;
     }
 
     private function conceptSchemeCanBeDeleted($uri)
     {
-        return $this->canBeDeletedBasic($uri);
+        $this->canBeDeletedBasic($uri);
     }
 
     private function tenantCanBeDeleted($uri)
     {
-        return $this->canBeDeletedBasic($uri);
+        $this->canBeDeletedBasic($uri);
     }
 
     private function setCanBeDeleted($uri)
     {
-        return $this->canBeDeletedBasic($uri);
+        $this->canBeDeletedBasic($uri);
     }
 
     private function skosCollectionCanBeDeleted($uri)
     {
-        return $this->canBeDeletedBasic($uri);
+        $this->canBeDeletedBasic($uri);
     }
 
     private function relationCanBeDeleted($uri)
     {
-        return $this->canBeDeletedBasic($uri);
+        $this->canBeDeletedBasic($uri);
     }
+
 }

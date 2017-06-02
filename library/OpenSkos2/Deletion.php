@@ -24,7 +24,6 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
 
     public function canBeDeleted($uri)
     {
-        $allowed = true;
         if ($this->defaultOn) {
             if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
                 $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';

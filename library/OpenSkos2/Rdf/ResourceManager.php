@@ -40,6 +40,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use RuntimeException;
 use OpenSkos2\Api\Exception\ApiException;
+use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -113,7 +114,7 @@ class ResourceManager
         $this->client = $client;
         $this->solrResourceManager = $solrResourceManager;
         $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        $this->infoLog = "/../../../".$this->init["custom.info_log"];
+        $this->infoLog = "/../../../" . $this->init["custom.info_log"];
         if ($this->init["custom.default_relationtypes"]) {
             $this->customRelationTypes = null;
         } else {
@@ -376,16 +377,25 @@ class ResourceManager
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
-        $result = $this->query($query);
-        $resources = EasyRdf::graphToResourceCollection($result, $resType);
-        if (count($resources) === 0) {
-            return null;
+        
+        try {
+            $result = $this->query($query);
+            $resources = EasyRdf::graphToResourceCollection($result, $resType);
+            // @TODO Add resourceType check.
+        } catch (\Exception $exp) {
+            throw new ResourceNotFoundException("Unable to fetch resource, ". $exp->getMEesage());
         }
+
+
+        if (count($resources) === 0) {
+            throw new ResourceNotFoundException(
+            "The requested resource with reference  $reference . of type $resType is not found."
+            );
+        }
+
         if (count($resources) > 1) {
-            throw new ApiException(
-                'Something went very wrong. The requested resource <' . $reference .
-                '> is found more than 1 time.',
-                500
+            throw new \RuntimeException(
+            "Something went very wrong. The requested resource $reference of type $resType was found more than once."
             );
         }
 
@@ -550,8 +560,8 @@ class ResourceManager
         // @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
-                return strcmp($resource1->getUri(), $resource2->getUri());
-            }
+            return strcmp($resource1->getUri(), $resource2->getUri());
+        }
         );
 
         return $resources;
@@ -584,7 +594,7 @@ class ResourceManager
 
         if (!$response->isSuccessful()) {
             throw new RuntimeException(
-                'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
+            'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
 
@@ -641,9 +651,7 @@ class ResourceManager
                     return ($count > 0);
                 } else {
                     $subjectURIs = $this->fetchSubjectWithPropertyGiven(
-                        OpenSkosNamespace::UUID,
-                        '"' . $id . '"',
-                        $rdfType
+                        OpenSkosNamespace::UUID, '"' . $id . '"', $rdfType
                     );
                     return (count($subjectURIs) > 0);
                 }
@@ -1200,22 +1208,19 @@ class ResourceManager
     {
         if ($val === null) {
             $resource->setProperty(
-                $property,
-                new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
+                $property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
             );
             return;
         } else {
             if (strtolower($val) === 'y' || strtolower($val) === "yes") {
                 $resource->setProperty(
-                    $property,
-                    new \OpenSkos2\Rdf\Literal('true', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
+                    $property, new \OpenSkos2\Rdf\Literal('true', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
                 );
                 return;
             }
             if (strtolower($val) === 'n' || strtolower($val) === "no") {
                 $resource->setProperty(
-                    $property,
-                    new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
+                    $property, new \OpenSkos2\Rdf\Literal('false', null, \OpenSkos2\Rdf\Literal::TYPE_BOOL)
                 );
                 return;
             }
@@ -1238,18 +1243,16 @@ class ResourceManager
                             $resource = $this->fetchByCode($id, $resourceType);
                         } catch (\Exception $ex2) {
                             throw new ApiException(
-                                'The resource of type ' . $resourceType .
-                                ' with the id/uri/code ' . $id . ' cannot be found (detailed reasons : ' .
-                                $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')',
-                                404
+                            'The resource of type ' . $resourceType .
+                            ' with the id/uri/code ' . $id . ' cannot be found (detailed reasons : ' .
+                            $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')', 404
                             );
                         }
                     } else {
                         throw new ApiException(
-                            'The resource of type ' . $resourceType .
-                            ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' .
-                            $ex->getMessage() . ')',
-                            404
+                        'The resource of type ' . $resourceType .
+                        ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' .
+                        $ex->getMessage() . ')', 404
                         );
                     }
                 }
@@ -1274,12 +1277,12 @@ class ResourceManager
         if ($resource !== null) {
             $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
             $rdfType = $rdfTypes[0]->getUri();
-            if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE && 
-                $rdfType !== \OpenSkos2\SkosCollection::TYPE && 
-                $rdfType !==\OpenSkos2\Set::TYPE) {
+            if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE &&
+                $rdfType !== \OpenSkos2\SkosCollection::TYPE &&
+                $rdfType !== \OpenSkos2\Set::TYPE) {
                 throw new \Exception(
-                    "The method augmentResourceWithTenant can be used"
-                    . "only for concept schemata, skos collections and sets. "
+                "The method augmentResourceWithTenant can be used"
+                . "only for concept schemata, skos collections and sets. "
                 );
             }
             $tenants = $resource->getProperty(OpenSkosNamespace::TENANT);
@@ -1300,8 +1303,8 @@ class ResourceManager
 
         if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE && $rdfType !== \OpenSkos2\SkosCollection::TYPE) {
             throw new \Exception(
-                "The method fetchTenantUriViaSet can be used only"
-                . "for concept chemata and skos collections. "
+            "The method fetchTenantUriViaSet can be used only"
+            . "for concept chemata and skos collections. "
             );
         }
         if ($resource !== null) {
@@ -1314,6 +1317,7 @@ class ResourceManager
                         return $tenantUris[0];
                     }
                 } catch (ApiException $ex) {
+                    
                 }
             }
         }
@@ -1325,15 +1329,15 @@ class ResourceManager
         $uri = $concept->getUri();
         $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle ?creatorname WHERE { '
             . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . '
-            . '?schemauri <' .OpenSkosNamespace::SET . '> ?seturi . '
-            . '?seturi <' .DcTerms::PUBLISHER . '> ?tenanturi .'
+            . '?schemauri <' . OpenSkosNamespace::SET . '> ?seturi . '
+            . '?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
             . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
             . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
             . '?tenanturi  <' . VCard::ORG . '> ?org . '
-            . '?org <' .VCard::ORGNAME . '> ?tenantname . '
-            . '?tenanturi <' .OpenSkosNamespace::CODE . '> ?tenantcode .'
-            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?creatoruri . '
-            . '?creatoruri <'.Foaf::NAME . '> ?creatorname . '
+            . '?org <' . VCard::ORGNAME . '> ?tenantname . '
+            . '?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .'
+            . '<' . $uri . '> <' . DcTerms::CREATOR . '> ?creatoruri . '
+            . '?creatoruri <' . Foaf::NAME . '> ?creatorname . '
             . '}';
 
         $response = $this->query($query);
@@ -1452,4 +1456,5 @@ class ResourceManager
         $result = array_merge($skosrels, $userrels);
         return $result;
     }
+
 }

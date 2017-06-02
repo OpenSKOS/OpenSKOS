@@ -78,6 +78,7 @@ class ConceptScheme extends Resource
      */
     public function getTenant()
     {
+        
         $values = $this->getProperty(OpenSkos::TENANT);
         if (isset($values[0])) {
             return $values[0];

@@ -29,7 +29,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     {
         $valid = $this->checkValidityOfRelations($concept);
         if ($this->conceptReferenceCheckOn) {
-            $init = $this->manager->getInitArray();
+            $init = $this->resourceManager->getInitArray();
             $strict = $this->strictCheckRelatedConcepts($concept, $init);
             $soft = $this->softCheckRelatedConcepts($concept, $init);
         } else {
@@ -84,9 +84,9 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     private function checkValidityOfRelations(Concept $concept)
     {
         $errorsBefore = count($this->errorMessages);
-        $customRelUris = array_values($this->getCustomRelationTypes());
-        $registeredRelationUris = array_values($this->manager->getTripleStoreRegisteredCustomRelationTypes());
-        $allRelationUris = array_values($this->manager->fetchConceptConceptRelationsNameUri());
+        $customRelUris = array_values($this->resourceManager->getCustomRelationTypes());
+        $registeredRelationUris = array_values($this->resourceManager->getTripleStoreRegisteredCustomRelationTypes());
+        $allRelationUris = array_values($this->resourceManager->fetchConceptConceptRelationsNameUri());
         $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {

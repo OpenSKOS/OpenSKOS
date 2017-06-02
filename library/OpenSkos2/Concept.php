@@ -25,6 +25,7 @@ use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
@@ -185,7 +186,6 @@ class Concept extends Resource
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
-        // $person is upcasetd to Uri if it is a parameter of setProperty or addProperty
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
             $this->unsetProperty(DcTerms::DATEACCEPTED);
@@ -196,11 +196,11 @@ class Concept extends Resource
             switch ($this->getStatus()) {
                 case \OpenSkos2\Concept::STATUS_APPROVED:
                     $this->addProperty(DcTerms::DATEACCEPTED, $nowLiteral());
-                    $this->addProperty(OpenSkos::ACCEPTEDBY, $person);
+                    $this->addProperty(OpenSkos::ACCEPTEDBY, new Uri($person->getUri()));
                     break;
                 case \OpenSkos2\Concept::STATUS_DELETED:
                     $this->addProperty(OpenSkos::DATE_DELETED, $nowLiteral());
-                    $this->addProperty(OpenSkos::DELETEDBY, $person);
+                    $this->addProperty(OpenSkos::DELETEDBY, new Uri($person->getUri()));
                     break;
             }
         }
@@ -315,7 +315,7 @@ class Concept extends Resource
 
         // Set the creator to the apikey user
         if (empty($dcCreator) && empty($dcTermsCreator)) {
-            $this->setCreator(null, $person);
+            $this->setCreator(null, new Uri($person->getUri()));
             return;
         }
 
@@ -324,9 +324,9 @@ class Concept extends Resource
             $dcCreator = $dcCreator[0];
 
             if ($dcCreator instanceof Literal) {
-                $dcTermsCreator = $personManager->fetchByName($dcCreator->getValue());
+                $dcTermsCreator = new Uri($personManager->fetchByName($dcCreator->getValue())->getUri());
             } elseif ($dcCreator instanceof Uri) {
-                $dcTermsCreator = $dcCreator;
+                $dcTermsCreator = new Uri($person->getUri());
                 $dcCreator = null;
             } else {
                 throw Exception('dc:Creator is not Literal nor Uri. Something is very wrong.');
@@ -342,9 +342,10 @@ class Concept extends Resource
 
             if ($dcTermsCreator instanceof Literal) {
                 $dcCreator = $dcTermsCreator;
-                $dcTermsCreator = $personManager->fetchByName($dcTermsCreator->getValue());
+                $dcTermsCreator = new Uri($personManager->fetchByName($dcTermsCreator->getValue()));
             } elseif ($dcTermsCreator instanceof Uri) {
-                // We are ok with this use case even if the Uri is not present in our system
+                // We are ok with this use case even if the Uri is not present in our system ??
+                $dcTermsCreator = new Uri($dcTermsCreator->getUri()); // upcasting
             } else {
                 throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
             }
@@ -360,7 +361,7 @@ class Concept extends Resource
             try {
                 $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
             } catch (ResourceNotFoundException $err) {
-                // We cannot find the resource so just leave values as they are
+                // We cannot find the resource so just leave values as they are ??
                 $dcTermsCreatorName = null;
             }
 
