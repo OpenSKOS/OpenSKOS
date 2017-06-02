@@ -187,6 +187,7 @@ class Concept extends AbstractTripleStoreResource
             }
         }
 
+        
         // concept scheme 
         if (isset($params['conceptScheme'])) {
             $options['scheme'] = explode(' ', trim($params['conceptScheme']));
