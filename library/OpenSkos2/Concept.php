@@ -123,6 +123,7 @@ class Concept extends Resource
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
         if ($existingConcept == null) { // a completely new concept under creation
+            $this->unsetProperty(DcTerms::DATEACCEPTED);
             $forFirstTimeInOpenSkos = [
                 // OpenSkos::UUID => new Literal(Uuid::uuid4()), uuid generation is a part of uri generation
                 // 
@@ -150,6 +151,7 @@ class Concept extends Resource
                     $this->setProperty($property, $defaultValue);
                 }
             }
+            
         } else { 
             $creatorUri = $existingConcept->getProperty(DcTerms::CREATOR);
             if (count($creatorUri)>0) {

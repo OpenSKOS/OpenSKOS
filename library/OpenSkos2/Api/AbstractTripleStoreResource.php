@@ -107,14 +107,7 @@ abstract class AbstractTripleStoreResource
             $extras = [];
         }
         
-        if ($this->manager->getResourceType() === Concept::TYPE) {
-        $specs = $this->manager->fetchConceptSpec($resource);
-                foreach ($specs as $spec) {
-                    $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
-                    $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
-                    $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
-                } 
-        }
+        
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($resource, $propertiesList, $fieldname, $extras))->getResponse();
@@ -157,6 +150,17 @@ abstract class AbstractTripleStoreResource
         if ($resource->isDeleted()) {
             throw new Exception\DeletedException('Resource ' . $id . ' is deleted', 410);
         }
+        
+        // augmenting concept with set, tenant and dc:creator
+        if ($this->manager->getResourceType() === Concept::TYPE) {
+        $specs = $this->manager->fetchConceptSpec($resource);
+                foreach ($specs as $spec) {
+                    $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
+                    $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
+                    $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
+                } 
+        }
+        
         return $resource;
     }
 
@@ -355,13 +359,16 @@ abstract class AbstractTripleStoreResource
                 $tenantAndSet['tenant'], $tenantAndSet['set'], $this->manager
             );
         }
+        
+        
         $this->validate(
             $resource, $tenantAndSet['tenant'], $tenantAndSet['set'], false);
 
         
         $this->manager->insert($resource);
-
+        
         $rdf = (new DataRdf($resource))->transform();
+        
         return $this->getSuccessResponse($rdf, 201);
     }
 

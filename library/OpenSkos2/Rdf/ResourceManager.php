@@ -27,6 +27,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
@@ -137,14 +138,15 @@ class ResourceManager
         // set and tenat are derived (based on shcema) elements for the concept
         // they are not submitted to the triple store
         // however to spead up search we add set and tenant to solr description of the concept
-        if ($resource->getType()->getUri() == Skos::CONCEPT) {
-            $set_and_tenant = $this->fetchConceptSpec($resource);
-            if (count($set_and_tenant) < 1) {
+        if ($resource->getType()->getUri() == Concept::TYPE) {
+            $specs = $this->fetchConceptSpec($resource);
+            if (count($specs) < 1) {
                 var_dump('Cannot fetch tenant for the concept ' . $resource->getUri());
             }
-            foreach ($set_and_tenant as $spec) {
+            foreach ($specs as $spec) {
                 $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
                 $resource->setProperty(OpenSkosNameSpace::SET, new Uri($spec['seturi']));
+                $resource->setProperty(Dc::CREATOR, new Literal($spec['creatorname']));
             }
             $this->solrResourceManager->insert($resource);
         }

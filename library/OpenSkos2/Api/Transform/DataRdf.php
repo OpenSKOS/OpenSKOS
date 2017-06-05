@@ -83,6 +83,7 @@ class DataRdf
         } else {
             $reducedResource = $this->resource;
         }
+        
         $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
         $retVal = $resource->serialise(
             'rdfxml_openskos',
