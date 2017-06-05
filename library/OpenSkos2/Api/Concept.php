@@ -21,27 +21,20 @@ namespace OpenSkos2\Api;
 
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
-use OpenSkos2\Api\Exception\InvalidPredicateException;
-use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
-use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Set;
-use OpenSkos2\Concept as ConceptResource;
 use OpenSkos2\PersonManager;
-use OpenSkos2\FieldsMaps;
-use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
-use OpenSkos2\Authorisation;
-use OpenSkos2\Deletion;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Response;
 
@@ -236,21 +229,13 @@ class Concept extends AbstractTripleStoreResource
 
         foreach ($concepts as $concept) {
             $specs = $this->manager->fetchConceptSpec($concept);
-            if ($this->init["custom.backward_compatible"]) {
                 foreach ($specs as $spec) {
                     $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
                     $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
                     $concept->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
-                }
-            } else {
-                foreach ($specs as $spec) {
-                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Uri($spec['seturi']));
-                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Uri($spec['tenanturi']));
-                }
-            }
+                }          
         }
-
-
+        
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {

@@ -122,17 +122,16 @@ class Concept extends Resource
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
-        if ($existingConcept === null) { // a completely new concept under creation
-            $this->setProperty(DcTerms::CREATOR, $person); //$person must be upcasted to Uri
-            $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
-        } else {
+        if ($existingConcept == null) { // a completely new concept under creation
             $forFirstTimeInOpenSkos = [
-                OpenSkos::UUID => new Literal(Uuid::uuid4()),
+                // OpenSkos::UUID => new Literal(Uuid::uuid4()), uuid generation is a part of uri generation
+                // 
                 // OpenSkos::TENANT => new Uri($tenant->getUri()), 
                 // tenant is not a part of the concept rdf because it is derived from the concept's schema's concept schema via set
                 // @TODO Make status dependent on if the tenant has statuses system enabled.
                 OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
                 DcTerms::DATESUBMITTED => $nowLiteral(),
+                DcTerms::CREATOR => new Uri($person->getUri())
             ];
 
             // set is not a part of the concept rdf because it is derived from a concept's schema
@@ -146,18 +145,25 @@ class Concept extends Resource
               }
              * */
 
-
             foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
                 if (!$this->hasProperty($property)) {
                     $this->setProperty($property, $defaultValue);
                 }
             }
-
+        } else { 
+            $creatorUri = $existingConcept->getProperty(DcTerms::CREATOR);
+            if (count($creatorUri)>0) {
+                $this->setProperty(DcTerms::CREATOR, $creatorUri[0]);
+            }
+            $dateSubmitted = $existingConcept->getProperty(DcTerms::DATESUBMITTED);
+            if (count($dateSubmitted)>0) {
+                $this->setProperty(DcTerms::DATESUBMITTED, $dateSubmitted[0]);
+            }
             $oldStatus = $existingConcept->getStatus();
             $this->handleStatusChange($person, $oldStatus);
+            $this->setModified($person);
         }
         $this->resolveCreator($person, $personManager);
-        $this->setModified($person);
     }
 
     /**
@@ -324,7 +330,8 @@ class Concept extends Resource
             $dcCreator = $dcCreator[0];
 
             if ($dcCreator instanceof Literal) {
-                $dcTermsCreator = new Uri($personManager->fetchByName($dcCreator->getValue())->getUri());
+                $creatorPerson = $personManager->fetchByName($dcCreator->getValue());
+                $dcTermsCreator = new Uri($creatorPerson->getUri());
             } elseif ($dcCreator instanceof Uri) {
                 $dcTermsCreator = new Uri($person->getUri());
                 $dcCreator = null;
@@ -344,13 +351,14 @@ class Concept extends Resource
                 $dcCreator = $dcTermsCreator;
                 $dcTermsCreator = new Uri($personManager->fetchByName($dcTermsCreator->getValue()));
             } elseif ($dcTermsCreator instanceof Uri) {
-                // We are ok with this use case even if the Uri is not present in our system ??
-                $dcTermsCreator = new Uri($dcTermsCreator->getUri()); // upcasting
+                // We are ok with this use case even if the Uri is not present in our system ??             
+               $dcTermsCreator = new Uri($dcTermsCreator->getUri()); 
             } else {
                 throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
             }
 
-            $this->setCreator($dcCreator, $dcTermsCreator);
+            //$this->setCreator($dcCreator, $dcTermsCreator);
+            $this->setCreator(null, $dcTermsCreator); // dc-creator as literal will be fetched as an additional propery (together with set and tenant) for get and index requests for concepts, otherwise.
             return;
         }
 

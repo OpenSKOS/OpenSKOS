@@ -29,6 +29,7 @@ use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use Psr\Http\Message\ResponseInterface;
@@ -105,7 +106,15 @@ abstract class AbstractTripleStoreResource
             $fieldname = null;
             $extras = [];
         }
-
+        
+        if ($this->manager->getResourceType() === Concept::TYPE) {
+        $specs = $this->manager->fetchConceptSpec($resource);
+                foreach ($specs as $spec) {
+                    $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
+                    $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
+                    $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
+                } 
+        }
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($resource, $propertiesList, $fieldname, $extras))->getResponse();
@@ -332,7 +341,7 @@ abstract class AbstractTripleStoreResource
             'The resource with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
             );
         }
-
+        
         $person = $this->getUserFromParams($params)->getFoafPerson();
 
         $resource->ensureMetadata(

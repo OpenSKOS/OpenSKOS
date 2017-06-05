@@ -46,9 +46,9 @@ class CreateConceptTest extends AbstractTest
             '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
             '</rdf:Description>' .
             '</rdf:RDF>';
-
+        
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
+        $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
         if ($response->getStatus() === 201) {
             $this->CheckCreatedConcept($response);
         } 
