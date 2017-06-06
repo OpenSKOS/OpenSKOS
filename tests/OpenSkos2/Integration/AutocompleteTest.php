@@ -52,6 +52,7 @@ class AutocompleteTest extends AbstractTest
             $about = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
             $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
                 '<rdf:Description rdf:about="' . $about . '">' .
+                '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
                 '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
                 '<skos:altLabel xml:lang="nl">' . $altLabel . '</skos:altLabel>' .
                 '<skos:hiddenLabel xml:lang="nl">' . $hiddenLabel . '</skos:hiddenLabel>' .

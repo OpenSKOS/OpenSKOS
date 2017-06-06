@@ -175,7 +175,7 @@ abstract class AbstractTripleStoreResource
         try {
             $response = $this->handleCreate($request);
         } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getBody());
+            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
         return $response;
     }
@@ -346,10 +346,12 @@ abstract class AbstractTripleStoreResource
             );
         }
         
-        $person = $this->getUserFromParams($params)->getFoafPerson();
+        $user = $this->getUserFromParams($params);
 
+        $this->authorisation->resourceCreateAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
+        
         $resource->ensureMetadata(
-            $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $person, $this->personManager
+            $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $user->getFoafPerson(), $this->personManager
         );
 
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);

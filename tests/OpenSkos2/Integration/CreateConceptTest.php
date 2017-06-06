@@ -54,7 +54,7 @@ class CreateConceptTest extends AbstractTest
         } 
     }
 
- /*  
+
     public function test02CreateConceptWithoutUriWithoutDateAccepted()
     {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
@@ -63,6 +63,7 @@ class CreateConceptTest extends AbstractTest
 
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
             '<rdf:Description>' .
+            '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
             '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
             '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
             '</rdf:Description>' .
@@ -86,6 +87,7 @@ class CreateConceptTest extends AbstractTest
         $uuid = uniqid();
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dcterms="http://purl.org/dc/terms/" > ' .
             '<rdf:Description rdf:about="' . $conceptURI . '">' .
+            '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
             '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
             '<skos:notation>' . $notation . '</skos:notation>' .
             '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
@@ -130,7 +132,7 @@ class CreateConceptTest extends AbstractTest
             self::$client->setParameterGet('set', SET_CODE);
         };
         $response = self::$client->request('POST');
-        $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
     }
 
     
@@ -223,13 +225,14 @@ class CreateConceptTest extends AbstractTest
         $prefLabel = 'testPrefLable_' . time();
         $wrongXml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description>' .
+            '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
             '<skos:prefLabel xml:lang="nl">' . $prefLabel . '</skos:prefLabel>' .
             '<skos:inScheme  rdf:resource="' . SCHEMA1_URI . '"/>' .
             '</rdf:Description' .
             '</rdf:RDF>';
 
         $response = self::create($wrongXml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(412, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
     }
 
     public function test07CreateConceptWithoutUri()
@@ -355,10 +358,10 @@ class CreateConceptTest extends AbstractTest
         if (self::$init["custom.default_authorisation"]) {
             $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
         } else {
-            $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept.');
+            $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept. '. $response->getBody());
         }
     }
-  */  
+  
 
     private function CheckCreatedConcept($response)
     {

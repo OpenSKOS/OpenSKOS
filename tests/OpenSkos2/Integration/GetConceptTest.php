@@ -56,6 +56,7 @@ class GetConceptTest extends AbstractTest
         $this->assertionsForXMLRDFConcept($response, self::$prefLabel, self::$altLabel, self::$hiddenLabel, "nl", "integration test get concept", self::$notation, 1, 1);
     }
 
+    
     public function testViaPrefLabel3()
     {
         print "\n" . "Test: get concept-rdf via its prefLabel where 'prefLabel' is a value of the request parameter 'label' ";
@@ -358,7 +359,10 @@ class GetConceptTest extends AbstractTest
         $this->AssertEquals(1, $results9->count());
 
         $results8 = $dom->query('openskos:set');
-        $this->AssertNotEmpty($results8->current()->getAttribute('rdf:resource'));
+        $this->AssertEquals(SET_CODE, $results8->current()->nodeValue);
+        
+        $results10 = $dom->query('dc:creator');
+        $this->AssertNotEmpty($results10->current()->nodeValue);
     }
 
     private function assertionsForHTMLConcept($response, $prefLabel, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme)

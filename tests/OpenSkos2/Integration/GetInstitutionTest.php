@@ -31,6 +31,7 @@ class GetInstitutionTest extends AbstractTest
          xmlns:openskos="http://openskos.org/xmlns#"
          xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
   <rdf:Description>
+    <rdf:type rdf:resource="http://www.w3.org/ns/org#FormalOrganization"/>
     <openskos:enableStatussesSystem rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true</openskos:enableStatussesSystem>
     <openskos:disableSearchInOtherTenants rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">false</openskos:disableSearchInOtherTenants>
     <vcard:ADR rdf:parseType="Resource">
