@@ -60,6 +60,7 @@ class DeleteConceptTest extends AbstractTest
         $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
     }
 
+    
     public function testDeleteCandidatebyOwner()
     { // TODO ///
         print "\n deleting concept with candidate status by the owner-deitor... \n";
@@ -109,5 +110,5 @@ class DeleteConceptTest extends AbstractTest
             $this->AssertEquals(403, $response->getStatus(), $response->getHeader("X-Error-Msg"));
         }
     }
-
+    
 }

@@ -50,6 +50,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     protected static function deleteResources($uris, $apikey, $resourcetype)
     { 
         foreach ($uris as $uri) {
+            var_dump("Removing $uri");
             $response = self::delete($uri, $apikey, $resourcetype);
             var_dump("\n Cleaning data base: ". $response->getMessage(). "\n");
         }
@@ -64,14 +65,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
     protected static function delete($id, $apikey, $resoursetype)
     {
-        $id_name = "uri";
-        if ($resoursetype === 'concept') {
-            $id_name = "id";
-        }
+        
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resoursetype");
         self::$client
-            ->setParameterGet($id_name, $id)
+            ->setParameterGet('id', $id)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
         if (self::$init["custom.backward_compatible"]) {
@@ -227,7 +225,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
     {
         print "\n Test: get all $resourcetype in default format ... ";
         $response = $this->getResource(API_BASE_URI . "/$resourcetype", 'text/xml');
-        $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(200, $response->getStatus(), $response->getBody());
         $this->assertionsXMLRDFResources($response);
     }
 
@@ -271,6 +269,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
     {
         print "\n Test: get a $resourcetype in default format ... ";
         $response = $this->getResource(API_BASE_URI . "/$resourcetype/$id", 'text/xml');
+        var_dump(API_BASE_URI . "/$resourcetype/$id");
         $this->AssertEquals(200, $response->getStatus(), $response->getMessage());
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentXML($response->getBody());

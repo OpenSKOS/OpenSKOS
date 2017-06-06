@@ -106,8 +106,8 @@ abstract class AbstractTripleStoreResource
             $fieldname = null;
             $extras = [];
         }
-        
-        
+
+
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($resource, $propertiesList, $fieldname, $extras))->getResponse();
@@ -137,30 +137,32 @@ abstract class AbstractTripleStoreResource
         if ($id instanceof Uri) {
             $resource = $this->manager->fetchByUri($id);
         } else {
-            $resource = $this->manager->fetchByUuid($id);
-            $rdfType = $this->manager->getResourceType();
-            if (!$resource && ($rdfType === Set::TYPE || $rdfType === Tenant::TYPE)) {
-                $resource = $this->manager->fetchByCode($id, $rdfType);
+            try {
+                $resource = $this->manager->fetchByUuid($id);
+            } catch (ResourceNotFoundException $ex) {
+                $rdfType = $this->manager->getResourceType();
+                if ($rdfType === Set::TYPE || $rdfType === Tenant::TYPE) {
+                    $resource = $this->manager->fetchByCode($id, $rdfType);
+                } else {
+                    throw $ex;
+                }
             }
         }
 
-        if (!$resource) {
-            throw new NotFoundException('Resource not found by id: ' . $id, 404);
-        }
         if ($resource->isDeleted()) {
-            throw new Exception\DeletedException('Resource ' . $id . ' is deleted', 410);
+            throw new NotFoundException('Resource ' . $id . ' is deleted', 410);
         }
-        
+
         // augmenting concept with set, tenant and dc:creator
         if ($this->manager->getResourceType() === Concept::TYPE) {
-        $specs = $this->manager->fetchConceptSpec($resource);
-                foreach ($specs as $spec) {
-                    $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
-                    $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
-                    $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
-                } 
+            $specs = $this->manager->fetchConceptSpec($resource);
+            foreach ($specs as $spec) {
+                $resource->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
+                $resource->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
+                $resource->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
+            }
         }
-        
+
         return $resource;
     }
 
@@ -194,9 +196,9 @@ abstract class AbstractTripleStoreResource
             $tenantAndSet = $this->getTenantAndSetFromParams($params);
 
             $resource = $this->getResourceFromRequest($request, $tenantAndSet['tenant']);
-            
+
             $existingResource = $this->manager->fetchByUri((string) $resource->getUri());
-            
+
             $user = $this->getUserFromParams($params);
 
             $this->authorisation->resourceEditAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
@@ -204,14 +206,14 @@ abstract class AbstractTripleStoreResource
                 $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $user->getFoafPerson(), $this->personManager, $existingResource);
 
             $this->validate($resource, $tenantAndSet['tenant'], $tenantAndSet['set'], true);
-            
+
             if ($this->manager->getResourceType() === Concept::TYPE) {
                 $this->manager->replaceAndCleanRelations($resource);
             }
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         } catch (ResourceNotFoundException $ex) {
-            return $this->getErrorResponse(404, $ex->getMessage(). "Try POST. ");
+            return $this->getErrorResponse(404, $ex->getMessage() . "Try POST. ");
         }
 
         $xml = (new DataRdf($resource))->transform();
@@ -345,11 +347,11 @@ abstract class AbstractTripleStoreResource
             'The resource with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
             );
         }
-        
+
         $user = $this->getUserFromParams($params);
 
         $this->authorisation->resourceCreateAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
-        
+
         $resource->ensureMetadata(
             $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $user->getFoafPerson(), $this->personManager
         );
@@ -361,16 +363,16 @@ abstract class AbstractTripleStoreResource
                 $tenantAndSet['tenant'], $tenantAndSet['set'], $this->manager
             );
         }
-        
-        
+
+
         $this->validate(
             $resource, $tenantAndSet['tenant'], $tenantAndSet['set'], false);
 
-        
+
         $this->manager->insert($resource);
-        
+
         $rdf = (new DataRdf($resource))->transform();
-        
+
         return $this->getSuccessResponse($rdf, 201);
     }
 
@@ -589,11 +591,11 @@ abstract class AbstractTripleStoreResource
                 . 'xml already contains uri (rdf:about).', 400
                 );
             }
-            if (count($uuids)>0) {
-               throw new InvalidArgumentException(
+            if (count($uuids) > 0) {
+                throw new InvalidArgumentException(
                 'Parameter autoGenerateIdentifiers is set to true, but the '
                 . 'xml already contains uuid.', 400
-                ); 
+                );
             }
         } else {
             // Is uri missing
@@ -603,10 +605,10 @@ abstract class AbstractTripleStoreResource
                 );
             }
             // Is uuid missing?
-            if (count($uuids)<1) {
-               throw new InvalidArgumentException(
+            if (count($uuids) < 1) {
+                throw new InvalidArgumentException(
                 'Uuid is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
-                ); 
+                );
             }
         }
 

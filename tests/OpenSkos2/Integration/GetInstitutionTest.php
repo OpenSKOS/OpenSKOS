@@ -63,6 +63,7 @@ class GetInstitutionTest extends AbstractTest
         self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institution');
     }
 
+    
     public function testAllInstitutions()
     {
         $this->allResources('institution');
