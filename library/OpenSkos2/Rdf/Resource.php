@@ -606,7 +606,7 @@ class Resource extends Uri implements ResourceIdentifier
 
    
 
-    public function selfGenerateUri($tenant, $set, ResourceManager $manager)
+    public function selfGenerateUri($tenant, $set, $manager)
     {
         $init = $manager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {

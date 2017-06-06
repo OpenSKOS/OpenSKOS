@@ -232,7 +232,7 @@ class Concept extends Resource
         );
     }
 
-    public function selfGenerateUri($tenant, $set, ConceptManager $manager)
+    public function selfGenerateUri($tenant, $set, $manager)
     {
         $init = $manager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {

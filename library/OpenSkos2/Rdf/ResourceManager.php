@@ -146,7 +146,6 @@ class ResourceManager
             foreach ($specs as $spec) {
                 $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
                 $resource->setProperty(OpenSkosNameSpace::SET, new Uri($spec['seturi']));
-                $resource->setProperty(Dc::CREATOR, new Literal($spec['creatorname']));
             }
             $this->solrResourceManager->insert($resource);
         }
