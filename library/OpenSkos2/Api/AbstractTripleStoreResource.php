@@ -107,7 +107,7 @@ abstract class AbstractTripleStoreResource
             $extras = [];
         }
 
-
+       
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($resource, $propertiesList, $fieldname, $extras))->getResponse();

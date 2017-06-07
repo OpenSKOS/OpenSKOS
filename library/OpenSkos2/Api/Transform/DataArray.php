@@ -22,6 +22,7 @@ namespace OpenSkos2\Api\Transform;
 use DateTime;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
@@ -66,7 +67,6 @@ class DataArray
     public function transform()
     {
         $resource = $this->resource;
-
         /* @var $resource Resource */
         $newResource = [];
         if ($this->doIncludeProperty('uri')) {
@@ -80,6 +80,7 @@ class DataArray
             if ($resource->isPropertyEmpty($prop['uri'])) {
                 continue;
             }
+            
             $newResource = $this->getPropertyValue(
                 $resource->getProperty($prop['uri']),
                 $field,
@@ -111,6 +112,7 @@ class DataArray
      */
     private function getPropertyValue(array $prop, $field, $settings, $resource)
     {
+        
         foreach ($prop as $val) {
             if ($val instanceof RdfResource) {
                 if (count($val->getProperties()) > 0) {
@@ -141,8 +143,7 @@ class DataArray
             if ($value === null || $value === '') {
                 continue;
             }
-
-
+            
             $lang = $val->getLanguage();
             $langField = $field;
             if (!empty($lang)) {
@@ -165,6 +166,7 @@ class DataArray
     public static function getFieldsPlusIsRepeatableMap()
     {
         $notRepeatable = [
+            Dc::CREATOR, // literal for names and backard compatibility
             DcTerms::CREATOR,
             DcTerms::PUBLISHER,
             DcTerms::LICENSE,

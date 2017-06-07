@@ -23,6 +23,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Namespaces\Rdf;
 
@@ -84,6 +85,7 @@ class FieldsMaps
             'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
             'dcterms_modified' => DcTerms::MODIFIED,
             'dcterms_creator' => DcTerms::CREATOR,
+            'dc_creator' => Dc::CREATOR,
             'dcterms_contributor' => DcTerms::CONTRIBUTOR,
             'dcterms_title' => DcTerms::TITLE,
             'dcterms_publisher' => DcTerms::PUBLISHER,
