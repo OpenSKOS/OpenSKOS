@@ -53,7 +53,7 @@ use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
 class ResourceManager
 {
-   
+
     /**
      * @var Client
      */
@@ -139,7 +139,7 @@ class ResourceManager
         if ($resource->getType()->getUri() == Concept::TYPE) {
             $specs = $this->fetchConceptSpec($resource);
             if (count($specs) < 1) {
-                var_dump('Cannot fetch tenant for the concept ' . $resource->getUri());
+                throw new \Exception("Cannot fetch spec for the concept {$resource->getUri()}");
             }
             foreach ($specs as $spec) {
                 $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
@@ -1346,6 +1346,35 @@ class ResourceManager
             $spec['creatorname'] = $descr->creatorname->getValue();
             $retVal[] = $spec;
         }
+        if (count($retVal) > 0) {
+            return $retVal;
+        }
+        
+        // attempt to fetch tenants ans sets with unknown creator, used e.g. when migrating
+        $queryNoCreator = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle ?creatorname WHERE { '
+            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . '
+            . '?schemauri <' . OpenSkosNamespace::SET . '> ?seturi . '
+            . '?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+            . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
+            . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
+            . '?tenanturi  <' . VCard::ORG . '> ?org . '
+            . '?org <' . VCard::ORGNAME . '> ?tenantname . '
+            . '?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .'
+            . '}';
+        
+        $responseNoCreator = $this->query($queryNoCreator);
+        foreach ($responseNoCreator as $descr) {
+            $spec = [];
+            $spec['tenanturi'] = $descr->tenanturi->getUri();
+            $spec['tenantname'] = $descr->tenantname->getValue();
+            $spec['tenantcode'] = $descr->tenantcode->getValue();
+            $spec['seturi'] = $descr->seturi->getUri();
+            $spec['setcode'] = $descr->setcode->getValue();
+            $spec['settitle'] = $descr->settitle->getValue();
+            $spec['creatorname'] = 'Unknown';
+            $retVal[] = $spec;
+        } 
+        
         return $retVal;
     }
 
@@ -1470,9 +1499,8 @@ class ResourceManager
             if ($transitiveInverse) {
                 throw new \Exception(
                 "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link of the target to itself");
-            }        
+            }
         }
-        
     }
 
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
@@ -1482,8 +1510,8 @@ class ResourceManager
         );
         if ($count > 0) {
             throw new \Exception(
-                        "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
-                    );  
+            "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
+            );
         }
 
         $trans = $this->customRelationTypes->getTransitives();
@@ -1491,8 +1519,8 @@ class ResourceManager
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {
                 throw new \Exception(
-                        "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure." 
-                    );
+                "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
+                );
             }
         }
         return false;
@@ -1523,8 +1551,8 @@ class ResourceManager
             . 'relation type nor a custom relation type. ');
         }
     }
-    
-     // all concepts from transitive closure for $conceptsUri;
+
+    // all concepts from transitive closure for $conceptsUri;
     private function getClosure($conceptUri, $relationUri)
     {
         $query = 'select ?trans where {<' . $conceptUri . '>  <' . $relationUri . '>+ ' . '  ?trans . }';
@@ -1537,8 +1565,5 @@ class ResourceManager
         }
         return $retVal;
     }
-
-    
-
 
 }

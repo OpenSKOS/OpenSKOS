@@ -749,7 +749,7 @@ function run_round($doc, $resourceManager, $tenantRdf, $class, $setRdf, $default
               $softConceptRelationValidation,
               LoggerInterface $logger = null
               ) */
-            $validator = new ResourceValidator($resourceManager, false, $tenantRdf, $setRdf, true, false);
+            $validator = new ResourceValidator($resourceManager, $tenantRdf, $setRdf, false, true, false);
             $valid = $validator->validate($resource);
             
             if ($valid) {
