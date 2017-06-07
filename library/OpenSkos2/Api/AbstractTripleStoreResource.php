@@ -352,10 +352,6 @@ abstract class AbstractTripleStoreResource
 
         $this->authorisation->resourceCreateAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
 
-        $resource->ensureMetadata(
-            $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $user->getFoafPerson(), $this->personManager
-        );
-
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
 
         if ($autoGenerateUri) {
@@ -363,8 +359,12 @@ abstract class AbstractTripleStoreResource
                 $tenantAndSet['tenant'], $tenantAndSet['set'], $this->manager
             );
         }
+        
+        $resource->ensureMetadata(
+            $tenantAndSet['tenantUri'], $tenantAndSet['setUri'], $user->getFoafPerson(), $this->personManager
+        );
 
-
+       
         $this->validate(
             $resource, $tenantAndSet['tenant'], $tenantAndSet['set'], false);
 

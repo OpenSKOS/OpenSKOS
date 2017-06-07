@@ -24,7 +24,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Set;
-use OpenSkos2\Logging;
+use OpenSkos2\Person;
 use OpenSkos2\Converter\File;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
@@ -33,13 +33,11 @@ use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Set;
 use OpenSkos2\PersonManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use SebastianBergmann\RecursionContext\Exception as Exception2;
 
 // Meertens: 
 // -- no need for ConceptManager since import runs also for other resources as well
@@ -65,7 +63,6 @@ class Command implements LoggerAwareInterface
     private $resourceManager;
     private $black_list;
     private $init;
-    private $errorLog;
 
     /**
      * @var PersonManager
@@ -91,7 +88,6 @@ class Command implements LoggerAwareInterface
         $this->person = $person;
         $this->tenant = $tenant;
         $this->init = $resourceManager->getInitArray();
-        $this->erroLog = '../../../' . $this->init["custom.error_log"];
     }
 
     public function handle(Message $message)
@@ -112,10 +108,9 @@ class Command implements LoggerAwareInterface
         $resourceCollection = $file->getResources();
 
         // set
-        $setUri = $message->getSetUri();
+        $setUri = $message->getSetUri()->getUri(); 
         $set = $this->resourceManager->fetchByUri($setUri, Set::TYPE);
-
-
+        
         //** Some purging stuff from the original picturae code
         if ($message->getClearSet()) {
             $this->resourceManager->deleteBy([OpenSkos::SET => $message->getSetUri()]);
@@ -167,14 +162,14 @@ class Command implements LoggerAwareInterface
                 $isForUpdates = false;
             }
 
-            if (type === Concept::TYPE) {
+            if ($type === Concept::TYPE) {
                 $resourceToInsert = $this->specialConceptImportLogic(
                     $message, $setUri, $resourceToInsert, $existingResource
                 );
             } else {
                 $resourceToInsert->ensureMetadata($this->tenant->getUri(), $setUri, $this->person, $this->personManager, $existingResource);
             }
-
+ 
             $validator = new ResourceValidator(
                 $this->resourceManager, $this->tenant, $set, $isForUpdates, true, false
             );
@@ -288,10 +283,8 @@ class Command implements LoggerAwareInterface
         $this->black_list[] = $uri;
         foreach ($validator->getErrorMessages() as $errorMessage) {
             var_dump($errorMessage);
-            Logging::varLogger(
-                "The followig resource has not been added due "
-                . "to the validation error " . $errorMessage, $resourceToInsert->getUri(), $this->errorLog
-            );
+            $this->logger->warning("The resource {$resourceToInsert->getUri()} has not been added due "
+                . "to the validation error " . $errorMessage);
         }
         var_dump($resourceToInsert->getUri() .
             " cannot not been inserted due to the validation error(s) above.");
@@ -303,7 +296,7 @@ class Command implements LoggerAwareInterface
     {
         foreach ($validator->getWarningMessages() as $warning) {
             var_dump($warning);
-            Logging::varLogger($warning, $uri, $this->errorLog);
+            $this->logger->warning("The resource {$uri} induces the foolowing warning: $warning");
         }
     }
 

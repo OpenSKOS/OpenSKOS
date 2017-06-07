@@ -20,7 +20,6 @@
 namespace OpenSkos2;
 
 use Exception;
-use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\ResourceNotFoundException;
@@ -124,9 +123,10 @@ class Concept extends Resource
         };
         if ($existingConcept == null) { // a completely new concept under creation
             $this->unsetProperty(DcTerms::DATEACCEPTED);
+            if ($this->isPropertyEmpty(OpenSkos::UUID)) {
+                $this->setProperty(OpenSkos::UUID, new Literal(Uuid::uuid4()));
+            }
             $forFirstTimeInOpenSkos = [
-                // OpenSkos::UUID => new Literal(Uuid::uuid4()), uuid generation is a part of uri generation
-                // 
                 // OpenSkos::TENANT => new Uri($tenant->getUri()), 
                 // tenant is not a part of the concept rdf because it is derived from the concept's schema's concept schema via set
                 // @TODO Make status dependent on if the tenant has statuses system enabled.

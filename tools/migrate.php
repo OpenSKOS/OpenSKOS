@@ -18,8 +18,7 @@
  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
-use OpenSkos2\Logging;
-use OpenSkos2\Roles;
+
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -30,7 +29,6 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Validator\Resource as ResourceValidator;
-
 // Meertens: 
 // -- Full merge is hardly possible due to different strcuture of the code. It does make sence to keep two separate migrate scripts.
 // -- what does it mean to validate URI in validate collections (now sets)? Validate syntactically, I guess? I switched it off because it all fails in Meertens database
@@ -425,7 +423,7 @@ function fetch_set($id, $collectionModel, $fetchRowWithRetries, $resourceManager
 $mappings = [
     'users' => [
         'callback' => function ($value) use 
-        ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries, $resourceManager, $isDryRun) {
+        ($userModel, &$users, &$notFoundUsers, $tenant, $fetchRowWithRetries, $resourceManager, $isDryRun, $logger) {
             if ($value === null || !$value || !isset($value)) {
                 return new \OpenSkos2\Rdf\Literal("Unknown");
             }
@@ -762,9 +760,10 @@ function run_round($doc, $resourceManager, $tenantRdf, $class, $setRdf, $default
                 $errorLog = "../".$init["custom.error_log"];
                 foreach ($validator->getErrorMessages() as $errorMessage) {
                     var_dump($errorMessage);
-                    Logging::varLogger(
-                        "The followig resource has not been added due to the validation error " .
-                        $errorMessage, $resource->getUri(), $errorLog);
+                    $logger->error(
+                        "The followig resource has not been added due to the validation error: " .
+                        $errorMessage
+                    );                       
                 }
                 $resourceManager->delete($resource); //remove garbage - 1
                 $resourceManager->deleteReferencesToObject($resource); //remove garbage - 2

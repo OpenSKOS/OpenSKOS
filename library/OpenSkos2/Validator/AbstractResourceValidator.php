@@ -322,7 +322,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
             $tenantUri = $tenantUris[0]->getUri();
             if ($tenantUri !== $this->tenant->getUri()) {
-                $this->errorMessages[] = "The resource " . $resource->getUri() .
+                $this->errorMessages[] = "The resource " . $resource->getUri() . " of type " . $resource->getType().
                     " attempts to access the set  " . $setURI->getUri() .
                     ", which does not belong to the user's tenant " . $this->tenant->getUri() .
                     ", but to the tenant " . $tenantUri . ".";
@@ -338,7 +338,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $errorsBeforeCheck = count($this->errorMessages);
         foreach ($setUris as $setURI) {
             if ($setURI->getUri() !== $this->set->getUri()) {
-                $this->errorMessages[] = "The resource " . $resource->getUri() .
+                $this->errorMessages[] = "The resource " . $resource->getUri() ." of type " . $resource->getType().
                     " attempts to access the set  " . $setURI->getUri() .
                     ", which does not coinside with the set announced by request parameter with " .
                     $this->set->getUri();

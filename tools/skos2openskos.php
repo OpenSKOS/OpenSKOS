@@ -56,8 +56,15 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
 $personManager = $diContainer->get('OpenSkos2\PersonManager');
 
-$person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Namespaces\Foaf::PERSON);
-$tenant = new \OpenSkos2\Tenant($OPTS->tenant);
+$person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Person::TYPE);
+$set = $resourceManager->fetchByUri($OPTS->setUri, \OpenSkos2\Set::TYPE);
+$publisher = $set->getProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER);
+if (count($publisher)<1) {
+  echo str_replace('Something went very wrong: the set '. $OPTS->setUri. 'does not have a publisher.');
+  exit(1); 
+}
+$tenant = $resourceManager->fetchByUri($publisher[0]->getUri(), \OpenSkos2\Tenant::TYPE);
+
 
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
@@ -72,7 +79,7 @@ echo "First round. (The referecne to a concept via relations, hasTopConcept or m
  /** Recall Message's constructor parameters to see what is going on
    /**
    * Message constructor.
-   * @param $user
+   * @param $person
    * @param $file
    * @param Uri $setUri
    * @param bool $ignoreIncomingStatus
@@ -85,7 +92,7 @@ echo "First round. (The referecne to a concept via relations, hasTopConcept or m
    * @param bool $deleteSchemes
    */
 $message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = false
-  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
+  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
 
 $not_valid_resource_uris = $importer->handle($message);
@@ -98,7 +105,7 @@ foreach ($not_valid_resource_uris as $uri) {
 echo "\n First round is finished. The second round: the references to the non-valid concepts from other concepts, or concept schemata or skos collections will be removed before submitting a concept for update. UpdateMode\n";
 
 $message2 = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = true
-  $user, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
+  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
 );
 $not_valid_resource_uris2 = $importer->handle($message2);
 $elapsed2 = time() - $old_time;

@@ -536,6 +536,9 @@ class Resource extends Uri implements ResourceIdentifier
         if ($existingResource === null) { // a completely new resource under creation
             $this->setProperty(DcTerms::CREATOR, new Uri($person->getUri())); 
             $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
+            if ($this->isPropertyEmpty(OpenSkos::UUID)) {
+                $this->setProperty(OpenSkos::UUID, new Literal(Uuid::uuid4()));
+            }
         } else {
             $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
             $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($person->getUri()));

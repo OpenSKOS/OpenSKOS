@@ -27,18 +27,18 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
 
     protected function validateConcept(Concept $concept)
     {
-        $valid = $this->checkValidityOfRelations($concept);
+        $valid = $this->checkConsistencyOfRelations($concept);
         if ($this->conceptReferenceCheckOn) {
             $init = $this->resourceManager->getInitArray();
-            $strict = $this->strictCheckRelatedConcepts($concept, $init);
-            $soft = $this->softCheckRelatedConcepts($concept, $init);
+            $strict = $this->strictCheckDanglingReferences($concept, $init);
+            $soft = $this->softCheckDanglingReferences($concept, $init);
         } else {
             $strict = true;
         }
         return $valid && $strict;
     }
 
-    private function strictCheckRelatedConcepts(Concept $concept, $init)
+    private function strictCheckDanglingReferences(Concept $concept, $init)
     {
         $errorsBefore = count($this->errorMessages);
         $toCheck = explode(" ", $init["custom.relations_strict_reference_check"]);
@@ -59,7 +59,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         return ($errorsBefore === count($this->errorMessages));
     }
 
-    private function softCheckRelatedConcepts(Concept $concept, $init)
+    private function softCheckDanglingReferences(Concept $concept, $init)
     {
         $toCheck = explode(" ", $init["custom.relations_soft_reference_check"]);
         for ($i = 0; $i < count($toCheck); $i++) {
@@ -81,7 +81,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         }
     }
 
-    private function checkValidityOfRelations(Concept $concept)
+    private function checkConsistencyOfRelations(Concept $concept)
     {
         $errorsBefore = count($this->errorMessages);
         $customRelUris = array_values($this->resourceManager->getCustomRelationTypes());
@@ -98,11 +98,10 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                         $allRelationUris); // throws an Exception
                     $relatedConcepts = $concept->getProperty($property);
                     foreach ($relatedConcepts as $relConceptUri) {
-                        // both throw an exception unless it is ok
-                        $this->resourceManager->relationTripleIsDuplicated($conceptUri, $relConceptUri, $property);
+                        // throw an exception unless it is ok
                         $this->resourceManager->relationTripleCreatesCycle($conceptUri, $relConceptUri, $property);
                     }
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $this->errorMessages[] = $ex->getMessage();
                 }
             } 

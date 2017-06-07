@@ -70,11 +70,11 @@ class Message
     /**
      * @var Person
      */
-    private $user;
+    private $person;
 
     /**
      * Message constructor.
-     * @param $user
+     * @param $person
      * @param $file
      * @param Uri $setUri
      * @param bool $ignoreIncomingStatus
@@ -87,7 +87,7 @@ class Message
      * @param bool $deleteSchemes
      */
     public function __construct(
-        $user,
+        $person,
         $file,
         $setUri,
         $ignoreIncomingStatus,
@@ -109,7 +109,7 @@ class Message
         $this->fallbackLanguage = $fallbackLanguage;
         $this->clearSet = $clearSet;
         $this->deleteSchemes = $deleteSchemes;
-        $this->user = $user;
+        $this->person = $person;
     }
 
     /**
@@ -189,7 +189,7 @@ class Message
      */
     public function getUser()
     {
-        return $this->user;
+        return $this->person;
     }
 
     public function isRemovingDanglingConceptReferencesRound()

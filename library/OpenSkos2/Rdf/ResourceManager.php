@@ -27,7 +27,6 @@ use OpenSkos2\Concept;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
@@ -40,7 +39,6 @@ use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use RuntimeException;
-use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
@@ -55,7 +53,7 @@ use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 
 class ResourceManager
 {
-
+   
     /**
      * @var Client
      */
@@ -378,13 +376,13 @@ class ResourceManager
         if ($resType === null) {
             $resType = $this->getResourceType();
         }
-        
+
         try {
             $result = $this->query($query);
             $resources = EasyRdf::graphToResourceCollection($result, $resType);
             // @TODO Add resourceType check.
         } catch (\Exception $exp) {
-            throw new ResourceNotFoundException("Unable to fetch resource, ". $exp->getMEesage());
+            throw new ResourceNotFoundException("Unable to fetch resource, " . $exp->getMEesage());
         }
 
 
@@ -645,7 +643,7 @@ class ResourceManager
         } else {
             if ($id !== null && isset($id)) {
                 if ($rdfType == null) {
-                    throw new ApiException('No rdf type is given for resource with id ' . $id, 412);
+                    throw new \Exception('No rdf type is given for resource with id ' . $id);
                 }
                 if (substr($id, 0, 7) === "http://" || substr($id, 0, 8) === "https://") {
                     $count = $this->countTriples('<' . $id . '>', '<' . RdfNamespace::TYPE . '>', '<' . $rdfType . '>');
@@ -1105,7 +1103,7 @@ class ResourceManager
         }
 
 
-        throw new ApiException("The resource with the reference " . $resourceReference . " is not found. ");
+        throw new ResourceNotFoundException("The resource with the reference " . $resourceReference . " is not found. ");
     }
 
     // used only for HTML output
@@ -1243,25 +1241,23 @@ class ResourceManager
                         try {
                             $resource = $this->fetchByCode($id, $resourceType);
                         } catch (\Exception $ex2) {
-                            throw new ApiException(
+                            throw new ResourceNotFoundException(
                             'The resource of type ' . $resourceType .
                             ' with the id/uri/code ' . $id . ' cannot be found (detailed reasons : ' .
-                            $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')', 404
-                            );
+                            $ex->getMessage() . ' AND   ' . $ex2->getMessage() . ')');
                         }
                     } else {
-                        throw new ApiException(
+                        throw new ResourceNotFoundException(
                         'The resource of type ' . $resourceType .
                         ' with the id/uri ' . $id . ' cannot be found (detailed reasons : ' .
-                        $ex->getMessage() . ')', 404
-                        );
+                        $ex->getMessage() . ')');
                     }
                 }
             }
 
             return $resource;
         } else {
-            throw new ApiException('No Id (URI or UUID, or Code) is given', 400);
+            throw new \Exception('No Id (URI or UUID, or Code) is given');
         }
     }
 
@@ -1311,14 +1307,10 @@ class ResourceManager
         if ($resource !== null) {
             $setUris = $resource->getProperty(OpenSkosNamespace::SET);
             if (count($setUris) > 0) {
-                try {
-                    $set = $this->fetchByUri($setUris[0]->getUri(), \OpenSkos2\Set::TYPE);
-                    $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-                    if (count($tenantUris) > 0) {
-                        return $tenantUris[0];
-                    }
-                } catch (ApiException $ex) {
-                    
+                $set = $this->fetchByUri($setUris[0]->getUri(), \OpenSkos2\Set::TYPE);
+                $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
+                if (count($tenantUris) > 0) {
+                    return $tenantUris[0];
                 }
             }
         }
@@ -1457,5 +1449,96 @@ class ResourceManager
         $result = array_merge($skosrels, $userrels);
         return $result;
     }
+
+    // a relation is invalid if it (possibly with its inverse) creates transitive
+    // link of a concept or related concept to itself
+    public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
+    {
+        $closure = $this->getClosure($relatedConceptUri, $relationUri);
+        $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
+        if ($transitive) {
+            throw new \Exception(
+            "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link of the source to itself, '
+            . 'possibly via inverse relation.");
+        }
+        // overkill??
+        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
+        if (array_key_exists($relationUri, $inverses)) {
+            $inverseRelUri = $inverses[$relationUri];
+            $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
+            $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
+            if ($transitiveInverse) {
+                throw new \Exception(
+                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link of the target to itself");
+            }        
+        }
+        
+    }
+
+    public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
+    {
+        $count = $this->countTriples(
+            '<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>'
+        );
+        if ($count > 0) {
+            throw new \Exception(
+                        "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
+                    );  
+        }
+
+        $trans = $this->customRelationTypes->getTransitives();
+        if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
+            $closure = $this->getClosure($conceptUri, $relationUri);
+            if (in_array($relatedConceptUri, $closure)) {
+                throw new \Exception(
+                        "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure." 
+                    );
+            }
+        }
+        return false;
+    }
+
+    public function isRelationURIValid($relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null)
+    {
+        if ($customRelUris == null) {
+            $customRelUris = array_values($this->getCustomRelationTypes());
+        }
+        if ($registeredRelationUris == null) {
+            $registeredRelationUris = array_values($this->getTripleStoreRegisteredCustomRelationTypes());
+        }
+        if ($allRelationUris == null) {
+            $allRelationUris = array_values($this->fetchConceptConceptRelationsNameUri());
+        }
+        if (in_array($relUri, $allRelationUris)) {
+            if (in_array($relUri, $customRelUris)) {
+                if (!in_array($relUri, $registeredRelationUris)) {
+                    throw new \Exception(
+                    'The relation  ' . $relUri .
+                    '  is not registered in the triple store. ');
+                }
+            }
+        } else {
+            throw new \Exception(
+            'The relation type ' . $relUri . '  is neither a skos concept-concept '
+            . 'relation type nor a custom relation type. ');
+        }
+    }
+    
+     // all concepts from transitive closure for $conceptsUri;
+    private function getClosure($conceptUri, $relationUri)
+    {
+        $query = 'select ?trans where {<' . $conceptUri . '>  <' . $relationUri . '>+ ' . '  ?trans . }';
+        $response = $this->query($query);
+        $retVal = array();
+        $i = 0;
+        foreach ($response as $key => $value) {
+            $retVal[$i] = $value->trans->getUri();
+            $i++;
+        }
+        return $retVal;
+    }
+
+    
+
 
 }
