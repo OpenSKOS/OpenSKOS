@@ -1565,5 +1565,4 @@ class ResourceManager
         }
         return $retVal;
     }
-
 }
