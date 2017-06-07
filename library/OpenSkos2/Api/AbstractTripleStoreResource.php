@@ -129,7 +129,6 @@ abstract class AbstractTripleStoreResource
      *
      * @param string|Uri $id
      * @throws NotFoundException
-     * @throws Exception\DeletedException
      * @return a sublcass of \OpenSkos2\Resource
      */
     public function getResource($id)
@@ -255,14 +254,14 @@ abstract class AbstractTripleStoreResource
             $tenantAndSet = $this->getTenantAndSetFromParams($params);
 
             $this->authorisation->resourceDeleteAllowed($user, $tenantAndSet['tenant'], $tenantAndSet['set'], $resource);
-            $this->deletion->canBeDeleted($id); // deletion is blocked for non-concept resources if nthere are references to this resource; deletion for concepts is not blocked; can be customized
+            $this->deletion->canBeDeleted($id); // deletion is blocked for non-concept resources if there are references to this resource; deletion for concepts is not blocked; can be customized
 
             if ($rdfType === Concept::TYPE) {
                 $this->manager->deleteSoft($resource);
             } else {
                 $this->manager->delete($resource);
             }
-        } catch (ApiException $ex) {
+        } catch (\Exception $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
         $xml = (new DataRdf($resource))->transform();

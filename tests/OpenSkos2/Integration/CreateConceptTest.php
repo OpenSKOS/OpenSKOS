@@ -358,7 +358,7 @@ class CreateConceptTest extends AbstractTest
         if (self::$init["custom.default_authorisation"]) {
             $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
         } else {
-            $this->AssertEquals(403, $response->getStatus(), 'An un-authorised guest has created a concept. '. $response->getBody());
+            $this->AssertEquals(500, $response->getStatus(), 'An un-authorised guest has created a concept. '. $response->getBody());
         }
     }
   

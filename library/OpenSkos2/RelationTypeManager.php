@@ -56,16 +56,15 @@ class RelationTypeManager extends ResourceManager
             if (in_array($rels[0], $existingRelations)) {
                 $relFilterStr = '( ?rel = <' . $rels[0] . '>';
             } else {
-                throw new \OpenSkos2\Api\Exception\ApiException('Relation ' . $rels[0] . " is not implemented.", 501);
+                throw new \Exception('Relation ' . $rels[0] . " is not implemented.");
             }
 
             for ($i = 1; $i < count($rels); $i++) {
                 if (in_array($rels[$i], $existingRelations)) {
                     $relFilterStr = $relFilterStr . ' || ?rel = <' . $rels[$i] . '>';
                 } else {
-                    throw new \OpenSkos2\Api\Exception\ApiException(
-                        'Relation ' . $rels[$i] . " is not implemented.",
-                        501
+                    throw new \Exception(
+                        'Relation ' . $rels[$i] . " is not implemented."
                     );
                 }
             }

@@ -30,7 +30,6 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Api\Exception\ApiException;
 
 // Mertens: the difference is in handling relations.
 // We use "addRelationTriple" and "deleteRelationTriple" since old names
@@ -55,7 +54,7 @@ class ConceptManager extends ResourceManager
     {
         $concept = parent::findResourceById($id, $resourceType);
         if ($concept->isDeleted()) {
-            throw new ApiException('Resource with id ' . $id . ' is deleted', 410);
+            throw new \Exception('Resource with id ' . $id . ' is deleted');
         }
         return $concept;
     }

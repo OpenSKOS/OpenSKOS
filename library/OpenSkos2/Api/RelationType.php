@@ -19,8 +19,7 @@
 
 namespace OpenSkos2\Api;
 
-use Exception;
-use OpenSkos2\Api\Exception\ApiException;
+
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Response\JsonResponse as JsonResponse2;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
@@ -124,7 +123,7 @@ class RelationType extends AbstractTripleStoreResource
                     $response = (new RdfResponse($result, []))->getResponse();
                     break;
                 default:
-                    throw new ApiException('Invalid context: ' . $format, 400);
+                    throw new \Exception('Invalid context: ' . $format);
             }
             return $response;
         } catch (Exception $e) {
@@ -140,19 +139,17 @@ class RelationType extends AbstractTripleStoreResource
     protected function checkResourceIdentifiers(PsrServerRequestInterface $request, $resourceObject)
     {
         if ($resourceObject->isBlankNode()) {
-            throw new ApiException(
+            throw new \Exception(
                 'Uri (rdf:about) is missing from the xml. For user relations you must supply it,'
-                . ' autogenerateIdentifiers is set to false compulsory.',
-                400
+                . ' autogenerateIdentifiers is set to false compulsory.'
             );
         }
         $ttl = $resourceObject->getUri();
         $hakje = strrpos($ttl, "#");
         if (strpos($ttl, 'http://') !== 0 || !$hakje || ($hakje === strlen($ttl) - 1)) {
-            throw new ApiException(
+            throw new \Exception(
                 'The user-defined relation uri must have the form <namespace>#<name> '
-                . 'where <namespace> starts with http:// and name is not empty.',
-                400
+                . 'where <namespace> starts with http:// and name is not empty.'
             );
         }
         // do not generate idenitifers
