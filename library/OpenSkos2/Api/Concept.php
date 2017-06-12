@@ -68,7 +68,7 @@ class Concept
      * @var ConceptManager
      */
     private $conceptManager;
-    
+
     /**
      * Person manager
      *
@@ -82,7 +82,7 @@ class Concept
      * @var \OpenSkos2\Search\Autocomplete
      */
     private $searchAutocomplete;
-    
+
     /**
      * Amount of concepts to return
      *
@@ -149,7 +149,7 @@ class Concept
             $tenant = $this->getTenantFromParams($params);
             $options['tenants'] = [$tenant->getCode()];
         }
-        
+
         // collection -> set in OpenSKOS 2
         if (isset($params['collection'])) {
             $collection = $this->getCollection($params, $tenant);
@@ -167,7 +167,7 @@ class Concept
         }
 
         $concepts = $this->searchAutocomplete->search($options, $total);
-        
+
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {
@@ -175,9 +175,9 @@ class Concept
         } else {
             $propertiesList = [];
         }
-        
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
-        
+
         if ($this->useXlLabels($tenant, $request) === true) {
             foreach ($concepts as $concept) {
                 $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
@@ -218,32 +218,32 @@ class Concept
     public function getConceptResponse(ServerRequestInterface $request, $uuid, $context)
     {
         $concept = $this->getConcept($uuid);
-        
+
         if (!($concept instanceof \OpenSkos2\Concept || $concept instanceof \OpenSkos2\ConceptScheme)) {
             throw new InvalidArgumentException(
                 'The requested resource was found, but is not supported by this endpoint - "concept/get".',
                 400
             );
         }
-        
+
         //TODO: make tenant openskos2tenant
         $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution());
 
         $params = $request->getQueryParams();
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
-        
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
-        
+
         if ($concept instanceof \OpenSkos2\Concept
                 && $excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
             $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
         }
-        
+
         switch ($context) {
             case 'json':
                 $response = (new DetailJsonResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
@@ -265,7 +265,7 @@ class Concept
 
         return $response;
     }
-    
+
     /**
      * Get a list of label exclude properties based on tenant configuration and request XL param
      * @param Tenant $tenant
@@ -274,7 +274,7 @@ class Concept
     public function getExcludeProperties($tenant, $request)
     {
         $useXlLabels = $this->useXlLabels($tenant, $request);
-                
+
         if ($useXlLabels === true) {
             return \OpenSkos2\Concept::$classes['LexicalLabels'];
         } else {
@@ -306,10 +306,10 @@ class Concept
         if ($concept->isDeleted()) {
             throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
-        
+
         return $concept;
     }
-    
+
     /**
      * Create the concept
      *
@@ -335,11 +335,11 @@ class Concept
     public function update(ServerRequestInterface $request)
     {
         $concept = $this->getConceptFromRequest($request);
-        
+
         if (!$this->manager->askForUri((string)$concept->getUri())) {
             return $this->getErrorResponse(404, 'Concept not found try insert');
         }
-        
+
         try {
             $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
 
@@ -351,7 +351,7 @@ class Concept
             $user = $this->getUserFromParams($params);
 
             $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
-            
+
             $this->checkConceptXl($concept, $tenant);
 
             $concept->ensureMetadata(
@@ -424,9 +424,9 @@ class Concept
         if (empty($request->getQueryParams()['xl'])) {
             return false;
         }
-        
+
         $xlParam = filter_var($request->getQueryParams()['xl'], FILTER_VALIDATE_BOOLEAN);
-        
+
         if ($xlParam === false) {
             return false;
         } else {
@@ -447,7 +447,7 @@ class Concept
             }
         }
     }
-    
+
     /**
      * Loads the resource from the db and transforms it to rdf.
      * @param Resource $resource
@@ -456,12 +456,17 @@ class Concept
     protected function loadResourceToRdf(Resource $resource)
     {
         $loadedResource = $this->manager->fetchByUri($resource->getUri());
-        
+
         $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($loadedResource->getInstitution());
         if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
             $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
+
+            // remove the skos labels if skosxl is activaeted
+            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#prefLabel');
+            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#altLabel');
+            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#hiddenLabel');
         }
-        
+
         return (new Transform\DataRdf($loadedResource))->transform();
     }
 
@@ -526,7 +531,7 @@ class Concept
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
         }
     }
-    
+
     /**
      * Handle the action of creating the concept
      *
@@ -553,7 +558,7 @@ class Concept
 
         if ($resource instanceof \OpenSkos2\Concept) {
             $this->checkConceptXl($resource, $tenant);
-            
+
             $resource->ensureMetadata(
                 $tenant->getCode(),
                 $collection->getUri(),
@@ -587,7 +592,7 @@ class Concept
 
         return $this->getSuccessResponse($this->loadResourceToRdf($resource), 201);
     }
-    
+
     /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
@@ -651,14 +656,14 @@ class Concept
         $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
 
         $resource = (new Text($doc->saveXML()))->getResources(\OpenSkos2\Concept::$classes['SkosXlLabels']);
-        
+
         if ($resource->count() != 1) {
             throw new InvalidArgumentException(
                 'Expected exactly one concept, got ' . $resource->count(),
                 412
             );
         }
-        
+
         if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
             throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
         }
@@ -825,7 +830,7 @@ class Concept
         }
 
         $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($this->getTenant($params['tenant']));
-        
+
         return $openSkos2Tenant;
     }
 
