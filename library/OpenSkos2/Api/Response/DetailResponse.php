@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,20 +15,17 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response;
-
 /**
  * Provide the json output for find-concepts api
  */
 abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
-
     /**
      * @var \OpenSkos2\Rdf\Resource
      */
     protected $resource;
-
+    
     /**
      * @var []
      */
@@ -39,7 +35,6 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
      * @var []
      */
     protected $excludePropertiesList;
-
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.

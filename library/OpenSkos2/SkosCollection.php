@@ -11,7 +11,6 @@ namespace OpenSkos2;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
 
@@ -43,20 +42,6 @@ class SkosCollection extends Resource
             return (string) $this->getPropertySingleValue(DcTerms::DESCRIPTION);
         } else {
             return null;
-        }
-    }
-
-    public function ensureMetadata(
-        $tenantUri, 
-        $setUri, 
-        \OpenSkos2\Person $person, 
-        \OpenSkos2\PersonManager $personManager, 
-        $existingSkosCollection = null)
-
-    {
-        parent::ensureMetadata($tenantUri, $setUri, $person, $personManager, $existingSkosCollection);
-        if ($this->isPropertyEmpty(OpenSkos::SET)) {
-            $this->setProperty(OpenSkos::SET, new Uri($setUri));
         }
     }
 

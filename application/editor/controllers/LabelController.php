@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,13 +15,11 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Search\Autocomplete;
-
 class Editor_LabelController extends OpenSKOS_Controller_Editor
 {
     public function init()
@@ -106,7 +103,6 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
     {
         /* @var $autocomplete Autocomplete */
         $autocomplete = $this->getDI()->get('\OpenSkos2\Search\AutocompleteLabels');
-
         $options = [
             'searchText' => $this->getRequest()->getParam('query'),
             'language' => $this->getRequest()->getParam('language'),
@@ -150,7 +146,6 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
         $this->view->labelXL = $labelXL;
         $this->view->relations = $relations;
     }
-
     /**
      * @return OpenSkos2\SkosXl\Label
      * @throws ResourceNotFoundException

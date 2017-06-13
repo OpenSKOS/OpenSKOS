@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,20 +15,15 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Converter;
-
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
-
 class File
 {
-
     /**
      * @var string
      */
     protected $fileName;
-
     /**
      * File constructor.
      * @param string $fileName
@@ -38,7 +32,6 @@ class File
     {
         $this->fileName = $fileName;
     }
-
     /**
      * @param array $allowedChildrenTypes , optional, For example skos xl
      * @return ResourceCollection

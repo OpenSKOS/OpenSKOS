@@ -24,11 +24,10 @@ use DateTime;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Namespaces as Namespaces;
-use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
@@ -81,7 +80,7 @@ class Resource extends Uri implements ResourceIdentifier
         ],
         'SkosCollections' => [
             OpenSkos::INSKOSCOLLECTION,
-            Skos::COLLECTION,
+            Skos::SKOSCOLLECTION,
             Skos::ORDEREDCOLLECTION, 
             Skos::MEMBER, 
             Skos::MEMBERLIST, 
@@ -96,6 +95,7 @@ class Resource extends Uri implements ResourceIdentifier
         ],
     );
     
+    protected $properties=[];
       /**
      * @return null dummy manager for non-concept-type resources
      */
@@ -526,7 +526,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Uri($tenant->getUri()),
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
             DcTerms::DATESUBMITTED => $nowLiteral
         ];
 

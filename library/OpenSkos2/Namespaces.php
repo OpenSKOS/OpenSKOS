@@ -21,6 +21,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dc;
+use OpenSkos2\Namespaces\SkosXl;
 use \EasyRdf\RdfNamespace;
 
 class Namespaces
@@ -113,7 +114,8 @@ class Namespaces
                     return "\OpenSkos2\Tenant";
                 case SkosCollection::TYPE:
                     return "\OpenSkos2\SkosCollection";
-                    // TODO: add Relationtype
+                case RelationType::TYPE:
+                    return "\OpenSkos2\RelationType";
                 default:
                     return "\OpenSkos2\Rdf\Resource";
             }

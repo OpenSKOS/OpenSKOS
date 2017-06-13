@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,23 +15,18 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Converter;
-
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
-
 /**
  * Convert xml string to ResourceCollection
  */
 class Text
 {
-
     /**
      * @var string
      */
     protected $string;
-
     /**
      * @param string $string
      */
@@ -40,12 +34,10 @@ class Text
     {
         $this->string = $string;
     }
-
     /**
      * @param array $allowedChildrenTypes , optional, For example skos xl
      * @return ResourceCollection
      */
-
     public function getResources($allowedChildrenTypes = [])
     {
         $graph = new Graph();

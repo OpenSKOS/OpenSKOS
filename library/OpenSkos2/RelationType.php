@@ -25,6 +25,7 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\PersonManager;
 
 class RelationType extends Resource
 {
@@ -37,4 +38,46 @@ class RelationType extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
         $this->addProperty(Rdfs::SUBPROPERTY_OF, new Uri(Skos::RELATED));
     }
+    
+   /**
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param \OpenSkos2\Tenant $tenant
+     * @param \OpenSkos2\Set $set
+     * @param \OpenSkos2\Person $person
+     * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\LabelManager | null  $labelManager
+     * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
+     * override for a concerete resources when necessary
+     */
+     public function ensureMetadata(
+        \OpenSkos2\Tenant $tenant, 
+        \OpenSkos2\Set $set, 
+        \OpenSkos2\Person $person,
+        PersonManager $personManager, 
+        $labelManager = null, 
+        $existingConcept = null, 
+        $forceCreationOfXl = false)
+    {
+
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+
+        $forFirstTimeInOpenSkos = [
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            DcTerms::DATESUBMITTED => $nowLiteral
+        ];
+
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
+            }
+        }
+
+        $this->resolveCreator($person, $personManager);
+
+        $this->setModified($person);
+
+    }
+
 }

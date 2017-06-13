@@ -161,18 +161,4 @@ class ConceptScheme extends Resource
         }
     }
 
-    public function ensureMetadata(
-        $tenantUri, 
-        $setUri, 
-        \OpenSkos2\Person $person, 
-        \OpenSkos2\PersonManager $personManager, 
-        $existingScheme = null)
-
-    {
-        parent::ensureMetadata($tenantUri, $setUri, $person, $personManager, $existingScheme);
-        if ($this->isPropertyEmpty(OpenSkos::SET)) {
-            $this->setProperty(OpenSkos::SET, new Uri($setUri));
-        }
-    }
-
 }

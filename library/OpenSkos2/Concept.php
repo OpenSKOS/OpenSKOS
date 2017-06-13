@@ -51,8 +51,7 @@ class Concept extends Resource
     const STATUS_DELETED = 'deleted';
     const STATUS_EXPIRED = 'expired';
 
-    protected $properties = [];
-
+    
     /**
      * Get list of all available concept statuses.
      * @return array
@@ -198,7 +197,8 @@ class Concept extends Resource
 
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Uri($tenant->getUri()),
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            OpenSkos::TENANT => new Literal($tenant->getCode()),
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::DATESUBMITTED => $nowLiteral

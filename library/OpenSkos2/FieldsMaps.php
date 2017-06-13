@@ -131,4 +131,20 @@ class FieldsMaps
         
         return array_merge(FieldsMaps::getNamesToProperties(), $xlProperties);
     }
+    
+    /**
+     * Returns the corresponding property for the given field.
+     * If property not found - returns $field.
+     * @param string $field
+     * @return string
+     */
+    public static function resolveField($field)
+    {
+        $map = self::getNamesToProperties();
+        if (isset($map[$field])) {
+            return $map[$field];
+        } else {
+            return $field;
+        }
+    }
 }

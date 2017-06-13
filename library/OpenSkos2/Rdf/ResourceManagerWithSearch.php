@@ -29,6 +29,7 @@ use OpenSkos2\Rdf\ResourceCollection;
 
 class ResourceManagerWithSearch extends ResourceManager
 {
+
     /**
      * @var \OpenSkos2\Solr\ResourceManager
      */
@@ -71,9 +72,20 @@ class ResourceManagerWithSearch extends ResourceManager
     public function insert(Resource $resource)
     {
         parent::insert($resource);
-        $this->solrResourceManager->insert($resource);
+
+        if ($resource->getType()->getUri() === Concept::TYPE) {
+            $specs = $this->fetchConceptSpec($resource);
+            if (count($specs) < 1) {
+                throw new \Exception("Cannot fetch spec for the concept {$resource->getUri()}");
+            }
+            foreach ($specs as $spec) {
+                $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
+                $resource->setProperty(OpenSkosNameSpace::SET, new Uri($spec['seturi']));
+            }
+            $this->solrResourceManager->insert($resource);
+        }
     }
-    
+
     /**
      * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
      * @throws ResourceAlreadyExistsException
@@ -83,7 +95,7 @@ class ResourceManagerWithSearch extends ResourceManager
         parent::insertCollection($resourceCollection);
         $this->solrResourceManager->insertCollection($resourceCollection);
     }
-    
+
     /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -91,9 +103,10 @@ class ResourceManagerWithSearch extends ResourceManager
     public function replace(Resource $resource)
     {
         parent::replace($resource);
-        
-        $this->solrResourceManager->delete($resource);
-        $this->solrResourceManager->insert($resource);
+        if ($resource->getType()->getUri() === Concept::TYPE) {
+            $this->solrResourceManager->delete($resource);
+            $this->solrResourceManager->insert($resource);
+        }
     }
 
     /**
@@ -120,15 +133,15 @@ class ResourceManagerWithSearch extends ResourceManager
     public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
     {
         $filterQueries = null;
-        
+
         if (!empty($this->resourceType)) {
             $filterQueries = [
                 'rdfTypeFilter' => 's_rdfType:"' . $this->resourceType . '"'
             ];
         }
-        
+
         return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
+                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
         );
     }
 
@@ -139,4 +152,5 @@ class ResourceManagerWithSearch extends ResourceManager
     {
         $this->solrResourceManager->commit();
     }
+
 }

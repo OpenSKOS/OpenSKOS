@@ -39,7 +39,6 @@ class RdfResponse extends ResultSetResponse
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)
             ->withHeader('Content-Type', 'text/xml; charset=UTF-8');
-
         return $response;
     }
 
@@ -61,19 +60,15 @@ class RdfResponse extends ResultSetResponse
         $root->setAttribute('openskos:rows', $this->result->getLimit());
         $root->setAttribute('openskos:start', $this->result->getStart());
         $doc->appendChild($root);
-
         foreach ($this->result->getResources() as $resource) {
             // @TODO This can be replaced with something like the OpenSkos2\Export\Serialiser\Format\Xml().
             // or both of them with something shared.
-
             /* @var $resource \OpenSkos2\Rdf\Resource */
             $xml = (new \OpenSkos2\Api\Transform\DataRdf(
-                $resource,
-                true,
-                $this->propertiesList,
-                $this->excludePropertiesList
-            ))->transform();
-            $resourceXML =  new \DOMDocument();
+                $resource, true, $this->propertiesList, $this->excludePropertiesList
+                ))->transform();
+            
+            $resourceXML = new \DOMDocument();
             $resourceXML->loadXML($xml);
 
             // Rename rdf:RDF to rdf:Description
@@ -86,8 +81,8 @@ class RdfResponse extends ResultSetResponse
             $root->appendChild(
                 $doc->importNode($resourceXML->documentElement, true)
             );
+           
         }
-
         return $doc;
     }
 
@@ -97,16 +92,16 @@ class RdfResponse extends ResultSetResponse
      */
     private function moveNodesFromResource(\DOMElement $resource)
     {
-
         $skosResource = $resource->childNodes->item(1);
-        
+
         if (empty($skosResource->childNodes)) {
             return;
         }
-        
+
         foreach ($skosResource->childNodes as $child) {
             $skosResource->parentNode->appendChild($child->cloneNode(true));
         }
+        $resource->removeChild($skosResource);
     }
 
     /**
@@ -118,15 +113,12 @@ class RdfResponse extends ResultSetResponse
      */
     private function renameElement(\DOMElement $node, \DOMELement $renamed)
     {
-
         foreach ($node->attributes as $attribute) {
             $renamed->setAttribute($attribute->nodeName, $attribute->nodeValue);
         }
-
         while ($node->firstChild) {
             $renamed->appendChild($node->firstChild);
         }
-
         return $node->parentNode->replaceChild($renamed, $node);
     }
 
@@ -142,7 +134,6 @@ class RdfResponse extends ResultSetResponse
         $type = $doc->createElement('rdf:type');
         $type->setAttribute('rdf:resource', $resource->getType());
         $element->appendChild($type);
-
         // @TODO This is map strictly for resources. We have other resources as well now.
         $map = [
             'openskos:status' => \OpenSkos2\Namespaces\OpenSkos::STATUS,
@@ -158,7 +149,6 @@ class RdfResponse extends ResultSetResponse
             'dcterms:creator' => \OpenSkos2\Namespaces\DcTerms::CREATOR,
             'dcterms:dateSubmitted' => \OpenSkos2\Namespaces\DcTerms::DATESUBMITTED,
         ];
-
         foreach ($map as $tag => $ns) {
             $properties = $resource->getProperty($ns);
             foreach ($properties as $prop) {
@@ -169,26 +159,21 @@ class RdfResponse extends ResultSetResponse
                     $element->appendChild($el);
                     continue;
                 }
-
                 $val = $prop->getValue();
-
                 if (empty($val)) {
                     continue;
                 }
-
                 if ($val instanceof \DateTime) {
                     $val = $val->format(DATE_W3C);
                     $el = $doc->createElement($tag, $val);
                     $element->appendChild($el);
                     continue;
                 }
-
                 $el = $doc->createElement($tag, $val);
                 $lang = $prop->getLanguage();
                 if (!empty($lang)) {
                     $el->setAttribute('xml:lang', $lang);
                 }
-
                 $element->appendChild($el);
             }
         }

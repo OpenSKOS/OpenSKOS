@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,26 +15,21 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response;
-
 /**
  * Provide the json output for find-concepts api
  */
 abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInterface
 {
-
     /**
      * @var \OpenSkos2\Api\ResourceResultSet
      */
     protected $result;
-
     /**
      * @var []
      */
     protected $propertiesList;
-    protected $resourceType;
-    protected $init;
+    
     /**
      * @var []
      */

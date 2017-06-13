@@ -28,9 +28,7 @@ use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Owl;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Skos;
@@ -40,8 +38,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use RuntimeException;
 use OpenSkos2\Exception\ResourceNotFoundException;
-use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
-use Asparagus\QueryBuilder;
+
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
 // For example getting a list of pref labels and uris
@@ -68,12 +65,17 @@ class ResourceManager
     protected $resourceType = null;
 
     /**
-     * @var \OpenSkos2\Solr\ResourceManager
+     * @var array
      */
     protected $customRelationTypes;
-    protected $init = [];
-
-    public function getResourceType()
+    
+    
+    /**
+     * @var array
+     */ 
+   protected $init = [];
+    
+   public function getResourceType()
     {
         return $this->resourceType;
     }
@@ -83,25 +85,6 @@ class ResourceManager
         return $this->init;
     }
 
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @return bool
-     */
-    public function getIsNoCommitMode()
-    {
-        return $this->solrResourceManager->getIsNoCommitMode();
-    }
-
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @param bool
-     */
-    public function setIsNoCommitMode($isNoCommitMode)
-    {
-        $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
-    }
 
     /**
 
@@ -134,7 +117,7 @@ class ResourceManager
         // Set rdf:type if we have it and if it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
-        }
+        } 
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
     }
     
@@ -243,16 +226,16 @@ class ResourceManager
         $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
             . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
             . 'FILTER ( ?type = <' . Skos::SKOSCOLLECTION . '> || ?type = <' . Skos::CONCEPTSCHEME .
-            '> || ?type = <' . Dcmi::DATASET . '>  ) } '
+            '> || ?type = <' . Set::TYPE . '>  ) } '
             . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
             . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
-            . ' FILTER ( ?type = <' . Org::FORMALORG . '>)} } ';
+            . ' FILTER ( ?type = <' . Tenant::TYPE . '>)} } ';
         $response = $this->query($query);
         $retVal = [];
         $retVal[Skos::SKOSCOLLECTION] = [];
         $retVal[Skos::CONCEPTSCHEME] = [];
-        $retVal[Dcmi::DATASET] = [];
-        $retVal[Org::FORMALORG] = [];
+        $retVal[Set::TYPE] = [];
+        $retVal[Tenant::TYPE] = [];
         foreach ($response as $descr) {
             $spec = [];
             $spec['uri'] = $descr->uri->getUri();
@@ -516,6 +499,7 @@ class ResourceManager
         } else {
             $newPatterns[RdfNamespace::TYPE] = $resType;
         };
+        
         if ($newPatterns[RdfNamespace::TYPE] !== null) {
             if ($newPatterns[RdfNamespace::TYPE]->getUri() === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
@@ -525,7 +509,7 @@ class ResourceManager
         };
 
 
-        $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
+        $query = 'DESCRIBE ?subject {' . PHP_EOL;
 
         $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
@@ -552,8 +536,10 @@ class ResourceManager
         }
 
         $query .= '}'; // end sub select
+        
         $resources = $this->fetchQuery($query, $resType);
-        // The order by part does not apply to the resources with describe.
+        
+// The order by part does not apply to the resources with describe.
         // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
         // @TODO provide possibility to order on other predicates.
@@ -906,10 +892,13 @@ class ResourceManager
             $query = $query->getSPARQL();
         }
         $result = $this->query($query);
+        
         if ($resType === null) {
             $resType = $this->resourceType;
         }
+        
         $retVal = EasyRdf::graphToResourceCollection($result, $resType);
+        
         return $retVal;
     }
 
@@ -1080,7 +1069,7 @@ class ResourceManager
     // used only for HTML output
     public function getResourceSearchID($resourceReference, $resourceType)
     {
-        if ($resourceType === Org::FORMALORG || $resourceType === Dcmi::DATASET) {
+        if ($resourceType === Tenant::TYPE || $resourceType === Set::TYPE) {
             $query = 'SELECT ?code WHERE { <' . $resourceReference . '>  <' . OpenSkosNamespace::CODE . '> ?code .  }';
             $response2 = $this->query($query);
             if ($response2 !== null & count($response2) > 0) {
@@ -1103,14 +1092,14 @@ class ResourceManager
     {
         $query = "SELECT ?name WHERE { ?seturi <" . OpenSkosNamespace::CODE . "> '" .
             $reference . "' . ?seturi <" . DcTerms::TITLE . "> ?name . ?seturi <" .
-            RdfNamespace::TYPE . "> <" . Dcmi::DATASET . "> . }";
+            RdfNamespace::TYPE . "> <" . Set::TYPE . "> . }";
         $response = $this->query($query);
         if ($response !== null & count($response) > 0) {
             return $response[0]->name->getValue();
         }
 
         $query = 'SELECT ?name WHERE { <' . $reference . '>  <' . DcTerms::TITLE . '> ?name .  <' .
-            $reference . '>  <' . RdfNamespace::TYPE . '> <' . Dcmi::DATASET . '> .}';
+            $reference . '>  <' . RdfNamespace::TYPE . '> <' . Set::TYPE . '> .}';
         $response1 = $this->query($query);
         if ($response1 !== null & count($response1) > 0) {
             return $response1[0]->name->getValue();
@@ -1229,7 +1218,7 @@ class ResourceManager
                 try {
                     $resource = $this->fetchByUuid($id, $resourceType);
                 } catch (\Exception $ex) {
-                    if ($resourceType == Org::FORMALORG || $resourceType == Dcmi::DATASET) {
+                    if ($resourceType == Tenant::TYPE || $resourceType == Set::TYPE) {
                         try {
                             $resource = $this->fetchByCode($id, $resourceType);
                         } catch (\Exception $ex2) {
@@ -1261,147 +1250,6 @@ class ResourceManager
         return $result;
     }
 
-    public function augmentResourceWithTenant($resource)
-    {
-        if ($resource !== null) {
-            $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
-            $rdfType = $rdfTypes[0]->getUri();
-            if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE &&
-                $rdfType !== \OpenSkos2\SkosCollection::TYPE &&
-                $rdfType !== \OpenSkos2\Set::TYPE) {
-                throw new \Exception(
-                "The method augmentResourceWithTenant can be used"
-                . "only for concept schemata, skos collections and sets. "
-                );
-            }
-            $tenants = $resource->getProperty(OpenSkosNamespace::TENANT);
-            if (count($tenants) < 1) {
-                $tenantUri = $this->fetchTenantUriViaSet($resource);
-                if ($tenantUri !== null) {
-                    $resource->setProperty(OpenSkosNamespace::TENANT, $tenantUri);
-                }
-            }
-        }
-        return $resource;
-    }
-
-    private function fetchTenantUriViaSet($resource)
-    {
-        $rdfTypes = $resource->getProperty(RdfNamespace::TYPE);
-        $rdfType = $rdfTypes[0]->getUri();
-
-        if ($rdfType !== \OpenSkos2\ConceptScheme::TYPE && $rdfType !== \OpenSkos2\SkosCollection::TYPE) {
-            throw new \Exception(
-            "The method fetchTenantUriViaSet can be used only"
-            . "for concept chemata and skos collections. "
-            );
-        }
-        if ($resource !== null) {
-            $setUris = $resource->getProperty(OpenSkosNamespace::SET);
-            if (count($setUris) > 0) {
-                $set = $this->fetchByUri($setUris[0]->getUri(), \OpenSkos2\Set::TYPE);
-                $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-                if (count($tenantUris) > 0) {
-                    return $tenantUris[0];
-                }
-            }
-        }
-        return null;
-    }
-
-    public function fetchConceptSpec($concept)
-    {
-        $uri = $concept->getUri();
-        $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle ?creatorname WHERE { '
-            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . '
-            . '?schemauri <' . OpenSkosNamespace::SET . '> ?seturi . '
-            . '?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-            . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
-            . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
-            . '?tenanturi  <' . VCard::ORG . '> ?org . '
-            . '?org <' . VCard::ORGNAME . '> ?tenantname . '
-            . '?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .'
-            . '<' . $uri . '> <' . DcTerms::CREATOR . '> ?creatoruri . '
-            . '?creatoruri <' . Foaf::NAME . '> ?creatorname . '
-            . '}';
-
-        $response = $this->query($query);
-        $retVal = [];
-        foreach ($response as $descr) {
-            $spec = [];
-            $spec['tenanturi'] = $descr->tenanturi->getUri();
-            $spec['tenantname'] = $descr->tenantname->getValue();
-            $spec['tenantcode'] = $descr->tenantcode->getValue();
-            $spec['seturi'] = $descr->seturi->getUri();
-            $spec['setcode'] = $descr->setcode->getValue();
-            $spec['settitle'] = $descr->settitle->getValue();
-            $spec['creatorname'] = $descr->creatorname->getValue();
-            $retVal[] = $spec;
-        }
-        if (count($retVal) > 0) {
-            return $retVal;
-        }
-        
-        // attempt to fetch tenants ans sets with unknown creator, used e.g. when migrating
-        $queryNoCreator = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle ?creatorname WHERE { '
-            . '<' . $uri . '> <' . Skos::INSCHEME . '> ?schemauri . '
-            . '?schemauri <' . OpenSkosNamespace::SET . '> ?seturi . '
-            . '?seturi <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-            . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
-            . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
-            . '?tenanturi  <' . VCard::ORG . '> ?org . '
-            . '?org <' . VCard::ORGNAME . '> ?tenantname . '
-            . '?tenanturi <' . OpenSkosNamespace::CODE . '> ?tenantcode .'
-            . '}';
-        
-        $responseNoCreator = $this->query($queryNoCreator);
-        foreach ($responseNoCreator as $descr) {
-            $spec = [];
-            $spec['tenanturi'] = $descr->tenanturi->getUri();
-            $spec['tenantname'] = $descr->tenantname->getValue();
-            $spec['tenantcode'] = $descr->tenantcode->getValue();
-            $spec['seturi'] = $descr->seturi->getUri();
-            $spec['setcode'] = $descr->setcode->getValue();
-            $spec['settitle'] = $descr->settitle->getValue();
-            $spec['creatorname'] = 'Unknown';
-            $retVal[] = $spec;
-        } 
-        
-        return $retVal;
-    }
-
-    public function fetchTenantSpecForConceptToAdd($concept)
-    {
-        $properties = [Skos::INSCHEME, OpenSkosNamespace::INSKOSCOLLECTION];
-        $retVal = [];
-        for ($i = 0; $i < 2; $i++) {
-            $refs = $concept->getProperty($properties[$i]);
-
-            foreach ($refs as $ref) {
-                $query = 'SELECT DISTINCT ?tenanturi ?tenantname ?tenantcode ?seturi ?setcode ?settitle WHERE { '
-                    . '<' . $ref->getUri() . '> <' . OpenSkosNamespace::SET . '> ?seturi . ?seturi <' .
-                    DcTerms::PUBLISHER . '> ?tenanturi .'
-                    . '?seturi <' . OpenSkosNamespace::CODE . '> ?setcode .'
-                    . '?seturi <' . DcTerms::TITLE . '> ?settitle .'
-                    . '?tenanturi  <' . VCard::ORG . '> ?org . ?org <' .
-                    VCard::ORGNAME . '> ?tenantname . ?tenanturi <' .
-                    OpenSkosNamespace::CODE . '> ?tenantcode .}';
-
-                $response = $this->query($query);
-                foreach ($response as $descr) {
-                    $spec = [];
-                    $spec['tenanturi'] = $descr->tenanturi->getUri();
-                    $spec['tenantname'] = $descr->tenantname->getValue();
-                    $spec['tenantcode'] = $descr->tenantcode->getValue();
-                    $spec['seturi'] = $descr->seturi->getUri();
-                    $spec['setcode'] = $descr->setcode->getValue();
-                    $spec['settitle'] = $descr->settitle->getValue();
-                    $retVal[] = $spec;
-                }
-            }
-        }
-        return $retVal;
-    }
 
     public function getCustomRelationTypes()
     {

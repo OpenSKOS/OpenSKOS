@@ -35,6 +35,7 @@ class TenantManager extends ResourceManager
         return $result;
     }
 
+    
     // used only for HTML representation
     public function fetchSetsForTenant($code)
     {

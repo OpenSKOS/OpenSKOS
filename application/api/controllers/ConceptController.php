@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,26 +15,20 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 require_once 'FindConceptsController.php';
-
-// Meertens: here was no code changes of picturae after October 2016, only documentation and formatting
-// which are taken in this merged file.
-// The code is basically identicall to the picturae version.
 
 class Api_ConceptController extends Api_FindConceptsController
 {
-
     public function init()
     {
+        $this->getHelper('layout')->disableLayout();
+        $this->getHelper('viewRenderer')->setNoRender(true);
         parent::init();
-        $this ->trow501 = false;
+        $this->isFindConcept = false;
     }
-
     /**
      *
      * @apiVersion 1.0.0
-
      * @apiDescription Create a SKOS Concept
      *
      * Create a new SKOS concept based on the post data.
@@ -56,42 +49,38 @@ class Api_ConceptController extends Api_FindConceptsController
      * instead of as defined in the example.
      *
      * @apiExample {String} Example request
-     *  <?xml version="1.0"?>
-     *  <rdf:RDF
+     * <rdf:RDF
      *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *    xmlns:openskos="http://openskos.org/xmlns#"
-     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *    openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
      *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
-     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+     *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept">
      *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
-     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen"/>
-     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842"/>
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652"/>
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957"/>
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Onderwerpen">
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/24842">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/25652">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/24957">
      *      <skos:altLabel xml:lang="nl">kruisigingen</skos:altLabel>
-     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731"/>
-     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
-     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
+     *      <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/27731">
+     *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109">
+     *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA">
      *      <skos:notation>28586</skos:notation>
-     *      <openskos:uuid>GTAA_-2571_b6e99d21-fdd8-5071-5179-1a2876cda0e8<openskos:uuid>
      *    </rdf:Description>
      *  </rdf:RDF>
-     * 
-     * 
+     *
      * @api {post} /api/concept Create SKOS concept
      * @apiName CreateConcept
      * @apiGroup Concept
      *
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
+     * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
-     * @apiParam {String} set A set's code
-     * @apiParam {String} collection Obsolete parameter for backward compatibility. A set's code
-     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) and uuid will be automatically generated.
-     *                                           If uri exists in the xml and autoGenerateIdentifiers is true then an error will be thrown.
-     *                                           If the parameter set to false then the xml must contain uri (rdf:about) and uuid.
-     * @apiSuccess (201) {String} Location New concept uri
-     * @apiSuccess (201) {xml} Body
-     * @apiSuccessExample Success-Response:
+     * @apiParam {String="true","false","1","0"} autoGenerateIdentifiers If set to true (any of "1", "true", "on" and "yes") the concept uri (rdf:about) will be automatically generated.
+     *                                           If uri exists in the xml and autoGenerateIdentifiers is true - an error will be thrown.
+     *                                           If set to false - the xml must contain uri (rdf:about).
+     * @apiSuccess (201) {String} Concept uri
+     * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 201 Created
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -112,54 +101,39 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
      *           &lt;skos:notation>285863243243224&lt;/skos:notation>
      *           &lt;openskos:status>candidate&lt;/openskos:status>
-     *           &lt;openskos:uuid>GTAA_-2571_b6e99d21-fdd8-5071-5179-1a2876cda0e8&lt;/openskos:uuid>
-     *           &lt;openskos:set rdf:resource="http://data.beeldengeluid.nl/gtaa/"/>
-     *           &lt;openskos:tenant rdf:resource="http://data.beeldengeluid.nl"/>
-     *           &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T14:19:57+00:00&lt;/dcterms:dateSubmitted>
-     *           &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>       
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * 
-     * @apiError MissingKey No user key specified
-     * @apiErrorExample MissingKey
+     * @apiError MissingKey {String} No key specified
+     * @apiErrorExample MissingKey:
      *   HTTP/1.1 412 Precondition Failed
-     *   No user key specified
-     * 
-     * @apiError MissingTenant No tenant specified
-     * @apiErrorExample MissingTenant
+     *   No key specified
+     * @apiError MissingTenant {String} No tenant specified
+     * @apiErrorExample MissingTenant:
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-     * 
-     * @apiError MissingTenant No set (former tenant collection) specified
-     * @apiErrorExample MissingSet
+     * @apiError MissingCollection {String} No collection specified
+     * @apiErrorExample MissingCollection:
      *   HTTP/1.1 412 Precondition Failed
-     *   No set (former tenant collection) specified
-     * 
-     * @apiError ConceptExists The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
-     * @apiErrorExample ConceptExists
+     *   No collection specified
+     * @apiError ConceptExists {String} Concept `uri` already exists
+     * @apiErrorExample ConceptExists:
+     *   HTTP/1.1 409 Not Found
+     *   Concept `uri` already exists
+     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
+     * @apiErrorExample UniquePreflabel:
      *   HTTP/1.1 400 Bad request
-     *   The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
-     * 
-     * @apiError ValidationError The pref label already exists in that concept scheme.
-     * @apiErrorExample ValidationError
-     *   HTTP/1.1 400 Bad request
-     *   The pref label already exists in that concept scheme.
-     * 
-     * @apiError ValidationError The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found,
-     * @apiErrorExample ValidationError
-     *   HTTP/1.1 400 Bad request
-     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri <concepts schema uri> is not found.
+     *   The concept preflabel must be unique per scheme
      */
     public function postAction()
     {
-      $this->throw501 =false; 
-      parent::postAction();
+        parent::postAction();
     }
-
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Update a specified SKOS concept with the new data provided in the request body.
+     * @apiDescription Update a SKOS Concept
+     *
+     * Update the specified concept with the new data present in the request.
      *
      * If the tenant is configured to use the new SKOS-XL labels then
      * the new concept also needs to have its labels (pref, alt and hidden) defined in SKOS-XL format.
@@ -177,11 +151,11 @@ class Api_ConceptController extends Api_FindConceptsController
      * instead of as defined in the example.
      *
      * @apiExample {String} Example request
-     *  <?xml version="1.0"?>
      *  <rdf:RDF
      *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      *    xmlns:openskos="http://openskos.org/xmlns#"
-     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+     *    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     *    openskos:tenant="beg" openskos:collection="gtaa" openskos:key="your-api-key">
      *    <rdf:Description rdf:about="http://data.beeldengeluid.nl/gtaa/28586">
      *      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
      *      <skos:prefLabel xml:lang="nl">doodstraf</skos:prefLabel>
@@ -194,7 +168,6 @@ class Api_ConceptController extends Api_FindConceptsController
      *      <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
      *      <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
      *      <skos:notation>28586</skos:notation>
-     *      <openskos:uuid>GTAA_-2571_b6e99d21-fdd8-5071-5179-1a2876cda0e8<openskos:uuid>
      *    </rdf:Description>
      *  </rdf:RDF>
      *
@@ -203,9 +176,10 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * @api {put} /api/concept Update SKOS concept
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
+     * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
-     * @apiSuccess {xml} Body
-     * @apiSuccessExample Success-Response:
+     * @apiSuccess (201) {String} Concept uri
+     * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -226,47 +200,33 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
      *           &lt;skos:notation>285863243243224&lt;/skos:notation>
      *           &lt;openskos:status>candidate&lt;/openskos:status>
-     *           &lt;openskos:uuid>GTAA_-2571_b6e99d21-fdd8-5071-5179-1a2876cda0e8 &lt;openskos:uuid>
-     *           &lt;openskos:set rdf:resource="http://data.beeldengeluid.nl/gtaa/"/>
-     *           &lt;openskos:tenant rdf:resource="http://data.beeldengeluid.nl"/>
-     *           &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T14:19:57+00:00&lt;/dcterms:dateSubmitted>
-     *           &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
-     *           &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T14:33:45+00:00&lt;/dcterms:modified>
-     *           &lt;dcterms:contributor rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * 
-     * @apiError MissingKey No user key specified
+     * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
-     *   No user key specified
-     * 
-     * @apiError MissingTenant No tenant specified
+     *   No key specified
+     * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-     * 
-     * @apiError ConceptExists The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
+     * @apiError MissingCollection {String} No collection specified
+     * @apiErrorExample MissingCollection
+     *   HTTP/1.1 412 Precondition Failed
+     *   No collection specified
+     * @apiError ConceptExists {String} Concept `uri` already exists
      * @apiErrorExample ConceptExists
+     *   HTTP/1.1 409 Not Found
+     *  Concept `uri` already exists
+     * @apiError UniquePreflabel {String} The concept preflabel must be unique per scheme
+     * @apiErrorExample UniquePreflabel
      *   HTTP/1.1 400 Bad request
-     *   The resource with uri &lt;concept uri&gt; already exists. Use PUT instead.
-     * 
-     * @apiError ValidationError The pref label already exists in that concept scheme.
-     * @apiErrorExample ValidationError
-     *   HTTP/1.1 400 Bad request
-     *   TThe pref label already exists in that concept scheme.
-     * 
-     * @apiError ValidationError The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri &lt;concept schema uri&gt; is not found,
-     * @apiErrorExample ValidationError
-     *   HTTP/1.1 400 Bad request
-     *   The resource (of type http://www.w3.org/2004/02/skos/core#ConceptScheme) referred by  uri &lt;concept schema uri&gt; is not found,
+     *   The concept preflabel must be unique per scheme
      */
     public function putAction()
     {
-      $this->throw501 =false; 
-      parent::putAction();
+        parent::putAction();
     }
-
     /**
      *
      * @apiVersion 1.0.0
@@ -275,10 +235,11 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiName DeleteConcept
      * @apiGroup Concept
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
+     * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
      * @apiParam {String} id The uri of the concept
-     * @apiSuccess (202) {xml} Body
-     * @apiSuccessExample Success-Response:
+     * @apiSuccess (202) {String} Concept uri
+     * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 202 Accepted
      *   &lt;?xml version="1.0"?>
      *   &lt;rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -298,38 +259,29 @@ class Api_ConceptController extends Api_FindConceptsController
      *           &lt;skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/28109"/>
      *           &lt;skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GTAA"/>
      *           &lt;skos:notation>285863243243224&lt;/skos:notation>
-     *           &lt;openskos:uuid>GTAA_-2571_b6e99d21-fdd8-5071-5179-1a2876cda0e8 &lt;openskos:uuid>
-     *           &lt;dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T14:19:57+00:00&lt;/dcterms:dateSubmitted>
-     *           &lt;dcterms:creator rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
-     *           &lt;dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-24T14:33:45+00:00&lt;/dcterms:modified>
-     *           &lt;dcterms:contributor rdf:resource="http://localhost/clavas/public/api/users/f122deab-755a-4f67-8502-7cd9bfd70ec5"/>
      *           &lt;openskos:status>deleted&lt;/openskos:status>
      *           &lt;openskos:dateDeleted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-11-12T04:13:45+00:00&lt;/openskos:dateDeleted>
      *     &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
-     * 
-     * @apiError Gone Concept already deleted: &lt;concept uri&gt;
+     * @apiError Gone {String} Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
      * @apiErrorExample Gone
      *   HTTP/1.1 410 Gone
-     *   Concept already deleted: &lt;concept uri&gt;
-     * 
-     * @apiError MissingKey No user key specified
+     *   Concept already deleted :http://data.beeldengeluid.nl/gtaa/285863243243224
+     * @apiError MissingKey {String} No key specified
      * @apiErrorExample MissingKey
      *   HTTP/1.1 412 Precondition Failed
-     *   No user key specified
-     * 
-     * @apiError MissingTenant No tenant specified
+     *   No key specified
+     * @apiError MissingTenant {String} No tenant specified
      * @apiErrorExample MissingTenant
      *   HTTP/1.1 412 Precondition Failed
      *   No tenant specified
-     * 
+     * @apiError MissingCollection {String} No collection specified
+     * @apiErrorExample MissingCollection
+     *   HTTP/1.1 412 Precondition Failed
+     *   No collection specified
      */
     public function deleteAction()
     {
-      $this->throw501=false;
-      parent::deleteAction();
+        parent::deleteAction();
     }
-    
-    
-
 }

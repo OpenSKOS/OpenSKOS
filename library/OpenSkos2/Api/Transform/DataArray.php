@@ -26,11 +26,9 @@ use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\VCard;
-use OpenSkos2\Rdf\Resource as RdfResource;
-use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 
 /**
  * Transform Resource to a php array with only native values to encode as json output.

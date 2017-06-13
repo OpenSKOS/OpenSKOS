@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,17 +15,13 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response\Detail;
-
 use OpenSkos2\Api\Response\DetailResponse;
-
 /**
  * Provide the json output for find-* api
  */
 class RdfResponse extends DetailResponse
 {
-
     /**
      * Get response
      *
@@ -45,7 +40,6 @@ class RdfResponse extends DetailResponse
         $response = (new \Zend\Diactoros\Response())
             ->withBody($stream)
             ->withHeader('Content-Type', 'text/xml; charset=UTF-8');
-
         return $response;
     }
 }

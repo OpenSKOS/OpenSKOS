@@ -18,20 +18,17 @@
  */
 
 use OpenSkos2\FieldsMaps;
-use OpenSkos2\Api\Response\Detail\JsonpResponse;
-
-// Meertens: 
-// -- we have implemented autocomplete for html, whereas for Picturae it is blocked on init phase, 
-// see 24837 issue
-// -- Meertens code is refactored by introducing "handleContext" and "dispatchRequest" methods.
-// -- there was no code changes of Pcitura since march 2016, only documentation and formatting 11/11/2016
 
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
+
     public function init()
     {
         parent::init();
-       $this->_helper->contextSwitch()
+        if ($this->getRequest()->getParam('format', 'json') == 'html') {
+            throw new Exception('Html format is not supported for autocomplete', 400);
+        }
+        $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'json'));
         $this->view->setEncoding('UTF-8');
     }
@@ -55,20 +52,30 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function indexAction()
     {
-      $request = $this->getRequest();
-      if (null === ($q = $request->getParam('q'))) {
+        $request = $this->getRequest();
+        if (null === ($q = $request->getParam('q'))) {
             $this->getResponse()
                 ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
+        $result = $this->getConceptManager()->autoComplete(
+            $q, 
+            FieldsMaps::resolveField($request->getParam('searchLabel', 'prefLabel')), 
+            FieldsMaps::resolveField($request->getParam('returnLabel', 'prefLabel')), 
+            $request->getParam('lang')
+        );
         
-        return $this->dispatchRequest($q, 'index');
-
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        $this->getResponse()->setBody(
+            json_encode($result)
+        );
     }
 
     /**
      * @apiVersion 1.0.0
-     * @apiDescription  Autocomplete on labels of concepts matching the term. The autocomplete API is a simplified version of the Find concepts API.
+     * @apiDescription  Autocomplete on labels of concepts matching the term
+     *
+     * The autocomplete API is a simplified version of the Find concepts API.
      * You can use the autocomplete API in your projects, for example with as Javascript based autocompete field.
      *
      * Get all lexical labels in JSON format, with a word in one of the lexical labels starting with "dood":
@@ -98,6 +105,8 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      *
      * The following requests are possible:
      *
+     * <a href='/api/autocomplete/something' target='_blank'>/api/autocomplete/something</a>
+     *
      * Must have a term in the path from the request:
      * <a href='/api/autocomplete/something' target='_blank'>/api/autocomplete/something</a>
      *
@@ -110,7 +119,7 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      * @apiParam {String} searchLabel Term label to search in
      * @apiParam {String} returnLabel Term label to return
      * @apiParam {String} lang Language to use for the searching
-     * @apiSuccess {json} Body
+     * @apiSuccess (200) {String} JSON array
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   [
@@ -121,69 +130,21 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
      */
     public function getAction()
     {
-        $q = $this->getRequest()->getParam('id');
-        return $this->dispatchRequest($q, 'get');
-    }
-    
-      private function dispatchRequest($term, $filename){
-        $params = $this->handleContext();
         $request = $this->getRequest();
+        $q = $request->getParam('id');
         $result = $this->getConceptManager()->autoComplete(
-            $term,
-            FieldsMaps::getNamesToProperties()[$request->getParam('searchLabel', 'prefLabel')],
-            FieldsMaps::getNamesToProperties()[$request->getParam('returnLabel', 'prefLabel')],
+            $q, 
+            FieldsMaps::resolveField($request->getParam('searchLabel', 'prefLabel')), 
+            FieldsMaps::resolveField($request->getParam('returnLabel', 'prefLabel')), 
             $request->getParam('lang')
         );
-        return $this->output($result, $params['context'], $term, $params['callback'], $filename);
+        
+        $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
+        $this->getResponse()->setBody(
+            json_encode($result)
+        );
     }
-    
-  
-    
-    private function handleContext() {
-        $retVal=[];
-        $retVal['callback'] = null;
-        $retVal['context'] = $this->_helper->contextSwitch()->getCurrentContext();
-        $request = $this->getRequest();
-        $format = $request->getParam('format');
-        if ($retVal['context'] === null) { // try to reset it via $format
-            if ($format !== null) {
-                if ('json' !== $format && 'html' !== $format && 'jsonp'!== $format) {
-                    throw new Exception('Autocomplete listing is implemented only in formats json, jsonp or html', 404);
-                } else {
-                    $retVal['context'] = $format; 
-                }
-            } else {
-                $retVal['context'] = 'json'; //default for index
-            }
-        }
-        if ($retVal['context'] === 'jsonp') {
-            $retVal['callback'] =  $request->getParam('callback');
-        } 
-        return $retVal;
-    }
-    
-    
-    private function output($result, $context, $term, $callback, $filename) {
-        if ($context === 'json') {
-            $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
-            $this->getResponse()->setBody(
-                    json_encode($result)
-            );
-        } else {
-            if ($context === 'jsonp') {
-                $response = JsonpResponse::produceJsonPResponse($result, $callback);
-                $this->emitResponse($response);
-                
-            } else { //only "html" is left as a possible option
-                $this->getHelper('layout')->enableLayout();
-                $this->view->items = $result;
-                $this->view->term = $term;
-                return $this->renderScript('/autocomplete/'.$filename.'.phtml');
-            }
-        }
-    }
-    
-  
+
     public function postAction()
     {
         $this->_501('POST');
@@ -198,4 +159,5 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     {
         $this->_501('DELETE');
     }
+
 }

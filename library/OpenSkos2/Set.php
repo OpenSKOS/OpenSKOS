@@ -25,6 +25,7 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\PersonManager;
 
 class Set extends Resource
 {
@@ -47,25 +48,44 @@ class Set extends Resource
         }
     }
 
-    public function ensureMetadata 
-        ($tenantUri, 
-        $setUri, 
-        \OpenSkos2\Person $person, 
-        \OpenSkos2\PersonManager $personManager, 
-        $existingSet = null)
+  /**
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param \OpenSkos2\Tenant $tenant
+     * @param \OpenSkos2\Set $set
+     * @param \OpenSkos2\Person $person
+     * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\LabelManager | null  $labelManager
+     * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
+     * override for a concerete resources when necessary
+     */
+     public function ensureMetadata(
+        \OpenSkos2\Tenant $tenant, 
+        \OpenSkos2\Set $set, 
+        \OpenSkos2\Person $person,
+        PersonManager $personManager, 
+        $labelManager = null, 
+        $existingConcept = null, 
+        $forceCreationOfXl = false)
     {
-        $metadata = [];
-        if (count($this->getProperty(DcTerms::PUBLISHER)) < 1) {
-            $metadata = [DcTerms::PUBLISHER => new Uri($tenantUri)];
-        }
-        if ($existingSet !== null) {
-            if (count($this->getProperty(OpenSkos::UUID)) < 1) {
-                $metadata = [OpenSkos::UUID => $existingSet->getUuid()];
+         $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            DcTerms::DATESUBMITTED => $nowLiteral
+        ];
+
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
             }
         }
-        foreach ($metadata as $property => $defaultValue) {
-            $this->setProperty($property, $defaultValue);
-        }
+
+        $this->resolveCreator($person, $personManager);
+
+        $this->setModified($person);
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts

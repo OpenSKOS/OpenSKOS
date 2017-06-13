@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,14 +15,10 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
-
 use EasyRdf\Resource;
-
 class OpenSkosAsDescriptions extends OpenSkos
 {
-
     /**
      * @param Resource $res
      * @return string

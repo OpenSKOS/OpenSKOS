@@ -64,7 +64,7 @@ class DataRdf
         $propertiesList = null,
         $excludePropertiesList = []
     ) {
-        $this->$resource = $concept;
+        $this->resource = $resource;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
         $this->excludePropertiesList = $excludePropertiesList;
@@ -77,15 +77,15 @@ class DataRdf
     }
 
     /**
-     * Transform the concept to xml string
+     * Transform the resouce to xml string
      *
      * @return string
      */
     public function transform()
     {
         if (!empty($this->propertiesList) || !empty($this->excludePropertiesList)) {
-            $reducedResource = new Resource($this->concept->getUri());
-            foreach ($this->concept->getProperties() as $property => $values) {
+            $reducedResource = new Resource($this->resource->getUri());
+            foreach ($this->resource->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
                     $reducedResource->setProperties($property, $values);
                 }
@@ -99,6 +99,7 @@ class DataRdf
         ];
         
         $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
+       
         return $resource->serialise(
             'rdfxml_openskos',
             [
@@ -125,6 +126,7 @@ class DataRdf
                 return false;
             }
         }
+        
         
         if (in_array($property, $this->propertiesList) === true) {
             if (in_array($property, $this->excludePropertiesList) === false) {

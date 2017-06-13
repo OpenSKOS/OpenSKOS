@@ -217,12 +217,19 @@ class Concept extends AbstractTripleStoreResource
             $propertiesList = [];
         }
 
-        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        if (isset($tenant)) {
 
-        if ($this->useXlLabels($tenant, $request) === true) {
-            foreach ($concepts as $concept) {
-                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+
+            if ($this->useXlLabels($tenant, $request) === true) {
+                foreach ($concepts as $concept) {
+                    $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+                }
             }
+        } else {
+             // for get requests tenant is not an obligatory parameter and may be empty
+            // place here what you consider must be a default behaviour
+            $excludePropertiesList = [];
         }
 
         switch ($context) {
@@ -256,7 +263,7 @@ class Concept extends AbstractTripleStoreResource
     {
         $concept = $this->getResource($id);
 
-        $tenant = $this->manager->fetchByUri($concept->getTenantCode(), Tenant::TYPE);
+        $tenant = $this->getInstitution();
 
         $params = $request->getQueryParams();
 
@@ -361,63 +368,6 @@ class Concept extends AbstractTripleStoreResource
     }
 
     /**
-     * Loads the resource from the db and transforms it to rdf.
-     * @param Resource $resource
-     * @return string
-     */
-    protected function loadResourceToRdf(Resource $resource)
-    {
-        $loadedResource = $this->manager->fetchByUri($resource->getUri());
-
-        $tenant = $this->manager->fetchByUri($loadedResource->getTenantUri(), Tenant::TYPE);
-
-        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
-            $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
-        }
-
-        return (new Transform\DataRdf($loadedResource))->transform();
-    }
-
-    /**
-     * Gets a list (array or string) of fields and try to recognise the properties from it.
-     * @param array $fieldsList
-     * @return array
-     * @throws InvalidPredicateException
-     */
-    protected function fieldsListToProperties($fieldsList)
-    {
-        if (!is_array($fieldsList)) {
-            $fieldsList = array_map('trim', explode(',', $fieldsList));
-        }
-        $propertiesList = [];
-        $fieldsMap = FieldsMaps::getNamesToProperties();
-        // Tries to search for the field in fields map.
-        // If not found there tries to expand it from short property.
-        // If not that - just pass it as it is.
-        foreach ($fieldsList as $field) {
-            if (!empty($field)) {
-                if (isset($fieldsMap[$field])) {
-                    $propertiesList[] = $fieldsMap[$field];
-                } else {
-                    $propertiesList[] = Namespaces::expandProperty($field);
-                }
-            }
-        }
-        // Check if we have a nice properties list at the end.
-        foreach ($propertiesList as $propertyUri) {
-            if ($propertyUri == 'uri') {
-                continue;
-            }
-            if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
-                throw new InvalidPredicateException(
-                'The field "' . $propertyUri . '" from fields list is not recognised.'
-                );
-            }
-        }
-        return $propertiesList;
-    }
-
-    /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
      * @param Tenant $tenant
@@ -449,8 +399,11 @@ class Concept extends AbstractTripleStoreResource
     public function addRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $this->getParams($request);
+
         $tenant = $this->getTenantFromParams($params);
+
         $user = $this->getUserFromParams($params)->getFoafPerson();
+
         $set = $this->getSet($params, $tenant);
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
@@ -473,8 +426,11 @@ class Concept extends AbstractTripleStoreResource
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $this->getParams($request);
+
         $tenant = $this->getTenantFromParams($params);
+
         $user = $this->getUserFromParams($params)->getFoafPerson();
+
         $set = $this->getSet($params, $tenant);
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, true);
