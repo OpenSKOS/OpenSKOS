@@ -40,12 +40,13 @@ class File
     }
 
     /**
+     * @param array $allowedChildrenTypes , optional, For example skos xl
      * @return ResourceCollection
      */
-    public function getResources()
+    public function getResources($allowedChildrenTypes = [])
     {
         $graph = new Graph();
         $graph->parseFile($this->fileName);
-        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph);
+        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph, null, $allowedChildrenTypes);
     }
 }

@@ -19,8 +19,13 @@
 
 namespace OpenSkos2\Rdf;
 
+
 use DateTime;
-use OpenSkos2\Roles;
+use OpenSkos2\Rdf\Object as RdfObject;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Namespaces as Namespaces;
+use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces as Namespaces;
@@ -28,10 +33,6 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Rdf\Object as RdfObject;
-use OpenSkos2\Rdf\Uri;
-use OpenSkos2\RelationType;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Custom\UriGeneration;
 
@@ -39,43 +40,8 @@ use OpenSkos2\Custom\UriGeneration;
 
 class Resource extends Uri implements ResourceIdentifier
 {
-    /**
-     * @TODO Separate in StatusAwareResource class or something like that
-     * openskos:status value which marks a resource as deleted.
-     */
-
-    /**
-     * All possible statuses
-     */
-    const STATUS_CANDIDATE = 'candidate';
-    const STATUS_APPROVED = 'approved';
-    const STATUS_REDIRECTED = 'redirected';
-    const STATUS_NOT_COMPLIANT = 'not_compliant';
-    const STATUS_REJECTED = 'rejected';
-    const STATUS_OBSOLETE = 'obsolete';
-    const STATUS_DELETED = 'deleted';
-    const STATUS_EXPIRED = 'expired';
-
-    protected $properties = [];
-
-    /**
-     * Get list of all available concept statuses.
-     * @return array
-     */
-    public static function getAvailableStatuses()
-    {
-        return [
-            self::STATUS_CANDIDATE,
-            self::STATUS_APPROVED,
-            self::STATUS_REDIRECTED,
-            self::STATUS_NOT_COMPLIANT,
-            self::STATUS_REJECTED,
-            self::STATUS_OBSOLETE,
-            self::STATUS_DELETED,
-            self::STATUS_EXPIRED,
-        ];
-    }
-
+    
+   
     public static $classes = array(
         'ConceptSchemes' => [
             Skos::CONCEPTSCHEME,
@@ -87,6 +53,11 @@ class Resource extends Uri implements ResourceIdentifier
             Skos::ALTLABEL,
             Skos::HIDDENLABEL,
             Skos::PREFLABEL,
+        ],
+        'SkosXlLabels' => [
+            SkosXl::PREFLABEL,
+            SkosXl::ALTLABEL,
+            SkosXl::HIDDENLABEL,
         ],
         'Notations' => [
             Skos::NOTATION,
@@ -110,9 +81,10 @@ class Resource extends Uri implements ResourceIdentifier
         ],
         'SkosCollections' => [
             OpenSkos::INSKOSCOLLECTION,
-            Skos::ORDEREDCOLLECTION, // ??
-            Skos::MEMBER, //??
-            Skos::MEMBERLIST, //?
+            Skos::COLLECTION,
+            Skos::ORDEREDCOLLECTION, 
+            Skos::MEMBER, 
+            Skos::MEMBERLIST, 
         ],
         'MappingProperties' => [
             Skos::BROADMATCH,
@@ -123,12 +95,22 @@ class Resource extends Uri implements ResourceIdentifier
             Skos::RELATEDMATCH,
         ],
     );
+    
+      /**
+     * @return null dummy manager for non-concept-type resources
+     */
+    public function getLabelManager()
+    {
+        return null;
+    }
 
     public static function getLanguagedProperties()
     {
         $retVal = array_merge(self::$classes['DocumentationProperties'], [DcTerms::DESCRIPTION, DcTerms::TITLE]);
         return $retVal;
     }
+    
+    
 
     /**
      * @return array of RdfObject[]
@@ -277,8 +259,18 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isPropertyEmpty($predicate)
     {
-        return !isset($this->properties[$predicate]) || $this->properties[$predicate] === null ||
-            $this->properties[$predicate] === '';
+        if (!$this->hasProperty($predicate)) {
+            return true;
+        }
+        
+        $allValuesAreEmpty = true;
+        foreach ($this->properties[$predicate] as $value) {
+            if (!$value->isEmpty()) {
+                $allValuesAreEmpty = false;
+                break;
+            }
+        }
+        return $allValuesAreEmpty;
     }
 
     /**
@@ -292,6 +284,17 @@ class Resource extends Uri implements ResourceIdentifier
             return (bool) $values[0]->getValue();
         }
         return false;
+    }
+    
+    /**
+     * @return array of RdfObject[]
+     */
+    public function getPropertiesSortedByKey()
+    {
+        $retArray = $this->properties;
+        ksort($retArray);
+        
+        return $retArray;
     }
 
     /**
@@ -318,22 +321,6 @@ class Resource extends Uri implements ResourceIdentifier
             return true;
         }
         return false;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUri()
-    {
-        return $this->uri;
-    }
-
-    /**
-     * @param string $uri
-     */
-    public function setUri($uri)
-    {
-        $this->uri = $uri;
     }
 
     /**
@@ -515,56 +502,155 @@ class Resource extends Uri implements ResourceIdentifier
 
     /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
-     * @param string $tenantUri
-     * @param string $setUri
+     * @param \OpenSkos2\Tenant $tenant
+     * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\LabelManager | null  $labelManager
      * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
      public function ensureMetadata(
-        $tenantUri, 
-        $setUri, 
-        \OpenSkos2\Person $person, 
-        \OpenSkos2\PersonManager $personManager, 
-        $existingResource = null)
+        \OpenSkos2\Tenant $tenant, 
+        \OpenSkos2\Set $set, 
+        \OpenSkos2\Person $person,
+        PersonManager $personManager, 
+        $labelManager = null, 
+        $existingConcept = null, 
+        $forceCreationOfXl = false)
     {
+
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
 
-        if ($existingResource === null) { // a completely new resource under creation
-            $this->setProperty(DcTerms::CREATOR, new Uri($person->getUri())); 
-            $this->setProperty(DcTerms::DATESUBMITTED, $nowLiteral());
-            if ($this->isPropertyEmpty(OpenSkos::UUID)) {
-                $this->setProperty(OpenSkos::UUID, new Literal(Uuid::uuid4()));
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::TENANT => new Uri($tenant->getUri()),
+            DcTerms::DATESUBMITTED => $nowLiteral
+        ];
+
+        if (!empty($set)) {
+            // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = new Uri($set->getUri());
+        }
+
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
             }
-        } else {
-            $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-            $this->addProperty(DcTerms::CONTRIBUTOR, new Uri($person->getUri()));
-            if ($this->getType() != RelationType::TYPE) {
-                $this->setProperty(OpenSkos::UUID, $existingResource->getUuid());
-            }
-            $creators = $existingResource->getProperty(DcTerms::CREATOR);
-            if (count($creators) === 0) {
-                $this->setProperty(DcTerms::CREATOR, new Literal("Unknown"));
+        }
+
+        $this->resolveCreator($person, $personManager);
+
+        $this->setModified($person);
+
+    }
+
+     /**
+     * Mark the concept as modified.
+     * @param Person $person
+     */
+    public function setModified(Person $person)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+
+        $personUri = new Uri($person->getUri());
+
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
+    }
+    
+   
+     /**
+     * Resolve the creator in all use cases:
+     * - dc:creator is set but dcterms:creator is not
+     * - dcterms:creator is set as Uri
+     * - dcterms:creator is set as literal value
+     * - no creator is set
+     * @param Person $person
+     * @param PersonManager $personManager
+     */
+    public function resolveCreator(Person $person, PersonManager $personManager)
+    {
+        $dcCreator = $this->getProperty(Dc::CREATOR);
+        $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
+
+        // Set the creator to the apikey user
+        if (empty($dcCreator) && empty($dcTermsCreator)) {
+            $this->setCreator(null, $person); 
+            return;
+        }
+
+        // Check if the dc:Creator is Uri or Literal
+        if (!empty($dcCreator) && empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+
+            if ($dcCreator instanceof Literal) {
+                $dcTermsCreator = $personManager->fetchByName($dcCreator->getValue());
+            } elseif ($dcCreator instanceof Uri) {
+                $dcTermsCreator = $dcCreator;
+                $dcCreator = null;
             } else {
-                $this->setProperty(DcTerms::CREATOR, $creators[0]);
+                throw Exception('dc:Creator is not Literal nor Uri. Something is very wrong.');
             }
-            $dateSubmitted = $existingResource->getProperty(DcTerms::DATESUBMITTED);
-            if (count($dateSubmitted) !== 0) {
-                $this->setProperty(
-                    DcTerms::DATESUBMITTED,
-                    new Literal(
-                        $dateSubmitted[0],
-                        null,
-                        Literal::TYPE_DATETIME
-                    )
-                );
+
+            $this->setCreator($dcCreator, $dcTermsCreator); // it does not upcast
+            return;
+        }
+        // Check if the dcTerms:Creator is Uri or Literal
+        if (empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcTermsCreator = $dcTermsCreator[0];
+
+            if ($dcTermsCreator instanceof Literal) {
+                $dcCreator = $dcTermsCreator;
+                $dcTermsCreator = $personManager->fetchByName($dcTermsCreator->getValue());
+            } elseif ($dcTermsCreator instanceof Uri) {
+                // We are ok with this use case even if the Uri is not present in our system
+            } else {
+                throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
             }
+
+            //$this->setCreator($dcCreator, $dcTermsCreator);
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+
+        // Resolve conflicting dc:Creator and dcTerms:Creator values
+        if (!empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+            $dcTermsCreator = $dcTermsCreator[0];
+            try {
+                $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
+            } catch (ResourceNotFoundException $err) {
+                // We cannot find the resource so just leave values as they are
+                $dcTermsCreatorName = null;
+            }
+
+            if (!empty($dcTermsCreatorName) && $dcTermsCreatorName[0]->getValue() !== $dcCreator->getValue()) {
+                throw new OpenSkosException('dc:Creator and dcTerms:Creator names do not match.');
+            }
+
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
         }
     }
 
+    protected function setCreator($dcCreator, $dcTermsCreator)
+    {
+        if (!empty($dcCreator)) {
+            $this->setProperty(Dc::CREATOR, $dcCreator);
+        }
+
+        if (!empty($dcTermsCreator)) {
+            $this->setProperty(DcTerms::CREATOR, $dcTermsCreator);
+        }
+    }
+
+
+    
     /**
      *
      * @return DateTime|null

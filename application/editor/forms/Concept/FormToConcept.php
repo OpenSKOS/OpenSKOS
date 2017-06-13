@@ -197,10 +197,25 @@ class Editor_Forms_Concept_FormToConcept
         }
 
         $concept->ensureMetadata(
-            $user->tenant, $setUri, $user->getFoafPerson(), $personManager, $oldStatus
+            $user->tenant,
+            $setUri,
+            $user->getFoafPerson(),
+            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
+            $personManager,
+            $oldStatus
         );
     }
 
+    /**
+     * Get dependency injection container
+     * 
+     * @return \DI\Container
+     */
+    protected static function getDI()
+    {
+        return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+    }
+    
     /**
      * Checks if the value is empty string or null.
      * @param mixed $value

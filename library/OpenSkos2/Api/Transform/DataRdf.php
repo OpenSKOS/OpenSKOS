@@ -47,17 +47,27 @@ class DataRdf
      * @var array
      */
     private $propertiesList;
+    
+    /**
+     * @var array
+     */
+    private $excludePropertiesList;
 
     /**
      * @param Resource $resource
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(Resource $resource, $includeRdfHeader = true, $propertiesList = null)
-    {
-        $this->resource = $resource;
+    public function __construct(
+        Resource $resource,
+        $includeRdfHeader = true,
+        $propertiesList = null,
+        $excludePropertiesList = []
+    ) {
+        $this->$resource = $concept;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
 
         // @TODO - put it somewhere globally
         \EasyRdf\Format::registerSerialiser(
@@ -73,9 +83,9 @@ class DataRdf
      */
     public function transform()
     {
-        if (!empty($this->propertiesList)) {
-            $reducedResource = new Resource($this->resource->getUri());
-            foreach ($this->resource->getProperties() as $property => $values) {
+        if (!empty($this->propertiesList) || !empty($this->excludePropertiesList)) {
+            $reducedResource = new Resource($this->concept->getUri());
+            foreach ($this->concept->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
                     $reducedResource->setProperties($property, $values);
                 }
@@ -83,13 +93,19 @@ class DataRdf
         } else {
             $reducedResource = $this->resource;
         }
+
+        $resourceTypes = [
+           $this->resource->getType()
+        ];
         
         $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
-        $retVal = $resource->serialise(
+        return $resource->serialise(
             'rdfxml_openskos',
-            [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
+            [
+                EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader,
+                EasyRdfOpenSkos::OPTION_RESOURCE_TYPES_TO_SERIALIZE => $resourceTypes
+            ]
         );
-        return $retVal;
     }
 
     /**
@@ -99,6 +115,25 @@ class DataRdf
      */
     protected function doIncludeProperty($property)
     {
-        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+        //The exclude list specifies properties which properties should be skipped
+        //If a property is both in the include and exclude list we throw an error
+        
+        if (empty($this->propertiesList)) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (in_array($property, $this->propertiesList) === true) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                throw new \OpenSkos2\Exception\InvalidArgumentException(
+                    'The property ' . $property . ' is present both in the include and exclude lists'
+                );
+            }
+        }
     }
 }

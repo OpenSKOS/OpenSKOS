@@ -64,15 +64,12 @@ class JsonResponse extends ResultSetResponse
         $docs = [];
         $backwardComatibility = new BackwardCompatibility();
         foreach ($this->result->getResources() as $resource) {
-            $nResource = (new \OpenSkos2\Api\Transform\DataArray($resource, $this->propertiesList))->transform();
-
-            if ($this->init["custom.backward_compatible"]) {
-                $nResourceCorrected = $backwardComatibility->backwardCompatibilityMap($nResource, $this->resourceType);
-            } else {
-                $nResourceCorrected = $nResource;
-            }
-
-            $docs[] = $nResourceCorrected;
+            $nResource = (new \OpenSkos2\Api\Transform\DataArray(
+                $resource,
+                $this->propertiesList,
+                $this->excludePropertiesList
+            ))->transform();
+            $docs[] = $nResource;
         }
         return $docs;
     }

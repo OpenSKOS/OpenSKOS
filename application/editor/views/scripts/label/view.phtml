@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
+ * @author     Picturae
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+
+?>
+<div class="skosxl-label-more-info">
+    <h2><?= $this->labelXL->getProperty(OpenSkos2\Namespaces\SkosXl::LITERALFORM)[0] ?></h2>
+    <div>
+        <?= $this->labelXL->getUri()?>
+    </div>
+    <div class="other-data">
+        <div class="concept-item-subtitle">
+            <?= 'Other data associated with this label'; ?>
+        </div>
+        <div class="other-data-content">
+            <ul>
+            <?php 
+                $properties = $this->labelXL->getPropertiesSortedByKey();
+                unset($properties[OpenSkos2\Namespaces\SkosXl::LITERALFORM]);
+                unset($properties[OpenSkos2\Namespaces\Rdf::TYPE]);
+                
+                if (empty($properties) === true): ?>
+                <li>There is no additional data associated with this label</li>
+            <?php endif; ?>
+            <?php foreach ($properties as $key => $valueList): ?>
+                <li>
+                    <div class="data-field"><?= OpenSkos2\Namespaces::shortenProperty($key); ?></div> 
+                    <div class="data-values">
+                        <ul>
+                            <?php foreach ($valueList as $value): ?>
+                                <li><?= $value ?></li>
+                            <?php endforeach ?>
+                        </ul>
+                    </div>
+                    <div class="clear"></div>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+    <div class="skosxl-label-relations" id="skosXlLabelRelations">
+        <?php $this->title = 'Triples associated with this label'; ?>
+        <?= $this->render('concept/view/relations.phtml') ?>
+    </div>
+</div>
+
+<script>
+    window.parent.Editor.Label.initConceptClick(
+        $('skosXlLabelRelations')
+    );
+</script>

@@ -21,6 +21,10 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Tenant;
+use OpenSkos2\Exception\TenantNotFoundException;
+use OpenSkos2\SkosXl\Label;
+use OpenSkos2\Concept\LabelHelper;
 
 /**
  * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
@@ -33,21 +37,17 @@ class Editor_Forms_Concept_ConceptToForm
      * @param string $prefLabel
      * @return array
      */
-    public static function getNewConceptFormData($language, $prefLabel)
+    public static function getNewConceptFormData($language, $prefLabel, Tenant $tenant, LabelHelper $labelHelper)
     {
-        return [
+        if ($tenant === null) {
+            throw new TenantNotFoundException('Tenant not specified');
+        }
+        
+        $formData = [
             'conceptLanguages' => [
                 strtoupper($language) => [
                     strtoupper($language) => $language
                 ]
-            ],
-            'prefLabel' => [
-                [
-                    'languageCode' => $language,
-                    'value' => [
-                        $prefLabel
-                    ],
-                ],
             ],
             'altLabel' => [
                 [
@@ -62,6 +62,25 @@ class Editor_Forms_Concept_ConceptToForm
                 ],
             ],
         ];
+        
+        if ($tenant->getEnableSkosXl() === false) {
+            $formData['prefLabel'] = [
+                [
+                    'languageCode' => $language,
+                    'value' => [
+                        $prefLabel
+                    ]
+                ]
+            ];
+        } else {
+            $label = $labelHelper->createNewLabel($prefLabel, $language, $tenant);
+            
+            $formData['skosXlPrefLabel'] = [
+                $label->getUri()
+            ];
+        }
+        
+        return $formData;
     }
     
     /**
@@ -119,7 +138,7 @@ class Editor_Forms_Concept_ConceptToForm
                     }
                     
                     $groupedValues[$value->getLanguage()]['value'][] = $value->getValue();
-                } else {
+                } elseif ($value->getValue() !== '') {
                     throw new \Exception(
                         'Value ' . $value . ' from field ' . $field . ' is not translated.'
                     );
@@ -220,7 +239,7 @@ class Editor_Forms_Concept_ConceptToForm
      */
     protected static function relationsToForm(Concept $concept, &$formData)
     {
-        $conceptManager = self::getDI()->get('\OpenSkos2\ConceptManager');
+        $conceptManager = self::getDI()->get('OpenSkos2\ConceptManager');
         
         foreach (Editor_Forms_Concept::getPerSchemeRelationsMap() as $relationKey => $relationProperty) {
             $relations = $conceptManager->fetchByUris(

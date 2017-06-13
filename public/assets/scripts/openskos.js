@@ -22,6 +22,20 @@ window.addEvent('load', function () {
     $$('a[rel=external]').each(function (a) {
         new ExternalLink(a);
     });
+    
+    $$('.decorator-with-helptext').each(function(tag) {
+        var helptextId = $$(tag).getElement('label').get('data-helptext-id');
+        
+        var tip = new Tips(tag, {
+            showDelay: 400,
+            hideDelay: 400,
+            fixed: false
+        });
+        
+        tip.addEvent('show', function(tipElem, el) {
+            this.container.innerHTML = $$('#' + helptextId).get('html');
+        });
+    });
 });
 
 var ExternalLink = new Class({

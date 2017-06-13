@@ -23,6 +23,8 @@ use DateTime;
 use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
@@ -47,15 +49,21 @@ class DataArray
      * @var array
      */
     private $propertiesList;
-
+    
     /**
-     * @param Resource $resource
+     * @var array
+     */
+    private $excludePropertiesList;
+    
+    /**
+     * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(RdfResource $resource, $propertiesList = null)
+    public function __construct(Resource $resource, $propertiesList = null, $excludePropertiesList = [])
     {
         $this->resource = $resource;
         $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
     }
 
     /**
@@ -98,7 +106,26 @@ class DataArray
      */
     protected function doIncludeProperty($property)
     {
-        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+        //The exclude list specifies properties which properties should be skipped
+        //If a property is both in the include and exclude list we throw an error
+        
+        if (empty($this->propertiesList)) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (in_array($property, $this->propertiesList) === true) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                throw new \OpenSkos2\Exception\InvalidArgumentException(
+                    'The property ' . $property . ' is present both in the include and exclude lists'
+                );
+            }
+        }
     }
 
     /**
@@ -126,8 +153,13 @@ class DataArray
             }
 
             // Some values only have a URI but not getValue or getLanguage
-            if ($val instanceof Uri && !method_exists($val, 'getLanguage')) {
-                if ($settings['repeatable']) {
+            if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
+                if ($val instanceof Resource) {
+                    $resource[$field][] = (new DataArray($val))->transform();
+                    continue;
+                }
+                
+                if ($settings['repeatable'] === true) {
                     $resource[$field][] = $val->getUri();
                 } else {
                     $resource[$field] = $val->getUri();
@@ -166,7 +198,7 @@ class DataArray
     public static function getFieldsPlusIsRepeatableMap()
     {
         $notRepeatable = [
-            Dc::CREATOR, // literal for names and backard compatibility
+            Dc::CREATOR, // literal for names and backward compatibility
             DcTerms::CREATOR,
             DcTerms::PUBLISHER,
             DcTerms::LICENSE,
@@ -202,10 +234,11 @@ class DataArray
             VCard::PCODE,
             VCard::STREET,
             VCard::URL,
+            SkosXl::LITERALFORM
         ];
 
         $map = [];
-        foreach (FieldsMaps::getNamesToProperties() as $field => $property) {
+        foreach (FieldsMaps::getKeyToPropertyMapping() as $field => $property) {
             $map[$field] = [
                 'uri' => $property,
                 'repeatable' => !in_array($property, $notRepeatable),

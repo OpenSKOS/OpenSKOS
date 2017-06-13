@@ -187,7 +187,6 @@ class Editor_Models_Export
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT,
                     'parameters' => serialize(
-                        //$this->createExportMessage()
                         $this->getSettings()
                     ),
                     'created' => new Zend_Db_Expr('NOW()')
@@ -340,7 +339,13 @@ class Editor_Models_Export
             $fieldsToExport = $this->getExportableConceptFields();
         }
         
+        $user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
+        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant(
+            OpenSKOS_Db_Table_Tenants::fromCode($user->tenant)
+        );
+        
         $message = new Message(
+            $tenant,
             $this->get('format'),
             $fieldsToExport,
             $this->get('maxDepth')

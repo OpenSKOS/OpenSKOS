@@ -33,7 +33,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
      * @var $_tenant OpenSKOS_Db_Table_Row_Tenant
      */
     protected $_tenant;
-
+    
     public function init()
     {
         if (false === OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor', 'view')) {
@@ -247,5 +247,38 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
     public function getDI()
     {
        return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+    }
+    
+    /**
+     * @return OpenSKOS_Db_Table_Row_Tenant
+     */
+    protected function getOpenSkosDbTableRowTenant()
+    {
+        $tenant = $this->_tenant;
+        
+        if ($tenant === null) {
+            $tenant = $this->getCurrentUser()->tenant;
+        }
+        
+        return $tenant;
+    }
+    
+    /**
+     * @return OpenSkos2\Tenant
+     */
+    protected function getOpenSkos2Tenant()
+    {
+        $tenant = $this->_tenant;
+        $openSkos2Tenant = null;
+        
+        if ($tenant === null) {
+            $tenant = $this->getCurrentUser()->tenant;
+        }
+        
+        if ($tenant !== null) {
+            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
+        }
+        
+        return $openSkos2Tenant;
     }
 }

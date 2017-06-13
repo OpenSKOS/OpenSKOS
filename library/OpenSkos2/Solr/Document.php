@@ -21,6 +21,7 @@ namespace OpenSkos2\Solr;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Object;
@@ -89,7 +90,12 @@ class Document
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
         OpenSkos::DELETEDBY => ['s_deletedBy'],
-        OpenSkos::DATE_DELETED => ['d_dateDeleted']
+        OpenSkos::DATE_DELETED => ['d_dateDeleted'],
+        SkosXl::LITERALFORM => ['a_skosXlLiteralForm'],
+        Rdf::TYPE => ['s_rdfType'],
+        SkosXl::PREFLABEL => ['s_prefLabelXl'],
+        SkosXl::ALTLABEL => ['s_altLabelXl'],
+        SkosXl::HIDDENLABEL => ['s_hiddenLabelXl']
     ];
 
     /**

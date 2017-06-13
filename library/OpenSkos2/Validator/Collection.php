@@ -20,9 +20,13 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\InvalidResourceException;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\SkosXl\Label;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -33,6 +37,15 @@ class Collection
      * @var ResourceManager
      */
     protected $resourceManager;
+    
+    /**
+     * @var ConceptManager
+     */
+    protected $conceptManager;
+    
+    /**
+     * @var Tenant
+     */
     protected $tenant;
     protected $set;
     protected $isForUpdate;
@@ -59,8 +72,8 @@ class Collection
     public function __construct(
         ResourceManager $resourceManager,
         $isForUpdate,
-        $tenant,
-        $set,
+        Tenant $tenant,
+        Set $set,
         $referencecheckOn,
         LoggerInterface $logger = null
     ) {
@@ -85,10 +98,8 @@ class Collection
     {
         $errorsFound = false;
         foreach ($resourceCollection as $resource) {
-            $currentValidator = $this->getResourceValidator();
-            $valid = $currentValidator->validate($resource);
-            if (!$valid) {
-                $this->errorMessages[] = array_merge($this->errorMessages[], $valid->getErrorMessages());
+            $validator = $this->getResourceValidator($resource);
+            if (!$validator->validate($resource)) {
                 $errorsFound = true;
 
                 $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
@@ -114,11 +125,11 @@ class Collection
     }
 
     /**
-     * Get resource validator
-     *
+     * Get resource validator by resource type
+     * @param Resource $resource
      * @return \OpenSkos2\Validator\Resource
      */
-    private function getResourceValidator()
+    private function getResourceValidator($resource)
     {
         return new \OpenSkos2\Validator\Resource(
             $this->resourceManager,
@@ -129,5 +140,6 @@ class Collection
             $this->conceptReferenceCheckOn,
             $this->logger
         );
+
     }
 }

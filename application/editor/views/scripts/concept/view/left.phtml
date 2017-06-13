@@ -59,6 +59,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
     ?>
     <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
         <div id="tab_language_<?= $languageCode; ?>" class="tab-content">
+            <?php if($this->tenant->getEnableSkosXl() === false): ?>
             <div class="concept-left" id="concept-lexical">
                 <div class="concept-left-content">
                     <ul id="concept-lexical-list">
@@ -80,7 +81,60 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                     </ul>
                 </div>
             </div>
-
+            <?php endif; ?>
+                       
+            <?php if($this->tenant->getEnableSkosXl() === true): ?>
+            <div class="concept-left" id="concept-skos-xl-labels">
+                <div class="concept-right-content">
+                    <ul>
+                        <?php foreach ($skosXlNames as $property => $title): ?>
+                            <?php
+                                // @TODO Optimize - do not load each label separately.
+                                // Gets all literal forms in the current language.
+                                $literalForms = [];
+                                $labelParams = [];
+                                foreach ($this->currentConcept->getProperty($property) as $labelUri) {
+                                    if ($labelManager->askForUri($labelUri)) {
+                                        $label = $labelManager->fetchByUri($labelUri);
+                                        $literalForm = $label->getProperty(SkosXl::LITERALFORM)[0];
+                                        if ($literalForm->getLanguage() == $languageCode) {
+                                            $literalForms[] = $literalForm->getValue();
+                                            $labelParams[] = [
+                                                'literalForm' => $literalForm->getValue(),
+                                                'uri' => $labelUri
+                                            ];
+                                        }
+                                    }
+                                }
+                            ?>
+                        
+                            <?php if (!empty($labelParams)) : ?>
+                                <li>
+                                    <div class="concept-lexical-field"><?= $title; ?></div> 
+                                    <div class="concept-lexical-values">
+                                        <ul>
+                                            <?php foreach ($labelParams as $labelParam): ?>
+                                                <li title="<?= $labelParam['uri']; ?>"><?= $labelParam['literalForm']; ?>
+                                                <a class="skos-xl-label-show-more"
+                                                   data-label-uri="<?= $labelParam['uri'] ?>"
+                                                   href="<?= $this->url([
+                                                        'module' => 'editor', 
+                                                        'controller' => 'label',  
+                                                        'action' => 
+                                                        'view'], null, true)?>"></a>
+                                                </li>
+                                            <?php endforeach ?>
+                                        </ul>
+                                    </div>
+                                    <div class="clear"></div>
+                                </li>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif; ?>
+            
             <div class="concept-left" id="concept-document">
                 <div class="concept-right-content">
                     <ul id="concept-document-list">
@@ -102,44 +156,6 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                     </ul>
                 </div>
             </div>
-            
-            <?php /* Temporary disable skos xl
-            <div class="concept-left" id="concept-skos-xl-labels">
-                <div class="concept-right-content">
-                    <ul>
-                        <?php foreach ($skosXlNames as $property => $title): ?>
-                            <?php
-                                // @TODO Optimize - do not load each label separately.
-                                // Gets all literal forms in the current language.
-                                $literalForms = [];
-                                foreach ($this->currentConcept->getProperty($property) as $labelUri) {
-                                    if ($labelManager->askForUri($labelUri)) {
-                                        $literalForm = $labelManager->fetchByUri($labelUri)->getProperty(SkosXl::LITERALFORM)[0];
-                                        if ($literalForm->getLanguage() == $languageCode) {
-                                            $literalForms[] = $literalForm->getValue();
-                                        }
-                                    }
-                                }
-                            ?>
-                        
-                            <?php if (!empty($literalForms)) : ?>
-                                <li>
-                                    <div class="concept-lexical-field"><?= $title; ?></div> 
-                                    <div class="concept-lexical-values">
-                                        <ul>
-                                            <?php foreach ($literalForms as $literalForm): ?>
-                                                <li><?= $literalForm; ?></li>
-                                            <?php endforeach ?>
-                                        </ul>
-                                    </div>
-                                    <div class="clear"></div>
-                                </li>
-                            <?php endif ?>
-                        <?php endforeach ?>
-                    </ul>
-                </div>
-            </div>
-            */ ?>
         </div>
     <?php endforeach ?>
 </div>

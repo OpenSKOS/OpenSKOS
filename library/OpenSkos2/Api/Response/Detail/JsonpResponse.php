@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,23 +15,18 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response\Detail;
-
-use OpenSkos2\Api\Response\Detail\JsonResponse;
-
+use OpenSkos2\Api\Response\DetailResponse;
 /**
  * Provide the json output for find-* api
  */
-class JsonpResponse extends JsonResponse
+class JsonpResponse extends DetailResponse
 {
-
     /**
      * JSONP Callback
      * @var string
      */
     private $callback;
-
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param string $callback
@@ -41,14 +35,15 @@ class JsonpResponse extends JsonResponse
     public function __construct(
         \OpenSkos2\Rdf\Resource $resource,
         $callback,
-        $propertiesList,
-        $auxField = null,
-        $auxVals = []
+        $propertiesList = null,
+        $excludePropertiesList = []
     ) {
-        parent::__construct($resource, $propertiesList, $auxField, $auxVals);
+        $this->resource = $resource;
+        $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
         $this->callback = $callback;
     }
-
+    
     /**
      * Get response
      *
@@ -56,16 +51,9 @@ class JsonpResponse extends JsonResponse
      */
     public function getResponse()
     {
-        $data = $this->getResponseData();
-        $response = self::produceJsonPResponse($data, $this->callback);
-        return $response;
-    }
-
-    // also used in autocomplete controller
-    public static function produceJsonPResponse($body, $callback)
-    {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
-        $jsonp = $callback . '(' . json_encode($body) . ');';
+        $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
+        $jsonp = $this->callback . '(' . json_encode($body) . ');';
         $stream->write($jsonp);
         $response = (new \Zend\Diactoros\Response($stream))
             ->withHeader('Content-Type', 'application/javascript');

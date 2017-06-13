@@ -35,7 +35,25 @@ class Api_ConceptController extends Api_FindConceptsController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Create a new SKOS concept based on the post data
+
+     * @apiDescription Create a SKOS Concept
+     *
+     * Create a new SKOS concept based on the post data.
+     *
+     * If the tenant is configured to use the new SKOS-XL labels then
+     * the new concept also needs to have its labels (pref, alt and hidden) defined in SKOS-XL format.
+     *
+     * e.g.
+     *
+     * &lt;skosxl:prefLabel>
+     *   &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/api/labels/d0e34b9f-d31d-4858-b4e7-3bcbdd377c26">
+     *   &lt;rdf:type rdf:resource="http://www.w3.org/2008/05/skos-xl#Label"/>
+     *   &lt;skosxl:literalForm xml:lang="nl">doodstraf&lt;/skosxl:literalForm>
+     *   &lt;openskos:tenant>beg&lt;/openskos:tenant>
+     *   &lt;/rdf:Description>
+     * &lt;/skosxl:prefLabel>
+     *
+     * instead of as defined in the example.
      *
      * @apiExample {String} Example request
      *  <?xml version="1.0"?>
@@ -142,6 +160,21 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * @apiVersion 1.0.0
      * @apiDescription Update a specified SKOS concept with the new data provided in the request body.
+     *
+     * If the tenant is configured to use the new SKOS-XL labels then
+     * the new concept also needs to have its labels (pref, alt and hidden) defined in SKOS-XL format.
+     *
+     * e.g.
+     *
+     * &lt;skosxl:prefLabel>
+     *   &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/api/labels/d0e34b9f-d31d-4858-b4e7-3bcbdd377c26">
+     *   &lt;rdf:type rdf:resource="http://www.w3.org/2008/05/skos-xl#Label"/>
+     *   &lt;skosxl:literalForm xml:lang="nl">doodstraf&lt;/skosxl:literalForm>
+     *   &lt;openskos:tenant>beg&lt;/openskos:tenant>
+     *   &lt;/rdf:Description>
+     * &lt;/skosxl:prefLabel>
+     *
+     * instead of as defined in the example.
      *
      * @apiExample {String} Example request
      *  <?xml version="1.0"?>

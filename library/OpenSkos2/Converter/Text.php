@@ -42,12 +42,14 @@ class Text
     }
 
     /**
+     * @param array $allowedChildrenTypes , optional, For example skos xl
      * @return ResourceCollection
      */
-    public function getResources($type = null)
+
+    public function getResources($allowedChildrenTypes = [])
     {
         $graph = new Graph();
         $graph->parse($this->string);
-        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph, $type);
+        return \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($graph, null, $allowedChildrenTypes);
     }
 }

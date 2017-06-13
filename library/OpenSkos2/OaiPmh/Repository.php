@@ -24,6 +24,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Exception\ResourceNotFoundException;
+use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Org;
@@ -59,6 +60,10 @@ use Picturae\OaiPmh\Exception\BadResumptionTokenException;
 
 class Repository implements InterfaceRepository
 {
+    const PREFIX_OAI_RDF = 'oai_rdf';
+    const PREFIX_OAI_RDF_XL = 'oai_rdf_xl';
+    
+    const SCHEMA_OAI_RDF = 'http://www.openarchives.org/OAI/2.0/rdf.xsd';
 
     /**
      * Amount of records to be displayed
@@ -133,7 +138,7 @@ class Repository implements InterfaceRepository
      * @var Autocomplete
      */
     private $searchAutocomplete;
-
+    
     /**
      * @param ConceptManager $conceptManager
      * @param ConceptSchemeManager $schemeManager
@@ -259,14 +264,17 @@ class Repository implements InterfaceRepository
         try {
             if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
                 $concept = $this->conceptManager->fetchByUuid($identifier);
+                if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
+                    $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+                }
             } else {
                 throw new BadArgumentException('Invalid identifier ' . $identifier);
             }
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
-
-        return new OaiConcept($concept, $this->getSetsMap());
+        
+        return new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
     }
 
     /**
@@ -295,7 +303,11 @@ class Repository implements InterfaceRepository
 
         $items = [];
         foreach ($concepts as $i => $concept) {
-            $items[] = new OaiConcept($concept, $this->getSetsMap());
+            /* @var $concept Concept */
+            if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            }
+            $items[] = new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
         }
         $token = null;
         if ($numFound > $this->limit) {
@@ -377,9 +389,15 @@ class Repository implements InterfaceRepository
 //        );
 
         $formats[] = new ImplementationMetadataFormatType(
-            'oai_rdf',
-            'http://www.openarchives.org/OAI/2.0/rdf.xsd',
-            'http://www.w3.org/2004/02/skos/core#'
+            self::PREFIX_OAI_RDF,
+            self::SCHEMA_OAI_RDF,
+            Namespaces\Skos::NAME_SPACE
+        );
+
+        $formats[] = new ImplementationMetadataFormatType(
+            self::PREFIX_OAI_RDF_XL,
+            self::SCHEMA_OAI_RDF,
+            Namespaces\SkosXl::NAME_SPACE
         );
 
         return $formats;

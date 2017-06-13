@@ -21,5 +21,16 @@ namespace OpenSkos2\Rdf;
 
 interface Object
 {
+
+    /**
+     * Output the object as string.
+     * @return string
+     */
+    public function __toString();
     
+    /**
+     * Is the object empty.
+     * @return bool
+     */
+    public function isEmpty();
 }

@@ -276,3 +276,31 @@ fieldset#fieldset-buttons dt {
 #code {
 	width: 80px;
 }
+
+.decorator-with-helptext::after {
+    content: '';
+    display: inline-block;
+    background: transparent url('/assets/images/tip.png') no-repeat bottom center;
+    height: 16px;
+    width: 16px;
+    margin: 0px 0px 0px 5px;
+}
+
+.decorator-helptext {
+    display:none;
+}
+
+.tip-wrap {
+    border: black solid 1px;
+    background: white;
+    padding: 5px;
+    width: 400px;
+}
+
+.hand-cursor > label {
+    cursor: pointer;
+}
+
+input[type='checkbox'] {
+    cursor: pointer;
+}

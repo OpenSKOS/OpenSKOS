@@ -20,17 +20,21 @@
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Api\Exception\ApiException;
+use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
+use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
+use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
+use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Tenant;
 use OpenSkos2\Set;
 use OpenSkos2\PersonManager;
+use OpenSkos2\FieldsMaps;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Search\Autocomplete;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -66,9 +70,16 @@ class Concept extends AbstractTripleStoreResource
     /**
      * Search autocomplete
      *
-     * @var Autocomplete
+     * @var \OpenSkos2\Search\Autocomplete
      */
-    protected $searchAutocomplete;
+    private $searchAutocomplete;
+
+    /**
+     * Amount of concepts to return, will be reset in constructor following application.ini settings
+     *
+     * @var int
+     */
+    private $limit = 0;
 
     /**
      *
@@ -77,15 +88,17 @@ class Concept extends AbstractTripleStoreResource
      * @param PersonManager $personManager
      */
     public function __construct(
-    ConceptManager $manager, Autocomplete $searchAutocomplete, PersonManager $personManager 
+    ConceptManager $manager, Autocomplete $searchAutocomplete, PersonManager $personManager
     )
     {
         $this->manager = $manager;
+        $this->personManager = $personManager;
+        $this->searchAutocomplete = $searchAutocomplete;
+
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
-        $this->personManager = $personManager;
         $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        $this->searchAutocomplete = $searchAutocomplete;
+        $this->limit = $this->init['custom.limit'];
     }
 
     /**
@@ -107,15 +120,14 @@ class Concept extends AbstractTripleStoreResource
 
         $params = $request->getQueryParams();
 
-// offset
+        // offset
         $start = 0;
         if (!empty($params['start'])) {
             $start = (int) $params['start'];
         }
-
-// limit
-        $limit = $this->init["custom.maximal_rows"];
-        if (isset($params['rows']) && $params['rows'] < $limit) {
+        // limit
+        $limit = $this->limit;
+        if (isset($params['rows']) && $params['rows'] < 1001) {
             $limit = (int) $params['rows'];
         }
 
@@ -126,68 +138,37 @@ class Concept extends AbstractTripleStoreResource
             'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
 
-        // tenants
 
+        // tenants
         $tenantCodes = [];
         if (isset($params['tenant'])) {
             $tenantCodes = explode(' ', trim($params['tenant']));
-        } else { // synomym parameter
-            if (isset($params['tenantUri'])) {
-                $options['tenants'] = explode(' ', trim($params['tenantUri']));
-            }
-        }
-
-        if (count($tenantCodes) > 0) {
             foreach ($tenantCodes as $tenantcode) {
-                $tenantUri = $this->manager->fetchUriByCode($tenantcode, Tenant::TYPE);
-                if ($tenantUri === null) {
-                    throw new ApiException(
-                    'The tenant referred by code ' . $tenantcode .
-                    ' does not exist in the triple store. ', 400
-                    );
-                };
-                $options['tenants'][] = $tenantUri;
+                $tenant = $this->manager->fetchByCode($tenantcode, Tenant::TYPE);
+                $options['tenants'][] = $tenant->getCode();
             }
         }
 
 
-        // sets (former collections)
-
-        if (isset($params['setUri'])) {
-            $options['set'] = explode(' ', trim($params['setUri']));
+        // sets
+        $setCodes = [];
+        if ($this->init['custom.backward_compatible']) {
+            $setName = 'collection';
         } else {
-            $setcodes = null;
-            if (isset($params['set'])) {
-                $setcodes = explode(' ', trim($params['set']));
-            } else {
-                if (isset($params['collection'])) {
-                    $setcodes = explode(' ', trim($params['collection']));
-                }
-            }
-            if ($setcodes !== null) {
-                $options['sets'] = array();
-                foreach ($setcodes as $setcode) {
-                    $setUri = $this->manager->fetchUriByCode($setcode, Set::TYPE);
-                    if ($setUri === null) {
-                        throw new ApiException(
-                        "The set (former known as collection) referred by code  "
-                        . "$setcode does not exist in the triple store.", 400
-                        );
-                    } else {
-                        $options['sets'][] = $setUri;
-                    }
-                }
+            $setName = 'set';
+        }
+        if (isset($params[$setName])) {
+            $setCodes = explode(' ', trim($params[$setName]));
+            foreach ($setCodes as $setcode) {
+                $set = $this->manager->fetchByCode($setcode, Set::TYPE);
+                $options['sets'][] = $set->getCode();
             }
         }
 
-        
+
         // concept scheme 
-        if (isset($params['conceptScheme'])) {
-            $options['scheme'] = explode(' ', trim($params['conceptScheme']));
-        } else {
-            if (isset($params['scheme'])) {
-                $options['scheme'] = explode(' ', trim($params['scheme']));
-            }
+        if (isset($params['scheme'])) {
+            $options['scheme'] = explode(' ', trim($params['scheme']));
         }
 
         // skos collection
@@ -225,17 +206,9 @@ class Concept extends AbstractTripleStoreResource
             }
         }
 
+
         $concepts = $this->searchAutocomplete->search($options, $total);
 
-        foreach ($concepts as $concept) {
-            $specs = $this->manager->fetchConceptSpec($concept);
-                foreach ($specs as $spec) {
-                    $concept->addProperty(OpenSkos::SET, new \OpenSkos2\Rdf\Literal($spec['setcode']));
-                    $concept->addProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($spec['tenantcode']));
-                    $concept->addProperty(Dc::CREATOR, new \OpenSkos2\Rdf\Literal($spec['creatorname']));
-                }          
-        }
-        
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {
@@ -243,69 +216,230 @@ class Concept extends AbstractTripleStoreResource
         } else {
             $propertiesList = [];
         }
+
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+
+        if ($this->useXlLabels($tenant, $request) === true) {
+            foreach ($concepts as $concept) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            }
+        }
+
         switch ($context) {
             case 'json':
-                $response = (new JsonResponse($result, $propertiesList))->getResponse();
+                $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             case 'jsonp':
-                $response = (new JsonpResponse($result, $params['callback'], $propertiesList))->getResponse();
+                $response = (new JsonpResponse(
+                    $result, $params['callback'], $propertiesList, $excludePropertiesList
+                    ))->getResponse();
                 break;
             case 'rdf':
-                $response = (new RdfResponse($result, $propertiesList))->getResponse();
+                $response = (new RdfResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
                 break;
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
-        set_time_limit($this->init["custom.normal_time_limit"]);
         return $response;
     }
 
-    private function prepareSortsForSolr($sortstring)
+    /**
+     * Get PSR-7 response for concept
+     *
+     * @param $request \Psr\Http\Message\ServerRequestInterface
+     * @param string $context
+     * @throws NotFoundException
+     * @throws InvalidArgumentException
+     * @return ResponseInterface
+     */
+    public function getResourceResponse(ServerRequestInterface $request, $id, $context)
     {
-        $sortlist = explode(" ", $sortstring);
-        $l = count($sortlist);
-        $sortmap = [];
-        $i = 0;
-        while ($i < $l - 1) { // the last element will be worked-on after the loop is finished
-            $j = $i;
-            $i++;
-            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]);
-            $sortorder = 'asc';
-            if ($sortlist[$i] === "asc" || $sortlist[$i] === 'desc') {
-                $sortorder = $sortlist[$i];
-                $i++;
-            }
-            $sortmap[$sortfield] = $sortorder;
-        };
-        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') {
-// field name is the last and no order after it
-            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l - 1]); // Fix "@nl" to "_nl"
-            $sortmap[$sortfield] = 'asc';
-        };
-        return $sortmap;
-    }
+        $concept = $this->getResource($id);
 
-    private function prepareSortFieldForSolr($term)
-    {
-        // translate field name  to am internal sort-field name
-        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") {
-// is already an internal presentation ready for solr, starts with sort_* or *_langcode
-            return $term;
-        }
-        if ($this->isDateField($term)) {
-            return "sort_d_" . $term;
+        $tenant = $this->manager->fetchByUri($concept->getTenantCode(), Tenant::TYPE);
+
+        $params = $request->getQueryParams();
+
+        if (isset($params['fl'])) {
+            $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
-            if (strpos($term, "@") !== false) {
-                return str_replace("@", "_", $term);
+            $propertiesList = [];
+        }
+
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+
+        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+            $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+
+        switch ($context) {
+            case 'json':
+                $response = (new DetailJsonResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
+                break;
+            case 'jsonp':
+                $response = (new DetailJsonpResponse(
+                    $concept, $params['callback'], $propertiesList, $excludePropertiesList
+                    ))->getResponse();
+                break;
+            case 'rdf':
+                $response = (new DetailRdfResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
+                break;
+            default:
+                throw new InvalidArgumentException('Invalid context: ' . $context);
+        }
+        return $response;
+    }
+
+    /**
+     * Get a list of label exclude properties based on tenant configuration and request XL param
+     * @param Tenant $tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     */
+    public function getExcludeProperties($tenant, $request)
+    {
+        $useXlLabels = $this->useXlLabels($tenant, $request);
+
+        if ($useXlLabels === true) {
+            return \OpenSkos2\Concept::$classes['LexicalLabels'];
+        } else {
+            return \OpenSkos2\Concept::$classes['SkosXlLabels'];
+        }
+    }
+
+    /**
+     * Get openskos concept
+     *
+     * @param string|\OpenSkos2\Rdf\Uri $id
+     * @throws NotFoundException
+     * @throws Exception\DeletedException
+     * @return \OpenSkos2\Concept
+     */
+    public function getResource($id)
+    {
+        /* @var $concept \OpenSkos2\Concept */
+        $concept = parent::getResource($id);
+
+        if ($concept->isDeleted()) {
+            throw new NotFoundException('Concept ' . $id . ' is deleted', 410);
+        }
+
+        return $concept;
+    }
+
+    /**
+     * Check if the requested label format conforms to the tenant configuration
+     * @return boolean Returns TRUE only if XL labels are enabled and requested
+     * @throws Zend_Controller_Exception when XL labels are requested but are not configured for tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     * @param Tenant $tenant
+     */
+    public function useXlLabels($tenant, $request)
+    {
+        if (empty($request->getQueryParams()['xl'])) {
+            return false;
+        }
+
+        $xlParam = filter_var($request->getQueryParams()['xl'], FILTER_VALIDATE_BOOLEAN);
+
+        if ($xlParam === false) {
+            return false;
+        } else {
+            if ($tenant !== null && $tenant->getEnableSkosXl() === true) {
+                return true;
             } else {
-                return "sort_s_" . $term;
+                if ($tenant === null) {
+                    throw new \Zend_Controller_Exception(
+                    'SKOS-XL labels are requested, but tenant is not defined', 501
+                    );
+                } else {
+                    throw new \Zend_Controller_Exception(
+                    'SKOS-XL labels are requested, but only simple labels are enabled for tenant', 501
+                    );
+                }
             }
         }
     }
 
-    private function isDateField($term)
+    /**
+     * Loads the resource from the db and transforms it to rdf.
+     * @param Resource $resource
+     * @return string
+     */
+    protected function loadResourceToRdf(Resource $resource)
     {
-        return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
+        $loadedResource = $this->manager->fetchByUri($resource->getUri());
+
+        $tenant = $this->manager->fetchByUri($loadedResource->getTenantUri(), Tenant::TYPE);
+
+        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
+            $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
+        }
+
+        return (new Transform\DataRdf($loadedResource))->transform();
+    }
+
+    /**
+     * Gets a list (array or string) of fields and try to recognise the properties from it.
+     * @param array $fieldsList
+     * @return array
+     * @throws InvalidPredicateException
+     */
+    protected function fieldsListToProperties($fieldsList)
+    {
+        if (!is_array($fieldsList)) {
+            $fieldsList = array_map('trim', explode(',', $fieldsList));
+        }
+        $propertiesList = [];
+        $fieldsMap = FieldsMaps::getNamesToProperties();
+        // Tries to search for the field in fields map.
+        // If not found there tries to expand it from short property.
+        // If not that - just pass it as it is.
+        foreach ($fieldsList as $field) {
+            if (!empty($field)) {
+                if (isset($fieldsMap[$field])) {
+                    $propertiesList[] = $fieldsMap[$field];
+                } else {
+                    $propertiesList[] = Namespaces::expandProperty($field);
+                }
+            }
+        }
+        // Check if we have a nice properties list at the end.
+        foreach ($propertiesList as $propertyUri) {
+            if ($propertyUri == 'uri') {
+                continue;
+            }
+            if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
+                throw new InvalidPredicateException(
+                'The field "' . $propertyUri . '" from fields list is not recognised.'
+                );
+            }
+        }
+        return $propertiesList;
+    }
+
+    /**
+     * Check if there are both xl labels and simple labels.
+     * @param \OpenSkos2\Concept $concept
+     * @param Tenant $tenant
+     * @throws InvalidArgumentException
+     */
+    protected function checkConceptXl(\OpenSkos2\Concept $concept, Tenant $tenant)
+    {
+        if ($tenant->getEnableSkosXl()) {
+            if ($concept->hasSimpleLabels()) {
+                throw new InvalidArgumentException(
+                'The concept contains simple labels. '
+                . 'But tenant "' . $tenant->getCode() . '" is configured to work with xl labels.', 400
+                );
+            }
+        } else {
+            if ($concept->hasXlLabels()) {
+                throw new InvalidArgumentException(
+                'The concept contains xl labels. '
+                . 'But tenant "' . $tenant->getCode() . '" is configured to work with simple labels.', 400
+                );
+            }
+        }
     }
 
     /**
@@ -382,6 +516,7 @@ class Concept extends AbstractTripleStoreResource
 
         $validURI = $this->manager->isRelationURIValid($body['type']); // throws an exception otherwise
 
+
         if (!$toBeDeleted) {
             $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
             $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
@@ -397,6 +532,54 @@ class Concept extends AbstractTripleStoreResource
         ); // throws an exception if not allowed
 
         return $body;
+    }
+
+    private function prepareSortsForSolr($sortstring)
+    {
+        $sortlist = explode(" ", $sortstring);
+        $l = count($sortlist);
+        $sortmap = [];
+        $i = 0;
+        while ($i < $l - 1) { // the last element will be worked-on after the loop is finished
+            $j = $i;
+            $i++;
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]);
+            $sortorder = 'asc';
+            if ($sortlist[$i] === "asc" || $sortlist[$i] === 'desc') {
+                $sortorder = $sortlist[$i];
+                $i++;
+            }
+            $sortmap[$sortfield] = $sortorder;
+        };
+        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') {
+// field name is the last and no order after it
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l - 1]); // Fix "@nl" to "_nl"
+            $sortmap[$sortfield] = 'asc';
+        };
+        return $sortmap;
+    }
+
+    private function prepareSortFieldForSolr($term)
+    {
+        // translate field name  to am internal sort-field name
+        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") {
+// is already an internal presentation ready for solr, starts with sort_* or *_langcode
+            return $term;
+        }
+        if ($this->isDateField($term)) {
+            return "sort_d_" . $term;
+        } else {
+            if (strpos($term, "@") !== false) {
+                return str_replace("@", "_", $term);
+            } else {
+                return "sort_s_" . $term;
+            }
+        }
+    }
+
+    private function isDateField($term)
+    {
+        return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
 
 }

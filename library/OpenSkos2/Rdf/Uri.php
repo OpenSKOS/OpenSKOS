@@ -33,13 +33,8 @@ class Uri implements Object, ResourceIdentifier
      */
     public function __construct($value)
     {
-        // We allow generated (by easy rdf) uris which are not valid uri.
-        $isGeneratedUri = stripos($value, '_:genid') === 0;
-
         // Null values where allowed from the start some functionality depends on it like createing new graphs :(
-
-        if (!$isGeneratedUri && $value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
-
+        if (!self::isUriTempGeneratedCheck($value) && $value !== null && !filter_var($value, FILTER_VALIDATE_URL)) {
             throw new Exception\InvalidUriException('Invalid URI: ' . $value);
         }
         $this->uri = $value;
@@ -53,10 +48,48 @@ class Uri implements Object, ResourceIdentifier
     {
         return $this->uri;
     }
+    
+    /**
+     * Is the literal empty.
+     * @return type
+     */
+    public function isEmpty()
+    {
+        return $this->uri === null || $this->uri === '';
+    }
 
+    /**
+     * @return string
+     */
     public function getUri()
     {
         return $this->uri;
     }
 
+    /**
+     * @param string $uri
+     */
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
+    }
+    
+    /**
+     * Is the uri generated (by easy rdf)
+     * @return bool
+     */
+    public function isUriTempGenerated()
+    {
+        return self::isUriTempGeneratedCheck($this->uri);
+    }
+    
+    /**
+     * Is it generated (by easy rdf).
+     * @param string $uri
+     * @return bool
+     */
+    public static function isUriTempGeneratedCheck($uri)
+    {
+        return stripos($uri, '_:genid') === 0;
+    }
 }

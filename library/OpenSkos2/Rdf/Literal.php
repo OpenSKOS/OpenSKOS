@@ -128,4 +128,42 @@ class Literal implements Object
             return (string) $this->getValue();
         }
     }
+    
+    /**
+     * Is the literal empty.
+     * @return type
+     */
+    public function isEmpty()
+    {
+        return $this->value === null || $this->value === '';
+    }
+    
+    /**
+     * Finds if the current literal is in the given array.
+     * @param Literal[] $literalsArray
+     * @return boolean
+     */
+    public function isInArray(array $literalsArray)
+    {
+        foreach ($literalsArray as $literalLookup) {
+            if ($this->isEqual($literalLookup)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * @param Literal $literalToCompare
+     * @return boolean
+     */
+    public function isEqual(Literal $literalToCompare)
+    {
+        if ($literalToCompare->getValue() == $this->getValue()
+         && $literalToCompare->getLanguage() == $this->getLanguage()
+         && $literalToCompare->getType() == $this->getType()) {
+            return true;
+        }
+    }
 }

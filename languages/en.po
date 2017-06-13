@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: OpenSKOS English translation\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-02-01 14:31+0100\n"
-"PO-Revision-Date: 2016-02-01 14:32+0100\n"
+"PO-Revision-Date: 2017-03-07 18:34+0200\n"
 "Last-Translator: David Thornley <d.thornley@picturae.nl>\n"
 "Language-Team:  <mark@lindeman.nu>\n"
 "Language: en_US\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-KeywordsList: _;gettext;translate\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.5.4\n"
 "X-Poedit-SearchPath-0: ../application\n"
 "X-Poedit-SearchPath-1: ../library\n"
 "X-Poedit-SearchPath-2: ../languages\n"
@@ -1556,11 +1556,11 @@ msgstr "Back"
 
 #: ../application/editor/views/scripts/label/create.phtml:20
 msgid "Create a new skos xl label"
-msgstr "Create a new skis xl label"
+msgstr "Create a new skos xl label"
 
 #: ../application/editor/views/scripts/label/edit.phtml:22
 msgid "Edit skos xl label (will apply to all concpts with that label)"
-msgstr "Edit skis xl label (will apply to all concepts with that label)"
+msgstr "Edit skos xl label (will apply to all concepts with that label)"
 
 #: ../application/editor/views/scripts/login/index.phtml:22
 msgid "Login for OpenSKOS Editor"

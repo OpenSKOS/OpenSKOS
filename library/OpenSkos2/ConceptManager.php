@@ -27,20 +27,12 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Serializer\NTriple;
-use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\ResourceManagerWithSearch;
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\SkosXl\LabelManager;
 
-// Mertens: the difference is in handling relations.
-// We use "addRelationTriple" and "deleteRelationTriple" since old names
-// "addRelation" and "deleteRelation" are related for a resource of Relation type
-// describing user-defined relations.
-// also the code for these methods is different (refactored)
-// An auxiliary method deleteRelationsWhereObject is replaced with more generic deleteMatchingTriples
-// which is implemented in the prent class ResourceManager
-// Mertens: the changes introduced by Picturae starting from 11/11/2016 are taken.
-
-class ConceptManager extends ResourceManager
+class ConceptManager extends ResourceManagerWithSearch
 {
 
     /**
@@ -48,6 +40,19 @@ class ConceptManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
+    
+    /**
+     * @var LabelManager
+     */
+    protected $labelManager;
+    
+    /**
+     * @return LabelManager
+     */
+    public function getLabelManager()
+    {
+        return $this->labelManager;
+    }
 
     // uses and overrides the parent's method
     public function findResourceById($id, $resourceType)
@@ -60,18 +65,47 @@ class ConceptManager extends ResourceManager
     }
 
     /**
-     * Deletes and then inserts the resource.
-     * For concepts also deletes all relations for which the concept is object.
+     * @param LabelManager $labelManager
+     */
+    public function setLabelManager(LabelManager $labelManager)
+    {
+        $this->labelManager = $labelManager;
+    }
+    
+    /**
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insert(Resource $resource)
+    {
+        parent::insert($resource);
+        
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
+    }
+    
+    /**
+     * Deletes and then inserts the resourse.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function replace(Resource $resource)
+    {
+        parent::replace($resource);
+        
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
+    }
+
+    /**
+     * Deletes and then inserts the concept.
+     * Also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
     public function replaceAndCleanRelations(Concept $concept)
     {
-        // @TODO Danger if one of the operations fail. Need transaction or something.
-        // @TODO What to do with imports. When several concepts are imported at once.
-        foreach ($this->fetchRelationUris() as $relationType) {
-            $this->deleteMatchingTriples('?subject', $relationType, $concept);
-        }
-        parent::replace($concept);
+       
+        $this->deleteRelationsWhereObject($concept);
+        $this->replace($concept);
     }
 
     /**
@@ -112,6 +146,134 @@ class ConceptManager extends ResourceManager
             $i++;
         }
         return $items;
+    }
+
+    /**
+     * Add relations to a skos concept
+     *
+     * @param string $uri
+     * @param string $relationType
+     * @param array|string $uris
+     * @throws Exception\InvalidArgumentException
+     */
+    public function addRelation($uri, $relationType, $uris)
+    {
+        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+
+        // @TODO Add check everywhere we may need it.
+        if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
+            throw new Exception\InvalidArgumentException(
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            );
+        }
+
+        $graph = new \EasyRdf\Graph();
+
+        if (!is_array($uris)) {
+            $uris = [$uris];
+        }
+        foreach ($uris as $related) {
+            $graph->addResource($uri, $relationType, $related);
+        }
+
+        $this->client->insert($graph);
+    }
+
+    /**
+     * Delete relations between two skos concepts.
+     * Deletes in both directions (narrower and broader for example).
+     * @param string $subjectUri
+     * @param string $relationType
+     * @param string $objectUri
+     * @throws Exception\InvalidArgumentException
+     */
+    public function deleteRelation($subjectUri, $relationType, $objectUri)
+    {
+        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+            throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
+        }
+
+        $this->deleteMatchingTriples(
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
+        );
+
+        $this->deleteMatchingTriples(
+            new Uri($objectUri),
+            Skos::getInferredRelationsMap()[$relationType],
+            new Uri($subjectUri)
+        );
+    }
+    
+    /**
+     * Get all concepts that are related as subjects to the given label uri
+     * @param Label $label
+     * @return ConceptCollection
+     */
+    public function fetchByLabel($label)
+    {
+        $query = '
+                DESCRIBE ?subject
+                WHERE {
+                    ?subject ?predicate <' . $label->getUri() . '> .
+                    ?subject <' . \OpenSkos2\Namespaces\Rdf::TYPE . '> <' . \OpenSkos2\Concept::TYPE . '>
+                }';
+        
+        $concepts = $this->fetchQuery($query);
+        
+        return $concepts;
+    }
+
+    /**
+     * Fetches all relations (can be a large number) for the given relation type.
+     * @param string $uri
+     * @param string $relationType Skos::BROADER for example.
+     * @param string $conceptScheme , optional Specify if you want relations from single concept scheme only.
+     * @return ConceptCollection
+     */
+    public function fetchRelations($uri, $relationType, $conceptScheme = null)
+    {
+        // @TODO It is possible that there are relations to uris, for which there is no resource.
+
+        $allRelations = new ConceptCollection([]);
+
+        if (!$uri instanceof Uri) {
+            $uri = new Uri($uri);
+        }
+
+        $patterns = [
+            [$uri, $relationType, '?subject'],
+        ];
+
+        if (!empty($conceptScheme)) {
+            $patterns[Skos::INSCHEME] = new Uri($conceptScheme);
+        }
+
+        $start = 0;
+        $step = 100;
+        do {
+            $relations = $this->fetch($patterns, $start, $step);
+            foreach ($relations as $relation) {
+                $allRelations->append($relation);
+            }
+            $start += $step;
+        } while (!(count($relations) < $step));
+
+        return $allRelations;
+    }
+
+    /**
+     * Delete all relations for which the concepts is object (target)
+     * @param Concept $concept
+     */
+    public function deleteRelationsWhereObject(Concept $concept)
+    {
+        foreach (Skos::getRelationsTypes() as $relationType) {
+            $this->deleteMatchingTriples('?subject', $relationType, $concept);
+        }
     }
 
     /**

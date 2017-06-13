@@ -78,6 +78,9 @@ use OpenSkos2\Validator\Tenant\VCardAdress;
 use OpenSkos2\Validator\Tenant\VCardEmail;
 use OpenSkos2\Validator\Tenant\VCardOrg;
 use OpenSkos2\Validator\Tenant\VCardUrl;
+use OpenSkos2\Validator\Concept\DisjointXlLabels;
+use OpenSkos2\Validator\Concept\LanguageRequired;
+use OpenSkos2\Validator\Concept\NoEmptyValues;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -340,6 +343,8 @@ class Resource
             new InScheme($this->referenceCheckOn),
             new InSkosCollection($this->referenceCheckOn),
             new SingleStatus(),
+            new NoEmptyValues(),
+            new LanguageRequired(),
             new SinglePrefLabel(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
@@ -353,7 +358,8 @@ class Resource
             new CycleInNarrower(),
             new RelatedToSelf(),
             new TopConceptOf($this->referenceCheckOn),
-            new ReferencesForConceptRelations($this->referenceCheckOn, $this->conceptReferenceCheckOn)
+            new ReferencesForConceptRelations($this->referenceCheckOn, $this->conceptReferenceCheckOn),
+            new DisjointXlLabels(),
         ];
         $validators = $this->refineValidators($validators);
         return $validators;

@@ -67,8 +67,13 @@ class RdfResponse extends ResultSetResponse
             // or both of them with something shared.
 
             /* @var $resource \OpenSkos2\Rdf\Resource */
-            $xml = (new \OpenSkos2\Api\Transform\DataRdf($resource, true, $this->propertiesList))->transform();
-            $resourceXML = new \DOMDocument();
+            $xml = (new \OpenSkos2\Api\Transform\DataRdf(
+                $resource,
+                true,
+                $this->propertiesList,
+                $this->excludePropertiesList
+            ))->transform();
+            $resourceXML =  new \DOMDocument();
             $resourceXML->loadXML($xml);
 
             // Rename rdf:RDF to rdf:Description
@@ -94,13 +99,13 @@ class RdfResponse extends ResultSetResponse
     {
 
         $skosResource = $resource->childNodes->item(1);
-
-
-        if ($skosResource !== null) { // to bypass the case when no childNodes at all, when only uri is requested
-            foreach ($skosResource->childNodes as $child) {
-                $skosResource->parentNode->appendChild($child->cloneNode(true));
-            }
-            $resource->removeChild($skosResource);
+        
+        if (empty($skosResource->childNodes)) {
+            return;
+        }
+        
+        foreach ($skosResource->childNodes as $child) {
+            $skosResource->parentNode->appendChild($child->cloneNode(true));
         }
     }
 
