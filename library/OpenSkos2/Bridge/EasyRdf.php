@@ -46,7 +46,7 @@ use OpenSkos2\Rdf\Uri;
 class EasyRdf
 {
 
-    private static $allowedSubresources = [VCard::ORG];
+    private static $allowedSubresources = [VCard::ORG, VCard::ADR];
 
     /**
      * @param \EasyRdf\Graph $graph to $read
@@ -58,8 +58,9 @@ class EasyRdf
     {
         $collection = self::createResourceCollection($expectedType);
         $alreadyAddedAsChild = [];
-
+        
         foreach ($graph->resources() as $resource) {
+            
             if (isset($alreadyAddedAsChild[$resource->getUri()])) {
                 // We skip resources which are part of other resource
                 continue;
@@ -85,7 +86,7 @@ class EasyRdf
         if (!$type) {
             return false;
         }
-        
+
         $openskosResource = self::createResource(
                 $resource->getUri(), $type
         );
@@ -113,8 +114,40 @@ class EasyRdf
                             continue;
                         }
                     }
+                    if (in_array($propertyUri, self::$allowedSubresources)) {
+                        $subResource = self::toOpenskosSubResource($propertyValue, [], $alreadyAddedAsChild);
+                        $openskosResource->addProperty($propertyUri, $subResource);
+                        continue;
+                    }
                     // Not a fully described resource or not a subresource so we just add the uri.
                     $openskosResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
+                }
+            }
+        }
+
+        return $openskosResource;
+    }
+
+    protected static function toOpenskosSubResource($resource)
+    {
+        $openskosResource = new Resource($resource->getUri());
+        
+        foreach ($resource->propertyUris() as $propertyUri) {
+            // We already have the rdf type proprty from the resource creation. No need to put it again.
+            if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
+                 throw new InvalidArgumentException(
+                    "Unexpected value found for property {$resource->getUri} is a subresource and should not have type. " );
+            }
+
+            foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
+                if ($propertyValue instanceof \EasyRdf\Literal) {
+                    $openskosResource->addProperty(
+                        $propertyUri, new Literal(
+                        $propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri()
+                        )
+                    );
+                } elseif ($propertyValue instanceof \EasyRdf\Uri) {
+                   $openskosResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                 }
             }
         }
@@ -236,7 +269,7 @@ class EasyRdf
                         $propName, new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Resource) {
-                    $easyResource->addResource($propName, self::fromOpenSkosResource($value, $graph));
+                   $easyResource->addResource($propName, self::fromOpenSkosResource($value, $graph));
                 } elseif ($value instanceof Uri) {
                     $easyResource->addResource($propName, trim($value->getUri()));
                 } else {
@@ -246,7 +279,7 @@ class EasyRdf
                 }
             }
         }
-
+            
         return $easyResource;
     }
 

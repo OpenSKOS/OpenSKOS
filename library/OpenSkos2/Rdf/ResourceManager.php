@@ -343,12 +343,16 @@ class ResourceManager
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);
             }
         }
-        $query = 'DESCRIBE ?subject {' . PHP_EOL;
-        $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
+        $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
+        // tenants have subresources: address and orgranisation
+        $where .= ' { ?subject  ?predicate ?object } . ';
+        $where .= 'FILTER NOT EXISTS { ?object <' .RdfNamespace::TYPE . '> ?type } . ';
+        // 
         if ($ignoreDeleted) {
             $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
-            $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
+            $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\') ';
         }
         $query .= 'WHERE { ' . $where . '}';
         // We need some order
@@ -365,7 +369,7 @@ class ResourceManager
         
         $resources = $this->fetchQuery($query);
         
-        // The order by part does not apply to the resources with describe.
+// The order by part does not apply to the resources with describe.
         // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
         // @TODO provide possibility to order on other predicates.
@@ -499,6 +503,7 @@ class ResourceManager
         if ($query instanceof \Asparagus\QueryBuilder) {
             $query = $query->getSPARQL();
         }
+        
         $result = $this->query($query);
         return EasyRdf::graphToResourceCollection($result, $this->resourceType);
     }
