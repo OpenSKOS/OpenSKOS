@@ -116,7 +116,11 @@ abstract class AbstractTripleStoreResource
         if ($id instanceof Uri) {
             $resource = $this->manager->fetchByUri($id);
         } else {
-            $resource = $this->manager->fetchByUuid($id);
+            try {
+                $resource = $this->manager->fetchByUuid($id);
+            } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
+                $resource = $this->manager->fetchByUuid($id, 'openskos:code');
+            }
         }
 
         if (!$resource) {
@@ -131,12 +135,12 @@ abstract class AbstractTripleStoreResource
         try {
 
             $index = $this->getResourceList($params);
-            
+
 
             $result = new ResourceResultSet(
                 $index, count($index), 1, $this->init["custom.maximal_rows"]
             );
-            
+
             switch ($params['context']) {
                 case 'json':
                     $response = (new JsonResponse($result))->getResponse();

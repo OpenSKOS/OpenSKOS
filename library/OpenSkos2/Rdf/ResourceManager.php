@@ -191,35 +191,39 @@ class ResourceManager
     }
 
     /**
-     * Fetch resource by uuid
+     * Fetch resource by uuid or code
      *
-     * @param string $uuid
+     * @param string $uuid which has value code or uuid
+     * @param string $property cab be either openskos:uuid or 'openskos:code
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUuid($uuid)
+    public function fetchByUuid($id, $property='openskos:uuid')
     {
         $prefixes = [
             'openskos' => OpenSkosNamespace::NAME_SPACE,
+            'rdf' => RdfNamespace::NAME_SPACE
         ];
-        $lit = new \OpenSkos2\Rdf\Literal($uuid);
+        $lit = new \OpenSkos2\Rdf\Literal($id);
         $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe('?subject')
-            ->where('?subject', 'openskos:uuid', (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit));
+        $query = $qb->describe(['?subject', '?object']) // untypes object is added to get subresources (bnodes) like vcard:adress and vcard:org
+            ->where('?subject', $property, (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit))
+            ->also('?subject', '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
         $data = $this->fetchQuery($query);
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-            'The requested resource with openskos::uuid <' . $uuid . '> was not found.'
+            "The requested resource with $property < . $id . > was not found.'"
             );
         }
         if (count($data) > 1) {
             throw new \RuntimeException(
-            'Something went very wrong. The requested resource with uuid <' . $uuid . '> was found more than once.'
+            "Something went very wrong. The requested resource with $property <  $id  > was found more than once."
             );
         }
         return $data[0];
     }
-
+    
+   
     /**
      * Fetches a single resource matching the uri.
      * @param string $uri
@@ -229,24 +233,31 @@ class ResourceManager
     public function fetchByUri($uri)
     {
         $resource = new Uri($uri);
+            $prefixes = [
+            'rdf' => RdfNamespace::NAME_SPACE
+        ];
+        $serializedURI = (new NTriple)->serialize($resource); 
+        $qb = new \Asparagus\QueryBuilder($prefixes);
+        $query = $qb->describe([$serializedURI, '?object']) // untypes object is added to get subresources (bnodes) like vcard:adress and vcard:org
+            ->where($serializedURI, '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
+       
         try {
-            $result = $this->query('DESCRIBE ' . (new NTriple)->serialize($resource));
-            $resources = EasyRdf::graphToResourceCollection($result, $this->resourceType);
+            $result = $this->fetchQuery($query);
             // @TODO Add resourceType check.
         } catch (\Exception $exp) {
-            throw new ResourceNotFoundException("Unable to fetch resource");
+            throw new ResourceNotFoundException("Unable to fetch resource \n".$exp->getMessage()."\n".$exp->getBody());
         }
-        if (count($resources) == 0) {
+        if (count($result) == 0) {
             throw new ResourceNotFoundException(
             'The requested resource <' . $uri . '> was not found.'
             );
         }
-        if (count($resources) > 1) {
+        if (count($result) > 1) {
             throw new \RuntimeException(
             'Something went very wrong. The requested resource <' . $uri . '> was found more than once.'
             );
         }
-        return $resources[0];
+        return $result[0];
     }
 
     /**
