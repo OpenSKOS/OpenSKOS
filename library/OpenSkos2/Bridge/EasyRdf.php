@@ -74,7 +74,7 @@ class EasyRdf
 
             $collection[] = $openskosResource;
         }
-
+                
         return $collection;
     }
 
@@ -115,7 +115,7 @@ class EasyRdf
                         }
                     }
                     if (in_array($propertyUri, self::$allowedSubresources)) {
-                        $subResource = self::toOpenskosSubResource($propertyValue, [], $alreadyAddedAsChild);
+                        $subResource = self::toOpenskosSubResource($propertyValue);
                         $openskosResource->addProperty($propertyUri, $subResource);
                         continue;
                     }

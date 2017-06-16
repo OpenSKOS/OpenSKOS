@@ -23,9 +23,7 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 
@@ -164,8 +162,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                     );
                 };
                 if ($isUnique) {
-                    $otherResourceUris = $this->resourceManager->fetchSubjectUriForUriRdfObject(
-                        $resource,
+                    $otherResourceUris = $this->resourceManager->fetchSubjectForUriObject(
                         $propertyUri,
                         $value
                     );
@@ -176,8 +173,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 }
             }
             if (($value instanceof Literal) && $isUnique) {
-                $otherResourceUris = $this->resourceManager->fetchSubjectUriForLiteralRdfObject(
-                    $resource,
+                $otherResourceUris = $this->resourceManager->fetchSubjectForLiteralObject(
                     $propertyUri,
                     $value
                 );
@@ -195,6 +191,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $errorMessages = ['The resource of type ' . $resource->getType()->getUri() .
             ' with the property ' . $propertyUri . ' set to ' . $value .
             ' has been already registered.'];
+            
         if (count($otherResourceUris) > 0) {
             if ($this->isForUpdate) { // for update
                 if (count($otherResourceUris) > 1) {
@@ -231,7 +228,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             return [];
         }
         if ($this->resourceManager !== null) {
-            $exists = $this->resourceManager->resourceExists(trim($uri->getUri()), $rdfType);
+            $exists = $this->resourceManager->askForUri(trim($uri->getUri()), false, $rdfType);
             if (!$exists) {
                 return ['The resource (of type ' . $rdfType . ') referred by  uri ' .
                     $uri->getUri() . ' is not found. '];
@@ -247,17 +244,17 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle,
     //$isBoolean, $isUnique,  $referencecheckOn, $type)
 
-    protected function validateUUID(RdfResource $resource)
+    protected function validateUUID($resource)
     {
         return $this->validateProperty($resource, OpenSkos::UUID, true, true, false, true);
     }
 
-    protected function validateOpenskosCode(RdfResource $resource)
+    protected function validateOpenskosCode($resource)
     {
         return $this->validateProperty($resource, OpenSkos::CODE, true, true, false, true);
     }
 
-    protected function validateTitle(RdfResource $resource)
+    protected function validateTitle($resource)
     {
         $firstRound = $this->validateProperty($resource, DcTerms::TITLE, true, false, false, true);
         $titles = $resource->getProperty(DcTerms::TITLE);
@@ -284,91 +281,18 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return ($firstRound && $secondRound);
     }
 
-    protected function validateDescription(RdfResource $resource)
+    protected function validateDescription($resource)
     {
         return $this->validateProperty($resource, DcTerms::DESCRIPTION, false, true, false, false);
     }
 
-    protected function validateType(RdfResource $resource)
+    protected function validateType($resource)
     {
         return $this->validateProperty($resource, Rdf::TYPE, true, true, false, false);
     }
 
-    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique,  $type)
-
-    protected function validateInSet(RdfResource $resource)
-    {
-        // set can be derived from the resource parameter, passed to $set
-        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, Dcmi::DATASET);
-        if ($firstRound) {
-            $secondRound = $this->isSetOfCurrentTenant($resource);
-            if ($this->set == null) {
-                return $secondRound;
-            } else {
-                $thirdRound = $this->isSetCoinsideWithSetRequestParameter($resource);
-                return $thirdRound;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    private function isSetOfCurrentTenant(RdfResource $resource)
-    {
-        $setUris = $resource->getProperty(OpenSkos::SET);
-        $errorsBeforeCheck = count($this->errorMessages);
-        foreach ($setUris as $setURI) {
-            $set = $this->resourceManager->fetchByUri($setURI->getUri(), Dcmi::DATASET);
-            $tenantUris = $set->getProperty(DcTerms::PUBLISHER);
-            $tenantUri = $tenantUris[0]->getUri();
-            if ($tenantUri !== $this->tenant->getUri()) {
-                $this->errorMessages[] = "The resource " . $resource->getUri() . " of type " . $resource->getType().
-                    " attempts to access the set  " . $setURI->getUri() .
-                    ", which does not belong to the user's tenant " . $this->tenant->getUri() .
-                    ", but to the tenant " . $tenantUri . ".";
-            }
-        }
-        $errorsAfterCheck = count($this->errorMessages);
-        return ($errorsBeforeCheck === $errorsAfterCheck);
-    }
-
-    private function isSetCoinsideWithSetRequestParameter(RdfResource $resource)
-    {
-        $setUris = $resource->getProperty(OpenSkos::SET);
-        $errorsBeforeCheck = count($this->errorMessages);
-        foreach ($setUris as $setURI) {
-            if ($setURI->getUri() !== $this->set->getUri()) {
-                $this->errorMessages[] = "The resource " . $resource->getUri() ." of type " . $resource->getType().
-                    " attempts to access the set  " . $setURI->getUri() .
-                    ", which does not coinside with the set announced by request parameter with " .
-                    $this->set->getUri();
-            }
-        }
-        $errorsAfterCheck = count($this->errorMessages);
-        return ($errorsBeforeCheck === $errorsAfterCheck);
-    }
-
-    private function refersToSetOfCurrentTenant(RdfResource $resource, $referenceName, $referenceType)
-    {
-        $referenceUris = $resource->getProperty($referenceName);
-        $errorsBeforeCheck = count($this->errorMessages);
-        foreach ($referenceUris as $uri) {
-            try {
-                $refResource = $this->resourceManager->fetchByUri(
-                    $uri->getUri(),
-                    $referenceType
-                );
-//throws an exception if something is wrong
-                $this->isSetOfCurrentTenant($refResource);
-            } catch (\Exception $e) {
-                $this->errorMessages[] = $e->getMessage();
-            }
-        }
-        $errorsAfterCheck = count($this->errorMessages);
-        return ($errorsBeforeCheck === $errorsAfterCheck);
-    }
-
-    protected function validateInScheme(RdfResource $resource)
+  
+    protected function validateInScheme($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
             $resource,
@@ -379,7 +303,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $retVal;
     }
 
-    protected function validateInSkosCollection(RdfResource $resource)
+    protected function validateInSkosCollection($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
             $resource,
@@ -390,27 +314,64 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $retVal;
     }
 
-    //validateProperty(RdfResource $resource, $propertyUri, $isRequired,
-    //$isSingle, $isUri, $isBoolean, $isUnique,  $type)
-    protected function validateCreator(RdfResource $resource)
-    {
-        return $this->validateProperty($resource, DcTerms::CREATOR, true, true, false, false, Foaf::PERSON);
-    }
+   
 
-    private function validateInSchemeOrInCollection(RdfResource $resource, $property, $rdftype, $must)
+    private function validateInSchemeOrInCollection($resource, $property, $rdftype, $must)
     {
         $firstRound = $this->validateProperty($resource, $property, $must, false, false, false, $rdftype);
-        if ($firstRound) {
-            $init = $this->resourceManager->getInitArray();
-            if ($init["custom.allowed_concepts_for_other_tenant_schemes"]) {
-                return true;
-            } else {
-                $correcttenant = $this->refersToSetOfCurrentTenant($resource, $property, $rdftype);
-                return $correcttenant;
-            }
-        } else {
-            return false;
-        }
-        return $firstRound;
+      return $firstRound;
     }
+    
+     //validateProperty(RdfResource $resource, $propertyUri, $isRequired,
+    //$isSingle, $isUri, $isBoolean, $isUnique,  $type)
+    protected function validateCreator($resource)
+    {
+        return $this->validateProperty($resource, DcTerms::CREATOR, true, true, false, false, \OpenSkos2\Person::TYPE);
+    }
+    
+    protected function checkTenant($resource)
+    {
+        $firstRound = $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, \OpenSkos2\Tenant::TYPE);
+        $tenantUri = $resource->getTenantUri();
+        $tenantCode = $resource->getTenant();
+        $secondRound = true;
+        if ($tenantCode == null) {
+            $secondRound = false;
+            $this->errorMessages[] = 'No tenant code as openskos:tenant is given. ';
+        } else {
+            $tripleStoreTenant = $this->resourceManager->fetchSubjectForLiteralObject(OpenSkos::CODE, $tenantCode->getValue());
+            
+            if ($tripleStoreTenant[0] !== $tenantUri->getUri()) {
+                $secondRound = false;
+                $this->errorMessages[] = "Specified openskos:tenant code {$tenantCode} with the uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
+            }
+        }
+        return $firstRound && $secondRound;
+    }
+    
+    protected function checkSet($resource)
+    {
+        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Set::TYPE);
+        $secondRound = true;
+        if ($firstRound) {
+            
+            $setUri = $resource->getSet->getUri();
+            $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
+            
+            $tenantUri = $resource->getTenantUri()->getUri();
+            $publisherUri = $set->getTenantUri()->getUri();
+            if ($tenantUri !== $publisherUri) {
+                $this->error[] = "The set $setUri declared in the resource has the tenant with the uri $publisherUri which does not coincide with the uri $tenantUri of the tenant declared in the resource";
+                $secondRound=false;
+            }
+            $tenantCode = $resource->getTenant()->getValue();
+            $publisherCode = $set->getTenant()->getValue();
+            if ($tenantCode !== $publisherCode) {
+                $this->error[] = "The set $setUri declared in the resource has the tenant with the code $publisherCode which does not coincide with the code $tenantCode of the tenant declared in the resource";
+                $secondRound=false;
+            }
+        }
+        return $firstRound && $secondRound;
+    }
+
 }

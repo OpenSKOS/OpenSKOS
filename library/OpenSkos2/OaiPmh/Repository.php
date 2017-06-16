@@ -263,7 +263,7 @@ class Repository implements InterfaceRepository
     {
         try {
             if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
-                $concept = $this->conceptManager->fetchByUuid($identifier);
+                $concept = $this->conceptManager->fetchByUuid($identifier, \OpenSkos2\Concept::TYPE);
                 if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
                     $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
                 }
@@ -372,7 +372,7 @@ class Repository implements InterfaceRepository
         if (!is_null($identifier)) {
             try {
                 if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
-                    $concept = $this->conceptManager->fetchByUuid($identifier);
+                    $concept = $this->conceptManager->fetchByUuid($identifier, \OpenSkos2\Concept::TYPE);
                 } else {
                     throw new BadArgumentException('Invalid identifier ' . $identifier);
                 }

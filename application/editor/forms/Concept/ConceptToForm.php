@@ -37,7 +37,7 @@ class Editor_Forms_Concept_ConceptToForm
      * @param string $prefLabel
      * @return array
      */
-    public static function getNewConceptFormData($language, $prefLabel, Tenant $tenant, LabelHelper $labelHelper)
+    public static function getNewConceptFormData($language, $prefLabel, \OpenSkos2\Tenant $tenant, LabelHelper $labelHelper)
     {
         if ($tenant === null) {
             throw new TenantNotFoundException('Tenant not specified');

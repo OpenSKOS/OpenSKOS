@@ -144,7 +144,7 @@ class Concept extends AbstractTripleStoreResource
         if (isset($params['tenant'])) {
             $tenantCodes = explode(' ', trim($params['tenant']));
             foreach ($tenantCodes as $tenantcode) {
-                $tenant = $this->manager->fetchByCode($tenantcode, Tenant::TYPE);
+                $tenant = $this->manager->fetchByCode($tenantcode, \OpenSkos2\Tenant::TYPE);
                 $options['tenants'][] = $tenant->getCode();
             }
         }
@@ -370,10 +370,10 @@ class Concept extends AbstractTripleStoreResource
     /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
-     * @param Tenant $tenant
+     * @param \OpenSkos2\Tenant $tenant
      * @throws InvalidArgumentException
      */
-    protected function checkConceptXl(\OpenSkos2\Concept $concept, Tenant $tenant)
+    protected function checkConceptXl(\OpenSkos2\Concept $concept, \OpenSkos2\Tenant $tenant)
     {
         if ($tenant->getEnableSkosXl()) {
             if ($concept->hasSimpleLabels()) {
@@ -391,6 +391,7 @@ class Concept extends AbstractTripleStoreResource
             }
         }
     }
+    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

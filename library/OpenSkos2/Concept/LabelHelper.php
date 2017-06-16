@@ -19,7 +19,6 @@
 namespace OpenSkos2\Concept;
 
 use OpenSkos2\Namespaces\SkosXl;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;

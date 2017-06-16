@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Rdf;
 
-
 use DateTime;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Literal;
@@ -29,6 +28,7 @@ use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
@@ -39,8 +39,7 @@ use OpenSkos2\Custom\UriGeneration;
 
 class Resource extends Uri implements ResourceIdentifier
 {
-    
-   
+
     public static $classes = array(
         'ConceptSchemes' => [
             Skos::CONCEPTSCHEME,
@@ -81,9 +80,9 @@ class Resource extends Uri implements ResourceIdentifier
         'SkosCollections' => [
             OpenSkos::INSKOSCOLLECTION,
             Skos::SKOSCOLLECTION,
-            Skos::ORDEREDCOLLECTION, 
-            Skos::MEMBER, 
-            Skos::MEMBERLIST, 
+            Skos::ORDEREDCOLLECTION,
+            Skos::MEMBER,
+            Skos::MEMBERLIST,
         ],
         'MappingProperties' => [
             Skos::BROADMATCH,
@@ -94,9 +93,9 @@ class Resource extends Uri implements ResourceIdentifier
             Skos::RELATEDMATCH,
         ],
     );
-    
-    protected $properties=[];
-      /**
+    protected $properties = [];
+
+    /**
      * @return null dummy manager for non-concept-type resources
      */
     public function getLabelManager()
@@ -109,8 +108,6 @@ class Resource extends Uri implements ResourceIdentifier
         $retVal = array_merge(self::$classes['DocumentationProperties'], [DcTerms::DESCRIPTION, DcTerms::TITLE]);
         return $retVal;
     }
-    
-    
 
     /**
      * @return array of RdfObject[]
@@ -133,24 +130,53 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-    // used in Tenant and Set
     public function getCode()
     {
-        return $this->getPropertyOneLiteralValue(OpenSkos::CODE);
+        return $this->getLiteralProperty(OpenSkos::CODE);
+    }
+
+    public function getTenant()
+    {
+        return $this->getLiteralProperty(OpenSkos::TENANT);
+    }
+
+    public function getTenantUri()
+    {
+        return $this->getUriProperty(DcTerms::PUBLISHER);
+    }
+
+    public function getSet()
+    {
+        return $this->getUriProperty(OpenSkos::Set);
     }
 
     public function getTitle()
     {
-        return $this->getPropertyOneLiteralValue(DcTerms::TITLE);
+        $title = $this->getLiteralProperty(DcTerms::TITLE);
+        if (isset($title)) {
+            return $this->getLiteralProperty(DcTerms::TITLE);
+        } else {
+            return new Literal("UNKNOWN");
+        }
     }
 
-    private function getPropertyOneLiteralValue($propertyURI)
+    private function getLiteralProperty($propertyURI)
     {
         $values = $this->getProperty($propertyURI);
         if (isset($values[0])) {
             return $values[0];
         } else {
-            return new Literal(Roles::UNKNOWN);
+            return null;
+        }
+    }
+
+    private function getUriProperty($propertyURI)
+    {
+        $values = $this->getProperty($propertyURI);
+        if (isset($values[0])) {
+            return $values[0];
+        } else {
+            return null;
         }
     }
 
@@ -262,7 +288,7 @@ class Resource extends Uri implements ResourceIdentifier
         if (!$this->hasProperty($predicate)) {
             return true;
         }
-        
+
         $allValuesAreEmpty = true;
         foreach ($this->properties[$predicate] as $value) {
             if (!$value->isEmpty()) {
@@ -285,7 +311,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return false;
     }
-    
+
     /**
      * @return array of RdfObject[]
      */
@@ -293,7 +319,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $retArray = $this->properties;
         ksort($retArray);
-        
+
         return $retArray;
     }
 
@@ -356,7 +382,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function getUuid()
     {
-        return $this->getPropertyOneLiteralValue(OpenSkos::UUID);
+        return $this->getLiteralProperty(OpenSkos::UUID);
     }
 
 // TODO : ask Picturae about this function, look for usages before
@@ -444,8 +470,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (count($values) > 1) {
             throw new OpenSkosException(
-                'Multiple values found for property "' . $property . '" while a single one was requested.'
-                . ' Values ' . implode(', ', $values)
+            'Multiple values found for property "' . $property . '" while a single one was requested.'
+            . ' Values ' . implode(', ', $values)
             );
         }
 
@@ -510,10 +536,10 @@ class Resource extends Uri implements ResourceIdentifier
      * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
-     public function ensureMetadata(
-        \OpenSkos2\Tenant $tenant, 
+    public function ensureMetadata(
+    \OpenSkos2\Tenant $tenant, 
         \OpenSkos2\Set $set, 
-        \OpenSkos2\Person $person,
+        \OpenSkos2\Person $person, 
         PersonManager $personManager, 
         $labelManager = null, 
         $existingConcept = null, 
@@ -527,6 +553,7 @@ class Resource extends Uri implements ResourceIdentifier
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            OpenSkos::TENANT => $tenant->getCode(),
             DcTerms::DATESUBMITTED => $nowLiteral
         ];
 
@@ -544,14 +571,13 @@ class Resource extends Uri implements ResourceIdentifier
         $this->resolveCreator($person, $personManager);
 
         $this->setModified($person);
-
     }
 
-     /**
+    /**
      * Mark the concept as modified.
      * @param Person $person
      */
-    public function setModified(Person $person)
+    public function setModified(\OpenSKos2\Person $person)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
@@ -562,9 +588,8 @@ class Resource extends Uri implements ResourceIdentifier
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
         $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
     }
-    
-   
-     /**
+
+    /**
      * Resolve the creator in all use cases:
      * - dc:creator is set but dcterms:creator is not
      * - dcterms:creator is set as Uri
@@ -573,14 +598,14 @@ class Resource extends Uri implements ResourceIdentifier
      * @param Person $person
      * @param PersonManager $personManager
      */
-    public function resolveCreator(Person $person, PersonManager $personManager)
+    public function resolveCreator(\OpenSkos2\Person $person, \OpenSkos2\PersonManager $personManager)
     {
         $dcCreator = $this->getProperty(Dc::CREATOR);
         $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
 
         // Set the creator to the apikey user
         if (empty($dcCreator) && empty($dcTermsCreator)) {
-            $this->setCreator(null, $person); 
+            $this->setCreator(null, $person);
             return;
         }
 
@@ -649,8 +674,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-
-    
     /**
      *
      * @return DateTime|null
@@ -693,8 +716,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-   
-
     public function selfGenerateUri($tenant, $set, $manager)
     {
         $init = $manager->getInitArray();
@@ -702,12 +723,12 @@ class Resource extends Uri implements ResourceIdentifier
             $customGen = new UriGeneration();
             return $customGen->generateUri($manager, $this);
         }
-        
+
         $uuid = Uuid::uuid4();
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-                'The resource already has an uri. Can not generate new one.'
+            'The resource already has an uri. Can not generate new one.'
             );
         }
 
@@ -717,14 +738,14 @@ class Resource extends Uri implements ResourceIdentifier
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
         $this->setUri($uri);
-        
+
         $this->setProperty(OpenSkos::UUID, new Literal($uuid));
-        
+
         return $uri;
     }
 
@@ -733,4 +754,5 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return $set->getUri() . "/" . $uuid;
     }
+
 }

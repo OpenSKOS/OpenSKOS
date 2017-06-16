@@ -53,8 +53,7 @@ class ResourceManager
      * @var array
      */
     protected $init = [];
-    
-    
+
     public function getResourceType()
     {
         return $this->resourceType;
@@ -65,7 +64,7 @@ class ResourceManager
         return $this->init;
     }
 
-     /**
+    /**
 
      * @param Client $client
      */
@@ -78,8 +77,8 @@ class ResourceManager
         } else {
             $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
         }
-    } 
-    
+    }
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -198,7 +197,7 @@ class ResourceManager
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUuid($id, $property='openskos:uuid')
+    public function fetchByUuid($id, $type, $property = 'openskos:uuid')
     {
         $prefixes = [
             'openskos' => OpenSkosNamespace::NAME_SPACE,
@@ -206,13 +205,16 @@ class ResourceManager
         ];
         $lit = new \OpenSkos2\Rdf\Literal($id);
         $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe(['?subject', '?object']) // untypes object is added to get subresources (bnodes) like vcard:adress and vcard:org
-            ->where('?subject', $property, (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit))
-            ->also('?subject', '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
-        $data = $this->fetchQuery($query);
+        $query = $qb->describe(['?subject', '?object']) // untyped object is added to get subresources (bnodes) like vcard:adress and vcard:org
+                ->where('?subject', $property, (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit))
+                ->also('?subject', '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
+        if (isset($type)) {
+            $query = $query->also('?subject', 'rdf:type', "<$type>");
+        }
+        $data = $this->fetchQuery($query, $type);
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-            "The requested resource with $property < . $id . > was not found.'"
+            "The requested resource with $property < . $id . > of type $type was not found.'"
             );
         }
         if (count($data) > 1) {
@@ -222,30 +224,32 @@ class ResourceManager
         }
         return $data[0];
     }
-    
-   
+
     /**
      * Fetches a single resource matching the uri.
      * @param string $uri
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUri($uri)
+    public function fetchByUri($uri, $type=null)
     {
         $resource = new Uri($uri);
-            $prefixes = [
+        $prefixes = [
             'rdf' => RdfNamespace::NAME_SPACE
         ];
-        $serializedURI = (new NTriple)->serialize($resource); 
+        $serializedURI = (new NTriple)->serialize($resource);
         $qb = new \Asparagus\QueryBuilder($prefixes);
         $query = $qb->describe([$serializedURI, '?object']) // untypes object is added to get subresources (bnodes) like vcard:adress and vcard:org
-            ->where($serializedURI, '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
-       
+                ->where($serializedURI, '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
+
+        if (isset($type)) {
+            $query = $query->also('?subject', 'rdf:type', "<$type>");
+        }
         try {
-            $result = $this->fetchQuery($query);
+            $result = $this->fetchQuery($query, $type);
             // @TODO Add resourceType check.
         } catch (\Exception $exp) {
-            throw new ResourceNotFoundException("Unable to fetch resource \n".$exp->getMessage()."\n".$exp->getBody());
+            throw new ResourceNotFoundException("Unable to fetch resource \n" . $exp->getMessage() . " (of $type) \n");
         }
         if (count($result) == 0) {
             throw new ResourceNotFoundException(
@@ -313,12 +317,18 @@ class ResourceManager
      * @param bool $checkAllResourceTypes
      * @return bool
      */
-    public function askForUri($uri, $checkAllResourceTypes = false)
+    public function askForUri($uri, $checkAllResourceTypes = false, $rdfType = null)
     {
         $query = '<' . $uri . '> ?predicate ?object';
-        if (!$checkAllResourceTypes && !empty($this->resourceType)) {
-            $query .= ' . ';
-            $query .= '<' . $uri . '> <' . RdfNamespace::TYPE . '> <' . $this->resourceType . '>';
+
+        if (!$checkAllResourceTypes) {
+            if (!isset($rdfType)) {
+                $rdfType = $this->resourceType;
+            }
+            if (isset($rdfType)) {
+                $query .= ' . ';
+                $query .= '<' . $uri . '> <' . RdfNamespace::TYPE . '> <' . $rdfType . '>';
+            }
         }
         return $this->ask($query);
     }
@@ -347,7 +357,7 @@ class ResourceManager
          */
         if (!empty($this->resourceType)) {
             $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
-            if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME || 
+            if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME ||
                 $this->resourceType === \OpenSkos2\Set::TYPE) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
@@ -359,7 +369,7 @@ class ResourceManager
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
         // tenants have subresources: address and orgranisation
         $where .= ' { ?subject  ?predicate ?object } . ';
-        $where .= 'FILTER NOT EXISTS { ?object <' .RdfNamespace::TYPE . '> ?type } . ';
+        $where .= 'FILTER NOT EXISTS { ?object <' . RdfNamespace::TYPE . '> ?type } . ';
         // 
         if ($ignoreDeleted) {
             $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
@@ -377,9 +387,9 @@ class ResourceManager
             $query .= PHP_EOL . 'OFFSET ' . $offset;
         }
         $query .= '}'; // end sub select
-        
+
         $resources = $this->fetchQuery($query);
-        
+
 // The order by part does not apply to the resources with describe.
         // So we need to order them again.
         // @TODO Find other solution - sort in jena, not here.
@@ -431,6 +441,65 @@ class ResourceManager
         /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
         return $result[0]->count->getValue();
+    }
+
+    public function fetchSubjectForUriObject($property, $objUri)
+    {
+        $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $query .= "WHERE { ?subject <$property>  <$objUri>. }";
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        $retval = $this->resultToArray($result, 'subject', 'uri');
+        return $retval;
+    }
+
+    public function fetchSubjectForLiteralObject($property, $string)
+    {
+        $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $query .= "WHERE { ?subject <$property>  '$string'. }";
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        $retval = $this->resultToArray($result, 'subject', 'uri');
+        return $retval;
+    }
+
+    private function resultToArray($result, $fieldname, $type = null)
+    {
+        $retval = array();
+        if ($type === 'uri') {
+            foreach ($result as $res) {
+                $retval[] = $res->$fieldname->getUri();
+            }
+        } else {
+            if ($type === 'lit') {
+                foreach ($result as $res) {
+                    $retval[] = $res->$fieldname->getValue();
+                }
+            } else {
+                foreach ($result as $res) {
+                    $retval[] = $res->$fieldname;
+                }
+            }
+        }
+        return $retval;
+    }
+
+    protected function makeNameUriMap($sparqlQueryResult)
+    {
+        $items = [];
+        foreach ($sparqlQueryResult as $resource) {
+            $uri = $resource->uri->getUri();
+            $name = $resource->name->getValue();
+            $items[$name] = $uri;
+        }
+        return $items;
+    }
+
+    // overriden in concept manager
+    // may be overriden in the future in other specific resource managers
+    public function replaceAndCleanRelations($resource)
+    {
+        $this->replace($resource);
     }
 
     /**
@@ -509,14 +578,17 @@ class ResourceManager
      * @param \Asparagus\QueryBuilder|string $query
      * @return ResourceCollection
      */
-    public function fetchQuery($query)
+    public function fetchQuery($query, $rdfType = null)
     {
         if ($query instanceof \Asparagus\QueryBuilder) {
             $query = $query->getSPARQL();
         }
-        
+
         $result = $this->query($query);
-        return EasyRdf::graphToResourceCollection($result, $this->resourceType);
+        if (!isset($rdfType)) {
+            $rdfType = $this->resourceType;
+        }
+        return EasyRdf::graphToResourceCollection($result, $rdfType);
     }
 
     /**

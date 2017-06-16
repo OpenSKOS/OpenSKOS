@@ -21,6 +21,7 @@ namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Tenant;
 
@@ -35,6 +36,7 @@ class TenantManager extends ResourceManager
         return $result;
     }
 
+ 
     
     // used only for HTML representation
     public function fetchSetsForTenant($code)
@@ -59,6 +61,14 @@ class TenantManager extends ResourceManager
             DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
         $response = $this->query($query);
         return $response;
+    }
+    
+    public function fetchTenantNameUri()
+    {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . VCard::ORG . '> ?org . ?org <' . VCard::ORGNAME . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
     }
 
     // used only for html output

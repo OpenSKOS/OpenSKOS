@@ -25,7 +25,9 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Literal;
 use OpenSkos2\PersonManager;
+use Rhumsaa\Uuid\Uuid;
 
 class Set extends Resource
 {
@@ -74,7 +76,8 @@ class Set extends Resource
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
-            DcTerms::DATESUBMITTED => $nowLiteral
+            OpenSkos::TENANT => $tenant->getCode(),
+            DcTerms::DATESUBMITTED => $nowLiteral()
         ];
 
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {

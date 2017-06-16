@@ -176,8 +176,8 @@ class Concept extends Resource
      * @param \OpenSkos2\Tenant $tenant
      * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
-     * @param \OpenSkos2\LabelManager $labelManager, 
      * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\LabelManager $labelManager, 
      * @param  Resource $existingConcept, optional $existingResource of one of concrete child types used for update 
      * $oldStatus will be derived from $existingResource
      */
@@ -185,9 +185,9 @@ class Concept extends Resource
         \OpenSkos2\Tenant $tenant, 
         \OpenSkos2\Set $set, 
         \OpenSkos2\Person $person, 
-        LabelManager $labelManager, 
-        PersonManager $personManager, 
-        $existingConcept = null, 
+        PersonManager $personManager,
+        LabelManager $labelManager=null, 
+        $existingConcept = null,
         $forceCreationOfXl = false)
     {
 
@@ -198,7 +198,7 @@ class Concept extends Resource
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
-            OpenSkos::TENANT => new Literal($tenant->getCode()),
+            OpenSkos::TENANT => $tenant->getCode(),
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
             DcTerms::DATESUBMITTED => $nowLiteral

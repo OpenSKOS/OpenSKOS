@@ -34,11 +34,11 @@ class Tenant extends AbstractTripleStoreResource
         try {
             $tenant = parent::getResource($id);
         } catch (ResourceNotFoundException $ex) {
-            $tenant = $this->manager->fetchByCode($id, Tenant::TYPE);
+            $tenant = $this->manager->fetchByUuid($id, \OpenSkos2\Tenant::TYPE, 'openskos:code');
         }
 
         if (!$tenant) {
-            throw new NotFoundException('Set not found by uri/uuid/code: ' . $id, 404);
+            throw new NotFoundException('Tenant not found by uri/uuid/code: ' . $id, 404);
         }
         return $tenant;
     }

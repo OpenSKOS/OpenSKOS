@@ -21,14 +21,14 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceCreateAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
         if (!$this->defaultOn) {
             $this->customAuthorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
         }
     }
 
-    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
 
         if (!$this->defaultOn) {
@@ -36,7 +36,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
         if (!$this->defaultOn) {
             $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);

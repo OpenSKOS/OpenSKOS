@@ -47,7 +47,6 @@ use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
 use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
 use OpenSkos2\Validator\ConceptScheme\HasTopConcept as SchemaHasTopConcept;
-use OpenSkos2\Validator\ConceptScheme\InSet as SchemaInSet;
 use OpenSkos2\Validator\ConceptScheme\OpenskosUuid as SchemaUuid;
 use OpenSkos2\Validator\ConceptScheme\Title as SchemaTitle;
 use OpenSkos2\Validator\RelationType\Creator as RelationTypeCreator;
@@ -60,7 +59,7 @@ use OpenSkos2\Validator\Set\OpenskosConceptBaseUri;
 use OpenSkos2\Validator\Set\OpenskosOAIBaseUri;
 use OpenSkos2\Validator\Set\OpenskosUuid as SetOpenskosUuid;
 use OpenSkos2\Validator\Set\OpenskosWebPage;
-use OpenSkos2\Validator\Set\Publisher;
+use OpenSkos2\Validator\Set\OpenSkosTenant;
 use OpenSkos2\Validator\Set\Title as SetTitle;
 use OpenSkos2\Validator\Set\Type as SetType;
 use OpenSkos2\Validator\SkosCollection\Creator as SkosCollCreator;
@@ -266,12 +265,13 @@ class Resource
     private function getSchemaValidators()
     {
         $validators = [
-            new SchemaInSet($this->referenceCheckOn),
             new SchemaTitle(),
             new SchemaDescription(),
             new SchemaCreator($this->referenceCheckOn),
             new SchemaUuid(),
-            new SchemaHasTopConcept($this->referenceCheckOn, $this->conceptReferenceCheckOn)
+            new SchemaHasTopConcept($this->referenceCheckOn, $this->conceptReferenceCheckOn),
+            new \OpenSkos2\Validator\ConceptScheme\OpenSkosTenant(),
+            new \OpenSkos2\Validator\ConceptScheme\OpenSkosSet()
         ];
         $validators = $this->refineValidators($validators);
         return $validators;
@@ -285,7 +285,9 @@ class Resource
             new SkosCollDescription(),
             new SkosCollCreator($this->referenceCheckOn),
             new SkosCollUuid(),
-            new SkosCollMember($this->referenceCheckOn, $this->conceptReferenceCheckOn)
+            new SkosCollMember($this->referenceCheckOn, $this->conceptReferenceCheckOn),
+            new \OpenSkos2\Validator\SkosCollection\OpenSkosTenant(),
+            new \OpenSkos2\Validator\SkosCollection\OpenSkosSet(),
         ];
         $validators = $this->refineValidators($validators);
         return $validators;
@@ -312,9 +314,10 @@ class Resource
             new SetOpenskosUuid(),
             new OpenskosOAIBaseUri(),
             new OpenskosWebPage(),
-            new Publisher($this->referenceCheckOn),
+            new OpenSkosTenant($this->referenceCheckOn),
             new SetTitle(),
-            new SetType()
+            new SetType(),
+            new \OpenSkos2\Validator\Set\OpenSkosTenant(),
         ];
         $validators = $this->refineValidators($validators);
         return $validators;
@@ -359,7 +362,9 @@ class Resource
             new RelatedToSelf(),
             new TopConceptOf($this->referenceCheckOn),
             new ReferencesForConceptRelations($this->referenceCheckOn, $this->conceptReferenceCheckOn),
-            new DisjointXlLabels(),
+            new \OpenSkos2\Validator\Concept\OpenSkosTenant(),
+            new \OpenSkos2\Validator\Concept\OpenSkosSet(),
+            new DisjointXlLabels()
         ];
         $validators = $this->refineValidators($validators);
         return $validators;

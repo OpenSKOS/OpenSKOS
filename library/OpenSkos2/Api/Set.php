@@ -44,7 +44,7 @@ class Set extends AbstractTripleStoreResource
         try {
             $set = parent::getResource($id);
         } catch (ResourceNotFoundException $ex) {
-            $set = $this->manager->fetchByCode($id, Set::TYPE);
+            $set = $this->manager->fetchByUuid($id, \OpenSkos2\Set::TYPE, 'openskos:code');
         }
 
         if (!$set) {
@@ -53,48 +53,7 @@ class Set extends AbstractTripleStoreResource
         return $set;
     }
 
-     /**
-     * Get the resource from the request to insert or update
-     * does some validation to see if the xml is valid
-     *
-     * @param ServerRequestInterface $request
-     * @param Tenant $inloggedTenant
-     * @return \OpenSkos2\*
-     * @throws InvalidArgumentException
-     */
-    protected function getResourceFromRequest(ServerRequestInterface $request, $inloggedTenant)
-    {
-        
-        $set = parent::getResourceFromRequest($request, $inloggedTenant);
-        
-        if ($this->init['custom.backward_compatible']) {
-            $xmlTenantCode = $set->getProperty(OpenSkos::TENANT); // literal, code
-            if (count($xmlTenantCode)>1) {
-                throw new InvalidArgumentException('More than 1 tenant specified in the xml body', 400);
-            }
-            if (count($xmlTenantCode)===0) {
-                $set->addUniqueProperty(DcTerms::PUBLISHER, new Uri($inloggedTenant->getUri()));
-            } 
-            if (count($xmlTenantCode)===1) {
-                $tenant = $this->getTenant($xmlTenantCode[0], $this->manager);
-                $set->unsetPoperty(OpenSkos::TENANT);
-                $set->addUniqueProperty(DcTerms::PUBLISHER, new Uri($tenant->getUri()));
-            } 
-            
-        } else {
-            $publishers= $set->getProperty(DcTerms::PUBLISHER); // uri
-            if (count($publishers)>1) {
-                throw new InvalidArgumentException('More than 1 publisher specified in the xml body', 400);
-            }
-            if (count($publishers)===0) {
-                $set->addUniqueProperty(DcTerms::PUBLISHER, new Uri($inloggedTenant->getUri()));
-            } 
-        }
-        return $set;
-    }
-    
- 
-    
+  
     protected function getRequiredParameters(){
        
         return ['key', 'tenant'];

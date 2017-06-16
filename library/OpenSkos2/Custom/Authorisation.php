@@ -23,7 +23,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $this->resourceManager = $manager;
     }
 
-    public function resourceCreateAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
         $type = $this->resourceManager->getResourceType();
 
@@ -61,7 +61,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
         $type = $this->resourceManager->getResourceType();
 
@@ -98,7 +98,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, $tenant, $set, $resource)
+    public function resourceDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $set, $resource)
     {
         $type = $this->resourceManager->getResourceType();
 
@@ -214,7 +214,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         
     }
 
-    private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $concept)
+    private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $concept)
     {
         $tenantCode = $tenant->getCode()->getValue();
         if ($user->tenant !== $tenantCode) {
@@ -243,37 +243,37 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         return true;
     }
 
-    private function conceptDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $concept)
+    private function conceptDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $concept)
     {
         $this->conceptEditAllowed($user, $tenant, $concept);
     }
 
-    private function conceptSchemeCreateAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function conceptSchemeCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceCreateAllowedBasic($user, $tenant, $resource);
     }
 
-    private function conceptSchemeEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function conceptSchemeEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
-    private function conceptSchemeDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function conceptSchemeDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
 
-    private function setCreateAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function setCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceCreateAllowedBasic($user, $tenant, $resource);
     }
 
-    private function setEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function setEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
-    private function setDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function setDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         return $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
@@ -302,32 +302,32 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         }
     }
 
-    private function skosCollectionCreateAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function skosCollectionCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceCreateAllowedBasic($user, $tenant, $resource);
     }
 
-    private function skosCollectionEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function skosCollectionEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
-    private function skosCollectionDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function skosCollectionDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
 
-    private function relationCreateAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function relationCreateAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceCreateAllowedBasic($user, $tenant, $resource);
     }
 
-    private function relationEditAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function relationEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
        $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
-    private function relationDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, Tenant $tenant, $resource)
+    private function relationDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
         $this->resourceDeleteAllowedBasic($user, $tenant, $resource);
     }
