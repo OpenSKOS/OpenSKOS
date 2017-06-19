@@ -451,7 +451,7 @@ abstract class AbstractTripleStoreResource
         $rdfType = $this->manager->getResourceType();
 
         $resources = (new Text($doc->saveXML()))->getResources($rdfType, \OpenSkos2\Concept::$classes['SkosXlLabels']);
-
+               
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
             "Expected exactly one resource of type $rdfType, got {$resources->count()}, check if you set rdf:type in the request body, " . $resources->count(), 412
@@ -479,7 +479,7 @@ abstract class AbstractTripleStoreResource
             if (!$resource->getTenant()) {
                 throw new InvalidArgumentException('No tenant specified', 400);
             }
-            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');  
             $resource->setProperty(Namespaces\DcTerms::PUBLISHER, new \OpenSkos2\Rdf\Uri($rdfTenant->getUri())); // within the triple store resources are referred via URI's not literals, we keep literals for API backward compatibility and convenience
         }
 
@@ -496,6 +496,7 @@ abstract class AbstractTripleStoreResource
     private function getDomDocumentFromRequest(ServerRequestInterface $request)
     {
         $xml = $request->getBody();
+        
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 400);
         }
@@ -510,6 +511,7 @@ abstract class AbstractTripleStoreResource
             . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 400
             );
         }
+        
         return $doc;
     }
 

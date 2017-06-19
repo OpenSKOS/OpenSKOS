@@ -280,7 +280,6 @@ class Resource
     private function getSkosCollectionValidators()
     {
         $validators = [
-            new SkosCollInSet($this->referenceCheckOn),
             new SkosCollTitle(),
             new SkosCollDescription(),
             new SkosCollCreator($this->referenceCheckOn),

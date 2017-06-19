@@ -203,6 +203,7 @@ class ResourceManager
             'openskos' => OpenSkosNamespace::NAME_SPACE,
             'rdf' => RdfNamespace::NAME_SPACE
         ];
+        
         $lit = new \OpenSkos2\Rdf\Literal($id);
         $qb = new \Asparagus\QueryBuilder($prefixes);
         $query = $qb->describe(['?subject', '?object']) // untyped object is added to get subresources (bnodes) like vcard:adress and vcard:org
@@ -212,9 +213,10 @@ class ResourceManager
             $query = $query->also('?subject', 'rdf:type', "<$type>");
         }
         $data = $this->fetchQuery($query, $type);
+        
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-            "The requested resource with $property < . $id . > of type $type was not found.'"
+            "The requested resource with $property set to $id of type $type was not found. $query"
             );
         }
         if (count($data) > 1) {
@@ -444,10 +446,14 @@ class ResourceManager
     }
 
   
-    public function fetchSubjectForObject($property, $object){
+    public function fetchSubjectForObject($property, $object, $type=null){
         $objString = $this->valueToTurtle($object);
         $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
+        if (isset($type)) {
+           $query .= "WHERE { ?subject <$property>  $objString. ?subject <".RdfNamespace::TYPE."> <$type>}"; 
+        } else {
         $query .= "WHERE { ?subject <$property>  $objString. }";
+        }
         /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
         $retval = $this->resultToArray($result, 'subject', new \OpenSkos2\Rdf\Uri("http://dummy"));

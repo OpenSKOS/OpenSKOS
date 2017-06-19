@@ -150,8 +150,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
             if ($isUnique) {
                if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
-                    $this->errorMessages[] = 'The resource with the property ' . $propertyUri . ' set to ' . $value .
-                        ' has been already registered.';
+                    $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered.";
                 }
             }
             if ($value instanceof Uri && $this->referenceCheckOn) {
@@ -167,7 +166,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     private function uniquenessCheck($resource, $propertyUri, $value)
     {
          $otherResourceUris = $this->resourceManager->fetchSubjectForObject(
-                    $propertyUri, $value
+                    $propertyUri, $value, $this->resourceManager->getResourceType()
                 );
         if (count($otherResourceUris) > 0) {
             if ($this->isForUpdate) { // for update
@@ -270,7 +269,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             $secondRound = false;
             $this->errorMessages[] = 'No tenant code as openskos:tenant is given. ';
         } else {
-            $tripleStoreTenant = $this->resourceManager->fetchSubjectForObject(OpenSkos::CODE, $tenantCode);
+            $tripleStoreTenant = $this->resourceManager->fetchSubjectForObject(OpenSkos::CODE, $tenantCode, \OpenSkos2\Tenant::TYPE);
 
             if ($tripleStoreTenant[0] !== $tenantUri->getUri()) {
                 $secondRound = false;

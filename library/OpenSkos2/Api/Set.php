@@ -43,7 +43,7 @@ class Set extends AbstractTripleStoreResource
     {
         try {
             $set = parent::getResource($id);
-        } catch (ResourceNotFoundException $ex) {
+        } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
             $set = $this->manager->fetchByUuid($id, \OpenSkos2\Set::TYPE, 'openskos:code');
         }
 
