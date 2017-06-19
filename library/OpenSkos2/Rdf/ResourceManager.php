@@ -197,7 +197,7 @@ class ResourceManager
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUuid($id, $type, $property = 'openskos:uuid')
+    public function fetchByUuid($id, $type=null, $property = 'openskos:uuid')
     {
         $prefixes = [
             'openskos' => OpenSkosNamespace::NAME_SPACE,
@@ -443,35 +443,26 @@ class ResourceManager
         return $result[0]->count->getValue();
     }
 
-    public function fetchSubjectForUriObject($property, $objUri)
-    {
+  
+    public function fetchSubjectForObject($property, $object){
+        $objString = $this->valueToTurtle($object);
         $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
-        $query .= "WHERE { ?subject <$property>  <$objUri>. }";
+        $query .= "WHERE { ?subject <$property>  $objString. }";
         /* @var $result \EasyRdf\Sparql\Result */
         $result = $this->query($query);
-        $retval = $this->resultToArray($result, 'subject', 'uri');
+        $retval = $this->resultToArray($result, 'subject', new \OpenSkos2\Rdf\Uri("http://dummy"));
         return $retval;
     }
-
-    public function fetchSubjectForLiteralObject($property, $string)
-    {
-        $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
-        $query .= "WHERE { ?subject <$property>  '$string'. }";
-        /* @var $result \EasyRdf\Sparql\Result */
-        $result = $this->query($query);
-        $retval = $this->resultToArray($result, 'subject', 'uri');
-        return $retval;
-    }
-
-    private function resultToArray($result, $fieldname, $type = null)
+    
+      private function resultToArray($result, $fieldname, $typeinstance)
     {
         $retval = array();
-        if ($type === 'uri') {
+        if ($typeinstance instanceof \OpenSkos2\Rdf\Uri) {
             foreach ($result as $res) {
                 $retval[] = $res->$fieldname->getUri();
             }
         } else {
-            if ($type === 'lit') {
+            if ($typeinstance instanceof \OpenSkos2\Rdf\Literal) {
                 foreach ($result as $res) {
                     $retval[] = $res->$fieldname->getValue();
                 }
@@ -484,6 +475,7 @@ class ResourceManager
         return $retval;
     }
 
+   
     protected function makeNameUriMap($sparqlQueryResult)
     {
         $items = [];

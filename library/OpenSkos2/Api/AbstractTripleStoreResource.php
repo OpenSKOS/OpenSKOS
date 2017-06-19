@@ -260,9 +260,11 @@ abstract class AbstractTripleStoreResource
             }
             $user = $this->getUserFromParams($params);
 
-            $set = $this->getSetFromParams($params);
+            $tenant = $this->getTenantFromParams($params);
 
-            $this->authorisation->resourceDeleteAllowed($user, $resource->getInstitution(), $set, $resource);
+            $set = $this->getSet($params);
+
+            $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
 
             $this->authorisation->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
 
@@ -377,6 +379,8 @@ abstract class AbstractTripleStoreResource
         if ($resource instanceof \OpenSkos2\Concept) {
             $this->checkConceptXl($resource, $tenant);
         }
+        
+        $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
 
         $resource->ensureMetadata(
             $tenant, $set, $user->getFoafPerson(), $this->personManager
@@ -450,7 +454,7 @@ abstract class AbstractTripleStoreResource
 
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
-            "Expected exactly one resource of type $rdfType, got, check if you set rdf:type in the request body, " . $resources->count(), 412
+            "Expected exactly one resource of type $rdfType, got {$resources->count()}, check if you set rdf:type in the request body, " . $resources->count(), 412
             );
         }
 
@@ -528,12 +532,13 @@ abstract class AbstractTripleStoreResource
         }
 
         $code = $params[$setName];
-        $set = $this->manager->fetchByCode($code, Set::TYPE);
-        if (null === $set) {
+        $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
+        if (!isset($set)) {
             throw new InvalidArgumentException(
             "No such $setName `$code`", 404
             );
         }
+        return $set;
     }
 
     /**

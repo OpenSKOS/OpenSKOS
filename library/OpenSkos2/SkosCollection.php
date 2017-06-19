@@ -25,17 +25,7 @@ class SkosCollection extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-    // how to add get property-reference attribute??
-
-    public function getTitle()
-    {
-        if ($this->hasProperty(DcTerms::TITLE)) {
-            return (string) $this->getPropertySingleValue(DcTerms::TITLE);
-        } else {
-            return null;
-        }
-    }
-
+ 
     public function getDescription()
     {
         if ($this->hasProperty(DcTerms::DESCRIPTION)) {

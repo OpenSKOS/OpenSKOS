@@ -147,7 +147,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function getSet()
     {
-        return $this->getUriProperty(OpenSkos::Set);
+        return $this->getUriProperty(OpenSkos::SET);
     }
 
     public function getTitle()
@@ -540,7 +540,7 @@ class Resource extends Uri implements ResourceIdentifier
     \OpenSkos2\Tenant $tenant, 
         \OpenSkos2\Set $set, 
         \OpenSkos2\Person $person, 
-        PersonManager $personManager, 
+        \OpenSkos2\PersonManager $personManager, 
         $labelManager = null, 
         $existingConcept = null, 
         $forceCreationOfXl = false)
@@ -554,7 +554,7 @@ class Resource extends Uri implements ResourceIdentifier
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
             OpenSkos::TENANT => $tenant->getCode(),
-            DcTerms::DATESUBMITTED => $nowLiteral
+            DcTerms::DATESUBMITTED => $nowLiteral()
         ];
 
         if (!empty($set)) {

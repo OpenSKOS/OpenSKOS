@@ -21,10 +21,8 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Namespaces\DcTerms;
 
 class ConceptScheme extends Resource
@@ -42,49 +40,8 @@ class ConceptScheme extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-    /**
-     * Gets preview title for the concept schema.
-     * @param string $language
-     * @return string
-     * @throws \Exception
-     */
-    public function getTitle($language = null)
-    {
-        if ($this->hasPropertyInLanguage(DcTerms::TITLE, $language)) {
-            return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
-        } else {
-            return $this->getPropertyFlatValue(DcTerms::TITLE);
-        }
-    }
-
-    /**
-     * Get openskos:set if it exists
-     * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string|null
-     */
-    public function getSet()
-    {
-        if ($this->hasProperty(OpenSkos::SET)) {
-            return (string) $this->getPropertySingleValue(OpenSkos::SET);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get tenant
-     *
-     * @return Literal
-     */
-    public function getTenant()
-    {
-        
-        $values = $this->getProperty(OpenSkos::TENANT);
-        if (isset($values[0])) {
-            return $values[0];
-        }
-    }
-
+   
+   
     public function getDescription()
     {
         if ($this->hasProperty(DcTerms::DESCRIPTION)) {

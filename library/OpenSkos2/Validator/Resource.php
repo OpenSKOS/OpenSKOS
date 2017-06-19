@@ -270,7 +270,7 @@ class Resource
             new SchemaCreator($this->referenceCheckOn),
             new SchemaUuid(),
             new SchemaHasTopConcept($this->referenceCheckOn, $this->conceptReferenceCheckOn),
-            new \OpenSkos2\Validator\ConceptScheme\OpenSkosTenant(),
+            new \OpenSkos2\Validator\ConceptScheme\OpenSkosTenant($this->referenceCheckOn),
             new \OpenSkos2\Validator\ConceptScheme\OpenSkosSet()
         ];
         $validators = $this->refineValidators($validators);

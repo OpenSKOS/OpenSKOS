@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Literal;
 
 abstract class AbstractResourceValidator implements ValidatorInterface
 {
@@ -37,6 +36,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $set;
     protected $referenceCheckOn;
     protected $conceptReferenceCheckOn;
+
     /**
      * @var array
      */
@@ -51,14 +51,13 @@ abstract class AbstractResourceValidator implements ValidatorInterface
      * @var array
      */
     protected $danglingReferences = [];
-    
-    
+
     public function setResourceManager($resourceManager)
     {
         if ($resourceManager === null) {
             throw new \Exception(
-                "Passed resource manager is null in this validator. "
-                . "Proper content validation is not possible"
+            "Passed resource manager is null in this validator. "
+            . "Proper content validation is not possible"
             );
         }
         $this->resourceManager = $resourceManager;
@@ -68,8 +67,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         if ($isForUpdate === null) {
             throw new \Exception(
-                "Cannot validate the resource because isForUpdateFlag is set to null"
-                . " (cannot differ between create- and update- validation mode."
+            "Cannot validate the resource because isForUpdateFlag is set to null"
+            . " (cannot differ between create- and update- validation mode."
             );
         }
         $this->isForUpdate = $isForUpdate;
@@ -84,7 +83,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         $this->set = $set;
     }
-    
+
     public function setDeleteDanglingConceptRelatonReferences($flag)
     {
         $this->deleteDanglingConceptRelatonReferences = $flag;
@@ -124,14 +123,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
 
     protected function validateProperty(
-        RdfResource $resource,
-        $propertyUri,
-        $isRequired,
-        $isSingle,
-        $isBoolean,
-        $isUnique,
-        $type = null
-    ) {
+    RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique, $type = null
+    )
+    {
         $val = $resource->getProperty($propertyUri);
         if (count($val) < 1) {
             if ($isRequired) {
@@ -149,100 +143,46 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
         foreach ($val as $value) {
             if ($isBoolean) {
-                $this->errorMessages = array_merge(
-                    $this->errorMessages,
-                    $this->checkBoolean($value, $propertyUri)
-                );
-            }
-            if ($value instanceof Uri) {
-                if ($type != null) {
-                    $this->errorMessages = array_merge(
-                        $this->errorMessages,
-                        $this->existenceCheck($value, $type)
-                    );
-                };
-                if ($isUnique) {
-                    $otherResourceUris = $this->resourceManager->fetchSubjectForUriObject(
-                        $propertyUri,
-                        $value
-                    );
-                    $this->errorMessages = array_merge(
-                        $this->errorMessages,
-                        $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value)
-                    );
+                if (!($val == "true" || $val == "false")) {
+                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false. ';
                 }
             }
-            if (($value instanceof Literal) && $isUnique) {
-                $otherResourceUris = $this->resourceManager->fetchSubjectForLiteralObject(
-                    $propertyUri,
-                    $value
-                );
-                $this->errorMessages = array_merge(
-                    $this->errorMessages,
-                    $this->uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value)
-                );
+
+            if ($isUnique) {
+               if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
+                    $this->errorMessages[] = 'The resource with the property ' . $propertyUri . ' set to ' . $value .
+                        ' has been already registered.';
+                }
+            }
+            if ($value instanceof Uri && $this->referenceCheckOn) {
+                if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
+                    $this->errorMessages[] = "The resource (of type  $type ) referred by  uri ".
+                    "{$resource->getUri()} via the property $propertyUri is not found. ";
+                }
             }
         }
         return (count($this->errorMessages) === 0);
     }
 
-    private function uniquenessCheck($resource, $otherResourceUris, $propertyUri, $value)
+    private function uniquenessCheck($resource, $propertyUri, $value)
     {
-        $errorMessages = ['The resource of type ' . $resource->getType()->getUri() .
-            ' with the property ' . $propertyUri . ' set to ' . $value .
-            ' has been already registered.'];
-            
+         $otherResourceUris = $this->resourceManager->fetchSubjectForObject(
+                    $propertyUri, $value
+                );
         if (count($otherResourceUris) > 0) {
             if ($this->isForUpdate) { // for update
                 if (count($otherResourceUris) > 1) {
-                    return $errorMessages;
+                    return false;
                 } else {
-                    if ($resource->getUri() !== $otherResourceUris[0]) { // the same resource
-                        return $errorMessages;
-                    } else {
-                        return [];
-                    }
+                    return($resource->getUri() === $otherResourceUris[0]);
                 }
             } else { // for create
-                return $errorMessages;
+                return false;
             }
         } else { // no duplications found
-            return [];
+            return true;
         }
     }
-
-    private function checkBoolean($val, $propertyUri)
-    {
-        $testVal = trim($val);
-        if (!($testVal == "true" || $testVal == "false")) {
-            return ['The value of ' . $propertyUri . ' must be set to true or false. '];
-        } else {
-            return [];
-        }
-    }
-
-    // the resource referred by the uri must exist in the triple store,
-    protected function existenceCheck($uri, $rdfType)
-    {
-        if (!$this->referenceCheckOn) {
-            return [];
-        }
-        if ($this->resourceManager !== null) {
-            $exists = $this->resourceManager->askForUri(trim($uri->getUri()), false, $rdfType);
-            if (!$exists) {
-                return ['The resource (of type ' . $rdfType . ') referred by  uri ' .
-                    $uri->getUri() . ' is not found. '];
-            } else {
-                return [];
-            }
-        } else {
-            return [];
-        }
-    }
-
-    // some common for different types of resources properties
-    //validateProperty(RdfResource $resource, $propertyUri, $isRequired, $isSingle,
-    //$isBoolean, $isUnique,  $referencecheckOn, $type)
 
     protected function validateUUID($resource)
     {
@@ -291,14 +231,10 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $this->validateProperty($resource, Rdf::TYPE, true, true, false, false);
     }
 
-  
     protected function validateInScheme($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
-            $resource,
-            Skos::INSCHEME,
-            Skos::CONCEPTSCHEME,
-            true
+            $resource, Skos::INSCHEME, Skos::CONCEPTSCHEME, true
         );
         return $retVal;
     }
@@ -306,29 +242,24 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected function validateInSkosCollection($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
-            $resource,
-            OpenSkos::INSKOSCOLLECTION,
-            Skos::SKOSCOLLECTION,
-            false
+            $resource, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION, false
         );
         return $retVal;
     }
 
-   
-
     private function validateInSchemeOrInCollection($resource, $property, $rdftype, $must)
     {
         $firstRound = $this->validateProperty($resource, $property, $must, false, false, false, $rdftype);
-      return $firstRound;
+        return $firstRound;
     }
-    
-     //validateProperty(RdfResource $resource, $propertyUri, $isRequired,
+
+    //validateProperty(RdfResource $resource, $propertyUri, $isRequired,
     //$isSingle, $isUri, $isBoolean, $isUnique,  $type)
     protected function validateCreator($resource)
     {
         return $this->validateProperty($resource, DcTerms::CREATOR, true, true, false, false, \OpenSkos2\Person::TYPE);
     }
-    
+
     protected function checkTenant($resource)
     {
         $firstRound = $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, \OpenSkos2\Tenant::TYPE);
@@ -339,8 +270,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             $secondRound = false;
             $this->errorMessages[] = 'No tenant code as openskos:tenant is given. ';
         } else {
-            $tripleStoreTenant = $this->resourceManager->fetchSubjectForLiteralObject(OpenSkos::CODE, $tenantCode->getValue());
-            
+            $tripleStoreTenant = $this->resourceManager->fetchSubjectForObject(OpenSkos::CODE, $tenantCode);
+
             if ($tripleStoreTenant[0] !== $tenantUri->getUri()) {
                 $secondRound = false;
                 $this->errorMessages[] = "Specified openskos:tenant code {$tenantCode} with the uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
@@ -348,27 +279,29 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         }
         return $firstRound && $secondRound;
     }
-    
+
     protected function checkSet($resource)
     {
         $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Set::TYPE);
         $secondRound = true;
         if ($firstRound) {
-            
-            $setUri = $resource->getSet->getUri();
+
+            $setUri = $resource->getSet()->getUri();
             $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
-            
+
             $tenantUri = $resource->getTenantUri()->getUri();
             $publisherUri = $set->getTenantUri()->getUri();
             if ($tenantUri !== $publisherUri) {
                 $this->error[] = "The set $setUri declared in the resource has the tenant with the uri $publisherUri which does not coincide with the uri $tenantUri of the tenant declared in the resource";
-                $secondRound=false;
+                $secondRound = false;
             }
             $tenantCode = $resource->getTenant()->getValue();
-            $publisherCode = $set->getTenant()->getValue();
-            if ($tenantCode !== $publisherCode) {
-                $this->error[] = "The set $setUri declared in the resource has the tenant with the code $publisherCode which does not coincide with the code $tenantCode of the tenant declared in the resource";
-                $secondRound=false;
+            if ($set->getTenant() != null) {
+                $publisherCode = $set->getTenant()->getValue();
+                if ($tenantCode !== $publisherCode) {
+                    $this->error[] = "The set $setUri declared in the resource has the tenant with the code $publisherCode which does not coincide with the code $tenantCode of the tenant declared in the resource";
+                    $secondRound = false;
+                }
             }
         }
         return $firstRound && $secondRound;

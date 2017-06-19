@@ -94,6 +94,6 @@ class Set extends Resource
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri($tenant, $set, $uuid, $notation, $init)
     {
-        return $tenant->getUri() . "" . $uuid;
+        return $tenant->getUri() . "/" . $uuid;
     }
 }
