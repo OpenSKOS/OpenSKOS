@@ -20,12 +20,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-
+use DI\Container;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\VCard;
-use OpenSkos2\Tenant;
 use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 
 require 'autoload.inc.php';
@@ -76,7 +76,7 @@ if (null === $OPTS->apikey) {
 
 require dirname(__FILE__) . '/bootstrap.inc.php';
 
-/* @var $diContainer DI\Container */
+/* @var $diContainer Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
 /**
@@ -114,15 +114,15 @@ function setID(&$resource, $uri, $uuid, $resourceManager){
 
 function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager) {
 
-    $resources = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::CODE, '"'.$code.'"', Org::FORMALORG);
+    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, new Literal($code), Tenant::TYPE);
     if (count($resources) > 0) {
         fwrite(STDERR, 'A tenant  with the code ' . $code . " has been already registered in the triple store. \n ");
         exit(1);
     }
     
-    $insts = $resourceManager->fetchSubjectWithPropertyGiven(VCard::ORGNAME, '"' . $name . '"');
+    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, new Literal($name));
     if (count($insts) > 0) {
-        fwrite(STDERR, "A institution with the name " . $name . " has been already registered in the triple store. \n");
+        fwrite(STDERR, "An institution with the name " . $name . " has been already registered in the triple store. \n");
         exit(1);
     }
 
@@ -140,15 +140,15 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     }
        
 
-    $tenantResource->setProperty(OpenSkos::CODE, new \OpenSkos2\Rdf\Literal($code));
-    $organisation = new \OpenSkos2\Rdf\Resource('http://node-org-'. Uuid::uuid4());
+    $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
+    $organisation = new Resource('http://node-org-'. Uuid::uuid4());
     $resourceManager->setLiteralWithEmptinessCheck($organisation, VCard::ORGNAME, $name);
     //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
     $tenantResource->setProperty(VCard::ORG, $organisation);
     //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
     //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
 
-    $adress = new \OpenSkos2\Rdf\Resource('http://node-adr-'.Uuid::uuid4());
+    $adress = new Resource('http://node-adr-'.Uuid::uuid4());
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
