@@ -269,7 +269,7 @@ class Concept extends Resource
      * Requires a URI from to an openskos set
      * @return string
      */
-    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, $conceptManager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, $set, $conceptManager)
     {
         $init = $conceptManager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {

@@ -27,6 +27,8 @@ use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
+use OpenSkos2\Namespaces\Owl;
+use OpenSkos2\Namespaces\Skos;
 use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -702,6 +704,105 @@ class ResourceManager
             $query .= $subject . ' ?predicate ?object' . PHP_EOL;
         }
         return $query;
+    }
+    
+    
+    // RELATIONS 
+    public function getCustomRelationTypes()
+    {
+        if ($this->init["custom.default_relationtypes"]) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getRelationTypes();
+        }
+    }
+    public function getCustomInverses()
+    {
+        if ($this->init["custom.default_relationtypes"]) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getInverses();
+        }
+    }
+    public function getCustomTransitives()
+    {
+        if ($this->init["default_relationtypes"]) {
+            return [];
+        } else {
+            return $this->customRelationTypes->getTransitives();
+        }
+    }
+    public function setCustomRelationTypes($relationtypes)
+    {
+        if ($this->init["custom.default_relationtypes"]) {
+            return;
+        } else {
+            $this->customRelationTypes->setRelationTypes($relationtypes);
+        }
+    }
+    public function setCustomInverses($inverses)
+    {
+        if ($this->init["custom.default_relationtypes"]) {
+            return;
+        } else {
+            $this->customRelationTypes->setInverses($inverses);
+        }
+    }
+    public function setCustomTransitives($transitives)
+    {
+        if ($this->init["custom.default_relationtypes"]) {
+            return;
+        } else {
+            $this->customRelationTypes->setTransitives($transitives);
+        }
+    }
+    
+    public function getTripleStoreRegisteredCustomRelationTypes()
+    {
+        $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <' . Owl::OBJECT_PROPERTY . '> . }';
+        $resource = $this->query($sparqlQuery);
+        $result = [];
+        foreach ($resource as $value) {
+            $result[] = $value->rel->getUri();
+        }
+        return $result;
+    }
+
+    public function fetchConceptConceptRelationsNameUri()
+    {
+        $uris = Skos::getSkosConceptConceptRelations();
+        $skosrels = [];
+        foreach ($uris as $uri) {
+            $border = strrpos($uri, "#");
+            $name = 'skos:' . substr($uri, $border + 1);
+            $skosrels[$name] = $uri;
+        }
+        $userrels = $this->getCustomRelationTypes();
+        $result = array_merge($skosrels, $userrels);
+        return $result;
+    }
+    
+    // MYSQL
+    
+    public function fetchRowWithRetries($model, $query)
+    {
+        $tries = 0;
+        $maxTries = 3;
+        do {
+            try {
+                return $model->fetchRow($query);
+            } catch (\Exception $exception) {
+                echo 'retry mysql connect' . PHP_EOL;
+                // Reconnect
+                $model->getAdapter()->closeConnection();
+                $modelClass = get_class($model);
+                $model = new $modelClass();
+                $tries ++;
+            }
+        } while ($tries < $maxTries);
+        if ($exception) {
+            throw $exception;
+        }
     }
 
 }

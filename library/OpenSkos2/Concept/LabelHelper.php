@@ -174,7 +174,7 @@ class LabelHelper
                     continue; // It is just an uri - nothing to do with it.
                 }
                 
-                $label->ensureMetadata($concept->getInstitution()['code']);
+                $label->ensureMetadata($concept->getTenant());
                 
                 // Fetch, insert or replace label
                 if ($labelExists) {

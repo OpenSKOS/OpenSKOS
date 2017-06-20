@@ -140,7 +140,7 @@ class ResourceManager
         } while ($exception !== null && $tries < $maxTries);
 
         if ($exception !== null) {
-            throw $exception;
+            throw new \Exception($exception->getBody());
         }
     }
 

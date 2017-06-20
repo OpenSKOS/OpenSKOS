@@ -72,18 +72,8 @@ class ResourceManagerWithSearch extends ResourceManager
     public function insert(Resource $resource)
     {
         parent::insert($resource);
+        $this->solrResourceManager->insert($resource);
 
-        if ($resource->getType()->getUri() === Concept::TYPE) {
-            $specs = $this->fetchConceptSpec($resource);
-            if (count($specs) < 1) {
-                throw new \Exception("Cannot fetch spec for the concept {$resource->getUri()}");
-            }
-            foreach ($specs as $spec) {
-                $resource->setProperty(OpenSkosNamespace::TENANT, new Uri($spec['tenanturi']));
-                $resource->setProperty(OpenSkosNameSpace::SET, new Uri($spec['seturi']));
-            }
-            $this->solrResourceManager->insert($resource);
-        }
     }
 
     /**

@@ -21,9 +21,7 @@
         
         <!-- Added by Meertens  -->
         <field name="set" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-        <field name="creator" type="string" indexed="true" stored="true" required="true" multiValued="false" />
         <field name="dateSubmitted" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
-        <field name="contributor" type="string" indexed="true" stored="true" required="false" multiValued="true"/>
         <field name="modified" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
         <field name="acceptedBy" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
         <field name="dateAccepted" type="string" indexed="true" stored="true" required="false" multiValued="false"/>

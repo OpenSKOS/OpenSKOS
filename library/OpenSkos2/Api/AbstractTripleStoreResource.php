@@ -217,13 +217,17 @@ abstract class AbstractTripleStoreResource
 
             $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
 
+            if ($resource instanceof \OpenSkos2\Concept) {
+                $this->checkConceptXl($resource, $tenant);
+            }
+
+
             $resource->ensureMetadata(
                 $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager(), $existingResource);
 
             $this->validate($resource, $tenant, $set, true);
 
             $this->manager->replaceAndCleanRelations($resource);
-            
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
@@ -282,15 +286,17 @@ abstract class AbstractTripleStoreResource
      */
     protected function loadResourceToRdf($resource)
     {
+        
         $loadedResource = $this->manager->fetchByUri($resource->getUri());
-  
+
+        
         $tenant = $this->manager->fetchByUri($loadedResource->getTenantUri(), \OpenSkos2\Tenant::TYPE);
 
         if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
             $loadedResource->loadFullXlLabels($this->manager->getLabelManager());
         }
-              
-        return (new Transform\DataRdf($loadedResource))->transform();
+
+        return (new Transform\DataRdf( $loadedResource))->transform();
     }
 
     /**
@@ -365,7 +371,7 @@ abstract class AbstractTripleStoreResource
         $tenant = $this->getTenantFromParams($params);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
-        
+
         if (!$resource->isBlankNode() && $this->manager->askForUri((string) $resource->getUri())) {
             throw new InvalidArgumentException(
             'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
@@ -379,13 +385,13 @@ abstract class AbstractTripleStoreResource
         if ($resource instanceof \OpenSkos2\Concept) {
             $this->checkConceptXl($resource, $tenant);
         }
-        
+
         $resource->ensureMetadata(
             $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager()
         );
-        
+
         $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
-        
+
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
 
         if ($autoGenerateUri) {
@@ -394,11 +400,11 @@ abstract class AbstractTripleStoreResource
             );
         }
 
-        
+
         $this->validate($resource, $tenant, $set, false);
 
         $this->manager->insert($resource);
-        
+
         return $this->getSuccessResponse($this->loadResourceToRdf($resource), 201);
     }
 
@@ -451,7 +457,7 @@ abstract class AbstractTripleStoreResource
         $rdfType = $this->manager->getResourceType();
 
         $resources = (new Text($doc->saveXML()))->getResources($rdfType, \OpenSkos2\Concept::$classes['SkosXlLabels']);
-               
+
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
             "Expected exactly one resource of type $rdfType, got {$resources->count()}, check if you set rdf:type in the request body, " . $resources->count(), 412
@@ -479,7 +485,7 @@ abstract class AbstractTripleStoreResource
             if (!$resource->getTenant()) {
                 throw new InvalidArgumentException('No tenant specified', 400);
             }
-            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code'); 
+            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
             $resource->setProperty(Namespaces\DcTerms::PUBLISHER, new \OpenSkos2\Rdf\Uri($rdfTenant->getUri())); // within the triple store resources are referred via URI's not literals, we keep literals for API backward compatibility and convenience
         }
 
@@ -496,7 +502,7 @@ abstract class AbstractTripleStoreResource
     private function getDomDocumentFromRequest(ServerRequestInterface $request)
     {
         $xml = $request->getBody();
-        
+
         if (!$xml) {
             throw new InvalidArgumentException('No RDF-XML recieved', 400);
         }
@@ -511,7 +517,7 @@ abstract class AbstractTripleStoreResource
             . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 400
             );
         }
-        
+
         return $doc;
     }
 

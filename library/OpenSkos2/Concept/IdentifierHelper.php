@@ -25,6 +25,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\Tenant;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Rdf\Literal;
+use Rhumsaa\Uuid\Uuid;
 
 class IdentifierHelper
 {

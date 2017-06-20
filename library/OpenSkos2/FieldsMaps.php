@@ -112,7 +112,7 @@ class FieldsMaps
             'vcard_pcode' => VCard::PCODE,
             'vcard_street' => VCard::STREET,
             'vcard_url' => VCard::URL,
-            'rdf_type' => Rdf::TYPE,
+            //'rdf_type' => Rdf::TYPE,
         ];
     }
     
