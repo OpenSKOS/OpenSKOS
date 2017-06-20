@@ -139,7 +139,8 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
 
 
     $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
-    $organisation = new Resource(null);
+    $blank1 = "_:genid_".Uuid::uuid4();
+    $organisation = new Resource($blank1);
     if (isset($name)) {
         $organisation->setProperty(VCard::ORGNAME, new Literal($name));
     }
@@ -148,7 +149,8 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
     //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
 
-    $adress = new Resource();
+    $blank2 = "_:genid_".Uuid::uuid4();
+    $adress = new Resource($blank2);
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
     //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
