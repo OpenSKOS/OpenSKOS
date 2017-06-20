@@ -401,7 +401,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isBlankNode()
     {
-        return empty($this->uri) || preg_match('/^_:/', $this->uri);
+        return empty($this->uri) || preg_match('/^_:/', $this->uri) || strpos('node-', $this->uri);
     }
 
     /**

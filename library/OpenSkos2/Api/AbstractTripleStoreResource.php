@@ -218,7 +218,7 @@ abstract class AbstractTripleStoreResource
             $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
 
             $resource->ensureMetadata(
-                $tenant, $set, $user->getFoafPerson(), $this->personManager, null, $existingResource);
+                $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager(), $existingResource);
 
             $this->validate($resource, $tenant, $set, true);
 
@@ -380,12 +380,12 @@ abstract class AbstractTripleStoreResource
             $this->checkConceptXl($resource, $tenant);
         }
         
-        $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
-
         $resource->ensureMetadata(
-            $tenant, $set, $user->getFoafPerson(), $this->personManager
+            $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager()
         );
-
+        
+        $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+        
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
 
         if ($autoGenerateUri) {
@@ -479,7 +479,7 @@ abstract class AbstractTripleStoreResource
             if (!$resource->getTenant()) {
                 throw new InvalidArgumentException('No tenant specified', 400);
             }
-            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');  
+            $rdfTenant = $this->manager->fetchByUuid($resource->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code'); 
             $resource->setProperty(Namespaces\DcTerms::PUBLISHER, new \OpenSkos2\Rdf\Uri($rdfTenant->getUri())); // within the triple store resources are referred via URI's not literals, we keep literals for API backward compatibility and convenience
         }
 

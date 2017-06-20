@@ -53,15 +53,17 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
-        /* @var $tenant OpenSKOS_Db_Table_Row_Tenant */
-        $tenant = $concept->getInstitution();
+        
+        /* @var $tenant \OpenSkos2\Tenant */
+        $tenant = $this->labelManager->fetchByUuid($concept->getTenant()->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            
         if (empty($tenant)) {
             throw new TenantNotFoundException(
                 'Could not determite tenant for concept.'
             );
         }
         
-        $useXlLabels = (bool)$tenant['enableSkosXl'];
+        $useXlLabels = $tenant->getEnableSkosXl();
         
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
             $fullXlLabels = [];

@@ -346,29 +346,13 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 $retval = ($setUri === ($sets[0]->getUri()) );
                 break;
             case Concept::TYPE:
-                $setUriRef = $this->checkUniqueSet($resource);
-                $retval = ($setUri === $setUriRef);
+                $sets = $resource->getProperty(OpenSkos::SET);
+                $retval = ($setUri === ($sets[0]->getUri()));
                 break;
             default:
                 $retval = true;
                 break;
         }
         return $retval;
-    }
-
-    private function checkUniqueSet($concept)
-    {
-        $spec = $this->resourceManager->fetchTenantSpecForConceptToAdd($concept);
-        $setUri = $spec[0]['seturi'];
-        for ($i = 1; $i < count($spec); $i++) {
-            if ($setUri !== $spec[$i]['seturi']) {
-                throw new \Exception(
-                    'The concept under submission via its schemes and skos:collections belongs '
-                    . 'to at least two sets,  ' . $setUri . ', ' . $spec[$i]['seturi'].
-                    ". The concept cannot be submitted. "
-                );
-            }
-        }
-        return $setUri;
     }
 }

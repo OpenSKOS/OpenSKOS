@@ -201,7 +201,7 @@ class Concept extends Resource
             OpenSkos::TENANT => $tenant->getCode(),
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
-            DcTerms::DATESUBMITTED => $nowLiteral
+            DcTerms::DATESUBMITTED => $nowLiteral()
         ];
 
         if (!empty($set)) {

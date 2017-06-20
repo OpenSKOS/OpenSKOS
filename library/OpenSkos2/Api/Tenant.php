@@ -52,7 +52,7 @@ class Tenant extends AbstractTripleStoreResource
 
     protected function getTenantFromParams($params)
     {
-        return new \OpenSkos2\Tenant('dummy-tenant');
+        return new \OpenSkos2\Tenant('http://dummy-tenant');
     }
 
     protected function getSet($params, $tenant)

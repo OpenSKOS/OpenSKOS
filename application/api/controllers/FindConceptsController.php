@@ -17,7 +17,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Api_FindConceptsController extends OpenSKOS_Rest_Controller
+require_once 'AbstractController.php';
+
+class Api_FindConceptsController extends AbstractController
 {
 
     protected $isFindConcept;

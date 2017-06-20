@@ -143,20 +143,20 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
         foreach ($val as $value) {
             if ($isBoolean) {
-                if (!($val == "true" || $val == "false")) {
-                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false. ';
+                if (!($value == "true" || $value == "false")) {
+                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false but it is set to '. $value;
                 }
             }
 
             if ($isUnique) {
                if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
-                    $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered.";
+                    $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
-            if ($value instanceof Uri && $this->referenceCheckOn) {
+            if ($value instanceof Uri && $this->referenceCheckOn && $propertyUri!==Rdf::TYPE) {
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
-                    $this->errorMessages[] = "The resource (of type  $type ) referred by  uri ".
-                    "{$resource->getUri()} via the property $propertyUri is not found. ";
+                    $this->errorMessages[] = "The resource (of type  $type) referred by  uri ".
+                    "{$value->getUri()} via the property $propertyUri is not found. ";
                 }
             }
         }

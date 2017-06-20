@@ -63,6 +63,12 @@ class ResourceManager
     {
         return $this->init;
     }
+    
+    // overriden in ConceptManager
+     public function getLabelManager()
+    {
+        return null;
+    }
 
     /**
 
@@ -216,7 +222,7 @@ class ResourceManager
         
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-            "The requested resource with $property set to $id of type $type was not found. $query"
+            "The requested resource with $property set to $id of type $type was not found, triple store query: $query"
             );
         }
         if (count($data) > 1) {
