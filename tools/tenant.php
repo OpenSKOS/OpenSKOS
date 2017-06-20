@@ -92,7 +92,7 @@ function setID(&$resource, $uri, $uuid, $resourceManager){
             exit(1);
         }
         if ($uuid !== null && $uuid !== "") {
-            $insts = $resourceManager->fetchSubjectWithPropertyGiven(OpenSkos::UUID, '"' . $uuid . '"');
+            $insts = $resourceManager->fetchSubjectForObject(OpenSkos::UUID, new Literal($uuid), Tenant::TYPE);
             if (count($insts) > 0) {
                 fwrite(STDERR, "A institution with the uuid " . $uuid . " has been already registered in the triple store. \n");
                 exit(1);
