@@ -120,7 +120,7 @@ class Document
         $properties = $this->resource->getProperties();
 
         // Index bare SKOS and OpenSKOs fields via their standart map to SKOS and OpenSKOS predicates
-        $predicateToField = array_flip(FieldsMaps::getNamesToProperties());
+        $predicateToField = array_flip(FieldsMaps::getSolrNamesToProperties());
 
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();

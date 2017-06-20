@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\VCard;
-use OpenSkos2\Namespaces\Rdf;
 
 class FieldsMaps
 {
@@ -112,7 +111,51 @@ class FieldsMaps
             'vcard_pcode' => VCard::PCODE,
             'vcard_street' => VCard::STREET,
             'vcard_url' => VCard::URL,
-            //'rdf_type' => Rdf::TYPE,
+            'rdf_type' => Rdf::TYPE,
+        ];
+    }
+    
+    public static function getSolrNamesToProperties()
+    {
+        return [
+            'status' => OpenSkos::STATUS,
+            'tenant' => OpenSkos::TENANT,
+            'collection' => OpenSkos::SET,
+            'uuid' => OpenSkos::UUID,
+            'notation' => Skos::NOTATION,
+            'inScheme' => Skos::INSCHEME,
+            'prefLabel' => Skos::PREFLABEL,
+            'altLabel' => Skos::ALTLABEL,
+            'hiddenLabel' => Skos::HIDDENLABEL,
+            'changeNote' => Skos::CHANGENOTE,
+            'definition' => Skos::DEFINITION,
+            'editorialNote' => Skos::EDITORIALNOTE,
+            'example' => Skos::EXAMPLE,
+            'historyNote' => Skos::HISTORYNOTE,
+            'note' => Skos::NOTE,
+            'scopeNote' => Skos::SCOPENOTE,
+            'broader' => Skos::BROADER,
+            'broaderTransitive' => Skos::BROADERTRANSITIVE,
+            'narrower' => Skos::NARROWER,
+            'narrowerTransitive' => Skos::NARROWERTRANSITIVE,
+            'related' => Skos::RELATED,
+            'broadMatch' => Skos::BROADMATCH,
+            'closeMatch' => Skos::CLOSEMATCH,
+            'exactMatch' => Skos::EXACTMATCH,
+            'mappingRelation' => Skos::MAPPINGRELATION,
+            'narrowMatch' => Skos::NARROWMATCH,
+            'relatedMatch' => Skos::RELATEDMATCH,
+            'topConceptOf' => Skos::TOPCONCEPTOF,
+            'created_timestamp' => DcTerms::CREATED,
+            'modified_timestamp' => DcTerms::MODIFIED,
+            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
+            'dcterms_modified' => DcTerms::MODIFIED,
+            'dcterms_creator' => DcTerms::CREATOR,
+            'dc_creator' => Dc::CREATOR,
+            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
+            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+            'dc_contributor' => Dc::CONTRIBUTOR,
+            'dcterms_title' => DcTerms::TITLE,
         ];
     }
     
