@@ -83,7 +83,6 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
-$resourceManager->setIsNoCommitMode(true);
 
 function setID(&$resource, $uri, $uuid, $resourceManager){
     if ($uri !== null && $uri !== "") {
