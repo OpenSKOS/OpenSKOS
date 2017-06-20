@@ -52,7 +52,7 @@ foreach ($must_params as $name) {
 
 check_if_admin($OPTS->tenant, $OPTS->key, $resourceManager, $model);
 
-fwrite(STDOUT, "\n\n\n Strating script ... \n ");
+fwrite(STDOUT, "\n\n\n Starting script set ... \n ");
 switch ($action) {
   case 'create':
 

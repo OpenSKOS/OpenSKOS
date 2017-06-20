@@ -166,7 +166,7 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     return $tenantResource;
 }
 
-fwrite(STDOUT, "\n\n\n Strating script ... \n ");
+fwrite(STDOUT, "\n\n\n Starting script tenant... \n ");
 switch ($action) {
     case 'create':
 

@@ -9,7 +9,7 @@ require 'Zend/Console/Getopt.php';
 require_once 'utils_functions.php';
 
 
-fwrite(STDOUT, "\n\n\n Strating script ... \n ");
+fwrite(STDOUT, "\n\n\n Starting script concept.php ... \n ");
 
 $opts = [
   'key=s' => 'user key',

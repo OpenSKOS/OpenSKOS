@@ -7,7 +7,7 @@ require 'Zend/Console/Getopt.php';
 require_once 'utils_functions.php';
 
 
-fwrite(STDOUT, "\n\n\n Strating script ... \n ");
+fwrite(STDOUT, "\n\n\n Starting script consceptscheme or skoscollection... \n ");
 
 
 $opts = array(
