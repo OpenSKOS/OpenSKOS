@@ -159,10 +159,9 @@ class Concept extends AbstractTripleStoreResource
             $setCodes = explode(' ', trim($params[$setName]));
             foreach ($setCodes as $setcode) {
                 $set = $this->manager->fetchByCode($setcode, Set::TYPE);
-                $options['sets'][] = $set->getCode();
+                $options['sets'][] = $set->getUri();
             }
         }
-
 
         // concept scheme 
         if (isset($params['scheme'])) {
@@ -215,21 +214,23 @@ class Concept extends AbstractTripleStoreResource
             $propertiesList = [];
         }
 
+
         if (isset($tenant)) {
 
             $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
             if ($this->useXlLabels($tenant, $request) === true) {
                 foreach ($concepts as $concept) {
-                    $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+                    $concept->loadFullXlLabels($this->manager->getLabelManager());
                 }
-            }
-        } else {
+       
+        } 
+        }else {
              // for get requests tenant is not an obligatory parameter and may be empty
             // place here what you consider must be a default behaviour
             $excludePropertiesList = [];
         }
-
+            
         switch ($context) {
             case 'json':
                 $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
@@ -259,9 +260,10 @@ class Concept extends AbstractTripleStoreResource
      */
     public function getResourceResponse(ServerRequestInterface $request, $id, $context)
     {
+        
         $concept = $this->getResource($id);
 
-        $tenant = $this->getInstitution();
+        $tenant = $this->getTenant();
 
         $params = $request->getQueryParams();
 
@@ -273,8 +275,9 @@ class Concept extends AbstractTripleStoreResource
 
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
+
         if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
-            $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+              $concept->loadFullXlLabels($this->manager->getLabelManager());
         }
 
         switch ($context) {
@@ -325,12 +328,14 @@ class Concept extends AbstractTripleStoreResource
         $concept = parent::getResource($id);
 
         if ($concept->isDeleted()) {
-            throw new NotFoundException('Concept ' . $id . ' is deleted', 410);
+            throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
 
         return $concept;
     }
 
+
+  
     /**
      * Check if the requested label format conforms to the tenant configuration
      * @return boolean Returns TRUE only if XL labels are enabled and requested
@@ -365,6 +370,7 @@ class Concept extends AbstractTripleStoreResource
         }
     }
 
+    
     /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
@@ -425,7 +431,6 @@ class Concept extends AbstractTripleStoreResource
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $this->getParams($request);
-
         $tenant = $this->getTenantFromParams($params);
 
         $user = $this->getUserFromParams($params)->getFoafPerson();
