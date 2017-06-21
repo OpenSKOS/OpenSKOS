@@ -181,12 +181,12 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
   
   $tenant_code = $set->getTenant();
   $tenantUri=$resourceManager->fetchSubjectForObject(OpenSkos::CODE,$tenant_code, \OpenSkos2\Tenant::TYPE);
-  if ($tenantUri == null) {
+  if (count($tenantUri)) {
     fwrite(STDERR, "The tenant with the code $tenant_code has not been found in the triple store.\n");
     exit(1);
   }
   set_property_with_check($resource, OpenSkos::TENANT, $tenant_code->getValue());
-  set_property_with_check($resource, DcTerms::PUBLISHER, $tenantUri, true);
+  set_property_with_check($resource, DcTerms::PUBLISHER, $tenantUri[0], true);
   
   set_property_with_check($resource, DcTerms::TITLE, $title, false, false);
   if ($description !== NULL) {
