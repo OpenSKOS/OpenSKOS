@@ -27,7 +27,6 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use Rhumsaa\Uuid\Uuid;
-use OpenSkos2\PersonManager;
 
 /**
  * Representation of tenant.
@@ -97,7 +96,13 @@ class Tenant extends Resource
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-    \OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, \OpenSkos2\Person $person, PersonManager $personManager, $labelManager = null, $existingConcept = null, $forceCreationOfXl = false)
+    \OpenSkos2\Tenant $tenant, 
+        \OpenSkos2\Set $set = null, 
+        \OpenSkos2\Person $person = null, 
+        \OpenSkos2\PersonManager $personManager = null, 
+ \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
+        $existingConcept = null, 
+        $forceCreationOfXl = false)
     {
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);

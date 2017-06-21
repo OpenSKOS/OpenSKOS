@@ -107,7 +107,8 @@ class LabelHelper
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
-                        $label->ensureMetadata($concept->getTenant());
+                        $tenant = $this->labelManager->fetchByUuid($concept->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                        $label->ensureMetadata($tenant);
 
                         $concept->addProperty($xlLabelProperty, $label);
 
@@ -174,7 +175,8 @@ class LabelHelper
                     continue; // It is just an uri - nothing to do with it.
                 }
                 
-                $label->ensureMetadata($concept->getTenant());
+                $tenant = $this->labelManager->fetchByUuid($concept->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                $label->ensureMetadata($tenant);
                 
                 // Fetch, insert or replace label
                 if ($labelExists) {
@@ -210,7 +212,7 @@ class LabelHelper
         
         $label = new Label(Label::generateUri());
         $label->addProperty(SkosXl::LITERALFORM, $rdfLiteral);
-        $label->ensureMetadata($tenant->getCode());
+        $label->ensureMetadata($tenant);
         
         $this->labelManager->insert($label);
         

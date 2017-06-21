@@ -532,16 +532,16 @@ class Resource extends Uri implements ResourceIdentifier
      * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
-     * @param \OpenSkos2\LabelManager | null  $labelManager
+     * @param \OpenSkos2\SkosXl\LabelManager | null  $labelManager
      * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
     \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set, 
-        \OpenSkos2\Person $person, 
-        \OpenSkos2\PersonManager $personManager, 
-        $labelManager = null, 
+        \OpenSkos2\Set $set = null, 
+        \OpenSkos2\Person $person = null, 
+        \OpenSkos2\PersonManager $personManager = null, 
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
         $existingConcept = null, 
         $forceCreationOfXl = false)
     {
@@ -716,7 +716,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-    public function selfGenerateUri($tenant, $set, $manager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
         $init = $manager->getInitArray();
         if (!$init["custom.default_urigenerate"]) {
@@ -750,7 +750,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($tenant, $set, $uuid, $notation, $init)
+    protected function assembleUri(\OpenSkos2\Set $set, \OpenSkos2\Set $set, $uuid, $notation, $init)
     {
         return $set->getUri() . "/" . $uuid;
     }

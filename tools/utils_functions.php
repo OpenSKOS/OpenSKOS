@@ -98,17 +98,17 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
 
 
 function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page) {
-  $count_sets = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
+  $count_sets = $resourceManager->countRdfTriples($uri, Rdf::TYPE, new Uri(Set::TYPE));
   if ($count_sets > 0) {
     fwrite(STDERR, 'The set with uri ' . $uri . "' already exists in the triple store.\n");
     exit(1);
   }
-  $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", Dcmi::DATASET));
+  $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, new Literal($uuid), new Uri(Set::TYPE)));
   if ($count_sets > 0) {
     fwrite(STDERR, 'The set with uuid ' . $uuid . "' already exists in the triple store.\n");
     exit(1);
   }
-  $count_sets = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::CODE, "'".$code."'", Dcmi::DATASET));
+  $count_sets = count($resourceManager->fetchSubjectFoObject(OpenSKOS::CODE, new Literal($code), new Uri(Set::TYPE)));
   if ($count_sets > 0) {
     fwrite(STDERR, 'The set with code ' . $code . "' already exists in the triple store.\n");
     exit(1);
@@ -141,17 +141,17 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
 }
 
 function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri, $uuid, $title, $description, $rdftype) {
-  $count = $resourceManager->countTriples("<".$uri.">", "<".Rdf::TYPE.">", "<".$rdftype.">");
+  $count = $resourceManager->countRdfTriples($uri, Rdf::TYPE, new Uri($rdftype));
   if ($count > 0) {
     fwrite(STDERR, "The resource of type $rdftype with the uri   $uri   already exists in the triple store.\n");
     exit(1);
   }
-  $count = count($resourceManager->fetchSubjectWithPropertyGiven(OpenSKOS::UUID, "'".$uuid."'", $rdftype));
+  $count = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, new Literal($uuid), $rdftype));
   if ($count > 0) {
     fwrite(STDERR, "The resource of type $rdftype with the uuid   $uuid   already exists in the triple store.\n");
     exit(1);
   }
-  $count = count($resourceManager->fetchSubjectWithPropertyGiven(DcTerms::TITLE, "'".$title."'", $rdftype));
+  $count = count($resourceManager->fetchSubjectForObject(DcTerms::TITLE,new Literal($title), $rdftype));
   if ($count > 0) {
     fwrite(STDERR, "The resource of type $rdftype with the title   $title   already exists in the triple store.\n");
     exit(1);
@@ -170,7 +170,7 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
 }
   $resource->setUri($uri);
   set_property_with_check($resource, OpenSkos::UUID, $uuid);
-  $count_set = $resourceManager->countTriples("<".$setUri.">", "<".Rdf::TYPE.">", "<".Dcmi::DATASET.">");
+  $count_set = $resourceManager->countRdfTriples($setUri, Rdf::TYPE, new Uri(Set::TYPE));
   if ($count_set <1) {
     fwrite(STDERR, "The set with the uri $setUri has not been found in the triple store.\n");
     exit(1);

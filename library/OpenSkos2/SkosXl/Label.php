@@ -74,13 +74,19 @@ class Label extends Resource
      * Ensure all mandatory properties are set before label is written in DB
      * @param string $tenantCode
      */
-    public function ensureMetadata($tenantCode)
+    public function ensureMetadata( \OpenSkos2\Tenant $tenant, 
+        \OpenSkos2\Set $set = null, 
+        \OpenSkos2\Person $person = null, 
+        \OpenSkos2\PersonManager $personManager = null, 
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
+        $existingConcept = null, 
+        $forceCreationOfXl = false)
     {
         $currentTenant = $this->getTenant();
         
         //Ensure tenant is set
-        if (empty($currentTenant) && !empty($tenantCode)) {
-            $this->setProperty(OpenSkos::TENANT, new Literal($tenantCode));
+        if (empty($currentTenant) && !empty($tenant->getCode()->getValue())) {
+            $this->setProperty(OpenSkos::TENANT, $tenant->getCode());
         }
         
         //Ensure date modified is updated

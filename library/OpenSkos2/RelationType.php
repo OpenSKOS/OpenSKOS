@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\PersonManager;
 
 class RelationType extends Resource
 {
@@ -51,10 +50,10 @@ class RelationType extends Resource
      */
      public function ensureMetadata(
         \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set, 
-        \OpenSkos2\Person $person,
-        PersonManager $personManager, 
-        $labelManager = null, 
+        \OpenSkos2\Set $set = null, 
+        \OpenSkos2\Person $person = null ,
+        \OpenSkos2\PersonManager $personManager = null, 
+        \OpenSkos2\SkosXl $labelManager = null, 
         $existingConcept = null, 
         $forceCreationOfXl = false)
     {

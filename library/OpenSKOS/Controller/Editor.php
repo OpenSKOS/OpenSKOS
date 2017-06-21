@@ -275,9 +275,14 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
             $tenant = $this->getCurrentUser()->tenant;
         }
         
+        //Tenant it must be in the triple store
+        // you will probably need a  resoureManaget there with resoureManager->fetchbyUuid($tenant, Tenant::TYPE, 'openskos:code')
+        
         if ($tenant !== null) {
             $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
         }
+        
+        
         
         return $openSkos2Tenant;
     }

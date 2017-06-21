@@ -453,6 +453,14 @@ class ResourceManager
         return $result[0]->count->getValue();
     }
 
+    public function countRdfTriples($uri, $property, $object){
+        $objString = $this->valueToTurtle($object);
+        $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
+        $query .= "WHERE { <$uri> <$property>  $objString.}"; 
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        return $result[0]->count->getValue();
+    }
   
     public function fetchSubjectForObject($property, $object, $type=null){
         $objString = $this->valueToTurtle($object);

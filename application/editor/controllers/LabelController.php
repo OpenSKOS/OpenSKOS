@@ -86,7 +86,7 @@ class Editor_LabelController extends OpenSKOS_Controller_Editor
             )
         );
         
-        $label->ensureMetadata($tenant->getCode());
+        $label->ensureMetadata($tenant);
         
         $this->getLabelManager()->replace($label);
         

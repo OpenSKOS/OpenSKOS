@@ -21,14 +21,15 @@ namespace OpenSkos2\OaiPmh;
 
 use DateTime;
 use OpenSkos2\Concept;
+use OpenSkos2\Set;
+use OpenSkos2\Tenant;
+use OpenSkos2\ConceptScheme;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Namespaces;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\OaiPmh\Concept as OaiConcept;
 use OpenSkos2\Search\Autocomplete;
@@ -440,10 +441,10 @@ class Repository implements InterfaceRepository
 
         $tenantURI = null;
         if (!empty($arrSet[0])) {
-            $tenants = $this->setManager->fetchSubjectWithPropertyGiven(
+            $tenants = $this->setManager->fetchSubjectForObject(
                 OpenSkos::CODE,
-                '"' . $arrSet[0] . '"',
-                Org::FORMALORG
+                new Literal($arrSet[0]),
+                Tenant::TYPE
             );
             if (count($tenants) > 0) {
                 $tenantURI = $tenants[0];
@@ -456,10 +457,10 @@ class Repository implements InterfaceRepository
 
         $setURI = null;
         if (!empty($arrSet[1])) {
-            $sets = $this->setManager->fetchSubjectWithPropertyGiven(
+            $sets = $this->setManager->fetchSubjectForObject(
                 OpenSkos::CODE,
-                '"' . $arrSet[1] . '"',
-                $this->setManager->getResourceType()
+                new Literal($arrSet[1]),
+                Set::TYPE
             );
             if (count($sets) > 0) {
                 $setURI = $sets[0];
@@ -472,10 +473,11 @@ class Repository implements InterfaceRepository
         $conceptSchemeURI = null;
 
         if (!empty($arrSet[2])) {
-            $conceptSchemes = $this->setManager->fetchSubjectWithPropertyGiven(
+            $conceptSchemes = $this->setManager->
+                fetchSubjectForObject(
                 OpenSkos::UUID,
-                '"' . $arrSet[2] . '"',
-                Skos::CONCEPTSCHEME
+                new Literal($arrSet[2]),
+                ConceptScheme::TYPE
             );
             if (count($conceptSchemes) > 0) {
                 $conceptSchemeURI = $conceptSchemes[0];

@@ -1,7 +1,7 @@
 <?php
 
 use DI\Container;
-use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Rdf;
 
 require 'autoload.inc.php';
@@ -43,10 +43,10 @@ $args = $OPTS->getRemainingArgs();
 $action = $args[count($args) - 1];
 
 function delete_all_concepts($resourceManager) {
-  $conceptURIs = $resourceManager->fetchSubjectWithPropertyGiven(Rdf::TYPE, '<' . Skos::CONCEPT . '>', null);
-  $concepts = $resourceManager->fetchByUris($conceptURIs, Skos::CONCEPT);
+  $conceptURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new \OpenSkos2\Rdf\Uri(Concept::TYPE), null);
+  $concepts = $resourceManager->fetchByUris($conceptURIs, Concept::TYPE);
   foreach ($concepts as $concept) {
-    $resourceManager->delete($concept, Skos::CONCEPT); // should also clean solr according to the code, but it does not. Possible reason: dependency injection does not work well.
+    $resourceManager->delete($concept, Concept::TYPE); // should also clean solr according to the code, but it does not. Possible reason: dependency injection does not work well.
     $resourceManager->deleteReferencesToObject($concept);
   }
 }

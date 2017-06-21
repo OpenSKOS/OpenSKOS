@@ -26,7 +26,6 @@ use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\PersonManager;
 use Rhumsaa\Uuid\Uuid;
 
 class Set extends Resource
@@ -56,16 +55,16 @@ class Set extends Resource
      * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
-     * @param \OpenSkos2\LabelManager | null  $labelManager
+     * @param \OpenSkos2\SkosXl\LabelManager | null  $labelManager
      * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
      public function ensureMetadata(
         \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set, 
-        \OpenSkos2\Person $person,
-        PersonManager $personManager, 
-        $labelManager = null, 
+        \OpenSkos2\Set $set = null, 
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null, 
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
         $existingConcept = null, 
         $forceCreationOfXl = false)
     {
@@ -92,7 +91,7 @@ class Set extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($tenant, $set, $uuid, $notation, $init)
+    protected function assembleUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $uuid, $notation, $init)
     {
         return $tenant->getUri() . "/" . $uuid;
     }
