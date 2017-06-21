@@ -25,10 +25,8 @@
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Set;
@@ -119,14 +117,18 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   set_property_with_check($setResource, OpenSkos::CODE, $code);
   set_property_with_check($setResource, OpenSkos::UUID, $uuid);
 
-  $publisherURI = $resourceManager->fetchUriByCode($tenant_code, Org::FORMALORG);
-  if ($publisherURI === null) {
+  $publisher = $resourceManager->fetchByUuid($tenant_code, \OpenSkos2\Tenant::TYPE, 'openskos::code');
+  if (count($publisher) <1) {
     fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.\n");
     exit(1);
   } else {
-    var_dump("PublisherURI: " . $publisherURI . "\n");
+    var_dump("PublisherURI: " . $publisher[0]->getUri() . "\n");
   }
+  $publisherURI = $publisher[0]->getUri();
+ 
   set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
+  set_property_with_check($setResource, OpenSkos::TENANT, $tenant_code);
+  
   set_property_with_check($setResource, DcTerms::TITLE, $title, false, false);
   if ($description !== NULL) {
     set_property_with_check($setResource, DcTerms::DESCRIPTION, $description);
@@ -170,12 +172,22 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
 }
   $resource->setUri($uri);
   set_property_with_check($resource, OpenSkos::UUID, $uuid);
-  $count_set = $resourceManager->countRdfTriples($setUri, Rdf::TYPE, new Uri(Set::TYPE));
-  if ($count_set <1) {
+  $set = $resourceManager->fetchByUri($setUri, Set::TYPE);
+  if (count($set) <1) {
     fwrite(STDERR, "The set with the uri $setUri has not been found in the triple store.\n");
     exit(1);
   }
-  set_property_with_check($resource, OpenSKOS::SET, $setUri, true);
+  set_property_with_check($resource, OpenSkos::SET, $setUri, true);
+  
+  $tenant_code = $set->getTenant();
+  $tenantUri=$resourceManager->fetchSubjectForObject(OpenSkos::CODE,$tenant_code, \OpenSkos2\Tenant::TYPE);
+  if (count($tenantUri) <1) {
+    fwrite(STDERR, "The tenant with the code $tenant_code has not been found in the triple store.\n");
+    exit(1);
+  }
+  set_property_with_check($resource, OpenSkos::TENANT, $tenant_code->getValue());
+  set_property_with_check($resource, DcTerms::PUBLISHER, $tenantUri[0]->getUri(), true);
+  
   set_property_with_check($resource, DcTerms::TITLE, $title, false, false);
   if ($description !== NULL) {
     set_property_with_check($resource, DcTerms::DESCRIPTION, $description);

@@ -19,7 +19,6 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 {
 
@@ -42,27 +41,27 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         if (null === $form) {
             $form = new Zend_Form();
             $form
-                    ->addElement('hidden', 'id', array('required' => $this->id ? true : false))
-                    ->addElement('text', 'tenant', array('label' => _('Tenant'), 'readonly' => true, 'disabled' => true))
-                    ->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
-                    ->addElement('text', 'email', array('label' => _('E-mail'), 'required' => true))
-                    ->addElement('password', 'pw1', array('label' => _('Password'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('StringLength', false, array(4, 30)), array('identical', false, array('token' => 'pw2')))))
-                    ->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
-                    ->addElement('select', 'role', array('label' => _('Role'), 'required' => true))
-                    ->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
-                    ->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
-                    ->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication)'), 'required' => false))
-                    ->addElement('multiselect', 'defaultSearchProfileIds', array('label' => _('Search Profile Id'), 'required' => false))
-                    ->addElement('checkbox', 'disableSearchProfileChanging', array('label' => _('Disable changing search profile'), 'required' => false))
-                    ->addElement('submit', 'submit', array('label' => _('Submit')))
-                    ->addElement('reset', 'reset', array('label' => _('Reset')))
-                    ->addElement('submit', 'cancel', array('label' => _('Cancel')))
-                    ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this user?') . '\');'))
-                    ->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
+                ->addElement('hidden', 'id', array('required' => $this->id ? true : false))
+                ->addElement('text', 'tenant', array('label' => _('Tenant'), 'readonly' => true, 'disabled' => true))
+                ->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
+                ->addElement('text', 'email', array('label' => _('E-mail'), 'required' => true))
+                ->addElement('password', 'pw1', array('label' => _('Password'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('StringLength', false, array(4, 30)), array('identical', false, array('token' => 'pw2')))))
+                ->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
+                ->addElement('select', 'role', array('label' => _('Role'), 'required' => true))
+                ->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
+                ->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
+                ->addElement('text', 'eppn', array('label' => _('eduPersonPrincipalName (for SAML authentication)'), 'required' => false))
+                ->addElement('multiselect', 'defaultSearchProfileIds', array('label' => _('Search Profile Id'), 'required' => false))
+                ->addElement('checkbox', 'disableSearchProfileChanging', array('label' => _('Disable changing search profile'), 'required' => false))
+                ->addElement('submit', 'submit', array('label' => _('Submit')))
+                ->addElement('reset', 'reset', array('label' => _('Reset')))
+                ->addElement('submit', 'cancel', array('label' => _('Cancel')))
+                ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this user?') . '\');'))
+                ->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
             ;
             $form->getElement('type')
-                    ->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$types, OpenSKOS_Db_Table_Users::$types))
-                    ->setSeparator(' ');
+                ->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$types, OpenSKOS_Db_Table_Users::$types))
+                ->setSeparator(' ');
 
             $form->getElement('role')->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$roles, OpenSKOS_Db_Table_Users::$roles));
 
@@ -80,27 +79,27 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 
             $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEmail'));
             $validator
-                    ->setMessage(_("there is already a user with e-mail address '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
+                ->setMessage(_("there is already a user with e-mail address '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
 
             $form->getElement('email')
-                    ->addValidator($validator)
-                    ->addValidator(new Zend_Validate_EmailAddress());
+                ->addValidator($validator)
+                ->addValidator(new Zend_Validate_EmailAddress());
 
 
             $validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
             $validator
-                    ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
+                ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
 
             $form->getElement('type')
-                    ->addValidator($validator, true);
+                ->addValidator($validator, true);
 
             $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueApiKey'));
             $validator
-                    ->setMessage(_("there is already a user with API key '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
+                ->setMessage(_("there is already a user with API key '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
             $form->getElement('apikey')
-                    ->addValidator(new Zend_Validate_Alnum())
-                    ->addValidator($validator)
-                    ->addValidator(new Zend_Validate_StringLength(array('min' => 6)));
+                ->addValidator(new Zend_Validate_Alnum())
+                ->addValidator($validator)
+                ->addValidator(new Zend_Validate_StringLength(array('min' => 6)));
 
             $userData = $this->toArray();
             $userData['defaultSearchProfileIds'] = explode(', ', $userData['defaultSearchProfileIds']);
@@ -224,7 +223,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $conceptsManager = $this->getDI()->get('\OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($this->getUserHistoryUris());
     }
-    
+
     public function getUserHistoryUris()
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -244,7 +243,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             array_pop($userOptions->userHistory);
         }
     }
-    
+
     public function removeFromUserHistory($identifier)
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -434,7 +433,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     public function getFoafPerson()
     {
         $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-        
+
         /**
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
@@ -450,16 +449,23 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
-            $tenantcode=$this['tenant'];
-            $tenanturi = $resourceManager->fetchUriByCode($tenantcode, \OpenSkos2\Tenant::TYPE);
+            $tenantcode = $this['tenant'];
+            $publisher = $resourceManager->etchByUuid($tenantcode, \OpenSkos2\Tenant::TYPE, 'openskos::code');
+            if (count($publisher) < 1) {
+                fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenantcode . " has not been found in the triple store.\n");
+                exit(1);
+            } else {
+                var_dump("PublisherURI: " . $publisher[0]->getUri() . "\n");
+            }
+            $tenanturi = $publisher[0]->getUri();
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::ORGANISATION, new OpenSkos2\Rdf\Uri($tenanturi));
-            
+
             $resourceManager->insert($person);
 
             return $person;
         }
     }
-    
+
     /**
      * Get dependency injection container
      * 
@@ -469,7 +475,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     {
         return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
     }
-    
+
     /**
      * @TODO temp function for base api uri
      */
@@ -478,4 +484,5 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
         return $apiOptions['baseUri'];
     }
+
 }
