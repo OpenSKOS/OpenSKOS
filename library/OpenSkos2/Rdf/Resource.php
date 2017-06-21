@@ -750,7 +750,7 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri(\OpenSkos2\Set $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null)
+    protected function assembleUri(\OpenSkos2\Tenant $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null)
     {
         return $set->getUri() . "/" . $uuid;
     }
