@@ -108,7 +108,7 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
     fwrite(STDERR, 'The set with uuid ' . $uuid . "' already exists in the triple store.\n");
     exit(1);
   }
-  $count_sets = count($resourceManager->fetchSubjectFoObject(OpenSKOS::CODE, new Literal($code), new Uri(Set::TYPE)));
+  $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::CODE, new Literal($code), new Uri(Set::TYPE)));
   if ($count_sets > 0) {
     fwrite(STDERR, 'The set with code ' . $code . "' already exists in the triple store.\n");
     exit(1);

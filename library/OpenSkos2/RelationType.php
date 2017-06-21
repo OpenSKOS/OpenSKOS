@@ -53,7 +53,7 @@ class RelationType extends Resource
         \OpenSkos2\Set $set = null, 
         \OpenSkos2\Person $person = null ,
         \OpenSkos2\PersonManager $personManager = null, 
-        \OpenSkos2\SkosXl $labelManager = null, 
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
         $existingConcept = null, 
         $forceCreationOfXl = false)
     {

@@ -91,7 +91,7 @@ class Set extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $uuid, $notation, $init)
+    protected function assembleUri(\OpenSkos2\Tenant $tenant = null , \OpenSkos2\Set $set = null, $uuid = null , $notation = null, $init = null)
     {
         return $tenant->getUri() . "/" . $uuid;
     }

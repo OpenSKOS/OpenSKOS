@@ -125,7 +125,7 @@ class Tenant extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri($tenant, $set, $uuid, $notation, $init)
+    protected function assembleUri(\OpenSkos2\Tenant $tenant = null , \OpenSkos2\Set $set = null , $uuid = null , $notation = null , $init =  null)
     {
         $baseUri = $init['api.baseUri'];
         return $baseUri . "" . $uuid;
