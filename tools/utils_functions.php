@@ -118,13 +118,13 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
   set_property_with_check($setResource, OpenSkos::UUID, $uuid);
 
   $publisher = $resourceManager->fetchByUuid($tenant_code, \OpenSkos2\Tenant::TYPE, 'openskos:code');
-  if (count($publisher) <1) {
+  if ($publisher == null) {
     fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.\n");
     exit(1);
   } else {
-    var_dump("PublisherURI: " . $publisher[0]->getUri() . "\n");
+    var_dump("PublisherURI: " . $publisher->getUri() . "\n");
   }
-  $publisherURI = $publisher[0]->getUri();
+  $publisherURI = $publisher->getUri();
  
   set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
   set_property_with_check($setResource, OpenSkos::TENANT, $tenant_code);
