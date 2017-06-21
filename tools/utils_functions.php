@@ -181,7 +181,7 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
   
   $tenant_code = $set->getTenant();
   $tenantUri=$resourceManager->fetchSubjectForObject(OpenSkos::CODE,$tenant_code, \OpenSkos2\Tenant::TYPE);
-  if (count($tenantUri)) {
+  if (count($tenantUri)>1) {
     fwrite(STDERR, "The tenant with the code $tenant_code has not been found in the triple store.\n");
     exit(1);
   }
