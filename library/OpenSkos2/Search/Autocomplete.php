@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Search;
 
-use OpenSkos2\Rdf\Resource;
 use Solarium\Core\Query\Helper as QueryHelper;
 
 // Meertens:
@@ -170,7 +169,7 @@ class Autocomplete
                     . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
                     . '))';
             } else {
-                $optionsQueries[] = '-s_status:' . Resource::STATUS_DELETED;
+                $optionsQueries[] = '-s_status:' . \OpenSkos2\Concept::STATUS_DELETED;
             }
         }
 

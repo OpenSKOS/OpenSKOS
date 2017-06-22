@@ -2,8 +2,6 @@
 
 namespace Tests\OpenSkos2\Integration;
 
-use OpenSkos2\Roles;
-
 require_once 'AbstractTest.php';
 
 class DeleteConceptTest extends AbstractTest
@@ -20,7 +18,7 @@ class DeleteConceptTest extends AbstractTest
     public function setUp()
     {
         self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        
+
         self::$client = new \Zend_Http_Client();
         self::$client->SetHeaders(array(
             'Accept' => 'text/html,application/xhtml+xml,application/xml',
@@ -40,7 +38,7 @@ class DeleteConceptTest extends AbstractTest
             self::$xml = $result['xml'];
         } else {
             shell_exec("php " . SOURCE_DIR . "/tools/concept.php --key=" . API_KEY_ADMIN . " --tenant=" . TENANT_CODE . "  delete");
-            throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . "\n " . $result['response']->getMessage(). "\n " . $result['response']->getBody());
+            throw new \Exception('Cannot create a test concept: ' . $result['response']->getStatus() . "\n " . $result['response']->getMessage() . "\n " . $result['response']->getBody());
         }
     }
 
@@ -54,61 +52,70 @@ class DeleteConceptTest extends AbstractTest
     {
         print "\n deleting concept with candidate status by admin... \n";
         $response = self::delete(self::$about, API_KEY_ADMIN, 'concept');
-        $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+        $this->AssertEquals(202, $response->getStatus(), $response->getBody());
         self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
         $checkResponse = self::$client->request('GET');
+        if ($checkResponse->getStatus() !== 410) {
+            var_dump($checkResponse->getBody());
+        }
         $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
     }
 
     
-    public function testDeleteCandidatebyOwner()
-    { // TODO ///
-        print "\n deleting concept with candidate status by the owner-deitor... \n";
-        $response = self::delete(self::$about, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-        self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
-        $checkResponse = self::$client->request('GET');
-        $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
-    }
-
-    public function testDeleteCandidateByGuest()
-    {
-        if (!self::$init["custom.default_authorisation"]) {
-            print "\n deleting concept with candidate status by guest...\n";
-            $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
-            $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      public function testDeleteCandidatebyOwner()
+      { // TODO ///
+      print "\n deleting concept with candidate status by the owner-deitor... \n";
+      $response = self::delete(self::$about, API_KEY_EDITOR, 'concept');
+      $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
+      $checkResponse = self::$client->request('GET');
+      if ($checkResponse->getStatus() !== 410) {
+            var_dump($checkResponse->getBody());
         }
-    }
+      $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
+      }
 
-    public function testDeleteApprovedByAdmin()
-    {
-        print "\n deleting concept with approved status by admin ...\n";
-        self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
-        $response = self::delete(self::$about, API_KEY_ADMIN, 'concept');
-        $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-        self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
-        $checkResponse = self::$client->request('GET');
-        $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
-    }
+      public function testDeleteCandidateByGuest()
+      {
+      if (!self::$init["custom.default_authorisation"]) {
+      print "\n deleting concept with candidate status by guest...\n";
+      $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
+      $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      }
+      }
 
-    public function testDeleteApprovedByOwner()
-    {
-        print "\n deleting concept with approved status by an owner-editor ...";
-        self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
-        $response = self::delete(self::$about, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
-    }
-
-    public function testDeleteApprovedByGuest()
-    {
-        print "\n deleting concept with approved status by a guest ...";
-        self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved" 
-        $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
-        if (self::$init["custom.default_authorisation"]) {
-            $this->AssertEquals(202, $response->getStatus(), $response->getMessage());
-        } else {
-            $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      public function testDeleteApprovedByAdmin()
+      {
+      print "\n deleting concept with approved status by admin ...\n";
+      self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved"
+      $response = self::delete(self::$about, API_KEY_ADMIN, 'concept');
+      $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      self::$client->setUri(API_BASE_URI . '/concept?id=' . self::$uuid);
+      $checkResponse = self::$client->request('GET');
+      if ($checkResponse->getStatus() !== 410) {
+            var_dump($checkResponse->getBody());
         }
-    }
-    
+      $this->AssertEquals(410, $checkResponse->getStatus(), 'Admin was not able to delete an approved concept or something else went wrong. Getting that concept gives status ' . $checkResponse->getStatus());
+      }
+
+      public function testDeleteApprovedByOwner()
+      {
+      print "\n deleting concept with approved status by an owner-editor ...";
+      self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved"
+      $response = self::delete(self::$about, API_KEY_EDITOR, 'concept');
+      $this->AssertEquals(202, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      }
+
+      public function testDeleteApprovedByGuest()
+      {
+      print "\n deleting concept with approved status by a guest ...";
+      self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved"
+      $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
+      if (self::$init["custom.default_authorisation"]) {
+      $this->AssertEquals(202, $response->getStatus(), $response->getMessage());
+      } else {
+      $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));
+      }
+      }
+     
 }

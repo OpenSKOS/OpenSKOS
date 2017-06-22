@@ -224,11 +224,10 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 $user->tenant
             );
         }
-        $spec = $this->resourceManager->fetchConceptSpec($concept);
-        if ($spec[0]['tenantcode'] !== $tenantCode) {
-            throw new \Exception('The concept has tenant ' .
-            $spec['tenantcode'] .
-            ' which does not correspond to the request-s tenant  ' . $tenantCode);
+        $concept->getTenant();
+        if ($concept->getTenant()->getValue() !== $tenantCode) {
+            throw new \Exception("The concept has tenant {$concept->getTenat()->getValue()}"
+            . "which does not correspond to the request-s tenant   $tenantCode");
         }
 
         if (!($user->role === Roles::ADMINISTRATOR ||

@@ -122,6 +122,11 @@ class SetsMap
 
     public function fetchTenantSpecData($concept)
     {
-        return $this->setManager->fetchConceptSpec($concept);
+        $retVal = [];
+        $retVal['tenantcode']= $concept->getTenant()->getValue();
+        $retVal['setUri']= $concept->getSet()->getUri();
+        $set = $this->setManager->fetchByUri($retVal['setUri'], \OpenSkos2\Set::TYPE);
+        $retVal['setcode']=$set->getCode()->getValue();
+        return $retVal;
     }
 }

@@ -93,7 +93,7 @@ class ResourceManagerWithSearch extends ResourceManager
     public function replace(Resource $resource)
     {
         parent::replace($resource);
-        if ($resource->getType()->getUri() === Concept::TYPE) {
+        if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
             $this->solrResourceManager->delete($resource);
             $this->solrResourceManager->insert($resource);
         }

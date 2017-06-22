@@ -35,8 +35,6 @@ use OpenSkos2\Namespaces\Skos;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\Custom\UriGeneration;
 
-// Meertens: Picturae changes starting from 22/11/2016 are taken
-
 class Resource extends Uri implements ResourceIdentifier
 {
 
@@ -132,54 +130,35 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function getCode()
     {
-        return $this->getLiteralProperty(OpenSkos::CODE);
+        return $this->getPropertySingleValue(OpenSkos::CODE);
     }
 
     public function getTenant()
     {
-        return $this->getLiteralProperty(OpenSkos::TENANT);
+        return $this->getPropertySingleValue(OpenSkos::TENANT);
     }
 
     public function getTenantUri()
     {
-        return $this->getUriProperty(DcTerms::PUBLISHER);
+        return $this->getPropertySingleValue(DcTerms::PUBLISHER);
     }
 
     public function getSet()
     {
-        return $this->getUriProperty(OpenSkos::SET);
+        return $this->getPropertySingleValue(OpenSkos::SET);
     }
 
     public function getTitle()
     {
-        $title = $this->getLiteralProperty(DcTerms::TITLE);
+        $title = $this->getPropertySingleValue(DcTerms::TITLE);
         if (isset($title)) {
-            return $this->getLiteralProperty(DcTerms::TITLE);
+            return $this->getPropertySingleValue(DcTerms::TITLE);
         } else {
             return new Literal("UNKNOWN");
         }
     }
 
-    private function getLiteralProperty($propertyURI)
-    {
-        $values = $this->getProperty($propertyURI);
-        if (isset($values[0])) {
-            return $values[0];
-        } else {
-            return null;
-        }
-    }
-
-    private function getUriProperty($propertyURI)
-    {
-        $values = $this->getProperty($propertyURI);
-        if (isset($values[0])) {
-            return $values[0];
-        } else {
-            return null;
-        }
-    }
-
+   
     /**
      * @param string $predicate
      * @param RdfObject $value
@@ -370,7 +349,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function getUuid()
     {
-        return $this->getLiteralProperty(OpenSkos::UUID);
+        return $this->getPropertySingleValue(OpenSkos::UUID);
     }
 
 // TODO : ask Picturae about this function, look for usages before

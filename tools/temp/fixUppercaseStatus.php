@@ -52,12 +52,11 @@ $conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
 
 use \OpenSkos2\Namespaces\OpenSkos;
 use \OpenSkos2\Rdf\Literal;
-use \OpenSkos2\Concept;
 
 $count = 0;
 foreach ($conceptManager->fetch([OpenSkos::STATUS => new Literal('NOT_COMPLIANT')]) as $concept) {
     echo $concept->getUri() . PHP_EOL;
-    $concept->setProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_NOT_COMPLIANT));
+    $concept->setProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_NOT_COMPLIANT));
     $conceptManager->replace($concept);
     $count ++;
 }

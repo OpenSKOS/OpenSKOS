@@ -266,11 +266,11 @@ abstract class AbstractTripleStoreResource
 
             $tenant = $this->getTenantFromParams($params);
 
-            $set = $this->getSet($params);
+            $set = $this->getSet($params, $tenant);
 
             $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
 
-            $this->authorisation->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
+            $this->deletion->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
 
             $this->manager->deleteSoft($resource); // amounts to full delete for non-concept resources
         } catch (ApiException $ex) {

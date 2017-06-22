@@ -53,7 +53,7 @@ class ConceptSchemeManager extends ResourceManager
         
         $resource->setUri(rtrim($resource->getUri(), '/') . '/deleted');
         
-        $resource->setProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_DELETED));
+        $resource->setProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_DELETED));
         $resource->setProperty(OpenSkos::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
 
         if ($user) {
