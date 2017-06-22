@@ -138,7 +138,7 @@ class Concept extends AbstractTripleStoreResource
 
 
         // tenants ???
-        // it used to be a non-obligatory multiple parameter, now is ibligatory and the only one
+        // it used to be a non-obligatory multiple parameter, now is obligatory and the only one
         $tenantCodes = [];
         if (isset($params['tenant'])) {
             $tenantCodes = explode(' ', trim($params['tenant']));

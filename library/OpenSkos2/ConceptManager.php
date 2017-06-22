@@ -126,7 +126,7 @@ class ConceptManager extends ResourceManagerWithSearch
 
         // Do a distinct query on pref and alt labels where string starts with $term
         $query = $q->selectDistinct('?returnLabel')
-            ->where('?subject', '<' . OpenSkos::STATUS . '>', '"' . Resource::STATUS_APPROVED . '"')
+            ->where('?subject', '<' . OpenSkos::STATUS . '>', '"' . Concept::STATUS_APPROVED . '"')
             ->also('<' . $returnLabel . '>', '?returnLabel')
             ->also('<' . $searchLabel . '>', '?searchLabel')
             ->limit(50);

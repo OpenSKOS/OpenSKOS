@@ -98,7 +98,7 @@ class AutocompleteTest extends AbstractTest
             $word = self::$labelMap[PREF_LABEL] . self::$prefix[$i];
             $response = $this->autocomplete($word, "");
             if ($response->getStatus() != 200) {
-                throw new Excpetion('Failure: ' . $response);
+                throw new \Excpetion('Failure: ' . $response);
             }
             $this->AssertEquals(200, $response->getStatus());
             $json = $response->getBody();
@@ -109,6 +109,7 @@ class AutocompleteTest extends AbstractTest
         }
     }
 
+    
     public function testAutocompleteSearchAltLabel()
     {
         print "\n testAutocomplete search alt Label \n";
@@ -116,7 +117,8 @@ class AutocompleteTest extends AbstractTest
         //print "\n $word \n";
         $response = $this->autocomplete($word, "?searchLabel=altLabel");
         if ($response->getStatus() != 200) {
-            throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $word);
+            var_dump($word);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         $json = $response->getBody();
@@ -131,7 +133,8 @@ class AutocompleteTest extends AbstractTest
         $searchword = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // should not occur in alt labels
         $response = $this->autocomplete($searchword, "?searchLabel=altLabel");
         if ($response->getStatus() != 200) {
-            throw new Excpetion('Failure: ' . $response, 'autocomplete on word ' . $searchword);
+            var_dump($searchword);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         $json = $response->getBody();
@@ -146,7 +149,8 @@ class AutocompleteTest extends AbstractTest
         $returnword = self::$labelMap[ALT_LABEL] . self::$prefix[1]; // altLabel_<someuuid>a.
         $response = $this->autocomplete($searchword, "?returnLabel=altLabel");
         if ($response->getStatus() != 200) {
-            throw new Exception('Failure:' . $response, 'autocomplete on word ' . $searchword);
+            var_dump($searchword);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         $json = $response->getBody();
@@ -163,7 +167,8 @@ class AutocompleteTest extends AbstractTest
         $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
         $response = $this->autocomplete($word, "?lang=nl");
         if ($response->getStatus() != 200) {
-            throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=nl");
+            var_dump($word);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         $json = $response->getBody();
@@ -178,7 +183,8 @@ class AutocompleteTest extends AbstractTest
         $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
         $response = $this->autocomplete($word, "?lang=en");
         if ($response->getStatus() != 200) {
-            throw new Exception('Failure: ' . $response, 'autocomplete on word ' . $word . "?lang=en (does not exists)");
+            var_dump($word);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         $json = $response->getBody();
@@ -192,7 +198,8 @@ class AutocompleteTest extends AbstractTest
         $word = self::$labelMap[PREF_LABEL] . self::$prefix[1]; // prefLabel<someuuid>a.
         $response = $this->autocomplete($word, "?format=html");
         if ($response->getStatus() != 200) {
-            throw new Exception('Failure:' . $response, 'autocomplete on word ' . $word . "?format=html");
+            var_dump($word);
+            var_dump($response);
         }
         $this->AssertEquals(200, $response->getStatus());
         // todo: add some chek when it becomes clear how the output looks like
