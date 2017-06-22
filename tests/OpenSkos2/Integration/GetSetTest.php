@@ -48,6 +48,8 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
+            var_dump($xml);
+            var_dump($response->getMessage());
             var_dump($response->getBody());
         }
     }

@@ -40,12 +40,12 @@ class ConceptManager extends ResourceManagerWithSearch
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
-    
+
     /**
      * @var LabelManager
      */
     protected $labelManager;
-    
+
     /**
      * @return LabelManager
      */
@@ -71,7 +71,7 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         $this->labelManager = $labelManager;
     }
-    
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -79,11 +79,11 @@ class ConceptManager extends ResourceManagerWithSearch
     public function insert(Resource $resource)
     {
         parent::insert($resource);
-        
+
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }
-    
+
     /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -91,7 +91,7 @@ class ConceptManager extends ResourceManagerWithSearch
     public function replace(Resource $resource)
     {
         parent::replace($resource);
-        
+
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }
@@ -103,7 +103,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function replaceAndCleanRelations(Concept $concept)
     {
-       
+
         $this->deleteRelationsWhereObject($concept);
         $this->replace($concept);
     }
@@ -165,7 +165,7 @@ class ConceptManager extends ResourceManagerWithSearch
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 
@@ -196,18 +196,14 @@ class ConceptManager extends ResourceManagerWithSearch
         }
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri),
-            $relationType,
-            new Uri($objectUri)
+            new Uri($subjectUri), $relationType, new Uri($objectUri)
         );
 
         $this->deleteMatchingTriples(
-            new Uri($objectUri),
-            Skos::getInferredRelationsMap()[$relationType],
-            new Uri($subjectUri)
+            new Uri($objectUri), Skos::getInferredRelationsMap()[$relationType], new Uri($subjectUri)
         );
     }
-    
+
     /**
      * Get all concepts that are related as subjects to the given label uri
      * @param Label $label
@@ -221,9 +217,9 @@ class ConceptManager extends ResourceManagerWithSearch
                     ?subject ?predicate <' . $label->getUri() . '> .
                     ?subject <' . \OpenSkos2\Namespaces\Rdf::TYPE . '> <' . \OpenSkos2\Concept::TYPE . '>
                 }';
-        
+
         $concepts = $this->fetchQuery($query);
-        
+
         return $concepts;
     }
 
@@ -326,6 +322,8 @@ class ConceptManager extends ResourceManagerWithSearch
             $start += $step;
         } while (!(count($concepts) < $step));
     }
+
+   
 
     /**
      * Perform a full text query
@@ -470,5 +468,4 @@ class ConceptManager extends ResourceManagerWithSearch
         $this->client->insert($graph);
     }
 
-   
 }

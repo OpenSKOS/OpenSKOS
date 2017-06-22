@@ -259,8 +259,10 @@ abstract class AbstractTripleStoreResource
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
 
-            if ($resource->isDeleted()) {
-                throw new NotFoundException('Concept already deleted :' . $id, 410);
+            if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
+                if ($resource->isDeleted()) {
+                    throw new NotFoundException('Concept already deleted :' . $id, 410);
+                }
             }
             $user = $this->getUserFromParams($params);
 
@@ -272,7 +274,13 @@ abstract class AbstractTripleStoreResource
 
             $this->deletion->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
 
-            $this->manager->deleteSoft($resource); // amounts to full delete for non-concept resources
+            if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
+                $this->manager->deleteSoft($resource);
+            } else {
+                $this->manager->delete($resource);
+            }
+
+// amounts to full delete for non-concept resources
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
@@ -286,17 +294,17 @@ abstract class AbstractTripleStoreResource
      */
     protected function loadResourceToRdf($resource)
     {
-        
+
         $loadedResource = $this->manager->fetchByUri($resource->getUri());
 
-        
+
         $tenant = $this->manager->fetchByUri($loadedResource->getTenantUri(), \OpenSkos2\Tenant::TYPE);
 
         if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
             $loadedResource->loadFullXlLabels($this->manager->getLabelManager());
         }
 
-        return (new Transform\DataRdf( $loadedResource))->transform();
+        return (new Transform\DataRdf($loadedResource))->transform();
     }
 
     /**

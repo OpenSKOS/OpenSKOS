@@ -153,7 +153,7 @@ class ResourceManager
         if ($user) {
             $resource->setProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
-        $this->replace($resource);
+        $this->delete($resource);
     }
 
     /**

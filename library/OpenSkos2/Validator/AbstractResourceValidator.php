@@ -36,6 +36,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $set;
     protected $referenceCheckOn;
     protected $conceptReferenceCheckOn;
+    private static $nonresolvableURIs = [Rdf::TYPE, DcTerms::LICENSE,OpenSkos::WEBPAGE];
 
     /**
      * @var array
@@ -153,7 +154,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                     $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
-            if ($value instanceof Uri && $this->referenceCheckOn && $propertyUri!==Rdf::TYPE) {
+            if ($value instanceof Uri && $this->referenceCheckOn && !in_array($propertyUri, self::$nonresolvableURIs)) {
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->errorMessages[] = "The resource (of type  $type) referred by  uri ".
                     "{$value->getUri()} via the property $propertyUri is not found. ";
