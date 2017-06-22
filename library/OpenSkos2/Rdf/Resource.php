@@ -336,19 +336,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-    /**
-     * Check if the resource is deleted
-     * @TODO Separate in StatusAwareResource class or something like that
-     * @return boolean
-     */
-    public function isDeleted()
-    {
-        if ($this->getStatus() === Resource::STATUS_DELETED) {
-            return true;
-        }
-        return false;
-    }
-
+  
     /**
      * @return string
      */

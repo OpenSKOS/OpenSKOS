@@ -75,6 +75,7 @@ class Concept extends Resource
         SkosXl::ALTLABEL => Skos::ALTLABEL,
         SkosXl::HIDDENLABEL => Skos::HIDDENLABEL,
     ];
+    
 
     /**
      * Resource constructor.
@@ -84,6 +85,19 @@ class Concept extends Resource
     {
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
+    }
+
+      /**
+     * Check if the resource is deleted
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
+        }
+        return false;
     }
 
     public function getSkosCollection()

@@ -25,6 +25,7 @@ use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\VCard;
+use OpenSkos2\Namespaces\Rdf;
 
 class FieldsMaps
 {
@@ -120,7 +121,7 @@ class FieldsMaps
         return [
             'status' => OpenSkos::STATUS,
             'tenant' => OpenSkos::TENANT,
-            'collection' => OpenSkos::SET,
+            'set' => OpenSkos::SET,
             'uuid' => OpenSkos::UUID,
             'notation' => Skos::NOTATION,
             'inScheme' => Skos::INSCHEME,

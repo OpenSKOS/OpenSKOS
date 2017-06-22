@@ -86,7 +86,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
      * @throws Zend_Controller_Exception
      * @return string|\OpenSkos2\Rdf\Uri
      */
-    private function getId()
+    protected function getId()
     {
         $id = $this->getRequest()->getParam('id');
         if (null === $id) {

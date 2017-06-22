@@ -101,9 +101,10 @@
         <copyField source="a_*" dest="autocomplete" />
 
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
+
     </fields>
-    
-    <defaultSearchField>search</defaultSearchField>
+
+     <defaultSearchField>search</defaultSearchField>
     
     <uniqueKey>uri</uniqueKey>
     

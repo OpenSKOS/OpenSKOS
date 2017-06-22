@@ -322,6 +322,9 @@ class GetConceptTest extends AbstractTest
 
         $dom = new \Zend_Dom_Query();
         $xml = $response->getBody();
+        
+        var_dump($xml);
+        
         $dom->setDocumentXML($xml);
 
         $results1 = $dom->queryXpath('/rdf:RDF/rdf:Description');
@@ -359,10 +362,7 @@ class GetConceptTest extends AbstractTest
         $this->AssertEquals(1, $results9->count());
 
         $results8 = $dom->query('openskos:set');
-        $this->AssertEquals(SET_CODE, $results8->current()->nodeValue);
-        
-        $results10 = $dom->query('dc:creator');
-        $this->AssertNotEmpty($results10->current()->nodeValue);
+        $this->AssertEquals(SET_URI, $results8->current()->getAttribute('rdf:resource'));
     }
 
     private function assertionsForHTMLConcept($response, $prefLabel, $altLabel, $hiddenLabel, $lang, $definition, $notation, $topConceptOf, $inScheme)

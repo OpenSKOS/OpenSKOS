@@ -137,7 +137,8 @@ class Concept extends AbstractTripleStoreResource
         ];
 
 
-        // tenants
+        // tenants ???
+        // it used to be a non-obligatory multiple parameter, now is ibligatory and the only one
         $tenantCodes = [];
         if (isset($params['tenant'])) {
             $tenantCodes = explode(' ', trim($params['tenant']));
@@ -263,16 +264,18 @@ class Concept extends AbstractTripleStoreResource
         
         $concept = $this->getResource($id);
 
-        $tenant = $this->getTenant();
-
         $params = $request->getQueryParams();
 
+        
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
             $propertiesList = [];
         }
 
+        $tenantCode = $concept->getTenant()->getValue();
+        $tenant = $this->manager->fetchByUuid($tenantCode, Tenant::TYPE, 'openskos:code');
+        
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
 

@@ -476,6 +476,13 @@ class ResourceManager
         return $retval;
     }
     
+    
+    public function deleteReferencesToObject(\OpenSkos2\Rdf\Uri $resource)
+    {
+        $this->client->update("DELETE WHERE {?subject ?predicate  <{$resource->getUri()}> }");
+    }
+
+    
       private function resultToArray($result, $fieldname, $typeinstance)
     {
         $retval = array();
