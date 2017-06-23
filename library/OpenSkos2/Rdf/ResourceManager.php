@@ -150,11 +150,14 @@ class ResourceManager
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
         $resource->setProperty(OpenSkosNamespace::STATUS, new Literal(\OpenSkos2\Concept::STATUS_DELETED));
+        
         $resource->setProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+        
         if ($user) {
             $resource->setProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
-        $this->delete($resource);
+        
+        $this->replace($resource);
     }
 
     /**

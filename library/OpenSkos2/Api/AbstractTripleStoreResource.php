@@ -259,11 +259,6 @@ abstract class AbstractTripleStoreResource
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
 
-            if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
-                if ($resource->isDeleted()) {
-                    throw new NotFoundException('Concept already deleted :' . $id, 410);
-                }
-            }
             $user = $this->getUserFromParams($params);
 
             $tenant = $this->getTenantFromParams($params);
@@ -274,17 +269,24 @@ abstract class AbstractTripleStoreResource
 
             $this->deletion->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
 
+
             if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
+                if ($resource->isDeleted()) {
+                    throw new DeletedException('Concept already deleted :' . $id, 410);
+                }
                 $this->manager->deleteSoft($resource);
+                $response = $this->getSuccessResponse($this->loadResourceToRdf($resource), 202);
             } else {
                 $this->manager->delete($resource);
+                $response = $this->getSuccessResponse($resource, 202);
             }
 
 // amounts to full delete for non-concept resources
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }
-        return $this->getSuccessResponse($this->loadResourceToRdf($resource), 202);
+
+        return $response;
     }
 
     /**
@@ -655,13 +657,13 @@ abstract class AbstractTripleStoreResource
         return ['key', 'tenant', $setName];
     }
 
-    public function mapNameSearchID() 
+    public function mapNameSearchID()
     {
         $index = $this->manager->fetchNameSearchID();
         return $index;
     }
 
-    public function mapNameURI() 
+    public function mapNameURI()
     {
         $index = $this->manager->fetchNameUri();
         return $index;
