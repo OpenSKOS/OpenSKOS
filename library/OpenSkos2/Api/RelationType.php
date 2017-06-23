@@ -38,11 +38,7 @@ class RelationType extends AbstractTripleStoreResource
         $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
     }
 
-    public function mapNameSearchID()
-    {
-        $index = $this->manager->fetchConceptConceptRelationsNameUri();
-        return $index;
-    }
+   
 
     public function listRelatedConceptPairs($request)
     {

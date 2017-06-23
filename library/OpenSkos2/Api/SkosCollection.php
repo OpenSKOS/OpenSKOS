@@ -21,4 +21,6 @@ public function __construct(
         $this->personManager = $personManager;
         $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
     }
+    
+  
 }

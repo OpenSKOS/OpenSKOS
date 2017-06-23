@@ -21,14 +21,18 @@
  */
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\Dcmi;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $scheme = $this->resource;
+
 $conceptSchemeManager = $di->get('OpenSkos2\ConceptSchemeManager');
+$setManager = $di->get('OpenSkos2\SetManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
 $uri = $scheme->getUri();
 $uuid = $scheme->getUuid();
 $name = $scheme->getTitle();
+$setUri= $scheme->getSet()->getUri();
+$tenantCode = $scheme ->getTenant()->getValue();
 $this->headTitle($name);
 ?>
 
@@ -43,16 +47,14 @@ $this->headTitle($name);
             <?php endif ?>
             <?php
             if ($key === "set"):
-                $setCode = $conceptSchemeManager->getResourceSearchID($val, Dcmi::DATASET);
-                $setTitle = $conceptSchemeManager->getSetTitle($val);
+                $setinfo = $setManager->fetchSetTitleAndCodeByUri($setUri);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setCode)) ?>.html"><?php echo $setTitle ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
             <?php endif ?>
             <?php
             if ($key === "tenant"):
-                $tenantCode = $conceptSchemeManager->getResourceSearchID($val, Org::FORMALORG);
-                $tenantName = $conceptSchemeManager->getTenantNameByCode($tenantCode);
+                $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                 ?>
                 <dt><?php echo $key ?>:</dt>
                 <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>

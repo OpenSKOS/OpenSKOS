@@ -66,5 +66,5 @@ class Set extends AbstractTripleStoreResource
         return new \OpenSkos2\Set();
     }
     
-   
+  
 }

@@ -19,18 +19,19 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Skos;
-use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\SkosCollection;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $set = $this->resource;
 
 /* @var $setManager \OpenSkos2\SetManager */
 $setManager = $di->get('OpenSkos2\SetManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
 $code = $set->getCode();
 $uri = $set->getUri();
-$name = $setManager->getSetTitle($code);
+$name = $set->getTitle()->getValue();
+$tenantCode = $set->getTenant()->getValue();
 $this->headTitle($name);
 ?>
 
@@ -43,8 +44,7 @@ $this->headTitle($name);
                 <dt><?php echo $key ?>:</dt>
                 <?php
                 if ($key === "publisher"):
-                    $tenantCode = $setManager->getResourceSearchID($val, Org::FORMALORG);
-                    $tenantName = $setManager->getTenantNameByCode($tenantCode);
+                    $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                     ?>
                     <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
                 <?php endif ?>
@@ -63,7 +63,7 @@ $this->headTitle($name);
             <?php endforeach; ?>
         </dl>
 
-        <?php $schemata = $setManager->fetchInhabitantsForSet($uri, Skos::CONCEPTSCHEME); ?>
+        <?php $schemata = $setManager->fetchInhabitantsForSet($uri, ConceptScheme::TYPE); ?>
         <h3>Concept Schemes (<?php echo count($schemata); ?>)</h3>
         <ul>
             <?php foreach ($schemata as $key => $value): ?>
@@ -75,7 +75,7 @@ $this->headTitle($name);
             <?php endforeach ?>
         </ul>
 
-        <?php $skoscollections = $setManager->fetchInhabitantsForSet($uri, Skos::SKOSCOLLECTION); ?>
+        <?php $skoscollections = $setManager->fetchInhabitantsForSet($uri, SkosCollection::TYPE); ?>
         <h3>Skos collections (<?php echo count($skoscollections) ?>) </h3>
         <ul>
             <?php foreach ($skoscollections as $key => $value): ?>
@@ -86,7 +86,7 @@ $this->headTitle($name);
                 </li>
             <?php endforeach ?>
         </ul>
-        <?php $concepts = $setManager->listConceptsForCluster($uri, OpenSkos::SET); ?>
+        <?php $concepts = $setManager->listConceptsForSet($uri); ?> 
         <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this set:</h3>
         <ul>
             <?php foreach ($concepts as $key => $value): ?>

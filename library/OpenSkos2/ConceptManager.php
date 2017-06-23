@@ -323,8 +323,6 @@ class ConceptManager extends ResourceManagerWithSearch
         } while (!(count($concepts) < $step));
     }
 
-   
-
     /**
      * Perform a full text query
      * lucene / solr queries are possible
@@ -467,5 +465,28 @@ class ConceptManager extends ResourceManagerWithSearch
 
         $this->client->insert($graph);
     }
+    
+
+   public function fetchNameUri()  
+    {
+        $query = "SELECT ?uri ?name WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
+    
+    
+      public function fetchNameSearchID()
+    {
+        $query = "SELECT ?name ?searchid WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name . "
+            . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+    
+  
 
 }

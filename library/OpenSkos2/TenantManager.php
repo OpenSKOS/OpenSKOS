@@ -30,14 +30,6 @@ class TenantManager extends ResourceManager
 
     protected $resourceType = Tenant::TYPE;
 
-    public function fetchNameUri()
-    {
-        $result = $this->fetchTenantNameUri();
-        return $result;
-    }
-
- 
-    
     // used only for HTML representation
     public function fetchSetsForTenant($code)
     {
@@ -61,14 +53,6 @@ class TenantManager extends ResourceManager
             DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
         $response = $this->query($query);
         return $response;
-    }
-    
-    public function fetchTenantNameUri()
-    {
-        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . VCard::ORG . '> ?org . ?org <' . VCard::ORGNAME . '> ?name . }';
-        $response = $this->query($query);
-        $result = $this->makeNameUriMap($response);
-        return $result;
     }
 
     // used only for html output
@@ -102,4 +86,39 @@ class TenantManager extends ResourceManager
         }
         return $retVal;
     }
+
+    public function fetchNameUri()  // orgname -> uri for tenants
+    {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . VCard::ORG . '> ?org . '
+            . '?org <' . VCard::ORGNAME . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
+
+      public function fetchNameSearchID() // orgname -> code for tenants
+    {
+        $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . VCard::ORG . '> ?org . '
+            . '?org <' . VCard::ORGNAME . '> ?name .'
+            . ' ?uri  <' . OpenSkos::CODE . '> ?searchid }';
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+    
+       public function fetchTenantNameByCode($code) 
+    {
+        $query = "SELECT ?name WHERE { ?uri  <".VCard::ORG."> ?org . "
+            . "?org <".VCard::ORGNAME . "> ?name . "
+            . "?uri  <" . OpenSkos::CODE . "> '$code' .}";
+        $response = $this->query($query);
+        if (count($response)>1) {
+            throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
+        }
+        if (count($response)<1) {
+            throw new \Exception("the institution with the code $code is not found");
+        }
+        return $response[0]->name->getValue();
+    }
+    
 }

@@ -32,10 +32,9 @@ $this->headTitle ('Skos Collections')?>
 <p>These are the avaliable skos collections in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $uuid = $skosCollectionManager -> getResourceSearchID($value, Skos::SKOSCOLLECTION);
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'skoscollection', 'id' => $uuid), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'skoscollection', 'id' => $value), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

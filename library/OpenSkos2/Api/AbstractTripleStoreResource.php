@@ -643,16 +643,6 @@ abstract class AbstractTripleStoreResource
         return $this->getUserByKey($params['key']);
     }
 
-    /*   Returns a mapping resource's titles to the resource's Uri
-     *   Works for tenant, set, concept scheme, skos colllection, relation type
-     */
-
-    public function mapNameSearchID()
-    {
-        $index = $this->manager->fetchNameUri();
-        return $index;
-    }
-
     protected function getRequiredParameters()
     {
 
@@ -663,6 +653,18 @@ abstract class AbstractTripleStoreResource
         }
 
         return ['key', 'tenant', $setName];
+    }
+
+    public function mapNameSearchID() 
+    {
+        $index = $this->manager->fetchNameSearchID();
+        return $index;
+    }
+
+    public function mapNameURI() 
+    {
+        $index = $this->manager->fetchNameUri();
+        return $index;
     }
 
 }

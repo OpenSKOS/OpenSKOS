@@ -20,7 +20,7 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Namespaces\Org;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
@@ -65,19 +65,6 @@ class SetManager extends ResourceManager
         return $retVal;
     }
 
-    // used only for HTML output
-    public function fetchInstitutionCodeByUri($uri)
-    {
-        $query = 'SELECT ?code WHERE { <' . $uri . '>  <' . OpenSkos::CODE . '> ?code .  ?uri  <' .
-            Rdf::TYPE . '> <' . Org::FORMALORG . '> .}';
-        $codes = $this->query($query);
-        if (count($codes) < 1) {
-            return null;
-        } else {
-            return $codes[0];
-        }
-    }
-
     // used only for HTML representation
     public function fetchInhabitantsForSet($setUri, $rdfType)
     {
@@ -116,6 +103,7 @@ class SetManager extends ResourceManager
         return $setResource;
     }
 
+    // 
     public function fetchFromMySQL($params)
     {
         $model = new OpenSKOS_Db_Table_Collections();
@@ -133,5 +121,47 @@ class SetManager extends ResourceManager
             $index->append($rdfSet);
         }
         return $index;
+    }
+    
+   
+      public function fetchNameSearchID() // title -> code for sets
+    {
+        $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . DcTerms::TITLE . '> ?name . '
+            . '?uri  <' . OpenSkos::CODE . '> ?searchid . '
+            . '?uri  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .}';
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+    
+    
+      public function listConceptsForSet($code) 
+    {
+        $query = "SELECT ?name ?searchid WHERE {?seturi  <" . OpenSkos::CODE . "> '$code' ."
+            . " ?seturi  <" . Rdf::TYPE . "> <".Set::TYPE."> . "
+            . "?concepturi  <" . OpenSkos::CODE . "> '$code' . "
+            . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
+            . "?concepturi  <" . OpenSkos::UUID . "> ?serachid .}";
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+    
+      public function fetchSetTitleAndCodeByUri($uri) 
+    {
+        $query = "SELECT ?title ?code WHERE { <$uri>  <".DcTerms::TITLE."> ?title . "
+             . "<$uri> <".OpenSkos::CODE . "> ?code . "
+            . "<$uri> <".Rdf::TYPE . "> <".Set::TYPE."> . }";
+        $response = $this->query($query);
+        if (count($response)>1) {
+            throw new \Exception("Something went very wrong: there more than 1 set with the uri $uri");
+        }
+        if (count($response)<1) {
+            throw new \Exception("the institution with the uri $uri is not found");
+        }
+        $retval = [];
+        $retval['code'] = $response[0]->code->getValue();
+        $retval['title'] = $response[0]->title->getValue();
+        return $retval;
     }
 }

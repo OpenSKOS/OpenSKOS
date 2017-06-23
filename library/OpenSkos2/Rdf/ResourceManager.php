@@ -29,6 +29,7 @@ use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\DcTerms;
 use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -65,9 +66,9 @@ class ResourceManager
     {
         return $this->init;
     }
-    
+
     // overriden in ConceptManager
-     public function getLabelManager()
+    public function getLabelManager()
     {
         return null;
     }
@@ -205,13 +206,13 @@ class ResourceManager
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUuid($id, $type=null, $property = 'openskos:uuid')
+    public function fetchByUuid($id, $type = null, $property = 'openskos:uuid')
     {
         $prefixes = [
             'openskos' => OpenSkosNamespace::NAME_SPACE,
             'rdf' => RdfNamespace::NAME_SPACE
         ];
-        
+
         $lit = new \OpenSkos2\Rdf\Literal($id);
         $qb = new \Asparagus\QueryBuilder($prefixes);
         $query = $qb->describe(['?subject', '?object']) // untyped object is added to get subresources (bnodes) like vcard:adress and vcard:org
@@ -221,7 +222,7 @@ class ResourceManager
             $query = $query->also('?subject', 'rdf:type', "<$type>");
         }
         $data = $this->fetchQuery($query, $type);
-        
+
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
             "The requested resource with $property set to $id of type $type was not found, triple store query: $query"
@@ -241,7 +242,7 @@ class ResourceManager
      * @return Resource
      * @throws ResourceNotFoundException
      */
-    public function fetchByUri($uri, $type=null)
+    public function fetchByUri($uri, $type = null)
     {
         $resource = new Uri($uri);
         $prefixes = [
@@ -453,76 +454,6 @@ class ResourceManager
         return $result[0]->count->getValue();
     }
 
-    public function countRdfTriples($uri, $property, $object){
-        $objString = $this->valueToTurtle($object);
-        $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
-        $query .= "WHERE { <$uri> <$property>  $objString.}"; 
-        /* @var $result \EasyRdf\Sparql\Result */
-        $result = $this->query($query);
-        return $result[0]->count->getValue();
-    }
-  
-    public function fetchSubjectForObject($property, $object, $type=null){
-        $objString = $this->valueToTurtle($object);
-        $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
-        if (isset($type)) {
-           $query .= "WHERE { ?subject <$property>  $objString. ?subject <".RdfNamespace::TYPE."> <$type>}"; 
-        } else {
-        $query .= "WHERE { ?subject <$property>  $objString. }";
-        }
-        /* @var $result \EasyRdf\Sparql\Result */
-        $result = $this->query($query);
-        $retval = $this->resultToArray($result, 'subject', new \OpenSkos2\Rdf\Uri("http://dummy"));
-        return $retval;
-    }
-    
-    
-    public function deleteReferencesToObject(\OpenSkos2\Rdf\Uri $resource)
-    {
-        $this->client->update("DELETE WHERE {?subject ?predicate  <{$resource->getUri()}> }");
-    }
-
-    
-      private function resultToArray($result, $fieldname, $typeinstance)
-    {
-        $retval = array();
-        if ($typeinstance instanceof \OpenSkos2\Rdf\Uri) {
-            foreach ($result as $res) {
-                $retval[] = $res->$fieldname->getUri();
-            }
-        } else {
-            if ($typeinstance instanceof \OpenSkos2\Rdf\Literal) {
-                foreach ($result as $res) {
-                    $retval[] = $res->$fieldname->getValue();
-                }
-            } else {
-                foreach ($result as $res) {
-                    $retval[] = $res->$fieldname;
-                }
-            }
-        }
-        return $retval;
-    }
-
-   
-    protected function makeNameUriMap($sparqlQueryResult)
-    {
-        $items = [];
-        foreach ($sparqlQueryResult as $resource) {
-            $uri = $resource->uri->getUri();
-            $name = $resource->name->getValue();
-            $items[$name] = $uri;
-        }
-        return $items;
-    }
-
-    // overriden in concept manager
-    // may be overriden in the future in other specific resource managers
-    public function replaceAndCleanRelations($resource)
-    {
-        $this->replace($resource);
-    }
-
     /**
      * Asks for if the properties map has a match.
      * Example for $matchProperties:
@@ -720,8 +651,118 @@ class ResourceManager
         }
         return $query;
     }
-    
-    
+
+    // Meertens
+    // overriden in concept manager
+    // may be overriden in the future in other specific resource managers
+    public function replaceAndCleanRelations($resource)
+    {
+        $this->replace($resource);
+    }
+
+    public function countRdfTriples($uri, $property, $object)
+    {
+        $objString = $this->valueToTurtle($object);
+        $query = 'SELECT (COUNT(DISTINCT ?subject) AS ?count)' . PHP_EOL;
+        $query .= "WHERE { <$uri> <$property>  $objString.}";
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        return $result[0]->count->getValue();
+    }
+
+    public function fetchSubjectForObject($property, $object, $type = null)
+    {
+        $objString = $this->valueToTurtle($object);
+        $query = 'SELECT DISTINCT ?subject' . PHP_EOL;
+        if (isset($type)) {
+            $query .= "WHERE { ?subject <$property>  $objString. ?subject <" . RdfNamespace::TYPE . "> <$type>}";
+        } else {
+            $query .= "WHERE { ?subject <$property>  $objString. }";
+        }
+        /* @var $result \EasyRdf\Sparql\Result */
+        $result = $this->query($query);
+        $retval = $this->resultToArray($result, 'subject', new \OpenSkos2\Rdf\Uri("http://dummy"));
+        return $retval;
+    }
+
+    public function deleteReferencesToObject(\OpenSkos2\Rdf\Uri $resource)
+    {
+        $this->client->update("DELETE WHERE {?subject ?predicate  <{$resource->getUri()}> }");
+    }
+
+    private function resultToArray($result, $fieldname, $typeinstance)
+    {
+        $retval = array();
+        if ($typeinstance instanceof \OpenSkos2\Rdf\Uri) {
+            foreach ($result as $res) {
+                $retval[] = $res->$fieldname->getUri();
+            }
+        } else {
+            if ($typeinstance instanceof \OpenSkos2\Rdf\Literal) {
+                foreach ($result as $res) {
+                    $retval[] = $res->$fieldname->getValue();
+                }
+            } else {
+                foreach ($result as $res) {
+                    $retval[] = $res->$fieldname;
+                }
+            }
+        }
+        return $retval;
+    }
+
+    public function fetchNameUri()  // title -> uri for sets, skos collections and conceptshcma's, overriden for the rest
+    {
+        $query = "SELECT ?uri ?name WHERE { ?uri  <" . DcTerms::TITLE . "> ?name ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <{$this->getResourceType()}>. }";
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
+
+    public function fetchNameSearchID() // title  -> uuid for concept shcme'a and skos collection, overriden for the rest
+    {
+        $query = "SELECT ?name ?searchid WHERE { ?uri  <" . DcTerms::TITLE . "> ?name . "
+            . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <{$this->getResourceType()}>. }";
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+
+    public function listConceptsForCluster($uri, $property)
+    {
+        $query = "SELECT ?name ?searchid WHERE { ?concepturi  <" . RdfNamespace::TYPE . "> <" . \OpenSkos2\Concept::TYPE . "> . "
+            . "?concepturi  <" . $property . "> <$uri> . "
+            . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
+            . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?serachid .}";
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
+
+    protected function makeNameUriMap($sparqlQueryResult)
+    {
+        $items = [];
+        foreach ($sparqlQueryResult as $resource) {
+            $uri = $resource->uri->getUri();
+            $name = $resource->name->getValue();
+            $items[$name] = $uri;
+        }
+        return $items;
+    }
+
+    protected function makeNameSearchIDMap($sparqlQueryResult)
+    {
+        $items = [];
+        foreach ($sparqlQueryResult as $resource) {
+            $searchid = $resource->searchid->getValue();
+            $name = $resource->name->getValue();
+            $items[$name] = $searchid;
+        }
+        return $items;
+    }
+
     // RELATIONS 
     public function getCustomRelationTypes()
     {
@@ -731,6 +772,7 @@ class ResourceManager
             return $this->customRelationTypes->getRelationTypes();
         }
     }
+
     public function getCustomInverses()
     {
         if ($this->init["custom.default_relationtypes"]) {
@@ -739,6 +781,7 @@ class ResourceManager
             return $this->customRelationTypes->getInverses();
         }
     }
+
     public function getCustomTransitives()
     {
         if ($this->init["default_relationtypes"]) {
@@ -747,6 +790,7 @@ class ResourceManager
             return $this->customRelationTypes->getTransitives();
         }
     }
+
     public function setCustomRelationTypes($relationtypes)
     {
         if ($this->init["custom.default_relationtypes"]) {
@@ -755,6 +799,7 @@ class ResourceManager
             $this->customRelationTypes->setRelationTypes($relationtypes);
         }
     }
+
     public function setCustomInverses($inverses)
     {
         if ($this->init["custom.default_relationtypes"]) {
@@ -763,6 +808,7 @@ class ResourceManager
             $this->customRelationTypes->setInverses($inverses);
         }
     }
+
     public function setCustomTransitives($transitives)
     {
         if ($this->init["custom.default_relationtypes"]) {
@@ -771,7 +817,7 @@ class ResourceManager
             $this->customRelationTypes->setTransitives($transitives);
         }
     }
-    
+
     public function getTripleStoreRegisteredCustomRelationTypes()
     {
         $sparqlQuery = 'select ?rel where {?rel <' . RdfNamespace::TYPE . '> <' . Owl::OBJECT_PROPERTY . '> . }';
@@ -796,9 +842,9 @@ class ResourceManager
         $result = array_merge($skosrels, $userrels);
         return $result;
     }
-    
+
     // MYSQL
-    
+
     public function fetchRowWithRetries($model, $query)
     {
         $tries = 0;

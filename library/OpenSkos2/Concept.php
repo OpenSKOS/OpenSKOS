@@ -51,7 +51,6 @@ class Concept extends Resource
     const STATUS_DELETED = 'deleted';
     const STATUS_EXPIRED = 'expired';
 
-    
     /**
      * Get list of all available concept statuses.
      * @return array
@@ -75,7 +74,6 @@ class Concept extends Resource
         SkosXl::ALTLABEL => Skos::ALTLABEL,
         SkosXl::HIDDENLABEL => Skos::HIDDENLABEL,
     ];
-    
 
     /**
      * Resource constructor.
@@ -87,7 +85,7 @@ class Concept extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-      /**
+    /**
      * Check if the resource is deleted
      * @TODO Separate in StatusAwareResource class or something like that
      * @return boolean
@@ -196,13 +194,7 @@ class Concept extends Resource
      * $oldStatus will be derived from $existingResource
      */
     public function ensureMetadata(
-        \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set = null, 
-        \OpenSkos2\Person $person = null, 
-        PersonManager $personManager = null,
-        LabelManager $labelManager=null, 
-        $existingConcept = null,
-        $forceCreationOfXl = false)
+    \OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set = null, \OpenSkos2\Person $person = null, PersonManager $personManager = null, LabelManager $labelManager = null, $existingConcept = null, $forceCreationOfXl = false)
     {
 
         $nowLiteral = function () {
@@ -248,9 +240,9 @@ class Concept extends Resource
     public function handleStatusChange($person, $existingConcept = null)
     {
         if ($existingConcept == null) {
-            $oldStatus=null;
+            $oldStatus = null;
         }
-        
+
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
@@ -275,9 +267,7 @@ class Concept extends Resource
             }
         }
     }
-    
 
-    
     /**
      * Generates an uri for the concept.
      * Requires a URI from to an openskos set
@@ -290,7 +280,7 @@ class Concept extends Resource
             $customGen = new UriGeneration();
             return $customGen->generateUri($conceptManager, $this);
         }
-        
+
         $identifierHelper = new Concept\IdentifierHelper($tenant, $conceptManager);
 
         $uri = $identifierHelper->generateUri($this);
@@ -317,5 +307,21 @@ class Concept extends Resource
         }
     }
 
-   
+      public function fetchNameUri()  // pref Label -> uri for concepts
+    {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
+    
+    
+      public function fetchNameSearchID() //pref Label -> uuid for concepts
+    {
+        $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . ?uri  <' .
+            OpenSkosNameSpace::UUID . '> ?searchid }';
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
+    }
 }

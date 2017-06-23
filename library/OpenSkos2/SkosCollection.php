@@ -25,7 +25,6 @@ class SkosCollection extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
- 
     public function getDescription()
     {
         if ($this->hasProperty(DcTerms::DESCRIPTION)) {
@@ -35,4 +34,5 @@ class SkosCollection extends Resource
         }
     }
 
+  
 }

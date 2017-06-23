@@ -32,10 +32,9 @@ $this->headTitle ('Sets')?>
 <p>These are the avaliable sets in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $code = $setManager -> getResourceSearchID($value, Dcmi::DATASET);
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'set', 'id' => $code), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'set', 'id' => $value), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

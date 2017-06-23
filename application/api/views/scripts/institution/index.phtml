@@ -18,7 +18,6 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\Org;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $list = $this->resource;
@@ -32,10 +31,9 @@ $this->headTitle ('Institutions')?>
 <p>These are the avaliable institutions in this repository:</p>
 <ul>
 	<?php foreach ($list as $key=>$value):
-            $code = $tenantManager -> getResourceSearchID($value, Org::FORMALORG);
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $code), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $value), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

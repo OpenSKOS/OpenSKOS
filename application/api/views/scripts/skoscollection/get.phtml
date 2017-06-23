@@ -29,6 +29,7 @@ $skosCollectionManager = $di->get('OpenSkos2\SkosCollectionManager');
 $uri = $skosCollection->getUri();
 $name = $skosCollection->getTitle();
 $uuid = $skosCollection->getUuid();
+$setUri = $skosCollection->getSet()->getUri();
 $this->headTitle($name);
 ?>
 
@@ -43,16 +44,14 @@ $this->headTitle($name);
             <?php endif ?>
             <?php
             if ($key === "set"):
-                $setCode = $skosCollectionManager->getResourceSearchID($val, Dcmi::DATASET);
-                $setTitle = $skosCollectionManager->getSetTitle($val);
+                $setinfo = $setManager->fetchSetTitleAndCodeByUri($setUri);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setCode)) ?>.html"><?php echo $setTitle ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
             <?php endif ?>
             <?php
             if ($key === "tenant"):
-                $tenantCode = $skosCollectionManager->getResourceSearchID($val, Org::FORMALORG);
-                $tenantName = $skosCollectionManager->getTenantNameByCode($tenantCode);
+                $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                 ?>
                 <dt><?php echo $key ?>:</dt>
                 <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
