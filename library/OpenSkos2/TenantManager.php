@@ -22,6 +22,7 @@ namespace OpenSkos2;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\VCard;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Tenant;
 
@@ -49,12 +50,14 @@ class TenantManager extends ResourceManager
 
     public function fetchSetsForTenantUri($tenantUri)
     {
-        $query = 'DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { ?subject <' .
-            DcTerms::PUBLISHER . '> <' . $tenantUri . '>. } }';
+        $query = "DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { "
+            . "?subject <" . DcTerms::PUBLISHER . "> <$tenantUri>. "
+            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Set::TYPE.">.} }";
         $response = $this->query($query);
         return $response;
     }
 
+  
     // used only for html output
     private function arrangeTripleStoreSets($response)
     {
@@ -120,5 +123,7 @@ class TenantManager extends ResourceManager
         }
         return $response[0]->name->getValue();
     }
+    
+    
     
 }

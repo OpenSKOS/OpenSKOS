@@ -86,14 +86,27 @@ abstract class AbstractTripleStoreResource
         } else {
             $propertiesList = [];
         }
+        
+        if (($context === 'json' || $context === 'jsonp') && $this->manager->getResourceType() === Tenant::TYPE) {
+            $fieldname = 'sets';
+            $extrasGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
+            $extras = \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($extrasGraph);
+        } else {
+            $fieldname = null;
+            $extras = [];
+        }
 
 
         switch ($context) {
             case 'json':
-                $response = (new DetailJsonResponse($resource, $propertiesList))->getResponse();
+                $detailJsonResponse = (new DetailJsonResponse($resource, $propertiesList));
+                $detailJsonResponse->setExtras($extras, $fieldname, $this->init['custom.backward_compatible']);
+                $response = $detailJsonResponse->getResponse();
                 break;
             case 'jsonp':
-                $response = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList))->getResponse();
+                $detailJsonPResponse = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList));
+                $detailJsonPResponse->setExtras($extras, $fieldname, $this->init['custom.backward_compatible']);
+                $response = $detailJsonPResponse->getResponse();
                 break;
             case 'rdf':
                 $response = (new DetailRdfResponse($resource, $propertiesList))->getResponse();
