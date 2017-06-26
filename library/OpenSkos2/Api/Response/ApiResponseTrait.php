@@ -22,7 +22,6 @@ namespace OpenSkos2\Api\Response;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Row_User;
 use OpenSKOS_Db_Table_Users;
@@ -91,6 +90,8 @@ trait ApiResponseTrait
 
         return $user;
     }
+    
+    
 
     /**
      * Check if the user is from the given tenant

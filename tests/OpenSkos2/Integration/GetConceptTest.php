@@ -322,9 +322,6 @@ class GetConceptTest extends AbstractTest
 
         $dom = new \Zend_Dom_Query();
         $xml = $response->getBody();
-        
-        var_dump($xml);
-        
         $dom->setDocumentXML($xml);
 
         $results1 = $dom->queryXpath('/rdf:RDF/rdf:Description');
@@ -372,8 +369,10 @@ class GetConceptTest extends AbstractTest
 
         //does not work because of . : $results1 = $dom->query('dl > dd  > a[href="http://hdl.handle.net/11148/CCR_C-4046_944cc750-1c29-ccf0-fb68-4d00385d7b42"]');
         $resultsUri1 = $dom->query('dl > dt');
-        $propertyName = $this->getByIndex($resultsUri1, 2)->nodeValue;
-        $this->AssertEquals("SKOS Class:", $propertyName);
+        $propertyName1 = $this->getByIndex($resultsUri1, 2)->nodeValue;
+        $this->AssertEquals("URI:", $propertyName1);
+        $propertyName2 = $this->getByIndex($resultsUri1, 3)->nodeValue;
+        $this->AssertEquals("SKOS Class:", $propertyName2);
 
         $resultsUri2 = $dom->query('dl > dd > a');
         $property = $this->getByIndex($resultsUri2, 2);

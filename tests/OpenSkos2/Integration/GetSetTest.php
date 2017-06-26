@@ -190,7 +190,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
                 $i++;
             }
             if ($item->nodeValue === "type:") {
-                $this->AssertEquals("http://purl.org/dc/dcmitype#Dataset", $this->getbyIndex($values, $j)->nodeValue);
+                $this->AssertEquals(\OpenSkos2\Set::TYPE, $this->getbyIndex($values, $j)->nodeValue);
                 $i++;
             }
             $j++;

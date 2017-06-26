@@ -40,13 +40,14 @@ $this->headTitle($name);
 <div class="clear">
     <div id="collection-form">
         <dl>
-            <?php foreach ($this->resProperties as $key => $val): ?>
-                <dt><?php echo $key ?>:</dt>
+            <?php foreach ($this->resProperties as $key => $val):?>
+                <?php if ($key === "publisher") { continue;} ?>
+                 <dt><?php echo $key ?>:</dt>
                 <?php
-                if ($key === "publisher"):
+                if ($key === "tenant"):
                     $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                     ?>
-                    <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+                    <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo "name '$tenantName', code '{$tenantCode}'"  ?></a></dd>
                 <?php endif ?>
                 <?php if ($key === "type"): ?>
                     <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
@@ -57,7 +58,7 @@ $this->headTitle($name);
                 <?php if (($key === "uuid") || ($key === "code") || ($key === "title") || ($key === "allow_oai")): ?>
                     <dd><?php echo $val ?></dd>
                 <?php endif ?>
-                <?php if ($key === "webpage" || $key === "conceptBaseUri" || $key === "OAI_baseURL" || $key === "license"): ?>
+                <?php if ($key === "webpage" || $key === "conceptBaseUri" || $key === "oai_baseURL" || $key === "license"): ?>
                     <dd><a rel="external" href="<?php echo $val ?>"><?php echo $val ?></a></dd>
                 <?php endif ?>
             <?php endforeach; ?>

@@ -4,8 +4,6 @@ namespace Tests\OpenSkos2\Integration;
 
 require_once 'AbstractTest.php';
 
-use OpenSkos2\Roles;
-
 class GetInstitutionTest extends AbstractTest
 {
 
@@ -74,6 +72,7 @@ class GetInstitutionTest extends AbstractTest
         $this->allResourcesJson('institution');
     }
 
+    
     public function testAllInstitutionsJsonP()
     {
         $this->allResourcesJsonP('institution');
@@ -96,7 +95,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitutionJson()
     {
-        //$this->resourceJson('institution', 'test');
+        $this->resourceJson('institution', 'test');
         $this->resourceJson('institution', 'example');
     }
 

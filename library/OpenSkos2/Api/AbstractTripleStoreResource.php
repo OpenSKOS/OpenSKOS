@@ -154,11 +154,14 @@ abstract class AbstractTripleStoreResource
 
             switch ($params['context']) {
                 case 'json':
-                    $response = (new JsonResponse($result))->getResponse();
+                    $jsonResponse = (new JsonResponse($result));
+                    $jsonResponse ->setInit($this->init);
+                    $response = $jsonResponse->getResponse();
                     break;
                 case 'jsonp':
-                    $response = (new JsonpResponse(
-                        $result, $params['callback']))->getResponse();
+                    $jsonPResponse = (new JsonpResponse($result, $params['callback']));
+                    $jsonPResponse ->setInit($this->init);
+                    $response = $jsonPResponse->getResponse();
                     break;
                 case 'rdf':
                     $response = (new RdfResponse($result))->getResponse();
