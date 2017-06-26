@@ -200,12 +200,15 @@ class Api_FindConceptsController extends AbstractController
         // Exception for html use ZF 1 easier with linking in the view
         if ('html' === $context) {
             /* @var $concept \OpenSkos2\Concept */
-            $concept = $apiConcept->getConcept($id);
+            $concept = $apiConcept->getResource($id);
+            $tenantCode = $concept->getTenant()->getValue();
+            $manager = $this->getConceptManager();
+            $tenant = $manager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
             $useXlLabels = $apiConcept->useXlLabels(
-                \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution()), $request
+                $tenant, $request
             );
             if ($useXlLabels === true) {
-                $concept->loadFullXlLabels($this->getConceptManager()->getLabelManager());
+                $concept->loadFullXlLabels($manager->getLabelManager());
             }
 
             $this->view->useXlLabels = $useXlLabels;

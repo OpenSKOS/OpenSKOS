@@ -34,7 +34,7 @@ class VCardOrg extends AbstractTenantValidator
                         }
 
                         $name = $names[0]->getValue();
-                        $insts = $this->resourceManager->fetchTenantNameUri();
+                        $insts = $this->resourceManager->fetchNameUri();
                         if (array_key_exists($name, $insts)) {
                             if ($this->isForUpdate) {
                                 if ($insts[$name] !== $resource->getUri()) {

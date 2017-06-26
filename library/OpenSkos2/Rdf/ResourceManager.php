@@ -259,6 +259,7 @@ class ResourceManager
         if (isset($type)) {
             $query = $query->also('?subject', 'rdf:type', "<$type>");
         }
+        
         try {
             $result = $this->fetchQuery($query, $type);
             // @TODO Add resourceType check.
@@ -284,7 +285,7 @@ class ResourceManager
      * @return ResourceCollection
      * @throws ResourceNotFoundException
      */
-    public function fetchByUris($uris)
+    public function fetchByUris($uris, $rdfType=null)
     {
         /*
           DESCRIBE ?subject
@@ -296,7 +297,10 @@ class ResourceManager
           )
           }
          */
-        $resources = EasyRdf::createResourceCollection($this->resourceType);
+        if ($rdfType == null){
+           $rdfType=$this->resourceType;
+        }
+        $resources = EasyRdf::createResourceCollection($rdfType);
         if (!empty($uris)) {
             foreach (array_chunk($uris, 50) as $urisChunk) {
                 $filters = [];
@@ -307,10 +311,10 @@ class ResourceManager
                 $query->describe('?subject')
                     ->where('?subject', '?predicate', '?object')
                     ->filter(implode(' || ', $filters));
-                if (!empty($this->resourceType)) {
-                    $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $this->resourceType . '>');
+                if (!empty($rdfType)) {
+                    $query->where('?subject', '<' . RdfNamespace::TYPE . '>', '<' . $rdfType . '>');
                 }
-                foreach ($this->fetchQuery($query) as $resource) {
+                foreach ($this->fetchQuery($query, $rdfType) as $resource) {
                     $resources->append($resource);
                 }
             }

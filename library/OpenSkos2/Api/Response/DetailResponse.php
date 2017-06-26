@@ -35,6 +35,27 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
      * @var []
      */
     protected $excludePropertiesList;
+    
+    
+      /**
+      *
+      * @var array
+      */
+     protected $auxVals=[];
+     /**
+      *
+      * @var string 
+      */
+     protected $auxField=null;
+     
+     /**
+      *
+      * @var bool 
+      */
+     protected $backwardCompatible = false;
+     
+     
+     
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param array $propertiesList Properties to serialize.
@@ -45,4 +66,35 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
         $this->propertiesList = $propertiesList;
         $this->excludePropertiesList = $excludePropertiesList;
     }
+    
+     
+     public function setExtras($collection, $fieldname, $backwardCompatible){
+         $this->auxVals = $collection;
+         $this->auxField = $fieldname;
+         $this->backwardCompatible = $backwardCompatible;
+     }
+
+   
+    
+    protected function addAuxToBody($body){
+        if ($this->auxField != null) {
+            if (count($this->auxVals) > 0) {
+                foreach ($this->auxVals as $val) {
+                    $body[$this->auxField][] = (new \OpenSkos2\Api\Transform\DataArray($val))->transform();
+                }
+            } else {
+                $body[$this->auxField] = [];
+            }
+        }
+        if ($this->backwardCompatible) {
+            $correctedBody = (new BackwardCompatibility())->backwardCompatibilityMap(
+                $body,
+                $this->resource->getType()->getUri()
+            );
+        } else {
+            $correctedBody = $body;
+        }
+        return $correctedBody;
+    }
+    
 }

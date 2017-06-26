@@ -36,7 +36,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $set;
     protected $referenceCheckOn;
     protected $conceptReferenceCheckOn;
-    private static $nonresolvableURIs = [Rdf::TYPE, DcTerms::LICENSE,OpenSkos::WEBPAGE];
+    private static $nonresolvableURIs = [Rdf::TYPE, DcTerms::LICENSE, OpenSkos::WEBPAGE];
 
     /**
      * @var array
@@ -145,19 +145,19 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         foreach ($val as $value) {
             if ($isBoolean) {
                 if (!($value == "true" || $value == "false")) {
-                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false but it is set to '. $value;
+                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false but it is set to ' . $value;
                 }
             }
 
             if ($isUnique) {
-               if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
+                if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
                     $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
             if ($value instanceof Uri && $this->referenceCheckOn && !in_array($propertyUri, self::$nonresolvableURIs)) {
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
-                    $this->errorMessages[] = "The resource (of type  $type) referred by  uri ".
-                    "{$value->getUri()} via the property $propertyUri is not found. ";
+                    $this->errorMessages[] = "The resource (of type  $type) referred by  uri " .
+                        "{$value->getUri()} via the property $propertyUri is not found. ";
                 }
             }
         }
@@ -166,9 +166,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
     private function uniquenessCheck($resource, $propertyUri, $value)
     {
-         $otherResourceUris = $this->resourceManager->fetchSubjectForObject(
-                    $propertyUri, $value, $this->resourceManager->getResourceType()
-                );
+        $otherResourceUris = $this->resourceManager->fetchSubjectForObject(
+            $propertyUri, $value, $this->resourceManager->getResourceType()
+        );
         if (count($otherResourceUris) > 0) {
             if ($this->isForUpdate) { // for update
                 if (count($otherResourceUris) > 1) {
@@ -286,15 +286,18 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $secondRound = true;
         if ($firstRound) {
 
-            $setUri = $resource->getSet()->getUri();
-            $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
+            $setUris = $resource->getSet();
+            foreach ($setUris as $setUri) {
+                $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
 
-            $tenantUri = $resource->getTenantUri()->getUri();
-            $publisherUri = $set->getTenantUri()->getUri();
-            if ($tenantUri !== $publisherUri) {
-                $this->error[] = "The set $setUri declared in the resource has the tenant with the uri $publisherUri which does not coincide with the uri $tenantUri of the tenant declared in the resource";
-                $secondRound = false;
+                $tenantUri = $resource->getTenantUri()->getUri();
+                $publisherUri = $set->getTenantUri()->getUri();
+                if ($tenantUri !== $publisherUri) {
+                    $this->error[] = "The set $setUri declared in the resource has the tenant with the uri $publisherUri which does not coincide with the uri $tenantUri of the tenant declared in the resource";
+                    $secondRound = false;
+                }
             }
+
             $tenantCode = $resource->getTenant()->getValue();
             if ($set->getTenant() != null) {
                 $publisherCode = $set->getTenant()->getValue();

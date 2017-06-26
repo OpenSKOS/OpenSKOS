@@ -145,7 +145,7 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function getSet()
     {
-        return $this->getPropertySingleValue(OpenSkos::SET);
+        return $this->getProperty(OpenSkos::SET);
     }
 
     public function getTitle()
@@ -352,7 +352,6 @@ class Resource extends Uri implements ResourceIdentifier
         return $this->getPropertySingleValue(OpenSkos::UUID);
     }
 
-// TODO : ask Picturae about this function, look for usages before
     /**
      * @return string
      */
