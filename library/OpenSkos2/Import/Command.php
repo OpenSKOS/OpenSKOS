@@ -70,10 +70,7 @@ class Command implements LoggerAwareInterface
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
     public function __construct(
-    ResourceManager $resourceManager, 
-        ConceptManager $conceptManager, 
-        PersonManager $personManager, 
-        Tenant $tenant = null
+    ResourceManager $resourceManager, ConceptManager $conceptManager, PersonManager $personManager, Tenant $tenant = null
     )
     {
         $this->resourceManager = $resourceManager;
@@ -100,19 +97,13 @@ class Command implements LoggerAwareInterface
 
 
         $validator = new ResourceValidator(
-            $this->conceptManager, 
-            !($message->getNoUpdates()), 
-            $this->tenant, 
-            $this->set, 
-            false, 
-            false, 
-            $this->logger);
+            $this->conceptManager, !($message->getNoUpdates()), $this->tenant, $this->set, false, false, $this->logger);
 
 
         // validation is in the loop below per resource, not with the whole bunch
-        /*if (!$validator->validate($resourceCollection)) {
-            throw new \Exception('Failed validation: ' . PHP_EOL . implode(PHP_EOL, $validator->getErrorMessages()));
-        }*/
+        /* if (!$validator->validate($resourceCollection)) {
+          throw new \Exception('Failed validation: ' . PHP_EOL . implode(PHP_EOL, $validator->getErrorMessages()));
+          } */
 
         if ($message->getClearSet()) {
             $this->conceptManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
@@ -131,7 +122,7 @@ class Command implements LoggerAwareInterface
                 $this->resourceManager->delete($scheme);
             }
         }
-        
+
         foreach ($resourceCollection as $resourceToInsert) {
             if ($validator->validate($resourceToInsert)) {
                 if ($resourceToInsert instanceof Concept) {
@@ -142,20 +133,44 @@ class Command implements LoggerAwareInterface
                     $this->logger->info("inserted resource {$resourceToInsert->getUri()}");
                 }
             } else {
-                $this->logger->error("Resource {$resourceToInsert->getUri()}: \n" . 
-                    implode(' , ',$validator->getErrorMessages()));
+                $this->logger->error("Resource {$resourceToInsert->getUri()}: \n" .
+                    implode(' , ', $validator->getErrorMessages()));
             }
-             if (count($validator->getWarningMessages())>0) {
-                $this->logger->warning("Resource {$resourceToInsert->getUri()}:\n". 
-                    implode(' , ',$validator->getWarningMessages()));
-             }
-             if (count($validator->getDanglingReferences())>0) {
-                 $this->logger->warning("Dangling references for resource {$resourceToInsert->getUri()}:\n". 
-                     implode(' , ',$validator->getDanglingReferences()));
-             }
+            if (count($validator->getWarningMessages()) > 0) {
+                $this->logger->warning("Resource {$resourceToInsert->getUri()}:\n" .
+                    implode(' , ', $validator->getWarningMessages()));
+            }
+            if (count($validator->getDanglingReferences()) > 0) {
+                $this->logger->warning("Dangling references for resource {$resourceToInsert->getUri()}:\n" .
+                    implode(' , ', $validator->getDanglingReferences()));
+            }
         }
         // Commit all solr documents
         $this->conceptManager->commit();
+
+        // Removing dangling references run
+        $this->logger->info("...");
+        $this->logger->info("Removing danglig references");
+        $this->logger->info("...");
+        $validatorUpdate = new ResourceValidator(
+            $this->conceptManager, true, $this->tenant, $this->set, true, true, $this->logger);
+        foreach ($resourceCollection as $resourceInserted) {
+            $uri = $resourceInserted->getUri();
+            $type = $resourceInserted->getType()->getUri();
+            try {
+                $resource = $this->resourceManager->fetchByUri($uri, $type);
+                $resource = $this->removeDanglingReferences($resource, $validator->getDanglingReferences());
+                if ($validatorUpdate->validate($resource)) {
+                    $this->conceptManager->replace($resourceToInsert);
+                    $this->logger->info("replaced resource {$resource->getUri()}");
+                } else {
+                    $this->logger->error("Resource {$resource->getUri()} of type {$resource->getType()->getUri()}: \n" .
+                        implode(' , ', $validator->getErrorMessages()));
+                }
+            } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
+                $this->logger->info("Skipping invalid resource {$uri}");
+            }
+        }
     }
 
     private function removeDanglingReferences($resource, $danglings)

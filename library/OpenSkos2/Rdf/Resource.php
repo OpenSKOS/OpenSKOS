@@ -317,7 +317,7 @@ class Resource extends Uri implements ResourceIdentifier
 
   
     /**
-     * @return string
+     * @return Uri
      */
     public function getType()
     {

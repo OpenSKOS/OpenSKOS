@@ -118,10 +118,10 @@ class CollectionHelper implements LoggerAwareInterface
 
             if ($resourceToInsert instanceof Concept) {
                 $this->prepareConcept($resourceToInsert, $alreadyExists);
-                var_dump("Has prepared concept {$resourceToInsert->getUri()}");
+                $this->logger->info("Has prepared concept {$resourceToInsert->getUri()}");
             } elseif ($resourceToInsert instanceof ConceptScheme) {
                 $this->prepareConceptScheme($resourceToInsert, $alreadyExists);
-                var_dump("Has prepared concept scheme {$resourceToInsert->getUri()}");
+                $this->logger->info("Has prepared concept scheme {$resourceToInsert->getUri()}");
             }
         }
         

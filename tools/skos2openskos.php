@@ -89,27 +89,9 @@ $message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReference
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
 $importer->setLogger($logger);
 
-var_dump("First round...");
 $importer->handle($message);
-//$elapsed = time() - $old_time;
-//echo "\n time elapsed since start of import (sec): " . $elapsed . "\n";
-/*echo "The following " . count($not_valid_resource_uris) . " resources are not valid and not imported: \n";
-foreach ($not_valid_resource_uris as $uri) {
-  echo "\n " . $uri;
-}*/
-echo "\n First round is finished. The second round is under construction: the references to the non-valid concepts from other concepts, or concept schemata or skos collections will be removed before submitting a concept for update. UpdateMode\n";
 
-/*
-$message2 = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = true
-  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
-);
-$not_valid_resource_uris2 = $importer->handle($message2);
-$elapsed2 = time() - $old_time;
-echo "\n time elapsed since start of the import : " . $elapsed2 . "\n";
-echo "The following " . count($not_valid_resource_uris2) . " resources are not valid and not imported in the second round import: \n";
-foreach ($not_valid_resource_uris2 as $uri) {
-  echo "\n " . $uri;
-}
-echo "Done\n";*/
+
+echo "Done\n";
 
 //php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/30216132-6d43-4cb0-9a5e-4382fe03336a --file=clavas-organisations.xml
