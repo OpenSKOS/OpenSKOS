@@ -20,7 +20,7 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
-use OpenSkos2\Concept;
+use OpenSkos2\Set;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource;
@@ -50,7 +50,7 @@ class Collection
     protected $set;
     protected $isForUpdate;
     protected $referenceCheckOn;
-
+    protected $conceptReferenceCheckOn;
     /**
      * Holds all error messages
      *
@@ -75,6 +75,7 @@ class Collection
         Tenant $tenant,
         Set $set,
         $referencecheckOn,
+        $conceptReferenceCheckOn=false,
         LoggerInterface $logger = null
     ) {
         if ($logger === null) {
@@ -86,6 +87,7 @@ class Collection
         $this->tenant = $tenant;
         $this->set = $set;
         $this->isForUpdate = $isForUpdate;
+        $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
         $this->referenceCheckOn = $referencecheckOn;
     }
 
@@ -101,9 +103,10 @@ class Collection
             $validator = $this->getResourceValidator($resource);
             if (!$validator->validate($resource)) {
                 $errorsFound = true;
-
+                   
                 $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
                     . implode(', ', $validator->getErrorMessages());
+                
             }
         }
 

@@ -154,10 +154,22 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                     $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
-            if ($value instanceof Uri && $this->referenceCheckOn && !in_array($propertyUri, self::$nonresolvableURIs)) {
+            
+            if ($value instanceof Uri && $this->referenceCheckOn && 
+                !in_array($propertyUri, self::$nonresolvableURIs)) { //ERROR
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
-                    $this->errorMessages[] = "The resource (of type  $type) referred by  uri " .
-                        "{$value->getUri()} via the property $propertyUri is not found. ";
+                    $this->errorMessages[] = "The resource (of type  $type) referred by uri " .
+                        "{$value->getUri()} via the property $propertyUri is not found in this triple store ";
+                        $this->danglingReferences[] = $value->getUri();
+                }
+            }
+            
+                if ($value instanceof Uri && !($this->referenceCheckOn) && 
+                    !in_array($propertyUri, self::$nonresolvableURIs)){ // WARNING
+                if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
+                    $this->warningMessages[] = "The resource (of type  $type) referred by  uri " .
+                        "{$value->getUri()} via the property $propertyUri is not found in thsi triple store. ";
+                    $this->danglingReferences[] = $value->getUri();    
                 }
             }
         }

@@ -659,13 +659,7 @@ class ResourceManager
         return $query;
     }
 
-    // Meertens
-    // overriden in concept manager
-    // may be overriden in the future in other specific resource managers
-    public function replaceAndCleanRelations($resource)
-    {
-        $this->replace($resource);
-    }
+   
 
     public function countRdfTriples($uri, $property, $object)
     {
@@ -848,6 +842,92 @@ class ResourceManager
         $userrels = $this->getCustomRelationTypes();
         $result = array_merge($skosrels, $userrels);
         return $result;
+    }
+    
+    // a relation is invalid if it (possibly with its inverse) creates transitive
+    // link of a concept or related concept to itself
+    public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
+    {
+        $closure = $this->getClosure($relatedConceptUri, $relationUri);
+        $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
+        if ($transitive) {
+            throw new \Exception(
+            "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link of the source to itself, '
+            . 'possibly via inverse relation.");
+        }
+        // overkill??
+        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
+        if (array_key_exists($relationUri, $inverses)) {
+            $inverseRelUri = $inverses[$relationUri];
+            $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
+            $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
+            if ($transitiveInverse) {
+                throw new \Exception(
+                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link of the target to itself");
+            }
+        }
+    }
+    public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
+    {
+        $count = $this->countTriples(
+            '<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>'
+        );
+        if ($count > 0) {
+            throw new \Exception(
+            "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
+            );
+        }
+        $trans = $this->customRelationTypes->getTransitives();
+        if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
+            $closure = $this->getClosure($conceptUri, $relationUri);
+            if (in_array($relatedConceptUri, $closure)) {
+                throw new \Exception(
+                "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
+                );
+            }
+        }
+        return false;
+    }
+
+    
+    public function isRelationURIValid($relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null)
+    {
+        if ($customRelUris == null) {
+            $customRelUris = array_values($this->getCustomRelationTypes());
+        }
+        if ($registeredRelationUris == null) {
+            $registeredRelationUris = array_values($this->getTripleStoreRegisteredCustomRelationTypes());
+        }
+        if ($allRelationUris == null) {
+            $allRelationUris = array_values($this->fetchConceptConceptRelationsNameUri());
+        }
+        if (in_array($relUri, $allRelationUris)) {
+            if (in_array($relUri, $customRelUris)) {
+                if (!in_array($relUri, $registeredRelationUris)) {
+                    throw new \Exception(
+                    'The relation  ' . $relUri .
+                    '  is not registered in the triple store. ');
+                }
+            }
+        } else {
+            throw new \Exception(
+            'The relation type ' . $relUri . '  is neither a skos concept-concept '
+            . 'relation type nor a custom relation type. ');
+        }
+    }
+    
+    // all concepts from transitive closure for $conceptsUri;
+    private function getClosure($conceptUri, $relationUri)
+    {
+        $query = 'select ?trans where {<' . $conceptUri . '>  <' . $relationUri . '>+ ' . '  ?trans . }';
+        $response = $this->query($query);
+        $retVal = array();
+        $i = 0;
+        foreach ($response as $key => $value) {
+            $retVal[$i] = $value->trans->getUri();
+            $i++;
+        }
+        return $retVal;
     }
 
     // MYSQL

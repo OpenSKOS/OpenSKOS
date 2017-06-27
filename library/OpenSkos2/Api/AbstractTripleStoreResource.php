@@ -243,7 +243,11 @@ abstract class AbstractTripleStoreResource
 
             $this->validate($resource, $tenant, $set, true);
 
-            $this->manager->replaceAndCleanRelations($resource);
+            if ($this->manager->getResourceType() === \OpenSkos2\Concept::TYPE) {
+               $this->manager->replaceAndCleanRelations($resource);
+            } else {
+               $this->manager->replace($resource);
+            }
         } catch (ApiException $ex) {
             return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
         }

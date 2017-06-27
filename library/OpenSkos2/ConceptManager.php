@@ -335,8 +335,10 @@ class ConceptManager extends ResourceManagerWithSearch
      * @param array $sorts
      * @return ConceptCollection
      */
+    
+   
     public function search(
-    $query, $rows, $start = 0, &$numFound = 0, $sorts = null
+    $query, $rows=20, $start = 0, &$numFound = 0, $sorts = null
     )
     {
         return $this->fetchByUris(

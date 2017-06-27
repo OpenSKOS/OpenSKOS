@@ -64,7 +64,6 @@ use OpenSkos2\Validator\Set\Title as SetTitle;
 use OpenSkos2\Validator\Set\Type as SetType;
 use OpenSkos2\Validator\SkosCollection\Creator as SkosCollCreator;
 use OpenSkos2\Validator\SkosCollection\Description as SkosCollDescription;
-use OpenSkos2\Validator\SkosCollection\InSet as SkosCollInSet;
 use OpenSkos2\Validator\SkosCollection\Member as SkosCollMember;
 use OpenSkos2\Validator\SkosCollection\OpenskosUuid as SkosCollUuid;
 use OpenSkos2\Validator\SkosCollection\Title as SkosCollTitle;
@@ -221,7 +220,7 @@ class Resource
             foreach ($validator->getDanglingReferences() as $ref) {
                 $this->danglingReferences[] = $ref;
             }
-            $this->logger->error('Errors founds while validating resource "' . $resource->getUri() . '"');
+            //$this->logger->error('Errors found while validating resource "' . $resource->getUri() . '"');
             $this->logger->error(implode(', ', $validator->getErrorMessages()));
 
             $errorsFound = true;

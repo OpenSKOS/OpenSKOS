@@ -19,13 +19,6 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-// Meertens:
-// -- conceptManager in our version is not necessary, Resource manager is reposinsible for managing all sort of recourses.
-// -- We do not have tenant as command line-parameter because we already have a setUri as a command-line parameter which is more precise, because a tenant may have few sets.
-// tenant's Uri  is derived in "handle" of OpenSkos2\Import\Command from setUri (once, so it should not slow down import)
-// -- because of this merging becomes a bit of a problem (Pictira'es code appeal to tenant quite a few times) and 
-// it does make sence to keep two skos2openskos sets
-// -- we alse refer set and tenant via their URI, not code. In the future a syntacti sugar we can use tenant and set code for user' concevnience
 
 include dirname(__FILE__) . '/autoload.inc.php';
 
@@ -54,6 +47,7 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
+$conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
 $personManager = $diContainer->get('OpenSkos2\PersonManager');
 
 $person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Person::TYPE);
@@ -69,8 +63,6 @@ $tenant = $resourceManager->fetchByUri($publisher[0]->getUri(), \OpenSkos2\Tenan
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$importer = new \OpenSkos2\Import\Command($resourceManager, $person, $personManager, $tenant);
-$importer->setLogger($logger);
 
 $check_concept_references = null;
 
@@ -94,16 +86,20 @@ echo "First round. (The referecne to a concept via relations, hasTopConcept or m
 $message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = false
   $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
+$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
+$importer->setLogger($logger);
 
-$not_valid_resource_uris = $importer->handle($message);
-$elapsed = time() - $old_time;
-echo "\n time elapsed since start of import (sec): " . $elapsed . "\n";
-echo "The following " . count($not_valid_resource_uris) . " resources are not valid and not imported: \n";
+var_dump("First round...");
+$importer->handle($message);
+//$elapsed = time() - $old_time;
+//echo "\n time elapsed since start of import (sec): " . $elapsed . "\n";
+/*echo "The following " . count($not_valid_resource_uris) . " resources are not valid and not imported: \n";
 foreach ($not_valid_resource_uris as $uri) {
   echo "\n " . $uri;
-}
-echo "\n First round is finished. The second round: the references to the non-valid concepts from other concepts, or concept schemata or skos collections will be removed before submitting a concept for update. UpdateMode\n";
+}*/
+echo "\n First round is finished. The second round is under construction: the references to the non-valid concepts from other concepts, or concept schemata or skos collections will be removed before submitting a concept for update. UpdateMode\n";
 
+/*
 $message2 = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = true
   $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, true, true, false, 'en', false, false
 );
@@ -114,6 +110,6 @@ echo "The following " . count($not_valid_resource_uris2) . " resources are not v
 foreach ($not_valid_resource_uris2 as $uri) {
   echo "\n " . $uri;
 }
-echo "Done\n";
+echo "Done\n";*/
 
-//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/a8db78a0-7b51-4914-a4a3-11d268d339ff --file=clavas-organisations.xml
+//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/30216132-6d43-4cb0-9a5e-4382fe03336a --file=clavas-organisations.xml
