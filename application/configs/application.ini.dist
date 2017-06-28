@@ -159,17 +159,18 @@ api.showOnlyApproved = "@api-show-only-approved@"
 
 ; customize applicaton
 custom.backward_compatible = true
-custom.default_authorisation = true
-custom.default_deletion = true
-custom.default_relationtypes = true
+custom.default_authorisation = false
+custom.default_deletion = false
+custom.default_relationtypes = false
 custom.default_urigenerate = true
+custom.relations_strict_reference_check = "http://www.w3.org/2004/02/skos/core#broader, http://www.w3.org/2004/02/skos/core#broaderTransitive, http://www.w3.org/2004/02/skos/core#narrower,http://www.w3.org/2004/02/skos/core#narrowerTransitive"
+custom.relations_soft_reference_check = "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch"
 custom.allowed_concepts_for_other_tenant_schemes = true
-custom.error_log = 'data/ValidationErrors.txt'
-custom.info_log = 'data/info.txt'
+custom.limit = 30;
 custom.maximal_rows = 500
 custom.maximal_time_limit = 120
 custom.normal_time_limit = 30
-custom.backend = backend_name
+custom.backend = ccr
 
 [staging : production]
 phpSettings.display_startup_errors = 1
