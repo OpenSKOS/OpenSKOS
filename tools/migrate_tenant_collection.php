@@ -23,10 +23,8 @@
 require_once dirname(__FILE__) . '/autoload.inc.php';
 
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Tenant;
 use OpenSkos2\Set;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 
 $opts = [
@@ -102,13 +100,13 @@ if (empty($tenantName)) {
 $tenantCache = new Institutions($dbSource);
 $tenants = $tenantCache->validateInstitutions($resourceManager);
 
-$logger->info("Validating collections, creating sets");
+$logger->info("Validating institutions, creating triple store tenants");
 
 foreach ($tenants as $tenant) {
     insertResource($resourceManager, $tenant);
 }
 
-$logger->info("Validating collections, creating sets");
+$logger->info("Validating collections, creating  triple store sets");
 
 $collectionCache = new Collections($dbSource);
 $sets = $collectionCache->validateCollections($resourceManager);

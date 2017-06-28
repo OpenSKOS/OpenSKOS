@@ -526,7 +526,7 @@ class Institutions
         }
         $insts = $this->db->fetchAll('select * from tenant');
         foreach ($insts as $inst) {
-            $this->institutions[$inst->id] = $inst;
+            $this->institutions[$inst->code] = $inst;
         }
         return $this->institutions;
     }
@@ -542,7 +542,17 @@ class Institutions
         foreach ($this->fetchAll() as $row) {
             $uuid = Uuid::uuid4();
             $uri = "http://tenant/{$uuid}";
-            $tenant = createTenantRdf($row->code, $row->name, $row->epic, $uri, $uuid, $row->disableSearchInOtherTenants, $row->enableStatussesSystem, $resourceManager);
+            if (isset($row->enableStatussesSystem)) {
+                $ess = $row->enableStatussesSystem;
+            } else {
+               $ess = "false" ;
+            }
+            if (isset($row->epic)) {
+                $epic = $row->epic;
+            } else {
+               $epic = "false" ;
+            }
+            $tenant = createTenantRdf($row->code, $row->name, $epic, $uri, $uuid, $row->disableSearchInOtherTenants, $ess, $resourceManager);
             $retVal[] = $tenant;
         }
         return $retVal;
