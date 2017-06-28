@@ -85,7 +85,8 @@ class Label extends Resource
         $currentTenant = $this->getTenant();
         
         //Ensure tenant is set
-        if (empty($currentTenant) && !empty($tenant->getCode()->getValue())) {
+        $tenantCodeValue = $tenant->getCode()->getValue();
+        if (empty($currentTenant) && !empty($tenantCodeValue)) {
             $this->setProperty(OpenSkos::TENANT, $tenant->getCode());
         }
         
