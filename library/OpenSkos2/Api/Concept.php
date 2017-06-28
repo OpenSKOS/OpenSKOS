@@ -143,7 +143,7 @@ class Concept extends AbstractTripleStoreResource
         if (isset($params['tenant'])) {
             $tenantCodes = explode(' ', trim($params['tenant']));
             foreach ($tenantCodes as $tenantcode) {
-                $tenant = $this->manager->fetchByCode($tenantcode, \OpenSkos2\Tenant::TYPE);
+                $tenant = $this->manager->fetchByUuid($tenantcode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
                 $options['tenants'][] = $tenant->getCode();
             }
         }

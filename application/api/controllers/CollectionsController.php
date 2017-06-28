@@ -2,7 +2,7 @@
 
 require_once 'AbstractController.php';
 
-class Api_SetController extends AbstractController
+class Api_CollectionsController extends AbstractController
 {
    
     public function init()

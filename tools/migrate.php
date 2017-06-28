@@ -47,7 +47,7 @@ $opts = [
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Fetch only those modified after that date.',
-    'tenantname' => 'Name of the organisaton.',
+    'tenantname=s' => 'Name of the organisaton.',
 ];
 
 try {
