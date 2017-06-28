@@ -49,6 +49,7 @@ $opts = [
     'modified|m=s' => 'Fetch only those modified after that date.',
     'tenantname' => 'Name of the organisaton.',
 ];
+
 try {
     $OPTS = new Zend_Console_Getopt($opts);
 } catch (Zend_Console_Getopt_Exception $e) {
@@ -90,28 +91,28 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
 
 $logger->info("Purging triple store: tenants");
 $tenantURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Tenant::TYPE));
-foreach($tenantURIs as $tenantURI){
-    $tenantManager ->delete(new Uri($tenantURI));
+foreach ($tenantURIs as $tenantURI) {
+    $tenantManager->delete(new Uri($tenantURI));
 }
 $logger->info("Purging triple store: sets");
 $setURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Set::TYPE));
-foreach($setURIs as $setURI){
-    $resourceManager ->delete(new Uri($setURI));
+foreach ($setURIs as $setURI) {
+    $resourceManager->delete(new Uri($setURI));
 }
 $logger->info("Purging triple store: scheme");
 $schemeURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(ConceptScheme::TYPE));
-foreach($schemeURIs as $schemeURI){
-    $resourceManager ->delete(new Uri($schemeURI));
+foreach ($schemeURIs as $schemeURI) {
+    $resourceManager->delete(new Uri($schemeURI));
 }
 $logger->info("Purging triple store: skos collections");
 $collectionURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(SkosCollection::TYPE));
-foreach($collectionURIs as $scollectionURI){
-    $resourceManager ->delete(new Uri($collectionURI));
+foreach ($collectionURIs as $collectionURI) {
+    $resourceManager->delete(new Uri($collectionURI));
 }
 $logger->info("Purging triple store and solr: concepts");
 $conceptURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Concept::TYPE));
-foreach($conceptURIs as $conceptURI){
-    $conceptManager ->delete(new Uri($conceptURI));
+foreach ($conceptURIs as $conceptURI) {
+    $conceptManager->delete(new Uri($conceptURI));
 }
 
 
@@ -133,13 +134,13 @@ insertResource($tenantManager, $tenantResource);
 $logger->info("Validating collections, creating sets");
 
 $collectionCache = new Collections($dbSource);
-$sets= $collectionCache->validateCollections($resourceManager);
-foreach($sets as $set){
+$sets = $collectionCache->validateCollections($resourceManager);
+foreach ($sets as $set) {
     insertResource($resourceManager, $set);
 }
-exit(1);
 
 $isDryRun = $OPTS->getOption('dryrun');
+
 $modifiedSince = $OPTS->getOption('modified');
 $queryQuery = 'tenant:"' . $tenantCode . '"';
 if (!empty($modifiedSince)) {
@@ -298,7 +299,9 @@ $mappings = [
         },
         'fields' => array_merge(
             $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), [
-            'member' => Skos::MEMBER, // for collections ?!?
+            'member' => Skos::MEMBER, // for skos collections 
+             //'inSkosCollection' => OpenSkos::INSKOSCOLLECTION, // DISCUSS
+              'inScheme'  => Skos::INSCHEME,
             ]
         ),
     ],
@@ -357,19 +360,21 @@ $mappings = [
             'statusOtherConcept' => 'statusOtherConcept',
             'statusOtherConceptLabelToFill' => 'statusOtherConceptLabelToFill',
             'ConceptCollections' => 'ConceptCollections',
+            'inSkosCollection' => 'inSkosCollection',
         ]
     ]
 ];
 $logger->info('Found ' . $total . ' records');
 var_dump('Skos Collection round');
-insert_round('SKOSCollection', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache);
-exit(1);
+insert_round('SKOSCollection', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun);
 var_dump('ConceptScheme round');
-insert_round('ConceptScheme', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache);
-var_dump('Concept round');
-insert_round('Concept', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $conceptManager);
+insert_round('ConceptScheme', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun);
 
-function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $conceptManager = null)
+
+var_dump('Concept round');
+insert_round('Concept', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun, $labelMapping, $conceptManager);
+
+function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun, $labelMapping=null, $conceptManager = null)
 {
     do {
         $logger->debug("fetching " . $endPoint . "&start=$counter");
@@ -380,7 +385,6 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
         foreach ($data['response']['docs'] as $doc) {
             $counter++;
             if ($docClass !== $doc['class']) {
-                //var_dump("Current document is not a {$docClass}");
                 continue;
             }
             $uri = trim($doc['uri']); // seems there are uri's with a space prefix ? :|
@@ -468,6 +472,8 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
             }
             // Add tenant in graph
             $resource->setProperty(OpenSkos2\Namespaces\OpenSkos::TENANT, $tenantResource->getCode());
+            $resource->setProperty(OpenSkos2\Namespaces\DcTerms::PUBLISHER, new Uri($tenantResource->getUri()));
+
             // Add set to graph
             if (!empty($doc['collection'])) {
                 $collectionId = $doc['collection'];
@@ -499,7 +505,11 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
                         $setResource = null;
                     }
                 }
-                $validator = $validator = new \OpenSkos2\Validator\Resource($resourceManager, $tenantResource, $setResource, false, false, false, $logger);
+                if ($resource instanceof OpenSkos2\Concept) {
+                    $validator = new \OpenSkos2\Validator\Resource($conceptManager, $tenantResource, $setResource, false, false, false, $logger); 
+                } else {
+                 $validator = new \OpenSkos2\Validator\Resource($resourceManager, $tenantResource, $setResource, false, false, false, $logger);
+                }
                 $isValid = validateResource($validator, $resource);
             }
             // Insert
@@ -507,10 +517,13 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
                 if ($resource instanceof OpenSkos2\Concept) {
                     insertResource($conceptManager, $resource);
                 } else {
+                    $logger->info("Inserting {$resource->getUri()}");
                     insertResource($resourceManager, $resource);
                 }
             } else {
-                var_dump($validator->getErrorMessages());
+                if (!$isValid) {
+                    $logger->error(implode(' ,',$validator->getErrorMessages()));
+                }
             }
         }
     } while ($counter < $total && isset($data['response']['docs']));
@@ -528,6 +541,7 @@ function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rd
             return $validator->validate($resource);
         } catch (\Exception $exc) {
             echo 'failed validating retry' . PHP_EOL;
+            echo $exc->getMessage(). PHP_EOL;;
             $tried++;
             sleep(5);
         }
@@ -739,14 +753,13 @@ class Collections
                 $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL, new Uri($row->OAI_baseURL));
             }
             if (!empty($row->allow_oai)) {
-                if ($row->allow_oai === "Y" || $row->allow_oai === "1" 
-                     ||  $row->allow_oai=== "true" ||  $row->allow_oai=== "YES") {
-                  $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("true", null, Literal::TYPE_BOOL));  
-                }  else {
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
-            }
+                if ($row->allow_oai === "Y" || $row->allow_oai === "1" || $row->allow_oai === "true" || $row->allow_oai === "YES") {
+                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("true", null, Literal::TYPE_BOOL));
+                } else {
+                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
+                }
             } else {
-               $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL)); 
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
             }
             $retVal[] = $set;
         }

@@ -215,8 +215,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         foreach ($titles as $title) {
             $lang = $title->getLanguage();
             $val = $title->getValue();
-            if ($lang === null || $lang === '') { // every title must have a language
-                $this->errorMessages[] = "Title " . $val . " is given without language. ";
+            if ($lang === null || $lang === '') { // every title must have a language ??
+                // $this->errorMessages[] = "Title " . $val . " is given without language. ";
             } else {
                 if (array_key_exists($lang, $pairs)) {
                     if ($pairs[$lang] !== $val) {

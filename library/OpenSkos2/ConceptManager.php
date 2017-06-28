@@ -79,7 +79,7 @@ class ConceptManager extends ResourceManagerWithSearch
     public function insert(Resource $resource)
     {
         parent::insert($resource);
-
+        
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }
@@ -92,8 +92,10 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         parent::replace($resource);
 
-        $labelHelper = new Concept\LabelHelper($this->labelManager);
-        $labelHelper->insertLabels($resource);
+        if ($this->labelManager != null) { // DISCUSS, migration, di ??
+            $labelHelper = new Concept\LabelHelper($this->labelManager);
+            $labelHelper->insertLabels($resource);
+        }
     }
 
     /**
