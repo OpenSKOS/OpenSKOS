@@ -92,10 +92,8 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         parent::replace($resource);
 
-        if ($this->labelManager != null) { // DISCUSS, migration, di ??
-            $labelHelper = new Concept\LabelHelper($this->labelManager);
-            $labelHelper->insertLabels($resource);
-        }
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
     }
 
     /**

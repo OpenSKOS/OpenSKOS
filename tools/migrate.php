@@ -74,10 +74,13 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 $tenantManager = $diContainer->make('\OpenSkos2\TenantManager');
+$labelManager = $diContainer->make('\OpenSkos2\SkosXl\LabelManager'); // Discuss
+
 /**
  * @var $conceptManager \OpenSkos2\ConceptManager
  */
 $conceptManager = $diContainer->make('\OpenSkos2\ConceptManager');
+$conceptManager->setLabelManager($labelManager);
 
 $logger = new \Monolog\Logger("Logger");
 $logLevel = \Monolog\Logger::INFO;
@@ -301,7 +304,8 @@ $mappings = [
             $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), [
             'member' => Skos::MEMBER, // for skos collections 
              //'inSkosCollection' => OpenSkos::INSKOSCOLLECTION, // DISCUSS
-              'inScheme'  => Skos::INSCHEME,
+             'inScheme'  => Skos::INSCHEME,
+                // has top concept vs memebr DISCUSS
             ]
         ),
     ],
