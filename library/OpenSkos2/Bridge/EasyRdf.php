@@ -170,7 +170,6 @@ class EasyRdf
     public static function resourceToGraph(Resource $resource)
     {
         $graph = new Graph();
-
         self::fromOpenSkosResource($resource, $graph);
         return $graph;
     }

@@ -27,8 +27,8 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Tenant;
 use Rhumsaa\Uuid\Uuid;
 
-require 'autoload.inc.php';
-require 'Zend/Console/Getopt.php';
+require_once 'autoload.inc.php';
+require_once 'Zend/Console/Getopt.php';
 
 $opts = array(
     'help|?' => 'Print this usage message',

@@ -27,11 +27,15 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Set;
+use OpenSkos2\Tenant;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\SkosCollection;
+use Rhumsaa\Uuid\Uuid;
 
 function check_if_admin($tenant_code, $key, $resourceManager, $user_model) {
 
@@ -194,4 +198,90 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
   }
   $resourceManager->insert($resource);
   return $uri;
+}
+
+
+function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager)
+{
+
+    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, new Literal($code), Tenant::TYPE);
+    if (count($resources) > 0) {
+        fwrite(STDERR, 'A tenant  with the code ' . $code . " has been already registered in the triple store. \n ");
+        exit(1);
+    }
+
+    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, new Literal($name));
+    if (count($insts) > 0) {
+        fwrite(STDERR, "An institution with the name " . $name . " has been already registered in the triple store. \n");
+        exit(1);
+    }
+
+    $tenantResource = new Tenant();
+    if ($epic === 'true') {
+        try {
+            $dummyTenant = new \OpenSkos2\Tenant("http://dummy-tenant");
+            $dummySet = new \OpenSkos2\Set("http://dummy-set");
+            $uri = $tenantResource->selfGenerateUri( $dummyTenant, $dummySet, $resourceManager);
+        } catch (Exception $ex) {
+            fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() . " \n");
+            fwrite(STDOUT, "\n I will use the uri and uuid provided by you \n");
+            setID($tenantResource, $uri, $uuid, $resourceManager);
+        };
+    } else {
+        setID($tenantResource, $uri, $uuid, $resourceManager);
+    }
+
+
+    $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
+    $blank1 = "_:genid_". Uuid::uuid4();
+    $organisation = new Resource($blank1);
+    if (isset($name)) {
+        $organisation->setProperty(VCard::ORGNAME, new Literal($name));
+    }
+    //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
+    $tenantResource->setProperty(VCard::ORG, $organisation);
+    //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
+    //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
+
+    $blank2 = "_:genid_".Uuid::uuid4();
+    $adress = new Resource($blank2);
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, "");
+    $tenantResource->setProperty(VCard::ADR, $adress);
+
+    if (isset($disableSearchInOtherTenants)) {
+        $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new Literal($disableSearchInOtherTenants, null, Literal::TYPE_BOOL));
+    }
+    if (isset($disableSearchInOtherTenants)) {
+        $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new Literal($enableStatussesSystem, null, Literal::TYPE_BOOL));
+    }
+    return $tenantResource;
+}
+
+function setID(&$resource, $uri, $uuid, $resourceManager)
+{
+    if ($uri !== null && $uri !== "") {
+        $exists = $resourceManager->askForUri($uri);
+        if ($exists) {
+            fwrite(STDERR, "An institution with the uri " . $uri . " has been already registered in the triple store. \n");
+            exit(1);
+        }
+        if ($uuid !== null && $uuid !== "") {
+            $insts = $resourceManager->fetchSubjectForObject(OpenSkos::UUID, new Literal($uuid), Tenant::TYPE);
+            if (count($insts) > 0) {
+                fwrite(STDERR, "A institution with the uuid " . $uuid . " has been already registered in the triple store. \n");
+                exit(1);
+            }
+            $resource->setUri($uri);
+            $resource->setProperty(OpenSkos::UUID, new Literal($uuid));
+        } else {
+            fwrite(STDERR, "You should provide an uuid as well. \n");
+            exit(1);
+        }
+    } else {
+        fwrite(STDERR, "You should provide an uri \n");
+        exit(1);
+    }
 }
