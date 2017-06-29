@@ -201,7 +201,7 @@ class Autocomplete
         if (!empty($options['tenants'])) {
             $optionsQueries[] = '('
                 . 's_tenant:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenant']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['tenants']))
                 . '))';
         }
 
