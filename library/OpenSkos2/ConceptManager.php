@@ -165,7 +165,7 @@ class ConceptManager extends ResourceManagerWithSearch
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 
@@ -196,11 +196,15 @@ class ConceptManager extends ResourceManagerWithSearch
         }
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri), $relationType, new Uri($objectUri)
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
         );
 
         $this->deleteMatchingTriples(
-            new Uri($objectUri), Skos::getInferredRelationsMap()[$relationType], new Uri($subjectUri)
+            new Uri($objectUri),
+            Skos::getInferredRelationsMap()[$relationType],
+            new Uri($subjectUri)
         );
     }
 
@@ -301,7 +305,9 @@ class ConceptManager extends ResourceManagerWithSearch
             $concepts = $this->fetch(
                 [
                 Skos::INSCHEME => $scheme,
-                ], $start, $step
+                ],
+                $start,
+                $step
             );
 
             foreach ($concepts as $concept) {
@@ -338,11 +344,15 @@ class ConceptManager extends ResourceManagerWithSearch
     
    
     public function search(
-    $query, $rows=20, $start = 0, &$numFound = 0, $sorts = null
-    )
-    {
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null
+    ) {
+    
         return $this->fetchByUris(
-                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
     }
 
@@ -355,7 +365,8 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:"' . $tenant->getUri() . '"', 'max_numeric_notation'
+            'tenant:"' . $tenant->getUri() . '"',
+            'max_numeric_notation'
         );
         return intval($max);
     }
@@ -431,11 +442,15 @@ class ConceptManager extends ResourceManagerWithSearch
     {
 
         $this->deleteMatchingTriples(
-            new Uri($subjectUri), $relationType, new Uri($objectUri)
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
         );
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->relationTypes->getInverses());
         $this->deleteMatchingTriples(
-            new Uri($objectUri), $inverses[$relationType], new Uri($subjectUri)
+            new Uri($objectUri),
+            $inverses[$relationType],
+            new Uri($subjectUri)
         );
     }
 
@@ -452,7 +467,7 @@ class ConceptManager extends ResourceManagerWithSearch
         // @TODO Add check everywhere we may need it.
         if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
             throw new Exception\InvalidArgumentException(
-            'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
             );
         }
 
@@ -469,7 +484,7 @@ class ConceptManager extends ResourceManagerWithSearch
     }
     
 
-   public function fetchNameUri()  
+    public function fetchNameUri()
     {
         $query = "SELECT ?uri ?name WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name ."
             . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
@@ -479,16 +494,13 @@ class ConceptManager extends ResourceManagerWithSearch
     }
     
     
-      public function fetchNameSearchID()
+    public function fetchNameSearchID()
     {
         $query = "SELECT ?name ?searchid WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name . "
-            . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
-            . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+        . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
+        . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
     }
-    
-  
-
 }

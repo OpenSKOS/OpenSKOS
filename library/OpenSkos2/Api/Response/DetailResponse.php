@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Api\Response;
+
 /**
  * Provide the json output for find-concepts api
  */
@@ -41,18 +42,18 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
       *
       * @var array
       */
-     protected $auxVals=[];
+    protected $auxVals=[];
      /**
       *
-      * @var string 
+      * @var string
       */
-     protected $auxField=null;
+    protected $auxField=null;
      
      /**
       *
-      * @var bool 
+      * @var bool
       */
-     protected $backwardCompatible = false;
+    protected $backwardCompatible = false;
      
      
      
@@ -68,15 +69,17 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
     }
     
      
-     public function setExtras($collection, $fieldname, $backwardCompatible){
-         $this->auxVals = $collection;
-         $this->auxField = $fieldname;
-         $this->backwardCompatible = $backwardCompatible;
-     }
+    public function setExtras($collection, $fieldname, $backwardCompatible)
+    {
+        $this->auxVals = $collection;
+        $this->auxField = $fieldname;
+        $this->backwardCompatible = $backwardCompatible;
+    }
 
    
     
-    protected function addAuxToBody($body){
+    protected function addAuxToBody($body)
+    {
         if ($this->auxField != null) {
             if (count($this->auxVals) > 0) {
                 foreach ($this->auxVals as $val) {
@@ -96,5 +99,4 @@ abstract class DetailResponse implements \OpenSkos2\Api\Response\ResponseInterfa
         }
         return $correctedBody;
     }
-    
 }

@@ -17,5 +17,4 @@ class HasTopConcept extends AbstractConceptSchemeValidator
             return true;
         }
     }
-
 }

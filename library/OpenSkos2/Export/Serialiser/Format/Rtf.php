@@ -72,7 +72,6 @@ class Rtf extends FormatAbstract
      * @param ConceptManager $conceptManager
      */
     public function __construct($conceptManager = null)
-
     {
         parent::__construct();
         

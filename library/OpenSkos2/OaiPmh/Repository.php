@@ -475,10 +475,10 @@ class Repository implements InterfaceRepository
         if (!empty($arrSet[2])) {
             $conceptSchemes = $this->setManager->
                 fetchSubjectForObject(
-                OpenSkos::UUID,
-                new Literal($arrSet[2]),
-                ConceptScheme::TYPE
-            );
+                    OpenSkos::UUID,
+                    new Literal($arrSet[2]),
+                    ConceptScheme::TYPE
+                );
             if (count($conceptSchemes) > 0) {
                 $conceptSchemeURI = $conceptSchemes[0];
             } else {
@@ -507,15 +507,11 @@ class Repository implements InterfaceRepository
             $row['dcterms_title'] = $set->getTitle()->getValue();
             $row['uri'] = $set->getUri();
 
-            $tenantUri = $set->getTenantUri();
-            if ($tenantUri == null) {
-                $row['tenant_code'] = 'UNKNOWN';
-                $row['tenant_title'] = 'UNKNOWN';
-            } else {
-                $tenantData = $this->fetchTenantSpecDataViaUri($tenantUri, $this->setManager);
-                $row['tenant_code'] = $tenantData['tenant_code'];
-                $row['tenant_title'] = $tenantData['tenant_title'];
-            }
+            $tenantCode = $set->getTenant();
+            $row['tenant_code'] = $tenantCode->getValue();
+            $tenantUri = $this->setManager->fetchTenantNameByCode($tenantCode);
+            $row['tenant_title'] = 'UNKNOWN';
+            
 
             $retVal[] = $row;
         }

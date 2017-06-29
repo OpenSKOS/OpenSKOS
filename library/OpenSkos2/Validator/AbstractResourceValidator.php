@@ -57,8 +57,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         if ($resourceManager === null) {
             throw new \Exception(
-            "Passed resource manager is null in this validator. "
-            . "Proper content validation is not possible"
+                "Passed resource manager is null in this validator. "
+                . "Proper content validation is not possible"
             );
         }
         $this->resourceManager = $resourceManager;
@@ -68,8 +68,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     {
         if ($isForUpdate === null) {
             throw new \Exception(
-            "Cannot validate the resource because isForUpdateFlag is set to null"
-            . " (cannot differ between create- and update- validation mode."
+                "Cannot validate the resource because isForUpdateFlag is set to null"
+                . " (cannot differ between create- and update- validation mode."
             );
         }
         $this->isForUpdate = $isForUpdate;
@@ -124,9 +124,15 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     }
 
     protected function validateProperty(
-    RdfResource $resource, $propertyUri, $isRequired, $isSingle, $isBoolean, $isUnique, $type = null
-    )
-    {
+        RdfResource $resource,
+        $propertyUri,
+        $isRequired,
+        $isSingle,
+        $isBoolean,
+        $isUnique,
+        $type = null
+    ) {
+    
         $val = $resource->getProperty($propertyUri);
         if (count($val) < 1) {
             if ($isRequired) {
@@ -155,7 +161,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 }
             }
             
-            if ($value instanceof Uri && $this->referenceCheckOn && 
+            if ($value instanceof Uri && $this->referenceCheckOn &&
                 !in_array($propertyUri, self::$nonresolvableURIs)) { //ERROR
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->errorMessages[] = "The resource (of type  $type) referred by uri " .
@@ -164,12 +170,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 }
             }
             
-                if ($value instanceof Uri && !($this->referenceCheckOn) && 
-                    !in_array($propertyUri, self::$nonresolvableURIs)){ // WARNING
+            if ($value instanceof Uri && !($this->referenceCheckOn) &&
+                    !in_array($propertyUri, self::$nonresolvableURIs)) { // WARNING
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->warningMessages[] = "The resource (of type  $type) referred by  uri " .
                         "{$value->getUri()} via the property $propertyUri is not found in thsi triple store. ";
-                    $this->danglingReferences[] = $value->getUri();    
+                    $this->danglingReferences[] = $value->getUri();
                 }
             }
         }
@@ -179,7 +185,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     private function uniquenessCheck($resource, $propertyUri, $value)
     {
         $otherResourceUris = $this->resourceManager->fetchSubjectForObject(
-            $propertyUri, $value, $this->resourceManager->getResourceType()
+            $propertyUri,
+            $value,
+            $this->resourceManager->getResourceType()
         );
         if (count($otherResourceUris) > 0) {
             if ($this->isForUpdate) { // for update
@@ -246,7 +254,10 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected function validateInScheme($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
-            $resource, Skos::INSCHEME, Skos::CONCEPTSCHEME, true
+            $resource,
+            Skos::INSCHEME,
+            Skos::CONCEPTSCHEME,
+            true
         );
         return $retVal;
     }
@@ -254,7 +265,10 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected function validateInSkosCollection($resource)
     {
         $retVal = $this->validateInSchemeOrInCollection(
-            $resource, OpenSkos::INSKOSCOLLECTION, Skos::SKOSCOLLECTION, false
+            $resource,
+            OpenSkos::INSKOSCOLLECTION,
+            Skos::SKOSCOLLECTION,
+            false
         );
         return $retVal;
     }
@@ -297,7 +311,6 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Set::TYPE);
         $secondRound = true;
         if ($firstRound) {
-
             $setUris = $resource->getSet();
             foreach ($setUris as $setUri) {
                 $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
@@ -321,5 +334,4 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         }
         return $firstRound && $secondRound;
     }
-
 }

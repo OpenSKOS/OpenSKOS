@@ -29,8 +29,10 @@ class RelationType extends AbstractTripleStoreResource
 {
 
     public function __construct(
-    \OpenSkos2\RelationTypeManager $manager, \OpenSkos2\PersonManager $personManager)
-    {
+        \OpenSkos2\RelationTypeManager $manager,
+        \OpenSkos2\PersonManager $personManager
+    ) {
+    
         $this->manager = $manager;
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
@@ -54,7 +56,9 @@ class RelationType extends AbstractTripleStoreResource
         };
         try {
             $response = $this->manager->fetchAllConceptConceptRelationsOfType(
-                $relType, $sourceSchemata, $targetSchemata
+                $relType,
+                $sourceSchemata,
+                $targetSchemata
             );
             $intermediate = $this->manager->createOutputRelationTriples($response);
             $result = new JsonResponse2($intermediate);
@@ -88,8 +92,8 @@ class RelationType extends AbstractTripleStoreResource
                         $isTarget = false;
                     } else {
                         throw new Exception(
-                        'Wrong value "' . $params['isTarget'] . '" for parameter isTarget,'
-                        . ' must be "true" or "false"'
+                            'Wrong value "' . $params['isTarget'] . '" for parameter isTarget,'
+                            . ' must be "true" or "false"'
                         );
                     }
                 }
@@ -99,7 +103,10 @@ class RelationType extends AbstractTripleStoreResource
             $concepts = $this->manager->fetchRelatedConcepts($uri, $relType, $isTarget, $schema);
 
             $result = new ResourceResultSet(
-                $concepts, $concepts->count(), 0, $init["custom.maximal_rows"]
+                $concepts,
+                $concepts->count(),
+                0,
+                $init["custom.maximal_rows"]
             );
             switch ($format) {
                 case 'json':
@@ -129,16 +136,16 @@ class RelationType extends AbstractTripleStoreResource
     {
         if ($resourceObject->isBlankNode()) {
             throw new \Exception(
-            'Uri (rdf:about) is missing from the xml. For user relations you must supply it,'
-            . ' autogenerateIdentifiers is set to false compulsory.'
+                'Uri (rdf:about) is missing from the xml. For user relations you must supply it,'
+                . ' autogenerateIdentifiers is set to false compulsory.'
             );
         }
         $ttl = $resourceObject->getUri();
         $hakje = strrpos($ttl, "#");
         if (strpos($ttl, 'http://') !== 0 || !$hakje || ($hakje === strlen($ttl) - 1)) {
             throw new \Exception(
-            'The user-defined relation uri must have the form <namespace>#<name> '
-            . 'where <namespace> starts with http:// and name is not empty.'
+                'The user-defined relation uri must have the form <namespace>#<name> '
+                . 'where <namespace> starts with http:// and name is not empty.'
             );
         }
         // do not generate idenitifers
@@ -149,5 +156,4 @@ class RelationType extends AbstractTripleStoreResource
     {
         return ['key', 'tenant'];
     }
-
 }

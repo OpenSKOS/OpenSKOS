@@ -436,8 +436,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (count($values) > 1) {
             throw new OpenSkosException(
-            'Multiple values found for property "' . $property . '" while a single one was requested.'
-            . ' Values ' . implode(', ', $values)
+                'Multiple values found for property "' . $property . '" while a single one was requested.'
+                . ' Values ' . implode(', ', $values)
             );
         }
 
@@ -503,14 +503,15 @@ class Resource extends Uri implements ResourceIdentifier
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-    \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set = null, 
-        \OpenSkos2\Person $person = null, 
-        \OpenSkos2\PersonManager $personManager = null, 
-        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
-        $existingConcept = null, 
-        $forceCreationOfXl = false)
-    {
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
 
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
@@ -694,7 +695,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-            'The resource already has an uri. Can not generate new one.'
+                'The resource already has an uri. Can not generate new one.'
             );
         }
 
@@ -704,7 +705,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use.'
+                'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
@@ -720,5 +721,4 @@ class Resource extends Uri implements ResourceIdentifier
     {
         return $set->getUri() . "/" . $uuid;
     }
-
 }

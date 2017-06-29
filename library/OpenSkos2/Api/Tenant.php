@@ -13,8 +13,10 @@ class Tenant extends AbstractTripleStoreResource
      * @param \OpenSkos2\PersonManager $personManager
      */
     public function __construct(
-    \OpenSkos2\TenantManager $manager, \OpenSkos2\PersonManager $personManager)
-    {
+        \OpenSkos2\TenantManager $manager,
+        \OpenSkos2\PersonManager $personManager
+    ) {
+    
         $this->manager = $manager;
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
@@ -59,6 +61,4 @@ class Tenant extends AbstractTripleStoreResource
     {
         return new \OpenSkos2\Set();
     }
-
-   
 }

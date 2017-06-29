@@ -12,5 +12,4 @@ class OpenSkosTenant extends AbstractSkosCollectionValidator
     {
          return $this->checkTenant($resource);
     }
-
 }

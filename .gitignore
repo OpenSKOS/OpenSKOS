@@ -12,3 +12,5 @@ public/data/export/*
 /public/apidoc/
 /apidoc/
 /public/oaidoc/
+/application/configs/application.ini_backup.dist
+/application/configs/application_corrupted.ini

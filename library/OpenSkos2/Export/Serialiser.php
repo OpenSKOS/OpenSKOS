@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Export;
+
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Exception\OpenSkosException;
@@ -23,6 +24,7 @@ use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Tenant;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
+
 class Serialiser
 {
     /**

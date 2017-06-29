@@ -37,7 +37,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         parent::checkSerialiseParams($graph, $format);
         if ($format != 'rdfxml_openskos') {
             throw new OpenSkosException(
-            "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
+                "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
             );
         }
         // store of namespaces to be appended to the rdf:RDF tag
@@ -110,7 +110,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     {
         $properties = $res->propertyUris();
 
-        // meertens patch 
+        // meertens patch
         if (!$res->isBNode()) { // bnodes does not have description tag
             $type = $this->determineResType($res);
             if ($type) {
@@ -151,8 +151,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                     }
                 } else {
                     throw new OpenSkosException(
-                    "It is not possible to serialse the property " .
-                    "'$property' to RDF/XML."
+                        "It is not possible to serialse the property " .
+                        "'$property' to RDF/XML."
                     );
                 }
             }
@@ -185,7 +185,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                     $tag .= " rdf:nodeID=\"" . htmlspecialchars($obj->getBNodeId()) . '"';
                 }
 
-                // mertens patch -3 
+                // mertens patch -3
                 if (!$alreadyOutput && $pcount > 0) { // e.g. for vcard:adr and vcard:org
                     $tag .= " rdf:nodeID=\"" . htmlspecialchars($obj->getBNodeId()) . '"';
                 }
@@ -198,14 +198,13 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             }
 
             if ($pcount > 0) {
-
-                // meertens patch -1 
+                // meertens patch -1
                 if ($alreadyOutput) { //I had an infinite loop without $alreadyOutput check. I had a resource of type Set (former collection), with conceptBaseUri is the same as the set's uri.
                     $uri = htmlspecialchars($obj->getUri());
                     return $tag .= " rdf:resource=\"$uri\"/>\n";
                 }
 
-                // meertens patch -2 
+                // meertens patch -2
                 if (!$alreadyOutput) {
                     $xml = $this->getResourceXmlString($obj, false, $depth + 1);
                     $this->outputtedResources[$obj->getUri()] = true;
@@ -241,7 +240,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             return "{$indent}<{$property}{$atrributes}>{$value}</{$property}>\n";
         } else {
             throw new OpenSkosException(
-            "Unable to serialise object to xml: " . getType($obj)
+                "Unable to serialise object to xml: " . getType($obj)
             );
         }
     }
@@ -273,5 +272,4 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             return false;
         }
     }
-
 }

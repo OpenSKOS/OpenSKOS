@@ -96,14 +96,15 @@ class Tenant extends Resource
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-    \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set = null, 
-        \OpenSkos2\Person $person = null, 
-        \OpenSkos2\PersonManager $personManager = null, 
- \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
-        $existingConcept = null, 
-        $forceCreationOfXl = false)
-    {
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
@@ -125,10 +126,9 @@ class Tenant extends Resource
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri(\OpenSkos2\Tenant $tenant = null , \OpenSkos2\Set $set = null , $uuid = null , $notation = null , $init =  null)
+    protected function assembleUri(\OpenSkos2\Tenant $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null)
     {
         $baseUri = $init['api.baseUri'];
         return $baseUri . "" . $uuid;
     }
-
 }

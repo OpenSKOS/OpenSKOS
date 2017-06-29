@@ -96,7 +96,6 @@ class CollectionHelper implements LoggerAwareInterface
         $this->message = $message;
         $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
         $this->person = $message->getUser();
-        
     }
 
     /**
@@ -209,7 +208,7 @@ class CollectionHelper implements LoggerAwareInterface
         if ($conceptScheme->isBlankNode()) {
             $conceptScheme->selfGenerateUri($this->tenant, $this->set, $this->conceptManager);
         }
-          if ($alreadyExists) {
+        if ($alreadyExists) {
             $currentVersion = $this->resourceManager->fetchByUri($conceptScheme->getUri(), Concept::TYPE);
         } else {
             $currentVersion = null;

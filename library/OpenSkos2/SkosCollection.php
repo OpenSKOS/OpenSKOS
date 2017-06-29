@@ -33,6 +33,4 @@ class SkosCollection extends Resource
             return null;
         }
     }
-
-  
 }

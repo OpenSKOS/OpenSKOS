@@ -140,7 +140,7 @@ class Resource
         $set,
         $isForUpdate,
         $referenceCheckOn,
-        $conceptReferenceCheckOn=true,
+        $conceptReferenceCheckOn = true,
         LoggerInterface $logger = null
     ) {
         if ($logger === null) {

@@ -73,7 +73,6 @@ class ResourceManagerWithSearch extends ResourceManager
     {
         parent::insert($resource);
         $this->solrResourceManager->insert($resource);
-
     }
 
     /**
@@ -131,7 +130,7 @@ class ResourceManagerWithSearch extends ResourceManager
         }
 
         return $this->fetchByUris(
-                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
         );
     }
 
@@ -142,5 +141,4 @@ class ResourceManagerWithSearch extends ResourceManager
     {
         $this->solrResourceManager->commit();
     }
-
 }

@@ -50,7 +50,7 @@ class Csv extends FormatAbstract
     {
         if (empty($this->propertiesToSerialise)) {
             throw new RequiredPropertiesListException(
-            'Properties to serialise are not specified. Can not export to csv.'
+                'Properties to serialise are not specified. Can not export to csv.'
             );
         }
         return $this->propertiesToSerialise;
@@ -64,7 +64,7 @@ class Csv extends FormatAbstract
     {
         // @TODO Beautify properties
         return $this->stringPutCsv(
-                array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $this->getPropertiesToSerialise())
+            array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $this->getPropertiesToSerialise())
         );
     }
 
@@ -104,7 +104,6 @@ class Csv extends FormatAbstract
                 if (in_array($property, $this->conceptPredicates)) {
                     $resourceData[$property] = $this->getConceptCaptions($resource, $property);
                 } else {
-
                     $values = $resource->getProperty($property);
                     if (count($values) > 1) {
                         $resourceData[$property] = implode(';', $values);
@@ -148,8 +147,8 @@ class Csv extends FormatAbstract
 
         if (!$this->conceptManager instanceof ConceptManager) {
             throw new Exception(
-            'Concept manager expected to be of type ConceptManager but is instead '
-            . get_class($this->conceptManager)
+                'Concept manager expected to be of type ConceptManager but is instead '
+                . get_class($this->conceptManager)
             );
         }
 
@@ -169,5 +168,4 @@ class Csv extends FormatAbstract
             return implode(';', $captions);
         }
     }
-
 }

@@ -49,5 +49,4 @@ class Person extends Resource
     {
         return $this->getPropertyFlatValue(Foaf::NAME, $language);
     }
-
 }

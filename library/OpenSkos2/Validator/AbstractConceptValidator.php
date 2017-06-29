@@ -26,7 +26,7 @@ abstract class AbstractConceptValidator extends AbstractResourceValidator
 {
 
  
-    public function __construct($referencecheckOn = true, $conceptReferenceCheckOn=true)
+    public function __construct($referencecheckOn = true, $conceptReferenceCheckOn = true)
     {
         $this->resourceType = Concept::TYPE;
         $this->referenceCheckOn = $referencecheckOn;

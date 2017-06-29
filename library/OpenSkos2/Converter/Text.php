@@ -16,8 +16,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Converter;
+
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
+
 /**
  * Convert xml string to ResourceCollection
  */
@@ -35,11 +37,11 @@ class Text
         $this->string = $string;
     }
     /**
-     * @param String $rdfType , optional 
+     * @param String $rdfType , optional
      * @param array $allowedChildrenTypes , optional, For example skos xl
      * @return ResourceCollection
      */
-    public function getResources($rdfType=null, $allowedChildrenTypes = [])
+    public function getResources($rdfType = null, $allowedChildrenTypes = [])
     {
         $graph = new Graph();
         $graph->parse($this->string);

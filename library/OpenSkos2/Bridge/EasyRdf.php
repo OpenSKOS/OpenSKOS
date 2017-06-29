@@ -60,7 +60,6 @@ class EasyRdf
         $alreadyAddedAsChild = [];
 
         foreach ($graph->resources() as $resource) {
-            
             if (isset($alreadyAddedAsChild[$resource->getUri()])) {
                 // We skip resources which are part of other resource
                 continue;
@@ -88,8 +87,9 @@ class EasyRdf
             return false;
         }
 
-       $openskosResource = self::createResource(
-                $resource->getUri(), $type
+        $openskosResource = self::createResource(
+            $resource->getUri(),
+            $type
         );
         
         foreach ($resource->propertyUris() as $propertyUri) {
@@ -101,21 +101,23 @@ class EasyRdf
             foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
                 if ($propertyValue instanceof \EasyRdf\Literal) {
                     $openskosResource->addProperty(
-                        $propertyUri, new Literal(
-                        $propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri()
+                        $propertyUri,
+                        new Literal(
+                            $propertyValue->getValue(),
+                            $propertyValue->getLang(),
+                            $propertyValue->getDatatypeUri()
                         )
                     );
                 } elseif ($propertyValue instanceof \EasyRdf\Resource) {
-                    
                     if ($propertyValue->isBNode()) {
                         if (in_array($propertyUri, self::$allowedSubresources)) {
                             $subResource = self::toOpenskosSubResource($propertyValue);
                             $openskosResource->addProperty($propertyUri, $subResource);
                             continue;
                         } else {
-                           continue; 
+                            continue;
                         }
-                    } 
+                    }
 
                     // Check if it is an allowed fully described child resource.
                     if (in_array($propertyUri, $allowedChildrenTypes)) {
@@ -144,14 +146,18 @@ class EasyRdf
             // We already have the rdf type proprty from the resource creation. No need to put it again.
             if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
                 throw new InvalidArgumentException(
-                "Unexpected value found for property {$resource->getUri} is a subresource and should not have type. ");
+                    "Unexpected value found for property {$resource->getUri} is a subresource and should not have type. "
+                );
             }
 
             foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
                 if ($propertyValue instanceof \EasyRdf\Literal) {
                     $openskosResource->addProperty(
-                        $propertyUri, new Literal(
-                        $propertyValue->getValue(), $propertyValue->getLang(), $propertyValue->getDatatypeUri()
+                        $propertyUri,
+                        new Literal(
+                            $propertyValue->getValue(),
+                            $propertyValue->getLang(),
+                            $propertyValue->getDatatypeUri()
                         )
                     );
                 } elseif ($propertyValue instanceof \EasyRdf\Uri) {
@@ -273,7 +279,8 @@ class EasyRdf
                     }
 
                     $easyResource->addLiteral(
-                        $propName, new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
+                        $propName,
+                        new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
                     );
                 } elseif ($value instanceof Resource) {
                     $easyResource->addResource($propName, self::fromOpenSkosResource($value, $graph));
@@ -281,7 +288,7 @@ class EasyRdf
                     $easyResource->addResource($propName, trim($value->getUri()));
                 } else {
                     throw new InvalidArgumentException(
-                    "Unexpected value found for property {$propName} " . var_export($value)
+                        "Unexpected value found for property {$propName} " . var_export($value)
                     );
                 }
             }
@@ -289,5 +296,4 @@ class EasyRdf
 
         return $easyResource;
     }
-
 }

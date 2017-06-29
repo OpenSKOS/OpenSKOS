@@ -102,5 +102,4 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         }
         return ($errorsBefore === count($this->errorMessages));
     }
-
 }

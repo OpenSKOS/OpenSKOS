@@ -23,8 +23,11 @@ class Set extends AbstractTripleStoreResource
      * @param \OpenSkos2\PersonManager $personManager
      */
     public function __construct(
-    \OpenSkos2\SetManager $manager, \OpenSkos2\Search\Autocomplete $searchAutocomplete, \OpenSkos2\PersonManager $personManager)
-    {
+        \OpenSkos2\SetManager $manager,
+        \OpenSkos2\Search\Autocomplete $searchAutocomplete,
+        \OpenSkos2\PersonManager $personManager
+    ) {
+    
         $this->manager = $manager;
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
@@ -54,7 +57,8 @@ class Set extends AbstractTripleStoreResource
     }
 
   
-    protected function getRequiredParameters(){
+    protected function getRequiredParameters()
+    {
        
         return ['key', 'tenant'];
     }
@@ -65,6 +69,4 @@ class Set extends AbstractTripleStoreResource
     {
         return new \OpenSkos2\Set();
     }
-    
-  
 }

@@ -16,8 +16,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Converter;
+
 use EasyRdf\Graph;
 use OpenSkos2\Rdf\ResourceCollection;
+
 class File
 {
     /**

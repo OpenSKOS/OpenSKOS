@@ -215,6 +215,7 @@ class DataArray
             Skos::PREFLABEL,
             OpenSkos::ENABLESTATUSSESSYSTEMS,
             OpenSkos::DISABLESEARCHINOTERTENANTS,
+            OpenSkos::ENABLESKOSXL,
             OpenSkos::ALLOW_OAI,
             OpenSkos::CONCEPTBASEURI,
             OpenSkos::CODE,

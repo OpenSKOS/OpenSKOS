@@ -27,12 +27,11 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
                 $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
                 $references = $this->resourceManager->query($query);
                 if (($references[0]->COUNT->getValue()) >0) {
-                   throw new \Exception('The resource cannot be deleted because there are other resources referring to it within this storage.'); 
+                    throw new \Exception('The resource cannot be deleted because there are other resources referring to it within this storage.');
                 }
             }
         } else {
             $this->customDeletion->canBeDeleted($uri);
-        }      
+        }
     }
-
 }

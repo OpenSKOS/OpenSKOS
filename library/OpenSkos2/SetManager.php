@@ -103,7 +103,7 @@ class SetManager extends ResourceManager
         return $setResource;
     }
 
-    // 
+    //
     public function fetchFromMySQL($params)
     {
         $model = new OpenSKOS_Db_Table_Collections();
@@ -124,34 +124,34 @@ class SetManager extends ResourceManager
     }
     
    
-      public function fetchNameSearchID() // title -> code for sets
+    public function fetchNameSearchID() // title -> code for sets
     {
         $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . DcTerms::TITLE . '> ?name . '
-            . '?uri  <' . OpenSkos::CODE . '> ?searchid . '
-            . '?uri  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .}';
+        . '?uri  <' . OpenSkos::CODE . '> ?searchid . '
+        . '?uri  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .}';
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
     }
     
     
-      public function listConceptsForSet($code) 
+    public function listConceptsForSet($code)
     {
         $query = "SELECT ?name ?searchid WHERE {?seturi  <" . OpenSkos::CODE . "> '$code' ."
-            . " ?seturi  <" . Rdf::TYPE . "> <".Set::TYPE."> . "
-            . "?concepturi  <" . OpenSkos::CODE . "> '$code' . "
-            . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
-            . "?concepturi  <" . OpenSkos::UUID . "> ?serachid .}";
+        . " ?seturi  <" . Rdf::TYPE . "> <".Set::TYPE."> . "
+        . "?concepturi  <" . OpenSkos::CODE . "> '$code' . "
+        . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
+        . "?concepturi  <" . OpenSkos::UUID . "> ?serachid .}";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
     }
     
-      public function fetchSetTitleAndCodeByUri($uri) 
+    public function fetchSetTitleAndCodeByUri($uri)
     {
         $query = "SELECT ?title ?code WHERE { <$uri>  <".DcTerms::TITLE."> ?title . "
-             . "<$uri> <".OpenSkos::CODE . "> ?code . "
-            . "<$uri> <".Rdf::TYPE . "> <".Set::TYPE."> . }";
+         . "<$uri> <".OpenSkos::CODE . "> ?code . "
+        . "<$uri> <".Rdf::TYPE . "> <".Set::TYPE."> . }";
         $response = $this->query($query);
         if (count($response)>1) {
             throw new \Exception("Something went very wrong: there more than 1 set with the uri $uri");

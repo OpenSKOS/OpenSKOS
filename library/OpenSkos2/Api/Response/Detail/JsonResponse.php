@@ -16,12 +16,13 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Api\Response\Detail;
+
 use OpenSkos2\Api\Response\DetailResponse;
+
 /**
  * Provide the json output for find-* api
  */
 class JsonResponse extends DetailResponse
-
 {
     /**
      * Get response
@@ -38,5 +39,4 @@ class JsonResponse extends DetailResponse
         $correctedBody = $this->addAuxtoBody($body);
         return new \Zend\Diactoros\Response\JsonResponse($correctedBody);
     }
-    
 }

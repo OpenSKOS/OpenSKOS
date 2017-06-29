@@ -49,22 +49,30 @@ function check_if_admin($tenant_code, $key, $resourceManager, $user_model)
         fwrite(STDERR, "missing required `key` argument\n");
         exit(1);
     } else {
-        $admin = $resourceManager->fetchRowWithRetries($user_model, 'apikey = ' . $user_model->getAdapter()->quote($key) . ' '
+        $admin = $resourceManager->fetchRowWithRetries($user_model, 
+            'apikey = ' . $user_model->getAdapter()->quote($key) . ' '
             . 'AND tenant = ' . $user_model->getAdapter()->quote($tenant_code)
         );
 
         if (null === $admin) {
-            fwrite(STDERR, 'There is no user with the key ' . $key . ' in the tenant with the code ' . $tenant_code . "\n");
+            fwrite(STDERR, 'There is no user with the key ' . $key . ' in the '
+                . 'tenant with the code ' . $tenant_code . "\n");
             exit(1);
         }
         if ($admin->role !== OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR) {
-            fwrite(STDERR, "The user with the key " . $key . ' is not the administrator of the tenant with the code ' . $tenant_code . "\n");
+            fwrite(STDERR, "The user with the key " . $key . ' is not the '
+                . 'administrator of the tenant with the code ' . $tenant_code . "\n");
             exit(1);
         }
     }
 }
 
-function set_property_with_check(&$resource, $property, $val, $isURI = false, $isBOOL = false, $lang = null)
+function set_property_with_check(&$resource, 
+    $property, 
+    $val, 
+    $isURI = false, 
+    $isBOOL = false, 
+    $lang = null)
 {
     if ($isURI) {
         if (isset($val)) {
@@ -83,10 +91,14 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
             if (strtolower(strtolower($val)) === 'n' || strtolower($val) === "no") {
                 $val = 'false';
             }
-            $resource->setProperty($property, new Literal($val, null, Literal::TYPE_BOOL));
+            $resource->setProperty($property, new Literal($val, 
+                null, 
+                Literal::TYPE_BOOL));
         } else {
             // default value is 'false'
-            $resource->setProperty($property, new Literal('false', null, Literal::TYPE_BOOL));
+            $resource->setProperty($property, new Literal('false', 
+                null, 
+                Literal::TYPE_BOOL));
         }
         return;
     }
@@ -99,21 +111,40 @@ function set_property_with_check(&$resource, $property, $val, $isURI = false, $i
     };
 }
 
-function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, $license, $description, $concep_base_uri, $oai_base_uri, $allow_oai, $web_page)
+function insert_set($tenant_code, 
+    $resourceManager, 
+    $uri, 
+    $uuid, 
+    $code, 
+    $title, 
+    $license, 
+    $description, 
+    $concep_base_uri, 
+    $oai_base_uri, 
+    $allow_oai, 
+    $web_page)
 {
-    $count_sets = $resourceManager->countRdfTriples($uri, Rdf::TYPE, new Uri(Set::TYPE));
+    $count_sets = $resourceManager->countRdfTriples($uri, 
+        Rdf::TYPE, 
+        new Uri(Set::TYPE));
     if ($count_sets > 0) {
-        fwrite(STDERR, 'The set with uri ' . $uri . "' already exists in the triple store.\n");
+        fwrite(STDERR, 'The set with uri ' . $uri . "' "
+            . "already exists in the triple store.\n");
         exit(1);
     }
-    $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, new Literal($uuid), new Uri(Set::TYPE)));
+    $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, 
+        new Literal($uuid), 
+        new Uri(Set::TYPE)));
     if ($count_sets > 0) {
         fwrite(STDERR, 'The set with uuid ' . $uuid . "' already exists in the triple store.\n");
         exit(1);
     }
-    $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::CODE, new Literal($code), new Uri(Set::TYPE)));
+    $count_sets = count($resourceManager->fetchSubjectForObject(OpenSKOS::CODE, 
+        new Literal($code), 
+        new Uri(Set::TYPE)));
     if ($count_sets > 0) {
-        fwrite(STDERR, 'The set with code ' . $code . "' already exists in the triple store.\n");
+        fwrite(STDERR, 'The set with code ' . $code . 
+            "' already exists in the triple store.\n");
         exit(1);
     }
 
@@ -122,17 +153,22 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
     set_property_with_check($setResource, OpenSkos::CODE, $code);
     set_property_with_check($setResource, OpenSkos::UUID, $uuid);
 
-    $publisher = $resourceManager->fetchByUuid($tenant_code, \OpenSkos2\Tenant::TYPE, 'openskos:code');
+    $publisher = $resourceManager->fetchByUuid($tenant_code, 
+        \OpenSkos2\Tenant::TYPE, 
+        'openskos:code');
     if ($publisher == null) {
-        fwrite(STDERR, "Something went terribly worng: the tenant with the code " . $tenant_code . " has not been found in the triple store.\n");
+        fwrite(STDERR, "Something went terribly worng: the tenant with the code "
+            . "$tenant_code  has not been found in the triple store.\n");
         exit(1);
     } else {
         var_dump("PublisherURI: " . $publisher->getUri() . "\n");
     }
     $publisherURI = $publisher->getUri();
 
-    set_property_with_check($setResource, DcTerms::PUBLISHER, $publisherURI, true);
-    set_property_with_check($setResource, OpenSkos::TENANT, $tenant_code);
+    set_property_with_check($setResource, 
+        DcTerms::PUBLISHER, $publisherURI, true);
+    set_property_with_check($setResource, 
+        OpenSkos::TENANT, $tenant_code);
 
     set_property_with_check($setResource, DcTerms::TITLE, $title, false, false);
     if ($description !== NULL) {
@@ -147,21 +183,32 @@ function insert_set($tenant_code, $resourceManager, $uri, $uuid, $code, $title, 
     return $uri;
 }
 
-function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri, $uuid, $title, $description, $rdftype)
+function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, 
+    $uri, 
+    $uuid, 
+    $title, 
+    $description, 
+    $rdftype)
 {
-    $count = $resourceManager->countRdfTriples($uri, Rdf::TYPE, new Uri($rdftype));
+    $count = $resourceManager->countRdfTriples($uri, Rdf::TYPE, 
+        new Uri($rdftype));
     if ($count > 0) {
-        fwrite(STDERR, "The resource of type $rdftype with the uri   $uri   already exists in the triple store.\n");
+        fwrite(STDERR, "The resource of type $rdftype with the uri   $uri  "
+            . " already exists in the triple store.\n");
         exit(1);
     }
-    $count = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, new Literal($uuid), $rdftype));
+    $count = count($resourceManager->fetchSubjectForObject(OpenSKOS::UUID, 
+        new Literal($uuid), 
+        $rdftype));
     if ($count > 0) {
-        fwrite(STDERR, "The resource of type $rdftype with the uuid   $uuid   already exists in the triple store.\n");
+        fwrite(STDERR, "The resource of type $rdftype with the uuid   $uuid "
+            . "  already exists in the triple store.\n");
         exit(1);
     }
     $count = count($resourceManager->fetchSubjectForObject(DcTerms::TITLE, new Literal($title), $rdftype));
     if ($count > 0) {
-        fwrite(STDERR, "The resource of type $rdftype with the title   $title   already exists in the triple store.\n");
+        fwrite(STDERR, "The resource of type $rdftype with the title   $title "
+            . "  already exists in the triple store.\n");
         exit(1);
     }
 
@@ -173,22 +220,27 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
             $resource = new SkosCollection();
             break;
         default:
-            fwrite(STDERR, "`rdftype` can be set to either uri of scheme-type or the uri for skos-collection-type\n");
+            fwrite(STDERR, "`rdftype` can be set to either uri of scheme-type"
+                . " or the uri for skos-collection-type\n");
             exit(1);
     }
     $resource->setUri($uri);
     set_property_with_check($resource, OpenSkos::UUID, $uuid);
     $set = $resourceManager->fetchByUri($setUri, Set::TYPE);
     if (count($set) < 1) {
-        fwrite(STDERR, "The set with the uri $setUri has not been found in the triple store.\n");
+        fwrite(STDERR, "The set with the uri $setUri has not been found in "
+            . "the triple store.\n");
         exit(1);
     }
     set_property_with_check($resource, OpenSkos::SET, $setUri, true);
 
     $tenant_code = $set->getTenant();
-    $tenantUri = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, $tenant_code, \OpenSkos2\Tenant::TYPE);
+    $tenantUri = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, 
+        $tenant_code, 
+        \OpenSkos2\Tenant::TYPE);
     if (count($tenantUri) > 1) {
-        fwrite(STDERR, "The tenant with the code $tenant_code has not been found in the triple store.\n");
+        fwrite(STDERR, "The tenant with the code $tenant_code has not been "
+            . "found in the triple store.\n");
         exit(1);
     }
     set_property_with_check($resource, OpenSkos::TENANT, $tenant_code->getValue());
@@ -202,18 +254,31 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager, $uri,
     return $uri;
 }
 
-function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager)
+function createTenantRdf($code, 
+    $name, 
+    $epic, 
+    $uri, 
+    $uuid, 
+    $disableSearchInOtherTenants, 
+    $enableStatussesSystem, 
+    $enableSkosXl, 
+    $resourceManager)
 {
 
-    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, new Literal($code), Tenant::TYPE);
+    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, 
+        new Literal($code), 
+        Tenant::TYPE);
     if (count($resources) > 0) {
-        fwrite(STDERR, 'A tenant  with the code ' . $code . " has been already registered in the triple store. \n ");
+        fwrite(STDERR, 'A tenant  with the code ' . $code . 
+            " has been already registered in the triple store. \n ");
         exit(1);
     }
 
-    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, new Literal($name));
+    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, 
+        new Literal($name));
     if (count($insts) > 0) {
-        fwrite(STDERR, "An institution with the name " . $name . " has been already registered in the triple store. \n");
+        fwrite(STDERR, "An institution with the name " . $name . 
+            " has been already registered in the triple store. \n");
         exit(1);
     }
 
@@ -222,7 +287,9 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
         try {
             $dummyTenant = new \OpenSkos2\Tenant("http://dummy-tenant");
             $dummySet = new \OpenSkos2\Set("http://dummy-set");
-            $uri = $tenantResource->selfGenerateUri($dummyTenant, $dummySet, $resourceManager);
+            $uri = $tenantResource->selfGenerateUri($dummyTenant, 
+                $dummySet, 
+                $resourceManager);
         } catch (Exception $ex) {
             fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() . " \n");
             fwrite(STDOUT, "\n I will use the uri and uuid provided by you \n");
@@ -239,39 +306,38 @@ function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOther
     if (isset($name)) {
         $organisation->setProperty(VCard::ORGNAME, new Literal($name));
     }
-    //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
+    //$resourceManager->setLiteralWithEmptinessCheck($organisation, 
+    //vCard::ORGUNIT, " ");
     $tenantResource->setProperty(VCard::ORG, $organisation);
-    //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
-    //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
+    //$resourceManager->setUriWithEmptinessCheck($tenantResource, 
+    //OpenSkos::WEBPAGE, " ");
+    //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, 
+    //vCard::EMAIL, "");
 
     $blank2 = "_:genid_" . Uuid::uuid4();
     $adress = new Resource($blank2);
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
+    //vCard::STREET, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
+    //vCard::LOCALITY, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
+    //vCard::PCODE, "");
+    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
+    //vCard::COUNTRY, "");
     $tenantResource->setProperty(VCard::ADR, $adress);
 
-    if (!empty($disableSearchInOtherTenants)) {
-        if ($disableSearchInOtherTenants === "Y" || $disableSearchInOtherTenants === "1" || $disableSearchInOtherTenants === "true" || $disableSearchInOtherTenants === "yes") {
-            $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new Literal("true", null, Literal::TYPE_BOOL));
-        } else {
-            $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new Literal("false", null, Literal::TYPE_BOOL));
-        }
-    } else {
-        $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new Literal("true", null, Literal::TYPE_BOOL));
-    }
+    $disableBool = makeRdfBoolean($disableSearchInOtherTenants);
+    $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, 
+        $disableBool);
+    
+    $enableStatussesBool = makeRdfBoolean($enableStatussesSystem); 
+    $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, 
+        $enableStatussesBool);
 
-    if (!empty($enableStatussesSystem)) {
-        if ($enableStatussesSystem === "Y" || $enableStatussesSystem === "1" || $enableStatussesSystem === "true" || $enableStatussesSystem === "yes") {
-            $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new Literal("true", null, Literal::TYPE_BOOL));
-        } else {
-            $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new Literal("false", null, Literal::TYPE_BOOL));
-        }
-    } else {
-        $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new Literal("true", null, Literal::TYPE_BOOL));
-    }
-
+    $enableSkosBool = makeRdfBoolean($enableSkosXl);
+    $tenantResource->setProperty(OpenSkos::ENABLESKOSXL,  
+        $enableSkosBool);
+    
     return $tenantResource;
 }
 
@@ -280,13 +346,17 @@ function setID(&$resource, $uri, $uuid, $resourceManager)
     if ($uri !== null && $uri !== "") {
         $exists = $resourceManager->askForUri($uri);
         if ($exists) {
-            fwrite(STDERR, "An institution with the uri " . $uri . " has been already registered in the triple store. \n");
+            fwrite(STDERR, "An institution with the uri " . $uri . " "
+                . "has been already registered in the triple store. \n");
             exit(1);
         }
         if ($uuid !== null && $uuid !== "") {
-            $insts = $resourceManager->fetchSubjectForObject(OpenSkos::UUID, new Literal($uuid), Tenant::TYPE);
+            $insts = $resourceManager->fetchSubjectForObject(OpenSkos::UUID, 
+                new Literal($uuid), 
+                Tenant::TYPE);
             if (count($insts) > 0) {
-                fwrite(STDERR, "A institution with the uuid " . $uuid . " has been already registered in the triple store. \n");
+                fwrite(STDERR, "A institution with the uuid " . $uuid . 
+                    " has been already registered in the triple store. \n");
                 exit(1);
             }
             $resource->setUri($uri);
@@ -324,7 +394,10 @@ function validateOptions(\Zend_Console_Getopt $opts)
     }
 }
 
-function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSkos2\Rdf\Resource $resource, $retry = 20)
+function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, 
+    \OpenSkos2\Rdf\Resource 
+    $resource, 
+    $retry = 20)
 {
     $tried = 0;
     filterLastModifiedDate($resource);
@@ -366,10 +439,26 @@ function filterLastModifiedDate(\OpenSkos2\Rdf\Resource $resource)
         }
     }
     $newDate = new \OpenSkos2\Rdf\Literal(
-        $lastDate->format("Y-m-d\TH:i:s.z\Z"), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME
+        $lastDate->format("Y-m-d\TH:i:s.z\Z"), 
+        null, 
+        \OpenSkos2\Rdf\Literal::TYPE_DATETIME
     );
     $resource->setProperty(DcTerms::MODIFIED, $newDate);
 }
+
+function makeRdfBoolean($rawVal){
+    if (empty($rawVal)) {
+        return (new Literal("false", null, Literal::TYPE_BOOL));
+    }
+    $loweredVal= strtolower($rawVal); 
+    if ($loweredVal === "y" || $rawVal === "1" || 
+        $rawVal === "true" || $rawVal === "yes") {
+        return (new Literal("true", null, Literal::TYPE_BOOL));
+    } else {
+        return (new Literal("false", null, Literal::TYPE_BOOL));
+    }
+}
+   
 
 class Collections
 {
@@ -433,44 +522,55 @@ class Collections
         $retVal = [];
         foreach ($this->fetchAll() as $row) {
             if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
-                throw new \RuntimeException('Could not validate url for collection: ' . var_export($row, true));
+                throw new \RuntimeException('Could not validate url for '
+                    . 'collection: ' . var_export($row, true));
             }
                 $set = new \OpenSkos2\Set($row->uri);
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, new Uri($row->conceptsBaseUrl));
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE, new Literal($row->code));
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT, new Literal($row->tenant));
-                $tenant = $resourceManager->fetchByUuid($row->tenant, \OpenSkos2\Tenant::TYPE, 'openskos:code');
-                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER, new Uri($tenant->getUri()));
+                
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, 
+                    new Uri($row->conceptsBaseUrl));
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE, 
+                    new Literal($row->code));
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT, 
+                    new Literal($row->tenant));
+                
+                $tenant = $resourceManager->fetchByUuid($row->tenant, 
+                    \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                
+                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER, 
+                    new Uri($tenant->getUri()));
                 if (!empty($row->dc_title)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::TITLE, new Literal($row->dc_title));
+                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::TITLE, 
+                        new Literal($row->dc_title));
                 }
                 if (!empty($row->dc_description)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION, new Literal($row->dc_description));
+                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION, 
+                        new Literal($row->dc_description));
                 }
                 if (!empty($row->website)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::WEBPAGE, new Uri($row->website));
+                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::WEBPAGE, 
+                        new Uri($row->website));
                 }
                 if (!empty($row->license_url)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, new Uri($row->license_url));
+                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
+                        new Uri($row->license_url));
                 } else {
                     if (!empty($row->license_name)) {
-                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, new Literal($row->license_name));
+                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
+                            new Literal($row->license_name));
                     } else {
-                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, new Uri("http://creativecommons.org/licenses/by/4.0/"));
+                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
+                            new Uri("http://creativecommons.org/licenses/by/4.0/"));
                     }
                 }
                 if (!empty($row->OAI_baseURL)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL, new Uri($row->OAI_baseURL));
+                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL, 
+                        new Uri($row->OAI_baseURL));
                 }
-                if (!empty($row->allow_oai)) {
-                    if ($row->allow_oai === "Y" || $row->allow_oai === "1" || $row->allow_oai === "true" || $row->allow_oai === "yes") {
-                        $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("true", null, Literal::TYPE_BOOL));
-                    } else {
-                        $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
-                    }
-                } else {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
-                }
+                $oai=makeRdfBoolean($row->allow_oai);
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, 
+                    $oai);
+                
                 $retVal[] = $set;
             }
         
@@ -542,17 +642,30 @@ class Institutions
         foreach ($this->fetchAll() as $row) {
             $uuid = Uuid::uuid4();
             $uri = "http://tenant/{$uuid}";
-            if (isset($row->enableStatussesSystem)) {
-                $ess = $row->enableStatussesSystem;
+            if (!empty($row->enableSkosXl)) {
+               $skosXl = $row->enableSkosXl; 
             } else {
-               $ess = "false" ;
+               $skosXl = "false";
             }
-            if (isset($row->epic)) {
-                $epic = $row->epic;
+            if (!empty($row->epic)) {
+               $epic = $row->epic; 
             } else {
-               $epic = "false" ;
+               $epic = "false";
             }
-            $tenant = createTenantRdf($row->code, $row->name, $epic, $uri, $uuid, $row->disableSearchInOtherTenants, $ess, $resourceManager);
+            if (!empty($row->enableStatussesSystem)) {
+               $enableStatussesSystem = $row->enableStatussesSystem; 
+            } else {
+               $enableStatussesSystem = "false";
+            }
+            $tenant = createTenantRdf($row->code, 
+                $row->name, 
+                $epic, 
+                $uri, 
+                $uuid, 
+                $row->disableSearchInOtherTenants, 
+                $enableStatussesSystem, 
+                $skosXl, 
+                $resourceManager);
             $retVal[] = $tenant;
         }
         return $retVal;

@@ -48,35 +48,34 @@ class RelationType extends Resource
      * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
-     public function ensureMetadata(
-        \OpenSkos2\Tenant $tenant, 
-        \OpenSkos2\Set $set = null, 
-        \OpenSkos2\Person $person = null ,
-        \OpenSkos2\PersonManager $personManager = null, 
-        \OpenSkos2\SkosXl\LabelManager $labelManager = null, 
-        $existingConcept = null, 
-        $forceCreationOfXl = false)
-    {
+    public function ensureMetadata(
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
 
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
 
-        $forFirstTimeInOpenSkos = [
+            $forFirstTimeInOpenSkos = [
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
             DcTerms::DATESUBMITTED => $nowLiteral
-        ];
+            ];
 
-        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
-            if (!$this->hasProperty($property)) {
-                $this->setProperty($property, $defaultValue);
+            foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+                if (!$this->hasProperty($property)) {
+                    $this->setProperty($property, $defaultValue);
+                }
             }
-        }
 
-        $this->resolveCreator($person, $personManager);
+            $this->resolveCreator($person, $personManager);
 
-        $this->setModified($person);
-
+            $this->setModified($person);
     }
-
 }

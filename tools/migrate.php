@@ -32,7 +32,6 @@ use OpenSkos2\Set;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Concept;
-use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 
 $opts = [
@@ -48,6 +47,7 @@ $opts = [
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Fetch only those modified after that date.',
     'tenantname=s' => 'Name of the organisaton.',
+    'enableSkosXl' => 'enable skos xl labels'
 ];
 
 try {
@@ -130,8 +130,18 @@ if (empty($tenantName)) {
 $tenantUuid = \Rhumsaa\Uuid\Uuid::uuid4();
 $tenantUri = "http://tenant/{$tenantCode}";
 require_once 'utils_functions.php';
-// ($tenantCode, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager)
-$tenantResource = createTenantRdf($tenantCode, $tenantName, false, $tenantUri, $tenantUuid, false, true, $resourceManager);
+// ($tenantCode, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $enableSkosXl, $resourceManager)
+$skosXl = $OPTS->enableSkosXl;
+$tenantResource = createTenantRdf($tenantCode, 
+    $tenantName, 
+    false, 
+    $tenantUri, 
+    $tenantUuid, 
+    false, 
+    true, 
+    $skosXl, 
+    $resourceManager);
+
 insertResource($tenantManager, $tenantResource);
 
 $logger->info("Validating collections, creating sets");
@@ -553,52 +563,6 @@ function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rd
     throw $exc;
 }
 
-function insertResource(\OpenSkos2\Rdf\ResourceManager $resourceManager, \OpenSkos2\Rdf\Resource $resource, $retry = 20)
-{
-    $tried = 0;
-    filterLastModifiedDate($resource);
-    do {
-        try {
-            return $resourceManager->replace($resource);
-        } catch (\Exception $exc) {
-            echo $exc->getMessage() . PHP_EOL;
-            echo 'failed inserting retry' . PHP_EOL;
-            //var_dump($resource);
-            //exit(1);
-            $tried++;
-            sleep(5);
-        }
-    } while ($tried < $retry);
-//    throw $exc;
-    echo PHP_EOL;
-    echo 'failed inserting ' . $retry . ' times ' . PHP_EOL;
-    echo 'last exception is ' . print_r($exc, true) . PHP_EOL;
-    echo PHP_EOL;
-}
-
-/**
- * Filter multiple modified dates to the last modified date.
- *
- * @param \OpenSkos2\Rdf\Resource $resource
- */
-function filterLastModifiedDate(\OpenSkos2\Rdf\Resource $resource)
-{
-    $dates = $resource->getProperty(DcTerms::MODIFIED);
-    if (count($dates) < 2) {
-        return;
-    }
-    $lastDate = new \DateTime($dates[0]->getValue());
-    foreach ($dates as $date) {
-        $otherDate = new \DateTime($date->getValue());
-        if ($lastDate->getTimestamp() < $otherDate->getTimestamp()) {
-            $lastDate = $otherDate;
-        }
-    }
-    $newDate = new \OpenSkos2\Rdf\Literal(
-        $lastDate->format("Y-m-d\TH:i:s.z\Z"), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME
-    );
-    $resource->setProperty(DcTerms::MODIFIED, $newDate);
-}
 
 /**
  * Get file contents with retry, and json decode results
@@ -624,28 +588,7 @@ function getFileContents($url, $retry = 20, $count = 0)
     throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
 }
 
-/**
- * Make sure all cli options are given
- *
- * @param \Zend_Console_Getopt $opts
- */
-function validateOptions(\Zend_Console_Getopt $opts)
-{
-    $required = [
-        'db-hostname',
-        'db-database',
-        'db-username',
-        //'db-password',
-    ];
-    foreach ($required as $req) {
-        $reqOption = $opts->getOption($req);
-        if (empty($reqOption)) {
-            echo "absent {$req} \n";
-            echo $opts->getUsageMessage();
-            exit();
-        }
-    }
-}
+
 
 /**
  * Used to generate uri's for bad data from the source
@@ -667,107 +610,4 @@ function getConceptUri($uri, array $solrDoc, \Collections $collections)
     return $collection->conceptsBaseUrl . '/' . current($solrDoc['notation']);
 }
 
-class Collections
-{
 
-    /**
-     * @var \Zend_Db_Adapter_Abstract
-     */
-    private $db;
-
-    /**
-     * @var array
-     */
-    private $collections = [];
-
-    /**
-     * Use the source db as parameter not the target.
-     *
-     * @param \Zend_Db_Adapter_Abstract $db
-     */
-    public function __construct(\Zend_Db_Adapter_Abstract $db)
-    {
-        $this->db = $db;
-    }
-
-    /**
-     * @param int $id
-     * @return \stdClass
-     */
-    public function fetchById($id)
-    {
-        if (!isset($this->fetchAll()[$id])) {
-            throw new \RunTimeException('Collection not found');
-        }
-        return $this->fetchAll()[$id];
-    }
-
-    /**
-     * Fetch all collections
-     *
-     * @return array
-     */
-    public function fetchAll()
-    {
-        if (!empty($this->collections)) {
-            return $this->collections;
-        }
-        $collections = $this->db->fetchAll('select * from collection');
-        foreach ($collections as $collection) {
-            $this->collections[$collection->id] = $collection;
-        }
-        return $this->collections;
-    }
-
-    /**
-     * Check if
-     *
-     * @throw \RuntimeException
-     */
-    public function validateCollections($resourceManager)
-    {
-        $retVal = [];
-        foreach ($this->fetchAll() as $row) {
-            if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
-                throw new \RuntimeException('Could not validate url for collection: ' . var_export($row, true));
-            }
-            $set = new \OpenSkos2\Set($row->uri);
-            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, new Uri($row->conceptsBaseUrl));
-            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE, new Literal($row->code));
-            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT, new Literal($row->tenant));
-            $tenant = $resourceManager->fetchByUuid($row->tenant, \OpenSkos2\Tenant::TYPE, 'openskos:code');
-            $set->setProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER, new Uri($tenant->getUri()));
-            if (isset($row->dc_title)) {
-                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::TITLE, new Literal($row->dc_title));
-            }
-            if (isset($row->dc_description)) {
-                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION, new Literal($row->dc_description));
-            }
-            if (!empty($row->website)) {
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::WEBPAGE, new Uri($row->website));
-            }
-            if (!empty($row->license_url)) {
-                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, new Uri($row->license_url));
-            } else {
-                if (!empty($row->license_name)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, new Literal($row->license_name));
-                }
-            }
-            if (!empty($row->OAI_baseURL)) {
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL, new Uri($row->OAI_baseURL));
-            }
-            if (!empty($row->allow_oai)) {
-                if ($row->allow_oai === "Y" || $row->allow_oai === "1" || $row->allow_oai === "true" || $row->allow_oai === "YES") {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("true", null, Literal::TYPE_BOOL));
-                } else {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
-                }
-            } else {
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, new Literal("false", null, Literal::TYPE_BOOL));
-            }
-            $retVal[] = $set;
-        }
-        return $retVal;
-    }
-
-}

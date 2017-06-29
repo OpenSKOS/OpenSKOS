@@ -70,9 +70,12 @@ class Command implements LoggerAwareInterface
      * @param Tenant $tenant optional If specified - tenant specific validation can be made.
      */
     public function __construct(
-    ResourceManager $resourceManager, ConceptManager $conceptManager, PersonManager $personManager, Tenant $tenant = null
-    )
-    {
+        ResourceManager $resourceManager,
+        ConceptManager $conceptManager,
+        PersonManager $personManager,
+        Tenant $tenant = null
+    ) {
+    
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
         $this->personManager = $personManager;
@@ -90,14 +93,25 @@ class Command implements LoggerAwareInterface
         $this->conceptManager->setIsNoCommitMode(true);
 
         $helper = new CollectionHelper(
-            $this->resourceManager, $this->conceptManager, $this->personManager, $this->tenant, $message
+            $this->resourceManager,
+            $this->conceptManager,
+            $this->personManager,
+            $this->tenant,
+            $message
         );
         $helper->setLogger($this->logger);
         $helper->prepare($resourceCollection);
 
 
         $validator = new ResourceValidator(
-            $this->conceptManager, !($message->getNoUpdates()), $this->tenant, $this->set, false, false, $this->logger);
+            $this->conceptManager,
+            !($message->getNoUpdates()),
+            $this->tenant,
+            $this->set,
+            false,
+            false,
+            $this->logger
+        );
 
 
         // validation is in the loop below per resource, not with the whole bunch
@@ -153,7 +167,14 @@ class Command implements LoggerAwareInterface
         $this->logger->info("Removing danglig references");
         $this->logger->info("...");
         $validatorUpdate = new ResourceValidator(
-            $this->conceptManager, true, $this->tenant, $this->set, true, true, $this->logger);
+            $this->conceptManager,
+            true,
+            $this->tenant,
+            $this->set,
+            true,
+            true,
+            $this->logger
+        );
         foreach ($resourceCollection as $resourceInserted) {
             $uri = $resourceInserted->getUri();
             $type = $resourceInserted->getType()->getUri();
@@ -199,5 +220,4 @@ class Command implements LoggerAwareInterface
         }
         return $resource;
     }
-
 }

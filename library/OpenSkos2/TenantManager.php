@@ -99,11 +99,11 @@ class TenantManager extends ResourceManager
         return $result;
     }
 
-      public function fetchNameSearchID() // orgname -> code for tenants
+    public function fetchNameSearchID() // orgname -> code for tenants
     {
         $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . VCard::ORG . '> ?org . '
-            . '?org <' . VCard::ORGNAME . '> ?name .'
-            . ' ?uri  <' . OpenSkos::CODE . '> ?searchid }';
+        . '?org <' . VCard::ORGNAME . '> ?name .'
+        . ' ?uri  <' . OpenSkos::CODE . '> ?searchid }';
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
@@ -119,5 +119,4 @@ class TenantManager extends ResourceManager
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> <".VCard::ADR."> ?object . ?object ?predicate2 ?object2 .}");
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
-    
 }

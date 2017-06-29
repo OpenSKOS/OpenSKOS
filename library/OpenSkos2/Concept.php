@@ -143,7 +143,8 @@ class Concept extends Resource
     public function hasAnyRelations()
     {
         $relationProperties = array_merge(
-            Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']
+            Resource::$classes['SemanticRelations'],
+            Resource::$classes['MappingProperties']
         );
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {
@@ -189,13 +190,20 @@ class Concept extends Resource
      * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
-     * @param \OpenSkos2\LabelManager $labelManager, 
-     * @param  Resource $existingConcept, optional $existingResource of one of concrete child types used for update 
+     * @param \OpenSkos2\LabelManager $labelManager,
+     * @param  Resource $existingConcept, optional $existingResource of one of concrete child types used for update
      * $oldStatus will be derived from $existingResource
      */
     public function ensureMetadata(
-    \OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set = null, \OpenSkos2\Person $person = null, PersonManager $personManager = null, LabelManager $labelManager = null, $existingConcept = null, $forceCreationOfXl = false)
-    {
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        PersonManager $personManager = null,
+        LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
 
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
@@ -307,7 +315,7 @@ class Concept extends Resource
         }
     }
 
-      public function fetchNameUri()  // pref Label -> uri for concepts
+    public function fetchNameUri()  // pref Label -> uri for concepts
     {
         $query = 'SELECT ?uri ?name WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . }';
         $response = $this->query($query);
@@ -316,10 +324,10 @@ class Concept extends Resource
     }
     
     
-      public function fetchNameSearchID() //pref Label -> uuid for concepts
+    public function fetchNameSearchID() //pref Label -> uuid for concepts
     {
         $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . ?uri  <' .
-            OpenSkosNameSpace::UUID . '> ?searchid }';
+        OpenSkosNameSpace::UUID . '> ?searchid }';
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;

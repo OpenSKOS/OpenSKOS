@@ -25,7 +25,7 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\OpenSkosException;
 
-class SinglePrefLabelXl extends AbstractConceptValidator 
+class SinglePrefLabelXl extends AbstractConceptValidator
 {
     /**
      * Validate if a concept's xl labels are pairwise disjoint as stated in

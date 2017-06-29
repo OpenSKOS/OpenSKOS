@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Api\Response\ResultSet;
+
 /**
  * Provide the jsonp output for find-* api
  */

@@ -12,7 +12,6 @@ use OpenSkos2\RelationType;
 use OpenSkos2\Roles;
 use OpenSkos2\Namespaces\OpenSkos;
 
-
 class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 {
 
@@ -34,7 +33,8 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 throw new \Exception(
                     'The set code ' . $set->getCode()->getValue() .
                     " from request parameters does not match the set {$sets[0]} to which the resource refers"
-                    . ' (indirectly via schemes and collections if the resource is a concept)');
+                    . ' (indirectly via schemes and collections if the resource is a concept)'
+                );
             }
         }
         switch ($type) {
@@ -72,7 +72,8 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 throw new \Exception(
                     'The set code ' . $set->getCode()->getValue() .
                     " from request parameters does not match the set {$sets[0]} to which the resource refers"
-                    . ' (indirectly via schemes and collections if the resource is a concept)');
+                    . ' (indirectly via schemes and collections if the resource is a concept)'
+                );
             }
         }
         switch ($type) {
@@ -110,7 +111,8 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 throw new \Exception(
                     'The set code ' . $set->getCode()->getValue() .
                     " from request parameters does not match the set {$sets[0]} to which the resource refers"
-                    . ' (indirectly via schemes and collections if the resource is a concept)');
+                    . ' (indirectly via schemes and collections if the resource is a concept)'
+                );
             }
         }
         switch ($type) {
@@ -150,7 +152,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             );
         }
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot delete this resource');
         }
     }
@@ -168,7 +170,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             );
         }
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot delete this resource');
         }
     }
@@ -186,7 +188,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             );
         }
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot delete this resource');
         }
     }
@@ -212,7 +214,6 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
                 'Your role ' . $user->role . ' does not give you permission to create concepts '
             );
         }
-        
     }
 
     private function conceptEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $concept)
@@ -281,7 +282,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     private function tenantCreateAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot create this resource');
         }
     }
@@ -289,7 +290,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     private function tenantEditAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot edit this resource');
         }
     }
@@ -297,7 +298,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     private function tenantDeleteAllowed(OpenSKOS_Db_Table_Row_User $user)
     {
         if (!($user->role === Roles::ADMINISTRATOR ||
-            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)){
+            $user->role === Roles::ROOT || $user->role === Roles::EDITOR)) {
             throw new \Exception('User the the role '.$user->role. ' cannot delete this resource');
         }
     }
@@ -324,7 +325,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
 
     private function relationEditAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)
     {
-       $this->resourceEditAllowedBasic($user, $tenant, $resource);
+        $this->resourceEditAllowedBasic($user, $tenant, $resource);
     }
 
     private function relationDeleteAllowed(OpenSKOS_Db_Table_Row_User $user, \OpenSkos2\Tenant $tenant, $resource)

@@ -75,7 +75,7 @@ class Collection
         Tenant $tenant,
         Set $set,
         $referencecheckOn,
-        $conceptReferenceCheckOn=false,
+        $conceptReferenceCheckOn = false,
         LoggerInterface $logger = null
     ) {
         if ($logger === null) {
@@ -106,7 +106,6 @@ class Collection
                    
                 $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
                     . implode(', ', $validator->getErrorMessages());
-                
             }
         }
 
@@ -143,6 +142,5 @@ class Collection
             $this->conceptReferenceCheckOn,
             $this->logger
         );
-
     }
 }

@@ -12,5 +12,4 @@ class OpenSkosSet extends AbstractConceptSchemeValidator
     {
          return $this->checkSet($resource);
     }
-
 }

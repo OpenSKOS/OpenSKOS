@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\Api\Response;
+
 /**
  * Provide the json output for find-concepts api
  */
@@ -55,7 +56,8 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
         $this->excludePropertiesList = $excludePropertiesList;
     }
     
-    public function setInit($init){
-       $this->init=$init; 
+    public function setInit($init)
+    {
+        $this->init=$init;
     }
 }

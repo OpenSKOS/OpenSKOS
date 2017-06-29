@@ -62,7 +62,8 @@ trait ApiResponseTrait
         $tenant = $manager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
         if (null === $tenant) {
             throw new InvalidArgumentException(
-            "No such tenant $tenantCode", 404
+                "No such tenant $tenantCode",
+                404
             );
         }
         return $tenant;
@@ -107,5 +108,4 @@ trait ApiResponseTrait
     // so that the developers of the given institution can adjust it for their own requirements
     // alos, there are different authorisation requirements for different sorts of resources
     // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)
-    
 }

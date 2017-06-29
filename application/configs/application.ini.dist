@@ -10,36 +10,7 @@ bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
 bootstrap.class = "Bootstrap"
 appnamespace = "Application"
 
-autoloadernamespaces[] = OpenSKOS_
-autoloadernamespaces[] = Net_
 
-
-; this path will be used for import files
-; it is not required to put this directory inside your DocumentRoot
-; make sure this directory is writable by your webserver!
-upload_path = APPLICATION_PATH "/../data/uploads"
-
-
-; EPIC
-epic.host=pid.gwdg.de/handles/
-epic.username=epic_username
-epic.password=epic_password
-epic.prefix=11148
-epic.guid.prefix=backend_name_
-epic.resolver=http://hdl.handle.net/
-epic.forwardLocationPrefix=http://host/backend_name/public/api/
-
-
-editor.languages.nl="Dutch"
-editor.languages.en="English"
-editor.languages.fr="French"
-
-; Concept scheme icons configuration
-editor.schemeIcons.uploadPath="/../public/data/icons/uploads"
-editor.schemeIcons.uploadHttpPath="/data/icons/uploads"
-editor.schemeIcons.allowedExtensions="jpg, jpeg, png, gif"
-editor.schemeIcons.maxSize=2097152
-editor.schemeIcons.width=16
 editor.schemeIcons.height=16
 editor.schemeIcons.extension="png"
 
@@ -53,39 +24,13 @@ editor.allowNotationEdit = "@editor-allow-notation-edit@"
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
 ; see http://framework.zend.com/manual/en/zend.view.scripts.html
-; homepagescript = APPLICATION_PATH "/../data/homepage/index.phtml"
-
-; OAI instances
-;instances.openskos.type=openskos
-;instances.openskos.url=http://openskos.org
-;instances.openskos.label=OpenSKOS.org
-
-pluginPaths.OpenSKOS_Application_Resource="OpenSKOS/Application/Resource"
-
-resources.frontController.controllerDirectory.website = APPLICATION_PATH "/website/controllers"
-resources.frontController.controllerDirectory.api = APPLICATION_PATH "/api/controllers"
-resources.frontController.controllerDirectory.oai-pmh = APPLICATION_PATH "/oai-pmh/controllers"
-resources.frontController.controllerDirectory.editor = APPLICATION_PATH "/editor/controllers"
-resources.frontController.defaultModule=website
-
-resources.layout.layout = "main"
-resources.layout.layoutPath = APPLICATION_PATH "/layouts"
-
-resources.view.encoding="UTF-8"
-resources.view.helperPath.OpenSKOS_View_Helper=APPLICATION_PATH "/../library/OpenSKOS/View/Helper/"
-
-resources.translate.adapter=gettext
-resources.translate.data=APPLICATION_PATH "/../languages"
-resources.translate.options.scan=filename
-resources.translate.options.disableNotices=true
-
-; ACL
-resources.acl.foo=bar
 
 ; Solr configuration:
 solr.host = localhost
 solr.port = 8983
 solr.context = /solr
+
+
 
 ; Database configuration:
 resources.db.adapter=pdo_mysql
@@ -96,48 +41,23 @@ resources.db.params.charset=utf8
 resources.db.params.dbname=openskos
 resources.db.isDefaultTableAdapter = true
 
-; Caching
-resources.cachemanager.general.frontend.name=Core
-resources.cachemanager.general.frontend.customFrontendNaming=false
-resources.cachemanager.general.frontend.options.lifetime=7200
-resources.cachemanager.general.frontend.options.automatic_serialization=true
-resources.cachemanager.general.backend.name=File
-resources.cachemanager.general.backend.customBackendNaming=false
-resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
-resources.cachemanager.general.frontendBackendAutoload=false
-
-
-;; SESSION ;;
-resources.session.cookie_path = "/backend_name/"
-
-
-;; PLUGINS ;;
-resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
-resources.frontController.plugins.auth="OpenSKOS_Controller_Plugin_Auth"
-resources.frontController.plugins.locale="OpenSKOS_Controller_Plugin_Locale"
-;resources.frontController.plugins.apiclient="OpenSKOS_Controller_Plugin_ApiClient"
-resources.frontController.plugins.rest="Zend_Controller_Plugin_PutHandler"
-
-; @extra routes here@
+ ; @extra routes here@
 
 resources.frontController.params.displayExceptions = 1
 resources.locale.default=nl_NL.utf8
-
 resources.view.encoding="UTF-8"
 resources.view.options.doctype=XHTML1_STRICTF
 
-; Apache Jena Fuseki configuration:
-sparql.queryUri = http://localhost:3030/openskos/query
+Apache Jena Fuseki configuration:
+parql.queryUri = http://localhost:3030/openskos/query
 sparql.updateUri = http://localhost:3030/openskos/update
 
-; Client id and clie nt secret configured in https://console.developers.google.com
-oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
 ; Api configuration
-;api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
-api.baseUri = "@api-base-uri@"
-api.showOnlyApproved = "@api-show-only-approved@"
++;api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
++api.baseUri = "@api-base-uri@
+api.showOnlyApproved = "@api-show-only-approved@""
 
 
 ; customize applicaton
@@ -154,15 +74,6 @@ custom.maximal_rows = 500
 custom.maximal_time_limit = 120
 custom.normal_time_limit = 30
 custom.backend = ccr
-
-[staging : production]
-phpSettings.display_startup_errors = 1
-phpSettings.display_errors = 1
-resources.frontController.params.displayExceptions = 1
-
-[testing : production]
-phpSettings.display_startup_errors = 1
-phpSettings.display_errors = 1
 
 [development : production]
 phpSettings.display_startup_errors = 1

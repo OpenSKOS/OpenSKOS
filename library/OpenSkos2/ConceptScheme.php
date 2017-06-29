@@ -117,5 +117,4 @@ class ConceptScheme extends Resource
             return '';
         }
     }
-
 }

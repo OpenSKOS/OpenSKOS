@@ -8,6 +8,7 @@ use OpenSkos2\Set;
 use OpenSkos2\Tenant;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\RelationType;
+
 class Deletion implements \OpenSkos2\Interfaces\Deletion
 {
 
@@ -47,7 +48,7 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
 
     private function canBeDeletedBasic($uri)
     {
-         if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
+        if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
             $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
             $references = $this->resourceManager->query($query);
             if (($references[0]->COUNT->getValue()) > 0) {
@@ -86,5 +87,4 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
     {
         $this->canBeDeletedBasic($uri);
     }
-
 }

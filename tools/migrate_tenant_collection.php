@@ -27,9 +27,13 @@ use OpenSkos2\Tenant;
 use OpenSkos2\Set;
 use OpenSkos2\Rdf\Uri;
 
+
+// VOORBEELD
+//php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim --db-password=geheim --db-username=root --debug=1
+
+
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
-    'endpoint=s' => 'Solr endpoint to fetch data from',
     'db-hostname=s' => 'Origin database host',
     'db-database=s' => 'Origin database name',
     'db-username=s' => 'Origin database username',

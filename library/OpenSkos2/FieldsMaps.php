@@ -51,6 +51,7 @@ class FieldsMaps
             'inScheme' => Skos::INSCHEME,
             'inSkosCollection' => OpenSkos::INSKOSCOLLECTION,
             'enableStatussesSystem' => OpenSkos::ENABLESTATUSSESSYSTEMS,
+            'enableSkosXl' =>  OpenSkos::ENABLESKOSXL,
             'disableSearchInOtherTenants' => OpenSkos::DISABLESEARCHINOTERTENANTS,
             'code' => OpenSkos::CODE,
             'conceptBaseUri' => OpenSkos::CONCEPTBASEURI,

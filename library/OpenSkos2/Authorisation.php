@@ -42,5 +42,4 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
             $this->customAuthorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
         }
     }
-
 }

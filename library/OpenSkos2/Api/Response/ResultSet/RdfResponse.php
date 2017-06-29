@@ -65,8 +65,11 @@ class RdfResponse extends ResultSetResponse
             // or both of them with something shared.
             /* @var $resource \OpenSkos2\Rdf\Resource */
             $xml = (new \OpenSkos2\Api\Transform\DataRdf(
-                $resource, true, $this->propertiesList, $this->excludePropertiesList
-                ))->transform();
+                $resource,
+                true,
+                $this->propertiesList,
+                $this->excludePropertiesList
+            ))->transform();
             
             $resourceXML = new \DOMDocument();
             $resourceXML->loadXML($xml);
@@ -81,7 +84,6 @@ class RdfResponse extends ResultSetResponse
             $root->appendChild(
                 $doc->importNode($resourceXML->documentElement, true)
             );
-           
         }
         return $doc;
     }

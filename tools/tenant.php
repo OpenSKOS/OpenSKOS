@@ -21,14 +21,12 @@
  */
 use DI\Container;
 use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Tenant;
-use Rhumsaa\Uuid\Uuid;
 
 require_once 'autoload.inc.php';
 require_once 'Zend/Console/Getopt.php';
+
 
 $opts = array(
     'help|?' => 'Print this usage message',
@@ -43,19 +41,22 @@ $opts = array(
     'email=s' => 'Admin email (required when creating a tenant)',
     'password=s' => 'Password for the Admin account',
     'apikey=s' => 'Api key for the Admin account',
-    'eppn=s' => 'eppn for the admin'
+    'eppn=s' => 'eppn for the admin',
+    'enableSkosXl' => 'enable skos xl labels'
 );
 $OPTS = new Zend_Console_Getopt($opts);
 
 if ($OPTS->help) {
-    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
+    echo str_replace('[ options ]', '[ options ] action', 
+        $OPTS->getUsageMessage());
     exit(0);
 }
 
 $args = $OPTS->getRemainingArgs();
 
 if (!$args || count($args) != 1) {
-    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
+    echo str_replace('[ options ]', '[ options ] action', 
+        $OPTS->getUsageMessage());
     fwrite(STDERR, "Expected an action (create|delete)\n");
     exit(1);
 }
@@ -73,7 +74,8 @@ if (null === $OPTS->apikey) {
     exit(1);
 }
 
-require dirname(__FILE__) . '/bootstrap.inc.php';
+require_once dirname(__FILE__) . '/bootstrap.inc.php';
+require_once 'utils_functions.php';
 
 /* @var $diContainer Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
@@ -109,75 +111,29 @@ function setID(&$resource, $uri, $uuid, $resourceManager)
     }
 }
 
-function createTenantRdf($code, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $resourceManager)
-{
 
-    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, new Literal($code), Tenant::TYPE);
-    if (count($resources) > 0) {
-        fwrite(STDERR, 'A tenant  with the code ' . $code . " has been already registered in the triple store. \n ");
-        exit(1);
-    }
-
-    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, new Literal($name));
-    if (count($insts) > 0) {
-        fwrite(STDERR, "An institution with the name " . $name . " has been already registered in the triple store. \n");
-        exit(1);
-    }
-
-    $tenantResource = new Tenant();
-    if ($epic === 'true') {
-        try {
-            $dummyTenant = new \OpenSkos2\Tenant("http://dummy-tenant");
-            $dummySet = new \OpenSkos2\Set("http://dummy-set");
-            $uri = $tenantResource->selfGenerateUri( $dummyTenant, $dummySet, $resourceManager);
-        } catch (Exception $ex) {
-            fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() . " \n");
-            fwrite(STDOUT, "\n I will use the uri and uuid provided by you \n");
-            setID($tenantResource, $uri, $uuid, $resourceManager);
-        };
-    } else {
-        setID($tenantResource, $uri, $uuid, $resourceManager);
-    }
-
-
-    $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
-    $blank1 = "_:genid_".Uuid::uuid4();
-    $organisation = new Resource($blank1);
-    if (isset($name)) {
-        $organisation->setProperty(VCard::ORGNAME, new Literal($name));
-    }
-    //$resourceManager->setLiteralWithEmptinessCheck($organisation, vCard::ORGUNIT, " ");
-    $tenantResource->setProperty(VCard::ORG, $organisation);
-    //$resourceManager->setUriWithEmptinessCheck($tenantResource, OpenSkos::WEBPAGE, " ");
-    //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, vCard::EMAIL, "");
-
-    $blank2 = "_:genid_".Uuid::uuid4();
-    $adress = new Resource($blank2);
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::STREET, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::LOCALITY, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::PCODE, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, vCard::COUNTRY, "");
-    $tenantResource->setProperty(VCard::ADR, $adress);
-
-    if (isset($disableSearchInOtherTenants)) {
-        $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, new Literal($disableSearchInOtherTenants, null, Literal::TYPE_BOOL));
-    }
-    if (isset($disableSearchInOtherTenants)) {
-        $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, new Literal($enableStatussesSystem, null, Literal::TYPE_BOOL));
-    }
-    return $tenantResource;
-}
 
 fwrite(STDOUT, "\n\n\n Starting script tenant... \n ");
 switch ($action) {
     case 'create':
 
         //create tenant 
-        $tenantRdf = createTenantRdf($OPTS->code, $OPTS->name, $OPTS->epic, $OPTS->uri, $OPTS->uuid, $OPTS->disableSearchInOtherTenants, $OPTS->enableStatussesSystem, $resourceManager);
+        $tenantRdf = createTenantRdf($OPTS->code, 
+            $OPTS->name, 
+            $OPTS->epic, 
+            $OPTS->uri, 
+            $OPTS->uuid, 
+            $OPTS->disableSearchInOtherTenants, 
+            $OPTS->enableStatussesSystem, 
+            $OPTS->enableSkosXl, 
+            $resourceManager);
         $resourceManager->insert($tenantRdf);
-        fwrite(STDOUT, 'A tenant has been created in the triple store with this uri: ' . $tenantRdf->getUri() . "\n");
-        fwrite(STDOUT, 'To check: try GET <host>/api/institution?id=' . $tenantRdf->getUri() . "\n");
-        fwrite(STDOUT, "Now Im about to add the user in the MySQL database ... \n\n");
+        fwrite(STDOUT, 'A tenant has been created in the triple store with this uri: ' . 
+            $tenantRdf->getUri() . "\n");
+        fwrite(STDOUT, 'To check: try GET <host>/api/institution?id=' . 
+            $tenantRdf->getUri() . "\n");
+        fwrite(STDOUT, "Now Im about to add the user in "
+            . "the MySQL database ... \n\n");
 
         // create user
         $model = new OpenSKOS_Db_Table_Users();

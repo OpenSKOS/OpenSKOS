@@ -40,6 +40,7 @@ class BackwardCompatibility
             "name" => ($newStyleBody["vcard_org"][0]["vcard_orgname"]),
             "disableSearchInOtherTenants" => ($newStyleBody["disableSearchInOtherTenants"]),
             "enableStatussesSystem" => ($newStyleBody["enableStatussesSystem"]),
+            "enableSkosXl"=> ($newStyleBody["enableSkosXl"]),
         ];
         
         if (isset($newStyleBody["vcard_org"][0]["vcard_orgunit"])) {
@@ -63,11 +64,8 @@ class BackwardCompatibility
         if (isset($newStyleBody["vcard_adr"][0]["vcard_country"])) {
             $oldStyleBodyArray["countryName"] = $newStyleBody["vcard_adr"][0]["vcard_country"];
         }
-        if (isset($newStyleBody["enableSkosXl"])) {
-            $oldStyleBodyArray["enableSkosXl"] = $newStyleBody["enableSkosXl"];
-        } else {
-            $oldStyleBodyArray["enableSkosXl"] = true;
-        }
+        
+        
         if (isset($newStyleBody["sets"])) {
             $oldStyleSet = [];
             $oldStyleBodyArray["collections"] = array();
