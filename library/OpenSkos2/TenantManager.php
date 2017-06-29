@@ -109,21 +109,7 @@ class TenantManager extends ResourceManager
         return $result;
     }
     
-       public function fetchTenantNameByCode($code) 
-    {
-        $query = "SELECT ?name WHERE { ?uri  <".VCard::ORG."> ?org . "
-            . "?org <".VCard::ORGNAME . "> ?name . "
-            . "?uri  <" . OpenSkos::CODE . "> '$code' .}";
-        $response = $this->query($query);
-        if (count($response)>1) {
-            throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
-        }
-        if (count($response)<1) {
-            throw new \Exception("the institution with the code $code is not found");
-        }
-        return $response[0]->name->getValue();
-    }
-    
+   
      /**
      * @param Uri $resource
      */
