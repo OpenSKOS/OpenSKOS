@@ -407,7 +407,7 @@ class Repository implements InterfaceRepository
      */
     private function getRdfSets()
     {
-        return $this->rdfSetManager->fetchAllSets(true);
+        return $this->rdfSetManager->fetchAllSets("true");
     }
     /**
      * Decode resumption token
