@@ -45,7 +45,7 @@ class SetManager extends ResourceManager
     public function fetchAllSets($allowOAI)
     {
         $query = 'DESCRIBE ?s {'
-            . 'select ?s where {?s <http://openskos.org/xmlns#allow_oai>  "' . $allowOAI . '"^^xsd:bool .} }';
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
     }
@@ -54,13 +54,14 @@ class SetManager extends ResourceManager
     {
         $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE '
             . '{ ?subject ?predicate ?object . ?subject <' .
-            OpenSkos::TENANT . '> ?tenantURI . ?tenantURI <' . OpenSkos::CODE . '> "' .
-            $tenantCode . '".} }';
+            OpenSkos::TENANT . '>  "'. $tenantCode . '". '
+            . ' ?subject <'.Rdf::TYPE.'> <'.Set::TYPE.'> } }';
         $result = $this->query($query);
-        $sets = EasyRdf::graphToResourceCollection($result, $this->getResourceType());
         $retVal = [];
-        foreach ($sets as $set) {
-            $retVal[$set->getUri()] = $set;
+        foreach ($result as $set) {
+            $retVal[$set->getUri()]['uri'] = $set->getUri();
+            $code = $set->getCode();
+            $retVal[$set->getUri()]['code'] = $code->getValue();
         }
         return $retVal;
     }

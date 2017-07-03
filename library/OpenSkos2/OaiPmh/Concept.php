@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,9 +15,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\OaiPmh;
-
 use DOMDocument;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
@@ -27,19 +24,12 @@ use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\OaiPmh\Repository;
-
-// Meertens: OpenSKOS:TENANT and OpenSKOS:SET are derived properties for a concept.
-// therefore obtaining them in "getHeader" for Meertens differ's from Picturae's version.
-// Picturae's  changes from 23/11/2016 are taken.
-
 class Concept implements Record
 {
-
     /**
      * @var SkosConcept $concept
      */
     protected $concept;
-
     /**
      * @var SetsMap
      */
@@ -49,7 +39,6 @@ class Concept implements Record
      *  @var string $metadataFormat
      */
     protected $metadataFormat;
-
     /**
      * @param SkosConcept $concept
      * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
@@ -60,7 +49,6 @@ class Concept implements Record
         $this->setsMap = $setsMap;
         $this->metadataFormat = $metadataFormat;
     }
-
     /**
      * Get header
      * @return Header
@@ -70,10 +58,6 @@ class Concept implements Record
         $concept = $this->concept;
         if (!$concept->isDeleted()) {
             $datestamp = $concept->getLatestModifyDate();
-            // Meertens: the fallback is necessary for us because we do not always have lastmodifies in a concept
-            if ($datestamp == null) {
-                $datestamp = $concept->getDateSubmitted()->getValue();
-            }
         } else {
             if ($concept->hasProperty(OpenSkos::DATE_DELETED)) {
                 $datestamp = $concept->getPropertySingleValue(OpenSkos::DATE_DELETED)->getValue();
@@ -81,23 +65,19 @@ class Concept implements Record
                 $datestamp = $concept->getLatestModifyDate();
             }
         }
-
         $setSpecs = [];
-        $specs = $this->setsMap->fetchTenantSpecData($concept);
-        foreach ($specs as $spec) {
-            $setSpecs[] = $spec['tenantcode'];
-            $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'];
-            $schemes = $this->setsMap->getSchemes(
-                $spec['tenantcode'],
-                $spec['seturi'],
-                $concept->getProperty(Skos::INSCHEME)
-            );
-            foreach ($schemes as $scheme) {
-                $setSpecs[] = $spec['tenantcode'] . ':' . $spec['setcode'] . ':' .
-                    $scheme->getUuid()->getValue();
+        foreach ($concept->getProperty(OpenSkos::TENANT) as $tenant) {
+            $setSpecs[] = (string)$tenant;
+            $setUris = $concept->getProperty(OpenSkos::SET);
+            $oaiSets = $this->setsMap->getSets($tenant, $setUris);
+           foreach ($oaiSets as $set) {
+                $setSpecs[] = $tenant . ':' . $set->code;
+                $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
+                foreach ($schemes as $scheme) {
+                    $setSpecs[] = $tenant . ':' . $set->code . ':' . $scheme->getUuid();
+                }
             }
         }
-
         /*
          * @TODO: Fix once migration works correctly
          * We should be able to just fetch a single value, but due to bad data in the old system we will
@@ -112,8 +92,8 @@ class Concept implements Record
             $setSpecs,
             $concept->isDeleted()
         );
+        
     }
-
     /**
      * Convert skos concept to \DomDocument to use as metadata in OAI-PMH Interface
      *
@@ -130,10 +110,8 @@ class Concept implements Record
                 $this->getExcludeProperties()
             ))->transform()
         );
-
         return $metadata;
     }
-
     /**
      * @return DomDocument|null
      */
