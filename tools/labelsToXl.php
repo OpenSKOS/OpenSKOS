@@ -16,7 +16,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /**
  * Script to index the solr from jena manually.
  * No need for regular use - just in case of some changes in the solr schema. 
@@ -29,6 +28,7 @@ $opts = [
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Process only those modified after that date.',
     'skipDone|s' => 'Skip concepts which are done.',
+    'add' => 'add skos xl labels for existing concepts'
 ];
 
 try {
@@ -50,9 +50,9 @@ if ($OPTS->getOption('debug')) {
     $logLevel = \Monolog\Logger::DEBUG;
 }
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
-    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
-    $logLevel
+    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM, $logLevel
 ));
+
 
 /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
 $resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -74,18 +74,20 @@ if (!empty($skipDone)) {
 // Process only concpets modified after the specified date.
 $modifiedSince = $OPTS->getOption('modified');
 if (!empty($modifiedSince)) {
-    $query .= ' AND d_modified:[' . $modifiedSince .  ' TO *]';
+    $query .= ' AND d_modified:[' . $modifiedSince . ' TO *]';
 }
 
 $offset = 0;
 $limit = 200;
 $counter = 0;
+$add = $OPTS->add;
+$obsoleteconcepts = [];
 do {
     try {
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
 
         $logger->info('Total: ' . $numFound);
-        
+
         if ($concepts->count() > 0) {
             $deleteResources = new \OpenSkos2\Rdf\ResourceCollection([]);
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
@@ -99,16 +101,25 @@ do {
 
                     $insertAndDelete = $labelHelper->getLabelsForInsertAndDelete($concept);
 
+
                     $deleteResources->merge($insertAndDelete['delete']);
                     $inserResources->merge($insertAndDelete['insert']);
 
-                    // Create concept only with xl labels to insert it as partial resource
-                    $partialConcept = new \OpenSkos2\Concept($concept->getUri());
-                    foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
-                        $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+                    if ($add) {
+                        foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                            $concept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+                        }
+                        $conceptManager->replaceAndCleanRelations($concept);
+                    } else {
+                        // Create concept only with xl labels to insert it as partial resource
+                        $partialConcept = new \OpenSkos2\Concept($concept->getUri());
+                        
+                        foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                            $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
+                        }
+                        
+                        $inserResources->append($partialConcept);
                     }
-
-                    $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
@@ -116,12 +127,15 @@ do {
                     );
                 }
             }
-            
+
+
             foreach ($deleteResources as $deleteResource) {
                 $resourceManager->delete($deleteResource);
             }
-            
-            $resourceManager->insertCollection($inserResources);
+
+            if (!$add) {
+                $resourceManager->insertCollection($inserResources);
+            }
         }
     } catch (\Exception $ex) {
         $logger->warning(
@@ -129,13 +143,13 @@ do {
             . '". The message is: ' . $ex->getMessage()
         );
     }
-    
+
     if (!empty($skipDone)) {
         $offset = 0; // if we skip done we need to work without pagination
     } else {
         $offset += $limit;
     }
-    
+
     $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 

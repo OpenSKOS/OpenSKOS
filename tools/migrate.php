@@ -18,17 +18,14 @@
  */
 /**
  * Script to migrate the data from SOLR to Jena run as following:
- * Run the file as : php tools/migrate.php --endpoint http://<host>:<port>/path/core/select --tenant=<code>
+ * Run the file as : php migrate.php --endpoint=http://<host>:<port>/solr/<core>/select --tenant=<tenant_code> --db-hostname=<db-host> --db-database=<> --db-username=<> --purge=1 --defaultSet="isocat"
  */
 require_once dirname(__FILE__) . '/autoload.inc.php';
 
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Tenant;
-use OpenSkos2\Set;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\Concept;
@@ -41,13 +38,13 @@ $opts = [
     'db-database=s' => 'Origin database name',
     'db-username=s' => 'Origin database username',
     'db-password=s' => 'Origin database password',
-    'tenant=s' => 'Tenant to migrate',
+    'tenant=s' => 'Tenant (code)',
     'start|s=s' => 'Start from that record',
     'dryrun' => 'Only validate the data, do not migrate it.',
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Fetch only those modified after that date.',
-    'tenantname=s' => 'Name of the organisaton.',
-    'enableSkosXl' => 'enable skos xl labels'
+    'defaultSet=s' => 'Set code to be used when tenant collection in the slor does not have any corresponding set in the tripl store',
+    'purge' => 'if set to 1 then purges the triples tore and slor before migrating'
 ];
 
 try {
@@ -58,6 +55,8 @@ try {
     exit(1);
 }
 require_once dirname(__FILE__) . '/bootstrap.inc.php';
+require_once 'utils_functions.php';
+
 validateOptions($OPTS);
 $dbSource = \Zend_Db::factory('Pdo_Mysql', array(
         'host' => $OPTS->getOption('db-hostname'),
@@ -91,66 +90,39 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
     \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM, $logLevel
 ));
 
-
-$logger->info("Purging triple store: tenants");
-$tenantURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Tenant::TYPE));
-foreach ($tenantURIs as $tenantURI) {
-    $tenantManager->delete(new Uri($tenantURI));
-}
-$logger->info("Purging triple store: sets");
-$setURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Set::TYPE));
-foreach ($setURIs as $setURI) {
-    $resourceManager->delete(new Uri($setURI));
-}
-$logger->info("Purging triple store: scheme");
-$schemeURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(ConceptScheme::TYPE));
-foreach ($schemeURIs as $schemeURI) {
-    $resourceManager->delete(new Uri($schemeURI));
-}
-$logger->info("Purging triple store: skos collections");
-$collectionURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(SkosCollection::TYPE));
-foreach ($collectionURIs as $collectionURI) {
-    $resourceManager->delete(new Uri($collectionURI));
-}
-$logger->info("Purging triple store and solr: concepts");
-$conceptURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, new Uri(Concept::TYPE));
-foreach ($conceptURIs as $conceptURI) {
-    $conceptManager->delete(new Uri($conceptURI));
+if ($OPTS->purge) {
+    
+    $logger->info("Purging triple store: scheme");
+    $schemeURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, 
+        new Uri(ConceptScheme::TYPE));
+    foreach ($schemeURIs as $schemeURI) {
+        $resourceManager->delete(new Uri($schemeURI));
+    }
+    $logger->info("Purging triple store: skos collections");
+    $collectionURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, 
+        new Uri(SkosCollection::TYPE));
+    foreach ($collectionURIs as $collectionURI) {
+        $resourceManager->delete(new Uri($collectionURI));
+    }
+    $logger->info("Purging triple store and solr: concepts");
+    $conceptURIs = $resourceManager->fetchSubjectForObject(Rdf::TYPE, 
+        new Uri(Concept::TYPE));
+    foreach ($conceptURIs as $conceptURI) {
+        $conceptManager->delete(new Uri($conceptURI));
+    }
+    $logger->info("Purging solr from possible garabage left from bad experiments");
+    $solrManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
+    $garbage = $solrManager->search("*:*", 10000000);
+    foreach ($garbage as $uri) {
+        $solrManager->delete(new Uri($uri));
+    }
 }
 
 
 $conceptManager->setIsNoCommitMode(true);
-
 $tenantCode = $OPTS->tenant;
-$tenantName = $OPTS->tenantname;
-if (empty($tenantName)) {
-    $tenantName = $tenantCode;
-}
-
-$tenantUuid = \Rhumsaa\Uuid\Uuid::uuid4();
-$tenantUri = "http://tenant/{$tenantCode}";
-require_once 'utils_functions.php';
-// ($tenantCode, $name, $epic, $uri, $uuid, $disableSearchInOtherTenants, $enableStatussesSystem, $enableSkosXl, $resourceManager)
-$skosXl = $OPTS->enableSkosXl;
-$tenantResource = createTenantRdf($tenantCode, 
-    $tenantName, 
-    false, 
-    $tenantUri, 
-    $tenantUuid, 
-    false, 
-    true, 
-    $skosXl, 
-    $resourceManager);
-
-insertResource($tenantManager, $tenantResource);
-
-$logger->info("Validating collections, creating sets");
-
-$collectionCache = new Collections($dbSource);
-$sets = $collectionCache->validateCollections($resourceManager);
-foreach ($sets as $set) {
-    insertResource($resourceManager, $set);
-}
+$tenantResource = $resourceManager -> fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
+$defaultSet = $OPTS->defaultSet;
 
 $isDryRun = $OPTS->getOption('dryrun');
 
@@ -313,9 +285,9 @@ $mappings = [
         'fields' => array_merge(
             $getFieldsInClass('SemanticRelations'), $getFieldsInClass('MappingProperties'), $getFieldsInClass('ConceptSchemes'), [
             'member' => Skos::MEMBER, // for skos collections 
-             //'inSkosCollection' => OpenSkos::INSKOSCOLLECTION, // DISCUSS
-             'inScheme'  => Skos::INSCHEME,
-                // has top concept vs memebr DISCUSS
+            //'inSkosCollection' => OpenSkos::INSKOSCOLLECTION, // DISCUSS
+            'inScheme' => Skos::INSCHEME,
+            // has top concept vs memebr DISCUSS
             ]
         ),
     ],
@@ -380,15 +352,15 @@ $mappings = [
 ];
 $logger->info('Found ' . $total . ' records');
 var_dump('Skos Collection round');
-insert_round('SKOSCollection', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun);
+insert_round('SKOSCollection', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $defaultSet, $isDryRun);
 var_dump('ConceptScheme round');
-insert_round('ConceptScheme', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun);
+insert_round('ConceptScheme', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $defaultSet, $isDryRun);
 
 
 var_dump('Concept round');
-insert_round('Concept', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun, $labelMapping, $conceptManager);
+insert_round('Concept', $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $defaultSet, $isDryRun, $labelMapping, $conceptManager);
 
-function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $collectionCache, $isDryRun, $labelMapping=null, $conceptManager = null)
+function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager, $tenantResource, $total, $mappings, $defaultSet, $isDryRun, $labelMapping = null, $conceptManager = null)
 {
     do {
         $logger->debug("fetching " . $endPoint . "&start=$counter");
@@ -419,8 +391,8 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
                         );
                         $doc['notation'] = [current($doc['notation'])];
                     }
-                    // Make sure we have a valid uri in all caes.
-                    $uri = getConceptUri($uri, $doc, $collectionCache);
+                    // Make sure we have a valid uri in all cases.
+                    $uri = getConceptUri($uri, $doc, $resourceManager);
                     $resource = new \OpenSkos2\Concept($uri);
                     break;
                 case 'SKOSCollection':
@@ -490,9 +462,12 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
 
             // Add set to graph
             if (!empty($doc['collection'])) {
-                $collectionId = $doc['collection'];
-                $collection = $collectionCache->fetchById($collectionId);
-                $resource->setProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new \OpenSKos2\Rdf\Uri($collection->uri));
+                try {
+                    $set = $resourceManager->fetchByUuid($doc['collection'], \OpenSkos2\Set::TYPE, 'openskos:code');
+                } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
+                     $set = $resourceManager->fetchByUuid($defaultSet, \OpenSkos2\Set::TYPE, 'openskos:code');
+                }
+                $resource->setProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new \OpenSKos2\Rdf\Uri($set->getUri()));
             }
 
             // Set status deleted
@@ -520,9 +495,9 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
                     }
                 }
                 if ($resource instanceof OpenSkos2\Concept) {
-                    $validator = new \OpenSkos2\Validator\Resource($conceptManager, $tenantResource, $setResource, false, false, false, $logger); 
+                    $validator = new \OpenSkos2\Validator\Resource($conceptManager, $tenantResource, $setResource, false, false, false, $logger);
                 } else {
-                 $validator = new \OpenSkos2\Validator\Resource($resourceManager, $tenantResource, $setResource, false, false, false, $logger);
+                    $validator = new \OpenSkos2\Validator\Resource($resourceManager, $tenantResource, $setResource, false, false, false, $logger);
                 }
                 $isValid = validateResource($validator, $resource);
             }
@@ -536,7 +511,7 @@ function insert_round($docClass, $logger, $endPoint, $counter, $resourceManager,
                 }
             } else {
                 if (!$isValid) {
-                    $logger->error(implode(' ,',$validator->getErrorMessages()));
+                    $logger->error(implode(' ,', $validator->getErrorMessages()));
                 }
             }
         }
@@ -555,14 +530,14 @@ function validateResource(\OpenSkos2\Validator\Resource $validator, OpenSkos2\Rd
             return $validator->validate($resource);
         } catch (\Exception $exc) {
             echo 'failed validating retry' . PHP_EOL;
-            echo $exc->getMessage(). PHP_EOL;;
+            echo $exc->getMessage() . PHP_EOL;
+            ;
             $tried++;
             sleep(5);
         }
     } while ($tried < $retry);
     throw $exc;
 }
-
 
 /**
  * Get file contents with retry, and json decode results
@@ -588,8 +563,6 @@ function getFileContents($url, $retry = 20, $count = 0)
     throw new \Exception('Failed file_get_contents on :' . $url . ' tried: ' . $tried);
 }
 
-
-
 /**
  * Used to generate uri's for bad data from the source
  * where the uri only had a notation
@@ -598,16 +571,21 @@ function getFileContents($url, $retry = 20, $count = 0)
  * @param array $solrDoc
  * @return string
  */
-function getConceptUri($uri, array $solrDoc, \Collections $collections)
+function getConceptUri($uri, array $solrDoc, $resourceManager)
 {
     if (filter_var($uri, FILTER_VALIDATE_URL, $uri)) {
         return $uri;
     }
-    $collection = $collections->fetchById($solrDoc['collection']);
+    try {
+                    $set = $resourceManager->fetchByUuid($doc['collection'], \OpenSkos2\Set::TYPE, 'openskos:code');
+                } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
+                     $set = $resourceManager->fetchByUuid($defaultSet, \OpenSkos2\Set::TYPE, 'openskos:code');
+                }
+                
     if (count($solrDoc['notation']) !== 1) {
         throw new \RuntimeException('More then one notation: ' . var_export($solrDoc[['notation']]));
     }
-    return $collection->conceptsBaseUrl . '/' . current($solrDoc['notation']);
+    $conceptBaseUris = $set->getProperty(OpenSkos::CONCEPTBASEURI);
+    $conceptBaseUri = $conceptBaseUris[0]->getUri();
+    return $conceptBaseUri . '/' . current($solrDoc['notation']);
 }
-
-

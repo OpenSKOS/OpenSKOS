@@ -125,6 +125,15 @@ class ResourceManager
 
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
+    
+     /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function addToCollection(ResourceCollection $resourceCollection)
+    {
+       $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
+    }
 
     /**
      * Deletes and then inserts the resourse.
@@ -136,6 +145,17 @@ class ResourceManager
             $resource->getUri(),
             EasyRdf::resourceToGraph($resource)
         );
+    }
+
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function replaceCollection(ResourceCollection $resourceCollection)
+    {
+        foreach ($resourceCollection as $resource) {
+            $this->replace($resource);
+        }
     }
 
     /**
@@ -151,13 +171,13 @@ class ResourceManager
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
         $resource->setProperty(OpenSkosNamespace::STATUS, new Literal(\OpenSkos2\Concept::STATUS_DELETED));
-        
+
         $resource->setProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
-        
+
         if ($user) {
             $resource->setProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
-        
+
         $this->replace($resource);
     }
 
@@ -181,7 +201,7 @@ class ResourceManager
         }
         $query .= "?predicate ?object\n}";
         $this->client->update($query);
-        // @TODO remove from solr
+// @TODO remove from solr
     }
 
     /**
@@ -193,7 +213,7 @@ class ResourceManager
      */
     public function deleteMatchingTriples($subject, $predicate, $object)
     {
-        // @TODO Refactor. Not for resource manager.
+// @TODO Refactor. Not for resource manager.
         $query = 'DELETE WHERE {' . PHP_EOL;
         $query .= $subject == '?subject' ? '?subject' : $this->valueToTurtle($subject);
         $query .= ' <' . $predicate . '> ';
@@ -260,10 +280,10 @@ class ResourceManager
         if (isset($type)) {
             $query = $query->also('?subject', 'rdf:type', "<$type>");
         }
-        
+
         try {
             $result = $this->fetchQuery($query, $type);
-            // @TODO Add resourceType check.
+// @TODO Add resourceType check.
         } catch (\Exception $exp) {
             throw new ResourceNotFoundException("Unable to fetch resource \n" . $exp->getMessage() . " (of $type) \n");
         }
@@ -299,7 +319,7 @@ class ResourceManager
           }
          */
         if ($rdfType == null) {
-            $rdfType=$this->resourceType;
+            $rdfType = $this->resourceType;
         }
         $resources = EasyRdf::createResourceCollection($rdfType);
         if (!empty($uris)) {
@@ -319,7 +339,7 @@ class ResourceManager
                     $resources->append($resource);
                 }
             }
-            // Keep the ordering of the passed uris.
+// Keep the ordering of the passed uris.
             $resources->uasort(function (Resource $resource1, Resource $resource2) use ($uris) {
                 $searchUris = array_values($uris);
                 $ind1 = array_search($resource1->getUri(), $searchUris);
@@ -386,18 +406,18 @@ class ResourceManager
         $query = 'DESCRIBE ?subject ?object {' . PHP_EOL;
         $query .= 'SELECT DISTINCT ?subject ?object ' . PHP_EOL;
         $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
-        // tenants have subresources: address and orgranisation
+// tenants have subresources: address and orgranisation
         $where .= ' { ?subject  ?predicate ?object } . ';
         $where .= 'FILTER NOT EXISTS { ?object <' . RdfNamespace::TYPE . '> ?type } . ';
-        //
+//
         if ($ignoreDeleted) {
             $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
             $where .= 'FILTER (!bound(?status) || ?status != \'' . \OpenSkos2\Concept::STATUS_DELETED . '\') ';
         }
         $query .= 'WHERE { ' . $where . '}';
-        // We need some order
-        // @TODO provide possibility to order on other predicates.
-        // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
+// We need some order
+// @TODO provide possibility to order on other predicates.
+// This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
         $query .= PHP_EOL . 'ORDER BY ?subject';
         if ($limit !== null) {
             $query .= PHP_EOL . 'LIMIT ' . $limit;
@@ -410,9 +430,9 @@ class ResourceManager
         $resources = $this->fetchQuery($query);
 
 // The order by part does not apply to the resources with describe.
-        // So we need to order them again.
-        // @TODO Find other solution - sort in jena, not here.
-        // @TODO provide possibility to order on other predicates.
+// So we need to order them again.
+// @TODO Find other solution - sort in jena, not here.
+// @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
                 return strcmp($resource1->getUri(), $resource2->getUri());
@@ -427,13 +447,13 @@ class ResourceManager
      */
     public function fetchNamespaces()
     {
-        // @TODO Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
+// @TODO Not working, see \OpenSkos2\Namespaces::getRdfConceptNamespaces()
         return \OpenSkos2\Namespaces::getRdfConceptNamespaces();
         $query = 'DESCRIBE ?subject';
         $query .= PHP_EOL . ' LIMIT 0';
-        // The EasyRdf\Sparql\Client does not gets the namespaces which fuseki provides.
-        // Maybe it can be fixed/configured. Then this method can use the client directly.
-        // @TODO DI
+// The EasyRdf\Sparql\Client does not gets the namespaces which fuseki provides.
+// Maybe it can be fixed/configured. Then this method can use the client directly.
+// @TODO DI
         $httpClient = Http::getDefaultHttpClient();
         $httpClient->resetParameters();
         $httpClient->setMethod('GET'); // @TODO Post for big queries
@@ -654,13 +674,11 @@ class ResourceManager
                 $query .= PHP_EOL;
             }
         } else {
-            // All subjects
+// All subjects
             $query .= $subject . ' ?predicate ?object' . PHP_EOL;
         }
         return $query;
     }
-
-   
 
     public function countRdfTriples($uri, $property, $object)
     {
@@ -765,7 +783,7 @@ class ResourceManager
         return $items;
     }
 
-    // RELATIONS
+// RELATIONS
     public function getCustomRelationTypes()
     {
         if ($this->init["custom.default_relationtypes"]) {
@@ -844,9 +862,9 @@ class ResourceManager
         $result = array_merge($skosrels, $userrels);
         return $result;
     }
-    
-    // a relation is invalid if it (possibly with its inverse) creates transitive
-    // link of a concept or related concept to itself
+
+// a relation is invalid if it (possibly with its inverse) creates transitive
+// link of a concept or related concept to itself
     public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
     {
         $closure = $this->getClosure($relatedConceptUri, $relationUri);
@@ -857,7 +875,7 @@ class ResourceManager
             . 'possibly via inverse relation."
             );
         }
-        // overkill??
+// overkill??
         $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
         if (array_key_exists($relationUri, $inverses)) {
             $inverseRelUri = $inverses[$relationUri];
@@ -870,6 +888,7 @@ class ResourceManager
             }
         }
     }
+
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
         $count = $this->countTriples(
@@ -894,7 +913,6 @@ class ResourceManager
         return false;
     }
 
-    
     public function isRelationURIValid($relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null)
     {
         if ($customRelUris == null) {
@@ -922,8 +940,8 @@ class ResourceManager
             );
         }
     }
-    
-    // all concepts from transitive closure for $conceptsUri;
+
+// all concepts from transitive closure for $conceptsUri;
     private function getClosure($conceptUri, $relationUri)
     {
         $query = 'select ?trans where {<' . $conceptUri . '>  <' . $relationUri . '>+ ' . '  ?trans . }';
@@ -937,7 +955,7 @@ class ResourceManager
         return $retVal;
     }
 
-    // MYSQL
+// MYSQL
 
     public function fetchRowWithRetries($model, $query)
     {
@@ -959,17 +977,17 @@ class ResourceManager
             throw $exception;
         }
     }
-    
+
     public function fetchTenantNameByCode($code)
     {
-        $query = "SELECT ?name WHERE { ?uri  <".VCard::ORG."> ?org . "
-        . "?org <".VCard::ORGNAME . "> ?name . "
-        . "?uri  <" . OpenSkos::CODE . "> '$code' .}";
+        $query = "SELECT ?name WHERE { ?uri  <" . VCard::ORG . "> ?org . "
+            . "?org <" . VCard::ORGNAME . "> ?name . "
+            . "?uri  <" . OpenSkos::CODE . "> '$code' .}";
         $response = $this->query($query);
-        if (count($response)>1) {
+        if (count($response) > 1) {
             throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
         }
-        if (count($response)<1) {
+        if (count($response) < 1) {
             throw new \Exception("the institution with the code $code is not found");
         }
         return $response[0]->name->getValue();

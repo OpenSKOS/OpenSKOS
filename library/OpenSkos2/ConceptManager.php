@@ -53,6 +53,14 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         return $this->labelManager;
     }
+    
+     /**
+     * @return LabelManager
+     */
+    public function getSolrManager()
+    {
+        return $this->solrResourceManager;
+    }
 
     // uses and overrides the parent's method
     public function findResourceById($id, $resourceType)
@@ -158,7 +166,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function addRelation($uri, $relationType, $uris)
     {
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelations(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -191,7 +199,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function deleteRelation($subjectUri, $relationType, $objectUri)
     {
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelations(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -271,7 +279,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function deleteRelationsWhereObject(Concept $concept)
     {
-        foreach (Skos::getRelationsTypes() as $relationType) {
+        foreach (Skos::getSkosRelations() as $relationType) {
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
     }

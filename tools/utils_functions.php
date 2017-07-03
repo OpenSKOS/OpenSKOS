@@ -450,6 +450,7 @@ function makeRdfBoolean($rawVal){
     if (empty($rawVal)) {
         return (new Literal("false", null, Literal::TYPE_BOOL));
     }
+    
     $loweredVal= strtolower($rawVal); 
     if ($loweredVal === "y" || $rawVal === "1" || 
         $rawVal === "true" || $rawVal === "yes") {

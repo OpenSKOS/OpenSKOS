@@ -24,6 +24,7 @@ use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\Namespaces\SkosXl;
 
 // @TODO Include resource type in insert/delete/search. Now we know it is only concepts
 
@@ -86,6 +87,16 @@ class ResourceManagerWithSearch extends ResourceManager
     }
 
     /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function addToCollection(ResourceCollection $resourceCollection)
+    {
+        parent::addToCollection($resourceCollection);
+        $this->solrResourceManager->insertCollection($resourceCollection);
+    }
+
+    /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
      */
@@ -99,10 +110,28 @@ class ResourceManagerWithSearch extends ResourceManager
     }
 
     /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function replaceCollection(ResourceCollection $resourceCollection)
+    {
+        parent::replaceCollection($resourceCollection);
+        $this->solrResourceManager->insertCollection($resourceCollection);
+    }
+
+    /**
      * @param Uri $resource
      */
     public function delete(Uri $resource)
     {
+        if ($this->resourceType === \OpenSkos2\Concept::TYPE) {
+            $this->client->update("DELETE WHERE {<{$resource->getUri()}> <" . SkosXl::PREFLABEL . "> ?object . "
+                . "?object ?predicate2 ?object2 .}");
+            $this->client->update("DELETE WHERE {<{$resource->getUri()}> <" . SkosXl::ALTLABEL . "> ?object . "
+                . "?object ?predicate2 ?object2 .}");
+            $this->client->update("DELETE WHERE {<{$resource->getUri()}> <" . SkosXl::HIDDENLABEL . "> ?object . "
+                . "?object ?predicate2 ?object2 .}");
+        }
         parent::delete($resource);
         $this->solrResourceManager->delete($resource);
     }
@@ -130,7 +159,7 @@ class ResourceManagerWithSearch extends ResourceManager
         }
 
         return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
+                $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, $filterQueries)
         );
     }
 
@@ -141,4 +170,5 @@ class ResourceManagerWithSearch extends ResourceManager
     {
         $this->solrResourceManager->commit();
     }
+
 }

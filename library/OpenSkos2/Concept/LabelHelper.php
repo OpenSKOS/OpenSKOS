@@ -55,7 +55,8 @@ class LabelHelper
     {
         
         /* @var $tenant \OpenSkos2\Tenant */
-        $tenant = $this->labelManager->fetchByUuid($concept->getTenant()->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+        $tenantCode = $concept->getTenant();
+        $tenant = $this->labelManager->fetchByUuid($tenantCode->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
             
         if (empty($tenant)) {
             throw new TenantNotFoundException(
@@ -107,7 +108,8 @@ class LabelHelper
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
-                        $tenant = $this->labelManager->fetchByUuid($concept->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                        $tenantCode = $concept->getTenant()->getValue();
+                        $tenant = $this->labelManager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
                         $label->ensureMetadata($tenant);
 
                         $concept->addProperty($xlLabelProperty, $label);
@@ -175,7 +177,8 @@ class LabelHelper
                     continue; // It is just an uri - nothing to do with it.
                 }
                 
-                $tenant = $this->labelManager->fetchByUuid($concept->getTenant(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                $tenantCode = $concept->getTenant();
+                $tenant = $this->labelManager->fetchByUuid($tenantCode->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
                 $label->ensureMetadata($tenant);
                 
                 // Fetch, insert or replace label
