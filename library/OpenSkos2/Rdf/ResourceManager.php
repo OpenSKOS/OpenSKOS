@@ -132,7 +132,7 @@ class ResourceManager
      */
     public function addToCollection(ResourceCollection $resourceCollection)
     {
-       $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
+        $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
 
     /**
@@ -239,7 +239,7 @@ class ResourceManager
 
         $lit = new \OpenSkos2\Rdf\Literal($id);
         $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe(['?subject', '?object']) // untyped object is added to get subresources (bnodes) like vcard:adress and vcard:org
+        $query = $qb->describe(['?subject', '?object'])
                 ->where('?subject', $property, (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit))
                 ->also('?subject', '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
         if (isset($type)) {
@@ -249,7 +249,7 @@ class ResourceManager
 
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-                "The requested resource with $property set to $id of type $type was not found, triple store query: $query"
+                "The requested resource with $property set to $id of type $type was not found in the triple store. "
             );
         }
         if (count($data) > 1) {
@@ -274,7 +274,7 @@ class ResourceManager
         ];
         $serializedURI = (new NTriple)->serialize($resource);
         $qb = new \Asparagus\QueryBuilder($prefixes);
-        $query = $qb->describe([$serializedURI, '?object']) // untypes object is added to get subresources (bnodes) like vcard:adress and vcard:org
+        $query = $qb->describe([$serializedURI, '?object'])
                 ->where($serializedURI, '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
 
         if (isset($type)) {
@@ -731,7 +731,7 @@ class ResourceManager
         return $retval;
     }
 
-    public function fetchNameUri()  // title -> uri for sets, skos collections and conceptshcma's, overriden for the rest
+    public function fetchNameUri() //title -> uri for sets,skos collections and conceptshcma's, overriden for the rest
     {
         $query = "SELECT ?uri ?name WHERE { ?uri  <" . DcTerms::TITLE . "> ?name ."
             . " ?uri  <" . RdfNameSpace::TYPE . "> <{$this->getResourceType()}>. }";
@@ -740,7 +740,7 @@ class ResourceManager
         return $result;
     }
 
-    public function fetchNameSearchID() // title  -> uuid for concept shcme'a and skos collection, overriden for the rest
+    public function fetchNameSearchID() // title ->uuid for concept shcme'a and skos collection, overriden for the rest
     {
         $query = "SELECT ?name ?searchid WHERE { ?uri  <" . DcTerms::TITLE . "> ?name . "
             . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
@@ -752,7 +752,8 @@ class ResourceManager
 
     public function listConceptsForCluster($uri, $property)
     {
-        $query = "SELECT ?name ?searchid WHERE { ?concepturi  <" . RdfNamespace::TYPE . "> <" . \OpenSkos2\Concept::TYPE . "> . "
+        $query = "SELECT ?name ?searchid WHERE { ?concepturi  <" . RdfNamespace::TYPE . "> <" .
+            \OpenSkos2\Concept::TYPE . "> . "
             . "?concepturi  <" . $property . "> <$uri> . "
             . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
             . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?serachid .}";
@@ -871,8 +872,8 @@ class ResourceManager
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
             throw new \Exception(
-                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link of the source to itself, '
-            . 'possibly via inverse relation."
+                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link 
+                    of the source to itself, possibly via inverse relation."
             );
         }
 // overkill??
@@ -883,7 +884,8 @@ class ResourceManager
             $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
             if ($transitiveInverse) {
                 throw new \Exception(
-                    "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link of the target to itself"
+                    "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link "
+                    . "of the target to itself"
                 );
             }
         }
@@ -906,15 +908,21 @@ class ResourceManager
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {
                 throw new \Exception(
-                    "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
+                    "There is an attempt to duplicate a relation: "
+                    . "($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
                 );
             }
         }
         return false;
     }
 
-    public function isRelationURIValid($relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null)
-    {
+    public function isRelationURIValid(
+        $relUri,
+        $customRelUris = null,
+        $registeredRelationUris = null,
+        $allRelationUris = null
+    ) {
+    
         if ($customRelUris == null) {
             $customRelUris = array_values($this->getCustomRelationTypes());
         }

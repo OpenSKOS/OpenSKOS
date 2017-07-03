@@ -151,13 +151,15 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         foreach ($val as $value) {
             if ($isBoolean) {
                 if (!($value == "true" || $value == "false")) {
-                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false but it is set to ' . $value;
+                    $this->errorMessages[] = 'The value of ' . $propertyUri . ' must be set to true or false but '
+                        . 'it is set to ' . $value;
                 }
             }
 
             if ($isUnique) {
                 if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
-                    $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
+                    $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with "
+                    . "the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
             
@@ -288,7 +290,15 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
     protected function checkTenant($resource)
     {
-        $firstRound = $this->validateProperty($resource, DcTerms::PUBLISHER, true, true, false, false, \OpenSkos2\Tenant::TYPE);
+        $firstRound = $this->validateProperty(
+            $resource,
+            DcTerms::PUBLISHER,
+            true,
+            true,
+            false,
+            false,
+            \OpenSkos2\Tenant::TYPE
+        );
         $tenantUri = $resource->getTenantUri();
         $tenantCode = $resource->getTenant();
         $secondRound = true;
@@ -296,11 +306,16 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             $secondRound = false;
             $this->errorMessages[] = 'No tenant code as openskos:tenant is given. ';
         } else {
-            $tripleStoreTenant = $this->resourceManager->fetchSubjectForObject(OpenSkos::CODE, $tenantCode, \OpenSkos2\Tenant::TYPE);
+            $tripleStoreTenant = $this->resourceManager->fetchSubjectForObject(
+                OpenSkos::CODE,
+                $tenantCode,
+                \OpenSkos2\Tenant::TYPE
+            );
 
             if ($tripleStoreTenant[0] !== $tenantUri->getUri()) {
                 $secondRound = false;
-                $this->errorMessages[] = "Specified openskos:tenant code {$tenantCode} with the uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
+                $this->errorMessages[] = "Specified openskos:tenant code {$tenantCode} with the "
+                . "uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
             }
         }
         return $firstRound && $secondRound;
@@ -318,7 +333,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 $tenantUri = $resource->getTenantUri()->getUri();
                 $publisherUri = $set->getTenantUri()->getUri();
                 if ($tenantUri !== $publisherUri) {
-                    $this->error[] = "The set $setUri declared in the resource has the tenant with the uri $publisherUri which does not coincide with the uri $tenantUri of the tenant declared in the resource";
+                    $this->error[] = "The set $setUri declared in the resource has the tenant "
+                        . "with the uri $publisherUri which does not coincide with the uri $tenantUri of the "
+                        . "tenant declared in the resource";
                     $secondRound = false;
                 }
             }
@@ -327,7 +344,9 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if ($set->getTenant() != null) {
                 $publisherCode = $set->getTenant()->getValue();
                 if ($tenantCode !== $publisherCode) {
-                    $this->error[] = "The set $setUri declared in the resource has the tenant with the code $publisherCode which does not coincide with the code $tenantCode of the tenant declared in the resource";
+                    $this->error[] = "The set $setUri declared in the resource has the tenant with "
+                        . "the code $publisherCode which does not coincide with the code $tenantCode of the tenant "
+                        . "declared in the resource";
                     $secondRound = false;
                 }
             }

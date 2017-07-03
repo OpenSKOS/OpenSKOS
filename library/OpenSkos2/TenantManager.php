@@ -115,8 +115,10 @@ class TenantManager extends ResourceManager
      */
     public function delete(\OpenSkos2\Rdf\Uri $resource)
     {
-        $this->client->update("DELETE WHERE {<{$resource->getUri()}> <".VCard::ORG."> ?object . ?object ?predicate2 ?object2 .}");
-        $this->client->update("DELETE WHERE {<{$resource->getUri()}> <".VCard::ADR."> ?object . ?object ?predicate2 ?object2 .}");
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> <".VCard::ORG."> ?object . "
+            . "?object ?predicate2 ?object2 .}");
+        $this->client->update("DELETE WHERE {<{$resource->getUri()}> <".VCard::ADR."> ?object . "
+            . "?object ?predicate2 ?object2 .}");
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
 }

@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\OaiPmh;
+
 use DOMDocument;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
@@ -24,6 +25,7 @@ use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\OaiPmh\Repository;
+
 class Concept implements Record
 {
     /**
@@ -70,7 +72,7 @@ class Concept implements Record
             $setSpecs[] = (string)$tenant;
             $setUris = $concept->getProperty(OpenSkos::SET);
             $oaiSets = $this->setsMap->getSets($tenant, $setUris);
-           foreach ($oaiSets as $set) {
+            foreach ($oaiSets as $set) {
                 $setSpecs[] = $tenant . ':' . $set->code;
                 $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
                 foreach ($schemes as $scheme) {
@@ -92,7 +94,6 @@ class Concept implements Record
             $setSpecs,
             $concept->isDeleted()
         );
-        
     }
     /**
      * Convert skos concept to \DomDocument to use as metadata in OAI-PMH Interface

@@ -499,7 +499,8 @@ class Resource extends Uri implements ResourceIdentifier
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
      * @param \OpenSkos2\SkosXl\LabelManager | null  $labelManager
-     * @param  \OpenSkos2\Rdf\Resource | null $existingResource, optional $existingResource of one of concrete child types used for update
+     * @param  \OpenSkos2\Rdf\Resource | null $existingResource,
+     * optional $existingResource of one of concrete child types used for update
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
@@ -717,8 +718,14 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
-    protected function assembleUri(\OpenSkos2\Tenant $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null)
-    {
+    protected function assembleUri(
+        \OpenSkos2\Tenant $tenant = null,
+        \OpenSkos2\Set $set = null,
+        $uuid = null,
+        $notation = null,
+        $init = null
+    ) {
+    
         return $set->getUri() . "/" . $uuid;
     }
 }

@@ -199,7 +199,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
             if ($pcount > 0) {
                 // meertens patch -1
-                if ($alreadyOutput) { //I had an infinite loop without $alreadyOutput check. I had a resource of type Set (former collection), with conceptBaseUri is the same as the set's uri.
+                if ($alreadyOutput) { //I had an infinite loop without $alreadyOutput check.
+                //  I had a resource of type Set (former collection), with conceptBaseUri is the same as the set's uri.
                     $uri = htmlspecialchars($obj->getUri());
                     return $tag .= " rdf:resource=\"$uri\"/>\n";
                 }
@@ -266,7 +267,9 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             return true;
         }
 
-        if ($resource->get('rdf:type') !== null && $resource->get('rdf:type')->getUri() !== null && in_array($resource->get('rdf:type')->getUri(), $options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
+        if ($resource->get('rdf:type') !== null &&
+            $resource->get('rdf:type')->getUri() !== null &&
+            in_array($resource->get('rdf:type')->getUri(), $options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
             return true;
         } else {
             return false;

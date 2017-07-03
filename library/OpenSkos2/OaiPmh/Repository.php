@@ -16,6 +16,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\OaiPmh;
+
 use DateTime;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
@@ -41,6 +42,7 @@ use Picturae\OaiPmh\Interfaces\RecordList;
 use Picturae\OaiPmh\Interfaces\Repository as InterfaceRepository;
 use Picturae\OaiPmh\Interfaces\Repository\Identity;
 use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
+
 class Repository implements InterfaceRepository
 {
     const PREFIX_OAI_RDF = 'oai_rdf';

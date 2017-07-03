@@ -295,8 +295,7 @@ abstract class AbstractTripleStoreResource
 
             $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
 
-            $this->deletion->canBeDeleted($id); // default: must not contain references to other resources down in the hierarchy
-
+            $this->deletion->canBeDeleted($id);
 
             if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
                 if ($resource->isDeleted()) {
@@ -509,7 +508,8 @@ abstract class AbstractTripleStoreResource
 
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
-                "Expected exactly one resource of type $rdfType, got {$resources->count()}, check if you set rdf:type in the request body, " . $resources->count(),
+                "Expected exactly one resource of type $rdfType, got {$resources->count()}, "
+                . "check if you set rdf:type in the request body, " . $resources->count(),
                 412
             );
         }
@@ -519,7 +519,8 @@ abstract class AbstractTripleStoreResource
         $className = Namespaces::mapRdfTypeToClassName($rdfType);
         if (!isset($resource) || !$resource instanceof $className) {
             $actualClassName = get_class($resource);
-            throw new InvalidArgumentException("XML Could not be converted to $className, it is an instance of $actualClassName", 400);
+            throw new InvalidArgumentException("XML Could not be converted to $className, "
+                . "it is an instance of $actualClassName", 400);
         }
 
         if ($this->manager->getResourceType() !== \OpenSkos2\Tenant::TYPE) {

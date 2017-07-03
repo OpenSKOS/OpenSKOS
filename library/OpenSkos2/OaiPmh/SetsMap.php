@@ -16,7 +16,9 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 namespace OpenSkos2\OaiPmh;
+
 use \OpenSkos2\ConceptSchemeManager;
+
 /**
  * Used to get tenant:set:schema sets.
  */

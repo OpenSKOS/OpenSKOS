@@ -146,7 +146,8 @@ class EasyRdf
             // We already have the rdf type proprty from the resource creation. No need to put it again.
             if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
                 throw new InvalidArgumentException(
-                    "Unexpected value found for property {$resource->getUri} is a subresource and should not have type. "
+                    "Unexpected value found for property {$resource->getUri} is a subresource "
+                    . "and should not have type. "
                 );
             }
 

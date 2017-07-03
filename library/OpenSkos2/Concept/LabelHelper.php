@@ -109,7 +109,11 @@ class LabelHelper
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
                         $tenantCode = $concept->getTenant()->getValue();
-                        $tenant = $this->labelManager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                        $tenant = $this->labelManager->fetchByUuid(
+                            $tenantCode,
+                            \OpenSkos2\Tenant::TYPE,
+                            'openskos:code'
+                        );
                         $label->ensureMetadata($tenant);
 
                         $concept->addProperty($xlLabelProperty, $label);
@@ -178,7 +182,11 @@ class LabelHelper
                 }
                 
                 $tenantCode = $concept->getTenant();
-                $tenant = $this->labelManager->fetchByUuid($tenantCode->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+                $tenant = $this->labelManager->fetchByUuid(
+                    $tenantCode->getValue(),
+                    \OpenSkos2\Tenant::TYPE,
+                    'openskos:code'
+                );
                 $label->ensureMetadata($tenant);
                 
                 // Fetch, insert or replace label

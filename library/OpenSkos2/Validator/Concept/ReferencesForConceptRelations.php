@@ -69,7 +69,8 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
             if (in_array($key, $toCheck)) {
                 foreach ($values as $value) {
                     if (!($this->resourceManager->askForUri($value, false, Concept::TYPE))) {
-                        $this->warningMessages[] = "The concept referred by  uri {$value->getUri()} is not found. It is addedto the the list of dangling references.";
+                        $this->warningMessages[] = "The concept referred by  uri {$value->getUri()} is not found. "
+                        . "It is addedto the the list of dangling references.";
                         $this->danglingReferences[] = $value;
                     }
                 }
@@ -89,7 +90,12 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         foreach ($properties as $property) {
             if (in_array($property, $allRelationUris)) {
                 try {
-                    $this->resourceManager->isRelationURIValid($property, $customRelUris, $registeredRelationUris, $allRelationUris); // throws an Exception
+                    $this->resourceManager->isRelationURIValid(
+                        $property,
+                        $customRelUris,
+                        $registeredRelationUris,
+                        $allRelationUris
+                    ); // throws an Exception
                     $relatedConcepts = $concept->getProperty($property);
                     foreach ($relatedConcepts as $relConceptUri) {
                         // throw an exception unless it is ok
