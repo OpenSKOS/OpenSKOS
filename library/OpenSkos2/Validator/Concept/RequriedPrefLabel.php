@@ -33,6 +33,12 @@ class RequriedPrefLabel extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
+        $enabledSkosXl =$this->tenant->
+            getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ENABLESKOSXL);
+        $enabledSkosXl = $enabledSkosXl->getValue();
+        if ($enabledSkosXl === "true") {
+           return true; 
+        }
         $languages = $concept->retrieveLanguages();
         foreach ($languages as $language) {
             $prefLabel = $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $language);

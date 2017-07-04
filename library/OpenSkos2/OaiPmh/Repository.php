@@ -247,6 +247,18 @@ class Repository implements InterfaceRepository
         try {
             $uuid = $this->validOAIidentifier($identifier);
             $concept = $this->conceptManager->fetchByUuid($identifier);
+            $rdfSetURIs = $concept->getSet();
+            foreach($rdfSetURIs as $setURI){
+                $rdfSetUri = $setURI->getUri();
+                $rdfSet = $this->rdfSetManager->fetchByUri($rdfSetUri);
+                $allowedOAILit=$rdfSet->
+                    getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
+                $allowedOAI = $allowedOAILit->getValue();
+                if ($allowedOAI === "false") {
+                  throw new BadArgumentException("This concept belongs to the set "
+                       . " (tenant-collection) {$setURI} where oai harvesting is not allowed");  
+                }
+            }
             if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
                 $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
             }
@@ -408,6 +420,10 @@ class Repository implements InterfaceRepository
         if (!empty($arrSet[1])) {
             $rdfSet = $this->setManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
+                $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
+                if (!(bool)$allowed) {
+                   throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]); 
+                }
                 $rdfSetId = $rdfSet->getUri();
             } else {
                 $rdfSetId = new Literal($arrSet[1]);
@@ -571,8 +587,8 @@ class Repository implements InterfaceRepository
             return $identifier;
         }
         $init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        if (array_key_exists('custom.uuid_regexp_prefices', $init)) {
-            $regexps = explode(',', $init['custom.uuid_regexp_prefices']);
+        if (array_key_exists('custom.uuid_regexp_prefixes', $init)) {
+            $regexps = explode(',', $init['custom.uuid_regexp_prefixes']);
             foreach ($regexps as $regexp) {
                 $matches=[];
                 $ok = preg_match($regexp, $identifier, $matches);
