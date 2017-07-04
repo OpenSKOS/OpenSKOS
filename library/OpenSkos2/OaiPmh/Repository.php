@@ -1,4 +1,5 @@
 <?php
+
 /*
  * OpenSKOS
  *
@@ -15,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2\OaiPmh;
 
 use DateTime;
@@ -45,43 +47,50 @@ use Picturae\OaiPmh\Interfaces\SetList as InterfaceSetList;
 
 class Repository implements InterfaceRepository
 {
+
     const PREFIX_OAI_RDF = 'oai_rdf';
     const PREFIX_OAI_RDF_XL = 'oai_rdf_xl';
-    
     const SCHEMA_OAI_RDF = 'http://www.openarchives.org/OAI/2.0/rdf.xsd';
+
     /**
      * Amount of records to be displayed
      *
      * @var int
      */
     private $limit = 100;
+
     /**
      * OAI-PMH Repository name
      * @var string
      */
     private $repositoryName;
+
     /**
      * Base url for OAI-PMH
      * @var string
      */
     private $baseUrl;
+
     /**
      * Admin emails
      *
      * @var string[]
      */
     private $adminEmails = [];
+
     /**
      * Optional description for the repository
      *
      * @var string|null
      */
     private $description;
+
     /**
      * Used to get tenant:set:schema sets.
      * @var SetsMap
      */
     protected $setsMap;
+
     /**
      * a datetime that is the guaranteed lower limit of all datestamps recording changes,modifications, or deletions
      * in the repository. A repository must not use datestamps lower than the one specified
@@ -91,28 +100,32 @@ class Repository implements InterfaceRepository
      * @return DateTime
      */
     private $earliestDateStamp;
+
     /**
      * RDF Resource manager
      *
      * @var ConceptManager
      */
     private $conceptManager;
+
     /**
      *
      * @var \OpenSkos2\Set
      */
     private $rdfSetManager;
+
     /**
      *
      * @var ConceptSchemeManager
      */
     private $schemeManager;
+
     /**
      *
      * @var Autocomplete
      */
     private $searchAutocomplete;
-    
+
     /**
      * @param ConceptManager $conceptManager
      * @param ConceptSchemeManager $schemeManager
@@ -133,6 +146,7 @@ class Repository implements InterfaceRepository
         SetManager $setManager,
         $description = null
     ) {
+    
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -142,6 +156,7 @@ class Repository implements InterfaceRepository
         $this->rdfSetManager = $setManager;
         $this->description = $description;
     }
+
     /**
      * @return string the base URL of the repository
      */
@@ -149,6 +164,7 @@ class Repository implements InterfaceRepository
     {
         return $this->baseUrl;
     }
+
     /**
      * @return string
      * the finest harvesting granularity supported by the repository. The legitimate values are
@@ -158,6 +174,7 @@ class Repository implements InterfaceRepository
     {
         return ImplementationIdentity::GRANULARITY_YYYY_MM_DDTHH_MM_SSZ;
     }
+
     /**
      * @return Identity
      */
@@ -173,19 +190,20 @@ class Repository implements InterfaceRepository
             null
         );
     }
+
     /**
      * @return InterfaceSetList
      */
     public function listSets()
     {
-        $rdfSets = $this->getRdfSets();
+        $rdfSets = $this->getRdfSets(); // old tenant collections
         $items = [];
         $tenantAdded = [];
         foreach ($rdfSets as $rdfSet) {
             // Tenant spec
             $tenantCodeLiteral = $rdfSet->getTenant();
             $tenantCode = $tenantCodeLiteral->getValue();
-            $tenantName= $this->setManager->fetchTenantNameByCode();
+            $tenantName = $this->rdfSetManager->fetchTenantNameByCode($tenantCode);
             if (!isset($tenantAdded[$tenantCode])) {
                 $items[] = new Set($tenantCode, $tenantName);
                 $tenantAdded[$tenantCode] = $tenantCode;
@@ -194,7 +212,7 @@ class Repository implements InterfaceRepository
             $rdfSetCodeLiteral = $rdfSet->getCode();
             $rdfSetCode = $rdfSetCodeLiteral->getValue();
             $spec = $tenantCode . ':' . $rdfSetCode;
-            $titleLiteral=$rdfSet->getTitle();
+            $titleLiteral = $rdfSet->getTitle();
             $items[] = new Set($spec, $titleLiteral->getValue());
             // Concept scheme spec
             $schemes = $this->schemeManager->getSchemeBySetUri($rdfSet->getUri());
@@ -209,6 +227,7 @@ class Repository implements InterfaceRepository
         }
         return new SetList($items);
     }
+
     /**
      * @param string $token
      * @return InterfaceSetList
@@ -217,6 +236,7 @@ class Repository implements InterfaceRepository
     {
         return $this->listSets();
     }
+
     /**
      * @param string $metadataFormat
      * @param string $identifier
@@ -225,20 +245,18 @@ class Repository implements InterfaceRepository
     public function getRecord($metadataFormat, $identifier)
     {
         try {
-            if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
-                $concept = $this->conceptManager->fetchByUuid($identifier);
-                if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
-                    $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
-                }
-            } else {
-                throw new BadArgumentException('Invalid identifier ' . $identifier);
+            $uuid = $this->validOAIidentifier($identifier);
+            $concept = $this->conceptManager->fetchByUuid($identifier);
+            if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
             }
         } catch (ResourceNotFoundException $exc) {
             throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
         }
-        
+
         return new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
     }
+
     /**
      * @param string $metadataFormat metadata format of the records to be fetch or null if only headers are fetched
      * (listIdentifiers)
@@ -272,9 +290,10 @@ class Repository implements InterfaceRepository
         if ($numFound > $this->limit) {
             $token = $this->encodeResumptionToken($this->limit, $from, $until, $metadataFormat, $set);
         }
-        $retval= new OaiRecordList($items, $token, $numFound, 0);
+        $retval = new OaiRecordList($items, $token, $numFound, 0);
         return $retval;
     }
+
     /**
      * @param string $token
      * @return RecordList
@@ -283,7 +302,7 @@ class Repository implements InterfaceRepository
     {
         $params = $this->decodeResumptionToken($token);
         $pSet = $this->parseSet($params['set']);
-        $cursor = (int)$params['offset'];
+        $cursor = (int) $params['offset'];
         $concepts = $this->getConcepts(
             $this->limit,
             $cursor,
@@ -310,6 +329,7 @@ class Repository implements InterfaceRepository
         }
         return new OaiRecordList($items, $token, $numFound, $cursor);
     }
+
     /**
      * @param string $identifier
      * @return MetadataFormatType[]
@@ -321,11 +341,8 @@ class Repository implements InterfaceRepository
         // can not be found.
         if (!is_null($identifier)) {
             try {
-                if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
-                    $concept = $this->conceptManager->fetchByUuid($identifier);
-                } else {
-                    throw new BadArgumentException('Invalid identifier ' . $identifier);
-                }
+                $uuid = $this->validOAIidentifier($identifier);
+                $concept = $this->conceptManager->fetchByUuid($identifier);
             } catch (ResourceNotFoundException $exc) {
                 throw new IdDoesNotExistException('No matching identifier ' . $identifier, $exc->getCode(), $exc);
             }
@@ -348,6 +365,7 @@ class Repository implements InterfaceRepository
         );
         return $formats;
     }
+
     /**
      * @return SetsMap
      */
@@ -359,6 +377,7 @@ class Repository implements InterfaceRepository
         }
         return $this->setsMap;
     }
+
     /**
      * Parse set string
      *
@@ -402,6 +421,7 @@ class Repository implements InterfaceRepository
         $return['conceptScheme'] = $conceptScheme;
         return $return;
     }
+
     /**
      * Get all sets
      *
@@ -411,6 +431,7 @@ class Repository implements InterfaceRepository
     {
         return $this->rdfSetManager->fetchAllSets("true");
     }
+
     /**
      * Decode resumption token
      * possible properties are:
@@ -438,6 +459,7 @@ class Repository implements InterfaceRepository
         }
         return $params;
     }
+
     /**
      * Get resumption token
      *
@@ -455,6 +477,7 @@ class Repository implements InterfaceRepository
         $metadataPrefix = null,
         $set = null
     ) {
+    
         $params = [];
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;
@@ -469,6 +492,7 @@ class Repository implements InterfaceRepository
         }
         return base64_encode(json_encode($params));
     }
+
     /**
      * Get earliest modified timestamp
      *
@@ -481,6 +505,7 @@ class Repository implements InterfaceRepository
         }
         return $this->earliestDateStamp;
     }
+
     /**
      * Fetch all concepts based on parameters in the token
      *
@@ -504,6 +529,7 @@ class Repository implements InterfaceRepository
         $scheme = null,
         &$numFound = null
     ) {
+    
         $searchOptions = [
             'start' => $offset,
             'rows' => $limit,
@@ -537,5 +563,28 @@ class Repository implements InterfaceRepository
             $searchOptions['searchText'] = '';
         }
         return $this->searchAutocomplete->search($searchOptions, $numFound);
+    }
+
+    private function validOAIidentifier($identifier)
+    {
+        if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
+            return $identifier;
+        }
+        $init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        if (array_key_exists('custom.uuid_regexp_prefices', $init)) {
+            $regexps = explode(',', $init['custom.uuid_regexp_prefices']);
+            foreach ($regexps as $regexp) {
+                $matches=[];
+                $ok = preg_match($regexp, $identifier, $matches);
+                if ($ok) {
+                    $length = strlen($matches[0]);
+                    $uuid = substr($identifier, $length);
+                    if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
+                         return $uuid;
+                    }
+                }
+            }
+        }
+        throw new BadArgumentException('Invalid identifier ' . $identifier);
     }
 }

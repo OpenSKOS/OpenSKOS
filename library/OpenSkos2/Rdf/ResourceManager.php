@@ -30,6 +30,7 @@ use OpenSkos2\Namespaces\Rdf as RdfNamespace;
 use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\VCard;
 use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -990,7 +991,7 @@ class ResourceManager
     {
         $query = "SELECT ?name WHERE { ?uri  <" . VCard::ORG . "> ?org . "
             . "?org <" . VCard::ORGNAME . "> ?name . "
-            . "?uri  <" . OpenSkos::CODE . "> '$code' .}";
+            . "?uri  <" . OpenSkosNamespace::CODE . "> '$code' .}";
         $response = $this->query($query);
         if (count($response) > 1) {
             throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");

@@ -36,7 +36,8 @@ abstract class AbstractResourceValidator implements ValidatorInterface
     protected $set;
     protected $referenceCheckOn;
     protected $conceptReferenceCheckOn;
-    private static $nonresolvableURIs = [Rdf::TYPE, DcTerms::LICENSE, OpenSkos::WEBPAGE];
+    private static $nonresolvableURIs = [Rdf::TYPE, DcTerms::LICENSE, OpenSkos::WEBPAGE,
+        OpenSkos::CONCEPTBASEURI, OpenSkos::OAI_BASEURL];
 
     /**
      * @var array

@@ -25,7 +25,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Set;
-use OpenSKOS_Db_Table_Collections;
 
 class SetManager extends ResourceManager
 {
@@ -44,7 +43,8 @@ class SetManager extends ResourceManager
 
     public function fetchAllSets($allowOAI)
     {
-        $query = 'DESCRIBE ?s {'
+        $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
+            . 'DESCRIBE ?s {'
             . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
@@ -104,25 +104,7 @@ class SetManager extends ResourceManager
         return $setResource;
     }
 
-    //
-    public function fetchFromMySQL($params)
-    {
-        $model = new OpenSKOS_Db_Table_Collections();
-        $select = $model->select();
-        if ($params['allow_oai'] === 'true') {
-            $select->where('allow_oai=?', 'Y');
-        };
-        if ($params['allow_oai'] === 'false') {
-            $select->where('allow_oai=?', 'N');
-        };
-        $mysqlres = $model->fetchAll($select);
-        $index = new SetCollection();
-        foreach ($mysqlres as $collection) {
-            $rdfSet = $this->translateMySqlCollectionToRdfSet($collection);
-            $index->append($rdfSet);
-        }
-        return $index;
-    }
+   
     
    
     public function fetchNameSearchID() // title -> code for sets
