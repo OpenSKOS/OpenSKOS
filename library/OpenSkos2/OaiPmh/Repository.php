@@ -248,15 +248,15 @@ class Repository implements InterfaceRepository
             $uuid = $this->validOAIidentifier($identifier);
             $concept = $this->conceptManager->fetchByUuid($identifier);
             $rdfSetURIs = $concept->getSet();
-            foreach($rdfSetURIs as $setURI){
+            foreach ($rdfSetURIs as $setURI) {
                 $rdfSetUri = $setURI->getUri();
                 $rdfSet = $this->rdfSetManager->fetchByUri($rdfSetUri);
                 $allowedOAILit=$rdfSet->
                     getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
                 $allowedOAI = $allowedOAILit->getValue();
                 if ($allowedOAI === "false") {
-                  throw new BadArgumentException("This concept belongs to the set "
-                       . " (tenant-collection) {$setURI} where oai harvesting is not allowed");  
+                    throw new BadArgumentException("This concept belongs to the set "
+                       . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
                 }
             }
             if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
@@ -422,7 +422,7 @@ class Repository implements InterfaceRepository
             if ($rdfSet) {
                 $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
                 if (!(bool)$allowed) {
-                   throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]); 
+                    throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]);
                 }
                 $rdfSetId = $rdfSet->getUri();
             } else {

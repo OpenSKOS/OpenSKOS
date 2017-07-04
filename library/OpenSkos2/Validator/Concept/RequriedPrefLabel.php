@@ -37,7 +37,7 @@ class RequriedPrefLabel extends AbstractConceptValidator
             getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ENABLESKOSXL);
         $enabledSkosXl = $enabledSkosXl->getValue();
         if ($enabledSkosXl === "true") {
-           return true; 
+            return true;
         }
         $languages = $concept->retrieveLanguages();
         foreach ($languages as $language) {
