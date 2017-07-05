@@ -586,21 +586,33 @@ class Repository implements InterfaceRepository
         if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
             return $identifier;
         }
-        $init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        if (array_key_exists('custom.uuid_regexp_prefixes', $init)) {
-            $regexps = explode(',', $init['custom.uuid_regexp_prefixes']);
-            foreach ($regexps as $regexp) {
-                $matches=[];
-                $ok = preg_match($regexp, $identifier, $matches);
-                if ($ok) {
-                    $length = strlen($matches[0]);
-                    $uuid = substr($identifier, $length);
-                    if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
-                         return $uuid;
-                    }
+        $cache = \Zend_Registry::getInstance()->get('config');
+        $env = apache_getenv('APP_ENV');
+        if (empty($env)) {
+            $env = "production";
+        }
+        $cache=$cache[$env];
+        if (!array_key_exists('custom', $cache)) {
+            throw new BadArgumentException('Invalid identifier ' . $identifier);
+        }
+        $custom = $cache['custom'];
+        if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
+            throw new BadArgumentException('Invalid identifier ' . $identifier);
+        }
+        
+        $regexps = explode(',', $custom['uuid_regexp_prefixes']);
+        foreach ($regexps as $regexp) {
+            $matches=[];
+            $ok = preg_match($regexp, $identifier, $matches);
+            if ($ok) {
+                $length = strlen($matches[0]);
+                $uuid = substr($identifier, $length);
+                if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
+                     return $uuid;
                 }
             }
         }
+        
         throw new BadArgumentException('Invalid identifier ' . $identifier);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 use Doctrine\Common\Cache\ArrayCache;
 
 /**
@@ -22,6 +23,9 @@ use Doctrine\Common\Cache\ArrayCache;
  */
 class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
+
+    protected $_cache;
+    
     protected function _initDefaultTimeZone()
     {
         date_default_timezone_set('UTC');
@@ -32,9 +36,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $this->bootstrap('frontController');
         $front = $this->getResource('FrontController');
         $restRoute = new Zend_Rest_Route(
-            $front,
-            array(),
-            array('api')
+            $front, array(), array('api')
         );
         $front->getRouter()->addRoute('rest', $restRoute);
     }
@@ -43,14 +45,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         $this->bootstrap('frontController');
         $this->getResource('FrontController')->getRouter()->addRoute(
-            'xmlns',
-            new Zend_Controller_Router_Route(
-                'xmlns',
-                [
-                    'module' => 'api',
-                    'controller' => 'xmlns',
-                    'action' => 'index'
-                ]
+            'xmlns', new Zend_Controller_Router_Route(
+            'xmlns', [
+            'module' => 'api',
+            'controller' => 'xmlns',
+            'action' => 'index'
+            ]
             )
         );
     }
@@ -59,8 +59,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // register the OpenSKOS action helpers
         Zend_Controller_Action_HelperBroker::addPath(
-            APPLICATION_PATH . '/../library/OpenSKOS/Controller/Action/Helper',
-            'OpenSKOS_Controller_Action_Helper'
+            APPLICATION_PATH . '/../library/OpenSKOS/Controller/Action/Helper', 'OpenSKOS_Controller_Action_Helper'
         );
     }
 
@@ -93,4 +92,31 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         Zend_Controller_Front::getInstance()->setDispatcher($dispatcher);
     }
+    
+    protected function _initCache()
+	{
+		$config = $this->getOption('resources');
+        
+        $this->_cache = Zend_Cache::factory(
+			'Core',
+			'File',
+			$config['cachemanager']['general']['frontend']['options'],
+			$config['cachemanager']['general']['backend']['options']
+		);
+	
+		Zend_Registry::set('cache', $this->_cache);
+	}
+	
+	protected function _initConfig()
+	{
+		if(!$config = $this->_cache->load('config')) {
+	
+			$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini');
+            $config = $config->toArray();
+			$this->_cache->save($config, 'config');
+		}
+	
+		Zend_Registry::set('config', $config);
+	}
+
 }

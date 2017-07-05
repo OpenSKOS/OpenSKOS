@@ -2,8 +2,6 @@
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Api\Exception\NotFoundException;
 
 class Set extends AbstractTripleStoreResource
