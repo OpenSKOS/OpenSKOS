@@ -40,6 +40,17 @@ editor.schemeIcons.width=16
 editor.schemeIcons.height=16
 editor.schemeIcons.extension="png"
 
+; Schemes order based on collections. FOR LIVE
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/gtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/nongtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+
+; Schemes order based on collections. FOR ACCEPT
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:gtaa"
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nongtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nonmatch"
+
 ; Export configuration
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
 editor.export.filesHttpPath = "/data/export/"
@@ -103,10 +114,8 @@ resources.cachemanager.general.backend.customBackendNaming=false
 resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
 resources.cachemanager.general.frontendBackendAutoload=false
 
-
 ;; SESSION ;;
 resources.session.cookie_path = "/backend_name/"
-
 
 ;; PLUGINS ;;
 resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
@@ -121,13 +130,13 @@ resources.frontController.params.displayExceptions = 1
 resources.locale.default=nl_NL.utf8
 
 resources.view.encoding="UTF-8"
-resources.view.options.doctype=XHTML1_STRICTF
+resources.view.options.doctype=XHTML1_STRICT
 
 ; Apache Jena Fuseki configuration:
 sparql.queryUri = http://localhost:3030/openskos/query
 sparql.updateUri = http://localhost:3030/openskos/update
 
-; Client id and clie nt secret configured in https://console.developers.google.com
+; Client id and client secret configured in https://console.developers.google.com
 oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
@@ -135,7 +144,6 @@ oAuth2.google.clientSecret = "@google-client-secret@"
 ;api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
 api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
-
 
 ; customize applicaton
 custom.backward_compatible = true
@@ -151,6 +159,7 @@ custom.maximal_rows = 500
 custom.maximal_time_limit = 120
 custom.normal_time_limit = 30
 custom.backend = ccr
+custom.uuid_regexp_prefixes = '/CCR_(.*)_/'
 
 [staging : production]
 phpSettings.display_startup_errors = 1
