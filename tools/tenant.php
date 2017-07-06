@@ -85,33 +85,6 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 
-function setID(&$resource, $uri, $uuid, $resourceManager)
-{
-    if ($uri !== null && $uri !== "") {
-        $exists = $resourceManager->askForUri($uri);
-        if ($exists) {
-            fwrite(STDERR, "A institution with the uri " . $uri . " has been already registered in the triple store. \n");
-            exit(1);
-        }
-        if ($uuid !== null && $uuid !== "") {
-            $insts = $resourceManager->fetchSubjectForObject(OpenSkos::UUID, new Literal($uuid), Tenant::TYPE);
-            if (count($insts) > 0) {
-                fwrite(STDERR, "A institution with the uuid " . $uuid . " has been already registered in the triple store. \n");
-                exit(1);
-            }
-            $resource->setUri($uri);
-            $resource->setProperty(OpenSkos::UUID, new Literal($uuid));
-        } else {
-            fwrite(STDERR, "You should provide an uuid as well. \n");
-            exit(1);
-        }
-    } else {
-        fwrite(STDERR, "You should provide an uri \n");
-        exit(1);
-    }
-}
-
-
 
 fwrite(STDOUT, "\n\n\n Starting script tenant... \n ");
 switch ($action) {
