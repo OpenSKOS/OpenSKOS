@@ -98,8 +98,8 @@ class Concept extends AbstractTripleStoreResource
 
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        $this->limit = $this->init['custom.limit'];
+        $this->init = $this->manager->getInitArray();
+        $this->limit = $this->init['custom']['limit'];
     }
 
     /**
@@ -117,7 +117,7 @@ class Concept extends AbstractTripleStoreResource
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
-        set_time_limit($this->init["custom.maximal_time_limit"]);
+        set_time_limit($this->init["custom"]["maximal_time_limit"]);
 
         $params = $request->getQueryParams();
 
@@ -151,7 +151,7 @@ class Concept extends AbstractTripleStoreResource
 
         // sets
         $setCodes = [];
-        if ($this->init['custom.backward_compatible']) {
+        if ($this->init['custom']['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';

@@ -92,7 +92,7 @@ class Resource extends Uri implements ResourceIdentifier
         ],
     );
     protected $properties = [];
-
+    
     /**
      * @return null dummy manager for non-concept-type resources
      */
@@ -687,7 +687,7 @@ class Resource extends Uri implements ResourceIdentifier
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
         $init = $manager->getInitArray();
-        if (!$init["custom.default_urigenerate"]) {
+        if (!$init["custom"]["default_urigenerate"]) {
             $customGen = new UriGeneration();
             return $customGen->generateUri($manager, $this);
         }

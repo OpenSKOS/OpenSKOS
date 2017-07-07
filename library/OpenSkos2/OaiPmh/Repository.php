@@ -586,15 +586,7 @@ class Repository implements InterfaceRepository
         if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
             return $identifier;
         }
-        $cache = \Zend_Registry::getInstance()->get('config');
-        $env = apache_getenv('APP_ENV');
-        if (empty($env)) {
-            $env = "production";
-        }
-        $cache=$cache[$env];
-        if (!array_key_exists('custom', $cache)) {
-            throw new BadArgumentException('Invalid identifier ' . $identifier);
-        }
+        $cache = $this->conceptManager->getInitArray();
         $custom = $cache['custom'];
         if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
             throw new BadArgumentException('Invalid identifier ' . $identifier);

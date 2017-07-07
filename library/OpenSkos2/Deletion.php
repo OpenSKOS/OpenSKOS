@@ -12,7 +12,7 @@ class Deletion implements \OpenSkos2\Interfaces\Deletion
     public function __construct($manager)
     {
         $init = $manager->getInitArray();
-        $this->defaultOn = $init["custom.default_deletion"];
+        $this->defaultOn = $init["custom"]["default_deletion"];
         if ($this->defaultOn) {
             $this->resourceManager = $manager;
         } else {

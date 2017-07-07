@@ -35,6 +35,17 @@ class ResourceManagerWithSearch extends ResourceManager
      * @var \OpenSkos2\Solr\ResourceManager
      */
     protected $solrResourceManager;
+    
+    /**
+     * @param Client $client
+     * @param SolrResourceManager $solrResourceManager
+     */
+    public function __construct(Client $client, SolrResourceManager $solrResourceManager)
+    {
+        parent::__construct($client);
+        $this->solrResourceManager = $solrResourceManager;
+    }
+
 
     /**
      * Use that if inserting a large amount of resources.
@@ -56,16 +67,7 @@ class ResourceManagerWithSearch extends ResourceManager
         $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
     }
 
-    /**
-     * @param Client $client
-     * @param SolrResourceManager $solrResourceManager
-     */
-    public function __construct(Client $client, SolrResourceManager $solrResourceManager)
-    {
-        parent::__construct($client);
-        $this->solrResourceManager = $solrResourceManager;
-    }
-
+    
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException

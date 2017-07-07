@@ -57,6 +57,22 @@ class ResourceManager
      * @var array
      */
     protected $init = [];
+    
+    /**
+
+     * @param Client $client
+     */
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+        $this->init = $this->getApplicationIni();
+        if ($this->init["custom"]["default_relationtypes"]) {
+            $this->customRelationTypes = new \OpenSkos2\Defaults\RelationTypes();
+        } else {
+            $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
+        }
+    }
+
 
     public function getResourceType()
     {
@@ -74,21 +90,7 @@ class ResourceManager
         return null;
     }
 
-    /**
-
-     * @param Client $client
-     */
-    public function __construct(Client $client)
-    {
-        $this->client = $client;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        if ($this->init["custom.default_relationtypes"]) {
-            $this->customRelationTypes = null;
-        } else {
-            $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
-        }
-    }
-
+    
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -787,8 +789,8 @@ class ResourceManager
 
 // RELATIONS
     public function getCustomRelationTypes()
-    {
-        if ($this->init["custom.default_relationtypes"]) {
+    { 
+        if ($this->init["custom"]["default_relationtypes"]) {
             return [];
         } else {
             return $this->customRelationTypes->getRelationTypes();
@@ -797,7 +799,7 @@ class ResourceManager
 
     public function getCustomInverses()
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if ($this->init["custom"]["default_relationtypes"]) {
             return [];
         } else {
             return $this->customRelationTypes->getInverses();
@@ -815,7 +817,7 @@ class ResourceManager
 
     public function setCustomRelationTypes($relationtypes)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if ($this->init["custom"]["default_relationtypes"]) {
             return;
         } else {
             $this->customRelationTypes->setRelationTypes($relationtypes);
@@ -824,7 +826,7 @@ class ResourceManager
 
     public function setCustomInverses($inverses)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if ($this->init["custom"]["default_relationtypes"]) {
             return;
         } else {
             $this->customRelationTypes->setInverses($inverses);
@@ -833,7 +835,7 @@ class ResourceManager
 
     public function setCustomTransitives($transitives)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if ($this->init["custom"]["default_relationtypes"]) {
             return;
         } else {
             $this->customRelationTypes->setTransitives($transitives);
@@ -1000,5 +1002,14 @@ class ResourceManager
             throw new \Exception("the institution with the code $code is not found");
         }
         return $response[0]->name->getValue();
+    }
+    
+    private function getApplicationIni(){
+        $config = \Zend_Registry::get('config');
+        $env = getenv('APP_ENV');
+        if (empty($env)) {
+            $env = "production";
+        }
+        return $config[$env];
     }
 }

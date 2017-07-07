@@ -13,7 +13,7 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
     public function __construct($manager)
     {
         $init = $manager->getInitArray();
-        $this->defaultOn = $init["custom.default_authorisation"];
+        $this->defaultOn = $init["custom"]["default_authorisation"];
         if ($this->defaultOn) {
             $this->customAuthorisation = null;
         } else {

@@ -21,7 +21,8 @@ class Tenant extends AbstractTripleStoreResource
         $this->authorisation = new \OpenSkos2\Authorisation($manager);
         $this->deletion = new \OpenSkos2\Deletion($manager);
         $this->personManager = $personManager;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        $this->init = $this->manager->getInitArray();
+        
     }
 
     /**
