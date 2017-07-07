@@ -282,21 +282,7 @@ function createTenantRdf($code,
     }
 
     $tenantResource = new Tenant();
-    if ($epic === 'true') {
-        try {
-            $dummyTenant = new \OpenSkos2\Tenant("http://dummy-tenant");
-            $dummySet = new \OpenSkos2\Set("http://dummy-set");
-            $uri = $tenantResource->selfGenerateUri($dummyTenant, 
-                $dummySet, 
-                $resourceManager);
-        } catch (Exception $ex) {
-            fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() . " \n");
-            fwrite(STDOUT, "\n I will use the uri and uuid provided by you \n");
-            setID($tenantResource, $uri, $uuid, $resourceManager);
-        };
-    } else {
-        setID($tenantResource, $uri, $uuid, $resourceManager);
-    }
+    setID($tenantResource, $uri, $uuid, $resourceManager);
 
 
     $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
