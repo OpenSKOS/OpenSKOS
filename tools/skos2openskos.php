@@ -87,6 +87,7 @@ $message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReference
   $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
 );
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
+
 $importer->setLogger($logger);
 
 $importer->handle($message);
@@ -94,4 +95,4 @@ $importer->handle($message);
 
 echo "Done\n";
 
-//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/30216132-6d43-4cb0-9a5e-4382fe03336a --file=clavas-organisations.xml
+//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost/clavas/public/api/users/ef832d31-446f-47c9-935c-d53015aaf948 --file=clavas-organisations.xml

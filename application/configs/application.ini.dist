@@ -134,6 +134,9 @@ api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
 ; customize applicaton
+
+@instance customizations@
+
 custom.backward_compatible = true
 custom.default_authorisation = false
 custom.default_deletion = false
