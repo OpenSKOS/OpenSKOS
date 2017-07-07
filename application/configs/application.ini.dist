@@ -137,20 +137,20 @@ api.showOnlyApproved = "@api-show-only-approved@"
 
 @instance customizations@
 
-custom.backward_compatible = true
-custom.default_authorisation = false
-custom.default_deletion = false
-custom.default_relationtypes = false
-custom.default_urigenerate = true
-custom.relations_strict_reference_check = "http://www.w3.org/2004/02/skos/core#broader, http://www.w3.org/2004/02/skos/core#broaderTransitive, http://www.w3.org/2004/02/skos/core#narrower,http://www.w3.org/2004/02/skos/core#narrowerTransitive"
-custom.relations_soft_reference_check = "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch"
-custom.allowed_concepts_for_other_tenant_schemes = true
-custom.limit = 30;
-custom.maximal_rows = 500
-custom.maximal_time_limit = 120
-custom.normal_time_limit = 30
-custom.backend = ccr
-custom.uuid_regexp_prefixes = '/CCR_(.*)_/'
+custom.backward_compatible = "@custom.backward_compatible@"
+custom.default_authorisation = "@custom.default_authorisation@"
+custom.default_deletion = "@custom.default_deletion@"
+custom.default_relationtypes = "@ustom.default_relationtypes@"
+custom.default_urigenerate = "@custom.default_urigenerate@"
+custom.relations_strict_reference_check = "@custom.relations_strict_reference_check@"
+custom.relations_soft_reference_check = "@custom.relations_soft_reference_check@"
+custom.allowed_concepts_for_other_tenant_schemes = "@custom.allowed_concepts_for_other_tenant_schemes@"
+custom.limit = "@custom.limit@";
+custom.maximal_rows = "@custom.maximal_rows@"
+custom.maximal_time_limit = "@custom.maximal_time_limit@"
+custom.normal_time_limit = "@custom.normal_time_limit@"
+custom.backend = "@custom.backend@"
+custom.uuid_regexp_prefixes = @custom.uuid_regexp_prefixes@
 
 [staging : production]
 
