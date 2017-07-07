@@ -95,4 +95,4 @@ $importer->handle($message);
 
 echo "Done\n";
 
-//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost/clavas/public/api/users/ef832d31-446f-47c9-935c-d53015aaf948 --file=clavas-organisations.xml
+//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/c6d8fce0-5c6f-4d87-acf8-b851a1385c55 --file=clavas-organisations.xml

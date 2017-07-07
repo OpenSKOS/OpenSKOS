@@ -91,6 +91,7 @@ class Concept extends AbstractTripleStoreResource
         PersonManager $personManager
     ) {
     
+
         $this->manager = $manager;
         $this->personManager = $personManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -141,16 +142,13 @@ class Concept extends AbstractTripleStoreResource
 
         // tenants ???
         // it used to be a non-obligatory multiple parameter, now is obligatory and the only one
-        $tenantCodes = [];
+        $tenant = null;
         if (isset($params['tenant'])) {
-            $tenantCodes = explode(' ', trim($params['tenant']));
-            foreach ($tenantCodes as $tenantcode) {
-                $tenant = $this->manager->fetchByUuid($tenantcode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
-                $tenantCode = $tenant->getCode();
-                $options['tenants'][] = $tenantCode->getValue();
-            }
+            $tenant = $this->manager->fetchByUuid($params['tenant'], \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            $tenantCode = $tenant->getCode();
+            $options['tenants'][] = $tenantCode->getValue();
         }
-       
+
         // sets
         $setCodes = [];
         if ($this->init['custom.backward_compatible']) {
@@ -218,20 +216,14 @@ class Concept extends AbstractTripleStoreResource
         }
 
 
-        if (isset($tenant)) {
-            $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
-            if ($this->useXlLabels($tenant, $request) === true) {
-                foreach ($concepts as $concept) {
-                    $concept->loadFullXlLabels($this->manager->getLabelManager());
-                }
+        if ($this->useXlLabels($tenant, $request) === true) {
+            foreach ($concepts as $concept) {
+                $concept->loadFullXlLabels($this->manager->getLabelManager());
             }
-        } else {
-             // for get requests tenant is not an obligatory parameter and may be empty
-            // place here what you consider must be a default behaviour
-            $excludePropertiesList = [];
         }
-            
+
         switch ($context) {
             case 'json':
                 $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
@@ -264,12 +256,12 @@ class Concept extends AbstractTripleStoreResource
      */
     public function getResourceResponse(ServerRequestInterface $request, $id, $context)
     {
-        
+
         $concept = $this->getResource($id);
 
         $params = $request->getQueryParams();
 
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
@@ -278,12 +270,12 @@ class Concept extends AbstractTripleStoreResource
 
         $tenantCode = $concept->getTenant()->getValue();
         $tenant = $this->manager->fetchByUuid($tenantCode, Tenant::TYPE, 'openskos:code');
-        
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
 
         if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
-              $concept->loadFullXlLabels($this->manager->getLabelManager());
+            $concept->loadFullXlLabels($this->manager->getLabelManager());
         }
 
         switch ($context) {
@@ -343,8 +335,6 @@ class Concept extends AbstractTripleStoreResource
         return $concept;
     }
 
-
-  
     /**
      * Check if the requested label format conforms to the tenant configuration
      * @return boolean Returns TRUE only if XL labels are enabled and requested
@@ -381,7 +371,6 @@ class Concept extends AbstractTripleStoreResource
         }
     }
 
-    
     /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
@@ -408,7 +397,6 @@ class Concept extends AbstractTripleStoreResource
             }
         }
     }
-    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

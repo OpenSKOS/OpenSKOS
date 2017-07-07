@@ -102,12 +102,21 @@ class Command implements LoggerAwareInterface
         $helper->setLogger($this->logger);
         $helper->prepare($resourceCollection);
 
-
+        /* Constructor for Validator
+         * public function __construct(
+        ResourceManager $resourceManager,
+        $tenant,
+        $set,
+        $isForUpdate,
+        $referenceCheckOn,
+        $conceptReferenceCheckOn = true,
+        LoggerInterface $logger = null */
+            
         $validator = new ResourceValidator(
             $this->conceptManager,
-            !($message->getNoUpdates()),
             $this->tenant,
             $this->set,
+            !($message->getNoUpdates()),
             false,
             false,
             $this->logger
@@ -168,9 +177,9 @@ class Command implements LoggerAwareInterface
         $this->logger->info("...");
         $validatorUpdate = new ResourceValidator(
             $this->conceptManager,
-            true,
             $this->tenant,
             $this->set,
+            true,
             true,
             true,
             $this->logger
