@@ -20,9 +20,6 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 use DI\Container;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Tenant;
 
 require_once 'autoload.inc.php';
 require_once 'Zend/Console/Getopt.php';
@@ -31,7 +28,6 @@ require_once 'Zend/Console/Getopt.php';
 $opts = array(
     'help|?' => 'Print this usage message',
     'env|e=s' => 'The environment to use (defaults to "production")',
-    'epic=s' => 'Epic is enabled or not, true/false',
     'uri=s' => 'tenant uri',
     'uuid=s' => 'tenant uuid',
     'code=s' => 'Tenant code (required)',
@@ -41,7 +37,6 @@ $opts = array(
     'email=s' => 'Admin email (required when creating a tenant)',
     'password=s' => 'Password for the Admin account',
     'apikey=s' => 'Api key for the Admin account',
-    'eppn=s' => 'eppn for the admin',
     'enableSkosXl' => 'enable skos xl labels'
 );
 $OPTS = new Zend_Console_Getopt($opts);
@@ -93,7 +88,6 @@ switch ($action) {
         //create tenant 
         $tenantRdf = createTenantRdf($OPTS->code, 
             $OPTS->name, 
-            $OPTS->epic, 
             $OPTS->uri, 
             $OPTS->uuid, 
             $OPTS->disableSearchInOtherTenants, 
@@ -116,7 +110,6 @@ switch ($action) {
             'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
             'tenant' => $OPTS->code,
             'apikey' => $OPTS->apikey,
-            'eppn' => $OPTS->eppn,
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
@@ -143,6 +136,6 @@ switch ($action) {
 
 exit(0);
 
-// php tenant.php --epic=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
+// php tenant.php --enableSkosXl=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
 
 
