@@ -84,6 +84,19 @@ $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
 fwrite(STDOUT, "\n\n\n Starting script tenant... \n ");
 switch ($action) {
     case 'create':
+        
+         // create admin user for this tenant
+        $model = new OpenSKOS_Db_Table_Users();
+        $model->createRow(array(
+            'email' => $OPTS->email,
+            'name' => $OPTS->name,
+            'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
+            'tenant' => $OPTS->code,
+            'apikey' => $OPTS->apikey,
+            'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
+            'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
+        ))->save();
+
 
         //create tenant 
         $tenantRdf = createTenantRdf($OPTS->code, 
@@ -102,19 +115,8 @@ switch ($action) {
         fwrite(STDOUT, "Now Im about to add the user in "
             . "the MySQL database ... \n\n");
 
-        // create user
-        $model = new OpenSKOS_Db_Table_Users();
-        $model->createRow(array(
-            'email' => $OPTS->email,
-            'name' => $OPTS->name,
-            'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
-            'tenant' => $OPTS->code,
-            'apikey' => $OPTS->apikey,
-            'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
-            'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
-        ))->save();
-
-        // add  user-info to triple store
+       
+        // add  admin user-info to triple store
         //firsts get it from MySql 
         $user = $resourceManager->fetchRowWithRetries($model, 'apikey = ' . $model->getAdapter()->quote($OPTS->apikey) . ' '
             . 'AND tenant = ' . $model->getAdapter()->quote($OPTS->code)
