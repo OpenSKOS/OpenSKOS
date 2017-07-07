@@ -37,7 +37,7 @@ $opts = array(
     'email=s' => 'Admin email (required when creating a tenant)',
     'password=s' => 'Password for the Admin account',
     'apikey=s' => 'Api key for the Admin account',
-    'enableSkosXl' => 'enable skos xl labels',
+    'enableSkosXl=s' => 'enable skos xl labels',
     'action=s' => 'create or delete'
 );
 $OPTS = new Zend_Console_Getopt($opts);
@@ -108,8 +108,8 @@ switch ($action) {
             $tenantRdf->getUri() . "\n");
         fwrite(STDOUT, 'To check: try GET <host>/api/institution?id=' . 
             $tenantRdf->getUri() . "\n");
-        fwrite(STDOUT, "Now Im about to add the user in "
-            . "the MySQL database ... \n\n");
+        fwrite(STDOUT, "Now Im about to add the user to "
+            . "the triple store ... \n\n");
 
        
         // add  admin user-info to triple store
