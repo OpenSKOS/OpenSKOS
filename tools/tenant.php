@@ -37,7 +37,8 @@ $opts = array(
     'email=s' => 'Admin email (required when creating a tenant)',
     'password=s' => 'Password for the Admin account',
     'apikey=s' => 'Api key for the Admin account',
-    'enableSkosXl' => 'enable skos xl labels'
+    'enableSkosXl' => 'enable skos xl labels',
+    'action=s' => 'create or delete'
 );
 $OPTS = new Zend_Console_Getopt($opts);
 
@@ -47,17 +48,12 @@ if ($OPTS->help) {
     exit(0);
 }
 
-$args = $OPTS->getRemainingArgs();
-
-if (!$args || count($args) != 1) {
-    echo str_replace('[ options ]', '[ options ] action', 
-        $OPTS->getUsageMessage());
-    fwrite(STDERR, "Expected an action (create|delete)\n");
+if (null === $OPTS->action) {
+    fwrite(STDERR, "required `action` argument\n");
     exit(1);
 }
-$action = $args[0];
 
-$query = $OPTS->query;
+$action = $OPTS->action;
 
 if (null === $OPTS->code) {
     fwrite(STDERR, "missing required `code` argument\n");
@@ -138,6 +134,6 @@ switch ($action) {
 
 exit(0);
 
-// php tenant.php --enableSkosXl=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
+// php tenant.php --enableSkosXl=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx --action=create
 
 
