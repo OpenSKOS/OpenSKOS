@@ -14,7 +14,6 @@ RUN apt-get update \
     && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 \
     && echo 'deb http://packages.dotdeb.org wheezy all' >> /etc/apt/sources.list \
     && echo 'deb-src http://packages.dotdeb.org wheezy all' >> /etc/apt/sources.list \
-    && echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.2 main" >> /etc/apt/sources.list.d/mongodb-org-3.2.list \
     && apt-get update && apt-get install -y --no-install-recommends curl ca-certificates nano \
     php5-cli php5-curl php5-json php5-mcrypt php5-mysql php5-xdebug php5-xsl php5-intl \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
