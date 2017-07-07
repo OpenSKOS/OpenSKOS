@@ -256,7 +256,6 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager,
 
 function createTenantRdf($code, 
     $name, 
-    $epic, 
     $uri, 
     $uuid, 
     $disableSearchInOtherTenants, 
@@ -660,7 +659,6 @@ class Institutions
             }
             $tenant = createTenantRdf($row->code, 
                 $row->name, 
-                $epic, 
                 $uri, 
                 $uuid, 
                 $row->disableSearchInOtherTenants, 
