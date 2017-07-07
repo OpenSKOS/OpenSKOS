@@ -1,5 +1,20 @@
 [![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
 
+# Development
+
+To test / develop the application you can run
+
+`docker-compose up --build`
+`docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev`
+
+Go to `http://localhost:9001/manage.html?tab=datasets` create a dataset named `openskos`
+
+Create a test tenant / user
+
+`docker exec -it openskos-php-fpm php ./tools/tenant.php create -e development --code=pic --name=Picturae --email=test@example.com --password=test`
+
+Now you can login on http://localhost:9000 
+
 1. Install the OpenSKOS code
 ===============================================================================
 Copy the code to a location of your choice.

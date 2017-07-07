@@ -121,7 +121,7 @@
             </analyzer>
         </fieldtype>
 
-        <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
+        <fieldType name="date" class="solr.TrieDateField" sortMissingLast="true" omitNorms="true"/>
 
         <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
 
@@ -130,7 +130,7 @@
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
                 <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
-                <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30" side="front"/>
+                <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30"/>
             </analyzer>
             <analyzer type="query">
                 <tokenizer class="solr.KeywordTokenizerFactory"/>

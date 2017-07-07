@@ -12,7 +12,9 @@
         "zendframework/zend-diactoros": "^1.1",
         "benestar/asparagus": "^0.4",
         "ml/json-ld": "^1.0",
-        "solarium/solarium": "^3.4"
+        "solarium/solarium": "^3.4",
+        "phing/phing": "^2.15",
+        "pear/http_request2": "^2.3"
     },
     "autoload": {
         "psr-4": {
@@ -23,8 +25,8 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "^2.7"
+        "squizlabs/php_codesniffer": "^2.7",
+        "phpunit/phpunit": "^4.8"
     },
     "scripts": {
         "validate": [

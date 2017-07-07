@@ -11,3 +11,4 @@ public/data/export/*
 /node_modules/
 /public/apidoc/
 /public/oaidoc/
+/data/solr/data/
