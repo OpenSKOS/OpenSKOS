@@ -135,7 +135,7 @@ api.showOnlyApproved = "@api-show-only-approved@"
 
 ; customize applicaton
 
-@instance customizations@
+; @instance customizations@
 
 custom.backward_compatible = "@custom.backward_compatible@"
 custom.default_authorisation = "@custom.default_authorisation@"
@@ -150,7 +150,7 @@ custom.maximal_rows = "@custom.maximal_rows@"
 custom.maximal_time_limit = "@custom.maximal_time_limit@"
 custom.normal_time_limit = "@custom.normal_time_limit@"
 custom.backend = "@custom.backend@"
-custom.uuid_regexp_prefixes = @custom.uuid_regexp_prefixes@
+custom.uuid_regexp_prefixes = "@custom.uuid_regexp_prefixes@"
 
 [staging : production]
 
