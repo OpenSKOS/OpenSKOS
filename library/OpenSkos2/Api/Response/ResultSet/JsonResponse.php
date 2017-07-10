@@ -65,7 +65,7 @@ class JsonResponse extends ResultSetResponse
                 $this->propertiesList,
                 $this->excludePropertiesList
             ))->transform();
-            if ($this->init['custom']['backward_compatible']) {
+            if ($this->init['options']['backward_compatible']) {
                 $nResource2 = (new BackwardCompatibility())->backwardCompatibilityMap(
                     $nResource,
                     $resource->getType()->getUri()

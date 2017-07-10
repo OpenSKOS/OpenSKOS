@@ -283,9 +283,8 @@ class Concept extends Resource
      */
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $conceptManager)
     {
-        $init = $conceptManager->getInitArray();
-        if (!$init["custom"]["default_urigenerate"]) {
-            $customGen = new UriGeneration();
+        $customGen = $conceptManager->getUriGenerateObject();
+        if (!isEmpty($customGen)) {
             return $customGen->generateUri($conceptManager, $this);
         }
 

@@ -92,7 +92,7 @@ class Resource extends Uri implements ResourceIdentifier
         ],
     );
     protected $properties = [];
-    
+
     /**
      * @return null dummy manager for non-concept-type resources
      */
@@ -158,7 +158,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-   
     /**
      * @param string $predicate
      * @param RdfObject $value
@@ -315,7 +314,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-  
     /**
      * @return Uri
      */
@@ -436,8 +434,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (count($values) > 1) {
             throw new OpenSkosException(
-                'Multiple values found for property "' . $property . '" while a single one was requested.'
-                . ' Values ' . implode(', ', $values)
+            'Multiple values found for property "' . $property . '" while a single one was requested.'
+            . ' Values ' . implode(', ', $values)
             );
         }
 
@@ -504,15 +502,10 @@ class Resource extends Uri implements ResourceIdentifier
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-        \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Set $set = null,
-        \OpenSkos2\Person $person = null,
-        \OpenSkos2\PersonManager $personManager = null,
-        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
-        $existingConcept = null,
-        $forceCreationOfXl = false
-    ) {
-    
+    \OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set = null, \OpenSkos2\Person $person = null, \OpenSkos2\PersonManager $personManager = null, \OpenSkos2\SkosXl\LabelManager $labelManager = null, $existingConcept = null, $forceCreationOfXl = false
+    )
+    {
+
 
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
@@ -687,16 +680,17 @@ class Resource extends Uri implements ResourceIdentifier
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
         $init = $manager->getInitArray();
-        if (!$init["custom"]["default_urigenerate"]) {
-            $customGen = new UriGeneration();
+        $customGen = $manager->getUriGenerateObject();
+        if (!isEmpty($customGen)) {
             return $customGen->generateUri($manager, $this);
         }
+
 
         $uuid = Uuid::uuid4();
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-                'The resource already has an uri. Can not generate new one.'
+            'The resource already has an uri. Can not generate new one.'
             );
         }
 
@@ -706,7 +700,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-                'The generated uri "' . $uri . '" is already in use.'
+            'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
@@ -719,13 +713,11 @@ class Resource extends Uri implements ResourceIdentifier
 
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri(
-        \OpenSkos2\Tenant $tenant = null,
-        \OpenSkos2\Set $set = null,
-        $uuid = null,
-        $notation = null,
-        $init = null
-    ) {
-    
+    \OpenSkos2\Tenant $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null
+    )
+    {
+
         return $set->getUri() . "/" . $uuid;
     }
+
 }

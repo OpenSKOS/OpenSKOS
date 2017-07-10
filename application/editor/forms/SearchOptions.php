@@ -117,7 +117,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
         foreach ($profiles as $profile) {
             $profilesOptions[$profile->id] = $profile->name;
         }
-        $profilesOptions['custom'] = _('Custom');
+        $profilesOptions['options'] = _('Custom');
 
         $this->addElement('select', 'searchProfileId', array(
             'label' => _('Search Profile'),

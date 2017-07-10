@@ -57,7 +57,10 @@ class ResourceManager
      * @var array
      */
     protected $init = [];
-    
+    protected $authorisationObject;
+    protected $uriGenerationObject;
+    protected $relationTypesObject;
+
     /**
 
      * @param Client $client
@@ -66,13 +69,10 @@ class ResourceManager
     {
         $this->client = $client;
         $this->init = $this->getApplicationIni();
-        if ($this->init["custom"]["default_relationtypes"]) {
-            $this->customRelationTypes = new \OpenSkos2\Defaults\RelationTypes();
-        } else {
-            $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
-        }
+        $this->authorisationObject = $this->makeOptionObject('authorisation');
+        $this->uriGenerationObject = $this->makeOptionObject('uri_generate');
+        $this->relationTypesObject = $this->makeOptionObject('relation_types');
     }
-
 
     public function getResourceType()
     {
@@ -90,7 +90,21 @@ class ResourceManager
         return null;
     }
 
-    
+    public function getAuthorisationObject()
+    {
+        return $this->authorisationObject;
+    }
+
+    public function getUriGenerateObject()
+    {
+        return $this->uriGenerationObject;
+    }
+
+    public function getRelationTypesObject()
+    {
+        return $this->relationTypesObject;
+    }
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -99,8 +113,8 @@ class ResourceManager
     {
         if ($this->askForUri($resource->getUri())) {
             throw new ResourceAlreadyExistsException(
-                'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
-                . 'It may be with status:deleted.'
+            'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+            . 'It may be with status:deleted.'
             );
         }
 
@@ -120,16 +134,16 @@ class ResourceManager
         foreach ($resourceCollection as $resource) {
             if ($this->askForUri($resource->getUri())) {
                 throw new ResourceAlreadyExistsException(
-                    'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
-                    . 'It may be with status:deleted.'
+                'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+                . 'It may be with status:deleted.'
                 );
             }
         }
 
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
-    
-     /**
+
+    /**
      * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
      * @throws ResourceAlreadyExistsException
      */
@@ -145,8 +159,7 @@ class ResourceManager
     public function replace(Resource $resource)
     {
         $this->client->replace(
-            $resource->getUri(),
-            EasyRdf::resourceToGraph($resource)
+            $resource->getUri(), EasyRdf::resourceToGraph($resource)
         );
     }
 
@@ -252,12 +265,12 @@ class ResourceManager
 
         if (count($data) == 0) {
             throw new ResourceNotFoundException(
-                "The requested resource with $property set to $id of type $type was not found in the triple store. "
+            "The requested resource with $property set to $id of type $type was not found in the triple store. "
             );
         }
         if (count($data) > 1) {
             throw new \RuntimeException(
-                "Something went very wrong. The requested resource with $property <  $id  > was found more than once."
+            "Something went very wrong. The requested resource with $property <  $id  > was found more than once."
             );
         }
         return $data[0];
@@ -292,12 +305,12 @@ class ResourceManager
         }
         if (count($result) == 0) {
             throw new ResourceNotFoundException(
-                'The requested resource <' . $uri . '> was not found.'
+            'The requested resource <' . $uri . '> was not found.'
             );
         }
         if (count($result) > 1) {
             throw new \RuntimeException(
-                'Something went very wrong. The requested resource <' . $uri . '> was found more than once.'
+            'Something went very wrong. The requested resource <' . $uri . '> was found more than once.'
             );
         }
         return $result[0];
@@ -438,8 +451,8 @@ class ResourceManager
 // @TODO provide possibility to order on other predicates.
         $resources->uasort(
             function (Resource $resource1, Resource $resource2) {
-                return strcmp($resource1->getUri(), $resource2->getUri());
-            }
+            return strcmp($resource1->getUri(), $resource2->getUri());
+        }
         );
         return $resources;
     }
@@ -465,7 +478,7 @@ class ResourceManager
         $response = $httpClient->request();
         if (!$response->isSuccessful()) {
             throw new \RuntimeException(
-                'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
+            'HTTP request to ' . $uri . ' for getting namespaces failed: ' . $response->getBody()
             );
         }
         return json_decode($response->getBody(), true)['@context'];
@@ -789,56 +802,56 @@ class ResourceManager
 
 // RELATIONS
     public function getCustomRelationTypes()
-    { 
-        if ($this->init["custom"]["default_relationtypes"]) {
+    {
+        if (isEmpty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getRelationTypes();
+            return $this->relationTypesObject->getRelationTypes();
         }
     }
 
     public function getCustomInverses()
     {
-        if ($this->init["custom"]["default_relationtypes"]) {
+        if (isEmpty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getInverses();
+            return $this->relationTypesObject->getInverses();
         }
     }
 
     public function getCustomTransitives()
     {
-        if ($this->init["default_relationtypes"]) {
+        if (isEmpty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getTransitives();
+            return $this->relationTypesObject->getTransitives();
         }
     }
 
     public function setCustomRelationTypes($relationtypes)
     {
-        if ($this->init["custom"]["default_relationtypes"]) {
+        if (isEmpty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setRelationTypes($relationtypes);
+            $this->relationTypesObject->setRelationTypes($relationtypes);
         }
     }
 
     public function setCustomInverses($inverses)
     {
-        if ($this->init["custom"]["default_relationtypes"]) {
+        if (isEmpty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setInverses($inverses);
+            $this->relationTypesObject->setInverses($inverses);
         }
     }
 
     public function setCustomTransitives($transitives)
     {
-        if ($this->init["custom"]["default_relationtypes"]) {
+        if (isEmpty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setTransitives($transitives);
+            $this->relationTypesObject->setTransitives($transitives);
         }
     }
 
@@ -875,7 +888,7 @@ class ResourceManager
         $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
         if ($transitive) {
             throw new \Exception(
-                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link 
+            "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link 
                     of the source to itself, possibly via inverse relation."
             );
         }
@@ -887,8 +900,8 @@ class ResourceManager
             $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
             if ($transitiveInverse) {
                 throw new \Exception(
-                    "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link "
-                    . "of the target to itself"
+                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link "
+                . "of the target to itself"
                 );
             }
         }
@@ -897,13 +910,11 @@ class ResourceManager
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
         $count = $this->countTriples(
-            '<' . $conceptUri . '>',
-            '<' . $relationUri . '>',
-            '<' . $relatedConceptUri . '>'
+            '<' . $conceptUri . '>', '<' . $relationUri . '>', '<' . $relatedConceptUri . '>'
         );
         if ($count > 0) {
             throw new \Exception(
-                "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
+            "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
             );
         }
         $trans = $this->customRelationTypes->getTransitives();
@@ -911,8 +922,8 @@ class ResourceManager
             $closure = $this->getClosure($conceptUri, $relationUri);
             if (in_array($relatedConceptUri, $closure)) {
                 throw new \Exception(
-                    "There is an attempt to duplicate a relation: "
-                    . "($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
+                "There is an attempt to duplicate a relation: "
+                . "($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
                 );
             }
         }
@@ -920,12 +931,10 @@ class ResourceManager
     }
 
     public function isRelationURIValid(
-        $relUri,
-        $customRelUris = null,
-        $registeredRelationUris = null,
-        $allRelationUris = null
-    ) {
-    
+    $relUri, $customRelUris = null, $registeredRelationUris = null, $allRelationUris = null
+    )
+    {
+
         if ($customRelUris == null) {
             $customRelUris = array_values($this->getCustomRelationTypes());
         }
@@ -939,15 +948,15 @@ class ResourceManager
             if (in_array($relUri, $customRelUris)) {
                 if (!in_array($relUri, $registeredRelationUris)) {
                     throw new \Exception(
-                        'The relation  ' . $relUri .
-                        '  is not registered in the triple store. '
+                    'The relation  ' . $relUri .
+                    '  is not registered in the triple store. '
                     );
                 }
             }
         } else {
             throw new \Exception(
-                'The relation type ' . $relUri . '  is neither a skos concept-concept '
-                . 'relation type nor a custom relation type. '
+            'The relation type ' . $relUri . '  is neither a skos concept-concept '
+            . 'relation type nor a custom relation type. '
             );
         }
     }
@@ -1003,8 +1012,9 @@ class ResourceManager
         }
         return $response[0]->name->getValue();
     }
-    
-    private function getApplicationIni(){
+
+    private function getApplicationIni()
+    {
         $config = \Zend_Registry::get('config');
         $env = getenv('APP_ENV');
         if (empty($env)) {
@@ -1012,4 +1022,17 @@ class ResourceManager
         }
         return $config[$env];
     }
+
+    private function makeOptionObject($init, $typeoption)
+    {
+        $className = $init['options'][$typeoption];
+        if (isEmpty($className)) {
+            return null;
+        } else {
+            $class = new ReflectionClass($className);
+            $instance = $class->newInstanceArgs($this);
+            return $instance;
+        }
+    }
+
 }

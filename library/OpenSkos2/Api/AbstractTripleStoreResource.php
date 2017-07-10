@@ -45,19 +45,13 @@ abstract class AbstractTripleStoreResource
      */
     protected $manager;
 
-    /**
-     * Authorisation rules
-     *
-     * @var Authorisation
-     */
-    protected $authorisation;
-
+   
     /**
      * Deletion rules
      *
      * @var Deletion
      */
-    protected $deletion;
+    protected $deletion_integrity_check;
 
     /**
      * array of application.ini settings
@@ -86,7 +80,7 @@ abstract class AbstractTripleStoreResource
         } else {
             $propertiesList = [];
         }
-        
+
         if (($context === 'json' || $context === 'jsonp') && $this->manager->getResourceType() === Tenant::TYPE) {
             $fieldname = 'sets';
             $extrasGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
@@ -100,12 +94,12 @@ abstract class AbstractTripleStoreResource
         switch ($context) {
             case 'json':
                 $detailJsonResponse = (new DetailJsonResponse($resource, $propertiesList));
-                $detailJsonResponse->setExtras($extras, $fieldname, $this->init['custom']['backward_compatible']);
+                $detailJsonResponse->setExtras($extras, $fieldname, $this->init['options']['backward_compatible']);
                 $response = $detailJsonResponse->getResponse();
                 break;
             case 'jsonp':
                 $detailJsonPResponse = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList));
-                $detailJsonPResponse->setExtras($extras, $fieldname, $this->init['custom']['backward_compatible']);
+                $detailJsonPResponse->setExtras($extras, $fieldname, $this->init['options']['backward_compatible']);
                 $response = $detailJsonPResponse->getResponse();
                 break;
             case 'rdf':
@@ -127,13 +121,13 @@ abstract class AbstractTripleStoreResource
     public function getResource($id)
     {
         $rdfType = $this->manager->getResourceType();
-            
+
         if ($id instanceof Uri) {
             $resource = $this->manager->fetchByUri($id, $rdfType);
         } else {
             $resource = $this->manager->fetchByUuid($id, $rdfType);
         }
-        
+
         if (!$resource) {
             throw new NotFoundException("Resource not found by uri/uuid: $id \n: ", 404);
         }
@@ -148,21 +142,18 @@ abstract class AbstractTripleStoreResource
 
 
             $result = new ResourceResultSet(
-                $index,
-                count($index),
-                1,
-                $this->init['custom']['maximal_rows']
+                $index, count($index), 1, $this->init['options']['maximal_rows']
             );
 
             switch ($params['context']) {
                 case 'json':
                     $jsonResponse = (new JsonResponse($result));
-                    $jsonResponse ->setInit($this->init);
+                    $jsonResponse->setInit($this->init);
                     $response = $jsonResponse->getResponse();
                     break;
                 case 'jsonp':
                     $jsonPResponse = (new JsonpResponse($result, $params['callback']));
-                    $jsonPResponse ->setInit($this->init);
+                    $jsonPResponse->setInit($this->init);
                     $response = $jsonPResponse->getResponse();
                     break;
                 case 'rdf':
@@ -233,7 +224,10 @@ abstract class AbstractTripleStoreResource
 
             $user = $this->getUserFromParams($params);
 
-            $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+            $authorisation = $this->manager->getAuthorisationObject();
+            if (!isEmpty($authorisation)) {
+                $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+            }
 
             if ($resource instanceof \OpenSkos2\Concept) {
                 $this->checkConceptXl($resource, $tenant);
@@ -241,12 +235,7 @@ abstract class AbstractTripleStoreResource
 
 
             $resource->ensureMetadata(
-                $tenant,
-                $set,
-                $user->getFoafPerson(),
-                $this->personManager,
-                $this->manager->getLabelManager(),
-                $existingResource
+                $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager(), $existingResource
             );
 
             $this->validate($resource, $tenant, $set, true);
@@ -293,9 +282,12 @@ abstract class AbstractTripleStoreResource
 
             $set = $this->getSet($params, $tenant);
 
-            $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+            $authorisation = $this->manager->getAuthorisationObject();
+            if (!isEmpty($authorisation)) {
+                $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+            }
 
-            $this->deletion->canBeDeleted($id);
+            $this->deletion_integrity_check->canBeDeleted($id);
 
             if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
                 if ($resource->isDeleted()) {
@@ -368,7 +360,7 @@ abstract class AbstractTripleStoreResource
             }
             if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
                 throw new InvalidPredicateException(
-                    'The field "' . $propertyUri . '" from fields list is not recognised.'
+                'The field "' . $propertyUri . '" from fields list is not recognised.'
                 );
             }
         }
@@ -387,11 +379,7 @@ abstract class AbstractTripleStoreResource
     {
         // the last parameter switches check if the referred within the resource objects do exists in the triple store
         $validator = new ResourceValidator(
-            $this->manager,
-            $tenant,
-            $set,
-            $isForUpdate,
-            true
+            $this->manager, $tenant, $set, $isForUpdate, true
         );
         if (!$validator->validate($resource)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
@@ -415,8 +403,7 @@ abstract class AbstractTripleStoreResource
 
         if (!$resource->isBlankNode() && $this->manager->askForUri((string) $resource->getUri())) {
             throw new InvalidArgumentException(
-                'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.',
-                400
+            'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
             );
         }
 
@@ -429,22 +416,19 @@ abstract class AbstractTripleStoreResource
         }
 
         $resource->ensureMetadata(
-            $tenant,
-            $set,
-            $user->getFoafPerson(),
-            $this->personManager,
-            $this->manager->getLabelManager()
+            $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager()
         );
 
-        $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+        $authorisation = $this->manager->getAuthorisationObject();
+         if (!isEmpty($authorisation)) {
+            $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+        }
 
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
 
         if ($autoGenerateUri) {
             $resource->selfGenerateUri(
-                $tenant,
-                $set,
-                $this->manager
+                $tenant, $set, $this->manager
             );
         }
 
@@ -469,7 +453,7 @@ abstract class AbstractTripleStoreResource
 
         // is a tenant, collection or api key set in the XML?
 
-        if ($this->init['custom']['backward_compatible']) {
+        if ($this->init['options']['backward_compatible']) {
             $set = 'collection';
         } else {
             $set = 'set';
@@ -508,9 +492,8 @@ abstract class AbstractTripleStoreResource
 
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
-                "Expected exactly one resource of type $rdfType, got {$resources->count()}, "
-                . "check if you set rdf:type in the request body, " . $resources->count(),
-                412
+            "Expected exactly one resource of type $rdfType, got {$resources->count()}, "
+            . "check if you set rdf:type in the request body, " . $resources->count(), 412
             );
         }
 
@@ -520,7 +503,7 @@ abstract class AbstractTripleStoreResource
         if (!isset($resource) || !$resource instanceof $className) {
             $actualClassName = get_class($resource);
             throw new InvalidArgumentException("XML Could not be converted to $className, "
-                . "it is an instance of $actualClassName", 400);
+            . "it is an instance of $actualClassName", 400);
         }
 
         if ($this->manager->getResourceType() !== \OpenSkos2\Tenant::TYPE) {
@@ -564,9 +547,8 @@ abstract class AbstractTripleStoreResource
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
             throw new InvalidArgumentException(
-                'Recieved RDF-XML is not valid: '
-                . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>',
-                400
+            'Recieved RDF-XML is not valid: '
+            . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 400
             );
         }
 
@@ -581,7 +563,7 @@ abstract class AbstractTripleStoreResource
      */
     protected function getSet($params, $tenant)
     {
-        if ($this->init['custom']['backward_compatible']) {
+        if ($this->init['options']['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -595,8 +577,7 @@ abstract class AbstractTripleStoreResource
         $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
         if (!isset($set)) {
             throw new InvalidArgumentException(
-                "No such $setName `$code`",
-                404
+            "No such $setName `$code`", 404
             );
         }
         return $set;
@@ -639,25 +620,22 @@ abstract class AbstractTripleStoreResource
         $autoGenerateIdentifiers = false;
         if (!empty($params['autoGenerateIdentifiers'])) {
             $autoGenerateIdentifiers = filter_var(
-                $params['autoGenerateIdentifiers'],
-                FILTER_VALIDATE_BOOLEAN
+                $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
             );
         }
 
         if ($autoGenerateIdentifiers) {
             if (!$resource->isBlankNode()) {
                 throw new InvalidArgumentException(
-                    'Parameter autoGenerateIdentifiers is set to true, but the '
-                    . 'xml already contains uri (rdf:about).',
-                    400
+                'Parameter autoGenerateIdentifiers is set to true, but the '
+                . 'xml already contains uri (rdf:about).', 400
                 );
             }
         } else {
             // Is uri missing
             if ($resource->isBlankNode()) {
                 throw new InvalidArgumentException(
-                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
-                    400
+                'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
                 );
             }
         }
@@ -694,7 +672,7 @@ abstract class AbstractTripleStoreResource
     protected function getRequiredParameters()
     {
 
-        if ($this->init['custom']['backward_compatible']) {
+        if ($this->init['options']['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -714,5 +692,5 @@ abstract class AbstractTripleStoreResource
         $index = $this->manager->fetchNameUri();
         return $index;
     }
-    
+   
 }

@@ -587,7 +587,7 @@ class Repository implements InterfaceRepository
             return $identifier;
         }
         $cache = $this->conceptManager->getInitArray();
-        $custom = $cache['custom'];
+        $custom = $cache['options'];
         if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
             throw new BadArgumentException('Invalid identifier ' . $identifier);
         }

@@ -34,10 +34,9 @@ class RelationType extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->authorisation = new \OpenSkos2\Authorisation($manager);
-        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->init = $this->manager->getInitArray();
+        $this->deletion_integrity_check = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
-        $this->init = $this->manager->getInitArray();;
     }
 
    
