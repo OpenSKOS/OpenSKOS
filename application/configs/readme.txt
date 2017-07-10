@@ -2,12 +2,12 @@ Application ini file must contain a section "customize application" which is use
 ensure flexibility for setting up and managing a particular openskos instance
 and support legacy. Here these parameters are explained one by one.
 
--- custom.backward_compatible --- 
+## custom.backward_compatible ##
 
 Must be set to "true" to run an instance supporting openskos-1 API:
 custom.backward_compatible = true
 
--- custom.default_authorisation ---
+## custom.default_authorisation ##
 
 Must be set to "true" if POST and PUT actions are delegated to the editor, 
 and POST and PUT actions for API give 501:
@@ -18,7 +18,7 @@ When set to "false" then the instance administrator must provide its
 institution authorisation procedures in OpenSkos2/Library/Custom/Authorisation
 class which must implement shared Authorisation interface.
 
--- custom.default_deletion ---
+## custom.default_deletion ##
 
 Standard setting is 
 
@@ -33,7 +33,7 @@ When set to "false" then the instance administrator should provide its
 institution deletion procedures in OpenSkos2/Library/Custom/Deletion
 class which must implement shared Deletion interface.
 
--- custom.default_relationtypes ---
+## custom.default_relationtypes ##
 
 Standard setting is 
 
@@ -46,7 +46,7 @@ If set to "false" then the instance administrator must provide
 OpenSkos2/Library/Custom/RelationTypes implementing the corresponding shared 
 interface.  
 
--- custom.default_urigenerate --
+## custom.default_urigenerate ##
 
 Standard setting is 
 
@@ -58,7 +58,7 @@ interface. For instance, for meertens the customized uri generation involves
 call to an EPIC server. The EPIC settings are added to meertens application.ini 
 as well.
 
--- custom.relations_strict_reference_check --
+## custom.relations_strict_reference_check ##
 
 Standard setting is:
 
@@ -69,7 +69,7 @@ It means that during validation a resource, if it refers via one of these
 properties to a resource which is not in "this" triple store, it will be 
 declared invalid, and error will be thrown.
 
--- custom.relations_soft_reference_check --
+## custom.relations_soft_reference_check ##
 
 Standard setting is 
 
@@ -80,21 +80,21 @@ It means that during validation a resource, if it refers via one of these
 properties to a resource which is not in "this" triple store, it will NOT be 
 declared invalid, but the waring will be generated.
 
--- custom.allowed_concepts_for_other_tenant_schemes --
+## custom.allowed_concepts_for_other_tenant_schemes ##
 
 Standard setting is 
 custom.allowed_concepts_for_other_tenant_schemes = true
 
 The name speaks for itself.
 
--- number of numeric settings, the names speak for themselves --
+## number of numeric settings, the names speak for themselves ##
 
 custom.limit = 30;
 custom.maximal_rows = 500
 custom.maximal_time_limit = 120
 custom.normal_time_limit = 30
 
--- custom.backend --
+## custom.backend ##
 
 Example 
 
@@ -103,7 +103,8 @@ custom.backend = clavas
 Used when one needs to run several openskos instances under one apache, to 
 distinguish them. May be used in custom uri generation. 
 
--- custom.uuid_regexp_prefixes --
+
+## custom.uuid_regexp_prefixes ##
 
 When pure uuid is used, without prefices, must be an empty string:
 
