@@ -151,7 +151,7 @@ abstract class AbstractTripleStoreResource
                 $index,
                 count($index),
                 1,
-                $this->init["custom']['maximal_rows"]
+                $this->init['custom']['maximal_rows']
             );
 
             switch ($params['context']) {
