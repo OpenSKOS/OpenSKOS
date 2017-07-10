@@ -28,7 +28,6 @@ use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Custom\UriGeneration;
 use OpenSkos2\PersonManager;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\SkosXl\LabelManager;
@@ -284,7 +283,7 @@ class Concept extends Resource
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $conceptManager)
     {
         $customGen = $conceptManager->getUriGenerateObject();
-        if (!isEmpty($customGen)) {
+        if (!empty($customGen)) {
             return $customGen->generateUri($conceptManager, $this);
         }
 

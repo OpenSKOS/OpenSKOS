@@ -803,7 +803,7 @@ class ResourceManager
 // RELATIONS
     public function getCustomRelationTypes()
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
             return $this->relationTypesObject->getRelationTypes();
@@ -812,7 +812,7 @@ class ResourceManager
 
     public function getCustomInverses()
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
             return $this->relationTypesObject->getInverses();
@@ -821,7 +821,7 @@ class ResourceManager
 
     public function getCustomTransitives()
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
             return $this->relationTypesObject->getTransitives();
@@ -830,7 +830,7 @@ class ResourceManager
 
     public function setCustomRelationTypes($relationtypes)
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
             $this->relationTypesObject->setRelationTypes($relationtypes);
@@ -839,7 +839,7 @@ class ResourceManager
 
     public function setCustomInverses($inverses)
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
             $this->relationTypesObject->setInverses($inverses);
@@ -848,7 +848,7 @@ class ResourceManager
 
     public function setCustomTransitives($transitives)
     {
-        if (isEmpty($this->relationTypesObject)) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
             $this->relationTypesObject->setTransitives($transitives);
@@ -1023,10 +1023,11 @@ class ResourceManager
         return $config[$env];
     }
 
-    private function makeOptionObject($init, $typeoption)
+    private function makeOptionObject($typeoption)
     {
-        $className = $init['options'][$typeoption];
-        if (isEmpty($className)) {
+        
+        $className = $this->init['options'][$typeoption];
+        if (empty($className)) {
             return null;
         } else {
             $class = new ReflectionClass($className);

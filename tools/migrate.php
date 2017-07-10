@@ -18,7 +18,7 @@
  */
 /**
  * Script to migrate the data from SOLR to Jena run as following:
- * Run the file as : php migrate.php --endpoint=http://<host>:<port>/solr/<core>/select --tenant=<tenant_code> --db-hostname=<db-host> --db-database=<> --db-username=<> --purge=1 --defaultSet="isocat"
+ * Run the file as : php migrate.php --endpoint=http://localhost:8984/solr/collection1/select --tenant=meertens --db-hostname=localhost --db-database=geheim  --db-username=geheim --db-password=geheim --purge=1 --defaultSet="isocat"
  */
 require_once dirname(__FILE__) . '/autoload.inc.php';
 

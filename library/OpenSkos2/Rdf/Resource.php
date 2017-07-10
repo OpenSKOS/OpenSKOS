@@ -681,7 +681,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $init = $manager->getInitArray();
         $customGen = $manager->getUriGenerateObject();
-        if (!isEmpty($customGen)) {
+        if (!empty($customGen)) {
             return $customGen->generateUri($manager, $this);
         }
 

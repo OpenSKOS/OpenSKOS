@@ -114,7 +114,7 @@ class Concept extends AbstractTripleStoreResource
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
-        set_time_limit($this->init["custom"]["maximal_time_limit"]);
+        set_time_limit($this->init["options"]["maximal_time_limit"]);
 
         $params = $request->getQueryParams();
 

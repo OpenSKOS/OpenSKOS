@@ -225,7 +225,7 @@ abstract class AbstractTripleStoreResource
             $user = $this->getUserFromParams($params);
 
             $authorisation = $this->manager->getAuthorisationObject();
-            if (!isEmpty($authorisation)) {
+            if (!empty($authorisation)) {
                 $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
             }
 
@@ -283,7 +283,7 @@ abstract class AbstractTripleStoreResource
             $set = $this->getSet($params, $tenant);
 
             $authorisation = $this->manager->getAuthorisationObject();
-            if (!isEmpty($authorisation)) {
+            if (!empty($authorisation)) {
                 $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
             }
 
@@ -420,7 +420,7 @@ abstract class AbstractTripleStoreResource
         );
 
         $authorisation = $this->manager->getAuthorisationObject();
-         if (!isEmpty($authorisation)) {
+         if (!empty($authorisation)) {
             $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
         }
 
