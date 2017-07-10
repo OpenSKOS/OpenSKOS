@@ -33,7 +33,7 @@ $this->headTitle ('Institutions')?>
 	<?php foreach ($list as $key=>$value):
             ?>
 	<li>
-		<a href="<?php echo $this->url(array('controller'=>'institution', 'id' => $value), 'rest')?>.html">
+		<a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $value), 'rest')?>.html">
 			<strong><?php echo $key?></strong>
 		</a>
 	</li>

@@ -47,14 +47,14 @@ $this->headTitle($name);
                 $setinfo = $setManager->fetchSetTitleAndCodeByUri($setUri);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
             <?php endif ?>
             <?php
             if ($key === "tenant"):
                 $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
             <?php endif ?>
     <?php if ($key === "description"): ?>
                 <dt><?php echo $key ?>:</dt>

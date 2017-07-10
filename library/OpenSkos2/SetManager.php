@@ -118,13 +118,12 @@ class SetManager extends ResourceManager
     }
     
     
-    public function listConceptsForSet($code)
+    public function listConceptsForSet($uri)
     {
-        $query = "SELECT ?name ?searchid WHERE {?seturi  <" . OpenSkos::CODE . "> '$code' ."
-        . " ?seturi  <" . Rdf::TYPE . "> <".Set::TYPE."> . "
-        . "?concepturi  <" . OpenSkos::CODE . "> '$code' . "
+        $query = "SELECT ?name ?searchid WHERE {"
+        . "?concepturi  <" . OpenSkos::SET . ">  <$uri> . "
         . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
-        . "?concepturi  <" . OpenSkos::UUID . "> ?serachid .}";
+        . "?concepturi  <" . OpenSkos::UUID . "> ?searchid .}";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
