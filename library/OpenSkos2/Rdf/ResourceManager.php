@@ -894,7 +894,15 @@ class ResourceManager
             );
         }
 // overkill??
-        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
+        if (empty($this->customRelationTypes)) {
+            $inverses = Skos::getInverseRelationsMap();
+        } else {
+            $inverses = array_merge(
+                Skos::getInverseRelationsMap(),
+                $this->customRelationTypes->getInverses()
+            );
+        }
+        
         if (array_key_exists($relationUri, $inverses)) {
             $inverseRelUri = $inverses[$relationUri];
             $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
