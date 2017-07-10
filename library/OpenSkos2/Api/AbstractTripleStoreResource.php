@@ -142,7 +142,10 @@ abstract class AbstractTripleStoreResource
 
 
             $result = new ResourceResultSet(
-                $index, count($index), 1, $this->init['options']['maximal_rows']
+                $index,
+                count($index),
+                1,
+                $this->init['options']['maximal_rows']
             );
 
             switch ($params['context']) {
@@ -235,7 +238,12 @@ abstract class AbstractTripleStoreResource
 
 
             $resource->ensureMetadata(
-                $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager(), $existingResource
+                $tenant,
+                $set,
+                $user->getFoafPerson(),
+                $this->personManager,
+                $this->manager->getLabelManager(),
+                $existingResource
             );
 
             $this->validate($resource, $tenant, $set, true);
@@ -360,7 +368,7 @@ abstract class AbstractTripleStoreResource
             }
             if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
                 throw new InvalidPredicateException(
-                'The field "' . $propertyUri . '" from fields list is not recognised.'
+                    'The field "' . $propertyUri . '" from fields list is not recognised.'
                 );
             }
         }
@@ -379,7 +387,11 @@ abstract class AbstractTripleStoreResource
     {
         // the last parameter switches check if the referred within the resource objects do exists in the triple store
         $validator = new ResourceValidator(
-            $this->manager, $tenant, $set, $isForUpdate, true
+            $this->manager,
+            $tenant,
+            $set,
+            $isForUpdate,
+            true
         );
         if (!$validator->validate($resource)) {
             throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
@@ -403,7 +415,8 @@ abstract class AbstractTripleStoreResource
 
         if (!$resource->isBlankNode() && $this->manager->askForUri((string) $resource->getUri())) {
             throw new InvalidArgumentException(
-            'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.', 400
+                'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.',
+                400
             );
         }
 
@@ -416,11 +429,15 @@ abstract class AbstractTripleStoreResource
         }
 
         $resource->ensureMetadata(
-            $tenant, $set, $user->getFoafPerson(), $this->personManager, $this->manager->getLabelManager()
+            $tenant,
+            $set,
+            $user->getFoafPerson(),
+            $this->personManager,
+            $this->manager->getLabelManager()
         );
 
         $authorisation = $this->manager->getAuthorisationObject();
-         if (!empty($authorisation)) {
+        if (!empty($authorisation)) {
             $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
         }
 
@@ -428,7 +445,9 @@ abstract class AbstractTripleStoreResource
 
         if ($autoGenerateUri) {
             $resource->selfGenerateUri(
-                $tenant, $set, $this->manager
+                $tenant,
+                $set,
+                $this->manager
             );
         }
 
@@ -492,8 +511,9 @@ abstract class AbstractTripleStoreResource
 
         if ($resources->count() != 1) {
             throw new InvalidArgumentException(
-            "Expected exactly one resource of type $rdfType, got {$resources->count()}, "
-            . "check if you set rdf:type in the request body, " . $resources->count(), 412
+                "Expected exactly one resource of type $rdfType, got {$resources->count()}, "
+                . "check if you set rdf:type in the request body, " . $resources->count(),
+                412
             );
         }
 
@@ -547,8 +567,9 @@ abstract class AbstractTripleStoreResource
         //do some basic tests
         if ($doc->documentElement->nodeName != 'rdf:RDF') {
             throw new InvalidArgumentException(
-            'Recieved RDF-XML is not valid: '
-            . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>', 400
+                'Recieved RDF-XML is not valid: '
+                . 'expected <rdf:RDF/> rootnode, got <' . $doc->documentElement->nodeName . '/>',
+                400
             );
         }
 
@@ -577,7 +598,8 @@ abstract class AbstractTripleStoreResource
         $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
         if (!isset($set)) {
             throw new InvalidArgumentException(
-            "No such $setName `$code`", 404
+                "No such $setName `$code`",
+                404
             );
         }
         return $set;
@@ -620,22 +642,25 @@ abstract class AbstractTripleStoreResource
         $autoGenerateIdentifiers = false;
         if (!empty($params['autoGenerateIdentifiers'])) {
             $autoGenerateIdentifiers = filter_var(
-                $params['autoGenerateIdentifiers'], FILTER_VALIDATE_BOOLEAN
+                $params['autoGenerateIdentifiers'],
+                FILTER_VALIDATE_BOOLEAN
             );
         }
 
         if ($autoGenerateIdentifiers) {
             if (!$resource->isBlankNode()) {
                 throw new InvalidArgumentException(
-                'Parameter autoGenerateIdentifiers is set to true, but the '
-                . 'xml already contains uri (rdf:about).', 400
+                    'Parameter autoGenerateIdentifiers is set to true, but the '
+                    . 'xml already contains uri (rdf:about).',
+                    400
                 );
             }
         } else {
             // Is uri missing
             if ($resource->isBlankNode()) {
                 throw new InvalidArgumentException(
-                'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.', 400
+                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
+                    400
                 );
             }
         }
@@ -692,5 +717,4 @@ abstract class AbstractTripleStoreResource
         $index = $this->manager->fetchNameUri();
         return $index;
     }
-   
 }

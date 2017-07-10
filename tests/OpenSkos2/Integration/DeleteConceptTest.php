@@ -76,7 +76,7 @@ class DeleteConceptTest extends AbstractTest
 
     public function testDeleteCandidateByGuest()
     {
-        if (!self::$init["custom.default_authorisation"]) {
+        if (!empty(self::$init["options.authorisation"])) {
             print "\n deleting concept with candidate status by guest...\n";
             $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
             $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));
@@ -110,7 +110,7 @@ class DeleteConceptTest extends AbstractTest
         print "\n deleting concept with approved status by a guest ...";
         self::update(self::$xml, API_KEY_EDITOR, 'concept'); // updating will make the status "approved"
         $response = self::delete(self::$about, API_KEY_GUEST, 'concept');
-        if (self::$init["custom.default_authorisation"]) {
+        if (empty(self::$init["options.authorisation"])) {
             $this->AssertEquals(202, $response->getStatus(), $response->getMessage());
         } else {
             $this->AssertEquals(500, $response->getStatus(), $response->getHeader("X-Error-Msg"));

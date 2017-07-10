@@ -47,7 +47,7 @@ class GetInstitutionTest extends AbstractTest
     <openskos:code>test</openskos:code>
   </rdf:Description>
 </rdf:RDF>';
-        $response = self::create($xml, API_KEY_ADMIN, 'institution', true);
+        $response = self::create($xml, API_KEY_ADMIN, 'institutions', true);
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -58,56 +58,58 @@ class GetInstitutionTest extends AbstractTest
     // delete all created resources
     public static function tearDownAfterClass()
     {
-        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institution');
+        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institutions');
     }
 
     
     public function testAllInstitutions()
     {
-        $this->allResources('institution');
+        $this->allResources('institutions');
     }
 
+    
     public function testAllInstitutionsJson()
     {
-        $this->allResourcesJson('institution');
+        $this->allResourcesJson('institutions');
     }
 
     
     public function testAllInstitutionsJsonP()
     {
-        $this->allResourcesJsonP('institution');
+        $this->allResourcesJsonP('institutions');
     }
 
     public function testAllInstitutionsRDFXML()
     {
-        $this->allResourcesRDFXML('institution');
+        $this->allResourcesRDFXML('institutions');
     }
 
+    
     public function testAllInstitutionsHTML()
     {
-        $this->allResourcesHTML('institution');
+        $this->allResourcesHTML('institutions');
     }
 
     public function testInstitution()
     {
-        $this->resource('institution', 'test');
+        $this->resource('institutions', 'test');
     }
 
     public function testInstitutionJson()
     {
-        $this->resourceJson('institution', 'test');
-        $this->resourceJson('institution', 'example');
+        $this->resourceJson('institutions', 'test');
+        $this->resourceJson('institutions', 'example');
     }
 
     public function testInstitutionJsonP()
     {
-        $this->resourceJsonP('institution', 'test');
-        $this->resourceJsonP('institution', 'example');
+        $this->resourceJsonP('institutions', 'test');
+        $this->resourceJsonP('institutions', 'example');
     }
 
     public function testInstitutionHTML()
     {
-        $this->resourceHTML('institution', 'test');
+        $this->resourceHTML('institutions', 'test');
     }
 
     ////////////////////////////////////
@@ -115,7 +117,7 @@ class GetInstitutionTest extends AbstractTest
     {
         switch ($institution["code"]) {
             case "test": {
-                    if (self::$init["custom.backward_compatible"]) {
+                    if (self::$init["options.backward_compatible"]) {
                         $this->assertEquals("info@test.nl", $institution["email"]);
                         $this->assertEquals("test-tenant", $institution["name"]);
                     } else {
@@ -125,7 +127,7 @@ class GetInstitutionTest extends AbstractTest
                     break;
                 }
             case "example": {
-                    if (self::$init["custom.backward_compatible"]) {
+                    if (self::$init["options.backward_compatible"]) {
                         if ($singleResourceCheck) {
                             $this->assertEquals("1", count($institution["collections"]));
                         }

@@ -14,5 +14,5 @@ class ConceptScheme extends AbstractTripleStoreResource
         $this->init = $this->manager->getInitArray();
         $this->deletion_integrity_check = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
-        }
+    }
 }

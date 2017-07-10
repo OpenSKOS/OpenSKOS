@@ -35,12 +35,18 @@ class BackwardCompatibility
     
     private function backwardCompatibilityMapTenant($newStyleBody)
     {
+        if (empty($newStyleBody["enableSkosXl"])) {
+            $enableSkosXl = false;
+        } else {
+            $enableSkosXl = $newStyleBody["enableSkosXl"];
+        }
+        
         $oldStyleBodyArray = [
             "code" => ($newStyleBody["code"]),
             "name" => ($newStyleBody["vcard_org"][0]["vcard_orgname"]),
             "disableSearchInOtherTenants" => ($newStyleBody["disableSearchInOtherTenants"]),
             "enableStatussesSystem" => ($newStyleBody["enableStatussesSystem"]),
-            "enableSkosXl"=> ($newStyleBody["enableSkosXl"]),
+            "enableSkosXl"=> ($enableSkosXl),
         ];
         
         if (isset($newStyleBody["vcard_org"][0]["vcard_orgunit"])) {

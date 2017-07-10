@@ -44,7 +44,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         <openskos:webpage rdf:resource="http://ergens"/>
     </rdf:Description>
   </rdf:RDF>';
-        $response = self::create($xml, API_KEY_ADMIN, 'set', true);
+        $response = self::create($xml, API_KEY_ADMIN, 'collections', true);
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -57,52 +57,52 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     // delete all created resources
     public static function tearDownAfterClass()
     {
-        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'set');
+        self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'collections');
     }
 
     public function testAllSets()
     {
-        $this->allResources('set');
+        $this->allResources('collections');
     }
 
     public function testAllSetsJson()
     {
-        $this->allResourcesJson('set');
+        $this->allResourcesJson('collections');
     }
 
     public function testAllSetsJsonP()
     {
-        $this->allResourcesJsonP('set');
+        $this->allResourcesJsonP('collections');
     }
 
     public function testAllISetsRDFXML()
     {
-        $this->allResourcesRDFXML('set');
+        $this->allResourcesRDFXML('collections');
     }
 
     public function testAllSetsHTML()
     {
-        $this->allResourcesHTML('set');
+        $this->allResourcesHTML('collections');
     }
 
     public function testSet()
     {
-        $this->resource('set', 'test-set');
+        $this->resource('collections', 'test-set');
     }
 
     public function testSetJson()
     {
-        $this->resourceJson('set', 'test-set');
+        $this->resourceJson('collections', 'test-set');
     }
 
     public function testSetJsonP()
     {
-        $this->resourceJsonP('set', 'test-set');
+        $this->resourceJsonP('collections', 'test-set');
     }
 
     public function testSetHTML()
     {
-        $this->resourceHTML('set', 'test-set');
+        $this->resourceHTML('collections', 'test-set');
     }
 
     ////////////////////////////////////
@@ -175,27 +175,10 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     protected function assertionsHTMLResource(\Zend_Dom_Query $dom, $i)
     {
         $header2 = $dom->query('h2');
-        $items = $dom->query('dl > dt');
-        $values = $dom->query('dl > dd');
         $formats = $dom->query('ul > li > a');
 
         $title = $this->getByIndex($header2, $i)->nodeValue;
         $this->AssertEquals('Test Set', $title);
-
-        $i = 0;
-        $j = 0;
-        foreach ($items as $item) {
-            if ($item->nodeValue === "code:") {
-                $this->AssertEquals("test-set", $this->getbyIndex($values, $j)->nodeValue);
-                $i++;
-            }
-            if ($item->nodeValue === "type:") {
-                $this->AssertEquals(\OpenSkos2\Set::TYPE, $this->getbyIndex($values, $j)->nodeValue);
-                $i++;
-            }
-            $j++;
-        }
-        $this->AssertEquals(2, $i);
         $this->AssertEquals(3, count($formats));
     }
 

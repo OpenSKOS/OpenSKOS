@@ -86,9 +86,11 @@ class Concept extends AbstractTripleStoreResource
      * @param PersonManager $personManager
      */
     public function __construct(
-    ConceptManager $manager, Autocomplete $searchAutocomplete, PersonManager $personManager
-    )
-    {
+        ConceptManager $manager,
+        Autocomplete $searchAutocomplete,
+        PersonManager $personManager
+    ) {
+    
 
 
         $this->manager = $manager;
@@ -227,8 +229,11 @@ class Concept extends AbstractTripleStoreResource
                 break;
             case 'jsonp':
                 $response = (new JsonpResponse(
-                    $result, $params['callback'], $propertiesList, $excludePropertiesList
-                    ))->getResponse();
+                    $result,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
                 $response = (new RdfResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
@@ -278,8 +283,11 @@ class Concept extends AbstractTripleStoreResource
                 break;
             case 'jsonp':
                 $response = (new DetailJsonpResponse(
-                    $concept, $params['callback'], $propertiesList, $excludePropertiesList
-                    ))->getResponse();
+                    $concept,
+                    $params['callback'],
+                    $propertiesList,
+                    $excludePropertiesList
+                ))->getResponse();
                 break;
             case 'rdf':
                 $response = (new DetailRdfResponse($concept, $propertiesList, $excludePropertiesList))->getResponse();
@@ -349,11 +357,13 @@ class Concept extends AbstractTripleStoreResource
             } else {
                 if ($tenant === null) {
                     throw new \Zend_Controller_Exception(
-                    'SKOS-XL labels are requested, but tenant is not defined', 501
+                        'SKOS-XL labels are requested, but tenant is not defined',
+                        501
                     );
                 } else {
                     throw new \Zend_Controller_Exception(
-                    'SKOS-XL labels are requested, but only simple labels are enabled for tenant', 501
+                        'SKOS-XL labels are requested, but only simple labels are enabled for tenant',
+                        501
                     );
                 }
             }
@@ -371,15 +381,17 @@ class Concept extends AbstractTripleStoreResource
         if ($tenant->getEnableSkosXl()) {
             if ($concept->hasSimpleLabels()) {
                 throw new InvalidArgumentException(
-                'The concept contains simple labels. '
-                . 'But tenant "' . $tenant->getCode() . '" is configured to work with xl labels.', 400
+                    'The concept contains simple labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with xl labels.',
+                    400
                 );
             }
         } else {
             if ($concept->hasXlLabels()) {
                 throw new InvalidArgumentException(
-                'The concept contains xl labels. '
-                . 'But tenant "' . $tenant->getCode() . '" is configured to work with simple labels.', 400
+                    'The concept contains xl labels. '
+                    . 'But tenant "' . $tenant->getCode() . '" is configured to work with simple labels.',
+                    400
                 );
             }
         }
@@ -472,11 +484,17 @@ class Concept extends AbstractTripleStoreResource
 
         $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
         $this->authorisation->resourceEditAllowed(
-            $user, $tenant, $set, $concept
+            $user,
+            $tenant,
+            $set,
+            $concept
         ); // throws an exception if not allowed
         $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
         $this->authorisation->resourceEditAllowed(
-            $user, $tenant, $set, $relatedConcept
+            $user,
+            $tenant,
+            $set,
+            $relatedConcept
         ); // throws an exception if not allowed
 
         return $body;
@@ -529,5 +547,4 @@ class Concept extends AbstractTripleStoreResource
     {
         return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
-
 }

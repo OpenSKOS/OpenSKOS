@@ -20,7 +20,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey)
             ->setParameterGet('autoGenerateIdentifiers', $autoGenerateIdentifiers);
-        if (self::$init["custom.backward_compatible"]) {
+        if (self::$init["options.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -38,7 +38,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setRawData($xml)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (self::$init["custom.backward_compatible"]) {
+        if (self::$init["options.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);
@@ -72,7 +72,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ->setParameterGet('id', $id)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', $apikey);
-        if (self::$init["custom.backward_compatible"]) {
+        if (self::$init["options.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

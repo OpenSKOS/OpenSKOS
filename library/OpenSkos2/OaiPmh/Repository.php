@@ -251,10 +251,8 @@ class Repository implements InterfaceRepository
             foreach ($rdfSetURIs as $setURI) {
                 $rdfSetUri = $setURI->getUri();
                 $rdfSet = $this->rdfSetManager->fetchByUri($rdfSetUri);
-                $allowedOAILit=$rdfSet->
-                    getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
-                $allowedOAI = $allowedOAILit->getValue();
-                if ($allowedOAI === "false") {
+                $allowedOAI=$rdfSet->getAllowOai();
+                if (!$allowedOAI) {
                     throw new BadArgumentException("This concept belongs to the set "
                        . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
                 }

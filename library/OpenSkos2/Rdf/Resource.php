@@ -434,8 +434,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (count($values) > 1) {
             throw new OpenSkosException(
-            'Multiple values found for property "' . $property . '" while a single one was requested.'
-            . ' Values ' . implode(', ', $values)
+                'Multiple values found for property "' . $property . '" while a single one was requested.'
+                . ' Values ' . implode(', ', $values)
             );
         }
 
@@ -502,9 +502,15 @@ class Resource extends Uri implements ResourceIdentifier
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-    \OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set = null, \OpenSkos2\Person $person = null, \OpenSkos2\PersonManager $personManager = null, \OpenSkos2\SkosXl\LabelManager $labelManager = null, $existingConcept = null, $forceCreationOfXl = false
-    )
-    {
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
 
 
         $nowLiteral = function () {
@@ -690,7 +696,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if (!$this->isBlankNode()) {
             throw new UriGenerationException(
-            'The resource already has an uri. Can not generate new one.'
+                'The resource already has an uri. Can not generate new one.'
             );
         }
 
@@ -700,7 +706,7 @@ class Resource extends Uri implements ResourceIdentifier
 
         if ($manager->askForUri($uri, true)) {
             throw new UriGenerationException(
-            'The generated uri "' . $uri . '" is already in use.'
+                'The generated uri "' . $uri . '" is already in use.'
             );
         }
 
@@ -713,11 +719,29 @@ class Resource extends Uri implements ResourceIdentifier
 
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri(
-    \OpenSkos2\Tenant $tenant = null, \OpenSkos2\Set $set = null, $uuid = null, $notation = null, $init = null
-    )
-    {
+        \OpenSkos2\Tenant $tenant = null,
+        \OpenSkos2\Set $set = null,
+        $uuid = null,
+        $notation = null,
+        $init = null
+    ) {
+    
 
         return $set->getUri() . "/" . $uuid;
     }
 
+    protected function toBool($val)
+    {
+        if (empty($val)) {
+            return false;
+        }
+        $val = $val->getValue();
+        if (strtolower($val) === "true" || $val==="1") {
+            return true;
+        }
+        if (strtolower($val) === "false" || $val==="0") {
+            return false;
+        }
+        throw new \Exception("Wrong value of a boolean element in the resource {$this->uri}");
+    }
 }

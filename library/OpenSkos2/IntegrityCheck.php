@@ -9,12 +9,12 @@ class IntegrityCheck
 
     public function __construct($manager)
     {
-       $this->init = $manager->getInitArray();
+        $this->init = $manager->getInitArray();
     }
 
     public function canBeDeleted($uri)
     {
-        $integrity_check_on  = $this->init["options"]["delete"]["integrity_check"]; 
+        $integrity_check_on  = $this->init["options"]["delete"]["integrity_check"];
         if ($integrity_check_on === "true") {
             if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {
                 $query = 'SELECT (COUNT(?s) AS ?COUNT) WHERE {?s ?p <' . $uri . '> . } LIMIT 1';
@@ -28,5 +28,4 @@ class IntegrityCheck
             return true;
         }
     }
-
 }
