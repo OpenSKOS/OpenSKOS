@@ -717,4 +717,9 @@ abstract class AbstractTripleStoreResource
         $index = $this->manager->fetchNameUri();
         return $index;
     }
+    
+    public function getResourceManager() {
+        
+        return $this->manager;
+    }
 }

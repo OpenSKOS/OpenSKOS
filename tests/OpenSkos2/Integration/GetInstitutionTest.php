@@ -10,7 +10,7 @@ class GetInstitutionTest extends AbstractTest
     public static function setUpBeforeClass()
     {
         self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        
+
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();
         self::$client->setConfig(array(
@@ -48,6 +48,14 @@ class GetInstitutionTest extends AbstractTest
   </rdf:Description>
 </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'institutions', true);
+        if (empty(self::$init['options.authorisation'])) {
+            echo 'These tests must be run when an authorisation procedure is specified. '
+            . 'Now the authroisation is not specified, update application.ini.';
+            if ($response->getStatus() !== 501) {
+                echo 'Creation of institutions is not allowed when the authorisation is not specified. '
+                . 'There is something wrong because it is still created.';
+            }
+        }
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -61,54 +69,86 @@ class GetInstitutionTest extends AbstractTest
         self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'institutions');
     }
 
-    
     public function testAllInstitutions()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResources('institutions');
     }
 
-    
     public function testAllInstitutionsJson()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesJson('institutions');
     }
 
-    
     public function testAllInstitutionsJsonP()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesJsonP('institutions');
     }
 
     public function testAllInstitutionsRDFXML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+           echo self::$message;
+           return;
+        }
         $this->allResourcesRDFXML('institutions');
     }
 
-    
     public function testAllInstitutionsHTML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesHTML('institutions');
     }
 
     public function testInstitution()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resource('institutions', 'test');
     }
 
     public function testInstitutionJson()
     {
+        if (empty(self::$init['options.authorisation'])) {
+           echo self::$message;
+           return;
+        }
         $this->resourceJson('institutions', 'test');
         $this->resourceJson('institutions', 'example');
     }
 
     public function testInstitutionJsonP()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resourceJsonP('institutions', 'test');
         $this->resourceJsonP('institutions', 'example');
     }
 
     public function testInstitutionHTML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resourceHTML('institutions', 'test');
     }
 

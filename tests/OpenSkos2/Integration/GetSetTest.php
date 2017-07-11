@@ -10,7 +10,7 @@ class GetSetTest extends AbstractTest
     public static function setUpBeforeClass()
     {
         self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        
+
         self::$createdresourses = array();
 
         self::$client = new \Zend_Http_Client();
@@ -45,6 +45,14 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     </rdf:Description>
   </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'collections', true);
+        if (empty(self::$init['options.authorisation'])) {
+            echo 'These tests must be run when an authorisation procedure is specified. '
+            . 'Now the authroisation is not specified, update application.ini.';
+            if ($response->getStatus() !== 501) {
+                echo 'Creation of institutions is not allowed when the authorisation is not specified. '
+                . 'There is something wrong because it is still created.';
+            }
+        }
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -62,46 +70,82 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSets()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResources('collections');
     }
 
     public function testAllSetsJson()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesJson('collections');
     }
 
     public function testAllSetsJsonP()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesJsonP('collections');
     }
 
     public function testAllISetsRDFXML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesRDFXML('collections');
     }
 
     public function testAllSetsHTML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->allResourcesHTML('collections');
     }
 
     public function testSet()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resource('collections', 'test-set');
     }
 
     public function testSetJson()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resourceJson('collections', 'test-set');
     }
 
     public function testSetJsonP()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resourceJsonP('collections', 'test-set');
     }
 
     public function testSetHTML()
     {
+        if (empty(self::$init['options.authorisation'])) {
+            echo self::$message;
+            return;
+        }
         $this->resourceHTML('collections', 'test-set');
     }
 
@@ -193,4 +237,5 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $list = $dom->query('ul > li > a');
         $this->AssertEquals(2, count($list) - NUMBER_SETS);
     }
+
 }

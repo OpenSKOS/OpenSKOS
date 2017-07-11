@@ -9,6 +9,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     protected static $createdresourses;
     private static $resourceManager;
     protected static $init;
+    protected static $message = "\n These tests must be run when an authorisation procedure is specified. Now the authroisation is not specified, update application.ini.";
 
     protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers = false)
     {
@@ -359,5 +360,6 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
 
         return $response;
     }
+    
 
 }

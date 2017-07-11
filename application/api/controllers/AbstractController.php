@@ -60,24 +60,40 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $response = $api->create($request);
-        $this->emitResponse($response);
+        $authorisationOn = $this->isAuthorisationOn($api);
+        if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') { 
+            // OpenSkos legacy all API work for concepts withiut auth
+            $response = $api->create($request);
+            $this->emitResponse($response);
+        } else {
+            $this->_501('No authorisation method is pecified. POST');
+        }
     }
 
     public function putAction()
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $response = $api->update($request);
-        $this->emitResponse($response);
+        $authorisationOn = $this->isAuthorisationOn($api);
+        if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') {
+            $response = $api->update($request);
+            $this->emitResponse($response);
+        } else {
+            $this->_501('No authorisation method is pecified. PUT ');
+        }
     }
 
     public function deleteAction()
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $response = $api->delete($request);
-        $this->emitResponse($response);
+        $authorisationOn = $this->isAuthorisationOn($api);
+        if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') {
+            $response = $api->delete($request);
+            $this->emitResponse($response);
+        } else {
+            $this->_501('No authorisation method is pecified. DELETE ');
+        }
     }
 
     /**
@@ -197,6 +213,13 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $parts = RdfNamespace::splitUri($key, false);
         return $parts[1];
+    }
+
+    protected function isAuthorisationOn($api)
+    {
+        $manager = $api->getResourceManager();
+        $init = $manager->getInitArray();
+        return (!empty($init['options']['authorisation']));
     }
 
 }
