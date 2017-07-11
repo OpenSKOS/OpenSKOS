@@ -248,6 +248,8 @@ class Concept extends Resource
     {
         if ($existingConcept == null) {
             $oldStatus = null;
+        } else {
+           $oldStatus = $existingConcept->getStatus(); 
         }
 
         $nowLiteral = function () {
