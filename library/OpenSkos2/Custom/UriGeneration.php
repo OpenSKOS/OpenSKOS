@@ -11,7 +11,14 @@ use Rhumsaa\Uuid\Uuid;
 class UriGeneration implements \OpenSkos2\Interfaces\UriGeneration
 {
 
-    public function generateUri($manager, $resource)
+    private $manager;
+    
+    public function __construct($manager)
+    {
+        
+        $this->manager = $manager;
+    }
+    public function generateUri($resource)
     {
         if (EPICHandleProxy::enabled()) {
             $uuid = Uuid::uuid4();
@@ -30,7 +37,7 @@ class UriGeneration implements \OpenSkos2\Interfaces\UriGeneration
                     400
                 );
             }
-            if ($manager->askForUri($uri, true)) {
+            if ($this->manager->askForUri($uri, true)) {
                 throw new UriGenerationException(
                     'The generated uri "' . $uri . '" is already in use.'
                 );

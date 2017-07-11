@@ -229,7 +229,7 @@ abstract class AbstractTripleStoreResource
 
             $authorisation = $this->manager->getAuthorisationObject();
             if (!empty($authorisation)) {
-                $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+                $authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
             }
 
             if ($resource instanceof \OpenSkos2\Concept) {
@@ -292,7 +292,7 @@ abstract class AbstractTripleStoreResource
 
             $authorisation = $this->manager->getAuthorisationObject();
             if (!empty($authorisation)) {
-                $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+                $authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
             }
 
             $this->deletion_integrity_check->canBeDeleted($id);
@@ -438,7 +438,7 @@ abstract class AbstractTripleStoreResource
 
         $authorisation = $this->manager->getAuthorisationObject();
         if (!empty($authorisation)) {
-            $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+            $authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
         }
 
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);

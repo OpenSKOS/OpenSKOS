@@ -1044,8 +1044,8 @@ class ResourceManager
         if (empty($className)) {
             return null;
         } else {
-            $class = new ReflectionClass($className);
-            $instance = $class->newInstanceArgs($this);
+            $class = new \ReflectionClass($className);
+            $instance = $class->newInstanceArgs([$this]);
             return $instance;
         }
     }

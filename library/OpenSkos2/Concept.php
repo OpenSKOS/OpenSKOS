@@ -284,7 +284,7 @@ class Concept extends Resource
     {
         $customGen = $conceptManager->getUriGenerateObject();
         if (!empty($customGen)) {
-            return $customGen->generateUri($conceptManager, $this);
+            return $customGen->generateUri($this);
         }
 
         $identifierHelper = new Concept\IdentifierHelper($tenant, $conceptManager);
