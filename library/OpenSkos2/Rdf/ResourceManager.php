@@ -1025,7 +1025,7 @@ class ResourceManager
     {
         try {
             $config = \OpenSKOS_Application_BootstrapAccess::getOption('optional');
-        } catch (Zend_Exception $e) {
+        } catch (\Zend_Exception $e) {
             $config = array();
         }
         return $config;

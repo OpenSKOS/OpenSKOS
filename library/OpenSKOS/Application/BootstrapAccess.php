@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-/**
+/** 
  * Provides a shortcut for getting the application configuration options.
  * 
  * @author a_mitsev
@@ -40,7 +40,7 @@ class OpenSKOS_Application_BootstrapAccess
 	public static function getOption($key)
 	{
 		$bootstrap = self::getBootstrap();
-		
+		var_dump($bootstrap);
 		if ($bootstrap->hasOption($key)) {
 			return $bootstrap->getOption($key);
 		} else {
