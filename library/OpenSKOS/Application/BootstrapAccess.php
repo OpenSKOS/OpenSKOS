@@ -24,7 +24,6 @@
  * 
  * @author a_mitsev
  */
-namespace OpenSkos;
 
 class OpenSKOS_Application_BootstrapAccess
 {

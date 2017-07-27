@@ -1024,7 +1024,7 @@ class ResourceManager
     private function getCustomIni()
     {
         try {
-            $config = OpenSkos\OpenSKOS_Application_BootstrapAccess::getOption('optional');
+            $config = OpenSKOS_Application_BootstrapAccess::getOption('optional');
         } catch (Zend_Exception $e) {
             $config = array();
         }
