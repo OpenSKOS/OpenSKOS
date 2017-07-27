@@ -133,6 +133,9 @@ oAuth2.google.clientSecret = "@google-client-secret@"
 api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
+; optional
+; end optional
+
 [staging : production]
 
 [testing : production]
@@ -146,4 +149,4 @@ phpSettings.display_startup_errors = 1
 phpSettings.display_errors = 1
 resources.frontController.params.displayExceptions = 1
 
-[optional]
+
