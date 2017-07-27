@@ -1,7 +1,5 @@
 <?php
 
-use Doctrine\Common\Cache\ArrayCache;
-
 /**
  * OpenSKOS
  *
