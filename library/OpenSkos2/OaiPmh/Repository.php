@@ -544,7 +544,7 @@ class Repository implements InterfaceRepository
             throw new BadArgumentException('Invalid identifier ' . $identifier);
         }
 
-        $custom = $customInit['options'];
+        $custom = $customInit;
         if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
             throw new BadArgumentException('Invalid identifier ' . $identifier);
         }

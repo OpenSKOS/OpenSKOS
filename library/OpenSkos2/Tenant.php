@@ -137,13 +137,18 @@ class Tenant extends Resource
         $notation = null,
         $customInit = null
     ) {
+        
         if (empty($customInit)) {
-            return "http://$uuid"; // a proper setting of tenant uri requres non-emty custom.ini file
+            $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
+            $prefix=$apiOptions['baseUri'];
+            return $prefix."/".$uuid; 
         }
-        if (count($customIni)===0) {
-            return "http://$uuid"; // a proper setting of tenant uri requres non-emty custom.ini file
+        if (count($customInit)===0) {
+            $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
+            $prefix=$apiOptions['baseUri'];
+            return $prefix."/".$uuid;  
         }
-        $baseUri = $customIni['options']['uriprefix'];
+        $baseUri = $customInit['uriprefix'];
         return $baseUri . "" . $uuid;
     }
 }

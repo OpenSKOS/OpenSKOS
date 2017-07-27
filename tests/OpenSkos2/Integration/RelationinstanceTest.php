@@ -19,7 +19,7 @@ class RelationinstanceTest extends AbstractTest
     
     public function setUp()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/custom.ini');
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
         
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();
@@ -89,7 +89,7 @@ class RelationinstanceTest extends AbstractTest
             ->setRawData($body)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', API_KEY_EDITOR);
-        if (self::$init["options.backward_compatible"]) {
+        if (self::$init["backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

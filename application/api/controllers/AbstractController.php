@@ -222,7 +222,7 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         if (count($customInit)===0) {
             return false;
         }
-        return (!empty($customInit['options']['authorisation']));
+        return (!empty($customInit['authorisation']));
     }
 
 }

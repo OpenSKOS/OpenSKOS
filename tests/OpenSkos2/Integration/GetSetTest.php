@@ -9,7 +9,7 @@ class GetSetTest extends AbstractTest
 
     public static function setUpBeforeClass()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/custom.ini');
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
 
         self::$createdresourses = array();
 
@@ -45,7 +45,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     </rdf:Description>
   </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'collections', true);
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo 'These tests must be run when an authorisation procedure is specified. '
             . 'Now the authroisation is not specified, update application.ini.';
             if ($response->getStatus() !== 501) {
@@ -70,7 +70,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSets()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -79,7 +79,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSetsJson()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -88,7 +88,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSetsJsonP()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -97,7 +97,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllISetsRDFXML()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -106,7 +106,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSetsHTML()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -115,7 +115,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testSet()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -124,7 +124,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testSetJson()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -133,7 +133,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testSetJsonP()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }
@@ -142,7 +142,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testSetHTML()
     {
-        if (empty(self::$init['options.authorisation'])) {
+        if (empty(self::$init['authorisation'])) {
             echo self::$message;
             return;
         }

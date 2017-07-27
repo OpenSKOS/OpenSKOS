@@ -98,7 +98,7 @@ class Concept extends AbstractTripleStoreResource
         $this->searchAutocomplete = $searchAutocomplete;
         $this->customInit = $this->manager->getCustomInitArray();
         $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
-        $this->limit = $this->customInit['options']['limit'];
+        $this->limit = $this->customInit['limit'];
     }
 
     /**
@@ -116,7 +116,7 @@ class Concept extends AbstractTripleStoreResource
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
-        set_time_limit($this->customInit["options"]["maximal_time_limit"]);
+        set_time_limit($this->customInit["maximal_time_limit"]);
 
         $params = $request->getQueryParams();
 
@@ -150,7 +150,7 @@ class Concept extends AbstractTripleStoreResource
 
         // sets
         $setCodes = [];
-        if ($this->customInit['options']['backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';

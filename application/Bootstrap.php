@@ -92,32 +92,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         Zend_Controller_Front::getInstance()->setDispatcher($dispatcher);
     }
-
-    protected function _initCache()
-    {
-        $config = $this->getOption('resources');
-
-        $this->_cache = Zend_Cache::factory(
-                'Core', 'File', $config['cachemanager']['general']['frontend']['options'], $config['cachemanager']['general']['backend']['options']
-        );
-
-        Zend_Registry::set('cache', $this->_cache);
-    }
-
-    protected function _initCustomConfig()
-    {
-        if (!$customConfig = $this->_cache->load('custom_config')) {
-            if (file_exists(APPLICATION_PATH . '/configs/custom.ini')) {
-                
-                $customConfig = new Zend_Config_Ini(APPLICATION_PATH . '/configs/custom.ini');
-                $customConfig = $customConfig->toArray();
-                $this->_cache->save($customConfig, 'custom_config');
-
-                Zend_Registry::set('custom_config', $customConfig);
-            } else {
-                Zend_Registry::set('custom_config', array());
-            }
-        }
-    }
-
+    
 }

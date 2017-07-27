@@ -45,7 +45,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     private function strictCheckDanglingReferences(Concept $concept, $init)
     {
         $errorsBefore = count($this->errorMessages);
-        $toCheck = explode(" ", $init['options']["relations_strict_reference_check"]);
+        $toCheck = explode(" ", $init["relations_strict_reference_check"]);
         for ($i = 0; $i < count($toCheck); $i++) {
             $toCheck[$i] = trim($toCheck[$i]);
         }
@@ -64,7 +64,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
 
     private function softCheckDanglingReferences(Concept $concept, $init)
     {
-        $toCheck = explode(" ", $init['options']["relations_soft_reference_check"]);
+        $toCheck = explode(" ", $init["relations_soft_reference_check"]);
         for ($i = 0; $i < count($toCheck); $i++) {
             $toCheck[$i] = trim($toCheck[$i]);
         }

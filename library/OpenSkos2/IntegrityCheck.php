@@ -17,7 +17,7 @@ class IntegrityCheck
         if (count($this->scutomInit) === 0) {
             $integrity_check_on = "false";
         } else {
-            $integrity_check_on = $this->customInit["options"]["delete"]["integrity_check"];
+            $integrity_check_on = $this->customInit["delete"]["integrity_check"];
         }
         if ($integrity_check_on === "true") {
             if ($this->resourceManager->getResourceType() !== \OpenSkos2\Concept::TYPE) {

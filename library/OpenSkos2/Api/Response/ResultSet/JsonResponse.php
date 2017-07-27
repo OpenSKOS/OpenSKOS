@@ -70,7 +70,7 @@ class JsonResponse extends ResultSetResponse
             if (count($this->customInit) === 0) {
                 $backwardCompatible = true;
             } else {
-                if ($this->customInit['options']['backward_compatible'] === "true") {
+                if ($this->customInit['backward_compatible'] === "true") {
                     $backwardCompatible = true;
                 } else {
                     $backwardCompatible = false;

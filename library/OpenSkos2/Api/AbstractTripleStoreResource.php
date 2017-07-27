@@ -101,12 +101,12 @@ abstract class AbstractTripleStoreResource
         switch ($context) {
             case 'json':
                 $detailJsonResponse = (new DetailJsonResponse($resource, $propertiesList));
-                $detailJsonResponse->setExtras($extras, $fieldname, $this->customInit['options']['backward_compatible']);
+                $detailJsonResponse->setExtras($extras, $fieldname, $this->customInit['backward_compatible']);
                 $response = $detailJsonResponse->getResponse();
                 break;
             case 'jsonp':
                 $detailJsonPResponse = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList));
-                $detailJsonPResponse->setExtras($extras, $fieldname, $this->customInit['options']['backward_compatible']);
+                $detailJsonPResponse->setExtras($extras, $fieldname, $this->customInit['backward_compatible']);
                 $response = $detailJsonPResponse->getResponse();
                 break;
             case 'rdf':
@@ -152,7 +152,7 @@ abstract class AbstractTripleStoreResource
                 $index,
                 count($index),
                 1,
-                $this->customInit['options']['maximal_rows']
+                $this->customInit['maximal_rows']
             );
 
             switch ($params['context']) {
@@ -479,7 +479,7 @@ abstract class AbstractTripleStoreResource
 
         // is a tenant, collection or api key set in the XML?
 
-        if ($this->customInit['options']['backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $set = 'collection';
         } else {
             $set = 'set';
@@ -591,7 +591,7 @@ abstract class AbstractTripleStoreResource
      */
     protected function getSet($params, $tenant)
     {
-        if ($this->customInit['options']['backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -704,7 +704,7 @@ abstract class AbstractTripleStoreResource
     protected function getRequiredParameters()
     {
 
-        if ($this->customInit['options']['backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
