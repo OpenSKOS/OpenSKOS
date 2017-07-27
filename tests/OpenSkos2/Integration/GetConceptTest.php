@@ -17,7 +17,7 @@ class GetConceptTest extends AbstractTest
 
     public static function setUpBeforeClass()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/custom.ini');
         
         self::$client = new \Zend_Http_Client();
         self::$client->SetHeaders(array(

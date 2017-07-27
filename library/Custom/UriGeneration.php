@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenSkos2\Custom;
+namespace Custom;
 
-use OpenSkos2\Custom\EPICHandleProxy;
+use Custom\EPICHandleProxy;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Rdf\Literal;

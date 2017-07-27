@@ -34,8 +34,8 @@ class RelationType extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->init = $this->manager->getInitArray();
-        $this->deletion_integrity_check = new \OpenSkos2\IntegrityCheck($manager);
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
     }
 
@@ -81,8 +81,12 @@ class RelationType extends AbstractTripleStoreResource
             $schema = null;
         }
         try {
-            $init = $this->manager->getInitArray();
-
+            $customInit = $this->manager->getCustomInitArray();
+            if (count($customInit)===0) {
+                $maxRows = $this->limit;
+            } else {
+               $maxRows=$customInit["custom']['maximal_rows"]; 
+            } 
             if (isset($params['isTarget'])) {
                 if ($params['isTarget'] === 'true') {
                     $isTarget = true;
@@ -105,7 +109,7 @@ class RelationType extends AbstractTripleStoreResource
                 $concepts,
                 $concepts->count(),
                 0,
-                $init["custom']['maximal_rows"]
+                $maxRows
             );
             switch ($format) {
                 case 'json':

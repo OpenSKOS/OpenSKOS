@@ -135,10 +135,15 @@ class Tenant extends Resource
         \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
-        $init = null
+        $customInit = null
     ) {
-    
-        $baseUri = $init['api']['baseUri'];
+        if (empty($customInit)) {
+            return "http://$uuid"; // a proper setting of tenant uri requres non-emty custom.ini file
+        }
+        if (count($customIni)===0) {
+            return "http://$uuid"; // a proper setting of tenant uri requres non-emty custom.ini file
+        }
+        $baseUri = $customIni['options']['uriprefix'];
         return $baseUri . "" . $uuid;
     }
 }

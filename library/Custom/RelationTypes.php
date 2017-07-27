@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\Custom;
+namespace Custom;
 
 use OpenSkos2\Namespaces\Skos;
 

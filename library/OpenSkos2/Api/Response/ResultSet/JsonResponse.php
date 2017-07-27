@@ -1,4 +1,5 @@
 <?php
+
 /*
  * OpenSKOS
  *
@@ -15,10 +16,10 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2\Api\Response\ResultSet;
 
 use OpenSkos2\Api\Response\ResultSetResponse;
-
 use OpenSkos2\Api\Response\BackwardCompatibility;
 
 /**
@@ -26,6 +27,7 @@ use OpenSkos2\Api\Response\BackwardCompatibility;
  */
 class JsonResponse extends ResultSetResponse
 {
+
     /**
      * Get response
      *
@@ -35,7 +37,7 @@ class JsonResponse extends ResultSetResponse
     {
         return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
     }
-    
+
     /**
      * Gets the response data.
      * @return array
@@ -51,6 +53,7 @@ class JsonResponse extends ResultSetResponse
             ]
         ];
     }
+
     /**
      * Get docs property response
      *
@@ -61,14 +64,21 @@ class JsonResponse extends ResultSetResponse
         $docs = [];
         foreach ($this->result->getResources() as $resource) {
             $nResource = (new \OpenSkos2\Api\Transform\DataArray(
-                $resource,
-                $this->propertiesList,
-                $this->excludePropertiesList
-            ))->transform();
-            if ($this->init['options']['backward_compatible']) {
+                $resource, $this->propertiesList, $this->excludePropertiesList
+                ))->transform();
+            // default backward compatibel
+            if (count($this->customInit) === 0) {
+                $backwardCompatible = true;
+            } else {
+                if ($this->customInit['options']['backward_compatible'] === "true") {
+                    $backwardCompatible = true;
+                } else {
+                    $backwardCompatible = false;
+                }
+            }
+            if ($backwardCompatible) {
                 $nResource2 = (new BackwardCompatibility())->backwardCompatibilityMap(
-                    $nResource,
-                    $resource->getType()->getUri()
+                    $nResource, $resource->getType()->getUri()
                 );
             } else {
                 $nResource2 = $nResource;
@@ -77,4 +87,5 @@ class JsonResponse extends ResultSetResponse
         }
         return $docs;
     }
+
 }

@@ -14,7 +14,7 @@ and POST and PUT actions for API give 501:
 
 options.authorisation = ""
 
-When set e.g.to "OpenSkos2\Custom\Authorisation" then the instance administrator
+When set e.g.to "Custom\Authorisation" then the instance administrator
 must provide its  institution authorisation procedures in 
 /Library/OpenSkos2/Custom/Authorisation class which must implement shared 
 Authorisation interface.
@@ -41,7 +41,7 @@ options.relation_types = ""
 which means that there is no other relations than skos relations. For instance,
 this is the case for the current "Beeld en Geluid" instance.
 
-If set, e.g. to "OpenSkos2\Custom\RelationTypes" then the instance administrator
+If set, e.g. to "Custom\RelationTypes" then the instance administrator
 must provide  OpenSkos2/Library/Custom/RelationTypes implementing the 
 corresponding shared interface.  
 
@@ -52,7 +52,7 @@ Standard setting is
 options.uri_generate = true
 
 If set to "" then the uri will be generated as in OpenSkos1. Otherwise if it is
-set e.g. to \OpenSkos2\Custom\UriGeneration then  the instance administrator 
+set e.g. to \Custom\UriGeneration then  the instance administrator 
 should provide  OpenSkos2/Library/Custom/UriGeneration implementing the 
 corresponding shared  interface. For instance, for meertens the customized uri 
 generation involves call to an EPIC server. The EPIC settings are added to 

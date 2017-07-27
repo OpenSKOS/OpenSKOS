@@ -18,8 +18,8 @@ class Tenant extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->init = $this->manager->getInitArray();
-        $this->deletion_integrity_check = new \OpenSkos2\IntegrityCheck($manager);
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
     }
 

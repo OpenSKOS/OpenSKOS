@@ -104,7 +104,7 @@ class Set extends Resource
         \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
-        $init = null
+        $customInit = null
     ) {
     
         return $tenant->getUri() . "/" . $uuid;

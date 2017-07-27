@@ -56,7 +56,7 @@ class ResourceManager
     /**
      * @var array
      */
-    protected $init = [];
+    protected $customInit = [];
     protected $authorisationObject;
     protected $uriGenerationObject;
     protected $relationTypesObject;
@@ -68,7 +68,7 @@ class ResourceManager
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->init = $this->getApplicationIni();
+        $this->customInit = $this->getCustomIni();
         $this->authorisationObject = $this->makeOptionObject('authorisation');
         $this->uriGenerationObject = $this->makeOptionObject('uri_generate');
         $this->relationTypesObject = $this->makeOptionObject('relation_types');
@@ -79,9 +79,9 @@ class ResourceManager
         return $this->resourceType;
     }
 
-    public function getInitArray()
+    public function getCustomInitArray()
     {
-        return $this->init;
+        return $this->customInit;
     }
 
     // overriden in ConceptManager
@@ -1027,20 +1027,18 @@ class ResourceManager
         return $response[0]->name->getValue();
     }
 
-    private function getApplicationIni()
+    private function getCustomIni()
     {
-        $config = \Zend_Registry::get('config');
-        $env = getenv('APP_ENV');
-        if (empty($env)) {
-            $env = "production";
-        }
-        return $config[$env];
+        $config = \Zend_Registry::get('custom_config');
+        return $config;
     }
 
     private function makeOptionObject($typeoption)
     {
-        
-        $className = $this->init['options'][$typeoption];
+        if (count($this->customInit)===0) {
+            return null;
+        }
+        $className = $this->customInit['options'][$typeoption];
         if (empty($className)) {
             return null;
         } else {

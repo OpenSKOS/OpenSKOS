@@ -137,16 +137,10 @@ class Repository implements InterfaceRepository
      * @param string $description
      */
     public function __construct(
-        ConceptManager $conceptManager,
-        ConceptSchemeManager $schemeManager,
-        Autocomplete $searchAutocomplete,
-        $repositoryName,
-        $baseUrl,
-        array $adminEmails,
-        SetManager $setManager,
-        $description = null
-    ) {
-    
+    ConceptManager $conceptManager, ConceptSchemeManager $schemeManager, Autocomplete $searchAutocomplete, $repositoryName, $baseUrl, array $adminEmails, SetManager $setManager, $description = null
+    )
+    {
+
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -181,13 +175,7 @@ class Repository implements InterfaceRepository
     public function identify()
     {
         return new ImplementationIdentity(
-            $this->repositoryName,
-            $this->getEarliestDateStamp(),
-            Identity::DELETED_RECORD_PERSISTENT,
-            $this->adminEmails,
-            $this->getGranularity(),
-            null,
-            null
+            $this->repositoryName, $this->getEarliestDateStamp(), Identity::DELETED_RECORD_PERSISTENT, $this->adminEmails, $this->getGranularity(), null, null
         );
     }
 
@@ -251,10 +239,10 @@ class Repository implements InterfaceRepository
             foreach ($rdfSetURIs as $setURI) {
                 $rdfSetUri = $setURI->getUri();
                 $rdfSet = $this->rdfSetManager->fetchByUri($rdfSetUri);
-                $allowedOAI=$rdfSet->getAllowOai();
+                $allowedOAI = $rdfSet->getAllowOai();
                 if (!$allowedOAI) {
                     throw new BadArgumentException("This concept belongs to the set "
-                       . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
+                    . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
                 }
             }
             if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
@@ -279,14 +267,7 @@ class Repository implements InterfaceRepository
     {
         $pSet = $this->parseSet($set);
         $concepts = $this->getConcepts(
-            $this->limit,
-            0,
-            $from,
-            $until,
-            $pSet['tenant'],
-            $pSet['rdfSet'],
-            $pSet['conceptScheme'],
-            $numFound
+            $this->limit, 0, $from, $until, $pSet['tenant'], $pSet['rdfSet'], $pSet['conceptScheme'], $numFound
         );
         $items = [];
         foreach ($concepts as $i => $concept) {
@@ -314,14 +295,7 @@ class Repository implements InterfaceRepository
         $pSet = $this->parseSet($params['set']);
         $cursor = (int) $params['offset'];
         $concepts = $this->getConcepts(
-            $this->limit,
-            $cursor,
-            $params['from'],
-            $params['until'],
-            $pSet['tenant'],
-            $pSet['collection'],
-            $pSet['conceptScheme'],
-            $numFound
+            $this->limit, $cursor, $params['from'], $params['until'], $pSet['tenant'], $pSet['collection'], $pSet['conceptScheme'], $numFound
         );
         $items = [];
         foreach ($concepts as $i => $concept) {
@@ -330,11 +304,7 @@ class Repository implements InterfaceRepository
         $token = null;
         if ($numFound > ($cursor + $this->limit)) {
             $token = $this->encodeResumptionToken(
-                $cursor + $this->limit,
-                $params['from'],
-                $params['until'],
-                $params['metadataPrefix'],
-                $params['set']
+                $cursor + $this->limit, $params['from'], $params['until'], $params['metadataPrefix'], $params['set']
             );
         }
         return new OaiRecordList($items, $token, $numFound, $cursor);
@@ -364,14 +334,10 @@ class Repository implements InterfaceRepository
 //            'http://www.openarchives.org/OAI/2.0/oai_dc/'
 //        );
         $formats[] = new ImplementationMetadataFormatType(
-            self::PREFIX_OAI_RDF,
-            self::SCHEMA_OAI_RDF,
-            Namespaces\Skos::NAME_SPACE
+            self::PREFIX_OAI_RDF, self::SCHEMA_OAI_RDF, Namespaces\Skos::NAME_SPACE
         );
         $formats[] = new ImplementationMetadataFormatType(
-            self::PREFIX_OAI_RDF_XL,
-            self::SCHEMA_OAI_RDF,
-            Namespaces\SkosXl::NAME_SPACE
+            self::PREFIX_OAI_RDF_XL, self::SCHEMA_OAI_RDF, Namespaces\SkosXl::NAME_SPACE
         );
         return $formats;
     }
@@ -419,7 +385,7 @@ class Repository implements InterfaceRepository
             $rdfSet = $this->setManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
                 $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
-                if (!(bool)$allowed) {
+                if (!(bool) $allowed) {
                     throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]);
                 }
                 $rdfSetId = $rdfSet->getUri();
@@ -485,13 +451,10 @@ class Repository implements InterfaceRepository
      * @return string
      */
     private function encodeResumptionToken(
-        $offset = 0,
-        DateTime $from = null,
-        DateTime $util = null,
-        $metadataPrefix = null,
-        $set = null
-    ) {
-    
+    $offset = 0, DateTime $from = null, DateTime $util = null, $metadataPrefix = null, $set = null
+    )
+    {
+
         $params = [];
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;
@@ -534,16 +497,10 @@ class Repository implements InterfaceRepository
      * @return \OpenSKOS2\ConceptCollection
      */
     private function getConcepts(
-        $limit = 10,
-        $offset = 0,
-        \DateTime $from = null,
-        \DateTime $till = null,
-        $tenant = null,
-        $collection = null,
-        $scheme = null,
-        &$numFound = null
-    ) {
-    
+    $limit = 10, $offset = 0, \DateTime $from = null, \DateTime $till = null, $tenant = null, $collection = null, $scheme = null, &$numFound = null
+    )
+    {
+
         $searchOptions = [
             'start' => $offset,
             'rows' => $limit,
@@ -569,9 +526,7 @@ class Repository implements InterfaceRepository
         if (!empty($from) || !empty($till)) {
             $parser = new ParserText();
             $searchOptions['searchText'] = $parser->buildDatePeriodQuery(
-                'd_modified',
-                $from,
-                $till
+                'd_modified', $from, $till
             );
         } else {
             $searchOptions['searchText'] = '';
@@ -584,25 +539,30 @@ class Repository implements InterfaceRepository
         if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
             return $identifier;
         }
-        $cache = $this->conceptManager->getInitArray();
-        $custom = $cache['options'];
+        $customInit = $this->conceptManager->getCustomInitArray();
+        if (count($customInit) === 0) {
+            throw new BadArgumentException('Invalid identifier ' . $identifier);
+        }
+
+        $custom = $customInit['options'];
         if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
             throw new BadArgumentException('Invalid identifier ' . $identifier);
         }
-        
+
         $regexps = explode(',', $custom['uuid_regexp_prefixes']);
         foreach ($regexps as $regexp) {
-            $matches=[];
+            $matches = [];
             $ok = preg_match($regexp, $identifier, $matches);
             if ($ok) {
                 $length = strlen($matches[0]);
                 $uuid = substr($identifier, $length);
                 if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
-                     return $uuid;
+                    return $uuid;
                 }
             }
         }
-        
+
         throw new BadArgumentException('Invalid identifier ' . $identifier);
     }
+
 }

@@ -33,7 +33,7 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use Rhumsaa\Uuid\Uuid;
-use OpenSkos2\Custom\UriGeneration;
+use Custom\UriGeneration;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -685,7 +685,6 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
-        $init = $manager->getInitArray();
         $customGen = $manager->getUriGenerateObject();
         if (!empty($customGen)) {
             return $customGen->generateUri($this);
@@ -700,8 +699,8 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-
-        $uri = $this->assembleUri($tenant, $set, $uuid, null, $init);
+        $customInit = $manager->getCustomInitArray();
+        $uri = $this->assembleUri($tenant, $set, $uuid, null, $customInit);
 
 
         if ($manager->askForUri($uri, true)) {
@@ -723,7 +722,7 @@ class Resource extends Uri implements ResourceIdentifier
         \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
-        $init = null
+        $customInit = null
     ) {
     
 

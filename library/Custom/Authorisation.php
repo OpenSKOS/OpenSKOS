@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSkos2\Custom;
+namespace Custom;
 
 use OpenSKOS_Db_Table_Row_User;
 use OpenSkos2\Concept;

@@ -218,8 +218,11 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     protected function isAuthorisationOn($api)
     {
         $manager = $api->getResourceManager();
-        $init = $manager->getInitArray();
-        return (!empty($init['options']['authorisation']));
+        $customInit = $manager->getCustomInitArray();
+        if (count($customInit)===0) {
+            return false;
+        }
+        return (!empty($customInit['options']['authorisation']));
     }
 
 }

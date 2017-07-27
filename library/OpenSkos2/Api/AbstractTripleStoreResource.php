@@ -51,14 +51,21 @@ abstract class AbstractTripleStoreResource
      *
      * @var Deletion
      */
-    protected $deletion_integrity_check;
+    protected $deletionIntegrityCheck;
 
     /**
-     * array of application.ini settings
+     * array of custom.ini settings
      *
-     * @var init
+     * @var array
      */
-    protected $init;
+    protected $customInit;
+    
+    /**
+     * Amount of concepts to return
+     *
+     * @var int
+     */
+    protected $limit = 20;
 
     /**
      * Get PSR-7 response for resource
@@ -94,12 +101,12 @@ abstract class AbstractTripleStoreResource
         switch ($context) {
             case 'json':
                 $detailJsonResponse = (new DetailJsonResponse($resource, $propertiesList));
-                $detailJsonResponse->setExtras($extras, $fieldname, $this->init['options']['backward_compatible']);
+                $detailJsonResponse->setExtras($extras, $fieldname, $this->customInit['options']['backward_compatible']);
                 $response = $detailJsonResponse->getResponse();
                 break;
             case 'jsonp':
                 $detailJsonPResponse = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList));
-                $detailJsonPResponse->setExtras($extras, $fieldname, $this->init['options']['backward_compatible']);
+                $detailJsonPResponse->setExtras($extras, $fieldname, $this->customInit['options']['backward_compatible']);
                 $response = $detailJsonPResponse->getResponse();
                 break;
             case 'rdf':
@@ -145,18 +152,18 @@ abstract class AbstractTripleStoreResource
                 $index,
                 count($index),
                 1,
-                $this->init['options']['maximal_rows']
+                $this->customInit['options']['maximal_rows']
             );
 
             switch ($params['context']) {
                 case 'json':
                     $jsonResponse = (new JsonResponse($result));
-                    $jsonResponse->setInit($this->init);
+                    $jsonResponse->setInit($this->customInit);
                     $response = $jsonResponse->getResponse();
                     break;
                 case 'jsonp':
                     $jsonPResponse = (new JsonpResponse($result, $params['callback']));
-                    $jsonPResponse->setInit($this->init);
+                    $jsonPResponse->setInit($this->customInit);
                     $response = $jsonPResponse->getResponse();
                     break;
                 case 'rdf':
@@ -295,7 +302,7 @@ abstract class AbstractTripleStoreResource
                 $authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
             }
 
-            $this->deletion_integrity_check->canBeDeleted($id);
+            $this->deletionIntegrityCheck->canBeDeleted($id);
 
             if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
                 if ($resource->isDeleted()) {
@@ -472,7 +479,7 @@ abstract class AbstractTripleStoreResource
 
         // is a tenant, collection or api key set in the XML?
 
-        if ($this->init['options']['backward_compatible']) {
+        if ($this->customInit['options']['backward_compatible']) {
             $set = 'collection';
         } else {
             $set = 'set';
@@ -584,7 +591,7 @@ abstract class AbstractTripleStoreResource
      */
     protected function getSet($params, $tenant)
     {
-        if ($this->init['options']['backward_compatible']) {
+        if ($this->customInit['options']['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -697,7 +704,7 @@ abstract class AbstractTripleStoreResource
     protected function getRequiredParameters()
     {
 
-        if ($this->init['options']['backward_compatible']) {
+        if ($this->customInit['options']['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';

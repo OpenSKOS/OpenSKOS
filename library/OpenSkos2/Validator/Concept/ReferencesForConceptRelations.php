@@ -29,9 +29,13 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     {
         $valid = $this->checkConsistencyOfRelations($concept);
         if ($this->conceptReferenceCheckOn) {
-            $init = $this->resourceManager->getInitArray();
-            $strict = $this->strictCheckDanglingReferences($concept, $init);
-            $soft = $this->softCheckDanglingReferences($concept, $init);
+            $customInit = $this->resourceManager->getCustomInitArray();
+            if (count($customInit) === 0) {
+               $strict = true; 
+            } else {
+                $strict = $this->strictCheckDanglingReferences($concept, $customInit);
+                $soft = $this->softCheckDanglingReferences($concept, $customInit);
+            }
         } else {
             $strict = true;
         }
@@ -70,7 +74,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                 foreach ($values as $value) {
                     if (!($this->resourceManager->askForUri($value, false, Concept::TYPE))) {
                         $this->warningMessages[] = "The concept referred by  uri {$value->getUri()} is not found. "
-                        . "It is addedto the the list of dangling references.";
+                            . "It is addedto the the list of dangling references.";
                         $this->danglingReferences[] = $value;
                     }
                 }
@@ -91,10 +95,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
             if (in_array($property, $allRelationUris)) {
                 try {
                     $this->resourceManager->isRelationURIValid(
-                        $property,
-                        $customRelUris,
-                        $registeredRelationUris,
-                        $allRelationUris
+                        $property, $customRelUris, $registeredRelationUris, $allRelationUris
                     ); // throws an Exception
                     $relatedConcepts = $concept->getProperty($property);
                     foreach ($relatedConcepts as $relConceptUri) {
@@ -108,4 +109,5 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         }
         return ($errorsBefore === count($this->errorMessages));
     }
+
 }

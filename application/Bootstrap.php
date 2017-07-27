@@ -25,7 +25,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
 
     protected $_cache;
-    
+
     protected function _initDefaultTimeZone()
     {
         date_default_timezone_set('UTC');
@@ -92,31 +92,32 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         Zend_Controller_Front::getInstance()->setDispatcher($dispatcher);
     }
-    
+
     protected function _initCache()
-	{
-		$config = $this->getOption('resources');
-        
+    {
+        $config = $this->getOption('resources');
+
         $this->_cache = Zend_Cache::factory(
-			'Core',
-			'File',
-			$config['cachemanager']['general']['frontend']['options'],
-			$config['cachemanager']['general']['backend']['options']
-		);
-	
-		Zend_Registry::set('cache', $this->_cache);
-	}
-	
-	protected function _initConfig()
-	{
-		if(!$config = $this->_cache->load('config')) {
-	
-			$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini');
-            $config = $config->toArray();
-			$this->_cache->save($config, 'config');
-		}
-	
-		Zend_Registry::set('config', $config);
-	}
+                'Core', 'File', $config['cachemanager']['general']['frontend']['options'], $config['cachemanager']['general']['backend']['options']
+        );
+
+        Zend_Registry::set('cache', $this->_cache);
+    }
+
+    protected function _initCustomConfig()
+    {
+        if (!$customConfig = $this->_cache->load('custom_config')) {
+            if (file_exists(APPLICATION_PATH . '/configs/custom.ini')) {
+                
+                $customConfig = new Zend_Config_Ini(APPLICATION_PATH . '/configs/custom.ini');
+                $customConfig = $customConfig->toArray();
+                $this->_cache->save($customConfig, 'custom_config');
+
+                Zend_Registry::set('custom_config', $customConfig);
+            } else {
+                Zend_Registry::set('custom_config', array());
+            }
+        }
+    }
 
 }
