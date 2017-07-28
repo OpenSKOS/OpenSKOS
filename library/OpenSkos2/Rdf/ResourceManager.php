@@ -1041,6 +1041,7 @@ class ResourceManager
         if (empty($className)) {
             return null;
         } else {
+            $className = str_replace("\\","\\\\", $className);
             $class = new \ReflectionClass($className);
             $instance = $class->newInstanceArgs([$this]);
             return $instance;
