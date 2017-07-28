@@ -20,6 +20,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`tenant` (
   `countryName` VARCHAR(100) NULL DEFAULT NULL ,
   `disableSearchInOtherTenants` BOOLEAN,
   `enableStatusesSystem` BOOLEAN,
+  `enableSkosXl` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`code`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
