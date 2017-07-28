@@ -40,8 +40,8 @@ class OpenSKOS_Application_BootstrapAccess
 	public static function getOption($key)
 	{
 		$bootstrap = self::getBootstrap();
-		var_dump($bootstrap);
-		if ($bootstrap->hasOption($key)) {
+		
+        if ($bootstrap->hasOption($key)) {
 			return $bootstrap->getOption($key);
 		} else {
 			throw new Zend_Exception('Getting configuration option failed. Option "' . $key . '" not found.');

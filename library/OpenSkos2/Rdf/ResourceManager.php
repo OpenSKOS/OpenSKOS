@@ -1028,6 +1028,7 @@ class ResourceManager
         } catch (\Zend_Exception $e) {
             $config = array();
         }
+        var_dump($config);
         return $config;
     }
 
