@@ -233,12 +233,12 @@ docker-compose up --build
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 
-Go to `http://localhost:9001/manage.html?tab=datasets` create a dataset named `openskos`
-
-Create a test tenant / user
+Go to `http://localhost:9001/manage.html?tab=datasets` login with admin / admin
+create a persistent dataset named `openskos`
+Create a test tenant / user in the openskos application
 
 ```
 docker exec -it openskos-php-fpm php ./tools/tenant.php create -e development --code=pic --name=Picturae --email=test@example.com --password=test
 ```
 
-Now you can login on http://localhost:9000 
+Now you can login on http://localhost:9000
