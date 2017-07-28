@@ -30,7 +30,7 @@ use OpenSkos2\Namespaces\DcTerms;
 class Label extends Resource
 {
     const TYPE = SkosXl::LABEL;
-    
+
     /**
      * Resource constructor.
      * @param string $uri , optional
@@ -40,7 +40,7 @@ class Label extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-    
+
     /**
      * Get tenant
      *
@@ -55,7 +55,7 @@ class Label extends Resource
             return null;
         }
     }
-        
+
     /**
      * Get institution row. Code adapted from OpenSkos2\Concept
      * @TODO Remove dependency on OpenSKOS v1 library
@@ -67,25 +67,17 @@ class Label extends Resource
         $model = new \OpenSKOS_Db_Table_Tenants();
         return $model->find($this->getTenant())->current();
     }
-    
+
     /**
      * Ensure all mandatory properties are set before label is written in DB
-     * @param string $tenantCode
      */
-    public function ensureMetadata($tenantCode)
+    public function ensureMetadata()
     {
-        $currentTenant = $this->getTenant();
-        
-        //Ensure tenant is set
-        if (empty($currentTenant) && !empty($tenantCode)) {
-            $this->setProperty(OpenSkos::TENANT, new Literal($tenantCode));
-        }
-        
         //Ensure date modified is updated
         $nowLiteral = new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral);
     }
-    
+
     /**
      * Generates label uri
      * @return string
@@ -93,12 +85,12 @@ class Label extends Resource
     public static function generateUri()
     {
         $separator = '/';
-        
+
         $baseUri = rtrim(self::getBaseApiUri(), $separator);
-        
+
         return $baseUri . $separator . 'labels' . $separator . Uuid::uuid4();
     }
-    
+
     /**
      * @TODO temp function for base api uri
      */

@@ -36,7 +36,7 @@ class LabelHelper
      * @var LabelManager
      */
     protected $labelManager;
-    
+
     /**
      * @param LabelManager $labelManager
      */
@@ -61,9 +61,9 @@ class LabelHelper
                 'Could not determite tenant for concept.'
             );
         }
-        
+
         $useXlLabels = (bool)$tenant['enableSkosXl'];
-        
+
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
             $fullXlLabels = [];
             foreach ($concept->getProperty($xlLabelProperty) as $labelValue) {
@@ -106,7 +106,7 @@ class LabelHelper
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
-                        $label->ensureMetadata($concept->getTenant());
+                        $label->ensureMetadata();
 
                         $concept->addProperty($xlLabelProperty, $label);
 
@@ -114,13 +114,13 @@ class LabelHelper
                     }
                 }
             }
-            
+
             // Dumbing down xl labels to simple labels.
             // Match all simple labels to the existing xl labels.
             $concept->setProperties($simpleLabelProperty, $xlLabelsLiterals);
         }
     }
-    
+
     /**
      * Insert any xl labels for the concept which do not exist yet.
      * Meant to be called together with insert of the concept.
@@ -132,14 +132,14 @@ class LabelHelper
     public function insertLabels(Concept $concept)
     {
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
-        
+
         foreach ($inserAndDelete['delete'] as $deleteLabel) {
             $this->labelManager->delete($deleteLabel);
         }
-        
+
         $this->labelManager->insertCollection($inserAndDelete['insert']);
     }
-    
+
     /**
      * Gets collections of labels to insert and to delete.
      * @param Concept $concept
@@ -150,7 +150,7 @@ class LabelHelper
     {
         $deleteLabels = new LabelCollection([]);
         $insertlabels = new LabelCollection([]);
-        
+
         foreach (array_keys(Concept::$labelsMap) as $xlLabelProperty) {
             // Loop through xl labels
             foreach ($concept->getProperty($xlLabelProperty) as $label) {
@@ -159,37 +159,37 @@ class LabelHelper
                         'Not a valid xl label provided.'
                     );
                 }
-                
+
                 $labelExists = $this->labelManager->askForUri($label->getUri());
-                
+
                 if (!$labelExists && !($label instanceof Label)) {
                     throw new OpenSkosException(
                         'The label ' . $label . ' is not a fully described label resource '
                         . 'and does not exist in the system.'
                     );
                 }
-                
+
                 if (!$label instanceof Label) {
                     continue; // It is just an uri - nothing to do with it.
                 }
-                
-                $label->ensureMetadata($concept->getInstitution()['code']);
-                
+
+                $label->ensureMetadata();
+
                 // Fetch, insert or replace label
                 if ($labelExists) {
                     $deleteLabels->append($label);
                 }
-                
+
                 $insertlabels->append($label);
             }
         }
-        
+
         return [
             'delete' => $deleteLabels,
             'insert' => $insertlabels,
         ];
     }
-    
+
     /**
      * Creates a new label using the parameters and inserts it into the DB
      * @param string $literalForm
@@ -203,16 +203,16 @@ class LabelHelper
         if (empty($literalForm) || empty($language) || empty($tenant)) {
             throw new OpenSkosException('LiteralForm Language and Tenant must be specified when creating a new label.');
         }
-        
+
         $rdfLiteral = new Literal($literalForm);
         $rdfLiteral->setLanguage($language);
-        
+
         $label = new Label(Label::generateUri());
         $label->addProperty(SkosXl::LITERALFORM, $rdfLiteral);
-        $label->ensureMetadata($tenant->getCode());
-        
+        $label->ensureMetadata();
+
         $this->labelManager->insert($label);
-        
+
         return $label;
     }
 }
