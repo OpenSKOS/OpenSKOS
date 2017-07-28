@@ -241,4 +241,4 @@ Create a test tenant / user in the openskos application
 docker exec -it openskos-php-fpm php ./tools/tenant.php create -e development --code=pic --name=Picturae --email=test@example.com --password=test
 ```
 
-Now you can login on http://localhost:9000
+Now you can login on http://localhost:9000/editor/login
