@@ -111,7 +111,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
   INDEX `fk_user_tenant` (`tenant` ASC) ,
-  UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) ,
   CONSTRAINT `fk_user_tenant`
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )
