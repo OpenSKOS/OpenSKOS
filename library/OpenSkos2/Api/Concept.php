@@ -73,13 +73,6 @@ class Concept extends AbstractTripleStoreResource
     private $searchAutocomplete;
 
     /**
-     * Amount of concepts to return, will be reset in constructor following application.ini settings
-     *
-     * @var int
-     */
-    private $limit = 0;
-
-    /**
      *
      * @param ConceptManager $manager
      * @param Autocomplete $searchAutocomplete

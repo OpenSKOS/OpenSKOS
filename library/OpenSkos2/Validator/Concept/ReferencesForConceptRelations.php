@@ -31,7 +31,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         if ($this->conceptReferenceCheckOn) {
             $customInit = $this->resourceManager->getCustomInitArray();
             if (count($customInit) === 0) {
-               $strict = true; 
+                $strict = true;
             } else {
                 $strict = $this->strictCheckDanglingReferences($concept, $customInit);
                 $soft = $this->softCheckDanglingReferences($concept, $customInit);
@@ -95,7 +95,10 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
             if (in_array($property, $allRelationUris)) {
                 try {
                     $this->resourceManager->isRelationURIValid(
-                        $property, $customRelUris, $registeredRelationUris, $allRelationUris
+                        $property,
+                        $customRelUris,
+                        $registeredRelationUris,
+                        $allRelationUris
                     ); // throws an Exception
                     $relatedConcepts = $concept->getProperty($property);
                     foreach ($relatedConcepts as $relConceptUri) {
@@ -109,5 +112,4 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         }
         return ($errorsBefore === count($this->errorMessages));
     }
-
 }

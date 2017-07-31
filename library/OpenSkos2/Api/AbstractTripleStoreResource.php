@@ -725,7 +725,8 @@ abstract class AbstractTripleStoreResource
         return $index;
     }
     
-    public function getResourceManager() {
+    public function getResourceManager()
+    {
         
         return $this->manager;
     }

@@ -89,7 +89,7 @@ class RelationinstanceTest extends AbstractTest
             ->setRawData($body)
             ->setParameterGet('tenant', TENANT_CODE)
             ->setParameterGet('key', API_KEY_EDITOR);
-        if (self::$init["backward_compatible"]) {
+        if (self::$init["optional.backward_compatible"]) {
             self::$client->setParameterGet('collection', SET_CODE);
         } else {
             self::$client->setParameterGet('set', SET_CODE);

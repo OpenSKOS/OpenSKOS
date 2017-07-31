@@ -141,12 +141,12 @@ class Tenant extends Resource
         if (empty($customInit)) {
             $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
             $prefix=$apiOptions['baseUri'];
-            return $prefix."/".$uuid; 
+            return $prefix."/".$uuid;
         }
         if (count($customInit)===0) {
             $apiOptions = OpenSKOS_Application_BootstrapAccess::getOption('api');
             $prefix=$apiOptions['baseUri'];
-            return $prefix."/".$uuid;  
+            return $prefix."/".$uuid;
         }
         $baseUri = $customInit['uriprefix'];
         return $baseUri . "" . $uuid;

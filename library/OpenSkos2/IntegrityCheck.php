@@ -32,5 +32,4 @@ class IntegrityCheck
             return true;
         }
     }
-
 }

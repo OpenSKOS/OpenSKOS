@@ -15,7 +15,7 @@ class EPICHandleProxy
     private static $guidPrefix;
     private static $resolver;
     private static $forwardLocationPrefix;
-    private static $init;
+    private static $init = array();
 
     public static function getInstance()
     {
@@ -27,7 +27,9 @@ class EPICHandleProxy
 
     public static function enabled()
     {
-        self::$init = parse_ini_file(__DIR__.'/../../../application/configs/application.ini');
+        if (count(self::$init) === 0) {
+            self::$init = parse_ini_file(__DIR__ . '/../../application/configs/application.ini');
+        }
         try {
             return isset(self::$init["epic.host"]);
         } catch (Exception $ex) {
@@ -56,8 +58,7 @@ class EPICHandleProxy
                 self::$host . " ,username= " . self::$username . " ,password= " .
                 self::$password . " ,prefix= " . self::$prefix . " ,guidPrefix= " .
                 self::$guidPrefix . " ,resolver= " .
-                self::$resolver . " ,forwardLocationPrefix= " . self::$forwardLocationPrefix,
-                E_USER_ERROR
+                self::$resolver . " ,forwardLocationPrefix= " . self::$forwardLocationPrefix, E_USER_ERROR
             );
         }
     }
@@ -143,7 +144,7 @@ class EPICHandleProxy
         curl_close($curl);
         if ($info['http_code'] != 200) {
             throw new Exception("unexpected result from handle server,"
-                . "server returned HTTP code :" . $info['http_code']);
+            . "server returned HTTP code :" . $info['http_code']);
         }
         return $output;
     }
@@ -202,8 +203,8 @@ class EPICHandleProxy
         curl_close($ch);
         if ($info['http_code'] != 201) {
             throw new Exception(
-                "unexpected result from handle server, server returned HTTP code :" .
-                $info['http_code']
+            "unexpected result from handle server, server returned HTTP code :" .
+            $info['http_code']
             );
         }
         return $UUID;
@@ -264,8 +265,8 @@ class EPICHandleProxy
             echo("location: " . $location . "\n");
             ob_flush();
             throw new Exception(
-                "unexpected result from handle server, server returned HTTP code :" .
-                $info['http_code']
+            "unexpected result from handle server, server returned HTTP code :" .
+            $info['http_code']
             );
         }
     }
@@ -305,7 +306,7 @@ class EPICHandleProxy
         curl_close($curl);
         if ($info['http_code'] != 204) {
             throw new Exception("unexpected result from handle server, "
-                . "server returned HTTP code :" . $info['http_code']);
+            . "server returned HTTP code :" . $info['http_code']);
         }
     }
 
@@ -314,21 +315,19 @@ class EPICHandleProxy
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
             // 16 bits for "time_mid"
-            mt_rand(0, 0xffff),
+                                        mt_rand(0, 0xffff),
             // 16 bits for "time_hi_and_version",
             // four most significant bits holds version number 4
-            mt_rand(0, 0x0fff) | 0x4000,
+                                                mt_rand(0, 0x0fff) | 0x4000,
             // 16 bits, 8 bits for "clk_seq_hi_res",
             // 8 bits for "clk_seq_low",
             // two most significant bits holds zero and one for variant DCE1.1
-            mt_rand(0, 0x3fff) | 0x8000,
+                                                        mt_rand(0, 0x3fff) | 0x8000,
             // 48 bits for "node"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
+                                                                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
     }
+
 }

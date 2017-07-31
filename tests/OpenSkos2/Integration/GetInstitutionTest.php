@@ -48,7 +48,7 @@ class GetInstitutionTest extends AbstractTest
   </rdf:Description>
 </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'institutions', true);
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo 'These tests must be run when an authorisation procedure is specified. '
             . 'Now the authroisation is not specified, update application.ini.';
             if ($response->getStatus() !== 501) {
@@ -71,7 +71,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutions()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -80,7 +80,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutionsJson()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -89,7 +89,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutionsJsonP()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -98,7 +98,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutionsRDFXML()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
            echo self::$message;
            return;
         }
@@ -107,7 +107,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutionsHTML()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -116,7 +116,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitution()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -125,7 +125,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitutionJson()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
            echo self::$message;
            return;
         }
@@ -135,7 +135,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitutionJsonP()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -145,7 +145,7 @@ class GetInstitutionTest extends AbstractTest
 
     public function testInstitutionHTML()
     {
-        if (empty(self::$init['authorisation'])) {
+        if (empty(self::$init['optional.authorisation'])) {
             echo self::$message;
             return;
         }
@@ -157,7 +157,7 @@ class GetInstitutionTest extends AbstractTest
     {
         switch ($institution["code"]) {
             case "test": {
-                    if (self::$init["backward_compatible"]) {
+                    if (self::$init["optional.backward_compatible"]) {
                         $this->assertEquals("info@test.nl", $institution["email"]);
                         $this->assertEquals("test-tenant", $institution["name"]);
                     } else {
@@ -167,7 +167,7 @@ class GetInstitutionTest extends AbstractTest
                     break;
                 }
             case "example": {
-                    if (self::$init["backward_compatible"]) {
+                    if (self::$init["optional.backward_compatible"]) {
                         if ($singleResourceCheck) {
                             $this->assertEquals("1", count($institution["collections"]));
                         }

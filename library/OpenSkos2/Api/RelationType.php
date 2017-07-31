@@ -85,8 +85,8 @@ class RelationType extends AbstractTripleStoreResource
             if (count($customInit)===0) {
                 $maxRows = $this->limit;
             } else {
-               $maxRows=$customInit["custom']['maximal_rows"]; 
-            } 
+                $maxRows=$customInit["custom']['maximal_rows"];
+            }
             if (isset($params['isTarget'])) {
                 if ($params['isTarget'] === 'true') {
                     $isTarget = true;
