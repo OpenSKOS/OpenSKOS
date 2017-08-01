@@ -257,7 +257,8 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager,
 function createTenantRdf($code, 
     $name, 
     $uri, 
-    $uuid, 
+    $uuid,
+    $email,
     $disableSearchInOtherTenants, 
     $enableStatussesSystem, 
     $enableSkosXl, 
@@ -280,17 +281,28 @@ function createTenantRdf($code,
             " has been already registered in the triple store. \n");
         exit(1);
     }
+    
+    $insts2 = $resourceManager->fetchSubjectForObject(VCard::EMAIL, 
+        new Literal($email));
+    if (count($insts2) > 0) {
+        fwrite(STDERR, "An institution with the email " . $email . 
+            " has been already registered in the triple store. \n");
+        exit(1);
+    }
 
     $tenantResource = new Tenant();
     setID($tenantResource, $uri, $uuid, $resourceManager);
 
 
     $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
+    $tenantResource->setProperty(VCard::EMAIL, new Literal($email));
+    
     $blank1 = "_:genid_" . Uuid::uuid4();
     $organisation = new Resource($blank1);
     if (isset($name)) {
         $organisation->setProperty(VCard::ORGNAME, new Literal($name));
     }
+    
     //$resourceManager->setLiteralWithEmptinessCheck($organisation, 
     //vCard::ORGUNIT, " ");
     $tenantResource->setProperty(VCard::ORG, $organisation);

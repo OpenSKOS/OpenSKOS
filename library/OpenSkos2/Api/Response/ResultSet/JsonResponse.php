@@ -68,15 +68,11 @@ class JsonResponse extends ResultSetResponse
                 $this->propertiesList,
                 $this->excludePropertiesList
             ))->transform();
-            // default backward compatibel
+            // default backward compatible
             if (count($this->customInit) === 0) {
                 $backwardCompatible = true;
             } else {
-                if ($this->customInit['backward_compatible'] === "true") {
-                    $backwardCompatible = true;
-                } else {
-                    $backwardCompatible = false;
-                }
+                $backwardCompatible= $this->customInit['backward_compatible'];
             }
             if ($backwardCompatible) {
                 $nResource2 = (new BackwardCompatibility())->backwardCompatibilityMap(
