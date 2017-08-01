@@ -37,6 +37,7 @@ class RelationType extends AbstractTripleStoreResource
         $this->customInit = $this->manager->getCustomInitArray();
         $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
+        $this->limit = $this->customInit['limit'];
     }
 
    

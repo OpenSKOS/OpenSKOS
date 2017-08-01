@@ -19,7 +19,7 @@ class RelationinstanceTest extends AbstractTest
     
     public function setUp()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        self::$init = self::getInit();
         
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();

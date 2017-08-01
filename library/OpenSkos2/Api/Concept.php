@@ -199,6 +199,8 @@ class Concept extends AbstractTripleStoreResource
 
         $concepts = $this->searchAutocomplete->search($options, $total);
 
+        set_time_limit($this->customInit["normal_time_limit"]);
+
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {

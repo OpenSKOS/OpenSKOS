@@ -9,10 +9,19 @@ class GetInstitutionTest extends AbstractTest
 
     public static function setUpBeforeClass()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-
+        self::$init = self::getInit();
         self::$createdresourses = array();
         self::$client = new \Zend_Http_Client();
+
+        if (empty(self::$init['optional.authorisation'])) {
+            return;
+        }
+
+        if (!(self::$init['optional.authorisation'])) {
+            return;
+        }
+
+
         self::$client->setConfig(array(
             'maxredirects' => 0,
             'timeout' => 30));
@@ -48,14 +57,6 @@ class GetInstitutionTest extends AbstractTest
   </rdf:Description>
 </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'institutions', true);
-        if (empty(self::$init['optional.authorisation'])) {
-            echo 'These tests must be run when an authorisation procedure is specified. '
-            . 'Now the authroisation is not specified, update application.ini.';
-            if ($response->getStatus() !== 501) {
-                echo 'Creation of institutions is not allowed when the authorisation is not specified. '
-                . 'There is something wrong because it is still created.';
-            }
-        }
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -71,85 +72,61 @@ class GetInstitutionTest extends AbstractTest
 
     public function testAllInstitutions()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResources('institutions');
     }
 
     public function testAllInstitutionsJson()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesJson('institutions');
     }
 
     public function testAllInstitutionsJsonP()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesJsonP('institutions');
     }
 
     public function testAllInstitutionsRDFXML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-           echo self::$message;
-           return;
-        }
         $this->allResourcesRDFXML('institutions');
     }
 
     public function testAllInstitutionsHTML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesHTML('institutions');
     }
 
     public function testInstitution()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resource('institutions', 'example');
+        } else {
+            $this->resource('institutions', 'test');
         }
-        $this->resource('institutions', 'test');
     }
 
     public function testInstitutionJson()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-           echo self::$message;
-           return;
+        if (!self::$init['optional.backward_compatible']) {
+            $this->resourceJson('institutions', 'test');
         }
-        $this->resourceJson('institutions', 'test');
         $this->resourceJson('institutions', 'example');
     }
 
     public function testInstitutionJsonP()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (!self::$init['optional.backward_compatible']) {
+            $this->resourceJsonP('institutions', 'test');
         }
-        $this->resourceJsonP('institutions', 'test');
         $this->resourceJsonP('institutions', 'example');
     }
 
     public function testInstitutionHTML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resourceHTML('institutions', 'example');
+        } else {
+            $this->resourceHTML('institutions', 'test');
         }
-        $this->resourceHTML('institutions', 'test');
     }
 
     ////////////////////////////////////
@@ -186,19 +163,33 @@ class GetInstitutionTest extends AbstractTest
 
     protected function assertionsJsonResources($institutions)
     {
-        $this->assertEquals(NUMBER_INSTITUTIONS, count($institutions["docs"]));
-        $this->assertionsJsonResource($institutions["docs"][0], false);
-        $this->assertionsJsonResource($institutions["docs"][1], false);
+        if (self::$init['optional.backward_compatible']) {
+            $this->assertEquals(1, count($institutions["docs"]));
+            $this->assertionsJsonResource($institutions["docs"][0], false);
+        } else {
+            $this->assertEquals(NUMBER_INSTITUTIONS, count($institutions["docs"]));
+            $this->assertionsJsonResource($institutions["docs"][0], false);
+            $this->assertionsJsonResource($institutions["docs"][1], false);
+        }
     }
 
     protected function assertionsXMLRDFResource(\Zend_Dom_Query $dom)
     {
-        $results1 = $dom->query('openskos:code');
-        $results2 = $dom->query('vcard:orgname');
-        $results3 = $dom->query('vcard:EMAIL');
-        $this->AssertEquals("test", $results1->current()->nodeValue);
-        $this->AssertEquals("test-tenant", $results2->current()->nodeValue);
-        $this->AssertEquals("info@test.nl", $results3->current()->nodeValue);
+        if (self::$init['optional.backward_compatible']) {
+            $results1 = $dom->query('openskos:code');
+            $results2 = $dom->query('vcard:orgname');
+            $results3 = $dom->query('vcard:EMAIL');
+            $this->AssertEquals("example", $results1->current()->nodeValue);
+            $this->AssertEquals("test tenant", $results2->current()->nodeValue);
+            $this->AssertEquals("admin@test.com", $results3->current()->nodeValue);
+        } else {
+            $results1 = $dom->query('openskos:code');
+            $results2 = $dom->query('vcard:orgname');
+            $results3 = $dom->query('vcard:EMAIL');
+            $this->AssertEquals("test", $results1->current()->nodeValue);
+            $this->AssertEquals("test-tenant", $results2->current()->nodeValue);
+            $this->AssertEquals("info@test.nl", $results3->current()->nodeValue);
+        }
     }
 
     protected function assertionsXMLRDFResources($response)
@@ -206,7 +197,11 @@ class GetInstitutionTest extends AbstractTest
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentXML($response->getBody());
         $results1 = $dom->query('rdf:Description');
-        $this->assertEquals(NUMBER_INSTITUTIONS, count($results1));
+        if (self::$init['optional.backward_compatible']) {
+            $this->assertEquals(1, count($results1));
+        } else {
+            $this->assertEquals(NUMBER_INSTITUTIONS, count($results1));
+        }
         $namespaces = array(
             "vcard" => "http://www.w3.org/2006/vcard/ns#"
         );
@@ -222,13 +217,22 @@ class GetInstitutionTest extends AbstractTest
         $formats = $dom->query('ul > li > a');
 
         $title = $this->getByIndex($header2, $i)->nodeValue;
-        $this->AssertEquals('test-tenant', $title);
+
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals('test tenant', $title);
+        } else {
+            $this->AssertEquals('test-tenant', $title);
+        }
 
         $i = 0;
         $j = 0;
         foreach ($items as $item) {
             if ($item->nodeValue === "code:") {
-                $this->AssertEquals("test", $this->getbyIndex($values, $j)->nodeValue);
+                if (self::$init['optional.backward_compatible']) {
+                    $this->AssertEquals("example", $this->getbyIndex($values, $j)->nodeValue);
+                } else {
+                    $this->AssertEquals("test", $this->getbyIndex($values, $j)->nodeValue);
+                }
                 $i++;
             }
             if ($item->nodeValue === "type:") {
@@ -246,11 +250,23 @@ class GetInstitutionTest extends AbstractTest
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentHTML($response->getBody());
         $institutions = $dom->query('ul > li > a > strong');
-        $this->AssertEquals(NUMBER_INSTITUTIONS, count($institutions));
-        $title = $this->getByIndex($institutions, 1)->nodeValue;
-        $this->AssertEquals('test-tenant', $title);
+
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals(1, count($institutions));
+            $title = $this->getByIndex($institutions, 0)->nodeValue;
+            $this->AssertEquals('test tenant', $title);
+        } else {
+            $this->AssertEquals(NUMBER_INSTITUTIONS, count($institutions));
+            $title = $this->getByIndex($institutions, 1)->nodeValue;
+            $this->AssertEquals('test-tenant', $title);
+        }
+        
         $list = $dom->query('ul > li > a');
-        $this->AssertEquals(2, count($list) - NUMBER_INSTITUTIONS);
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals(2+1, count($list)); // 2 for available formats
+        } else {
+            $this->AssertEquals(2+NUMBER_INSTITUTIONS, count($list)); 
+        }
     }
 
 }

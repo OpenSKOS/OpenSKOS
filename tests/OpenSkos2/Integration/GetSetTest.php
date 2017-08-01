@@ -9,10 +9,18 @@ class GetSetTest extends AbstractTest
 
     public static function setUpBeforeClass()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        self::$init = self::getInit();
         self::$createdresourses = array();
-
         self::$client = new \Zend_Http_Client();
+
+        if (empty(self::$init['optional.authorisation'])) {
+            return;
+        }
+
+        if (!(self::$init['optional.authorisation'])) {
+            return;
+        }
+
         self::$client->setConfig(array(
             'maxredirects' => 0,
             'timeout' => 30));
@@ -44,14 +52,6 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     </rdf:Description>
   </rdf:RDF>';
         $response = self::create($xml, API_KEY_ADMIN, 'collections', true);
-        if (empty(self::$init['optional.authorisation'])) {
-            echo 'These tests must be run when an authorisation procedure is specified. '
-            . 'Now the authroisation is not specified, update application.ini.';
-            if ($response->getStatus() !== 501) {
-                echo 'Creation of institutions is not allowed when the authorisation is not specified. '
-                . 'There is something wrong because it is still created.';
-            }
-        }
         if ($response->getStatus() === 201) {
             array_push(self::$createdresourses, self::getAbout($response));
         } else {
@@ -69,83 +69,63 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     public function testAllSets()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResources('collections');
     }
 
     public function testAllSetsJson()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesJson('collections');
     }
 
     public function testAllSetsJsonP()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesJsonP('collections');
     }
 
     public function testAllISetsRDFXML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesRDFXML('collections');
     }
 
     public function testAllSetsHTML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
-        }
         $this->allResourcesHTML('collections');
     }
 
     public function testSet()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resource('collections', 'Test Set 01');
+        } else {
+            $this->resource('set', 'test-set');
         }
-        $this->resource('collections', 'test-set');
     }
 
     public function testSetJson()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resourceJson('collections', 'Test Set 01');
+        } else {
+            $this->resourceJson('set', 'test-set');
         }
-        $this->resourceJson('collections', 'test-set');
     }
 
     public function testSetJsonP()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resourceJsonP('collections', 'Test Set 01');
+        } else {
+            $this->resourceJsonP('set', 'test-set');
         }
-        $this->resourceJsonP('collections', 'test-set');
     }
 
     public function testSetHTML()
     {
-        if (empty(self::$init['optional.authorisation'])) {
-            echo self::$message;
-            return;
+        if (self::$init['optional.backward_compatible']) {
+            $this->resourceHTML('collections', 'Test Set 01');
+        } else {
+            $this->resourceHTML('set', 'test-set');
         }
-        $this->resourceHTML('collections', 'test-set');
     }
 
     ////////////////////////////////////
@@ -172,16 +152,25 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
 
     protected function assertionsJsonResources($sets)
     {
-        $this->assertEquals(NUMBER_SETS, count($sets["docs"]));
-        $this->assertionsJsonResource($sets["docs"][0], false);
-        $this->assertionsJsonResource($sets["docs"][1], false);
+        if (self::$init['optional.backward_compatible']) {
+            $this->assertEquals(1, count($sets["docs"]));
+            $this->assertionsJsonResource($sets["docs"][0], false);
+        } else {
+            $this->assertEquals(NUMBER_SETS, count($sets["docs"]));
+            $this->assertionsJsonResource($sets["docs"][0], false);
+            $this->assertionsJsonResource($sets["docs"][1], false);
+        }
     }
 
     protected function assertionsXMLRDFResource(\Zend_Dom_Query $dom)
     {
         $results1 = $dom->query('openskos:code');
         $results2 = $dom->query('dcterms:publisher');
-        $this->AssertEquals("test-set", $results1->current()->nodeValue);
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals("Test Set 01", $results1->current()->nodeValue);
+        } else {
+            $this->AssertEquals("test-set", $results1->current()->nodeValue);
+        }
         $this->AssertEquals(TENANT_URI, $results2->current()->getAttribute('rdf:resource'));
     }
 
@@ -190,7 +179,11 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentXML($response->getBody());
         $descriptions = $dom->query('rdf:Description');
-        $this->assertEquals(NUMBER_SETS, count($descriptions));
+        if (self::$init['optional.backward_compatible']) {
+            $this->assertEquals(1, count($descriptions));
+        } else {
+            $this->assertEquals(NUMBER_SETS, count($descriptions));
+        }
         foreach ($descriptions as $description) {
             $code = $description->getElementsByTagName('code')->item(0)->nodeValue;
             $publisher = $description->getElementsByTagName('publisher')->item(0)->getAttribute('rdf:resource');
@@ -221,7 +214,11 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $formats = $dom->query('ul > li > a');
 
         $title = $this->getByIndex($header2, $i)->nodeValue;
-        $this->AssertEquals('Test Set', $title);
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals('Test Set 01', $title);
+        } else {
+            $this->AssertEquals('Test Set', $title);
+        }
         $this->AssertEquals(3, count($formats));
     }
 
@@ -232,8 +229,13 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $sets = $dom->query('ul > li > a > strong');
         $this->AssertEquals(NUMBER_SETS, count($sets));
         $title = $this->getByIndex($sets, 1)->nodeValue;
-        $this->AssertEquals('Test Set', $title);
+        if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals('Test Set 01', $title);
+        } else {
+            $this->AssertEquals('Test Set', $title);
+        }
         $list = $dom->query('ul > li > a');
+        
         $this->AssertEquals(2, count($list) - NUMBER_SETS);
     }
 

@@ -9,8 +9,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     protected static $createdresourses;
     private static $resourceManager;
     protected static $init;
-    protected static $message = "\n These tests must be run when an authorisation procedure is specified. Now the authroisation is not specified, update application.ini.";
-
+    
     protected static function create($xml, $apikey, $resourcetype, $autoGenerateIdentifiers = false)
     {
         self::$client->resetParameters();
@@ -359,6 +358,18 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
         $response = self::$client->request(\Zend_Http_Client::GET);
 
         return $response;
+    }
+    
+    protected static function getInit(){
+        $init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        if (empty($init)) {
+           $init['optional.backward_compatible']= true;
+           return $init;
+        }
+        if (empty($init['optional.backward_compatible'])) {
+           $init['optional.backward_compatible']= true;
+           return $init;
+        }
     }
     
 

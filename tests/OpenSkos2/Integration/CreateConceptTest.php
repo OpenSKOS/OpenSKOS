@@ -9,7 +9,7 @@ class CreateConceptTest extends AbstractTest
 
     public function setUp()
     {
-        self::$init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        self::$init = self::getInit();
         self::$client = new \Zend_Http_Client();
         self::$client->setConfig(array(
             'maxredirects' => 0,
@@ -47,7 +47,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
         
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
+        $this->AssertEquals(201, $response->getStatus());//, $response->getBody());
         if ($response->getStatus() === 201) {
             $this->CheckCreatedConcept($response);
         } 
@@ -382,4 +382,6 @@ class CreateConceptTest extends AbstractTest
         $dateAccepted = $dom->queryXpath('/rdf:RDF/rdf:Description/dcterms:dateAccepted');
         $this->assertEquals(0, $dateAccepted->count(), "Just created concept cannt have dcterm:dateAccepted set.");
     }
+    
+    
 }

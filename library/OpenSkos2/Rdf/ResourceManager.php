@@ -1033,7 +1033,7 @@ class ResourceManager
         try {
             $config = \OpenSKOS_Application_BootstrapAccess::getOption('optional');
         } catch (\Zend_Exception $e) {
-            $config = array();
+           $config = $this->makeDefaultInit(); 
         }
         return $config;
     }
@@ -1051,5 +1051,22 @@ class ResourceManager
             $instance = $class->newInstanceArgs([$this]);
             return $instance;
         }
+    }
+    
+    private function makeDefaultInit(){
+        // making a default config
+            $config = array();
+            $config['maximal_rows']=20;
+            $config['limit']=20;
+            $config['normal_time_limit']=30;
+            $config['maximal_time_limit']=$config['normal_time_limit'];
+            $config['backward_compatible'] = true;
+            $config['authorisation'] = null;
+            $config['relation_types'] = null;
+            $config['uri_generate'] = null;
+            $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, http://www.w3.org/2004/02/skos/core#broaderTransitive, http://www.w3.org/2004/02/skos/core#narrower,http://www.w3.org/2004/02/skos/core#narrowerTransitive";
+            $config['relations_soft_reference_check'] = "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
+            $config['uuid_regexp_prefixes'] = '';
+            return $config;
     }
 }

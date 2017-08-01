@@ -65,7 +65,7 @@ abstract class AbstractTripleStoreResource
      *
      * @var int
      */
-    protected $limit = 20;
+    protected $limit;
 
     /**
      * Get PSR-7 response for resource

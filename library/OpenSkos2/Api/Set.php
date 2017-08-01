@@ -28,8 +28,9 @@ class Set extends AbstractTripleStoreResource
     
         $this->manager = $manager;
         $this->customInit = $this->manager->getCustomInitArray();
-         $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
+        $this->limit = $this->customInit['limit'];
     }
 
     /**

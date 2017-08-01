@@ -43,14 +43,14 @@ class BackwardCompatibility
         
         $oldStyleBodyArray = [
             "code" => ($newStyleBody["code"]),
-            "name" => ($newStyleBody["vcard_org"][0]["vcard_orgname"]),
+            "name" => ($newStyleBody["vcard_org"]["vcard_orgname"]),
             "disableSearchInOtherTenants" => ($newStyleBody["disableSearchInOtherTenants"]),
             "enableStatussesSystem" => ($newStyleBody["enableStatussesSystem"]),
             "enableSkosXl"=> ($enableSkosXl),
         ];
         
-        if (isset($newStyleBody["vcard_org"][0]["vcard_orgunit"])) {
-            $oldStyleBodyArray["organisationUnit"] = $newStyleBody["vcard_org"][0]["vcard_orgunit"];
+        if (isset($newStyleBody["vcard_org"]["vcard_orgunit"])) {
+            $oldStyleBodyArray["organisationUnit"] = $newStyleBody["vcard_org"]["vcard_orgunit"];
         }
         if (isset($newStyleBody["vcard_email"])) {
             $oldStyleBodyArray["email"] = $newStyleBody["vcard_email"];
@@ -58,17 +58,17 @@ class BackwardCompatibility
         if (isset($newStyleBody["vcard_url"])) {
             $oldStyleBodyArray["webpage"] = $newStyleBody["vcard_url"];
         }
-        if (isset($newStyleBody["vcard_adr"][0]["vcard_street"])) {
-            $oldStyleBodyArray["streetAddress"] = $newStyleBody["vcard_adr"][0]["vcard_street"];
+        if (isset($newStyleBody["vcard_adr"]["vcard_street"])) {
+            $oldStyleBodyArray["streetAddress"] = $newStyleBody["vcard_adr"]["vcard_street"];
         }
-        if (isset($newStyleBody["vcard_adr"][0]["vcard_locality"])) {
-            $oldStyleBodyArray["locality"] = $newStyleBody["vcard_adr"][0]["vcard_locality"];
+        if (isset($newStyleBody["vcard_adr"]["vcard_locality"])) {
+            $oldStyleBodyArray["locality"] = $newStyleBody["vcard_adr"]["vcard_locality"];
         }
-        if (isset($newStyleBody["vcard_adr"][0]["vcard_pcode"])) {
-            $oldStyleBodyArray["postalCode"] = $newStyleBody["vcard_adr"][0]["vcard_pcode"];
+        if (isset($newStyleBody["vcard_adr"]["vcard_pcode"])) {
+            $oldStyleBodyArray["postalCode"] = $newStyleBody["vcard_adr"]["vcard_pcode"];
         }
-        if (isset($newStyleBody["vcard_adr"][0]["vcard_country"])) {
-            $oldStyleBodyArray["countryName"] = $newStyleBody["vcard_adr"][0]["vcard_country"];
+        if (isset($newStyleBody["vcard_adr"]["vcard_country"])) {
+            $oldStyleBodyArray["countryName"] = $newStyleBody["vcard_adr"]["vcard_country"];
         }
         
         
