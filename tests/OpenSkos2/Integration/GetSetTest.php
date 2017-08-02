@@ -95,7 +95,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     public function testSet()
     {
         if (self::$init['optional.backward_compatible']) {
-            $this->resource('collections', 'Test Set 01');
+            $this->resource('collections', 'set01');
         } else {
             $this->resource('set', 'test-set');
         }
@@ -104,7 +104,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     public function testSetJson()
     {
         if (self::$init['optional.backward_compatible']) {
-            $this->resourceJson('collections', 'Test Set 01');
+            $this->resourceJson('collections', 'set01');
         } else {
             $this->resourceJson('set', 'test-set');
         }
@@ -113,7 +113,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     public function testSetJsonP()
     {
         if (self::$init['optional.backward_compatible']) {
-            $this->resourceJsonP('collections', 'Test Set 01');
+            $this->resourceJsonP('collections', 'set01');
         } else {
             $this->resourceJsonP('set', 'test-set');
         }
@@ -122,7 +122,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     public function testSetHTML()
     {
         if (self::$init['optional.backward_compatible']) {
-            $this->resourceHTML('collections', 'Test Set 01');
+            $this->resourceHTML('collections', 'set01');
         } else {
             $this->resourceHTML('set', 'test-set');
         }
@@ -167,7 +167,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $results1 = $dom->query('openskos:code');
         $results2 = $dom->query('dcterms:publisher');
         if (self::$init['optional.backward_compatible']) {
-            $this->AssertEquals("Test Set 01", $results1->current()->nodeValue);
+            $this->AssertEquals("set01", $results1->current()->nodeValue);
         } else {
             $this->AssertEquals("test-set", $results1->current()->nodeValue);
         }
@@ -219,7 +219,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         } else {
             $this->AssertEquals('Test Set', $title);
         }
-        $this->AssertEquals(3, count($formats));
+       
     }
 
     protected function assertionsHTMLAllResources($response)
@@ -227,16 +227,21 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         $dom = new \Zend_Dom_Query();
         $dom->setDocumentHTML($response->getBody());
         $sets = $dom->query('ul > li > a > strong');
-        $this->AssertEquals(NUMBER_SETS, count($sets));
-        $title = $this->getByIndex($sets, 1)->nodeValue;
+       
         if (self::$init['optional.backward_compatible']) {
+            $this->AssertEquals(1, count($sets));
+            $title = $this->getByIndex($sets, 0)->nodeValue;
             $this->AssertEquals('Test Set 01', $title);
+            $list = $dom->query('ul > li > a');
+            $this->AssertEquals(2+1, count($list));
         } else {
+             $this->AssertEquals(NUMBER_SETS, count($sets));
+            $title = $this->getByIndex($sets, 1)->nodeValue;
             $this->AssertEquals('Test Set', $title);
+            $list = $dom->query('ul > li > a');
+            $this->AssertEquals(2+NUMBER_SETS, count($list));
         }
-        $list = $dom->query('ul > li > a');
         
-        $this->AssertEquals(2, count($list) - NUMBER_SETS);
     }
 
 }
