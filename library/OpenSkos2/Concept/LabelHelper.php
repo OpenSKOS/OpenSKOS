@@ -58,7 +58,7 @@ class LabelHelper
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
             throw new TenantNotFoundException(
-                'Could not determite tenant for concept.'
+                'Could not determine tenant for concept.'
             );
         }
 
