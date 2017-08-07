@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/d25d2bd9-7c5e-4b6b-baf5-cd0055c93b10 --file=clavas-organisations.xml
+// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f --file=clavas-organisations.xml
 
 include dirname(__FILE__) . '/autoload.inc.php';
 
