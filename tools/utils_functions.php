@@ -19,9 +19,7 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-/* VOORBEELD!!!!
- * Run the file as :  php tenant.php --epic=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
- */
+
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -645,10 +643,10 @@ class Institutions
             } else {
                $skosXl = "false";
             }
-            if (!empty($row->epic)) {
-               $epic = $row->epic; 
+            if (!empty($row->email)) {
+               $email = $row->email; 
             } else {
-               $epic = "false";
+               $email = "unknown";
             }
             if (!empty($row->enableStatussesSystem)) {
                $enableStatussesSystem = $row->enableStatussesSystem; 
@@ -659,6 +657,7 @@ class Institutions
                 $row->name, 
                 $uri, 
                 $uuid, 
+                $email,
                 $row->disableSearchInOtherTenants, 
                 $enableStatussesSystem, 
                 $skosXl, 
