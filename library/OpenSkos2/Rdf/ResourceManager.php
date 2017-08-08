@@ -1027,6 +1027,55 @@ class ResourceManager
         }
         return $response[0]->name->getValue();
     }
+    
+    public function fetchResourceFilters()
+    {
+        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+            . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . \OpenSkos2\SkosCollection::TYPE . '> || ?type = <' . \OpenSkos2\ConceptScheme::TYPE .
+            '> || ?type = <' . \OpenSkos2\Set::TYPE . '>  ) } '
+            . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
+            . ' FILTER ( ?type = <' . \OpenSkos2\Tenant::TYPE . '>)} } ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[ \OpenSkos2\SkosCollection::TYPE] = [];
+        $retVal[\OpenSkos2\ConceptScheme::TYPE] = [];
+        $retVal[\OpenSkos2\Set::TYPE] = [];
+        $retVal[\OpenSkos2\Tenant::TYPE] = [];
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['uri'] = $descr->uri->getUri();
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
+        }
+        return $retVal;
+    }
+    public function fetchResourceFiltersForRelations()
+    {
+        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+            . ' {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . Owl::OBJECT_PROPERTY . '> || ?type = <' . \OpenSkos2\ConceptScheme::TYPE . '> )} ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[Owl::OBJECT_PROPERTY] = [];
+        $retVal[\OpenSkos2\ConceptScheme::TYPE] = [];
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['uri'] = $descr->uri->getUri();
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
+        }
+        $skosrels = Skos::getSkosConceptConceptRelations();
+        $len = strlen(Skos::NAME_SPACE);
+        foreach ($skosrels as $skosrel) {
+            $spec = [];
+            $spec['uri'] = $skosrel;
+            $spec['title'] = 'skos:' . substr($skosrel, $len);
+            $retVal[Owl::OBJECT_PROPERTY][] = $spec;
+        }
+        return $retVal;
+    }
 
     private function getCustomIni()
     {
