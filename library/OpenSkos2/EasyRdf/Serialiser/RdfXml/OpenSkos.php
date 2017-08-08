@@ -34,7 +34,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
     public function serialise(\EasyRdf\Graph $graph, $format, array $options = array())
     {
-        parent::checkSerialiseParams($format);
+        parent::checkSerialiseParams($graph, $format);
         if ($format != 'rdfxml_openskos') {
             throw new OpenSkosException(
                 "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
