@@ -1032,7 +1032,8 @@ class ResourceManager
     {
         $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
             . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
-            . 'FILTER ( ?type = <' . \OpenSkos2\SkosCollection::TYPE . '> || ?type = <' . \OpenSkos2\ConceptScheme::TYPE .
+            . 'FILTER ( ?type = <' . \OpenSkos2\SkosCollection::TYPE . '> || '
+            . '?type = <' . \OpenSkos2\ConceptScheme::TYPE .
             '> || ?type = <' . \OpenSkos2\Set::TYPE . '>  ) } '
             . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
             . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
@@ -1082,7 +1083,7 @@ class ResourceManager
         try {
             $config = \OpenSKOS_Application_BootstrapAccess::getOption('optional');
         } catch (\Zend_Exception $e) {
-           $config = $this->makeDefaultInit(); 
+            $config = $this->makeDefaultInit();
         }
         return $config;
     }
@@ -1102,7 +1103,8 @@ class ResourceManager
         }
     }
     
-    private function makeDefaultInit(){
+    private function makeDefaultInit()
+    {
         // making a default config
             $config = array();
             $config['maximal_rows']=20;
@@ -1113,8 +1115,15 @@ class ResourceManager
             $config['authorisation'] = null;
             $config['relation_types'] = null;
             $config['uri_generate'] = null;
-            $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, http://www.w3.org/2004/02/skos/core#broaderTransitive, http://www.w3.org/2004/02/skos/core#narrower,http://www.w3.org/2004/02/skos/core#narrowerTransitive";
-            $config['relations_soft_reference_check'] = "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
+            $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, "
+                . "http://www.w3.org/2004/02/skos/core#broaderTransitive, "
+                . "http://www.w3.org/2004/02/skos/core#narrower,"
+                . "http://www.w3.org/2004/02/skos/core#narrowerTransitive";
+            $config['relations_soft_reference_check'] =
+                "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,"
+                . "http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,"
+                . "http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,"
+                . "http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
             $config['uuid_regexp_prefixes'] = '';
             return $config;
     }

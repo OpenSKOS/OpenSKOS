@@ -152,7 +152,6 @@ class DataArray
 
             // Some values only have a URI but not getValue or getLanguage
             if ($val instanceof \OpenSkos2\Rdf\Uri && !method_exists($val, 'getLanguage')) {
-                
                 if ($val instanceof Resource) {
                     if ($settings['repeatable']) {
                         $resource[$field][] = (new DataArray($val))->transform();
