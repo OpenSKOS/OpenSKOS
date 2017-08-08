@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: jsmit
@@ -15,23 +16,32 @@ use OpenSkos2\Rdf\Uri;
 class InSchemeTest extends \PHPUnit_Framework_TestCase
 {
 
-
     public function testValidate()
     {
-        $validator = new InScheme();
+        $validator = new InScheme(false, false); // reference check is switched off
+        // reference check was not assumed when this test was created by Picturae
+        
         $concept = new Concept('http://example.com#1');
 
         //no scheme
         $this->assertFalse($validator->validate($concept));
 
-        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme1'));
-
+        $validator->emptyErrorMessages(); 
+        $validator->emptyWarningMessages();
+        $validator->emptyDanglingReferences();
+        
+        $concept->addProperty(Skos::INSCHEME, new Uri('http://example.com#scheme1'));
         //1 scheme
-        $this->assertTrue($validator->validate($concept));
+        $this->assertTrue($validator->validate($concept), implode(",",$validator->getErrorMessages()));
 
-        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme2'));
+        $validator->emptyErrorMessages(); 
+        $validator->emptyWarningMessages();
+        $validator->emptyDanglingReferences();
+        
+        $concept->addProperty(Skos::INSCHEME, new Uri('http://example.com#scheme2'));
 
         //2 schemes
         $this->assertTrue($validator->validate($concept));
     }
+
 }

@@ -14,7 +14,7 @@ class IntegrityCheck
 
     public function canBeDeleted($uri)
     {
-        if (count($this->scutomInit) === 0) {
+        if (count($this->cutomInit) === 0) {
             $integrity_check_on = "false";
         } else {
             $integrity_check_on = $this->customInit["delete"]["integrity_check"];

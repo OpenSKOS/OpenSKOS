@@ -950,6 +950,7 @@ class ResourceManager
     
 
 
+
         if ($customRelUris == null) {
             $customRelUris = array_values($this->getCustomRelationTypes());
         }
@@ -1027,7 +1028,7 @@ class ResourceManager
         }
         return $response[0]->name->getValue();
     }
-    
+
     public function fetchResourceFilters()
     {
         $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
@@ -1040,7 +1041,7 @@ class ResourceManager
             . ' FILTER ( ?type = <' . \OpenSkos2\Tenant::TYPE . '>)} } ';
         $response = $this->query($query);
         $retVal = [];
-        $retVal[ \OpenSkos2\SkosCollection::TYPE] = [];
+        $retVal[\OpenSkos2\SkosCollection::TYPE] = [];
         $retVal[\OpenSkos2\ConceptScheme::TYPE] = [];
         $retVal[\OpenSkos2\Set::TYPE] = [];
         $retVal[\OpenSkos2\Tenant::TYPE] = [];
@@ -1052,6 +1053,7 @@ class ResourceManager
         }
         return $retVal;
     }
+
     public function fetchResourceFiltersForRelations()
     {
         $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
@@ -1093,38 +1095,43 @@ class ResourceManager
         if (count($this->customInit) === 0) {
             return null;
         }
-        $className = $this->customInit[$typeoption];
-        if (empty($className)) {
-            return null;
+        if (key_exists($typeoption, $this->customInit)) {
+            $className = $this->customInit[$typeoption];
+            if (empty($className)) {
+                return null;
+            } else {
+                $class = new \ReflectionClass($className);
+                $instance = $class->newInstanceArgs([$this]);
+                return $instance;
+            }
         } else {
-            $class = new \ReflectionClass($className);
-            $instance = $class->newInstanceArgs([$this]);
-            return $instance;
+            return null;
         }
     }
-    
+
     private function makeDefaultInit()
     {
         // making a default config
-            $config = array();
-            $config['maximal_rows']=20;
-            $config['limit']=20;
-            $config['normal_time_limit']=30;
-            $config['maximal_time_limit']=$config['normal_time_limit'];
-            $config['backward_compatible'] = true;
-            $config['authorisation'] = null;
-            $config['relation_types'] = null;
-            $config['uri_generate'] = null;
-            $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, "
-                . "http://www.w3.org/2004/02/skos/core#broaderTransitive, "
-                . "http://www.w3.org/2004/02/skos/core#narrower,"
-                . "http://www.w3.org/2004/02/skos/core#narrowerTransitive";
-            $config['relations_soft_reference_check'] =
-                "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,"
-                . "http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,"
-                . "http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,"
-                . "http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
-            $config['uuid_regexp_prefixes'] = '';
-            return $config;
+        $config = array();
+        $config['maximal_rows'] = 20;
+        $config['limit'] = 20;
+        $config['normal_time_limit'] = 30;
+        $config['maximal_time_limit'] = $config['normal_time_limit'];
+        $config['backward_compatible'] = true;
+        $config['authorisation'] = null;
+        $config['relation_types'] = null;
+        $config['uri_generate'] = null;
+        $config['relations_strict_reference_check'] =
+            "http://www.w3.org/2004/02/skos/core#broader, "
+            . "http://www.w3.org/2004/02/skos/core#broaderTransitive, "
+            . "http://www.w3.org/2004/02/skos/core#narrower,"
+            . "http://www.w3.org/2004/02/skos/core#narrowerTransitive";
+        $config['relations_soft_reference_check'] =
+            "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,"
+            . "http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,"
+            . "http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,"
+            . "http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
+        $config['uuid_regexp_prefixes'] = '';
+        return $config;
     }
 }

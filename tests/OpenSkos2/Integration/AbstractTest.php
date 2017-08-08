@@ -370,6 +370,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
            $init['optional.backward_compatible']= true;
            return $init;
         }
+        return $init;
     }
     
 

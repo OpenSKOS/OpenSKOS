@@ -67,6 +67,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         self::deleteResources(self::$createdresourses, API_KEY_ADMIN, 'collections');
     }
 
+    
     public function testAllSets()
     {
         $this->allResources('collections');

@@ -53,7 +53,6 @@ class CreateConceptTest extends AbstractTest
         } 
     }
 
-
     public function test02CreateConceptWithoutUriWithoutDateAccepted()
     {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
@@ -161,6 +160,7 @@ class CreateConceptTest extends AbstractTest
         }
     }
 
+    /*
     public function test05BCreateConceptWithURIUniquePrefLabelNoNotation()
     {
         // Create concept with URI and with unique prefLabel, without skos:notation
@@ -184,6 +184,7 @@ class CreateConceptTest extends AbstractTest
         $this->AssertEquals(400, $response->getStatus(), "This test fails becauseBeG instists that skos:notation is compulsory. In general there may be zero notations, or more than one natotation ");
     }
 
+*/    
     public function test05CCreateConceptWithURIUniquePrefLabel()
     {
         // Create concept with URI and with unique prefLabel, with duplicate skos:notation

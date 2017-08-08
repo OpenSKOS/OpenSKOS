@@ -64,11 +64,13 @@ class RelationinstanceTest extends AbstractTest
 
     public function testCreateRelation()
     {
+        
         print "\n" . "Test: create relation 1 related 2 via text body";
         $body = 'concept=' . self::$about1 . '&type=http://www.w3.org/2004/02/skos/core#narrower&related=' . self::$about2;
         $response = $this->createRelationTriple($body);
         $this->AssertEquals(200, $response->getStatus(), $response->getHeader('X-Error-Msg'));
 // todo: add assertions
+         
     }
 
     private function createRelationTriple($body)
