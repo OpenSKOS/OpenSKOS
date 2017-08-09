@@ -773,7 +773,7 @@ class ResourceManager
             \OpenSkos2\Concept::TYPE . "> . "
             . "?concepturi  <" . $property . "> <$uri> . "
             . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
-            . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?serachid .}";
+            . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?searchid .}";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
