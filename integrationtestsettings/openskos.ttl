@@ -1,0 +1,45 @@
+@prefix :      <http://base/#> .
+@prefix tdb:   <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ja:    <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix fuseki: <http://jena.apache.org/fuseki#> .
+
+# Can be removed in later release https://issues.apache.org/jira/browse/JENA-1181
+tdb:GraphTDB rdfs:subClassOf ja:Model .
+
+:service_tdb_all
+        a                                   fuseki:Service ;
+        rdfs:label                          "TDB openskos" ;
+        fuseki:dataset                      <#openskos> ;
+        fuseki:name                         "openskos" ;
+        fuseki:serviceQuery                 "query" , "sparql" ;
+        fuseki:serviceReadGraphStore        "get" ;
+        fuseki:serviceReadWriteGraphStore   "data" ;
+        fuseki:serviceUpdate                "update" ;
+        fuseki:serviceUpload                "upload"
+.
+
+<#openskos> 
+        a       ja:RDFDataset ;    
+        ja:defaultGraph <#modelDft> ;
+.
+
+<#modelDft>
+        a       ja:InfModel ;
+        ja:baseModel <#tdbGraph> ;
+	ja:reasoner [
+		ja:rulesFrom <file:rules/skos>
+	]
+.
+
+<#tdbDataset>
+        a             tdb:DatasetTDB ;
+        tdb:location  "run/databases/openskos" ;
+        ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "30000" ] 
+.
+
+<#tdbGraph> 
+        a tdb:GraphTDB ;
+        tdb:dataset <#tdbDataset>
+.

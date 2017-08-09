@@ -1,0 +1,41 @@
+{
+    "require": {
+        "league/oauth2-client": "0.9.*",
+        "zendframework/zendframework1": "1.*",
+        "easyrdf/easyrdf": "dev-master",
+        "psr/log": "^1.0",
+        "php-di/zf1-bridge": "^3.1",
+        "doctrine/cache": "~1.0",
+        "monolog/monolog": "^1.16",
+        "ramsey/uuid": "^2.8",
+        "picturae/oai-pmh": "^0.5.0",
+        "zendframework/zend-diactoros": "^1.1",
+        "benestar/asparagus": "^0.4",
+        "ml/json-ld": "^1.0",
+        "solarium/solarium": "^3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "OpenSkos2\\": "library/OpenSkos2",
+            "Custom\\": "library/Custom"
+        },
+        "psr-0": {
+            "OpenSKOS_": "library/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "squizlabs/php_codesniffer": "^2.7"
+    },
+    "scripts": {
+        "validate": [
+            "phpcs library/OpenSkos2 --standard=PSR2"
+        ],
+        "format": [
+            "phpcbf library/OpenSkos2 --standard=PSR2 --no-patch"
+        ],
+        "post-install-cmd": [
+            "bash contrib/setup.sh"
+        ]
+    }
+}

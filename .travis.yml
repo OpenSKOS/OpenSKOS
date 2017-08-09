@@ -15,6 +15,7 @@ matrix:
 
 install:
   - composer install --dev --prefer-dist
+  - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
 
