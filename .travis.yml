@@ -15,7 +15,8 @@ matrix:
 
 install:
   - composer install --dev --prefer-dist
-  - sudo ./install-test-env.sh
+  - chmod +x install-test-env.sh
+  - ./install-test-env.sh
 
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
