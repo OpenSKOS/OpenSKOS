@@ -14,6 +14,3 @@ cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/solrconfig.xml /opt/solr/serve
 cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
 cp /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh /home/travis/build/start-solr.sh
 chmod 755 /home/travis/build/start-solr.sh
-
-# back to the application directory
-cd /home/travis/build/OpenSKOS/OpenSKOS

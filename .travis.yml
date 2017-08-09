@@ -18,6 +18,8 @@ install:
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
+  - cd ..
+  - ls
 
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
