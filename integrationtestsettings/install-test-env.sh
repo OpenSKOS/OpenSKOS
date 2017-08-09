@@ -14,5 +14,5 @@ cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/solrconfig.xml /opt/solr/serve
 cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
 cp /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh /home/travis/build/start-solr.sh
 chmod 755 /home/travis/build/start-solr.sh
-mkdir /etc/supervisor/conf.d/
+mkdir -p /etc/supervisor/conf.d
 cp /home/travis/build/OpenSKOS/OpenSKOS/supervisord-solr.conf /etc/supervisor/conf.d/supervisord-solr.conf
