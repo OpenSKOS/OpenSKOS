@@ -26,5 +26,8 @@ cp -r /home/travis/build/OpenSKOS/OpenSKOS/data/fuseki/configuration /opt/apache
 mkdir /opt/apache-jena-fuseki/logs
 chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-fuseki.sh 
 
+#mysql
+chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-create.sql 
+
 # initialisation
 chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh 
