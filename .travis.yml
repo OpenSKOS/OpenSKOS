@@ -13,11 +13,17 @@ matrix:
   allow_failures:
     - php: hhvm
 
+before_install:
+  - sudo apt-get -qq update
+  - apt-get install -y apache2 
+  - echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 install:
   - composer install --dev --prefer-dist
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
+  - ./start-apache2.sh
   - ./start-solr.sh &
   - ./start-fuseki.sh &
   - mysql < openskos-create.sql

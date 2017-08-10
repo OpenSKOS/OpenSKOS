@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#install apache2
+
 cp  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/application.ini /home/travis/build/OpenSKOS/OpenSKOS/application/configs/application.ini 
 
 # install solr:
@@ -30,4 +32,5 @@ chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-fus
 chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-create.sql 
 
 # initialisation
-chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh 
+chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh
+chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-apache2.sh  
