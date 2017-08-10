@@ -25,7 +25,7 @@ install:
   - chmod -R ugo+rw public/data
   - sudo rm -rf /var/www/html 
   - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
-  - sudo chmod -R ugo+rw /var/www/html
+  - sudo chmod -R ugo+rw  /home/travis/build/OpenSKOS/OpenSKOS
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
