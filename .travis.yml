@@ -20,6 +20,8 @@ before_install:
 
 install:
   - composer install --dev --prefer-dist
+  - sudo -rf /var/www/html 
+  - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
