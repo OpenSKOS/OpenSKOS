@@ -1,4 +1,8 @@
 #!/bin/bash
+
+cat /opt/apache-jena-fuseki/logs/fuseki*.logs
+ps -ef
+
 cd /home/travis/build/OpenSKOS/OpenSKOS/tools
 
 php tenant.php --code=example --name="test tenant"  --uri=http://test.com --uuid=test_a --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=admin@test.com --password=password --apikey=xxx --action=create
