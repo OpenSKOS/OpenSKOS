@@ -20,6 +20,10 @@ install:
   - ./install-test-env.sh
   - cd ..
   - ls
+  - ./start-solr.sh &
+  - ./start-fuseki.sh &
+  - ./openskos-create.sql
+  - ./openskos-init.sh 
 
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
