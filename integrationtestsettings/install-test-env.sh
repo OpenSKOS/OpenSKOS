@@ -33,4 +33,3 @@ chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos
 
 # initialisation
 chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh
-chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-apache2.sh  
