@@ -27,4 +27,4 @@ mkdir /opt/apache-jena-fuseki/logs
 chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-fuseki.sh 
 
 # initialisation
-chmod 755/home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh 
+chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh 
