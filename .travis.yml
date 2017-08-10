@@ -20,7 +20,7 @@ install:
   - ./install-test-env.sh
   - ./start-solr.sh &
   - ./start-fuseki.sh &
-  - ./openskos-create.sql
+  - mysql > openskos-create.sql
   - ./openskos-init.sh
   - cd ..
   - ls
