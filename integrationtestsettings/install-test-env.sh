@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cp  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/application.ini /home/travis/build/OpenSKOS/OpenSKOS/application/configs/application.ini.dist 
+cp  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/application.ini /home/travis/build/OpenSKOS/OpenSKOS/application/configs/application.ini 
 
 # install solr:
 
