@@ -9,6 +9,8 @@ cd /home/travis/build/OpenSKOS/OpenSKOS/tools
 
 php tenant.php --code=example --name="test tenant"  --uri=http://test.com --uuid=test_a --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=admin@test.com --password=password --apikey=xxx --action=create
 
+wget -O - "http://localhost:80/public/api/institutions/example" 
+
 php user_account.php --adminkey=xxx --code=example --name=userguest  --email=userguest@mail.com --password=u3 --apikey=zzz --role=guest  create
 
 php user_account.php --adminkey=xxx --code=example --name=usereditor --email=usereditor@mail.com --password=u2 --apikey=yyy --role=editor  create
