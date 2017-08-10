@@ -1,8 +1,5 @@
 #!/bin/bash
-/run.sh &
-sleep 30
-mysql < /tmp/openskos-create.sql
-cd /app/test/tools
+cd /home/travis/build/tools
 
 php tenant.php --code=example --name="test tenant"  --uri=http://test.com --uuid=test_a --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=admin@test.com --password=password --apikey=xxx --action=create
 
@@ -16,3 +13,4 @@ php conceptscheme_or_skoscollection.php --tenant=example --key=xxx --setUri=http
 
 php conceptscheme_or_skoscollection.php --tenant=example --key=xxx --setUri=http://set01/set01abc --uri=http://scheme02/ --description="test scheme 2" --uuid=scheme02abc  --title="test scheme 02"  --restype=scheme create
 
+cd /home/travis/build/
