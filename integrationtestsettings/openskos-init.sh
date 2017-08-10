@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat /opt/apache-jena-fuseki/logs/fuseki*.logs
+cat /opt/apache-jena-fuseki/logs/fuseki*.log
 ps -ef
 
 cd /home/travis/build/OpenSKOS/OpenSKOS/tools
