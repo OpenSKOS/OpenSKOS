@@ -18,7 +18,7 @@ cp /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh /h
 chmod 755 /home/travis/build/start-solr.sh
 
 # install fuseki:
-mv /home/travis/build/OpenSKOS/OpenSKOS/apache-jena-fuseki-2.3.0.tar.gz /opt/apache-jena-fuseki
+mv /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/apache-jena-fuseki-2.3.0.tar.gz /opt/apache-jena-fuseki
 tar -zxvf /opt/apache-jena-fuseki/apache-jena-fuseki-2.3.0.tar.gz
 chmod -R ugo+rw /opt/apache-jena-fuseki 
 chmod +x /opt/apache-jena-fuseki/fuseki-server /opt/apache-jena-fuseki/bin/* 
