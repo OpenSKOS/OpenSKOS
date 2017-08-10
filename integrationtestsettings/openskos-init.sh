@@ -11,7 +11,7 @@ php tenant.php --code=example --name="test tenant"  --uri=http://test.com --uuid
 
 wget -O - "http://localhost:80/public/api/institutions/example" 
 
-cat /var/log/apache2/error.log
+sudo cat /var/log/apache2/error.log
 
 php user_account.php --adminkey=xxx --code=example --name=userguest  --email=userguest@mail.com --password=u3 --apikey=zzz --role=guest  create
 
