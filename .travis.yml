@@ -18,12 +18,12 @@ install:
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
-  - cd ..
-  - ls
   - ./start-solr.sh &
   - ./start-fuseki.sh &
   - ./openskos-create.sql
-  - ./openskos-init.sh 
+  - ./openskos-init.sh
+  - cd ..
+  - ls
 
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
