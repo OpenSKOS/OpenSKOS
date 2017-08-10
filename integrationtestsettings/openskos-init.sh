@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 30
+
 cat /opt/apache-jena-fuseki/logs/fuseki*.log
 ps -ef
 
