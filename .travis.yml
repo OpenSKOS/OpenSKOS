@@ -16,7 +16,6 @@ matrix:
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 -y
-  - sudo echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 install:
   - composer install --dev --prefer-dist
