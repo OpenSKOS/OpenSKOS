@@ -30,13 +30,12 @@ before_install:
 
 install:
   - composer install --dev --prefer-dist
+  - sudo rm -rf /var/www/html 
+  - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
+  - find /home/travis/build -type d -exec chmod ugo+x {} \;
   - chmod -R ugo+rw cache
   - chmod -R ugo+rw data
   - chmod -R ugo+rw public/data
-  - sudo rm -rf /var/www/html 
-  - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
-  - chmod -R ugo+rw  /home/travis/build/OpenSKOS/OpenSKOS
-  - find /home/travis/build/OpenSKOS/OpenSKOS -type d -exec chmod ugo+x {} \;
   - ls  /home/travis/build/OpenSKOS/OpenSKOS -Rl 
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
