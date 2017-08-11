@@ -38,7 +38,7 @@ install:
   - chmod -R ugo+rwx cache
   - chmod -R ugo+rwx data
   - chmod -R ugo+rwx public/data
-  - sudo find -user www-data /home/travis/build/OpenSKOS/OpenSKOS/public -print
+  - sudo find  /home/travis/build/OpenSKOS/OpenSKOS/public -user www-data -print
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
