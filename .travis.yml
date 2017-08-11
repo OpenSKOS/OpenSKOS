@@ -26,7 +26,7 @@ before_install:
   - sudo a2ensite openskos
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
-  - sudo usermod -a -G travis www-dat
+  - sudo usermod -a -G travis www-data
   
   
 
