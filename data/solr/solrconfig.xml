@@ -15,7 +15,7 @@
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
     <lockType>simple</lockType>
-    <unlockOnStartup>true</unlockOnStartup>
+    <!-- <unlockOnStartup>true</unlockOnStartup> -->
   </indexConfig>
 
   <updateHandler class="solr.DirectUpdateHandler2">
