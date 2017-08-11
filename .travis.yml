@@ -35,11 +35,11 @@ install:
   - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
   - sudo usermod -a -G travis www-data
   - sudo groups www-data
-  - sudo find /home/travis/build -group travis
   - find /home/travis/build -type d -exec chmod ugo+x {} \;
   - chmod -R ugo+rwx cache
   - chmod -R ugo+rwx data
   - chmod -R ugo+rwx public/data
+  - sudo service apache2 restart
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
