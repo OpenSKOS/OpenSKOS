@@ -14,7 +14,7 @@ mkdir /opt/solr
 cp -r /tmp/solr/solr-6.3.0/* /opt/solr 
 mkdir -p /opt/solr/server/solr/openskos/conf 
 touch /opt/solr/server/solr/openskos/core.properties
-cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/solrconfig.xml /opt/solr/server/solr/openskos/conf/solrconfig.xml
+cp /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/solrconfig.xml /opt/solr/server/solr/openskos/conf/solrconfig.xml
 cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
 chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh 
 
