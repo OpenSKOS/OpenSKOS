@@ -19,17 +19,20 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $skosCollection = $this->resource;
 $skosCollectionManager = $di->get('OpenSkos2\SkosCollectionManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
+$setManager = $di->get('OpenSkos2\SetManager');
 $uri = $skosCollection->getUri();
 $name = $skosCollection->getTitle();
 $uuid = $skosCollection->getUuid();
-$setUri = $skosCollection->getSet()->getUri();
+$set = $skosCollection->getSet();
+$setUri = $set[0]->getUri();
+$inst=$skosCollection ->getTenant();
+$tenantCode = $inst->getValue();
 $this->headTitle($name);
 ?>
 
