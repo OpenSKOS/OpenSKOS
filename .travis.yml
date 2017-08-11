@@ -24,8 +24,9 @@ before_install:
   - sudo cp /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos.conf /etc/apache2/sites-available/ 
   - sudo a2dissite 000-default
   - sudo a2ensite openskos
-  - sudo usermod -a -G travis www-dat
   - sudo service apache2 restart
+  - sudo ps aux | egrep '(apache|httpd)'
+  - sudo usermod -a -G travis www-dat
   
   
 
