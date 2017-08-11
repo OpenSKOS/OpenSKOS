@@ -47,7 +47,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
         
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus());//, $response->getBody());
+        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         if ($response->getStatus() === 201) {
             $this->CheckCreatedConcept($response);
         } 
@@ -68,7 +68,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         if ($response->getStatus() === 201) {
             $this->CheckCreatedConcept($response);
         }
@@ -100,7 +100,7 @@ class CreateConceptTest extends AbstractTest
             $response2 = self::create($xml2, API_KEY_EDITOR, 'concept');
             $this->AssertEquals(400, $response2->getStatus(), $response2->getMessage());
         } else {
-            $this->AssertEquals(201, $response->getStatus(), 'Fialure while creating the first concept. Status: ' . $response->getStatus() . "\n " . $response->getMessage());
+            $this->AssertEquals(201, $response->getStatus(), 'Fialure while creating the first concept. Status: ' . $response->getStatus() . "\n " . $response->getBody());
         }
     }
 
@@ -154,7 +154,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         if ($response->getStatus() == 201) {
             $this->CheckCreatedConcept($response);
         }
@@ -297,7 +297,7 @@ class CreateConceptTest extends AbstractTest
             $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
             $this->AssertEquals(400, $response->getStatus(), $response->getBody());
         } else {
-            $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getMessage());
+            $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getBody());
         }
     }
 

@@ -53,4 +53,3 @@ install:
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
  - phpunit
- - sudo cat /opt/solr/logs/solr.log
