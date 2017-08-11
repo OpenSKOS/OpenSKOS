@@ -38,7 +38,7 @@ class AutocompleteTest extends AbstractTest
         // create test concepts
 
         $letters = range('a', 'z');
-        self::$prefix[0] = uniqid();
+        self::$prefix[0] = \Rhumsaa\Uuid\Uuid::uuid4();
         $i = 1;
 
         foreach ($letters as $letter) {
@@ -48,7 +48,7 @@ class AutocompleteTest extends AbstractTest
             $altLabel = self::$labelMap[ALT_LABEL] . self::$prefix[$i] . $randomn;
             $hiddenLabel = self::$labelMap[HIDDEN_LABEL] . self::$prefix[$i] . $randomn;
             $notation = self::$labelMap[NOTATION] . self::$prefix[$i] . $randomn;
-            $uuid = uniqid();
+            $uuid = \Rhumsaa\Uuid\Uuid::uuid4();
             $about = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
             $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
                 '<rdf:Description rdf:about="' . $about . '">' .
@@ -103,8 +103,6 @@ class AutocompleteTest extends AbstractTest
             $this->AssertEquals(200, $response->getStatus());
             $json = $response->getBody();
             $arrayjson = json_decode($json, true);
-            //var_dump($array);
-            // todo: for now the spec is unclear. correct after the spec is clarified.
             $this->AssertEquals($numPrefixes - $i, count($arrayjson));
         }
     }
