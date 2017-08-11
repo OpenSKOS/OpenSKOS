@@ -33,7 +33,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use Rhumsaa\Uuid\Uuid;
-use Custom\UriGeneration;
 
 class Resource extends Uri implements ResourceIdentifier
 {

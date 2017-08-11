@@ -135,7 +135,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
 
     protected static function createTestConcept($apikey)
     {
-        $randomn = time().uniqid();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $altLabel = 'testAltLable_' . $randomn;
         $hiddenLabel = 'testHiddenLable_' . $randomn;

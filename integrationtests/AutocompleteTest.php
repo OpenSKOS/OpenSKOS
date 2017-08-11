@@ -43,7 +43,7 @@ class AutocompleteTest extends AbstractTest
 
         foreach ($letters as $letter) {
             self::$prefix[$i] = self::$prefix[$i - 1] . $letter;
-            $randomn = time();
+            $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
             $prefLabel = self::$labelMap[PREF_LABEL] . self::$prefix[$i] . $randomn;
             $altLabel = self::$labelMap[ALT_LABEL] . self::$prefix[$i] . $randomn;
             $hiddenLabel = self::$labelMap[HIDDEN_LABEL] . self::$prefix[$i] . $randomn;

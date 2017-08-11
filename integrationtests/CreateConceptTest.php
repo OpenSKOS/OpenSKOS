@@ -34,7 +34,7 @@ class CreateConceptTest extends AbstractTest
     {
 // Create new concept with dateAccepted filled. This should be ignored. 
         print "\n\n test01 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $dateAccepted = '2015-10-02T10:31:35Z';
 
         $xml = '<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:ns0="http://dublincore.org/documents/dcmi-terms/#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">' .
@@ -57,7 +57,7 @@ class CreateConceptTest extends AbstractTest
     {
 // Create a concept without Uri and without dateAccepted , but with UniquePrefLabel. Check XML response.
         print "\n\n test02 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
 
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
             '<rdf:Description>' .
@@ -78,7 +78,7 @@ class CreateConceptTest extends AbstractTest
     {
 // test if creating a new concept with an URI that already exists, fails
         print "\n\n test03 ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $notation = 'notation_' . $randomn;
         $conceptURI = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
@@ -98,7 +98,7 @@ class CreateConceptTest extends AbstractTest
         if ($response->getStatus() === 201) {
             $xml2 = str_replace('testPrefLable_', '_another_testPrefLable_', $xml);
             $response2 = self::create($xml2, API_KEY_EDITOR, 'concept');
-            $this->AssertEquals(400, $response2->getStatus(), $response2->getMessage());
+            $this->AssertEquals(400, $response2->getStatus(), $response2->getBody());
         } else {
             $this->AssertEquals(201, $response->getStatus(), 'Fialure while creating the first concept. Status: ' . $response->getStatus() . "\n " . $response->getBody());
         }
@@ -108,7 +108,7 @@ class CreateConceptTest extends AbstractTest
     {
 // create concept without URI. but with unique prefLabel. Api Key is missng.
         print "\n\n test04 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
             '<rdf:Description>' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -130,7 +130,7 @@ class CreateConceptTest extends AbstractTest
             self::$client->setParameterGet('set', SET_CODE);
         };
         $response = self::$client->request('POST');
-        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getBody());
     }
 
     
@@ -138,7 +138,7 @@ class CreateConceptTest extends AbstractTest
     {
 // Create concept with URI and with unique prefLabel, including skos:notation
         print "\n\n test05 ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $notation = 'testNotation_' . $randomn;
         $about = API_BASE_URI . "/" . SET_CODE . '/' . $notation;
@@ -165,7 +165,7 @@ class CreateConceptTest extends AbstractTest
     {
         // Create concept with URI and with unique prefLabel, without skos:notation
         print "\n\n test05B ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $notation = 'testNotation_' . $randomn;
         $about = API_BASE_URI . "/" . SET_CODE . '/' . $notation;
@@ -189,13 +189,13 @@ class CreateConceptTest extends AbstractTest
     {
         // Create concept with URI and with unique prefLabel, with duplicate skos:notation
         print "\n\n test05C ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $notation = 'testNotation_' . $randomn;
         $about = API_BASE_URI . "/" . SET_CODE . '/' . $notation;
         $anotherAbout = $about . '-a';
-        $uuid = uniqid();
-        $anotherUUID = uniqid();
+        $uuid = \Rhumsaa\Uuid\Uuid::uuid4();
+        $anotherUUID = \Rhumsaa\Uuid\Uuid::uuid4();
         $xml0 = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description rdf:about="' . $about . '">' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -212,9 +212,9 @@ class CreateConceptTest extends AbstractTest
             $xml1 = str_replace($about, $anotherAbout, $xml1);
             $xml1 = str_replace('<openskos:uuid>' . $uuid . '</openskos:uuid>', '<openskos:uuid>' . $anotherUUID . '</openskos:uuid>', $xml1);
             $response1 = self::create($xml1, API_KEY_EDITOR, 'concept');
-            $this->AssertEquals(400, $response1->getStatus(), $response1->getMessage());
+            $this->AssertEquals(400, $response1->getStatus(), $response1->getBody());
         } else {
-            $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getMessage());
+            $this->AssertEquals(201, $response0->getStatus(), 'Fialure while creating the first concept. Status: ' . $response0->getStatus() . "\n " . $response0->getBody());
         }
     }
 
@@ -222,7 +222,7 @@ class CreateConceptTest extends AbstractTest
     {
         // Create concept without URI about, the xml is wrong
         print "\n\n test06 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $wrongXml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description>' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -232,14 +232,14 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($wrongXml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getBody());
     }
 
     public function test07CreateConceptWithoutUri()
     {
         // Create a concept without Uri and with unique PrefLabel.
         print "\n\n test07 ... \n";
-        $randomn = rand(0, 4092);
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description>' .
@@ -250,7 +250,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept', true);
-        $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         if ($response->getStatus() == 201) {
             $this->CheckCreatedConcept($response);
         }
@@ -260,7 +260,7 @@ class CreateConceptTest extends AbstractTest
     {
         // Create a concept without Uri and with unique PrefLabel.  Autogenerate parameter is false
         print "\n\n test08 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description>' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -270,14 +270,14 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getBody());
     }
   
     public function test09CreateConceptWithoutUriPrefLabelExists()
     {
         // Create a concept without Uri and prefLabel is not unique within a scheme.
         print "\n\n test09 ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $altLabel = 'testAltPrefLable_' . $randomn;
         // create the first instance of the concept
@@ -306,7 +306,7 @@ class CreateConceptTest extends AbstractTest
     {
         // Create a concept without Uri (no rdf:about), but with notation. prefLabel is unique.
         print "\n\n test10 ... \n";
-        $randomn = time();
+        $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
         $prefLabel = 'testPrefLable_' . $randomn;
         $notation = 'testNotation_' . $randomn;
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
@@ -320,7 +320,7 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getBody());
     }
 
     public function test10BCreateConceptWithoutUriButWithoutNotationUniquePrefLabel()
@@ -328,7 +328,7 @@ class CreateConceptTest extends AbstractTest
         // Create a concept without Uri (no rdf:about), and no notation. prefLabel is unique.
         print "\n\n test10 ... \n";
         $uuid = uniqid();
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#" > ' .
             '<rdf:Description>' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -339,13 +339,13 @@ class CreateConceptTest extends AbstractTest
             '</rdf:RDF>';
 
         $response = self::create($xml, API_KEY_EDITOR, 'concept');
-        $this->AssertEquals(400, $response->getStatus(), $response->getMessage());
+        $this->AssertEquals(400, $response->getStatus(), $response->getBody());
     }
 
     public function test11CreateConceptByGuest()
     {
         print "\n\n test11 ... \n";
-        $prefLabel = 'testPrefLable_' . time();
+        $prefLabel = 'testPrefLable_' . \Rhumsaa\Uuid\Uuid::uuid4();
         $xml = '<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:ns0="http://dublincore.org/documents/dcmi-terms/#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">' .
             '<rdf:Description>' .
             '<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>' .
@@ -356,7 +356,7 @@ class CreateConceptTest extends AbstractTest
 
         $response = self::create($xml, API_KEY_GUEST, 'concept', true);
         if (empty(self::$init["optional.authorisation"])) {
-            $this->AssertEquals(201, $response->getStatus(), $response->getMessage());
+            $this->AssertEquals(201, $response->getStatus(), $response->getBody());
         } else {
             $this->AssertEquals(500, $response->getStatus(), 'An un-authorised guest has created a concept. '. $response->getBody());
         }
