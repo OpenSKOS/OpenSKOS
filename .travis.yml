@@ -33,7 +33,7 @@ install:
   - composer install --dev --prefer-dist
   - sudo rm -rf /var/www/html 
   - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
-  - sudo useradd -G travis www-data
+  - sudo usermod -g travis www-data
   - ls  /home/travis/build -Rl
   - find /home/travis/build -type d -exec chmod ugo+x {} \;
   - chmod -R ugo+rwx cache
