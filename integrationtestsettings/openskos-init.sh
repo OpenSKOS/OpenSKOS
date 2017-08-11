@@ -5,12 +5,14 @@ sleep 30
 cat /opt/apache-jena-fuseki/logs/fuseki*.log
 ps -ef
 
+wget -O - "http://localhost:8983/solr/openskos/select?indent=on&q=*:*&wt=json"
+sudo cat /opt/solr/logs/solr*.log
+
 cd /home/travis/build/OpenSKOS/OpenSKOS/tools
 
 php tenant.php --code=example --name="test tenant"  --uri=http://test.com --uuid=test_a --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=admin@test.com --password=password --apikey=xxx --action=create
 
 wget -O - "http://localhost:80/public/api/institutions/example" 
-
 sudo cat /var/log/apache2/error.log
 
 php user_account.php --adminkey=xxx --code=example --name=userguest  --email=userguest@mail.com --password=u3 --apikey=zzz --role=guest  create
