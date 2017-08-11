@@ -33,12 +33,13 @@ install:
   - composer install --dev --prefer-dist
   - sudo rm -rf /var/www/html 
   - sudo ln -s /home/travis/build/OpenSKOS/OpenSKOS /var/www/html
-  - sudo chgrp www-data  /home/travis/build
+  - sudo chown www-data  /home/travis/build
+  - ls  /home/travis/build -Rl 
   - find /home/travis/build -type d -exec chmod ugo+x {} \;
   - chmod -R ugo+rw cache
   - chmod -R ugo+rw data
   - chmod -R ugo+rw public/data
-  - ls  /home/travis/build/OpenSKOS/OpenSKOS -Rl 
+  - ls  /home/travis/build -Rl 
   - cd integrationtestsettings
   - chmod +x install-test-env.sh
   - ./install-test-env.sh
