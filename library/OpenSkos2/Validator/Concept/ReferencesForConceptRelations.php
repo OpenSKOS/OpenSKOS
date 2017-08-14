@@ -89,7 +89,6 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         $customRelUris = array_values($this->resourceManager->getCustomRelationTypes());
         $registeredRelationUris = array_values($this->resourceManager->getTripleStoreRegisteredCustomRelationTypes());
         $allRelationUris = array_values($this->resourceManager->fetchConceptConceptRelationsNameUri());
-        $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {
             if (in_array($property, $allRelationUris)) {
@@ -100,11 +99,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                         $registeredRelationUris,
                         $allRelationUris
                     ); // throws an Exception
-                    $relatedConcepts = $concept->getProperty($property);
-                    foreach ($relatedConcepts as $relConceptUri) {
-                        // throw an exception unless it is ok
-                        $this->resourceManager->relationTripleCreatesCycle($conceptUri, $relConceptUri, $property);
-                    }
+                    
                 } catch (\Exception $ex) {
                     $this->errorMessages[] = $ex->getMessage();
                 }
