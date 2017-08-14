@@ -38,7 +38,7 @@ class AutocompleteTest extends AbstractTest
         // create test concepts
 
         $letters = range('a', 'z');
-        self::$prefix[0] = \Rhumsaa\Uuid\Uuid::uuid4();
+        self::$prefix[0] = "something";
         $i = 1;
 
         foreach ($letters as $letter) {
@@ -93,7 +93,8 @@ class AutocompleteTest extends AbstractTest
     {
         print "\n testAutocomplete in loop ";
         $numPrefixes = count(self::$prefix);
-        $lim = $numPrefixes - 1; // must be 26
+        $lim = $numPrefixes - 1; // must be 26, we discard an empty prefix at the beginning
+        $this->AssertEquals(26, $lim);
         for ($i = 1; $i <= $lim; $i++) {
             $word = self::$labelMap[PREF_LABEL] . self::$prefix[$i];
             $response = $this->autocomplete($word, "");
