@@ -38,16 +38,18 @@ class AutocompleteTest extends AbstractTest
         // create test concepts
 
         $letters = range('a', 'z');
-        self::$prefix[0] = "something";
+        self::$prefix[0] = "";
         $i = 1;
 
         foreach ($letters as $letter) {
             self::$prefix[$i] = self::$prefix[$i - 1] . $letter;
             $randomn = \Rhumsaa\Uuid\Uuid::uuid4();
-            $prefLabel = self::$labelMap[PREF_LABEL] . self::$prefix[$i] . $randomn;
-            $altLabel = self::$labelMap[ALT_LABEL] . self::$prefix[$i] . $randomn;
-            $hiddenLabel = self::$labelMap[HIDDEN_LABEL] . self::$prefix[$i] . $randomn;
-            $notation = self::$labelMap[NOTATION] . self::$prefix[$i] . $randomn;
+            $prefLabel = self::$labelMap[PREF_LABEL] . self::$prefix[$i] . "_".$randomn;
+            var_dump("\n");
+            var_dump($prefLabel);
+            $altLabel = self::$labelMap[ALT_LABEL] . self::$prefix[$i] . "_".$randomn;
+            $hiddenLabel = self::$labelMap[HIDDEN_LABEL] . self::$prefix[$i] . "_".$randomn;
+            $notation = self::$labelMap[NOTATION] . self::$prefix[$i] ."_". $randomn;
             $uuid = \Rhumsaa\Uuid\Uuid::uuid4();
             $about = API_BASE_URI . "/" . SET_CODE . "/" . $notation;
             $xml = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmi="http://dublincore.org/documents/dcmi-terms/#">' .
@@ -79,6 +81,7 @@ class AutocompleteTest extends AbstractTest
                 }
             }
             echo $i;
+            var_dump("\n");
             $i++;
         }
     }

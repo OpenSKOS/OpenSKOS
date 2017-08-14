@@ -99,7 +99,6 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                         $registeredRelationUris,
                         $allRelationUris
                     ); // throws an Exception
-                    
                 } catch (\Exception $ex) {
                     $this->errorMessages[] = $ex->getMessage();
                 }
