@@ -9,7 +9,7 @@ cp  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/application.ini
 mkdir -p /tmp/solr
 cd /tmp/solr
 # wget "https://archive.apache.org/dist/lucene/solr/6.3.0/solr-6.3.0.zip" 
-wget "http://apache.mirror.triple-it.nl/lucene/solr/5.5.4/"
+wget "http://apache.mirror.triple-it.nl/lucene/solr/5.5.4/solr-5.5.4.zip"
 unzip solr-5.5.4.zip 
 mkdir /opt/solr 
 cp -r /tmp/solr/solr-5.5.4/* /opt/solr 
