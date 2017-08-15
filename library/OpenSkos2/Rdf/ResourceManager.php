@@ -881,64 +881,38 @@ class ResourceManager
         return $result;
     }
 
-// a relation is invalid if it (possibly with its inverse) creates transitive
-// link of a concept or related concept to itself
     public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
     {
-        $closure = $this->getClosure($relatedConceptUri, $relationUri);
-        $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
-        if ($transitive) {
-            throw new \Exception(
-                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link 
-                    of the source to itself, possibly via inverse relation."
-            );
+        if ($conceptUri === $relatedConceptUri) {
+            throw new \Exception("The concept $conceptUri can not be related to "
+                . "itself via $relatedConceptUri.");
         }
-// overkill??
-        if (empty($this->customRelationTypes)) {
-            $inverses = Skos::getInverseRelationsMap();
-        } else {
-            $inverses = array_merge(
-                Skos::getInverseRelationsMap(),
-                $this->customRelationTypes->getInverses()
-            );
-        }
-
-        if (array_key_exists($relationUri, $inverses)) {
-            $inverseRelUri = $inverses[$relationUri];
-            $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
-            $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
-            if ($transitiveInverse) {
-                throw new \Exception(
-                    "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link "
-                    . "of the target to itself"
-                );
+        $conceptB = $this->fetchByUri($relatedConceptUri, \OpenSkos2\Concept::TYPE);
+        foreach ($conceptB->getProperty($relationUri) as $object) {
+            if ($object->getUri() == $conceptUri) {
+                throw new \Exception("The concept $conceptUri can not be related to "
+                . "itself via  a transitive relation cycle "
+                . "from $relatedConceptUri via $relatedConceptUri.");
             }
         }
     }
 
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
-        $count = $this->countTriples(
-            '<' . $conceptUri . '>',
-            '<' . $relationUri . '>',
-            '<' . $relatedConceptUri . '>'
-        );
-        if ($count > 0) {
-            throw new \Exception(
-                "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
-            );
+        $concept = $this->fetchByUri($conceptUri, \OpenSkos2\Concept::TYPE);
+
+        $relatedTerms = $concept->getProperty($relationUri);
+
+        if (empty($relatedTerms)) {
+            return true;
         }
-        $trans = $this->customRelationTypes->getTransitives();
-        if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
-            $closure = $this->getClosure($conceptUri, $relationUri);
-            if (in_array($relatedConceptUri, $closure)) {
-                throw new \Exception(
-                    "There is an attempt to duplicate a relation: "
-                    . "($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
-                );
+
+        foreach ($relatedTerms as $relatedTerm) {
+            if ($relatedConceptUri === $relatedTerm->getUri()) {
+                throw new \Exception("Related via $relationUri term $relatedConceptUri is alredy defined");
             }
         }
-        return false;
+        return true;
     }
 
     public function isRelationURIValid(
@@ -948,8 +922,6 @@ class ResourceManager
         $allRelationUris = null
     ) {
     
-
-
 
         if ($customRelUris == null) {
             $customRelUris = array_values($this->getCustomRelationTypes());
@@ -1121,13 +1093,12 @@ class ResourceManager
         $config['authorisation'] = null;
         $config['relation_types'] = null;
         $config['uri_generate'] = null;
-        $config['relations_strict_reference_check'] =
-            "http://www.w3.org/2004/02/skos/core#broader, "
+        $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, "
             . "http://www.w3.org/2004/02/skos/core#broaderTransitive, "
             . "http://www.w3.org/2004/02/skos/core#narrower,"
             . "http://www.w3.org/2004/02/skos/core#narrowerTransitive";
-        $config['relations_soft_reference_check'] =
-            "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,"
+        $config['relations_soft_reference_check'] = "http://www.w3.org/2004/02/skos/core#related,"
+            . "http://www.w3.org/2004/02/skos/core#semanticRelation,"
             . "http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,"
             . "http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,"
             . "http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";

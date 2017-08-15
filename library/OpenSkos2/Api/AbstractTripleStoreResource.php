@@ -693,7 +693,7 @@ abstract class AbstractTripleStoreResource
      * @return OpenSKOS_Db_Table_Row_User
      * @throws InvalidArgumentException
      */
-    private function getUserFromParams($params)
+    protected function getUserFromParams($params)
     {
         if (empty($params['key'])) {
             throw new InvalidArgumentException('No key specified', 400);

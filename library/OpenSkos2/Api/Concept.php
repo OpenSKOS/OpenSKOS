@@ -86,6 +86,7 @@ class Concept extends AbstractTripleStoreResource
     
 
 
+
         $this->manager = $manager;
         $this->personManager = $personManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -398,13 +399,14 @@ class Concept extends AbstractTripleStoreResource
      */
     public function addRelationTriple(PsrServerRequestInterface $request)
     {
-        $params = $this->getParams($request);
+        $params = $request->getQueryParams();
 
         $tenant = $this->getTenantFromParams($params);
 
         $user = $this->getUserFromParams($params)->getFoafPerson();
 
         $set = $this->getSet($params, $tenant);
+
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
@@ -425,7 +427,8 @@ class Concept extends AbstractTripleStoreResource
      */
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
-        $params = $this->getParams($request);
+        $params = $request->getQueryParams();
+
         $tenant = $this->getTenantFromParams($params);
 
         $user = $this->getUserFromParams($params)->getFoafPerson();
@@ -459,39 +462,47 @@ class Concept extends AbstractTripleStoreResource
             throw new ApiException('Missing type', 400);
         }
 
-        $exists1 = $this->manager->resourceExists($body['concept'], Skos::CONCEPT);
-        if (!$exists1) {
-            throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 404);
+        try {
+            $this->manager->fetchByUri($body['concept'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
         }
 
-        $exists2 = $this->manager->resourceExists($body['related'], Skos::CONCEPT);
-        if (!$exists2) {
-            throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 404);
+        try {
+            $this->manager->fetchByUri($body['related'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
         }
 
         $validURI = $this->manager->isRelationURIValid($body['type']); // throws an exception otherwise
-
-
+        
         if (!$toBeDeleted) {
-            $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
-            $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+            try {
+                $this->manager->
+                    relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
+                $this->manager->
+                    relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+            } catch (\Exception $ex) {
+                throw new ApiException($ex->getMessage(), 400);
+            }
         }
 
-        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed(
-            $user,
-            $tenant,
-            $set,
-            $concept
-        ); // throws an exception if not allowed
-        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed(
-            $user,
-            $tenant,
-            $set,
-            $relatedConcept
-        ); // throws an exception if not allowed
+        $authorisation = $this->manager->getAuthorisationObject();
 
+        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            // throws an exception if not allowed
+            $authorisation->resourceEditAllowed($user, $tenant, $set, $concept);
+        }
+        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            $authorisation->resourceEditAllowed(
+                $user,
+                $tenant,
+                $set,
+                $relatedConcept
+            ); // throws an exception if not allowed
+        }
         return $body;
     }
 

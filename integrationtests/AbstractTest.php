@@ -155,7 +155,7 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
             '<skos:definition xml:lang="nl">integration test get concept</skos:definition>' .
             '</rdf:Description>' .
             '</rdf:RDF>';
-
+        
         $response = self::create($xml, $apikey, 'concept');
         $retVal = array('xml' => $xml, 'prefLabel' => $prefLabel, 'altLabel' => $altLabel, 'hiddenLabel' => $hiddenLabel, 'uuid' => $uuid, 'about' => $about, 'notation' => $notation, 'response' => $response);
         return $retVal;

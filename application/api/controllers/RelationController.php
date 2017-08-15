@@ -62,8 +62,8 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     {
         $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
-        $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addRelation($request);
+        $relation = $this->getDI()->get('\OpenSkos2\Api\Concept');
+        $response = $relation->addRelationTriple($request);
         $this->emitResponse($response);
     }
     public function putAction()
