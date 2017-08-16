@@ -1085,6 +1085,7 @@ class ResourceManager
     {
         // making a default config
         $config = array();
+        $config['delete_integrity_check'] = true;
         $config['maximal_rows'] = 20;
         $config['limit'] = 20;
         $config['normal_time_limit'] = 30;

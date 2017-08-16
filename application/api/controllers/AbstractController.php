@@ -60,13 +60,13 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $authorisationOn = $this->isAuthorisationOn($api);
+        $authorisationOn = $this->customAuthorisation($api);
         if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') { 
             // OpenSkos legacy all API work for concepts withiut auth
             $response = $api->create($request);
             $this->emitResponse($response);
         } else {
-            $this->_501('No authorisation method is pecified. POST');
+            $this->_501('No authorisation method is specified. POST');
         }
     }
 
@@ -74,12 +74,12 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $authorisationOn = $this->isAuthorisationOn($api);
+        $authorisationOn = $this->customAuthorisation($api);
         if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') {
             $response = $api->update($request);
             $this->emitResponse($response);
         } else {
-            $this->_501('No authorisation method is pecified. PUT ');
+            $this->_501('No authorisation method is specified. PUT ');
         }
     }
 
@@ -87,12 +87,12 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make($this->apiResourceClass);
-        $authorisationOn = $this->isAuthorisationOn($api);
+        $authorisationOn = $this->customAuthorisation($api);
         if ($authorisationOn || $this->apiResourceClass === 'OpenSkos2\Api\Concept') {
             $response = $api->delete($request);
             $this->emitResponse($response);
         } else {
-            $this->_501('No authorisation method is pecified. DELETE ');
+            $this->_501('No authorisation method is specified. DELETE ');
         }
     }
 
@@ -215,14 +215,10 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
         return $parts[1];
     }
 
-    protected function isAuthorisationOn($api)
+    protected function customAuthorisation($api)
     {
-        $manager = $api->getResourceManager();
-        $customInit = $manager->getCustomInitArray();
-        if (count($customInit)===0) {
-            return false;
-        }
-        return (!empty($customInit['authorisation']));
+        $customInit = $api->getResourceManager()->getCustomInitArray();
+        return isset($customInit['authorisation']);
     }
 
 }

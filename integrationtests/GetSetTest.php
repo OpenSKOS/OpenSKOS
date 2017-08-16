@@ -98,7 +98,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         if (self::$init['optional.backward_compatible']) {
             $this->resource('collections', 'set01');
         } else {
-            $this->resource('set', 'test-set');
+            $this->resource('collections', 'test-set');
         }
     }
 
@@ -107,7 +107,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         if (self::$init['optional.backward_compatible']) {
             $this->resourceJson('collections', 'set01');
         } else {
-            $this->resourceJson('set', 'test-set');
+            $this->resourceJson('collections', 'test-set');
         }
     }
 
@@ -116,7 +116,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         if (self::$init['optional.backward_compatible']) {
             $this->resourceJsonP('collections', 'set01');
         } else {
-            $this->resourceJsonP('set', 'test-set');
+            $this->resourceJsonP('collections', 'test-set');
         }
     }
 
@@ -125,7 +125,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
         if (self::$init['optional.backward_compatible']) {
             $this->resourceHTML('collections', 'set01');
         } else {
-            $this->resourceHTML('set', 'test-set');
+            $this->resourceHTML('collections', 'test-set');
         }
     }
 
@@ -157,7 +157,7 @@ xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
             $this->assertEquals(1, count($sets["docs"]));
             $this->assertionsJsonResource($sets["docs"][0], false);
         } else {
-            $this->assertEquals(NUMBER_SETS, count($sets["docs"]));
+            $this->assertEquals(2, count($sets["docs"]));
             $this->assertionsJsonResource($sets["docs"][0], false);
             $this->assertionsJsonResource($sets["docs"][1], false);
         }

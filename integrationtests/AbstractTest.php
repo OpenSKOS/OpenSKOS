@@ -362,13 +362,8 @@ xmlns:dcterms = "http://purl.org/dc/terms/">
     
     protected static function getInit(){
         $init = parse_ini_file(__DIR__ . '/../application/configs/application.ini');
-        if (empty($init)) {
+        if (!key_exists('optional.backward_compatible', $init)) {
            $init['optional.backward_compatible']= true;
-           return $init;
-        }
-        if (empty($init['optional.backward_compatible'])) {
-           $init['optional.backward_compatible']= true;
-           return $init;
         }
         return $init;
     }

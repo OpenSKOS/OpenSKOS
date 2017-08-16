@@ -403,7 +403,7 @@ class Concept extends AbstractTripleStoreResource
 
         $tenant = $this->getTenantFromParams($params);
 
-        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $user = $this->getUserFromParams($params);
 
         $set = $this->getSet($params, $tenant);
 
@@ -431,7 +431,7 @@ class Concept extends AbstractTripleStoreResource
 
         $tenant = $this->getTenantFromParams($params);
 
-        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $user = $this->getUserFromParams($params);
 
         $set = $this->getSet($params, $tenant);
         try {

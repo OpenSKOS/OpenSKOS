@@ -250,7 +250,10 @@ class API_RelationtypeController extends AbstractController {
         $this->emitResponse($response);
       } else {
         $id = $this->getParam('id');
-        if (substr($id, 0, strlen('http://www.w3.org/2004/02/skos/core')) === 'http://www.w3.org/2004/02/skos/core') {
+        if (substr($id, 
+            0, 
+            strlen('http://www.w3.org/2004/02/skos/core')) 
+            === 'http://www.w3.org/2004/02/skos/core') {
           throw new Exception('There is no relation-type description for skos relation types', 404);
         }
         parent::getAction();
