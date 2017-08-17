@@ -227,182 +227,43 @@ Visit: http://example.com/apidoc/
 5.6. Using API
 --------------------------------------------------------------------------------
 
-Getting the list of institutions (tenants): 
-```
-<base uri>/public/api/institution?format=json
-```
+Consult <baseruri>/apidoc
 
-Getting the list of sets (former tenant collections) : 
+5.7. Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1
+--------------------------------------------------------------------------------
 
-```
-<base uri>/public/api/set?format=json
-```
+Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1 is split into two parts + optional 
+SkosXL transformation:
+-- /tools/migrate_tenant_collection.php (migrates tenants and collections from MySQL 
+to institutions and sets of Triple store)
+-- /tools/migrate.php (migrates concepts, schemata and skos collections from Solr to 
+the triple store)
+-- /tools/optionally labelsToXl.php (this is a picturae script slightly extended by 
+Meertens), if skos xl labels are demanded.
 
-Getting the list of skos colections : 
+Examples of the corresponding command lines are:
 
-```<base uri>/public/api/skoscollection?format=json
-```
+php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
+--db-password=geheim --db-username=ookgeheim --debug=1
 
-Getting concepts sorted: 
-```
-<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en
-```
-```
-<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20desc
-```
-```
-<server>/public/api/find-concepts?q=prefLabel@en:*&sorts=prefLabel@en%20asc
-```
+and
 
-Getting the list of all statuses 
-```
-<server>/public/api/status?format=json
-```
-Throws an error on other formats (html and rdf/xml). 
+php migrate.php --endpoint=http://localhost:8984/solr/collection1/select 
+--tenant=meertens --db-hostname=localhost --db-database=geheim  
+--db-username=geheim --db-password=geheim --purge=1 --defaultSet="isocat"
 
-Getting the list of all schemata 
+Run the second script only after the first run, otherwise validation errors 
+will be reported because of referencing e.g. from concept schemata to the sets 
+and tenants which are not yet in the triple store.
 
-```
-<server>/public/api/conceptscheme?format=json
+Adding skos xl labels is possible after updating the tenant so that skos-xl 
+labels are enabled and then one should run
 
+labelsToXl.php –add=1
 
-5.7. Check URI's (examples)
-----------------------------------------------------------------------------------
-
-Getting (all) concepts, may take a minute or 2.
-
-```
-http://192.168.99.100/public/api/concepts?q=prefLabel:*
-```
-
-Getting concepts within given skos:collection(s)
-
-```
-http://192.168.99.100/public/api/find-concepts?q=*:*&skosCollection=http://data.beeldengeluid.nl/gtaa/skoscollectionA%20http://data.beeldengeluid.nl/gtaa/skoscollectionB
-```
-
-Getting deleted concepts:
-
-```
-http://192.168.99.100/public/api/concept?q=*:*&status=deleted
-```
-
-5.8. Relations
-
-List complete URI's of all relations
-```
-http://192.168.99.100/public/api/relation?format=json
-```
-
-Fetch relation description (work only for user-defined relations)
-```
-http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23slower
-```
-
-Fetch all pairs for a given relations (filtering by source-target schemes is possible)
-```
-http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23slower&members=true
-```
-```
-http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&members=true
-```
-
-Fetch all concepts for a given relation with a given concept as a source
-```
-http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
-```
-```
-http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&isTarget=false
-```
-```
-http://192.168.99.100/public/api/relation?id=http://menzo.org/xmlns%23faster&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870
-```
-
-Fetch all concepts for a given relation with a given concept as a target
-```
-http://192.168.99.100/public/api/relation?id=http://www.w3.org/2004/02/skos/core%23broader&conceptUri=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&isTarget=true
-```
-
-Creating (user-)relation definition
-```
-POST http://192.168.99.100/public/api/relation?tenant=meertens&key=<secret>&create=true
-```
-Body:
-```
-<?xml version="1.0" encoding="utf-8" ?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-         xmlns:dcterms="http://purl.org/dc/terms/">
-  <rdf:Description rdf:about="http://menzo.org/xmlns#older">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#objectProperty"/>
-    <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#related"/>
-    <dcterms:creator rdf:resource="http://192.168.99.100/public/api/users/8471422e-b720-4d37-ac74-abdd579831bc"/>
-    <dcterms:dateSubmitted rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-04-28T15:01:38+00:00</dcterms:dateSubmitted>
-    <dcterms:title>older</dcterms:title>
-  </rdf:Description>
-</rdf:RDF>
-```
-
-
-Updating (user-)relation definition
-```
-PUT http://192.168.99.100/public/api/relation?tenant=meertens&key=<secret>
-```
-Body:
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:openskos = "http://openskos.org/xmlns#"
-xmlns:dcterms = "http://purl.org/dc/terms/">
-    <rdf:Description rdf:about="http://menzo.org/xmlns#older">
-        <dcterms:title>older-2</dcterms:title>
-    </rdf:Description>
-</rdf:RDF>
-```
-Creating relation triple with its inverse if defined
-```
-POST http://192.168.99.100/public/api/relation?tenant=meertens
-```
-Body:
-```
-concept=http://hdl.handle.net/11148/CCR_C-2753_0d58c774-7ba4-60d1-9e79-88a031ec27e3&type=http://www.w3.org/2004/02/skos/core#narrower&
-related=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&key=<secret>
-```
-
-Importnat: if you add a relation the admin of the backend should not forget to update your institution relations
-setting.
-
-Delete relation triple (with the inverse, if defined)
-```
-DELETE http://192.168.99.100/public/api/relation?tenant=meertens
-```
-Body:
-```
-concept=http://hdl.handle.net/11148/CCR_concept_8915057f-f4d4-43f3-8d5a-96d4470ef885&type=http://menzo.org/xmlns#stronger&related=http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870&key=<secret>
-```
-
-
-
-Creating concept with a relation
-```
-POST http://192.168.99.100/public/api/concept?autoGenerateIdentifiers=true&tenant=meertens&key=<secret>
-```
-Body:
-```
-<?xml version="1.0" encoding="UTF-8"?>	<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:ns0="http://dublincore.org/documents/dcmi-terms/#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:openskos="http://openskos.org/xmlns#"
-xmlns:menzo="http://menzo.org/xmlns#">
-<rdf:Description>
-
-  <skos:prefLabel xml:lang="nl">testrel-2</skos:prefLabel>
-  <skos:scopeNote xml:lang="nl">Nederlands</skos:scopeNote>
-  <skoss:example xml:lang="nl">example test rel</skos:example>
-  <skos:definition xml:lang="nl">definition!</skos:definition>
-
-<menzo:warmer rdf:resource="http://hdl.handle.net/11148/CCR_C-2731_5853a464-7c2d-53f9-d3cf-2f75a4dc4870"/>
-
-<openskos:set rdf:resource="http://hdl.handle.net/11148/CCR_Dataset_0400ec14-22a0-4b9d-b7ab-86b97b8fbb15"/>
-<openskos:inSkosCollection rdf:resource="http://hdl.handle.net/11148/CCR__d3c2a8ee-984e-27ff-3500-45033c871c95"/>
-<skos:inScheme  rdf:resource="http://hdl.handle.net/11148/CCR_P-Morphosyntax_c99c78ee-1425-c8f3-33e3-fe2a4b2ec7ca"/>
-</rdf:Description>
-</rdf:RDF> 
-```
+5.7. Import (/tools/skos2openskos.php)
+--------------------------------------------------------------------------------
+Example of a command line 
+php skos2openskos.php --setUri=http://htdl/clavas-org/set 
+--userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
+--file=clavas-organisations.xml

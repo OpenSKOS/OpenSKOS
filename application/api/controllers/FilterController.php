@@ -21,7 +21,7 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
    * @apiVersion 1.0.0
    * @apiDescription Returns a list of filters (skos collection, concept scheme, set, tenant, status, relation types)
    * to facilitate concept or relation search via a frontend.
-   *  It is used to obtain lists of all the tenants, sets, skos collections, concept scheme’s, concepts and statuses by 
+   * It is used to obtain lists of all the tenants, sets, skos collections, concept scheme’s, concepts and statuses by 
    * doing one API request instead of doing 6 requests. And it eventually amounts to a single request to a triple store,
    * via fetchResourceFilters() from ResourceManager.php.  It is useful for a frontend-browser to provide the lists of 
    * the tenants, sets, skos collections, concept schemes and statuses, so that the user can mark, say, some concept 
