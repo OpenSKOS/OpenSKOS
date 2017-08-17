@@ -543,6 +543,7 @@ abstract class AbstractTripleStoreResource
             if (!$resource->getTenant()) {
                 $resource->addUniqueProperty(OpenSkos::TENANT, $tenant->getCode());
             }
+            // overkill check
             if (!$resource->getTenant()) {
                 throw new InvalidArgumentException('No tenant specified', 400);
             }

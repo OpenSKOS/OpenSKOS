@@ -20,10 +20,7 @@
 require_once 'AbstractController.php';
 
 /*
- * Relation is a resource as for instance, a concept or a chema. User-defined relation definitions are stored in triple store as any other resource.
- * There is a difference between a relation as a definition (works for used-defined relations) and relation as a triple. This is reflectied
- * in the naming of methods, e.g. deleteRelation means deleting the relation definition (if no correspondingly related concepts are detected)
- * and deleteRelationTriple amounts to updating corresponding related concepts.
+ * Relation type is a resource as for instance, a concept or a chema. User-defined relation types are stored in triple store as any other resource.
  * 
  */
 
@@ -269,6 +266,9 @@ class API_RelationtypeController extends AbstractController {
    * The attribute rdf:about in the rdf:description element is obligatory. It is of the form &lt;namespace_uri>#&lt;title>.
    * The title is an obligatory element and must be unique within all relation types.
    *
+   * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+   * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+   * Custom\Authorisation. If this parameter is absent then 501 is thrown.
    * @apiExample {String} Example request
    * <?xml version="1.0" encoding="UTF-8"?>
    * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -338,6 +338,9 @@ class API_RelationtypeController extends AbstractController {
    * The attribute rdf:about in the rdf:description element is obligatory. It is of the form &lt;namespace_uri>#&lt;title>.
    * The title is an obligatory element and must be unique within all relation types.
    *
+   * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+   * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+   * Custom\Authorisation. If this parameter is absent then 501 is thrown.
    * @apiExample {String} Example request
    * <?xml version="1.0" encoding="UTF-8"?>
    * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -399,7 +402,9 @@ class API_RelationtypeController extends AbstractController {
    *
    * @apiVersion 1.0.0
    * @apiDescription Delete an OpenSKOS (non-SKOS) relation type by its uri
-   * 
+   * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+   * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+   * Custom\Authorisation. If this parameter is absent then 501 is thrown.
    * @api {delete} /api/relationtype Delete an OpenSKOS (non-SKOS) relation type
    * @apiName DeleteRelationType
    * @apiGroup RelationType

@@ -168,7 +168,9 @@ class Api_SkoscollectionController extends AbstractController
      * The reference to a set, to which  the collection under submission belongs to, must be the reference to an existing set.
      * If one of the conditions above is not fullfilled the validator will throw an error.
      * 
-     * 
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      * @apiExample {String} Example request
      * <?xml version="1.0"?>
      * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -238,7 +240,9 @@ class Api_SkoscollectionController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Update a SKOS collection based on the post data. Validation requirements are the same as for the POST request.
-     *
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      * @apiExample {String} Example request
      * <?xml version="1.0"?>
      * <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -315,6 +319,9 @@ class Api_SkoscollectionController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Delete a SKOS collection by its uri
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      * @api {delete} /api/skoscollection delete SKOS collection
      * @apiName DeleteSkosCollection
      * @apiGroup SkosCollection
