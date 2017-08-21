@@ -47,6 +47,8 @@ class EasyRdf
 {
 
     private static $allowedSubresources = [VCard::ORG, VCard::ADR];
+    private static $skosTypes = [Tenant::TYPE, Set::TYPE, ConceptScheme::TYPE,
+        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE];
 
     /**
      * @param \EasyRdf\Graph $graph to $read
@@ -80,7 +82,7 @@ class EasyRdf
     protected static function toOpenskosResource($resource, $allowedChildrenTypes, &$alreadyAddedAsChild)
     {
         /** @var $resource \EasyRdf\Resource */
-        $type = $resource->get('rdf:type');
+        $type = self::getTypeOfEasyRdfResource($resource);
                 
         // Filter out resources which are not fully described.
         if (!$type) {
@@ -296,5 +298,25 @@ class EasyRdf
         }
 
         return $easyResource;
+    }
+    
+    private static function getTypeOfEasyRdfResource(\EasyRdf\Resource $resource)
+    {
+        $types = $resource->all(new \EasyRdf\Resource(Rdf::TYPE));
+        
+        if ($types == null) {
+            return null;
+        }
+        if (count($types)=== 0) {
+            return null;
+        }
+        foreach ($types as $type) {
+            if (in_array($type->getUri(), self::$skosTypes)) {
+                return $type->getUri();
+            }
+        }
+        throw new InvalidArgumentException(
+            "Resource {$resource->getUri} does not have a proper skos type :( "
+        );
     }
 }
