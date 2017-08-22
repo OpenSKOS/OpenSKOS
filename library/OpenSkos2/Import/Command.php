@@ -76,6 +76,7 @@ class Command implements LoggerAwareInterface
         Tenant $tenant = null
     ) {
     
+
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
         $this->personManager = $personManager;
@@ -104,14 +105,16 @@ class Command implements LoggerAwareInterface
 
         /* Constructor for Validator
          * public function __construct(
-        ResourceManager $resourceManager,
-        $tenant,
-        $set,
-        $isForUpdate,
-        $referenceCheckOn,
-        $conceptReferenceCheckOn = true,
-        LoggerInterface $logger = null */
-            
+          ResourceManager $resourceManager,
+          $tenant,
+          $set,
+          $isForUpdate,
+          $referenceCheckOn,
+          $conceptReferenceCheckOn = true,
+          LoggerInterface $logger = null */
+
+
+
         $validator = new ResourceValidator(
             $this->conceptManager,
             $this->tenant,
@@ -171,34 +174,37 @@ class Command implements LoggerAwareInterface
         // Commit all solr documents
         $this->conceptManager->commit();
 
-        // Removing dangling references run
-        $this->logger->info("...");
-        $this->logger->info("Removing danglig references");
-        $this->logger->info("...");
-        $validatorUpdate = new ResourceValidator(
-            $this->conceptManager,
-            $this->tenant,
-            $this->set,
-            true,
-            true,
-            true,
-            $this->logger
-        );
-        foreach ($resourceCollection as $resourceInserted) {
-            $uri = $resourceInserted->getUri();
-            $type = $resourceInserted->getType()->getUri();
-            try {
-                $resource = $this->resourceManager->fetchByUri($uri, $type);
-                $resource = $this->removeDanglingReferences($resource, $validator->getDanglingReferences());
-                if ($validatorUpdate->validate($resource)) {
-                    $this->conceptManager->replace($resourceToInsert);
-                    $this->logger->info("replaced resource {$resource->getUri()}");
-                } else {
-                    $this->logger->error("Resource {$resource->getUri()} of type {$resource->getType()->getUri()}: \n" .
-                        implode(' , ', $validator->getErrorMessages()));
+        if ($message->removeDanglingReferences()) {
+            // Removing dangling references run
+            $this->logger->info("...");
+            $this->logger->info("Removing danglig references");
+            $this->logger->info("...");
+            $validatorUpdate = new ResourceValidator(
+                $this->conceptManager,
+                $this->tenant,
+                $this->set,
+                true,
+                true,
+                true,
+                $this->logger
+            );
+            foreach ($resourceCollection as $resourceInserted) {
+                $uri = $resourceInserted->getUri();
+                $type = $resourceInserted->getType()->getUri();
+                try {
+                    $resource = $this->resourceManager->fetchByUri($uri, $type);
+                    $resource = $this->removeDanglingReferences($resource, $validator->getDanglingReferences());
+                    if ($validatorUpdate->validate($resource)) {
+                        $this->conceptManager->replace($resourceToInsert);
+                        $this->logger->info("replaced resource {$resource->getUri()}");
+                    } else {
+                        $this->logger->error("Resource {$resource->getUri()} of "
+                        . "type {$resource->getType()->getUri()}: \n" .
+                            implode(' , ', $validator->getErrorMessages()));
+                    }
+                } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
+                    $this->logger->info("Skipping invalid resource {$uri}");
                 }
-            } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
-                $this->logger->info("Skipping invalid resource {$uri}");
             }
         }
     }

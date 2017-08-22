@@ -60,7 +60,7 @@ class Message
     /**
      * @var bool
      */
-    private $isRemovingDanglingConceptReferencesRound;
+    private $removeDanglingReferences;
 
     /**
      * @var bool
@@ -79,7 +79,7 @@ class Message
      * @param Uri $setUri
      * @param bool $ignoreIncomingStatus
      * @param string $importedConceptStatus
-     * @param bool $isRemovingDanglingConceptReferencesRound
+     * @param bool $removeDanglingReferences
      * @param bool $noUpdates
      * @param bool $toBeChecked
      * @param string $fallbackLanguage
@@ -92,7 +92,7 @@ class Message
         $setUri,
         $ignoreIncomingStatus,
         $importedConceptStatus,
-        $isRemovingDanglingConceptReferencesRound,
+        $removeDanglingReferences,
         $noUpdates = false,
         $toBeChecked = false,
         $fallbackLanguage = null,
@@ -103,7 +103,7 @@ class Message
         $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
-        $this->isRemovingDanglingConceptReferencesRound = $isRemovingDanglingConceptReferencesRound;
+        $this->removeDanglingReferences = $removeDanglingReferences;
         $this->noUpdates = $noUpdates; // create mode
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
@@ -192,8 +192,8 @@ class Message
         return $this->person;
     }
 
-    public function isRemovingDanglingConceptReferencesRound()
+    public function removeDanglingReferences()
     {
-        return $this->isRemovingDanglingConceptReferencesRound;
+        return $this->removeDanglingReferences;
     }
 }
