@@ -1003,12 +1003,13 @@ class ResourceManager
 
     public function fetchResourceFilters()
     {
-        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+        $query = 'SELECT DISTINCT ?uri  ?title ?type ?code WHERE '
             . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
             . 'FILTER ( ?type = <' . \OpenSkos2\SkosCollection::TYPE . '> || '
             . '?type = <' . \OpenSkos2\ConceptScheme::TYPE .
             '> || ?type = <' . \OpenSkos2\Set::TYPE . '>  ) } '
             . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . ' ?uri <' . OpenSkosNamespace::CODE . '> ?code . ' 
             . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
             . ' FILTER ( ?type = <' . \OpenSkos2\Tenant::TYPE . '>)} } ';
         $response = $this->query($query);
@@ -1019,7 +1020,11 @@ class ResourceManager
         $retVal[\OpenSkos2\Tenant::TYPE] = [];
         foreach ($response as $descr) {
             $spec = [];
-            $spec['uri'] = $descr->uri->getUri();
+            if ($descr->type->getUri() === \OpenSkos2\Tenant::TYPE) {
+               $spec['code'] = $descr->code->getValue(); 
+            } else {
+               $spec['uri'] = $descr->uri->getUri();
+            }
             $spec['title'] = $descr->title->getValue();
             $retVal[$descr->type->getUri()][] = $spec;
         }
