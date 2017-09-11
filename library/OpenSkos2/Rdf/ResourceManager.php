@@ -1009,7 +1009,7 @@ class ResourceManager
             . '?type = <' . \OpenSkos2\ConceptScheme::TYPE .
             '> || ?type = <' . \OpenSkos2\Set::TYPE . '>  ) } '
             . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
-            . ' ?uri <' . OpenSkosNamespace::CODE . '> ?code . ' 
+            . ' ?uri <' . OpenSkosNamespace::CODE . '> ?code . '
             . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
             . ' FILTER ( ?type = <' . \OpenSkos2\Tenant::TYPE . '>)} } ';
         $response = $this->query($query);
@@ -1021,9 +1021,9 @@ class ResourceManager
         foreach ($response as $descr) {
             $spec = [];
             if ($descr->type->getUri() === \OpenSkos2\Tenant::TYPE) {
-               $spec['code'] = $descr->code->getValue(); 
+                $spec['code'] = $descr->code->getValue();
             } else {
-               $spec['uri'] = $descr->uri->getUri();
+                $spec['uri'] = $descr->uri->getUri();
             }
             $spec['title'] = $descr->title->getValue();
             $retVal[$descr->type->getUri()][] = $spec;
