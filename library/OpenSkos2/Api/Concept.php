@@ -140,7 +140,7 @@ class Concept extends AbstractTripleStoreResource
             $tenant = $this->manager->fetchByUuid($params['tenant'], \OpenSkos2\Tenant::TYPE, 'openskos:code');
             $tenantCode = $tenant->getCode();
             $options['tenants'][] = $tenantCode->getValue();
-        } 
+        }
 
         // sets
         $setCodes = [];
@@ -157,10 +157,10 @@ class Concept extends AbstractTripleStoreResource
             }
         } else {
             if (isset($params['setUri'])) {
-               $setUris = explode(' ', trim($params['setUri']));
-               foreach ($setUris as $setUri) {
-                 $options['sets'][] = $setUri;
-               }
+                $setUris = explode(' ', trim($params['setUri']));
+                foreach ($setUris as $setUri) {
+                    $options['sets'][] = $setUri;
+                }
             }
         }
 
