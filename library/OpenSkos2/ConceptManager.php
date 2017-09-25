@@ -454,7 +454,7 @@ class ConceptManager extends ResourceManagerWithSearch
             $relationType,
             new Uri($objectUri)
         );
-        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->relationTypes->getInverses());
+        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->getCustomInverses());
         $this->deleteMatchingTriples(
             new Uri($objectUri),
             $inverses[$relationType],

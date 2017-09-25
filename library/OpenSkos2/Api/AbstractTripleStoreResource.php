@@ -597,7 +597,7 @@ abstract class AbstractTripleStoreResource
         } else {
             $setName = 'set';
         }
-
+        
         if (empty($params[$setName])) {
             throw new InvalidArgumentException("No $setName specified in the request parameters", 400);
         }
