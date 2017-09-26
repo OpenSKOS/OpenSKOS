@@ -228,6 +228,7 @@ function removeDeletedResourcesFromSolr(
     $solrResourceManager->search('*:*', 0, 0, $total);
     $rows = 100;
     $offset = 0;
+    $deleted = 0;
     
     while ($offset < $total) {
         $pageStart = microtime(true);

@@ -366,7 +366,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             
             //!TODO Handle deleted all around the system.
             if ($concept->isDeleted()) {
-                throw new ResourceNotFoundException('The concpet was not found (it is deleted).');
+                throw new ResourceNotFoundException('This concept has been deleted and is no longer available.');
             }
             
             return $concept;
