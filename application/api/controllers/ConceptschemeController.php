@@ -151,6 +151,9 @@ class Api_ConceptschemeController extends AbstractController
      * The title must be unique per language and single per language.
      * The reference to a set, to which  the schema under submission belongs to, must be the reference to an existing set.
      * If one of the conditions above is not fullfilled the validator will throw an error.
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      *
      @apiExample {String} Example request
      * <?xml version="1.0"?>
@@ -235,6 +238,9 @@ class Api_ConceptschemeController extends AbstractController
      *
      * Update a SKOS concept scheme based on the post data. The validation requrements are the same as for
      * the POST request.
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      *
      * @apiExample {String} Example request
      * <?xml version="1.0"?>
@@ -299,7 +305,9 @@ class Api_ConceptschemeController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Delete a SKOS concept scheme 
-    
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      * Delete a SKOS scheme by its uri
      * @api {delete} /api/conceptscheme delete SKOS concept scheme
      * @apiName DeleteConceptScheme

@@ -47,7 +47,7 @@ $this->headTitle($name);
                 if ($key === "tenant"):
                     $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                     ?>
-                    <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo "name '$tenantName', code '{$tenantCode}'"  ?></a></dd>
+                    <dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $tenantCode)) ?>.html"><?php echo "name '$tenantName', code '{$tenantCode}'"  ?></a></dd>
                 <?php endif ?>
                 <?php if ($key === "type"): ?>
                     <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
@@ -103,9 +103,9 @@ $this->headTitle($name);
     <h3>Alternative formats</h3>
     <ul>
         
-    <li><a class="json" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.json'?>">JSON</a></li>
-	<li><a class="jsonp" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.jsonp?callback=myCallBack1234'?>">JSONP</a></li>
-	<li><a class="rdf" href="<?php echo $this->url(['controller'=>'set', 'id'=>$code]).'.rdf'?>">RDF</a></li>
+    <li><a class="json" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.json'?>">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.jsonp?callback=myCallBack1234'?>">JSONP</a></li>
+	<li><a class="rdf" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.rdf'?>">RDF</a></li>
     </ul>
 
 

@@ -11,9 +11,9 @@ class ConceptScheme extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->authorisation = new \OpenSkos2\Authorisation($manager);
-        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        $this->limit = $this->customInit['limit'];
     }
 }

@@ -73,13 +73,6 @@ class Concept extends AbstractTripleStoreResource
     private $searchAutocomplete;
 
     /**
-     * Amount of concepts to return, will be reset in constructor following application.ini settings
-     *
-     * @var int
-     */
-    private $limit = 0;
-
-    /**
      *
      * @param ConceptManager $manager
      * @param Autocomplete $searchAutocomplete
@@ -91,14 +84,15 @@ class Concept extends AbstractTripleStoreResource
         PersonManager $personManager
     ) {
     
+
+
+
         $this->manager = $manager;
         $this->personManager = $personManager;
         $this->searchAutocomplete = $searchAutocomplete;
-
-        $this->authorisation = new \OpenSkos2\Authorisation($manager);
-        $this->deletion = new \OpenSkos2\Deletion($manager);
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        $this->limit = $this->init['custom.limit'];
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
+        $this->limit = $this->customInit['limit'];
     }
 
     /**
@@ -116,7 +110,7 @@ class Concept extends AbstractTripleStoreResource
      */
     public function findConcepts(PsrServerRequestInterface $request, $context)
     {
-        set_time_limit($this->init["custom.maximal_time_limit"]);
+        set_time_limit($this->customInit["maximal_time_limit"]);
 
         $params = $request->getQueryParams();
 
@@ -141,19 +135,16 @@ class Concept extends AbstractTripleStoreResource
 
         // tenants ???
         // it used to be a non-obligatory multiple parameter, now is obligatory and the only one
-        $tenantCodes = [];
+        $tenant = null;
         if (isset($params['tenant'])) {
-            $tenantCodes = explode(' ', trim($params['tenant']));
-            foreach ($tenantCodes as $tenantcode) {
-                $tenant = $this->manager->fetchByUuid($tenantcode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
-                $tenantCode = $tenant->getCode();
-                $options['tenants'][] = $tenantCode->getValue();
-            }
+            $tenant = $this->manager->fetchByUuid($params['tenant'], \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            $tenantCode = $tenant->getCode();
+            $options['tenants'][] = $tenantCode->getValue();
         }
-       
+
         // sets
         $setCodes = [];
-        if ($this->init['custom.backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -163,6 +154,13 @@ class Concept extends AbstractTripleStoreResource
             foreach ($setCodes as $setcode) {
                 $set = $this->manager->fetchByUuid($setcode, Set::TYPE, 'openskos:code');
                 $options['sets'][] = $set->getUri();
+            }
+        } else {
+            if (isset($params['setUri'])) {
+                $setUris = explode(' ', trim($params['setUri']));
+                foreach ($setUris as $setUri) {
+                    $options['sets'][] = $setUri;
+                }
             }
         }
 
@@ -209,6 +207,8 @@ class Concept extends AbstractTripleStoreResource
 
         $concepts = $this->searchAutocomplete->search($options, $total);
 
+        set_time_limit($this->customInit["normal_time_limit"]);
+
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
         if (isset($params['fl'])) {
@@ -218,20 +218,14 @@ class Concept extends AbstractTripleStoreResource
         }
 
 
-        if (isset($tenant)) {
-            $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
+        $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
-            if ($this->useXlLabels($tenant, $request) === true) {
-                foreach ($concepts as $concept) {
-                    $concept->loadFullXlLabels($this->manager->getLabelManager());
-                }
+        if ($this->useXlLabels($tenant, $request) === true) {
+            foreach ($concepts as $concept) {
+                $concept->loadFullXlLabels($this->manager->getLabelManager());
             }
-        } else {
-             // for get requests tenant is not an obligatory parameter and may be empty
-            // place here what you consider must be a default behaviour
-            $excludePropertiesList = [];
         }
-            
+
         switch ($context) {
             case 'json':
                 $response = (new JsonResponse($result, $propertiesList, $excludePropertiesList))->getResponse();
@@ -264,12 +258,12 @@ class Concept extends AbstractTripleStoreResource
      */
     public function getResourceResponse(ServerRequestInterface $request, $id, $context)
     {
-        
+
         $concept = $this->getResource($id);
 
         $params = $request->getQueryParams();
 
-        
+
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
         } else {
@@ -278,12 +272,12 @@ class Concept extends AbstractTripleStoreResource
 
         $tenantCode = $concept->getTenant()->getValue();
         $tenant = $this->manager->fetchByUuid($tenantCode, Tenant::TYPE, 'openskos:code');
-        
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
 
         if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
-              $concept->loadFullXlLabels($this->manager->getLabelManager());
+            $concept->loadFullXlLabels($this->manager->getLabelManager());
         }
 
         switch ($context) {
@@ -343,8 +337,6 @@ class Concept extends AbstractTripleStoreResource
         return $concept;
     }
 
-
-  
     /**
      * Check if the requested label format conforms to the tenant configuration
      * @return boolean Returns TRUE only if XL labels are enabled and requested
@@ -381,7 +373,6 @@ class Concept extends AbstractTripleStoreResource
         }
     }
 
-    
     /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
@@ -408,7 +399,6 @@ class Concept extends AbstractTripleStoreResource
             }
         }
     }
-    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
@@ -416,13 +406,14 @@ class Concept extends AbstractTripleStoreResource
      */
     public function addRelationTriple(PsrServerRequestInterface $request)
     {
-        $params = $this->getParams($request);
+        $params = $request->getQueryParams();
 
         $tenant = $this->getTenantFromParams($params);
 
-        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $user = $this->getUserFromParams($params);
 
         $set = $this->getSet($params, $tenant);
+
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
             $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
@@ -443,10 +434,11 @@ class Concept extends AbstractTripleStoreResource
      */
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
-        $params = $this->getParams($request);
+        $params = $request->getQueryParams();
+
         $tenant = $this->getTenantFromParams($params);
 
-        $user = $this->getUserFromParams($params)->getFoafPerson();
+        $user = $this->getUserFromParams($params);
 
         $set = $this->getSet($params, $tenant);
         try {
@@ -477,39 +469,47 @@ class Concept extends AbstractTripleStoreResource
             throw new ApiException('Missing type', 400);
         }
 
-        $exists1 = $this->manager->resourceExists($body['concept'], Skos::CONCEPT);
-        if (!$exists1) {
-            throw new ApiException('The concept referred by the uri ' . $body['concept'] . ' does not exist.', 404);
+        try {
+            $this->manager->fetchByUri($body['concept'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
         }
 
-        $exists2 = $this->manager->resourceExists($body['related'], Skos::CONCEPT);
-        if (!$exists2) {
-            throw new ApiException('The concept referred by the uri ' . $body['related'] . ' does not exist.', 404);
+        try {
+            $this->manager->fetchByUri($body['related'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
         }
 
         $validURI = $this->manager->isRelationURIValid($body['type']); // throws an exception otherwise
-
-
+        
         if (!$toBeDeleted) {
-            $this->manager->relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
-            $this->manager->relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+            try {
+                $this->manager->
+                    relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
+                $this->manager->
+                    relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+            } catch (\Exception $ex) {
+                throw new ApiException($ex->getMessage(), 400);
+            }
         }
 
-        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed(
-            $user,
-            $tenant,
-            $set,
-            $concept
-        ); // throws an exception if not allowed
-        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
-        $this->authorisation->resourceEditAllowed(
-            $user,
-            $tenant,
-            $set,
-            $relatedConcept
-        ); // throws an exception if not allowed
+        $authorisation = $this->manager->getAuthorisationObject();
 
+        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            // throws an exception if not allowed
+            $authorisation->resourceEditAllowed($user, $tenant, $set, $concept);
+        }
+        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            $authorisation->resourceEditAllowed(
+                $user,
+                $tenant,
+                $set,
+                $relatedConcept
+            ); // throws an exception if not allowed
+        }
         return $body;
     }
 

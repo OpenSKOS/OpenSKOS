@@ -33,7 +33,6 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use Rhumsaa\Uuid\Uuid;
-use OpenSkos2\Custom\UriGeneration;
 
 class Resource extends Uri implements ResourceIdentifier
 {
@@ -158,7 +157,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-   
     /**
      * @param string $predicate
      * @param RdfObject $value
@@ -315,7 +313,6 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-  
     /**
      * @return Uri
      */
@@ -514,6 +511,7 @@ class Resource extends Uri implements ResourceIdentifier
     ) {
     
 
+
         $nowLiteral = function () {
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
@@ -686,11 +684,11 @@ class Resource extends Uri implements ResourceIdentifier
 
     public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
-        $init = $manager->getInitArray();
-        if (!$init["custom.default_urigenerate"]) {
-            $customGen = new UriGeneration();
-            return $customGen->generateUri($manager, $this);
+        $customGen = $manager->getUriGenerateObject();
+        if (!empty($customGen)) {
+            return $customGen->generateUri($this);
         }
+
 
         $uuid = Uuid::uuid4();
 
@@ -700,8 +698,8 @@ class Resource extends Uri implements ResourceIdentifier
             );
         }
 
-
-        $uri = $this->assembleUri($tenant, $set, $uuid, null, $init);
+        $customInit = $manager->getCustomInitArray();
+        $uri = $this->assembleUri($tenant, $set, $uuid, null, $customInit);
 
 
         if ($manager->askForUri($uri, true)) {
@@ -723,9 +721,25 @@ class Resource extends Uri implements ResourceIdentifier
         \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
-        $init = null
+        $customInit = null
     ) {
     
+
         return $set->getUri() . "/" . $uuid;
+    }
+
+    protected function toBool($val)
+    {
+        if (empty($val)) {
+            return false;
+        }
+        $val = $val->getValue();
+        if (strtolower($val) === "true" || $val==="1") {
+            return true;
+        }
+        if (strtolower($val) === "false" || $val==="0") {
+            return false;
+        }
+        throw new \Exception("Wrong value of a boolean element in the resource {$this->uri}");
     }
 }

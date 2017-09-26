@@ -18,15 +18,6 @@ autoloadernamespaces[] = Net_
 ; make sure this directory is writable by your webserver!
 upload_path = APPLICATION_PATH "/../data/uploads"
 
-; EPIC
-epic.host=pid.gwdg.de/handles/
-epic.username=epic_username
-epic.password=epic_password
-epic.prefix=11148
-epic.guid.prefix=backend_name_
-epic.resolver=http://hdl.handle.net/
-epic.forwardLocationPrefix=http://host/backend_name/public/api/
-
 editor.languages.nl="Dutch"
 editor.languages.en="English"
 editor.languages.fr="French"
@@ -114,9 +105,6 @@ resources.cachemanager.general.backend.customBackendNaming=false
 resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
 resources.cachemanager.general.frontendBackendAutoload=false
 
-;; SESSION ;;
-resources.session.cookie_path = "/backend_name/"
-
 ;; PLUGINS ;;
 resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
 resources.frontController.plugins.auth="OpenSKOS_Controller_Plugin_Auth"
@@ -141,25 +129,11 @@ oAuth2.google.clientId = "@google-client-id@"
 oAuth2.google.clientSecret = "@google-client-secret@"
 
 ; Api configuration
-;api.baseUri = "http://host/backend_name/public/api/" ;"@api-base-uri@"
 api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
-; customize applicaton
-custom.backward_compatible = true
-custom.default_authorisation = false
-custom.default_deletion = false
-custom.default_relationtypes = false
-custom.default_urigenerate = true
-custom.relations_strict_reference_check = "http://www.w3.org/2004/02/skos/core#broader, http://www.w3.org/2004/02/skos/core#broaderTransitive, http://www.w3.org/2004/02/skos/core#narrower,http://www.w3.org/2004/02/skos/core#narrowerTransitive"
-custom.relations_soft_reference_check = "http://www.w3.org/2004/02/skos/core#related,http://www.w3.org/2004/02/skos/core#semanticRelation,http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch"
-custom.allowed_concepts_for_other_tenant_schemes = true
-custom.limit = 30;
-custom.maximal_rows = 500
-custom.maximal_time_limit = 120
-custom.normal_time_limit = 30
-custom.backend = ccr
-custom.uuid_regexp_prefixes = '/CCR_(.*)_/'
+; optional
+; end optional
 
 [staging : production]
 phpSettings.display_startup_errors = 1

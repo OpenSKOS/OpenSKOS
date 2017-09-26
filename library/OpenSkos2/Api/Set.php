@@ -2,8 +2,6 @@
 
 namespace OpenSkos2\Api;
 
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Api\Exception\NotFoundException;
 
 class Set extends AbstractTripleStoreResource
@@ -29,10 +27,10 @@ class Set extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->authorisation = new \OpenSkos2\Authorisation($manager);
-        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        $this->limit = $this->customInit['limit'];
     }
 
     /**

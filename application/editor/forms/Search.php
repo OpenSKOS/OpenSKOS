@@ -206,7 +206,7 @@ class Editor_Forms_Search extends OpenSKOS_Form
         foreach ($profiles as $profile) {
                 $profilesOptions[$profile->id] = $profile->name;
         }
-        $profilesOptions['custom'] = _('Custom');
+        $profilesOptions['options'] = _('Custom');
 
         // Check which profiles are allowed for the user.
         foreach (array_keys($profilesOptions) as $profileKey) {

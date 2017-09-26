@@ -30,17 +30,15 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
         $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
             ->disableOriginalConstructor()
             ->getMock();
-        $resourceManagerMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
-            ->disableOriginalConstructor()
-            ->getMock();
         $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
             ->disableOriginalConstructor()
             ->getMock();
         $personManagerMock = $this->getMockBuilder('\OpenSkos2\PersonManager')
             ->disableOriginalConstructor()
             ->getMock();
-        $concept = new \OpenSkos2\Api\Concept(
-            $resourceManagerMock, $conceptManagerMock, $autocompleteMock, $personManagerMock
+        $concept = new \OpenSkos2\Api\Concept($conceptManagerMock, 
+            $autocompleteMock, 
+            $personManagerMock
         );
         $response = $concept->create($request);
 
@@ -54,17 +52,15 @@ class ConceptTest extends \PHPUnit_Framework_TestCase
         $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
             ->disableOriginalConstructor()
             ->getMock();
-        $resourceManagerMock = $this->getMockBuilder('\OpenSkos2\Rdf\ResourceManager')
-            ->disableOriginalConstructor()
-            ->getMock();
         $autocompleteMock = $this->getMockBuilder('\OpenSkos2\Search\Autocomplete')
             ->disableOriginalConstructor()
             ->getMock();
         $personManagerMock = $this->getMockBuilder('\OpenSkos2\PersonManager')
             ->disableOriginalConstructor()
             ->getMock();
-        $concept = new \OpenSkos2\Api\Concept(
-            $resourceManagerMock, $conceptManagerMock, $autocompleteMock, $personManagerMock
+        $concept = new \OpenSkos2\Api\Concept($conceptManagerMock, 
+            $autocompleteMock, 
+            $personManagerMock
         );
         $response = $concept->create($request);
 

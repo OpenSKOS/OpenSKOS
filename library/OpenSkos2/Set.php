@@ -48,6 +48,12 @@ class Set extends Resource
             return $tenants[0];
         }
     }
+    
+    public function getAllowOai()
+    {
+        $val = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
+        return $this->toBool($val);
+    }
 
   /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
@@ -98,7 +104,7 @@ class Set extends Resource
         \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
-        $init = null
+        $customInit = null
     ) {
     
         return $tenant->getUri() . "/" . $uuid;

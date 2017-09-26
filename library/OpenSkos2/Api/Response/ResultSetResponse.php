@@ -39,7 +39,7 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
       /**
      * @var []
      */
-    protected $init;
+    protected $customInit;
     
     /**
      *
@@ -56,8 +56,8 @@ abstract class ResultSetResponse implements \OpenSkos2\Api\Response\ResponseInte
         $this->excludePropertiesList = $excludePropertiesList;
     }
     
-    public function setInit($init)
+    public function setInit($customInit)
     {
-        $this->init=$init;
+        $this->customInit=$customInit;
     }
 }

@@ -124,6 +124,22 @@ abstract class AbstractResourceValidator implements ValidatorInterface
         return $this->danglingReferences;
     }
 
+    public function emptyErrorMessages()
+    {
+        $this->errorMessages=[];
+    }
+
+    public function emptyWarningMessages()
+    {
+        $this->warningMessages = [];
+    }
+
+    public function emptyDanglingReferences()
+    {
+
+        $this->danglingReferences = [];
+    }
+
     protected function validateProperty(
         RdfResource $resource,
         $propertyUri,
@@ -160,21 +176,21 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if ($isUnique) {
                 if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
                     $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with "
-                    . "the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
+                        . "the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
                 }
             }
-            
+
             if ($value instanceof Uri && $this->referenceCheckOn &&
                 !in_array($propertyUri, self::$nonresolvableURIs)) { //ERROR
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->errorMessages[] = "The resource (of type  $type) referred by uri " .
                         "{$value->getUri()} via the property $propertyUri is not found in this triple store ";
-                        $this->danglingReferences[] = $value->getUri();
+                    $this->danglingReferences[] = $value->getUri();
                 }
             }
-            
-            if ($value instanceof Uri && !($this->referenceCheckOn) &&
-                    !in_array($propertyUri, self::$nonresolvableURIs)) { // WARNING
+
+            if ($value instanceof Uri && !($this->referenceCheckOn) && $this->resourceManager != null &&
+                !in_array($propertyUri, self::$nonresolvableURIs)) { // WARNING
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->warningMessages[] = "The resource (of type  $type) referred by  uri " .
                         "{$value->getUri()} via the property $propertyUri is not found in thsi triple store. ";
@@ -182,6 +198,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 }
             }
         }
+
         return (count($this->errorMessages) === 0);
     }
 
@@ -316,7 +333,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if ($tripleStoreTenant[0] !== $tenantUri->getUri()) {
                 $secondRound = false;
                 $this->errorMessages[] = "Specified openskos:tenant code {$tenantCode} with the "
-                . "uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
+                    . "uri {$tripleStoreTenant[0]} does not correspond to dcterms:publisher uri $tenantUri . ";
             }
         }
         return $firstRound && $secondRound;

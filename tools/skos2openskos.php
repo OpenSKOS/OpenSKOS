@@ -20,6 +20,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f --file=clavas-organisations.xml
+
 include dirname(__FILE__) . '/autoload.inc.php';
 
 $opts = array(
@@ -27,6 +29,7 @@ $opts = array(
   'file|f=s' => 'File to import',
   'userUri|u=s' => 'Uri of the user who is doing the import',
   'setUri=s' => 'Set uri',
+  'removeDangling=s' => 'Remove dangling references as well' 
 );
 
 try {
@@ -38,6 +41,11 @@ try {
 }
 
 include dirname(__FILE__) . '/bootstrap.inc.php';
+
+$removeDangling = false;
+if ($OPTS->removeDangling === "yes") {
+  $removeDangling = true;  
+}
 
 $old_time = time();
 /* @var $diContainer DI\Container */
@@ -66,7 +74,6 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
 $check_concept_references = null;
 
-echo "First round. (The referecne to a concept via relations, hasTopConcept or member are not validated.) \n";
 
  /** Recall Message's constructor parameters to see what is going on
    /**
@@ -76,17 +83,19 @@ echo "First round. (The referecne to a concept via relations, hasTopConcept or m
    * @param Uri $setUri
    * @param bool $ignoreIncomingStatus
    * @param string $importedConceptStatus
-   * @param bool $isRemovingDanglingConceptReferencesRound
+   * @param bool $removeDanglingReferences
    * @param bool $noUpdates
    * @param bool $toBeChecked
    * @param string $fallbackLanguage
    * @param bool $clearSet
    * @param bool $deleteSchemes
    */
-$message = new \OpenSkos2\Import\Message( // $isRemovingDanglingConceptReferencesRound = false
-  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, false, true, false, 'en', false, false
+
+$message = new \OpenSkos2\Import\Message( // $removeDanglingReferences = false
+  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, $removeDangling, true, false, 'en', false, false
 );
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
+
 $importer->setLogger($logger);
 
 $importer->handle($message);
@@ -94,4 +103,3 @@ $importer->handle($message);
 
 echo "Done\n";
 
-//php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://host/clavas/public/api/users/30216132-6d43-4cb0-9a5e-4382fe03336a --file=clavas-organisations.xml

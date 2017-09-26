@@ -16,17 +16,17 @@ class Api_InstitutionsController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Return a list of OpenSKOS institutions (tenants) 
      *
-     * in RDF: /api/institution/  or /api/institution?format=rdf
+     * in RDF: /api/institutions/  or /api/institutions?format=rdf
      * 
-     * in JSON: /api/institution?format=json
+     * in JSON: /api/institutions?format=json
      * 
-     * in JSONP: /api/institution?format=jsonp&callback=myCallback1234
+     * in JSONP: /api/institutions?format=jsonp&callback=myCallback1234
      * 
-     * in HTML: /api/institution?format=html
+     * in HTML: /api/institutions?format=html
      * 
-     * in JSON as name-uri map: /api/institution?shortlist=true&format=json
+     * in JSON as name-uri map: /api/institutions?shortlist=true&format=json
      * 
-     * @api {get} /api/institution Get OpenSKOS institutions
+     * @api {get} /api/institutions Get OpenSKOS institutions
      * @apiName GetInstitutions
      * @apiGroup Institution
      *
@@ -75,39 +75,39 @@ class Api_InstitutionsController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Return a specific OpenSKOS institution given its uri or uuid
      * 
-     * in RDF: /api/institution/{uuid} 
+     * in RDF: /api/institutions/{uuid} 
      * 
-     * or /api/institution/{uuid.rdf}
+     * or /api/institutions/{uuid.rdf}
      * 
-     * or /api/institution?id={uuid}
+     * or /api/institutions?id={uuid}
      * 
-     * or /api/institution?id={uuid}&format=rdf
+     * or /api/institutions?id={uuid}&format=rdf
      * 
-     * or /api/institution?id={uri}
+     * or /api/institutions?id={uri}
      * 
-     * or /api/institution?id={uri}&format=rdf
+     * or /api/institutions?id={uri}&format=rdf
      * 
-     * in JSON: /api/institution/{uuid.json}
+     * in JSON: /api/institutions/{uuid.json}
      * 
-     * or /api/institution?id={uuid}&format=json
+     * or /api/institutions?id={uuid}&format=json
      * 
-     * or /api/institution?id={uri}&format=json
+     * or /api/institutions?id={uri}&format=json
      * 
-     * in JSONP: /api/institution/{uuid.jsonp}?callback=myCallback1234
+     * in JSONP: /api/institutions/{uuid.jsonp}?callback=myCallback1234
      * 
-     * or /api/institution?id={uuid}&format=jsonp&callback=myCallback1234
+     * or /api/institutions?id={uuid}&format=jsonp&callback=myCallback1234
      * 
-     * or /api/institution?id={uri}&format=jsonp&callback=myCallback1234
+     * or /api/institutions?id={uri}&format=jsonp&callback=myCallback1234
      * 
-     * in HTML: /api/institution/{uuid.html}
+     * in HTML: /api/institutions/{uuid.html}
      * 
-     * or /api/institution?id={uuid}&format=html
+     * or /api/institutions?id={uuid}&format=html
      * 
-     * or /api/institution?id={uri}&format=html
+     * or /api/institutions?id={uri}&format=html
      * 
      *
      *
-     * @api {get} /api/institution/{uuid} Get OpenSKOS institution details
+     * @api {get} /api/institutions/{uuid} Get OpenSKOS institution details
      *
      * @apiName GetInstitution
      * @apiGroup Institution
@@ -151,10 +151,13 @@ class Api_InstitutionsController extends AbstractController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Create an OpenSKOS institution
+     * @apiDescription Create an OpenSKOS institution 
      *
      * Create a new OpenSKOS institution based on the post data.
      * The code and the e-mail, provided in the request body, must be unique, otherwise validator will throw an error.
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      *
      *  @apiExample {String} Example request body
      *  <?xml version="1.0" encoding="utf-8" ?>
@@ -180,7 +183,7 @@ class Api_InstitutionsController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      *
-     * @api {post} /api/institution Create an OpenSKOS institution
+     * @api {post} /api/institutions Create an OpenSKOS institution
      * @apiName CreateInstitution
      * @apiGroup Institution
      *
@@ -255,7 +258,9 @@ class Api_InstitutionsController extends AbstractController
      * @apiDescription Update an OpenSKOS institution
      * Update an OpenSKOS institution based on the post data. 
      * The code and the e-mail, provided in the request body, must be unique otherwise the validator will throw an error.
-     *
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown. *
      *  @apiExample {String} Example request
      *  <?xml version="1.0" encoding="utf-8" ?>
      *  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -281,7 +286,7 @@ class Api_InstitutionsController extends AbstractController
      *   </rdf:Description>
      * </rdf:RDF>
      *
-     * @api {put} /api/institution Update an OpenSKOS institution
+     * @api {put} /api/institutions Update an OpenSKOS institution
      * @apiName UpdateInstitution
      * @apiGroup Institution
      *
@@ -343,7 +348,10 @@ class Api_InstitutionsController extends AbstractController
      *
      * @apiVersion 1.0.0
      * @apiDescription Delete an OpensSKOS Institution by its uri
-     * @api {delete} /api/institution Delete OpensSKOS institution
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
+     * @api {delete} /api/institutions Delete OpensSKOS institution
      * @apiName DeleteInstitution
      * @apiGroup Institution
      * @apiParam {String} key A valid API key

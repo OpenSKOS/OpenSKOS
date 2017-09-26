@@ -25,6 +25,7 @@ use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 
 class TenantManager extends ResourceManager
 {
@@ -36,6 +37,7 @@ class TenantManager extends ResourceManager
     {
         $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
             . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
+            . ' ?seturi  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .'
             . ' ?seturi  ?p ?o .}';
         $response = $this->query($query);
         if ($response !== null) {

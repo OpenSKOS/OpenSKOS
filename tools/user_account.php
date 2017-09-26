@@ -36,7 +36,6 @@ $opts = array(
   'code=s' => 'Tenants (institution) code (required)',
   'adminkey=s' => 'The key of the administrator of this tenant (required)',
   'name=s' => 'New-user name (required)',
-  'eppn=s' => 'New-user eppn (required)',
   'email=s' => 'New-user e-mail (required)',
   'password=s' => 'Password for the new user account (required)',
   'apikey=s' => 'Api key for the new user account (required)',
@@ -87,7 +86,7 @@ function user_with_password_exists($password, $tenantcode, $model, $resManager) 
 }
 
 
-$must_params = ['name', 'eppn', 'email', 'password', 'apikey'];
+$must_params = ['name', 'email', 'password', 'apikey'];
 foreach ($must_params as $name) {
   if (null === $OPTS->$name) {
     fwrite(STDERR, "missing required `" . $name . "` argument\n");
@@ -112,7 +111,6 @@ switch ($action) {
       'name' => $OPTS->name,
       'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
       'tenant' => $OPTS->code,
-      'eppn' => $OPTS->eppn,
       'apikey' => $OPTS->apikey,
       'type' => OpenSKOS_Db_Table_Users::USER_TYPE_API,
       'role' => $OPTS->role,

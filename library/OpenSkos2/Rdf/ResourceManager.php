@@ -56,23 +56,10 @@ class ResourceManager
     /**
      * @var array
      */
-    protected $init = [];
-
-    public function getResourceType()
-    {
-        return $this->resourceType;
-    }
-
-    public function getInitArray()
-    {
-        return $this->init;
-    }
-
-    // overriden in ConceptManager
-    public function getLabelManager()
-    {
-        return null;
-    }
+    protected $customInit = [];
+    protected $authorisationObject;
+    protected $uriGenerationObject;
+    protected $relationTypesObject;
 
     /**
 
@@ -81,12 +68,41 @@ class ResourceManager
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        if ($this->init["custom.default_relationtypes"]) {
-            $this->customRelationTypes = null;
-        } else {
-            $this->customRelationTypes = new \OpenSkos2\Custom\RelationTypes();
-        }
+        $this->customInit = $this->getCustomIni();
+        $this->authorisationObject = $this->makeOptionObject('authorisation');
+        $this->uriGenerationObject = $this->makeOptionObject('uri_generate');
+        $this->relationTypesObject = $this->makeOptionObject('relation_types');
+    }
+
+    public function getResourceType()
+    {
+        return $this->resourceType;
+    }
+
+    public function getCustomInitArray()
+    {
+        return $this->customInit;
+    }
+
+    // overriden in ConceptManager
+    public function getLabelManager()
+    {
+        return null;
+    }
+
+    public function getAuthorisationObject()
+    {
+        return $this->authorisationObject;
+    }
+
+    public function getUriGenerateObject()
+    {
+        return $this->uriGenerationObject;
+    }
+
+    public function getRelationTypesObject()
+    {
+        return $this->relationTypesObject;
     }
 
     /**
@@ -126,8 +142,8 @@ class ResourceManager
 
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
-    
-     /**
+
+    /**
      * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
      * @throws ResourceAlreadyExistsException
      */
@@ -757,7 +773,7 @@ class ResourceManager
             \OpenSkos2\Concept::TYPE . "> . "
             . "?concepturi  <" . $property . "> <$uri> . "
             . "?concepturi  <" . Skos::PREFLABEL . "> ?name . "
-            . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?serachid .}";
+            . "?concepturi  <" . OpenSkosNameSpace::UUID . "> ?searchid .}";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
@@ -788,55 +804,55 @@ class ResourceManager
 // RELATIONS
     public function getCustomRelationTypes()
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getRelationTypes();
+            return $this->relationTypesObject->getRelationTypes();
         }
     }
 
     public function getCustomInverses()
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getInverses();
+            return $this->relationTypesObject->getInverses();
         }
     }
 
     public function getCustomTransitives()
     {
-        if ($this->init["default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return [];
         } else {
-            return $this->customRelationTypes->getTransitives();
+            return $this->relationTypesObject->getTransitives();
         }
     }
 
     public function setCustomRelationTypes($relationtypes)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setRelationTypes($relationtypes);
+            $this->relationTypesObject->setRelationTypes($relationtypes);
         }
     }
 
     public function setCustomInverses($inverses)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setInverses($inverses);
+            $this->relationTypesObject->setInverses($inverses);
         }
     }
 
     public function setCustomTransitives($transitives)
     {
-        if ($this->init["custom.default_relationtypes"]) {
+        if (empty($this->relationTypesObject)) {
             return;
         } else {
-            $this->customRelationTypes->setTransitives($transitives);
+            $this->relationTypesObject->setTransitives($transitives);
         }
     }
 
@@ -865,56 +881,38 @@ class ResourceManager
         return $result;
     }
 
-// a relation is invalid if it (possibly with its inverse) creates transitive
-// link of a concept or related concept to itself
     public function relationTripleCreatesCycle($conceptUri, $relatedConceptUri, $relationUri)
     {
-        $closure = $this->getClosure($relatedConceptUri, $relationUri);
-        $transitive = ($conceptUri === $relatedConceptUri || in_array($conceptUri, $closure));
-        if ($transitive) {
-            throw new \Exception(
-                "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates transitive link 
-                    of the source to itself, possibly via inverse relation."
-            );
+        if ($conceptUri === $relatedConceptUri) {
+            throw new \Exception("The concept $conceptUri can not be related to "
+                . "itself via $relatedConceptUri.");
         }
-// overkill??
-        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->customRelationTypes->getInverses());
-        if (array_key_exists($relationUri, $inverses)) {
-            $inverseRelUri = $inverses[$relationUri];
-            $inverseClosure = $this->getClosure($conceptUri, $inverseRelUri);
-            $transitiveInverse = ($relatedConceptUri === $conceptUri || in_array($relatedConceptUri, $inverseClosure));
-            if ($transitiveInverse) {
-                throw new \Exception(
-                    "The triple ($conceptUri, $relatedConceptUri, $relationUri) creates inverse transitive link "
-                    . "of the target to itself"
-                );
+        $conceptB = $this->fetchByUri($relatedConceptUri, \OpenSkos2\Concept::TYPE);
+        foreach ($conceptB->getProperty($relationUri) as $object) {
+            if ($object->getUri() == $conceptUri) {
+                throw new \Exception("The concept $conceptUri can not be related to "
+                . "itself via  a transitive relation cycle "
+                . "from $relatedConceptUri via $relatedConceptUri.");
             }
         }
     }
 
     public function relationTripleIsDuplicated($conceptUri, $relatedConceptUri, $relationUri)
     {
-        $count = $this->countTriples(
-            '<' . $conceptUri . '>',
-            '<' . $relationUri . '>',
-            '<' . $relatedConceptUri . '>'
-        );
-        if ($count > 0) {
-            throw new \Exception(
-                "There is an attempt to duplicate a relation: ($conceptUri, $relationUri, $relatedConceptUri)"
-            );
+        $concept = $this->fetchByUri($conceptUri, \OpenSkos2\Concept::TYPE);
+
+        $relatedTerms = $concept->getProperty($relationUri);
+
+        if (empty($relatedTerms)) {
+            return true;
         }
-        $trans = $this->customRelationTypes->getTransitives();
-        if (!isset($trans[$relationUri]) || $trans[$relationUri] == null) {
-            $closure = $this->getClosure($conceptUri, $relationUri);
-            if (in_array($relatedConceptUri, $closure)) {
-                throw new \Exception(
-                    "There is an attempt to duplicate a relation: "
-                    . "($conceptUri, $relationUri, $relatedConceptUri) which is in the transitive closure."
-                );
+
+        foreach ($relatedTerms as $relatedTerm) {
+            if ($relatedConceptUri === $relatedTerm->getUri()) {
+                throw new \Exception("Related via $relationUri term $relatedConceptUri is alredy defined");
             }
         }
-        return false;
+        return true;
     }
 
     public function isRelationURIValid(
@@ -924,6 +922,7 @@ class ResourceManager
         $allRelationUris = null
     ) {
     
+
         if ($customRelUris == null) {
             $customRelUris = array_values($this->getCustomRelationTypes());
         }
@@ -1000,5 +999,116 @@ class ResourceManager
             throw new \Exception("the institution with the code $code is not found");
         }
         return $response[0]->name->getValue();
+    }
+
+    public function fetchResourceFilters()
+    {
+        $query = 'SELECT DISTINCT ?uri  ?title ?type ?code WHERE '
+            . '{ {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . \OpenSkos2\SkosCollection::TYPE . '> || '
+            . '?type = <' . \OpenSkos2\ConceptScheme::TYPE .
+            '> || ?type = <' . \OpenSkos2\Set::TYPE . '>  ) } '
+            . ' UNION { ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . ' ?uri <' . OpenSkosNamespace::CODE . '> ?code . '
+            . ' ?uri <' . VCard::ORG . '> ?node . ?node <' . VCard::ORGNAME . '> ?title '
+            . ' FILTER ( ?type = <' . \OpenSkos2\Tenant::TYPE . '>)} } ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[\OpenSkos2\SkosCollection::TYPE] = [];
+        $retVal[\OpenSkos2\ConceptScheme::TYPE] = [];
+        $retVal[\OpenSkos2\Set::TYPE] = [];
+        $retVal[\OpenSkos2\Tenant::TYPE] = [];
+        foreach ($response as $descr) {
+            $spec = [];
+            if ($descr->type->getUri() === \OpenSkos2\Tenant::TYPE) {
+                $spec['code'] = $descr->code->getValue();
+            } else {
+                $spec['uri'] = $descr->uri->getUri();
+            }
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
+        }
+        return $retVal;
+    }
+
+    public function fetchResourceFiltersForRelations()
+    {
+        $query = 'SELECT DISTINCT ?uri  ?title ?type WHERE '
+            . ' {?uri <' . DcTerms::TITLE . '> ?title . ?uri <' . RdfNamespace::TYPE . '> ?type . '
+            . 'FILTER ( ?type = <' . Owl::OBJECT_PROPERTY . '> || ?type = <' . \OpenSkos2\ConceptScheme::TYPE . '> )} ';
+        $response = $this->query($query);
+        $retVal = [];
+        $retVal[Owl::OBJECT_PROPERTY] = [];
+        $retVal[\OpenSkos2\ConceptScheme::TYPE] = [];
+        foreach ($response as $descr) {
+            $spec = [];
+            $spec['uri'] = $descr->uri->getUri();
+            $spec['title'] = $descr->title->getValue();
+            $retVal[$descr->type->getUri()][] = $spec;
+        }
+        $skosrels = Skos::getSkosConceptConceptRelations();
+        $len = strlen(Skos::NAME_SPACE);
+        foreach ($skosrels as $skosrel) {
+            $spec = [];
+            $spec['uri'] = $skosrel;
+            $spec['title'] = 'skos:' . substr($skosrel, $len);
+            $retVal[Owl::OBJECT_PROPERTY][] = $spec;
+        }
+        return $retVal;
+    }
+
+    private function getCustomIni()
+    {
+        try {
+            $config = \OpenSKOS_Application_BootstrapAccess::getOption('optional');
+        } catch (\Zend_Exception $e) {
+            $config = $this->makeDefaultInit();
+        }
+        return $config;
+    }
+
+    private function makeOptionObject($typeoption)
+    {
+        if (count($this->customInit) === 0) {
+            return null;
+        }
+        if (key_exists($typeoption, $this->customInit)) {
+            $className = $this->customInit[$typeoption];
+            if (empty($className)) {
+                return null;
+            } else {
+                $class = new \ReflectionClass($className);
+                $instance = $class->newInstanceArgs([$this]);
+                return $instance;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private function makeDefaultInit()
+    {
+        // making a default config
+        $config = array();
+        $config['delete_integrity_check'] = true;
+        $config['maximal_rows'] = 20;
+        $config['limit'] = 20;
+        $config['normal_time_limit'] = 30;
+        $config['maximal_time_limit'] = $config['normal_time_limit'];
+        $config['backward_compatible'] = true;
+        $config['authorisation'] = null;
+        $config['relation_types'] = null;
+        $config['uri_generate'] = null;
+        $config['relations_strict_reference_check'] = "http://www.w3.org/2004/02/skos/core#broader, "
+            . "http://www.w3.org/2004/02/skos/core#broaderTransitive, "
+            . "http://www.w3.org/2004/02/skos/core#narrower,"
+            . "http://www.w3.org/2004/02/skos/core#narrowerTransitive";
+        $config['relations_soft_reference_check'] = "http://www.w3.org/2004/02/skos/core#related,"
+            . "http://www.w3.org/2004/02/skos/core#semanticRelation,"
+            . "http://www.w3.org/2004/02/skos/core#broadMatch,http://www.w3.org/2004/02/skos/core#closeMatch,"
+            . "http://www.w3.org/2004/02/skos/core#exactMatch,http://www.w3.org/2004/02/skos/core#mappingRelation,"
+            . "http://www.w3.org/2004/02/skos/core#narrowMatch,http://www.w3.org/2004/02/skos/core#relatedMatch";
+        $config['uuid_regexp_prefixes'] = '';
+        return $config;
     }
 }

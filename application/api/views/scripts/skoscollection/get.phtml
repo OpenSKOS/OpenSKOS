@@ -19,17 +19,20 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use OpenSkos2\Namespaces\Org;
-use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Namespaces\OpenSkos;
 
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $skosCollection = $this->resource;
 $skosCollectionManager = $di->get('OpenSkos2\SkosCollectionManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
+$setManager = $di->get('OpenSkos2\SetManager');
 $uri = $skosCollection->getUri();
 $name = $skosCollection->getTitle();
 $uuid = $skosCollection->getUuid();
-$setUri = $skosCollection->getSet()->getUri();
+$set = $skosCollection->getSet();
+$setUri = $set[0]->getUri();
+$inst=$skosCollection ->getTenant();
+$tenantCode = $inst->getValue();
 $this->headTitle($name);
 ?>
 
@@ -47,14 +50,14 @@ $this->headTitle($name);
                 $setinfo = $setManager->fetchSetTitleAndCodeByUri($setUri);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'set', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
             <?php endif ?>
             <?php
             if ($key === "tenant"):
                 $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
                 ?>
                 <dt><?php echo $key ?>:</dt>
-                <dd><a href="<?php echo $this->url(array('controller' => 'institution', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+                <dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
             <?php endif ?>
     <?php if ($key === "description"): ?>
                 <dt><?php echo $key ?>:</dt>

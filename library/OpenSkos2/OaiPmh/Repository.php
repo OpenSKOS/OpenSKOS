@@ -147,6 +147,7 @@ class Repository implements InterfaceRepository
         $description = null
     ) {
     
+
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -251,12 +252,10 @@ class Repository implements InterfaceRepository
             foreach ($rdfSetURIs as $setURI) {
                 $rdfSetUri = $setURI->getUri();
                 $rdfSet = $this->rdfSetManager->fetchByUri($rdfSetUri);
-                $allowedOAILit=$rdfSet->
-                    getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
-                $allowedOAI = $allowedOAILit->getValue();
-                if ($allowedOAI === "false") {
+                $allowedOAI = $rdfSet->getAllowOai();
+                if (!$allowedOAI) {
                     throw new BadArgumentException("This concept belongs to the set "
-                       . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
+                    . " (tenant-collection) {$setURI} where oai harvesting is not allowed");
                 }
             }
             if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
@@ -421,7 +420,7 @@ class Repository implements InterfaceRepository
             $rdfSet = $this->setManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
                 $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
-                if (!(bool)$allowed) {
+                if (!(bool) $allowed) {
                     throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]);
                 }
                 $rdfSetId = $rdfSet->getUri();
@@ -494,6 +493,7 @@ class Repository implements InterfaceRepository
         $set = null
     ) {
     
+
         $params = [];
         $params['offset'] = $offset;
         $params['metadataPrefix'] = $metadataPrefix;
@@ -546,6 +546,7 @@ class Repository implements InterfaceRepository
         &$numFound = null
     ) {
     
+
         $searchOptions = [
             'start' => $offset,
             'rows' => $limit,
@@ -586,21 +587,29 @@ class Repository implements InterfaceRepository
         if (\Rhumsaa\Uuid\Uuid::isValid($identifier)) {
             return $identifier;
         }
-        $init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
-        if (array_key_exists('custom.uuid_regexp_prefixes', $init)) {
-            $regexps = explode(',', $init['custom.uuid_regexp_prefixes']);
-            foreach ($regexps as $regexp) {
-                $matches=[];
-                $ok = preg_match($regexp, $identifier, $matches);
-                if ($ok) {
-                    $length = strlen($matches[0]);
-                    $uuid = substr($identifier, $length);
-                    if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
-                         return $uuid;
-                    }
+        $customInit = $this->conceptManager->getCustomInitArray();
+        if (count($customInit) === 0) {
+            throw new BadArgumentException('Invalid identifier ' . $identifier);
+        }
+
+        $custom = $customInit;
+        if (!array_key_exists('uuid_regexp_prefixes', $custom)) {
+            throw new BadArgumentException('Invalid identifier ' . $identifier);
+        }
+
+        $regexps = explode(',', $custom['uuid_regexp_prefixes']);
+        foreach ($regexps as $regexp) {
+            $matches = [];
+            $ok = preg_match($regexp, $identifier, $matches);
+            if ($ok) {
+                $length = strlen($matches[0]);
+                $uuid = substr($identifier, $length);
+                if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
+                    return $uuid;
                 }
             }
         }
+
         throw new BadArgumentException('Invalid identifier ' . $identifier);
     }
 }

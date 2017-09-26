@@ -24,6 +24,7 @@ use OpenSkos2\Namespaces\Owl;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Rdfs;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Uri;
 
 class RelationType extends Resource
@@ -61,12 +62,16 @@ class RelationType extends Resource
     
 
         $nowLiteral = function () {
-            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+            return new \OpenSkos2\Rdf\Literal(
+                date('c'),
+                null,
+                \OpenSkos2\Rdf\Literal::TYPE_DATETIME
+            );
         };
 
             $forFirstTimeInOpenSkos = [
             DcTerms::PUBLISHER => new Uri($tenant->getUri()),
-            DcTerms::DATESUBMITTED => $nowLiteral
+            DcTerms::DATESUBMITTED => $nowLiteral()
             ];
 
             foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {

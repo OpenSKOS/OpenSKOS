@@ -17,17 +17,17 @@ class Api_CollectionsController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Get a detailed list of OpenSKOS sets
      * 
-     * in RDF: /api/set/  or /api/set?format=rdf
+     * in RDF: /api/collections/  or /api/collections?format=rdf
      * 
-     * in JSON: /api/set?format=json
+     * in JSON: /api/collections?format=json
      * 
-     * in JSONP: /api/set?format=jsonp&callback=myCallback1234
+     * in JSONP: /api/collections?format=jsonp&callback=myCallback1234
      * 
-     * in HTML: /api/set?format=html
+     * in HTML: /api/collections?format=html
      *
-     * in JSON as name-uri map: /api/set?shortlist=true&format=json
+     * in JSON as name-uri map: /api/collections?shortlist=true&format=json
      *  
-     * @api {get} /api/set  Get OpenSKOS sets
+     * @api {get} /api/collections  Get OpenSKOS sets
      * @apiName GetSets
      * @apiGroup Set
      *
@@ -90,38 +90,38 @@ class Api_CollectionsController extends AbstractController
      * @apiVersion 1.0.0
      * @apiDescription Get an OpenSKOS Set details by its uri or uuid:
      * 
-     * in RDF: /api/set/{uuid} 
+     * in RDF: /api/collections/{uuid} 
      * 
-     * or /api/set/{uuid.rdf}
+     * or /api/collections/{uuid.rdf}
      * 
-     * or /api/set?id={uuid}
+     * or /api/collections?id={uuid}
      * 
-     * or /api/set?id={uuid}&format=rdf
+     * or /api/collections?id={uuid}&format=rdf
      * 
-     * or /api/set?id={uri}
+     * or /api/collections?id={uri}
      * 
-     * or /api/set?id={uri}&format=rdf
+     * or /api/collections?id={uri}&format=rdf
      * 
-     * in JSON: /api/set/{uuid.json}
+     * in JSON: /api/collections/{uuid.json}
      * 
-     * or /api/set?id={uuid}&format=json
+     * or /api/collections?id={uuid}&format=json
      * 
-     * or /api/set?id={uri}&format=json
+     * or /api/collections?id={uri}&format=json
      * 
-     * in JSONP: /api/set/{uuid.jsonp}?callback=myCallback1234
+     * in JSONP: /api/collections/{uuid.jsonp}?callback=myCallback1234
      * 
-     * or /api/set?id={uuid}&format=jsonp&callback=myCallback1234
+     * or /api/collections?id={uuid}&format=jsonp&callback=myCallback1234
      * 
-     * or /api/set?id={uri}&format=jsonp&callback=myCallback1234
+     * or /api/collections?id={uri}&format=jsonp&callback=myCallback1234
      * 
-     * in HTML: /api/set/{uuid.html}
+     * in HTML: /api/collections/{uuid.html}
      * 
-     * or /api/set?id={uuid}&format=html
+     * or /api/collections?id={uuid}&format=html
      * 
-     * or /api/set?id={uri}&format=html
+     * or /api/collections?id={uri}&format=html
      * 
      *
-     * @api {get} /api/set/{uuid} Get OpenSKOS set details
+     * @api {get} /api/collections/{uuid} Get OpenSKOS set details
      * @apiName GetSet
      * @apiGroup Set
      *
@@ -164,11 +164,13 @@ class Api_CollectionsController extends AbstractController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Create a new OpenSKOS set based on the post data.
-     * The set's code and the web-page provided in the request body, must be unique. 
-     * The obligatory publisher reference must be the reference to an existing institution and must 
-     * coinside with the tenant code given as a the request parameter.
-     * If one of the conditions above is not fullfilled the validator will throw an error.
+     * @apiDescription Create a new OpenSKOS set (former collection) based on the post data.
+     * The set's code and the web-page provided in the request body, must be unique. If publisher (which is the uri of 
+     * the tenant) is not given, then the uri of the tenant set in the request parameters will be assigned to publisher 
+     * property. 
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      *
      @apiExample {String} Example request
      * <?xml version="1.0" encoding="UTF-8"?>
@@ -188,7 +190,7 @@ class Api_CollectionsController extends AbstractController
      *      </rdf:Description>
      * </rdf:RDF>
      *
-     * @api {post} /api/set Create an OpenSKOS set
+     * @api {post} /api/collections Create an OpenSKOS set
      * @apiName CreateSet
      * @apiGroup Set
      *
@@ -248,8 +250,10 @@ class Api_CollectionsController extends AbstractController
     /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Update an OpenSKOS set based on the post data
-     *
+     * @apiDescription Update an OpenSKOS set (former collection) based on the post data.
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
      @apiExample {String} Example request
      * <?xml version="1.0" encoding="UTF-8"?>
      * <rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -268,7 +272,7 @@ class Api_CollectionsController extends AbstractController
      *  </rdf:Description>
      * </rdf:RDF>
      *
-     * @api {post} /api/set Update SKOS set
+     * @api {post} /api/collections Update SKOS set
      * @apiName UpdateSet
      * @apiGroup Set
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
@@ -318,8 +322,11 @@ class Api_CollectionsController extends AbstractController
      /**
      *
      * @apiVersion 1.0.0
-     * @apiDescription Delete an OpensSKOS Set by its uri
-     * @api {delete} /api/set Delete OpensSKOS set
+     * @apiDescription Delete an OpensSKOS set (former collection) by its uri
+     * To activate this API function, the parameter 'optional.authorisation' in application.ini must be set to the 
+     * dicrectory where the authorisation procedure is implemented, for instance optional.authorisation = 
+     * Custom\Authorisation. If this parameter is absent then 501 is thrown.
+     * @api {delete} /api/collections Delete OpensSKOS set
      * @apiName DeleteSet
      * @apiGroup Set
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal

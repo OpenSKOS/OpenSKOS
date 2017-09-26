@@ -19,9 +19,7 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-/* VOORBEELD!!!!
- * Run the file as :  php tenant.php --epic=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx create
- */
+
 
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -256,9 +254,9 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager,
 
 function createTenantRdf($code, 
     $name, 
-    $epic, 
     $uri, 
-    $uuid, 
+    $uuid,
+    $email,
     $disableSearchInOtherTenants, 
     $enableStatussesSystem, 
     $enableSkosXl, 
@@ -281,31 +279,28 @@ function createTenantRdf($code,
             " has been already registered in the triple store. \n");
         exit(1);
     }
+    
+    $insts2 = $resourceManager->fetchSubjectForObject(VCard::EMAIL, 
+        new Literal($email));
+    if (count($insts2) > 0) {
+        fwrite(STDERR, "An institution with the email " . $email . 
+            " has been already registered in the triple store. \n");
+        exit(1);
+    }
 
     $tenantResource = new Tenant();
-    if ($epic === 'true') {
-        try {
-            $dummyTenant = new \OpenSkos2\Tenant("http://dummy-tenant");
-            $dummySet = new \OpenSkos2\Set("http://dummy-set");
-            $uri = $tenantResource->selfGenerateUri($dummyTenant, 
-                $dummySet, 
-                $resourceManager);
-        } catch (Exception $ex) {
-            fwrite(STDOUT, "\n Epic failed: " . $ex->getMessage() . " \n");
-            fwrite(STDOUT, "\n I will use the uri and uuid provided by you \n");
-            setID($tenantResource, $uri, $uuid, $resourceManager);
-        };
-    } else {
-        setID($tenantResource, $uri, $uuid, $resourceManager);
-    }
+    setID($tenantResource, $uri, $uuid, $resourceManager);
 
 
     $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
+    $tenantResource->setProperty(VCard::EMAIL, new Literal($email));
+    
     $blank1 = "_:genid_" . Uuid::uuid4();
     $organisation = new Resource($blank1);
     if (isset($name)) {
         $organisation->setProperty(VCard::ORGNAME, new Literal($name));
     }
+    
     //$resourceManager->setLiteralWithEmptinessCheck($organisation, 
     //vCard::ORGUNIT, " ");
     $tenantResource->setProperty(VCard::ORG, $organisation);
@@ -648,10 +643,10 @@ class Institutions
             } else {
                $skosXl = "false";
             }
-            if (!empty($row->epic)) {
-               $epic = $row->epic; 
+            if (!empty($row->email)) {
+               $email = $row->email; 
             } else {
-               $epic = "false";
+               $email = "unknown";
             }
             if (!empty($row->enableStatussesSystem)) {
                $enableStatussesSystem = $row->enableStatussesSystem; 
@@ -660,9 +655,9 @@ class Institutions
             }
             $tenant = createTenantRdf($row->code, 
                 $row->name, 
-                $epic, 
                 $uri, 
                 $uuid, 
+                $email,
                 $row->disableSearchInOtherTenants, 
                 $enableStatussesSystem, 
                 $skosXl, 

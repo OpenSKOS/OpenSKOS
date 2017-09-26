@@ -15,7 +15,6 @@
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
     <lockType>simple</lockType>
-    <unlockOnStartup>true</unlockOnStartup>
   </indexConfig>
 
   <updateHandler class="solr.DirectUpdateHandler2">
@@ -38,13 +37,10 @@
     </autoCommit> 
       
     <!-- SoftAutoCommit
-
          Perform a 'soft' commit automatically under certain conditions.
          This commit avoids ensuring that data is synched to disk.
-
          maxDocs - Maximum number of documents to add since the last
                    soft commit before automaticly triggering a new soft commit.
-
          maxTime - Maximum amount of time in ms that is allowed to pass
                    since a document was added before automaticly
                    triggering a new soft commit.
@@ -57,18 +53,14 @@
     <!-- Search Components
         Search components are registered to SolrCore and used by
         instances of SearchHandler (which can access them by name)
-
         By default, the following components are available:
-
         <searchComponent name="query"     class="solr.QueryComponent" />
         <searchComponent name="facet"     class="solr.FacetComponent" />
         <searchComponent name="mlt"       class="solr.MoreLikeThisComponent" />
         <searchComponent name="highlight" class="solr.HighlightComponent" />
         <searchComponent name="stats"     class="solr.StatsComponent" />
         <searchComponent name="debug"     class="solr.DebugComponent" />
-
         Default configuration in a requestHandler would look like:
-
         <arr name="components">
           <str>query</str>
           <str>facet</str>
@@ -77,20 +69,15 @@
           <str>stats</str>
           <str>debug</str>
         </arr>
-
         If you register a searchComponent to one of the standard names,
         that will be used instead of the default.
-
         To insert components before or after the 'standard' components, use:
-
         <arr name="first-components">
           <str>myFirstComponentName</str>
         </arr>
-
         <arr name="last-components">
           <str>myLastComponentName</str>
         </arr>
-
         NOTE: The component registered with the name "debug" will
         always be executed after the "last-components"
       -->
@@ -118,7 +105,6 @@
     
     <!-- SearchHandler
          http://wiki.apache.org/solr/SearchHandler
-
        For processing Search Queries, the primary Request Handler
        provided with Solr is "SearchHandler" It delegates to a sequent
        of SearchComponents (see below) and supports distributed
@@ -146,7 +132,8 @@
     </requestHandler>
 
     <requestHandler name="/update" class="solr.UpdateRequestHandler" />
-    <requestHandler name="/update/json" class="solr.JsonUpdateRequestHandler"/>
+    <!-- removed in solr 5, but keep seperate json endpoint for backwards compatability -->
+    <requestHandler name="/update/json" class="solr.UpdateRequestHandler"/>
 
     <!-- ter vervanging van alle losse /admin/* handlers -->
     <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />

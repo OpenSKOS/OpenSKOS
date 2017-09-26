@@ -34,17 +34,17 @@ class RelationType extends AbstractTripleStoreResource
     ) {
     
         $this->manager = $manager;
-        $this->authorisation = new \OpenSkos2\Authorisation($manager);
-        $this->deletion = new \OpenSkos2\Deletion($manager);
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
         $this->personManager = $personManager;
-        $this->init = parse_ini_file(__DIR__ . '/../../../application/configs/application.ini');
+        $this->limit = $this->customInit['limit'];
     }
 
    
 
-    public function listRelatedConceptPairs($request)
+    public function listRelatedConceptPairs(PsrServerRequestInterface $request)
     {
-        $params = $request->fetchUserTenantSetViaRequestParameters();
+        $params = $request->getQueryParams();
         $relType = $params['id'];
         $sourceSchemata = null;
         $targetSchemata = null;
@@ -72,7 +72,7 @@ class RelationType extends AbstractTripleStoreResource
         }
     }
 
-    public function findRelatedConcepts($request, $uri, $format)
+    public function findRelatedConcepts(PsrServerRequestInterface $request, $uri, $format)
     {
         $params = $request->fetchUserTenantSetViaRequestParameters();
         $relType = $params['id'];
@@ -82,8 +82,12 @@ class RelationType extends AbstractTripleStoreResource
             $schema = null;
         }
         try {
-            $init = $this->manager->getInitArray();
-
+            $customInit = $this->manager->getCustomInitArray();
+            if (count($customInit)===0) {
+                $maxRows = $this->limit;
+            } else {
+                $maxRows=$customInit["custom']['maximal_rows"];
+            }
             if (isset($params['isTarget'])) {
                 if ($params['isTarget'] === 'true') {
                     $isTarget = true;
@@ -106,7 +110,7 @@ class RelationType extends AbstractTripleStoreResource
                 $concepts,
                 $concepts->count(),
                 0,
-                $init["custom.maximal_rows"]
+                $maxRows
             );
             switch ($format) {
                 case 'json':

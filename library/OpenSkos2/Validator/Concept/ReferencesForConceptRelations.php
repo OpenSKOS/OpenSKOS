@@ -29,9 +29,13 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     {
         $valid = $this->checkConsistencyOfRelations($concept);
         if ($this->conceptReferenceCheckOn) {
-            $init = $this->resourceManager->getInitArray();
-            $strict = $this->strictCheckDanglingReferences($concept, $init);
-            $soft = $this->softCheckDanglingReferences($concept, $init);
+            $customInit = $this->resourceManager->getCustomInitArray();
+            if (count($customInit) === 0) {
+                $strict = true;
+            } else {
+                $strict = $this->strictCheckDanglingReferences($concept, $customInit);
+                $soft = $this->softCheckDanglingReferences($concept, $customInit);
+            }
         } else {
             $strict = true;
         }
@@ -41,7 +45,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
     private function strictCheckDanglingReferences(Concept $concept, $init)
     {
         $errorsBefore = count($this->errorMessages);
-        $toCheck = explode(" ", $init["custom.relations_strict_reference_check"]);
+        $toCheck = explode(" ", $init["relations_strict_reference_check"]);
         for ($i = 0; $i < count($toCheck); $i++) {
             $toCheck[$i] = trim($toCheck[$i]);
         }
@@ -60,7 +64,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
 
     private function softCheckDanglingReferences(Concept $concept, $init)
     {
-        $toCheck = explode(" ", $init["custom.relations_soft_reference_check"]);
+        $toCheck = explode(" ", $init["relations_soft_reference_check"]);
         for ($i = 0; $i < count($toCheck); $i++) {
             $toCheck[$i] = trim($toCheck[$i]);
         }
@@ -70,7 +74,7 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                 foreach ($values as $value) {
                     if (!($this->resourceManager->askForUri($value, false, Concept::TYPE))) {
                         $this->warningMessages[] = "The concept referred by  uri {$value->getUri()} is not found. "
-                        . "It is addedto the the list of dangling references.";
+                            . "It is addedto the the list of dangling references.";
                         $this->danglingReferences[] = $value;
                     }
                 }
@@ -85,7 +89,6 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
         $customRelUris = array_values($this->resourceManager->getCustomRelationTypes());
         $registeredRelationUris = array_values($this->resourceManager->getTripleStoreRegisteredCustomRelationTypes());
         $allRelationUris = array_values($this->resourceManager->fetchConceptConceptRelationsNameUri());
-        $conceptUri = $concept->getUri();
         $properties = array_keys($concept->getProperties());
         foreach ($properties as $property) {
             if (in_array($property, $allRelationUris)) {
@@ -96,11 +99,6 @@ class ReferencesForConceptRelations extends AbstractConceptValidator
                         $registeredRelationUris,
                         $allRelationUris
                     ); // throws an Exception
-                    $relatedConcepts = $concept->getProperty($property);
-                    foreach ($relatedConcepts as $relConceptUri) {
-                        // throw an exception unless it is ok
-                        $this->resourceManager->relationTripleCreatesCycle($conceptUri, $relConceptUri, $property);
-                    }
                 } catch (\Exception $ex) {
                     $this->errorMessages[] = $ex->getMessage();
                 }

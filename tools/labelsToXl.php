@@ -19,7 +19,7 @@
 /**
  * Script to index the solr from jena manually.
  * No need for regular use - just in case of some changes in the solr schema. 
- * Run the file as : php tools/indexSolr.php -e environment
+ * Run the file as : php tools/indexSolr.php -e environment ???
  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
@@ -65,12 +65,15 @@ $labelHelper = $diContainer->make('OpenSkos2\Concept\LabelHelper');
 
 $query = '-status:deleted';
 
+$query .= 'AND s_rdfType:"http://www.w3.org/2004/02/skos/core#Concept"';
+
 // Should concepts which have pref label xl already be skipped.
 $skipDone = $OPTS->getOption('skipDone');
 if (!empty($skipDone)) {
     $query .= ' AND -s_prefLabelXl:*';
 }
 
+   
 // Process only concpets modified after the specified date.
 $modifiedSince = $OPTS->getOption('modified');
 if (!empty($modifiedSince)) {
@@ -82,8 +85,10 @@ $limit = 200;
 $counter = 0;
 $add = $OPTS->add;
 $obsoleteconcepts = [];
+
 do {
     try {
+        
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
 
         $logger->info('Total: ' . $numFound);
@@ -94,6 +99,7 @@ do {
 
             foreach ($concepts as $concept) {
                 $counter ++;
+                
                 $logger->debug($concept->getUri());
 
                 try {
@@ -109,7 +115,7 @@ do {
                         foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
                             $concept->setProperties($xlProperty, $concept->getProperty($xlProperty));
                         }
-                        $conceptManager->replaceAndCleanRelations($concept);
+                        $conceptManager->replace($concept);
                     } else {
                         // Create concept only with xl labels to insert it as partial resource
                         $partialConcept = new \OpenSkos2\Concept($concept->getUri());
@@ -144,6 +150,7 @@ do {
         );
     }
 
+    
     if (!empty($skipDone)) {
         $offset = 0; // if we skip done we need to work without pagination
     } else {

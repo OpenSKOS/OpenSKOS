@@ -23,7 +23,7 @@ use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSKOS_Db_Table_Row_User;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Solarium\Exception\InvalidArgumentException;
+use OpenSkos2\Api\Exception\InvalidArgumentException;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
@@ -45,26 +45,27 @@ abstract class AbstractTripleStoreResource
      */
     protected $manager;
 
-    /**
-     * Authorisation rules
-     *
-     * @var Authorisation
-     */
-    protected $authorisation;
-
+   
     /**
      * Deletion rules
      *
      * @var Deletion
      */
-    protected $deletion;
+    protected $deletionIntegrityCheck;
 
     /**
-     * array of application.ini settings
+     * array of custom.ini settings
      *
-     * @var init
+     * @var array
      */
-    protected $init;
+    protected $customInit;
+    
+    /**
+     * Amount of concepts to return
+     *
+     * @var int
+     */
+    protected $limit;
 
     /**
      * Get PSR-7 response for resource
@@ -86,7 +87,7 @@ abstract class AbstractTripleStoreResource
         } else {
             $propertiesList = [];
         }
-        
+
         if (($context === 'json' || $context === 'jsonp') && $this->manager->getResourceType() === Tenant::TYPE) {
             $fieldname = 'sets';
             $extrasGraph = $this->manager->fetchSetsForTenantUri($resource->getUri());
@@ -100,12 +101,12 @@ abstract class AbstractTripleStoreResource
         switch ($context) {
             case 'json':
                 $detailJsonResponse = (new DetailJsonResponse($resource, $propertiesList));
-                $detailJsonResponse->setExtras($extras, $fieldname, $this->init['custom.backward_compatible']);
+                $detailJsonResponse->setExtras($extras, $fieldname, $this->customInit['backward_compatible']);
                 $response = $detailJsonResponse->getResponse();
                 break;
             case 'jsonp':
                 $detailJsonPResponse = (new DetailJsonpResponse($resource, $params['callback'], $propertiesList));
-                $detailJsonPResponse->setExtras($extras, $fieldname, $this->init['custom.backward_compatible']);
+                $detailJsonPResponse->setExtras($extras, $fieldname, $this->customInit['backward_compatible']);
                 $response = $detailJsonPResponse->getResponse();
                 break;
             case 'rdf':
@@ -127,13 +128,13 @@ abstract class AbstractTripleStoreResource
     public function getResource($id)
     {
         $rdfType = $this->manager->getResourceType();
-            
+
         if ($id instanceof Uri) {
             $resource = $this->manager->fetchByUri($id, $rdfType);
         } else {
             $resource = $this->manager->fetchByUuid($id, $rdfType);
         }
-        
+
         if (!$resource) {
             throw new NotFoundException("Resource not found by uri/uuid: $id \n: ", 404);
         }
@@ -151,18 +152,18 @@ abstract class AbstractTripleStoreResource
                 $index,
                 count($index),
                 1,
-                $this->init["custom.maximal_rows"]
+                $this->customInit['maximal_rows']
             );
 
             switch ($params['context']) {
                 case 'json':
                     $jsonResponse = (new JsonResponse($result));
-                    $jsonResponse ->setInit($this->init);
+                    $jsonResponse->setInit($this->customInit);
                     $response = $jsonResponse->getResponse();
                     break;
                 case 'jsonp':
                     $jsonPResponse = (new JsonpResponse($result, $params['callback']));
-                    $jsonPResponse ->setInit($this->init);
+                    $jsonPResponse->setInit($this->customInit);
                     $response = $jsonPResponse->getResponse();
                     break;
                 case 'rdf':
@@ -233,7 +234,10 @@ abstract class AbstractTripleStoreResource
 
             $user = $this->getUserFromParams($params);
 
-            $this->authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+            $authorisation = $this->manager->getAuthorisationObject();
+            if (!empty($authorisation)) {
+                $authorisation->resourceEditAllowed($user, $tenant, $set, $resource);
+            }
 
             if ($resource instanceof \OpenSkos2\Concept) {
                 $this->checkConceptXl($resource, $tenant);
@@ -293,9 +297,12 @@ abstract class AbstractTripleStoreResource
 
             $set = $this->getSet($params, $tenant);
 
-            $this->authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+            $authorisation = $this->manager->getAuthorisationObject();
+            if (!empty($authorisation)) {
+                $authorisation->resourceDeleteAllowed($user, $tenant, $set, $resource);
+            }
 
-            $this->deletion->canBeDeleted($id);
+            $this->deletionIntegrityCheck->canBeDeleted($id);
 
             if ($resource->getType()->getUri() === \OpenSkos2\Concept::TYPE) {
                 if ($resource->isDeleted()) {
@@ -436,7 +443,10 @@ abstract class AbstractTripleStoreResource
             $this->manager->getLabelManager()
         );
 
-        $this->authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+        $authorisation = $this->manager->getAuthorisationObject();
+        if (!empty($authorisation)) {
+            $authorisation->resourceCreateAllowed($user, $tenant, $set, $resource);
+        }
 
         $autoGenerateUri = $this->checkResourceIdentifiers($request, $resource);
 
@@ -469,7 +479,7 @@ abstract class AbstractTripleStoreResource
 
         // is a tenant, collection or api key set in the XML?
 
-        if ($this->init['custom.backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $set = 'collection';
         } else {
             $set = 'set';
@@ -520,7 +530,7 @@ abstract class AbstractTripleStoreResource
         if (!isset($resource) || !$resource instanceof $className) {
             $actualClassName = get_class($resource);
             throw new InvalidArgumentException("XML Could not be converted to $className, "
-                . "it is an instance of $actualClassName", 400);
+            . "it is an instance of $actualClassName", 400);
         }
 
         if ($this->manager->getResourceType() !== \OpenSkos2\Tenant::TYPE) {
@@ -533,6 +543,7 @@ abstract class AbstractTripleStoreResource
             if (!$resource->getTenant()) {
                 $resource->addUniqueProperty(OpenSkos::TENANT, $tenant->getCode());
             }
+            // overkill check
             if (!$resource->getTenant()) {
                 throw new InvalidArgumentException('No tenant specified', 400);
             }
@@ -581,12 +592,12 @@ abstract class AbstractTripleStoreResource
      */
     protected function getSet($params, $tenant)
     {
-        if ($this->init['custom.backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
         }
-
+        
         if (empty($params[$setName])) {
             throw new InvalidArgumentException("No $setName specified in the request parameters", 400);
         }
@@ -683,7 +694,7 @@ abstract class AbstractTripleStoreResource
      * @return OpenSKOS_Db_Table_Row_User
      * @throws InvalidArgumentException
      */
-    private function getUserFromParams($params)
+    protected function getUserFromParams($params)
     {
         if (empty($params['key'])) {
             throw new InvalidArgumentException('No key specified', 400);
@@ -694,7 +705,7 @@ abstract class AbstractTripleStoreResource
     protected function getRequiredParameters()
     {
 
-        if ($this->init['custom.backward_compatible']) {
+        if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
@@ -713,5 +724,11 @@ abstract class AbstractTripleStoreResource
     {
         $index = $this->manager->fetchNameUri();
         return $index;
+    }
+    
+    public function getResourceManager()
+    {
+        
+        return $this->manager;
     }
 }

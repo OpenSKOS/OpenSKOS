@@ -29,7 +29,7 @@ use OpenSkos2\Rdf\Uri;
 
 
 // VOORBEELD
-//php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim --db-password=geheim --db-username=root --debug=1
+//php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim --db-password=geheim --db-username=ookgeheim --debug=1
 
 
 $opts = [

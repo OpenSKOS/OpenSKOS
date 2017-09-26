@@ -13,6 +13,9 @@
         <testsuite name="Openskos Test Suite">
             <directory>tests</directory>
         </testsuite>
+        <testsuite name="Openskos Integration Test Suite">
+            <directory>integrationtests</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist>
@@ -28,7 +31,7 @@
     </logging>
     <php>
         <!-- integration test setting -->
-        <const name="API_BASE_URI" value = "http://localhost:80/test/public/api"/>
+        <const name="API_BASE_URI" value = "http://localhost:80/public/api"/>
         <const name="SOURCE_DIR" value = "/app/test"/>
         <const name="TENANT_URI" value="http://test.com"/>
         <const name="API_KEY_ADMIN" value="xxx"/>
