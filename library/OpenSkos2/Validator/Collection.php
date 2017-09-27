@@ -26,7 +26,6 @@ use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
-use OpenSkos2\SkosXl\Label;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -71,9 +70,9 @@ class Collection
      */
     public function __construct(
         ResourceManager $resourceManager,
-        $isForUpdate,
         Tenant $tenant,
         Set $set,
+        $isForUpdate,
         $referencecheckOn,
         $conceptReferenceCheckOn = false,
         LoggerInterface $logger = null

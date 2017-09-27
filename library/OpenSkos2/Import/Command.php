@@ -77,6 +77,7 @@ class Command implements LoggerAwareInterface
     ) {
     
 
+
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
         $this->personManager = $personManager;
@@ -86,7 +87,7 @@ class Command implements LoggerAwareInterface
     public function handle(Message $message)
     {
         $file = new File($message->getFile());
-        $resourceCollection = $file->getResources(Concept::$classes['SkosXlLabels']);
+        $resourceCollection = $file->getResources(null, Concept::$classes['SkosXlLabels']);
 
         $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
 
@@ -199,7 +200,7 @@ class Command implements LoggerAwareInterface
                         $this->logger->info("replaced resource {$resource->getUri()}");
                     } else {
                         $this->logger->error("Resource {$resource->getUri()} of "
-                        . "type {$resource->getType()->getUri()}: \n" .
+                            . "type {$resource->getType()->getUri()}: \n" .
                             implode(' , ', $validator->getErrorMessages()));
                     }
                 } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
@@ -207,6 +208,105 @@ class Command implements LoggerAwareInterface
                 }
             }
         }
+    }
+
+    // validating and inserting concepts chunk by chunk
+    public function handleQuick(Message $message, $bulksize)
+    {
+        $file = new File($message->getFile());
+        $resourceCollection = $file->getResources(Concept::TYPE, Concept::$classes['SkosXlLabels']);
+
+        $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
+
+        // Disable commit's for every concept
+        $this->conceptManager->setIsNoCommitMode(true);
+
+        $helper = new CollectionHelper(
+            $this->resourceManager,
+            $this->conceptManager,
+            $this->personManager,
+            $this->tenant,
+            $message
+        );
+        $helper->setLogger($this->logger);
+        $helper->prepare($resourceCollection);
+
+        if ($message->getClearSet()) {
+            $this->conceptManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
+            $this->resourceManager->deleteBy([\OpenSkos2\Namespaces\OpenSkos::SET => $message->getSetUri()]);
+        }
+        if ($message->getDeleteSchemes()) {
+            $conceptSchemes = [];
+            foreach ($resourceCollection as $resourceToInsert) {
+                foreach ($resourceToInsert->getProperty(Skos::INSCHEME) as $scheme) {
+                    /** @var $scheme Uri */
+                    $conceptSchemes[$scheme->getUri()] = $scheme;
+                }
+            }
+            foreach ($conceptSchemes as $scheme) {
+                $this->conceptManager->deleteBy([Skos::INSCHEME => $scheme]);
+                $this->resourceManager->delete($scheme);
+            }
+        }
+
+        /* Constructor for Validator
+         * public function __construct(
+          ResourceManager $resourceManager,
+          $tenant,
+          $set,
+          $isForUpdate,
+          $referenceCheckOn,
+          $conceptReferenceCheckOn = true,
+          LoggerInterface $logger = null */
+
+
+
+        $validator = new ResourceValidator(
+            $this->conceptManager,
+            $this->tenant,
+            $this->set,
+            !($message->getNoUpdates()),
+            false,
+            false,
+            $this->logger
+        );
+
+
+        $finish = count($resourceCollection); // size of the whole collection
+        $n_bulks = $this->intdiv($finish, $bulksize);
+        for ($i = 0; $i < $n_bulks + 1; $i++) {
+            $current_finish = min($i * $bulksize + $bulksize, $finish);
+            
+                
+            // validate (validate collection amounts to validate per resource anyway, see /Validator/Collection)
+            $valid = true;
+            $concepts = array($current_finish - $i * $bulksize);
+            $k=0;
+            for ($j = $i * $bulksize; $j < $current_finish; $j++) {
+                $concept = $resourceCollection->offsetGet($j);
+                $valid = $validator->validate($concept);
+                if (!$valid) {
+                    $this->logger->error(implode(' , ', $validator->getErrorMessages()));
+                } else {
+                    $concepts[$k] = $concept;
+                    $k++;
+                }
+                if (count($validator->getWarningMessages()) > 0) {
+                    $this->logger->warning(implode(' , ', $validator->getWarningMessages()));
+                }
+                if (count($validator->getDanglingReferences()) > 0) {
+                    $this->logger->warning(implode(' , ', $validator->getDanglingReferences()));
+                }
+            }
+            
+            if ($valid) {
+                $subcollection = new \OpenSkos2\ConceptCollection($concepts);
+                $this->conceptManager->insertCollection($subcollection);
+                var_dump("inserted bulk # ". ($i+1));
+            }
+        }
+        // Commit all solr documents
+        $this->conceptManager->commit();
     }
 
     private function removeDanglingReferences($resource, $danglings)
@@ -234,5 +334,17 @@ class Command implements LoggerAwareInterface
             }
         }
         return $resource;
+    }
+    
+    // works only for nonnegative numbers
+    // implemented in PHP 7
+    private function intdiv($dividend, $divisor)
+    {
+        for ($i=0; $i<=$divisor; $i++) {
+            if (($i+1)*$divisor>$dividend) {
+                return $i;
+            }
+        }
+         return -1;
     }
 }
