@@ -53,8 +53,8 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         return $this->labelManager;
     }
-    
-     /**
+
+    /**
      * @return LabelManager
      */
     public function getSolrManager()
@@ -80,6 +80,23 @@ class ConceptManager extends ResourceManagerWithSearch
         $this->labelManager = $labelManager;
     }
 
+    private function isSkosXL(Resource $resource)
+    {
+        $tenantCode = $resource->getTenant()->getValue();
+        $tenant = $this->fetchByUuid($tenantCode, Tenant::TYPE, 'openskos:code');
+        $skosXL = $tenant->getPropertySingleValue(OpenSkos::ENABLESKOSXL);
+        if ($skosXL === null) {
+            $skosXL = false;
+        } else {
+            if ($skosXL->getValue() === "true") {
+                $skosXL = true;
+            } else {
+                $skosXL = false;
+            }
+        };
+        return $skosXL;
+    }
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -87,9 +104,11 @@ class ConceptManager extends ResourceManagerWithSearch
     public function insert(Resource $resource)
     {
         parent::insert($resource);
-        
-        $labelHelper = new Concept\LabelHelper($this->labelManager);
-        $labelHelper->insertLabels($resource);
+        $isSkosXL = $this->isSkosXL($resource);
+        if ($isSkosXL) {
+            $labelHelper = new Concept\LabelHelper($this->labelManager);
+            $labelHelper->insertLabels($resource);
+        }
     }
 
     /**
@@ -99,9 +118,11 @@ class ConceptManager extends ResourceManagerWithSearch
     public function replace(Resource $resource)
     {
         parent::replace($resource);
-
-        $labelHelper = new Concept\LabelHelper($this->labelManager);
-        $labelHelper->insertLabels($resource);
+        $isSkosXL = $this->isSkosXL($resource);
+        if ($isSkosXL) {
+            $labelHelper = new Concept\LabelHelper($this->labelManager);
+            $labelHelper->insertLabels($resource);
+        }
     }
 
     /**
@@ -349,8 +370,6 @@ class ConceptManager extends ResourceManagerWithSearch
      * @param array $sorts
      * @return ConceptCollection
      */
-    
-   
     public function search(
         $query,
         $rows = 20,
@@ -359,6 +378,7 @@ class ConceptManager extends ResourceManagerWithSearch
         $sorts = null
     ) {
     
+
         return $this->fetchByUris(
             $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
         );
@@ -490,23 +510,21 @@ class ConceptManager extends ResourceManagerWithSearch
 
         $this->client->insert($graph);
     }
-    
 
     public function fetchNameUri()
     {
         $query = "SELECT ?uri ?name WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name ."
-            . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <" . \OpenSkos2\Concept::TYPE . ">. }";
         $response = $this->query($query);
         $result = $this->makeNameUriMap($response);
         return $result;
     }
-    
-    
+
     public function fetchNameSearchID()
     {
         $query = "SELECT ?name ?searchid WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name . "
-        . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
-        . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+            . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <" . \OpenSkos2\Concept::TYPE . ">. }";
         $response = $this->query($query);
         $result = $this->makeNameSearchIDMap($response);
         return $result;
