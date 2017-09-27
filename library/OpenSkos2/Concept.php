@@ -308,7 +308,7 @@ class Concept extends Resource
                 if ($xlLabel instanceof Label) {
                     $fullXlLabels[] = $xlLabel;
                 } else {
-                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabel);
+                    $fullXlLabels[] = $labelManager->fetchByUri($xlLabel, SkosXl::LABEL);
                 }
             }
             $this->setProperties($xlLabelPredicate, $fullXlLabels);

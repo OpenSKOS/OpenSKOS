@@ -22,6 +22,7 @@ namespace OpenSkos2\Bridge;
 use EasyRdf\Graph;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\VCard;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Set;
 use OpenSkos2\SetCollection;
 use OpenSkos2\SkosXl\Label;
@@ -48,7 +49,7 @@ class EasyRdf
 
     private static $allowedSubresources = [VCard::ORG, VCard::ADR];
     private static $skosTypes = [Tenant::TYPE, Set::TYPE, ConceptScheme::TYPE,
-        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE];
+        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, SkosXl::LABEL];
 
     /**
      * @param \EasyRdf\Graph $graph to $read
