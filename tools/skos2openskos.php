@@ -19,35 +19,33 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
-// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f --file=clavas-organisations.xml
+// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/ceab33f2-bb18-486d-b4ee-73c63c015a87 --file=clavas-organisations.xml
 
 include dirname(__FILE__) . '/autoload.inc.php';
 
 $opts = array(
-  'env|e=s' => 'The environment to use (defaults to "production")',
-  'file|f=s' => 'File to import',
-  'userUri|u=s' => 'Uri of the user who is doing the import',
-  'setUri=s' => 'Set uri',
-  'removeDangling=s' => 'Remove dangling references as well' 
-);
+    'env|e=s' => 'The environment to use (defaults to "production")',
+    'file|f=s' => 'File to import',
+    'userUri|u=s' => 'Uri of the user who is doing the import',
+    'setUri=s' => 'Set uri',
+    'removeDangling=s' => 'Remove dangling references as well',
+    'bulksize=i' => 'size of the portion (amount concepts) for insert, so that inserting concepts will happen portion by portion, not resource by resource; a whole portion fails if one of it concepts already exists in the triple store or not valid');
 
 try {
-  $OPTS = new Zend_Console_Getopt($opts);
+    $OPTS = new Zend_Console_Getopt($opts);
 } catch (Zend_Console_Getopt_Exception $e) {
-  fwrite(STDERR, $e->getMessage() . "\n");
-  echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
-  exit(1);
+    fwrite(STDERR, $e->getMessage() . "\n");
+    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
+    exit(1);
 }
 
 include dirname(__FILE__) . '/bootstrap.inc.php';
 
 $removeDangling = false;
 if ($OPTS->removeDangling === "yes") {
-  $removeDangling = true;  
+    $removeDangling = true;
 }
 
-$old_time = time();
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -61,9 +59,9 @@ $personManager = $diContainer->get('OpenSkos2\PersonManager');
 $person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Person::TYPE);
 $set = $resourceManager->fetchByUri($OPTS->setUri, \OpenSkos2\Set::TYPE);
 $publisher = $set->getProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER);
-if (count($publisher)<1) {
-  echo str_replace('Something went very wrong: the set '. $OPTS->setUri. 'does not have a publisher.');
-  exit(1); 
+if (count($publisher) < 1) {
+    echo str_replace('Something went very wrong: the set ' . $OPTS->setUri . 'does not have a publisher.');
+    exit(1);
 }
 $tenant = $resourceManager->fetchByUri($publisher[0]->getUri(), \OpenSkos2\Tenant::TYPE);
 
@@ -75,31 +73,48 @@ $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 $check_concept_references = null;
 
 
- /** Recall Message's constructor parameters to see what is going on
-   /**
-   * Message constructor.
-   * @param $person
-   * @param $file
-   * @param Uri $setUri
-   * @param bool $ignoreIncomingStatus
-   * @param string $importedConceptStatus
-   * @param bool $removeDanglingReferences
-   * @param bool $noUpdates
-   * @param bool $toBeChecked
-   * @param string $fallbackLanguage
-   * @param bool $clearSet
-   * @param bool $deleteSchemes
-   */
-
-$message = new \OpenSkos2\Import\Message( // $removeDanglingReferences = false
-  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, $removeDangling, true, false, 'en', false, false
+/** Recall Message's constructor parameters to see what is going on
+  /**
+ * Message constructor.
+ * @param $person
+ * @param $file
+ * @param Uri $setUri
+ * @param bool $ignoreIncomingStatus
+ * @param string $importedConceptStatus
+ * @param bool $removeDanglingReferences
+ * @param bool $noUpdates
+ * @param bool $toBeChecked
+ * @param string $fallbackLanguage
+ * @param bool $clearSet
+ * @param bool $deleteSchemes
+ */
+$message = new \OpenSkos2\Import\Message(// $removeDanglingReferences = false
+    $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::APPROVED, $removeDangling, true, false, 'en', false, false
 );
 $importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
 
 $importer->setLogger($logger);
 
-$importer->handle($message);
+$chunk = $OPTS->bulksize;
 
+$init_time = time();
+
+if (isset($chunk)) {
+    // works only for concepts
+     $importer->handleQuick($message, $chunk);
+} else {
+    $importer->handle($message);
+}
+
+$end_time = time();
+$spent = $end_time - $init_time;
+var_dump("Time spent " . $spent);
+
+// experiment 1192 concepten endo-emo: time spend with all 3: validator, delete-solr and insert-labels, 533 sec, 520 sec(the second time)
+// experiment 1192: time spend without validator, but with the other two, 460 sec
+// experiment 1192: time spend without insert labels, but with the other two, 256 sec
+// experiment 1192: added if is skos xl is not true. Time spent 257 sec.
+// experiment 1192: handleQuick, only concepts (there was only 1 schema). Time spent 79 sec.
 
 echo "Done\n";
 
