@@ -274,7 +274,10 @@ class Command implements LoggerAwareInterface
 
         $finish = count($resourceCollection); // size of the whole collection
         $n_bulks = $this->intdiv($finish, $bulksize);
-        for ($i = 0; $i < $n_bulks + 1; $i++) {
+        if ($finish - $bulksize * $n_bulks > 0) {
+            $n_bulks = $n_bulks + 1; // for a tail bulk, not complete one
+        }
+        for ($i = 0; $i < $n_bulks; $i++) {
             $current_finish = min($i * $bulksize + $bulksize, $finish);
             
                 
