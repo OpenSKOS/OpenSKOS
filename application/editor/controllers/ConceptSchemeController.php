@@ -49,7 +49,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $this->view->conceptSchemesWithDeleteJobs = $this->_getConceptSchemesWithDeleteJob();
         
-        $modelCollections = new OpenSKOS_Db_Table_Sets();
+        $modelCollections = new OpenSKOS_Db_Table_Collections();
         $this->view->collectionsMap = $modelCollections->getUriToTitleMap($user->tenant);
     }
     
@@ -130,7 +130,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $getConceptSchemesWithDeleteJob = $this->_getConceptSchemesWithDeleteJob();
         if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme->getUri()])) {
-            $collections = new OpenSKOS_Db_Table_Sets();
+            $collections = new OpenSKOS_Db_Table_Collections();
             $collection = $collections->findByUri((string)$conceptScheme->getPropertySingleValue(OpenSkos::SET));
             
             $model = new OpenSKOS_Db_Table_Jobs();

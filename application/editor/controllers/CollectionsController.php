@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Editor_SetsController extends OpenSKOS_Controller_Editor
+class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
     {
@@ -164,11 +164,11 @@ class Editor_SetsController extends OpenSKOS_Controller_Editor
         }
         $collection = $this->_getCollection();
         if (null!==$this->getRequest()->getParam('delete')) {
-            if (!$set->id) {
+            if (!$collection->id) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty set.'));
                 $this->_helper->redirector('index');
             }
-            $set->delete();
+            $collection->delete();
             $this->getHelper('FlashMessenger')->addMessage(_('The set has been deleted, it might take a while before changes are committed to our system.'));
             $this->_helper->redirector('index');
         }
@@ -177,11 +177,11 @@ class Editor_SetsController extends OpenSKOS_Controller_Editor
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('edit');
         } else {
-            $set
+            $collection
                 ->setFromArray($form->getValues())
                 ->setFromArray(array('tenant' => $this->_tenant->code));
             try {
-                $set->save();
+                $collection->save();
             } catch (Zend_Db_Statement_Exception $e) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
                 return $this->_forward('edit');
@@ -196,8 +196,8 @@ class Editor_SetsController extends OpenSKOS_Controller_Editor
      */
     protected function _getCollection()
     {
-        $model = new OpenSKOS_Db_Table_Sets();
-        if (null === ($code = $this->getRequest()->getParam('set'))) {
+        $model = new OpenSKOS_Db_Table_Collections();
+        if (null === ($code = $this->getRequest()->getParam('collection'))) {
             //create a new set:
             $set = $model->createRow(array('tenant' => $this->_tenant->code));
         } else {

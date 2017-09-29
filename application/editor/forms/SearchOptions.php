@@ -350,7 +350,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
      */
     protected function buildCollections()
     {
-        $modelCollections = new OpenSKOS_Db_Table_Sets();
+        $modelCollections = new OpenSKOS_Db_Table_Collections();
         $collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
         $collectionsOptions = array();
         foreach ($collections as $collection) {
