@@ -79,6 +79,7 @@ class Command implements LoggerAwareInterface
 
 
 
+
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
         $this->personManager = $personManager;
@@ -217,12 +218,6 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources(Concept::TYPE, Concept::$classes['SkosXlLabels']);
 
-        $finish = count($resourceCollection); // size of the whole collection before filtering
-        $n_bulks = $this->intdiv($finish, $bulksize);
-        if ($finish - $bulksize * $n_bulks > 0) {
-            $n_bulks = $n_bulks + 1; // for a tail bulk, not complete one
-        }
-
 
         $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
 
@@ -277,28 +272,32 @@ class Command implements LoggerAwareInterface
             $this->logger
         );
 
+        $finish = count($resourceCollection); // size of the whole collection after filtering
+        $n_bulks = $this->intdiv($finish, $bulksize);
+        if ($finish - $bulksize * $n_bulks > 0) {
+            $n_bulks = $n_bulks + 1; // for a tail bulk, not complete one
+        }
 
+        $collection_as_array = array_values($resourceCollection->getArrayCopy());
         for ($i = 0; $i < $n_bulks; $i++) {
             $current_finish = min($i * $bulksize + $bulksize, $finish);
             // validate (validate whole collection amounts to validate per resource anyway, see /Validator/Collection)
             $valid = true;
             $concepts = [];
             for ($j = $i * $bulksize; $j < $current_finish; $j++) {
-                if ($resourceCollection->offsetExists($j)) { 
-                    // the concept has not been defected by the preparator as already existing
-                    $concept = $resourceCollection->offsetGet($j);
-                    $valid = $validator->validate($concept);
-                    if (!$valid) {
-                        $this->logger->error(implode(' , ', $validator->getErrorMessages()));
-                    } else {
-                        array_push($concepts, $concept);
-                    }
-                    if (count($validator->getWarningMessages()) > 0) {
-                        $this->logger->warning(implode(' , ', $validator->getWarningMessages()));
-                    }
-                    if (count($validator->getDanglingReferences()) > 0) {
-                        $this->logger->warning(implode(' , ', $validator->getDanglingReferences()));
-                    }
+                // the concept has not been defected by the preparator as already existing
+                $concept = $collection_as_array[$j];
+                $valid = $validator->validate($concept);
+                if (!$valid) {
+                    $this->logger->error(implode(' , ', $validator->getErrorMessages()));
+                } else {
+                    array_push($concepts, $concept);
+                }
+                if (count($validator->getWarningMessages()) > 0) {
+                    $this->logger->warning(implode(' , ', $validator->getWarningMessages()));
+                }
+                if (count($validator->getDanglingReferences()) > 0) {
+                    $this->logger->warning(implode(' , ', $validator->getDanglingReferences()));
                 }
             }
             $subcollection = new \OpenSkos2\ConceptCollection($concepts);
