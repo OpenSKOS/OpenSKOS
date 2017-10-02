@@ -78,6 +78,7 @@ class Command implements LoggerAwareInterface
     
 
 
+
         $this->resourceManager = $resourceManager;
         $this->conceptManager = $conceptManager;
         $this->personManager = $personManager;
@@ -216,6 +217,13 @@ class Command implements LoggerAwareInterface
         $file = new File($message->getFile());
         $resourceCollection = $file->getResources(Concept::TYPE, Concept::$classes['SkosXlLabels']);
 
+        $finish = count($resourceCollection); // size of the whole collection before filtering
+        $n_bulks = $this->intdiv($finish, $bulksize);
+        if ($finish - $bulksize * $n_bulks > 0) {
+            $n_bulks = $n_bulks + 1; // for a tail bulk, not complete one
+        }
+
+
         $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
 
         // Disable commit's for every concept
@@ -259,8 +267,6 @@ class Command implements LoggerAwareInterface
           $conceptReferenceCheckOn = true,
           LoggerInterface $logger = null */
 
-
-
         $validator = new ResourceValidator(
             $this->conceptManager,
             $this->tenant,
@@ -272,41 +278,31 @@ class Command implements LoggerAwareInterface
         );
 
 
-        $finish = count($resourceCollection); // size of the whole collection
-        $n_bulks = $this->intdiv($finish, $bulksize);
-        if ($finish - $bulksize * $n_bulks > 0) {
-            $n_bulks = $n_bulks + 1; // for a tail bulk, not complete one
-        }
         for ($i = 0; $i < $n_bulks; $i++) {
             $current_finish = min($i * $bulksize + $bulksize, $finish);
-            
-                
-            // validate (validate collection amounts to validate per resource anyway, see /Validator/Collection)
+            // validate (validate whole collection amounts to validate per resource anyway, see /Validator/Collection)
             $valid = true;
-            $concepts = array($current_finish - $i * $bulksize);
-            $k=0;
+            $concepts = [];
             for ($j = $i * $bulksize; $j < $current_finish; $j++) {
-                $concept = $resourceCollection->offsetGet($j);
-                $valid = $validator->validate($concept);
-                if (!$valid) {
-                    $this->logger->error(implode(' , ', $validator->getErrorMessages()));
-                } else {
-                    $concepts[$k] = $concept;
-                    $k++;
-                }
-                if (count($validator->getWarningMessages()) > 0) {
-                    $this->logger->warning(implode(' , ', $validator->getWarningMessages()));
-                }
-                if (count($validator->getDanglingReferences()) > 0) {
-                    $this->logger->warning(implode(' , ', $validator->getDanglingReferences()));
+                if ($resourceCollection->offsetExists($j)) { 
+                    // the concept has not been defected by the preparator as already existing
+                    $concept = $resourceCollection->offsetGet($j);
+                    $valid = $validator->validate($concept);
+                    if (!$valid) {
+                        $this->logger->error(implode(' , ', $validator->getErrorMessages()));
+                    } else {
+                        array_push($concepts, $concept);
+                    }
+                    if (count($validator->getWarningMessages()) > 0) {
+                        $this->logger->warning(implode(' , ', $validator->getWarningMessages()));
+                    }
+                    if (count($validator->getDanglingReferences()) > 0) {
+                        $this->logger->warning(implode(' , ', $validator->getDanglingReferences()));
+                    }
                 }
             }
-            
-            if ($valid) {
-                $subcollection = new \OpenSkos2\ConceptCollection($concepts);
-                $this->conceptManager->insertCollection($subcollection);
-                var_dump("inserted bulk # ". ($i+1));
-            }
+            $subcollection = new \OpenSkos2\ConceptCollection($concepts);
+            $this->conceptManager->insertCollection($subcollection);
         }
         // Commit all solr documents
         $this->conceptManager->commit();
@@ -338,16 +334,16 @@ class Command implements LoggerAwareInterface
         }
         return $resource;
     }
-    
+
     // works only for nonnegative numbers
     // implemented in PHP 7
     private function intdiv($dividend, $divisor)
     {
-        for ($i=0; $i<=$divisor; $i++) {
-            if (($i+1)*$divisor>$dividend) {
+        for ($i = 0; $i <= $divisor; $i++) {
+            if (($i + 1) * $divisor > $dividend) {
                 return $i;
             }
         }
-         return -1;
+        return -1;
     }
 }
