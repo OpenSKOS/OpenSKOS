@@ -258,7 +258,8 @@ class ResourceManager
         $qb = new \Asparagus\QueryBuilder($prefixes);
         $query = $qb->describe(['?subject', '?object'])
                 ->where('?subject', $property, (new \OpenSkos2\Rdf\Serializer\NTriple)->serialize($lit))
-                ->also('?subject', '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
+                ->also('?subject', '?property', '?object')
+                ->filterNotExists('?object', 'rdf:type', '?sometype');
         if (isset($type)) {
             $query = $query->also('?subject', 'rdf:type', "<$type>");
         }
@@ -414,7 +415,7 @@ class ResourceManager
         if (!empty($this->resourceType)) {
             $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
             if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME ||
-                $this->resourceType === \OpenSkos2\Set::TYPE) {
+                $this->resourceType === \OpenSkos2\Collection::TYPE) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);

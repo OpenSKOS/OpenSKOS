@@ -19,26 +19,40 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Literal;
+
 class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
     {
         $this->_requireAccess('editor.collections', 'index');
 
-        $this->view->collections = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
+        // Clears the schemes cache when we start managing them.
+        $cache = $this->getDI()->get('Editor_Models_CollectionsCache');
+        $cache->clearCache();
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
 
-        $model = new OpenSKOS_Db_Table_Collections();
+        $this->view->collections= $cache->fetchAll();
     }
 
     public function editAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
 
-        $collection = $this->_getCollection();
+        $collection = $this->_getCollection()[0];
 
+        if(!$collection) { //Inserting a new collection?
+            $collection = new \OpenSkos2\Collection();
+        }
+
+
+        /*
         if (! OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.delete-all-concepts-in-collection', null)) {
             $collection->getUploadForm()->removeElement('delete-before-import');
         }
+        */
 
         $this->view->assign('collection', $collection);
         $this->view->assign('jobs', $collection->getJobs());
@@ -162,7 +176,27 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
             $this->_helper->redirector('index');
         }
-        $collection = $this->_getCollection();
+        $collection = $this->_getCollection()[0];
+
+        if(!$collection) { //Inserting a new collection?
+            $params = $this->getRequest()->getParams();
+            $collection = new \OpenSkos2\Collection();
+            $form = $collection->getForm();
+            $collection->arrayToData( array('tenant' => $this->_tenant->code));
+            $collection->arrayToData( $params);
+            $collection->generateUri();
+
+            try {
+                $this->getCollectionsManager()->insert($collection);
+            } catch (Zend_Db_Statement_Exception $e) {
+                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+                return $this->_forward('edit');
+            }
+            $this->getHelper('FlashMessenger')->addMessage('Data saved');
+            $this->_helper->redirector('index');
+            return;
+        }
+
         if (null!==$this->getRequest()->getParam('delete')) {
             if (!$collection->id) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty set.'));
@@ -177,11 +211,14 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('edit');
         } else {
-            $collection
-                ->setFromArray($form->getValues())
-                ->setFromArray(array('tenant' => $this->_tenant->code));
+            $collection->arrayToData( $form->getValues());
+                //->setFromArray(array('tenant' => $this->_tenant->code));
+            /*
+            highlight_string("<?php\n\$data =\n" . var_export($collection, true) . ";\n?>");
+            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
+            */
             try {
-                $collection->save();
+                $this->getCollectionsManager()->replace($collection);
             } catch (Zend_Db_Statement_Exception $e) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
                 return $this->_forward('edit');
@@ -196,6 +233,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
      */
     protected function _getCollection()
     {
+        /*
         $model = new OpenSKOS_Db_Table_Collections();
         if (null === ($code = $this->getRequest()->getParam('collection'))) {
             //create a new set:
@@ -208,5 +246,38 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             }
         }
         return $set;
+        */
+
+
+
+        $code = $this->getRequest()->getParam('collection');
+
+        if (!empty($code)) {
+            $collection = $this->getCollectionsManager()->fetch(
+                [
+                 OpenSkos::CODE => new Literal($code)
+                ]
+            );
+
+            //!TODO Handle deleted all around the system.
+            /*
+            if ($collection->isDeleted()) {
+                throw new ResourceNotFoundException('The concept scheme has been deleted and is no longer available.');
+            }
+            */
+
+            return $collection;
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * @return OpenSkos2\CollectionsManager
+     */
+    protected function getCollectionsManager()
+    {
+        return $this->getDI()->get('\OpenSkos2\CollectionsManager');
+    }
+
 }

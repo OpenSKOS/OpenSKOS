@@ -47,7 +47,7 @@ class Api_CollectionsController extends AbstractController
      *    openskos:numFound="2" openskos:rows="5000" 
      *    openskos:start="1">
      * &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_3cdae699-61f3-4454-b032-ccc6c4b2e5da">
-     *     &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *     &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *     &lt;openskos:allow_oai rdf:datatype="http://www.w3.org/2001/XMLSchema#bool">true&lt;/openskos:allow_oai>
      *     &lt;openskos:webpage rdf:resource="http://ergens2"/>
      *     &lt;dcterms:publisher rdf:resource="http://mertens/knaw/formalorganization_10302a0e-7e4e-4dbb-bce0-59e2a21c8785"/>
@@ -59,7 +59,7 @@ class Api_CollectionsController extends AbstractController
      *     &lt;openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens2"/>
      *   &lt;/rdf:Description>
      *   &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
-     *     &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *     &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *     &lt;openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
      *     &lt;openskos:code>ISO-lang&lt;/openskos:code>
      *     &lt;dcterms:title xml:lang="en">CLARIN Languages upd&lt;/dcterms:title>
@@ -137,7 +137,7 @@ class Api_CollectionsController extends AbstractController
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
      * &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
-     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *   &lt;openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
      *   &lt;openskos:code>ISO-lang&lt;/openskos:code>
      *   &lt;openskos:webpage rdf:resource="http://ergens"/>
@@ -150,10 +150,10 @@ class Api_CollectionsController extends AbstractController
      * &lt;/rdf:Description>
      * &lt;/rdf:RDF>
      * 
-     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype/Dataset was not found in the triple store.
      * @apiErrorExample Not found
      *   HTTP/1.1 404 Not Found
-     *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype/Dataset was not found in the triple store.
      */
    
     public function getAction()
@@ -207,7 +207,7 @@ class Api_CollectionsController extends AbstractController
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
      * &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
-     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *   &lt;openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
      *   &lt;openskos:code>ISO-lang&lt;/openskos:code>
      *   &lt;openskos:webpage rdf:resource="http://ergens"/>
@@ -285,7 +285,7 @@ class Api_CollectionsController extends AbstractController
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
      * &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
-     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *   &lt;openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
      *   &lt;openskos:code>ISO-lang&lt;/openskos:code>
      *   &lt;openskos:webpage rdf:resource="http://ergens"/>
@@ -340,7 +340,7 @@ class Api_CollectionsController extends AbstractController
      *       xmlns:openskos="http://openskos.org/xmlns#"
      *       xmlns:dcterms="http://purl.org/dc/terms/">
      * &lt;rdf:Description rdf:about="http://mertens/knaw/dataset_5980699b-2c9a-4717-ac30-aed13743cc84">
-     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+     *   &lt;rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
      *   &lt;openskos:conceptBaseUri>http://example.com/collection-example&lt;/openskos:conceptBaseUri>
      *   &lt;openskos:code>ISO-lang&lt;/openskos:code>
      *   &lt;openskos:webpage rdf:resource="http://ergens"/>
@@ -353,10 +353,10 @@ class Api_CollectionsController extends AbstractController
      *   &lt;/rdf:Description>
      *   &lt;/rdf:RDF>
      * 
-     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     * @apiError NotFound The requested resource &lt;id> of type http://purl.org/dc/dcmitype/Dataset was not found in the triple store.
      * @apiErrorExample NotFound
      *   HTTP/1.1 404 NotFound
-     *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype#Dataset was not found in the triple store.
+     *   The requested resource &lt;id> of type http://purl.org/dc/dcmitype/Dataset was not found in the triple store.
      * 
      * @apiError MissingKey No user key specified
      * @apiErrorExample MissingKey

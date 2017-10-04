@@ -67,6 +67,19 @@ return [
 
         return $conceptsSchemesCache;
     },
+    'Editor_Models_CollectionsCache' => function (ContainerInterface $c) {
+        $collectionsCache = new Editor_Models_CollectionsCache(
+            $c->get('OpenSkos2\CollectionsManager'),
+            OpenSKOS_Cache::getCache()
+        );
+
+        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        if (!empty($tenant)) {
+            $collectionsCache->setTenantCode($tenant->code);
+        }
+
+        return $collectionsCache;
+    },
     'OpenSkos2\ConceptManager' => function (ContainerInterface $c) {
         $conceptManager = new OpenSkos2\ConceptManager(
             $c->get('OpenSkos2\EasyRdf\Sparql\Client'),
