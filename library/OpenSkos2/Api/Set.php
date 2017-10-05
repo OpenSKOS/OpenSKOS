@@ -3,6 +3,8 @@
 namespace OpenSkos2\Api;
 
 use OpenSkos2\Api\Exception\NotFoundException;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Literal;
 
 class Set extends AbstractTripleStoreResource
 {
@@ -21,7 +23,7 @@ class Set extends AbstractTripleStoreResource
      * @param \OpenSkos2\PersonManager $personManager
      */
     public function __construct(
-        \OpenSkos2\SetManager $manager,
+        \OpenSkos2\CollectionManager $manager,
         \OpenSkos2\Search\Autocomplete $searchAutocomplete,
         \OpenSkos2\PersonManager $personManager
     ) {
@@ -38,20 +40,27 @@ class Set extends AbstractTripleStoreResource
      *
      * @param string|Uri $id
      * @throws NotFoundException
-     * @return a sublcass of \OpenSkos2\Set
+     * @return a sublcass of \OpenSkos2\Collection
      */
     public function getResource($id)
     {
         try {
             $set = parent::getResource($id);
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $ex) {
-            $set = $this->manager->fetchByUuid($id, \OpenSkos2\Set::TYPE, 'openskos:code');
+            //$set = $this->manager->fetchByUuid($id, \OpenSkos2\Collection::TYPE, 'openskos:code');
+
+            $collection = $this->manager->fetch(
+                [
+                    OpenSkos::CODE => new Literal($id)
+                ]
+            );
+            $collection = $collection[0];
         }
 
-        if (!$set) {
-            throw new NotFoundException('Set not found by uri/uuid/code: ' . $id, 404);
+        if (!$collection) {
+            throw new NotFoundException('Collection not found by uri/uuid/code: ' . $id, 404);
         }
-        return $set;
+        return $collection;
     }
 
   
@@ -65,6 +74,6 @@ class Set extends AbstractTripleStoreResource
     
     protected function getSet($params, $tenant)
     {
-        return new \OpenSkos2\Set();
+        return new \OpenSkos2\Collection();
     }
 }

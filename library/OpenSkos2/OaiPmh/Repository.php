@@ -22,7 +22,7 @@ namespace OpenSkos2\OaiPmh;
 use DateTime;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
-use OpenSkos2\SetManager;
+use OpenSkos2\CollectionManager;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Search\ParserText;
@@ -133,7 +133,7 @@ class Repository implements InterfaceRepository
      * @param string $repositoryName
      * @param string $baseUrl
      * @param array $adminEmails
-     * @param \OpenSkos2\Set $setManager
+     * @param \OpenSkos2\Collection $collectionManager
      * @param string $description
      */
     public function __construct(
@@ -143,7 +143,7 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        SetManager $setManager,
+        CollectionsManager $collectionManager,
         $description = null
     ) {
     
@@ -154,7 +154,7 @@ class Repository implements InterfaceRepository
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
-        $this->rdfSetManager = $setManager;
+        $this->rdfSetManager = $collectionManager;
         $this->description = $description;
     }
 
@@ -417,7 +417,7 @@ class Repository implements InterfaceRepository
         $return['tenant'] = $tenant;
         $rdfSetId = null;
         if (!empty($arrSet[1])) {
-            $rdfSet = $this->setManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
+            $rdfSet = $this->collectionManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
                 $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
                 if (!(bool) $allowed) {

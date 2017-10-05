@@ -38,7 +38,7 @@ return [
             $sparqlOptions['updateUri']
         );
     },
-            
+
     'Solarium\Client' => function (ContainerInterface $c) {
 
         $solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
@@ -69,7 +69,7 @@ return [
     },
     'Editor_Models_CollectionsCache' => function (ContainerInterface $c) {
         $collectionsCache = new Editor_Models_CollectionsCache(
-            $c->get('OpenSkos2\CollectionsManager'),
+            $c->get('OpenSkos2\CollectionManager'),
             OpenSKOS_Cache::getCache()
         );
 

@@ -273,11 +273,11 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     }
 
     /**
-     * @return OpenSkos2\CollectionsManager
+     * @return OpenSkos2\CollectionManager
      */
     protected function getCollectionsManager()
     {
-        return $this->getDI()->get('\OpenSkos2\CollectionsManager');
+        return $this->getDI()->get('\OpenSkos2\CollectionManager');
     }
 
 }

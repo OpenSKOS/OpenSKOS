@@ -46,7 +46,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $this->view->uploadedIcons = $this->_getUploadedIcons();
         $this->view->conceptSchemes = $cache->fetchAll();
-        
+
         $this->view->conceptSchemesWithDeleteJobs = $this->_getConceptSchemesWithDeleteJob();
         
         $modelCollections = new OpenSKOS_Db_Table_Collections();

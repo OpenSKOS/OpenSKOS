@@ -17,7 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-use OpenSkos2\CollectionsManager;
+use OpenSkos2\CollectionManager;
 use OpenSkos2\CollectionCollection;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
@@ -35,7 +35,7 @@ class Editor_Models_CollectionsCache
     protected $tenantCode;
     
     /**
-     * @var CollectionsManager
+     * @var CollectionManager
      */
     protected $manager;
     
@@ -76,10 +76,10 @@ class Editor_Models_CollectionsCache
     
     /**
      * @param string $tenantCode
-     * @param CollectionsManager $manager
+     * @param CollectionManager $manager
      * @param Zend_Cache_Core $cache
      */
-    public function __construct(CollectionsManager $manager, Zend_Cache_Core $cache)
+    public function __construct(CollectionManager $manager, Zend_Cache_Core $cache)
     {
         $this->manager = $manager;
         $this->cache = $cache;

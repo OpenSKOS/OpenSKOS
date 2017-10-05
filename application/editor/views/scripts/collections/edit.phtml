@@ -21,6 +21,8 @@
 
 
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+
 ?>
 <?php if ($this->collection->getPropertySingleValue(DcTerms::TITLE)):?>
 <?php $this->headTitle($this->translate('Edit collection'))?>
@@ -99,9 +101,9 @@ use OpenSkos2\Namespaces\DcTerms;
 <div class="share-collection">
     <p>You can share this information via the OpenSKOS API:</p>
     <ul>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(DcTerms::TITLE)), 'rest', true)?>.rdf">in RDF</a></li>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(DcTerms::TITLE)), 'rest', true)?>.html">in HTML</a></li>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(DcTerms::TITLE)), 'rest', true)?>.json">in JSON</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.rdf">in RDF</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.html">in HTML</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.json">in JSON</a></li>
     </ul>
 </div>
 <?php endif?>
