@@ -54,7 +54,7 @@ class TenantManager extends ResourceManager
     {
         $query = "DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { "
             . "?subject <" . DcTerms::PUBLISHER . "> <$tenantUri>. "
-            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Set::TYPE.">.} }";
+            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Collection::TYPE.">.} }";
         $response = $this->query($query);
         return $response;
     }

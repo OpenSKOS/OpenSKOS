@@ -99,8 +99,8 @@ class BackwardCompatibility
                     $oldStyleBodyArray["webpage"] = $set["webpage"];
                 }
                 $oldStyleBodyArray["allow_oai"] = $set["allow_oai"];
-                $oldStyleBodyArray["conceptBaseUrl"] = $set["conceptBaseUri"];
-                $oldStyleBodyArray["OAI_baseUrl"] = $set["OAI_base_uri"];
+                $oldStyleBodyArray["conceptBaseUrl"] = isset($set["conceptBaseUri"]) ? $set["conceptBaseUri"] : null;
+                $oldStyleBodyArray["OAI_baseUrl"] = isset($set["OAI_base_uri"]) ? $set["OAI_base_uri"] : null;
                 $oldStyleBodyArray["collections"][] = (object) $oldStyleSet;
                 $oldStyleSet = [];
             }
