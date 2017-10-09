@@ -25,7 +25,7 @@ use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Tenant;
-use OpenSkos2\Set;
+use OpenSkos2\Collection;
 
 class TenantManager extends ResourceManager
 {
@@ -37,7 +37,7 @@ class TenantManager extends ResourceManager
     {
         $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
             . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-            . ' ?seturi  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .'
+            . ' ?seturi  <' . Rdf::TYPE . '> <'.Collection::TYPE.'> .'
             . ' ?seturi  ?p ?o .}';
         $response = $this->query($query);
         if ($response !== null) {
@@ -77,7 +77,7 @@ class TenantManager extends ResourceManager
                     $retVal[$seturi]['dcterms_description'] = $triple->o->getValue();
                     continue;
                 case OpenSkos::WEBPAGE:
-                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getUri();
+                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getValue();
                     continue;
                 case OpenSkos::CODE:
                     $retVal[$seturi]['openskos_code'] = $triple->o->getValue();
