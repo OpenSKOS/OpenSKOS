@@ -151,7 +151,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $title = $this->getPropertySingleValue(DcTerms::TITLE);
         if (isset($title)) {
-            return $this->getPropertySingleValue(DcTerms::TITLE);
+            return $title->getValue();
         } else {
             return new Literal("UNKNOWN");
         }
