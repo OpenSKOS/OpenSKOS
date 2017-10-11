@@ -69,7 +69,7 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             $form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
             $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
             $form->addElement('select', 'lang', array('label' => 'The default language to use if no "xml:lang" attribute is found', 'multiOptions' => $editorOptions['languages']));
-            $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeCheked status of imported concepts'));
+            $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeChecked status of imported concepts'));
             $form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
             $form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));
             $form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));

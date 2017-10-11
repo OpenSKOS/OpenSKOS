@@ -559,7 +559,7 @@ class ResourceManager
         }
         if ($ignoreDeleted) {
             $select .= '?subject <' . OpenSkosNamespace::STATUS . '> ?status. ' . PHP_EOL;
-            $filters[] = '(!bound(?status) || ?status != \'' . \OpenSkos2\Concepts::STATUS_DELETED . '\')';
+            $filters[] = '(!bound(?status) || ?status != \'' . \OpenSkos2\Concept::STATUS_DELETED . '\')';
         }
         $filter .= implode(' && ', $filters) . ' ';
         if ($excludeUri) {

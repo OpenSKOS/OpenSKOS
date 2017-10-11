@@ -351,10 +351,21 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected function buildCollections()
     {
         $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
+        //$collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
+
+
+        // Clears the schemes cache when we start managing them.
+        $dataInjector =  Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $cache = $dataInjector->get('Editor_Models_CollectionsCache');
+        $cache->clearCache();
+
+        $collections= $cache->fetchAll();
+
+
         $collectionsOptions = array();
         foreach ($collections as $collection) {
-            $collectionsOptions[$collection->uri] = $collection->dc_title;
+            $uri = $collection->getUri();
+            $collectionsOptions[$uri] = $collection->getTitle();
         }
 
         $this->addElement('multiselect', 'collections', array(

@@ -24,6 +24,8 @@ use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
+use OpenSkos2\Namespaces\Org as Org;
 use OpenSkos2\Tenant;
 use OpenSkos2\Collection;
 
@@ -110,9 +112,30 @@ class TenantManager extends ResourceManager
         $result = $this->makeNameSearchIDMap($response);
         return $result;
     }
-    
-   
-     /**
+
+    public function getTenantUuidFromCode($code)
+    {
+        $query = <<<SELECT_URI
+SELECT ?uuid WHERE { 
+  ?uri  <%s> <%s>.
+  ?uri  <%s> "%s".
+  ?uri  <%s> ?uuid
+}
+SELECT_URI;
+        $query = sprintf($query, Rdf::TYPE, Org::FORMALORG, OpenSkosNamespace::CODE, $code, OpenSkos::UUID);
+
+        $response = $this->query($query);
+        if (count($response) > 1) {
+            throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
+        }
+        if (count($response) < 1) {
+            throw new \Exception("the institution with the code $code is not found");
+        }
+        return $response[0]->uuid->getValue();
+    }
+
+
+    /**
      * @param Uri $resource
      */
     public function delete(\OpenSkos2\Rdf\Uri $resource)

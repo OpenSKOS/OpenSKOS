@@ -43,7 +43,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
         $this->_helper->_layout->setLayout('editor_central_content');
-        $form = Editor_Forms_Concept::getInstance(null, $this->getOpenSkosDbTableRowTenant());
+        $form = Editor_Forms_Concept::getInstance(null, $this->getOpenSkos2Tenant());
         
         $labelHelper = $this->getDI()->get('\OpenSkos2\Concept\LabelHelper');
         
@@ -107,7 +107,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
         $concept = $this->_getConcept();
         
-        $form = Editor_Forms_Concept::getInstance($concept, $this->getOpenSkosDbTableRowTenant());
+        $form = Editor_Forms_Concept::getInstance($concept, $this->getOpenSkos2Tenant());
         
         if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);

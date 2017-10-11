@@ -155,7 +155,7 @@ function insert_set($tenant_code,
         \OpenSkos2\Tenant::TYPE, 
         'openskos:code');
     if ($publisher == null) {
-        fwrite(STDERR, "Something went terribly worng: the tenant with the code "
+        fwrite(STDERR, "Something went terribly wrong: the tenant with the code "
             . "$tenant_code  has not been found in the triple store.\n");
         exit(1);
     } else {
@@ -516,15 +516,17 @@ class Collections
     public function validateCollections($resourceManager)
     {
         $retVal = [];
+
         foreach ($this->fetchAll() as $row) {
-            if (!filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
+            if ($row->conceptsBaseUrl && !filter_var($row->conceptsBaseUrl, FILTER_VALIDATE_URL)) {
                 throw new \RuntimeException('Could not validate url for '
-                    . 'collection: ' . var_export($row, true));
+                    . 'collection: ' . $row->conceptsBaseUrl ); //var_export($row, true));
             }
-                $set = new \OpenSkos2\Set($row->uri);
-                
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, 
-                    new Uri($row->conceptsBaseUrl));
+            $set = new \OpenSkos2\Set($row->uri);
+
+            if ($row->conceptsBaseUrl) {
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, new Uri($row->conceptsBaseUrl));
+            }
                 $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE, 
                     new Literal($row->code));
                 $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT, 

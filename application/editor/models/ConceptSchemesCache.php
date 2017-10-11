@@ -140,7 +140,7 @@ class Editor_Models_ConceptSchemesCache
         $result = [];
         foreach ($shemes as $scheme) {
             if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
-                $result[$scheme->getUri()] = $scheme->getCaption();
+                $result[$scheme->getUri()] = $scheme->getTitle();
             }
         }
         return $result;

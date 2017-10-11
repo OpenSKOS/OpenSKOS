@@ -28,7 +28,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use Rhumsaa\Uuid\Uuid;
 
-class Set extends Resource
+class Setxxx extends Resource
 {
 
     const TYPE = Dcmi::DATASET;

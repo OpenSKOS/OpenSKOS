@@ -20,9 +20,9 @@
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
-use Openskos2\Set;
 
-class SetCollection extends ResourceCollection
+
+class SetCollectionxxx extends ResourceCollection
 {
 
     protected $resourceType = Set::TYPE;

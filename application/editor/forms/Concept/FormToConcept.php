@@ -175,7 +175,6 @@ class Editor_Forms_Concept_FormToConcept
      * Per scheme relations + mapping properties.
      * @param Concept &$concept
      * @param OpenSKOS_Db_Table_Row_Set $set
-      =======
      * Metadata as set, tenant, modified date, creator and etc.
      * @param Concept $concept
       >>>>>>> master
@@ -189,19 +188,27 @@ class Editor_Forms_Concept_FormToConcept
     )
     {
         // Get concept set from the first scheme
-        $setUri = null;
+        $collection = null;
+        $collectionManager = self::getDI()->get('OpenSkos2\CollectionManager');
         if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $firstSchemeUri = $concept->getProperty(Skos::INSCHEME)[0];
-            $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
-            $setUri = $firstScheme->getPropertySingleValue(OpenSkos::SET);
+            //$firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
+            $uri = $firstSchemeUri->getUri();
+            highlight_string("<?php\n\$data =\n" . var_export($uri, true) . ";\n?>");
+            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
+            $collection = $collectionManager->fetchByUri( $uri);
         }
 
+        $tenantManager = self::getDI()->get('OpenSkos2\TenantManager');
+        $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+        $tenant = $tenantManager->fetchByUuid($tenantUuid);
+
         $concept->ensureMetadata(
-            $user->tenant,
-            $setUri,
+            $tenant,
+            $collection,
             $user->getFoafPerson(),
-            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
             $personManager,
+            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
             $oldStatus
         );
     }

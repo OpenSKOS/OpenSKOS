@@ -254,6 +254,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
      */
     protected function getOpenSkosDbTableRowTenant()
     {
+        die("Calling for table ");
         $tenant = $this->_tenant;
         
         if ($tenant === null) {
@@ -274,12 +275,17 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
         if ($tenant === null) {
             $tenant = $this->getCurrentUser()->tenant;
         }
-        
+
         //Tenant it must be in the triple store
         // you will probably need a  resoureManaget there with resoureManager->fetchbyUuid($tenant, Tenant::TYPE, 'openskos:code')
         
         if ($tenant !== null) {
-            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
+            //$tenantManager = new \OpenSkos2\TenantManager();
+            $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+            //$openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
+
+            $tenantUuid = $tenantManager->getTenantUuidFromCode($tenant->code);
+            $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
         }
         
         

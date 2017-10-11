@@ -52,6 +52,14 @@ class Collection extends Resource
 
 
     /**
+     * Returns title of collection
+     * @return null|string Title
+     */
+    public function getTitle()
+    {
+        return $this->getPropertySingleValue(DcTerms::TITLE);
+    }
+    /**
      * @return Zend_Db_Table_Rowset
      */
     public function getJobs($task = null)
