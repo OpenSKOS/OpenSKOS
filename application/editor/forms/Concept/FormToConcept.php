@@ -18,6 +18,7 @@
  */
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\PersonManager;
@@ -192,11 +193,14 @@ class Editor_Forms_Concept_FormToConcept
         $collectionManager = self::getDI()->get('OpenSkos2\CollectionManager');
         if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $firstSchemeUri = $concept->getProperty(Skos::INSCHEME)[0];
-            //$firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
-            $uri = $firstSchemeUri->getUri();
-            highlight_string("<?php\n\$data =\n" . var_export($uri, true) . ";\n?>");
-            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
-            $collection = $collectionManager->fetchByUri( $uri);
+            $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
+            $collectionUri = $firstScheme->getProperty(OpenSkos::SET);
+            if(count($collectionUri) == 0){
+                throw new \OpenSkos2\Exception\ResourceNotFoundException(
+                    sprintf('No collection found for concept scheme "%s".', $firstSchemeUri)
+                );
+            }
+            $collection = $collectionManager->fetchByUri($collectionUri[0]->getUri());
         }
 
         $tenantManager = self::getDI()->get('OpenSkos2\TenantManager');

@@ -40,7 +40,7 @@ class GetSetTest extends AbstractTest
 xmlns:dcterms = "http://purl.org/dc/terms/"
 xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
     <rdf:Description>
-        <rdf:type rdf:resource="http://purl.org/dc/dcmitype#Dataset"/>
+        <rdf:type rdf:resource="http://purl.org/dc/dcmitype/Dataset"/>
         <openskos:code>test-set</openskos:code>
         <dcterms:title xml:lang="en">Test Set</dcterms:title>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:license>

@@ -21,7 +21,7 @@
             "dcterms_title": "Clavas Languages",
             "dcterms_publisher": "http://example.com",
             "dcterms_license": "http://creativecommons.org/licenses/by/4.0/",
-            "rdf_type": "http://purl.org/dc/dcmitype#Dataset"
+            "rdf_type": "http://purl.org/dc/dcmitype/Dataset"
         }, {
             "uri": "http://htdl/clavas-org/set",
             "uuid": "clavas-org-set",
@@ -33,6 +33,6 @@
             "dcterms_title": "Clavas Organisations",
             "dcterms_publisher": "http://example.com",
             "dcterms_license": "http://creativecommons.org/licenses/by/4.0/",
-            "rdf_type": "http://purl.org/dc/dcmitype#Dataset"
+            "rdf_type": "http://purl.org/dc/dcmitype/Dataset"
         }]
 }

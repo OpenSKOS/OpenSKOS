@@ -39,7 +39,7 @@ class Setxxx extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
-    public function getTenantUri()
+    public function getPublisherUri()
     {
         $tenants = $this->getProperty(DcTerms::PUBLISHER);
         if (count($tenants) < 1) {
@@ -68,7 +68,7 @@ class Setxxx extends Resource
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Collection $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
         \OpenSkos2\SkosXl\LabelManager $labelManager = null,
@@ -101,7 +101,7 @@ class Setxxx extends Resource
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri(
         \OpenSkos2\Tenant $tenant = null,
-        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Collection $collection = null,
         $uuid = null,
         $notation = null,
         $customInit = null

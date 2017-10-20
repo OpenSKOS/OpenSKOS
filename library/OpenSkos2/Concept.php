@@ -186,7 +186,7 @@ class Concept extends Resource
     /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param \OpenSkos2\Tenant $tenant
-     * @param \OpenSkos2\Set $set
+     * @param \OpenSkos2\Collection $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
      * @param \OpenSkos2\LabelManager $labelManager,
@@ -195,10 +195,10 @@ class Concept extends Resource
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Collection $set = null,
         \OpenSkos2\Person $person = null,
-        PersonManager $personManager = null,
-        LabelManager $labelManager = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
         $existingConcept = null,
         $forceCreationOfXl = false
     ) {
@@ -242,14 +242,15 @@ class Concept extends Resource
     /**
      * Handle change in status.
      * @param Person $person
-     * @param existingConcept
+     * @param currentStatus string Current status of concept
      */
-    public function handleStatusChange($person, $existingConcept = null)
+    public function handleStatusChange($person, $currentStatus = null)
     {
-        if ($existingConcept == null) {
+        if ($currentStatus == null) {
             $oldStatus = null;
         } else {
-            $oldStatus = $existingConcept->getStatus();
+            highlight_string("<?php\n\$data =\n" . var_export($currentStatus, true) . ";\n?>");
+            $oldStatus = $currentStatus;
         }
 
         $nowLiteral = function () {
@@ -282,7 +283,7 @@ class Concept extends Resource
      * Requires a URI from to an openskos set
      * @return string
      */
-    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $conceptManager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Collection $collection, $conceptManager)
     {
         $customGen = $conceptManager->getUriGenerateObject();
         if (!empty($customGen)) {

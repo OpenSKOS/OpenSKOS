@@ -66,7 +66,8 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $concept = $this->_getConcept();
 
-        $form = Editor_Forms_Concept::getInstance($concept);
+        $tenant = $this->getOpenSkos2Tenant();
+        $form = Editor_Forms_Concept::getInstance($concept, $tenant);
 
         if ($form->getIsCreate()) {
             $this->_requireAccess('editor.concepts', 'propose', self::RESPONSE_TYPE_PARTIAL_HTML);
@@ -105,6 +106,11 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
     public function saveAction()
     {
+
+        $concertSchemeManager = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager');
+        $collectionManager = $this->getDI()->get('\OpenSkos2\CollectionManager');
+        $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
+
         $concept = $this->_getConcept();
         
         $form = Editor_Forms_Concept::getInstance($concept, $this->getOpenSkos2Tenant());
@@ -128,15 +134,23 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             $concept = new Concept();
         }
 
+        $formValues = $form->getValues();
         Editor_Forms_Concept_FormToConcept::toConcept(
-            $concept, $form->getValues(), $this->getDI()->get('\OpenSkos2\ConceptSchemeManager'), OpenSKOS_Db_Table_Users::fromIdentity(), $this->getDI()->get('\OpenSkos2\PersonManager')
+            $concept, $formValues, $concertSchemeManager, OpenSKOS_Db_Table_Users::fromIdentity(), $personManager
         );
+
+        $inCollection = $concept->getPropertySingleValue(OpenSkos::SET);
+
+        $collection = $collectionManager->fetchByUri($inCollection);
+
 
         $validator = new ResourceValidator(
             
             $this->getConceptManager(),
-            $this->getOpenSkos2Tenant()
-            
+            $this->getOpenSkos2Tenant(),
+            null,
+            !($form->getIsCreate()),
+            true
         );
 
         if ($validator->validate($concept)) {
@@ -144,11 +158,12 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
                 $concept->selfGenerateUri(
                     $this->getOpenSkos2Tenant(),
+                    $collection,
                     $this->getConceptManager()
                 );
             }
 
-            $this->handleStatusAutomatedActions($concept, $form->getValues());
+            $this->handleStatusAutomatedActions($concept, $formValues);
 
             $this->getConceptManager()->replaceAndCleanRelations($concept);
         } else {
@@ -354,7 +369,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
 //!TODO Handle deleted all around the system.
             if ($concept->isDeleted()) {
-                throw new ResourceNotFoundException('The concpet was not found (it is deleted).');
+                throw new ResourceNotFoundException('The concept has been deleted and is no longer available.');
             }
 
             return $concept;

@@ -14,6 +14,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         self::$client->resetParameters();
         self::$client->setUri(API_BASE_URI . "/$resourcetype?");
+        /*
+        print "=====================\n";
+        print($xml);
+        print "\n=====================\n";
+        print self::$client->getUri();
+        print "\n=====================\n";
+        print $apikey;
+        print "\n=====================\n";
+        print TENANT_CODE;
+        print "\n=====================\n";
+        die("Done");
+*/
         self::$client
             ->setEncType('text/xml')
             ->setRawData($xml)
@@ -43,6 +55,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         } else {
             self::$client->setParameterGet('set', SET_CODE);
         };
+
         $response = self::$client->request('PUT');
         return $response;
     }

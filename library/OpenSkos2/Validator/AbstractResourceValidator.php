@@ -317,7 +317,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             false,
             \OpenSkos2\Tenant::TYPE
         );
-        $tenantUri = $resource->getTenantUri();
+        $tenantUri = $resource->getPublisherUri();
         $tenantCode = $resource->getTenant();
         $secondRound = true;
         if ($tenantCode == null) {
@@ -341,15 +341,25 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
     protected function checkSet($resource)
     {
-        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Set::TYPE);
+        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Collection::TYPE);
         $secondRound = true;
         if ($firstRound) {
+
             $setUris = $resource->getSet();
             foreach ($setUris as $setUri) {
-                $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
+                $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Collection::TYPE);
 
-                $tenantUri = $resource->getTenantUri()->getUri();
-                $publisherUri = $set->getTenantUri()->getUri();
+                $tenantUri = $resource->getPublisherUri()->getUri();
+
+                $setTenantCode = $set->getTenant();
+                $tripleStoreSetTenant = $this->resourceManager->fetchSubjectForObject(
+                    OpenSkos::CODE,
+                    $setTenantCode,
+                    \OpenSkos2\Tenant::TYPE
+                );
+
+                $publisherUri = $tripleStoreSetTenant[0];
+
                 if ($tenantUri !== $publisherUri) {
                     $this->error[] = "The set $setUri declared in the resource has the tenant "
                         . "with the uri $publisherUri which does not coincide with the uri $tenantUri of the "

@@ -158,4 +158,22 @@ class CollectionManager extends ResourceManager
         $result = $this->makeNameSearchIDMap($response);
         return $result;
     }
+
+
+    /**
+     * Gets map with uri as key and title as value.
+     *
+     * @param string $tenant
+     * @return array
+     */
+    public function getUriToTitleMap($tenant)
+    {
+        $collections = $this->fetchAll($this->select()->where('tenant=?', $tenant));
+        $collectionsMap = array();
+        foreach ($collections as $collection) {
+            $collectionsMap[(string)$collection->getUri()] = $collection->dc_title;
+        }
+        return $collectionsMap;
+    }
+
 }

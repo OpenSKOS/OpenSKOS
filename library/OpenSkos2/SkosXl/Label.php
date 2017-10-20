@@ -76,7 +76,7 @@ class Label extends Resource
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Collection $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
         \OpenSkos2\SkosXl\LabelManager $labelManager = null,

@@ -223,8 +223,12 @@ class Editor_Forms_Concept_ConceptToForm
         $formData['inScheme'] = [];
         $conceptSchemesCaptions = self::getDI()->get('Editor_Models_ConceptSchemesCache')
             ->fetchUrisCaptionsMap();
-        foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) {
-            $schemeUri = (string) $schemeUri;
+
+        $allSchemeUris = $concept->getProperty(Skos::INSCHEME);
+        foreach ($concept->getProperty(Skos::INSCHEME) as $sUri) {
+            $schemeUri = (string) $sUri->getUri();
+            highlight_string("<?php\n\$data =\n" . var_export($schemeUri, true) . ";\n?>");
+
             $caption = $conceptSchemesCaptions[$schemeUri];
             $formData['inScheme'][$caption] = [$caption => $schemeUri];
         }

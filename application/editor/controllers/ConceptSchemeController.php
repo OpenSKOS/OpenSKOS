@@ -49,8 +49,9 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 
         $this->view->conceptSchemesWithDeleteJobs = $this->_getConceptSchemesWithDeleteJob();
         
-        $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $this->view->collectionsMap = $modelCollections->getUriToTitleMap($user->tenant);
+        // Collections
+        $cache->setTenantCode($this->_tenant->code);
+        $this->view->collectionsMap = $cache->fetchUrisMap();
     }
     
     /**
@@ -103,17 +104,28 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
             $form->populate($formData);
             
             $conceptScheme = new ConceptScheme();
-            
+
+            $user =  OpenSKOS_Db_Table_Users::fromIdentity();
+            $tenantManager = $this->getDI()->get('OpenSkos2\TenantManager');
+            $collectionManager = $this->getDI()->get('OpenSkos2\CollectionManager');
+            $collection = $collectionManager->fetchByUri($formData['collection']);
+            $personManager = $this->getDI()->get('OpenSkos2\PersonManager');
+
+
+            $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+            $tenant = $tenantManager->fetchByUuid($tenantUuid);
+
             Editor_Forms_ConceptScheme_FormToConceptScheme::toConceptScheme(
                 $conceptScheme,
                 $form->getValues(),
-                OpenSKOS_Db_Table_Users::fromIdentity()
+                $user,
+                $tenant,
+                $collection,
+                $personManager
             );
             
             $this->getConceptSchemeManager()->insert($conceptScheme);
             
-            // Clears the schemes cache after a new scheme is added.
-            $this->getDI()->get('Editor_Models_ConceptSchemesCache')->clearCache();
         }
     }
     

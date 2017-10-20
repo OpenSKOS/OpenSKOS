@@ -144,9 +144,11 @@ class Editor_Models_CollectionsCache
      */
     public function fetchUrisCaptionsMap($inCollections = [])
     {
-        $schemes = $this->fetchAll();
+        $allSchemes = $this->fetchAll();
+        highlight_string("<?php\n\$data =\n" . var_export($allSchemes, true) . ";\n?>");
+        die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
         $result = [];
-        foreach ($schemes as $scheme) {
+        foreach ($allSchemes as $scheme) {
             if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
                 $result[$scheme->getUri()] = $scheme->getCaption();
             }
