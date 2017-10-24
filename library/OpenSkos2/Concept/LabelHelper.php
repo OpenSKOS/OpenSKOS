@@ -64,7 +64,7 @@ class LabelHelper
             );
         }
         
-        $useXlLabels = $tenant->getEnableSkosXl();
+        $useXlLabels = $tenant->isEnableSkosXl();
         
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
             $fullXlLabels = [];

@@ -75,7 +75,7 @@ class ConceptScheme extends Resource
      * @todo Moved from Editor_Models_ConceptScheme for backwards compatibility,
      * refactor later to not depend on the zend application
      * @param srtring $uuid
-     * @param OpenSKOS_Db_Table_Row_Tenant $tenant optional, Default null.
+     * @param \OpenSkos2\Tenant $tenant optional, Default null.
      * If not set the currently logged one will be used.
      * @return string
      */
@@ -84,22 +84,22 @@ class ConceptScheme extends Resource
         $editorOptions = \OpenSKOS_Application_BootstrapAccess::getBootstrap()->getOption('editor');
 
         if (null === $tenant) {
-            $tenant = \OpenSKOS_Db_Table_Tenants::fromIdentity();
+            $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
         }
 
         $ap = APPLICATION_PATH;
         // We always need tenant for getting icon path.
         if (null !== $tenant) {
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
-                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->code;
+                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->getCode();
             } else {
-                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->code;
+                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->getCode();
             }
 
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignHttpPath'])) {
-                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->code;
+                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->getCode();
             } else {
-                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->code;
+                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->getCode();
             }
 
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['extension'])) {

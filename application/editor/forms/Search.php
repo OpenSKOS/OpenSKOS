@@ -19,6 +19,8 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+
+use OpenSkos2\Namespaces\OpenSkos;
 class Editor_Forms_Search extends OpenSKOS_Form
 {
     /**
@@ -197,7 +199,10 @@ class Editor_Forms_Search extends OpenSKOS_Form
     protected function buildSearchProfiles()
     {
         $profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
-        $profiles = $profilesModel->fetchAll($profilesModel->select()->where('tenant=?', $this->_getCurrentTenant()->code));
+
+        $tenantCode = $this->_getCurrentTenant()->getCode()->getValue();
+
+        $profiles = $profilesModel->fetchAll($profilesModel->select()->where('tenant=?', $tenantCode ));
 
         $user = OpenSKOS_Db_Table_Users::requireFromIdentity();
 
@@ -259,21 +264,35 @@ class Editor_Forms_Search extends OpenSKOS_Form
         return $this->_currentTenant;
     }
 
-    /**
-     * Gets the currently logged user's tenant.
-     *
-     * @return OpenSKOS_Db_Table_Row_Tenant
-     */
-    protected function _getCurrentTenant()
-    {
-        if (! $this->_currentTenant) {
-            $this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
-            if (null === $this->_currentTenant) {
-                throw new Zend_Exception('Tenant not found. Needed for request to the api.');
-            }
-        }
 
+    /*
+     * Read the Tenant record from RDF Store to the class's internal record.
+     * @throws Zend_Controller_Action_Exception
+     * @return Resource
+     */
+    private function _getCurrentTenant()
+    {
+
+        if (!$this->_currentTenant){
+            $user = OpenSKOS_Db_Table_Users::fromIdentity();
+            if (null === $user) {
+                throw new Zend_Controller_Action_Exception('User not found', 404);
+            }
+            $tenantCode = $user->tenant;
+
+            $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+
+            $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
+            $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+
+            if (!$openSkos2Tenant) {
+                throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
+            }
+
+            $this->_currentTenant = $openSkos2Tenant;
+        }
         return $this->_currentTenant;
+
     }
 
     /**
@@ -310,6 +329,7 @@ class Editor_Forms_Search extends OpenSKOS_Form
         return new Editor_Forms_Search(array('UserForSearch' => $userForSearch));
     }
 
+
     /**
      * Merge search options
      * @param array $formOptions
@@ -327,8 +347,9 @@ class Editor_Forms_Search extends OpenSKOS_Form
         $options = array_merge($formOptions, $profileOptions);
         
         // Remove any status options if status system is disabled.
+        $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
 
-        if (!OpenSKOS_Db_Table_Tenants::fromIdentity()['enableStatusesSystem']) {
+        if (!$tenant->isEnableStatusesSystems()){
             $options['status'] = [];
         } elseif (!empty($options['status'])) {
             // We can not search for status deleted.

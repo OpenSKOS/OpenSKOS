@@ -60,9 +60,10 @@ return [
             OpenSKOS_Cache::getCache()
         );
 
-        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        $tenant = $user->tenant;
         if (!empty($tenant)) {
-            $conceptsSchemesCache->setTenantCode($tenant->code);
+            $conceptsSchemesCache->setTenantCode($tenant);
         }
 
         return $conceptsSchemesCache;
@@ -73,9 +74,10 @@ return [
             OpenSKOS_Cache::getCache()
         );
 
-        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        $tenant = $user->tenant;
         if (!empty($tenant)) {
-            $collectionsCache->setTenantCode($tenant->code);
+            $collectionsCache->setTenantCode($tenant);
         }
 
         return $collectionsCache;

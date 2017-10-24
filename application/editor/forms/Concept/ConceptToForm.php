@@ -63,7 +63,7 @@ class Editor_Forms_Concept_ConceptToForm
             ],
         ];
         
-        if ($tenant->getEnableSkosXl() === false) {
+        if ($tenant->isEnableSkosXl() === false) {
             $formData['prefLabel'] = [
                 [
                     'languageCode' => $language,
@@ -227,7 +227,6 @@ class Editor_Forms_Concept_ConceptToForm
         $allSchemeUris = $concept->getProperty(Skos::INSCHEME);
         foreach ($concept->getProperty(Skos::INSCHEME) as $sUri) {
             $schemeUri = (string) $sUri->getUri();
-            highlight_string("<?php\n\$data =\n" . var_export($schemeUri, true) . ";\n?>");
 
             $caption = $conceptSchemesCaptions[$schemeUri];
             $formData['inScheme'][$caption] = [$caption => $schemeUri];

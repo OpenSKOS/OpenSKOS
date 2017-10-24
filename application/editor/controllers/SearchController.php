@@ -300,7 +300,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         $userOptions = $this->getCurrentUser()->getSearchOptions();
         $searchForm = Editor_Forms_Search::factory();
-        
+
         if ($this->getCurrentUser()->disableSearchProfileChanging) {
             if (isset($searchOptions['allowedConceptScheme'])) {
                 $userOptions['allowedConceptScheme'] = $searchOptions['allowedConceptScheme'];

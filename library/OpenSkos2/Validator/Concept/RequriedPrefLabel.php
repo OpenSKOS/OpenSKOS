@@ -33,7 +33,7 @@ class RequriedPrefLabel extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
-        $enabledSkosXl =$this->tenant->getEnableSkosXl();
+        $enabledSkosXl =$this->tenant->isEnableSkosXl();
         if ($enabledSkosXl) {
             return true;
         }

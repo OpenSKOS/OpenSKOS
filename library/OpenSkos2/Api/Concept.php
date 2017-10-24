@@ -355,7 +355,7 @@ class Concept extends AbstractTripleStoreResource
         if ($xlParam === false) {
             return false;
         } else {
-            if ($tenant !== null && $tenant->getEnableSkosXl() === true) {
+            if ($tenant !== null && $tenant->isEnableSkosXl() === true) {
                 return true;
             } else {
                 if ($tenant === null) {
@@ -381,7 +381,7 @@ class Concept extends AbstractTripleStoreResource
      */
     protected function checkConceptXl(\OpenSkos2\Concept $concept, \OpenSkos2\Tenant $tenant)
     {
-        if ($tenant->getEnableSkosXl()) {
+        if ($tenant->isEnableSkosXl()) {
             if ($concept->hasSimpleLabels()) {
                 throw new InvalidArgumentException(
                     'The concept contains simple labels. '

@@ -336,7 +336,7 @@ abstract class AbstractTripleStoreResource
 
         $tenant = $this->manager->fetchByUri($loadedResource->getPublisherUri(), \OpenSkos2\Tenant::TYPE);
 
-        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
+        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->isEnableSkosXl()) {
             $loadedResource->loadFullXlLabels($this->manager->getLabelManager());
         }
 

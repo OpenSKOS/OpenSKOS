@@ -174,7 +174,7 @@ class Serialiser
             $resources = $this->fetchResources($start, $step, $hasMore);
             
             foreach ($resources as $resource) {
-                if ($resource instanceof Concept && $this->tenant->getEnableSkosXl()) {
+                if ($resource instanceof Concept && $this->tenant->isEnableSkosXl()) {
                     $resource->loadFullXlLabels($this->conceptManager->getLabelManager());
                 }
                 

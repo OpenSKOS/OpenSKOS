@@ -213,10 +213,6 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
         } else {
             $collection->arrayToData( $form->getValues());
                 //->setFromArray(array('tenant' => $this->_tenant->code));
-            /*
-            highlight_string("<?php\n\$data =\n" . var_export($collection, true) . ";\n?>");
-            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
-            */
             try {
                 $this->getCollectionsManager()->replace($collection);
             } catch (Zend_Db_Statement_Exception $e) {

@@ -237,6 +237,7 @@ class Collection extends Resource
 
 
         }
+        return $this;
 
     }
 

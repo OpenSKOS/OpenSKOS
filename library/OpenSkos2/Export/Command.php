@@ -52,7 +52,7 @@ class Command
      */
     public function handle(Message $message)
     {
-        if ($message->getTenant()->getEnableSkosXl()) {
+        if ($message->getTenant()->isEnableSkosXl()) {
             $excludeProperties = Concept::$classes['LexicalLabels'];
         } else {
             $excludeProperties = Concept::$classes['SkosXlLabels'];

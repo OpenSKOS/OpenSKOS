@@ -61,7 +61,6 @@ class TenantManager extends ResourceManager
         return $response;
     }
 
-  
     // used only for html output
     private function arrangeTripleStoreSets($response)
     {
@@ -146,4 +145,29 @@ SELECT_URI;
             . "?object ?predicate2 ?object2 .}");
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
     }
+
+
+    /**
+     * Gets the RDF object for the logged in tenant
+     * @return logged in tenant or null
+     */
+    public static function getLoggedInTenant()
+    {
+        $tenant = null;
+
+        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
+
+        $user = \OpenSKOS_Db_Table_Users::requireFromIdentity();
+        if($user) {
+            $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+            $tenant = $tenantManager->fetchByUuid($tenantUuid);
+        }
+
+        return $tenant;
+
+    }
+
 }
+

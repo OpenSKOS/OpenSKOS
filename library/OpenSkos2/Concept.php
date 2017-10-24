@@ -249,7 +249,6 @@ class Concept extends Resource
         if ($currentStatus == null) {
             $oldStatus = null;
         } else {
-            highlight_string("<?php\n\$data =\n" . var_export($currentStatus, true) . ";\n?>");
             $oldStatus = $currentStatus;
         }
 
