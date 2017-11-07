@@ -22,6 +22,7 @@
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
@@ -29,6 +30,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
 
@@ -487,7 +489,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     protected function handleStatusAutomatedActions(Concept $concept, $formData)
     {
         if (!empty($formData['statusOtherConcept'])) {
-            
+
             if ($this->getConceptManager()->askForUri($formData['statusOtherConcept'])) {
                 $otherConcept = $this->getConceptManager()->fetchByUri($formData['statusOtherConcept']);
                 
@@ -505,10 +507,35 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 if ($concept->getStatus() == Concept::STATUS_REDIRECTED) {
                     foreach ($concept->retrieveLanguages() as $lang) {
                         if ($concept->hasPropertyInLanguage(Skos::PREFLABEL, $lang)) {
+
                             $otherConcept->addUniqueProperty(
                                 $formData['statusOtherConceptLabelToFill'],
                                 $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]
                             );
+
+
+                            //Redmine #34508. Also save the XL labels if XL is active.
+                            $tenant = $this->getOpenSkos2Tenant();
+                            if ($tenant->getEnableSkosXl() === true) {
+
+                                $label = new Label(Label::generateUri());
+                                $label->setProperty(SkosXl::LITERALFORM, $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]);
+                                $label->ensureMetadata();
+
+                                if ($formData['statusOtherConceptLabelToFill'] === Skos::HIDDENLABEL) {
+                                    $otherConcept->addUniqueProperty(
+                                        SkosXl::HIDDENLABEL,
+                                        $label
+                                    );
+                                }
+                                if ($formData['statusOtherConceptLabelToFill'] === Skos::ALTLABEL) {
+                                    $otherConcept->addUniqueProperty(
+                                        SkosXl::ALTLABEL,
+                                        $label
+                                    );
+                                }
+                            }
+
                         }
                     }
 
