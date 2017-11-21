@@ -81,7 +81,7 @@ $offset = 0;
 $limit = 200;
 $counter = 0;
 do {
-    //try {
+    try {
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
 
         $logger->info('Total: ' . $numFound);
@@ -91,6 +91,8 @@ do {
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
 
             foreach ($concepts as $concept) {
+
+
                 $counter ++;
                 $logger->debug($concept->getUri());
 
@@ -116,21 +118,20 @@ do {
                     );
                 }
             }
-            
+
             foreach ($deleteResources as $deleteResource) {
                 $resourceManager->delete($deleteResource);
             }
-            
-            $resourceManager->insertCollection($inserResources);
+
+            $resourceManager->extendCollection($inserResources);
         }
-        /*
     } catch (\Exception $ex) {
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
         );
     }
-        */
+
     
     if (!empty($skipDone)) {
         $offset = 0; // if we skip done we need to work without pagination

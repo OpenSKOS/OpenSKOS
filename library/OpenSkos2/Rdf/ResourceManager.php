@@ -94,6 +94,27 @@ class ResourceManager
     }
 
     /**
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function extend(Resource $resource)
+    {
+        // Set rdf:type if we have it and if it is missing.
+        if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
+            $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
+        }
+
+        $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
+    }
+
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     */
+    public function extendCollection(ResourceCollection $resourceCollection)
+    {
+        $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
+    }
+
+    /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
      */
