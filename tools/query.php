@@ -75,7 +75,7 @@ WHERE {
   ?subject <%s> ?coreLabel.
   ?subject <%s> ?status.
   OPTIONAL { ?subject <%s> ?object } .
-  FILTER ( bound(?object) )  
+  FILTER ( !bound(?object) )  
 }
 MY_SPARQL;
 
