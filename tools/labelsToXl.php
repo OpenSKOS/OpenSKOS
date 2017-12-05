@@ -80,6 +80,7 @@ if (!empty($modifiedSince)) {
 $offset = 0;
 $limit = 200;
 $counter = 0;
+
 do {
     try {
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
@@ -119,11 +120,17 @@ do {
                 }
             }
 
-            foreach ($deleteResources as $deleteResource) {
-                $resourceManager->delete($deleteResource);
+            try{
+                foreach ($deleteResources as $deleteResource) {
+                    $resourceManager->delete($deleteResource);
+                }
+                $resourceManager->extendCollection($inserResources);
+            } catch (\Exception $ex) {
+                $logger->warning(
+                    'Problem adding the labels '
+                    . '". The message is: ' . $ex->getMessage()
+                );
             }
-
-            $resourceManager->extendCollection($inserResources);
         }
     } catch (\Exception $ex) {
         $logger->warning(
@@ -139,7 +146,7 @@ do {
         $offset += $limit;
     }
     
-    $logger->info('Concepts processed so far: ' . $counter);
+    $logger->warning('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 
 $logger->info('Concepts processed (total): ' . $counter);

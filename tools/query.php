@@ -28,6 +28,7 @@ $opts = [
     'list' => 'Lists possible queries.',
     'noxl' => 'List all concepts missing a SkosXL prefLabel',
     'noxl-machine' => 'List all concepts missing a SkosXL prefLabel in machine readable format',
+    'limit' => 'Limit result set',
 ];
 
 try {
@@ -65,7 +66,12 @@ if ($OPTS->getOption('noxl') || $OPTS->getOption('noxl-machine') ) {
 $logger->info("Done!");
 ?>
 <?php
-    function getQueryItemsWithoutLabels()
+/**
+ * Query to retrieve concept with a prefLabel and no prefXL label
+ * @param $limit  Limit results to this value if set
+ * @return string
+ */
+function getQueryItemsWithoutLabels($limit = null)
     {
 
         $queryOut =  <<<MY_SPARQL
@@ -77,6 +83,7 @@ WHERE {
   OPTIONAL { ?subject <%s> ?object } .
   FILTER ( !bound(?object) )  
 }
+%s
 MY_SPARQL;
 
         $queryOut = sprintf(    $queryOut,
@@ -84,24 +91,29 @@ MY_SPARQL;
                                  'http://www.w3.org/2004/02/skos/core#Concept',
                                     \OpenSkos2\Namespaces\Skos::PREFLABEL,
                                     \OpenSkos2\Namespaces\OpenSkos::STATUS,
-                                    \OpenSkos2\Namespaces\SkosXl::PREFLABEL
+                                    \OpenSkos2\Namespaces\SkosXl::PREFLABEL,
+                                    ($limit ? "LIMIT $limit" : '')
             );
         return $queryOut;
     }
 
-    function listNonXLConcepts()
+/**
+ *
+ * List all concepts which have an skos::prefLabel instead of a SkosXL::PrefLabel
+ */
+function listNonXLConcepts()
     {
         global $diContainer, $logger, $OPTS;
 
         $formatString = "\033[1m<%s>\033[0m\n[%s]  '%s'\n\n";       //Default to human readable
-
-
         if ($OPTS->getOption('noxl-machine')) {
-            $formatString = "<%s>\t%s\n";
             $formatString = "<%s>\t%s\t%s\n";
         }
 
-
+        $limit = null;
+        if ($OPTS->getOption('limit')) {
+            $limit = 1000;
+        }
 
         /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
         $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -109,7 +121,7 @@ MY_SPARQL;
         /*
          * Query anything with Skos::Preflabel but no SkosXL::Preflabel
          */
-        $sparql = getQueryItemsWithoutLabels();
+        $sparql = getQueryItemsWithoutLabels($limit);
         $results = $resourceManager->query($sparql);
 
         //Tell the user the news
