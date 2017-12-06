@@ -146,7 +146,7 @@ do {
         $offset += $limit;
     }
     
-    $logger->warning('Concepts processed so far: ' . $counter);
+    $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 
 $logger->info('Concepts processed (total): ' . $counter);
