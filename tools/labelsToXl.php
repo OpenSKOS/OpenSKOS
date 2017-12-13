@@ -76,6 +76,7 @@ $modifiedSince = $OPTS->getOption('modified');
 if (!empty($modifiedSince)) {
     $query .= ' AND d_modified:[' . $modifiedSince .  ' TO *]';
 }
+$processedCount = $emptyCount = 0;
 
 $offset = 0;
 $limit = 200;
@@ -96,7 +97,10 @@ do {
 
                 $counter ++;
                 $logger->debug($concept->getUri());
-
+                if($concept->getProperty('http://openskos.org/xmlns#status')[0]->__toString() != 'approved'){
+                    continue;
+                }
+                print $concept->getUri() ."\n";
                 try {
                     $labelHelper->assertLabels($concept, true);
 
@@ -108,11 +112,19 @@ do {
                     // Create concept only with xl labels to insert it as partial resource
                     $partialConcept = new \OpenSkos2\Concept($concept->getUri());
                     foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                        $fds = $concept->getProperty($xlProperty);
+                        if (count($fds) === 0) {
+                            $emptyCount++;
+                        }
+                        else {
+                            $processedCount ++;
+                        }
                         $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
                     }
 
                     $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
+                    die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
                         . '". The message is: ' . $ex->getMessage()
@@ -126,6 +138,7 @@ do {
                 }
                 $resourceManager->extendCollection($inserResources);
             } catch (\Exception $ex) {
+                die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
                 $logger->warning(
                     'Problem adding the labels '
                     . '". The message is: ' . $ex->getMessage()
@@ -133,6 +146,7 @@ do {
             }
         }
     } catch (\Exception $ex) {
+        die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
@@ -145,9 +159,14 @@ do {
     } else {
         $offset += $limit;
     }
+
+
     
     $logger->info('Concepts processed so far: ' . $counter);
+    printf("Empty: %d, Processed %d\n", $emptyCount, $processedCount);
 } while (count($concepts) > 0);
+
+printf("\nemptycount %d\n", $emptyCount);
 
 $logger->info('Concepts processed (total): ' . $counter);
 
