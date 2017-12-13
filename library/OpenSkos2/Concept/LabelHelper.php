@@ -150,9 +150,6 @@ class LabelHelper
             $concept->setProperties($simpleLabelProperty, $xlLabelsLiterals);
             //print "\n\n";
         }
-        if($xxx !== 3){
-            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
-        }
     }
 
     /**

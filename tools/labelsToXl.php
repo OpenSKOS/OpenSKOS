@@ -97,6 +97,7 @@ do {
 
                 $counter ++;
                 $logger->debug($concept->getUri());
+
                 if($concept->getProperty('http://openskos.org/xmlns#status')[0]->__toString() != 'approved'){
                     continue;
                 }
