@@ -54,8 +54,6 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
-        $xxx = 1;
-        print "\n\nAssertLabels\n";
         /* @var $tenant OpenSKOS_Db_Table_Row_Tenant */
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
@@ -67,7 +65,6 @@ class LabelHelper
         $useXlLabels = (bool)$tenant['enableSkosXl'];
 
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
-            //print "Simple Label Property $simpleLabelProperty\n";
             $fullXlLabels = [];
             foreach ($concept->getProperty($xlLabelProperty) as $labelValue) {
                 if (!$labelValue instanceof Uri) {
@@ -81,7 +78,6 @@ class LabelHelper
                         $labelValue->setUri(Label::generateUri());
                     }
                     $fullXlLabels[] = $labelValue;
-                    print "Path 1";
                     continue;
                 }
 
@@ -94,12 +90,9 @@ class LabelHelper
                     );
                 }
 
-                print "Has Full Label\n";
-                $xxx++;
                 $fullXlLabels[] = $this->labelManager->fetchByUri($labelValue);
             }
 
-            //printf("CountXL %d\n", count($fullXlLabels));
             // Extract all literals to compare agains simple labels
             $xlLabelsLiterals = [];
             foreach ($fullXlLabels as $label) {
@@ -109,46 +102,20 @@ class LabelHelper
             // Create xl label for any simple label which does not have matching one.
             // Do this only if skos xl labels are disabled, i.e. simple labels are primary.
             if ($useXlLabels === false || $forceCreationOfXl) {
-                if(count($fullXlLabels) == 0)
-                print "PATH 2\n";
                 foreach ($concept->getProperty($simpleLabelProperty) as $simpleLabel) {
-                    print "Has Simple Label\n";
-                    $xxx++;
-                    if (count($fullXlLabels) == 0) {
-                        print "PATH 3\n";
-                        print var_export($simpleLabel);
-                        print "\n";
-                        print var_export($xlLabelsLiterals);
-                        print "\n";
-                    }
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
-                        print "Adding \n";
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
                         $label->ensureMetadata();
 
-                        print "Adding Property\n";
                         $concept->addProperty($xlLabelProperty, $label);
 
                         $xlLabelsLiterals[] = $simpleLabel;
                     }
-                    else {
-                        print "not adding \n";
-                    }
                 }
             }
 
-            // Dumbing down xl labels to simple labels.
-            // Match all simple labels to the existing xl labels.
-            /*
-            print "\n\n===MATCHDOWN===\n";
-            print "Simple\n";
-            var_dump($simpleLabelProperty);
-            print "XL\n";
-            var_dump($xlLabelsLiterals);
-            */
             $concept->setProperties($simpleLabelProperty, $xlLabelsLiterals);
-            //print "\n\n";
         }
     }
 

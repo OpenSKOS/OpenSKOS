@@ -128,10 +128,8 @@ class Concept extends Resource
     
     public static $labelsMap = [
         SkosXl::PREFLABEL => Skos::PREFLABEL,
-        /*
         SkosXl::ALTLABEL => Skos::ALTLABEL,
         SkosXl::HIDDENLABEL => Skos::HIDDENLABEL,
-        */
     ];
 
     /**
