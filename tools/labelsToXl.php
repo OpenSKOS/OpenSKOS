@@ -78,7 +78,7 @@ if (!empty($modifiedSince)) {
 }
 
 $offset = 0;
-$limit = 200;
+$limit = 50;
 $counter = 0;
 
 do {
