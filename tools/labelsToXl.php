@@ -118,6 +118,7 @@ do {
 
                     $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
+                    die ($ex->getMessage());
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
                         . '". The message is: ' . $ex->getMessage()
@@ -131,6 +132,7 @@ do {
                 }
                 $resourceManager->extendCollection($inserResources);
             } catch (\Exception $ex) {
+                die ($ex->getMessage());
                 $logger->warning(
                     'Problem adding the labels '
                     . '". The message is: ' . $ex->getMessage()
@@ -138,6 +140,7 @@ do {
             }
         }
     } catch (\Exception $ex) {
+        die ($ex->getMessage());
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
