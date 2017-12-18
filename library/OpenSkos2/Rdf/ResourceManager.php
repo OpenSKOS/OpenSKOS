@@ -611,9 +611,7 @@ class ResourceManager
             try {
                 return $this->client->insert($data);
             } catch (\EasyRdf\Exception $ex) {
-                if (strpos($ex->getMessage(), 'timed out') === false) {
                     throw $ex;
-                }
             }
             sleep(1);
             $tries ++;
