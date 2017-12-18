@@ -103,8 +103,12 @@ do {
 
                     $insertAndDelete = $labelHelper->getLabelsForInsertAndDelete($concept);
 
+                    printf("To delete: %d\n", $insertAndDelete['delete']->count());
+                    printf("To insert: %d\n", $insertAndDelete['insert']->count());
+
                     $deleteResources->merge($insertAndDelete['delete']);
                     $inserResources->merge($insertAndDelete['insert']);
+
 
                     // Create concept only with xl labels to insert it as partial resource
                     $partialConcept = new \OpenSkos2\Concept($concept->getUri());

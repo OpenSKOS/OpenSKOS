@@ -112,6 +112,7 @@ class ResourceManager
      */
     public function extendCollection(ResourceCollection $resourceCollection)
     {
+        print "Call insertWithRetry\n";
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
 
