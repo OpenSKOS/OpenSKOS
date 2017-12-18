@@ -54,6 +54,7 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
+        print "Asserting\n";
         /* @var $tenant OpenSKOS_Db_Table_Row_Tenant */
         $tenant = $concept->getInstitution();
         if (empty($tenant)) {
@@ -108,6 +109,7 @@ class LabelHelper
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
                         $label->ensureMetadata();
 
+                        print "Adding Label\n";
                         $concept->addProperty($xlLabelProperty, $label);
 
                         $xlLabelsLiterals[] = $simpleLabel;

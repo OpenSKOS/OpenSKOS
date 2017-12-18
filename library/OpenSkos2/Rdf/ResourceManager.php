@@ -98,6 +98,7 @@ class ResourceManager
      */
     public function extend(Resource $resource)
     {
+        print "Extending Resource\n";
         // Set rdf:type if we have it and if it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));

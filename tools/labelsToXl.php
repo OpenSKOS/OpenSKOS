@@ -96,6 +96,7 @@ do {
 
                 $counter ++;
                 $logger->debug($concept->getUri());
+                printf("\n\nPROCESSING %s\n=============================\n", $concept->getUri());
 
                 try {
                     $labelHelper->assertLabels($concept, true);
@@ -113,7 +114,6 @@ do {
 
                     $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
-                    die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
                         . '". The message is: ' . $ex->getMessage()
@@ -127,7 +127,6 @@ do {
                 }
                 $resourceManager->extendCollection($inserResources);
             } catch (\Exception $ex) {
-                die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
                 $logger->warning(
                     'Problem adding the labels '
                     . '". The message is: ' . $ex->getMessage()
@@ -135,7 +134,6 @@ do {
             }
         }
     } catch (\Exception $ex) {
-        die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
