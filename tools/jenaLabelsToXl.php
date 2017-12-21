@@ -81,7 +81,6 @@ function processNonXLConcepts()
     if ($OPTS->getOption('limit')) {
         $limit = 10;
     }
-    $limit = 1000; //TODO
 
     /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
     $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -98,7 +97,9 @@ function processNonXLConcepts()
         $sparql = getQueryItemsWithoutLabels($skosLabel, $xlLabel, $limit);
         $unLabeled = $resourceManager->query($sparql);
 
-        $logger->info(sprintf("%d labels to  convert", count($unLabeled)));
+        $toProcess = count($unLabeled);
+
+        $logger->info(sprintf("%d labels to  convert", $toProcess));
 
         $insertResources = new \OpenSkos2\Rdf\ResourceCollection([]);
         $innerCounter = 0;
@@ -128,13 +129,28 @@ function processNonXLConcepts()
             $insertResources->append($partialConcept);
 
             if($innerCounter % COMMIT_FREQUENCY == 0){
-                $resourceManager->extendCollection($insertResources);
-                $logger->info(sprintf("Commit after %d concepts", count($innerCounter)));
+
+                try {
+                    $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
+                    $resourceManager->extendCollection($insertResources);
+                } catch (\Exception $ex) {
+                    $logger->warning(
+                        'Problem with the labels for "' . $subjectUri
+                        . '". The message is: ' . $ex->getMessage()
+                    );
+                }
             }
 
         }
-        $logger->info(sprintf("Commit after %d concepts", count($innerCounter)));
-        $resourceManager->extendCollection($insertResources);
+        try {
+            $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
+            $resourceManager->extendCollection($insertResources);
+        } catch (\Exception $ex) {
+            $logger->warning(
+                'Problem with the labels for "' . $subjectUri
+                . '". The message is: ' . $ex->getMessage()
+            );
+        }
     }
     /*
 
