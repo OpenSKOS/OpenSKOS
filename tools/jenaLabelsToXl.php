@@ -72,6 +72,8 @@ processNonXLConcepts();
 
 /**
  *
+ * Walk through all concepts without xlLabels, and append
+ *
  */
 function processNonXLConcepts()
 {
@@ -81,6 +83,7 @@ function processNonXLConcepts()
     if ($OPTS->getOption('limit')) {
         $limit = 10;
     }
+    $limit = 10;
 
     /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
     $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -91,66 +94,76 @@ function processNonXLConcepts()
     $labelsList = getLabelsMap();
     foreach($labelsList as $xlLabel => $skosLabel){
 
-        $logger->info(sprintf("Convert %s to  %s", $xlLabel, $skosLabel));
+        do {
 
-        //Fetch all subjects missing this label
-        $sparql = getQueryItemsWithoutLabels($skosLabel, $xlLabel, $limit);
-        $unLabeled = $resourceManager->query($sparql);
+            $logger->info(sprintf("Convert %s to  %s", $xlLabel, $skosLabel));
 
-        $toProcess = count($unLabeled);
+            //Fetch all subjects missing this label
+            $sparql = getQueryItemsWithoutLabels($skosLabel, $xlLabel, $limit);
+            $unLabeled = $resourceManager->query($sparql);
 
-        $logger->info(sprintf("%d labels to  convert", $toProcess));
-
-        $insertResources = new \OpenSkos2\Rdf\ResourceCollection([]);
-        $innerCounter = 0;
-
-        foreach ($unLabeled as $row){
-            $innerCounter ++;
-
-            $subjectUri = $row->subject->getUri();
-            $jenaObject = $resourceManager->fetchByUri($subjectUri);
-
-            // Create concept only with xl labels to insert it as partial resource
-            $partialConcept = new \OpenSkos2\Concept($jenaObject->getUri());
-
-
-            //Get every instance of the simple label attached to this property
-            $allSimpleLabels = $jenaObject->getProperty($skosLabel);
-            foreach ( $allSimpleLabels as $simpleLabelValue) {
-
-                //@TODO. Check this label isn't already there
-                $newLabel = new Label(Label::generateUri());
-                $newLabel->setProperty(SkosXl::LITERALFORM, $simpleLabelValue);
-                $newLabel->ensureMetadata();
-
-                $partialConcept->setProperty($xlLabel, $newLabel);
-
+            $toProcess = count($unLabeled);
+            if($toProcess == 0){
+                break;
             }
-            $insertResources->append($partialConcept);
 
-            if($innerCounter % COMMIT_FREQUENCY == 0){
+            $logger->info(sprintf("%d labels to  convert", $toProcess));
 
-                try {
-                    $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
-                    $resourceManager->extendCollection($insertResources);
-                } catch (\Exception $ex) {
-                    $logger->warning(
-                        'Problem with the labels for "' . $subjectUri
-                        . '". The message is: ' . $ex->getMessage()
-                    );
+            $insertResources = new \OpenSkos2\Rdf\ResourceCollection([]);
+            $innerCounter = 0;
+
+            //Loop anything missing an XL Label
+            foreach ($unLabeled as $row) {
+                $innerCounter++;
+
+                $subjectUri = $row->subject->getUri();
+                $jenaObject = $resourceManager->fetchByUri($subjectUri);
+
+                // Create concept only with xl labels to insert it as partial resource
+                $partialConcept = new \OpenSkos2\Concept($jenaObject->getUri());
+
+
+                //Get every instance of the simple label attached to this property
+                $allSimpleLabels = $jenaObject->getProperty($skosLabel);
+                foreach ($allSimpleLabels as $simpleLabelValue) {
+
+                    //@TODO. Maybe check this label isn't already there
+                    //Although the current query we're using wont get any partially labeled concepts anyway
+                    $newLabel = new Label(Label::generateUri());
+                    $newLabel->setProperty(SkosXl::LITERALFORM, $simpleLabelValue);
+                    $newLabel->ensureMetadata();
+
+                    $partialConcept->setProperty($xlLabel, $newLabel);
+
                 }
-            }
+                $insertResources->append($partialConcept);
 
-        }
-        try {
-            $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
-            $resourceManager->extendCollection($insertResources);
-        } catch (\Exception $ex) {
-            $logger->warning(
-                'Problem with the labels for "' . $subjectUri
-                . '". The message is: ' . $ex->getMessage()
-            );
-        }
+                if ($innerCounter % COMMIT_FREQUENCY == 0) {
+
+                    try {
+                        //Commit the resources we just processed
+                        $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
+                        $resourceManager->extendCollection($insertResources);
+                    } catch (\Exception $ex) {
+                        $logger->warning(
+                            'Problem with the labels for "' . $subjectUri
+                            . '". The message is: ' . $ex->getMessage()
+                        );
+                    }
+                }
+
+            }
+            try {
+                //Commit the resources we just processed
+                $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
+                $resourceManager->extendCollection($insertResources);
+            } catch (\Exception $ex) {
+                $logger->warning(
+                    'Problem with the labels for "' . $subjectUri
+                    . '". The message is: ' . $ex->getMessage()
+                );
+            }
+        }while (true);
     }
     /*
 
