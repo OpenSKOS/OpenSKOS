@@ -81,7 +81,7 @@ function processNonXLConcepts()
     if ($OPTS->getOption('limit')) {
         $limit = 10;
     }
-    $limit = 1; //TODO
+    $limit = 1000; //TODO
 
     /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
     $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
