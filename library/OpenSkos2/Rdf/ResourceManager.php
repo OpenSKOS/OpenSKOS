@@ -98,7 +98,6 @@ class ResourceManager
      */
     public function extend(Resource $resource)
     {
-        print "Extending Resource\n";
         // Set rdf:type if we have it and if it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
@@ -112,7 +111,6 @@ class ResourceManager
      */
     public function extendCollection(ResourceCollection $resourceCollection)
     {
-        print "Call insertWithRetry\n";
         $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
 
@@ -611,7 +609,9 @@ class ResourceManager
             try {
                 return $this->client->insert($data);
             } catch (\EasyRdf\Exception $ex) {
+                if (strpos($ex->getMessage(), 'timed out') === false) {
                     throw $ex;
+                }
             }
             sleep(1);
             $tries ++;
