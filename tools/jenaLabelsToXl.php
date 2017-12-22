@@ -79,11 +79,7 @@ function processNonXLConcepts()
 {
     global $diContainer, $logger, $OPTS;
 
-    $limit = null;
-    if ($OPTS->getOption('limit')) {
-        $limit = 10;
-    }
-    $limit = 10;
+    $limit = COMMIT_FREQUENCY;
 
     /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
     $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -94,20 +90,24 @@ function processNonXLConcepts()
     $labelsList = getLabelsMap();
     foreach($labelsList as $xlLabel => $skosLabel){
 
+        $logger->info(sprintf("Convert %s to  %s", $xlLabel, $skosLabel));
+
+        $totalItems = countItemsWithoutLabels($resourceManager, $skosLabel, $xlLabel);
+        $logger->info(sprintf("Total concepts to process: %s", $totalItems));
+
+
+        $outerCounter = 0;
         do {
 
-            $logger->info(sprintf("Convert %s to  %s", $xlLabel, $skosLabel));
-
             //Fetch all subjects missing this label
-            $sparql = getQueryItemsWithoutLabels($skosLabel, $xlLabel, $limit);
+            $sparql = getQueryItemsWithoutLabels($skosLabel, $xlLabel, COMMIT_FREQUENCY);
             $unLabeled = $resourceManager->query($sparql);
 
             $toProcess = count($unLabeled);
             if($toProcess == 0){
+                //This is the only exit point of the loop. Please don't delete it without replacing it
                 break;
             }
-
-            $logger->info(sprintf("%d labels to  convert", $toProcess));
 
             $insertResources = new \OpenSkos2\Rdf\ResourceCollection([]);
             $innerCounter = 0;
@@ -115,6 +115,7 @@ function processNonXLConcepts()
             //Loop anything missing an XL Label
             foreach ($unLabeled as $row) {
                 $innerCounter++;
+                $outerCounter++;
 
                 $subjectUri = $row->subject->getUri();
                 $jenaObject = $resourceManager->fetchByUri($subjectUri);
@@ -138,24 +139,10 @@ function processNonXLConcepts()
                 }
                 $insertResources->append($partialConcept);
 
-                if ($innerCounter % COMMIT_FREQUENCY == 0) {
-
-                    try {
-                        //Commit the resources we just processed
-                        $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
-                        $resourceManager->extendCollection($insertResources);
-                    } catch (\Exception $ex) {
-                        $logger->warning(
-                            'Problem with the labels for "' . $subjectUri
-                            . '". The message is: ' . $ex->getMessage()
-                        );
-                    }
-                }
-
             }
             try {
                 //Commit the resources we just processed
-                $logger->info(sprintf("Commit after %d of %s concepts", $innerCounter, $toProcess));
+                $logger->info(sprintf("Commit after %d of %s concepts", $outerCounter, $totalItems));
                 $resourceManager->extendCollection($insertResources);
             } catch (\Exception $ex) {
                 $logger->warning(
@@ -163,24 +150,9 @@ function processNonXLConcepts()
                     . '". The message is: ' . $ex->getMessage()
                 );
             }
+            gc_collect_cycles();
         }while (true);
     }
-    /*
-
-    $sparql = getQueryItemsWithoutLabels($limit);
-    $results = $resourceManager->query($sparql);
-
-    //Tell the user the news
-    foreach($results as $row){
-        printf($formatString,
-            $row->subject->getUri(),
-            $row->status->getValue(),
-            $row->coreLabel->getValue()
-        );
-
-    }
-    */
-
 }
 
 
@@ -215,6 +187,42 @@ MY_SPARQL;
     );
     return $queryOut;
 }
+
+
+/**
+ * Query to retrieve concept with a prefLabel and no prefXL label
+ * @param $limit  Limit results to this value if set
+ * @return string
+ */
+function countItemsWithoutLabels($resourceManager, $skosLabel, $xlLabel)
+{
+
+    $query =  <<<MY_SPARQL
+SELECT (COUNT(?subject) as ?count)	
+WHERE { 
+  ?subject <%s> <%s> .
+  ?subject <%s> ?coreLabel.
+  ?subject <%s> ?status.
+  OPTIONAL { ?subject <%s> ?object } .
+  FILTER ( !bound(?object) )  
+}
+MY_SPARQL;
+
+    $query = sprintf(    $query,
+        \OpenSkos2\Namespaces\Rdf::TYPE,
+        'http://www.w3.org/2004/02/skos/core#Concept',
+        $skosLabel,
+        OpenSkos::STATUS,
+        $xlLabel
+    );
+
+    $result = $resourceManager->query($query);
+
+    $count = $result[0]->count->getValue();
+
+    return ((int)$count);
+}
+
 
 function getLabelsMap(){
     return array(
