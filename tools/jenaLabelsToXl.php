@@ -33,7 +33,7 @@ use OpenSkos2\SkosXl\LabelCollection;
 require dirname(__FILE__) . '/autoload.inc.php';
 
 //How often to commit rows
-define ('COMMIT_FREQUENCY', 100);
+define ('COMMIT_FREQUENCY', 10000);
 
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
