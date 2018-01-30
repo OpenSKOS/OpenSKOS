@@ -118,6 +118,8 @@ function processNonXLConcepts()
                 $outerCounter++;
 
                 $subjectUri = $row->subject->getUri();
+                $labelContent = $row->coreLabel->getValue();
+
                 $jenaObject = $resourceManager->fetchByUri($subjectUri);
 
                 // Create concept only with xl labels to insert it as partial resource
@@ -125,18 +127,15 @@ function processNonXLConcepts()
 
 
                 //Get every instance of the simple label attached to this property
-                $allSimpleLabels = $jenaObject->getProperty($skosLabel);
-                foreach ($allSimpleLabels as $simpleLabelValue) {
+                //$allSimpleLabels = $jenaObject->getProperty($skosLabel);
+                $valueAsOpenSkosObject = new Literal($row->coreLabel);
 
-                    //@TODO. Maybe check this label isn't already there
-                    //Although the current query we're using wont get any partially labeled concepts anyway
-                    $newLabel = new Label(Label::generateUri());
-                    $newLabel->setProperty(SkosXl::LITERALFORM, $simpleLabelValue);
-                    $newLabel->ensureMetadata();
+                $newLabel = new Label(Label::generateUri());
+                $newLabel->setProperty(SkosXl::LITERALFORM, $valueAsOpenSkosObject);
+                $newLabel->ensureMetadata();
 
-                    $partialConcept->setProperty($xlLabel, $newLabel);
+                $partialConcept->setProperty($xlLabel, $newLabel);
 
-                }
                 $insertResources->append($partialConcept);
 
             }
@@ -175,6 +174,7 @@ WHERE {
   FILTER ( !bound(?object) )  
 }
 %s
+
 MY_SPARQL;
 
     $queryOut = sprintf(    $queryOut,
