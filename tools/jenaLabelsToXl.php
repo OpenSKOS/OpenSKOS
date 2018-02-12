@@ -33,7 +33,7 @@ use OpenSkos2\SkosXl\LabelCollection;
 require dirname(__FILE__) . '/autoload.inc.php';
 
 //How often to commit rows
-define ('COMMIT_FREQUENCY', 10000);
+define ('COMMIT_FREQUENCY', 1);
 
 $opts = [
     'env|e=s' => 'The environment to use (defaults to "production")',
@@ -116,6 +116,8 @@ function processNonXLConcepts()
             foreach ($unLabeled as $row) {
                 $innerCounter++;
                 $outerCounter++;
+                print var_export(($row));
+                print "\n\n";
 
                 $subjectUri = $row->subject->getUri();
                 $labelContent = $row->coreLabel->getValue();
@@ -129,6 +131,8 @@ function processNonXLConcepts()
                 //Get every instance of the simple label attached to this property
                 //$allSimpleLabels = $jenaObject->getProperty($skosLabel);
                 $valueAsOpenSkosObject = new Literal($row->coreLabel);
+                $valueAsOpenSkosObject->setLanguage($row->coreLabel->getLang());
+                print var_export($valueAsOpenSkosObject);
 
                 $newLabel = new Label(Label::generateUri());
                 $newLabel->setProperty(SkosXl::LITERALFORM, $valueAsOpenSkosObject);
@@ -149,6 +153,7 @@ function processNonXLConcepts()
                     . '". The message is: ' . $ex->getMessage()
                 );
             }
+            die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
             gc_collect_cycles();
         }while (true);
     }
