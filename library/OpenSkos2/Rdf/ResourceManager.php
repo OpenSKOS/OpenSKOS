@@ -602,6 +602,8 @@ class ResourceManager
      */
     protected function insertWithRetry($data)
     {
+        return $this->client->insert($data);
+
         $maxTries = 3;
         $tries = 0;
         $ex = null;
