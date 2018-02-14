@@ -57,6 +57,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
         SkosXl::HIDDENLABEL => _('Skos Xl hidden label'),
     );
     ?>
+
     <?php foreach ($this->currentConcept->retrieveLanguages() as $languageCode): ?>
         <div id="tab_language_<?= $languageCode; ?>" class="tab-content">
             <?php if($this->tenant->getEnableSkosXl() === false): ?>

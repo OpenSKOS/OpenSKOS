@@ -131,6 +131,7 @@ class LabelHelper
     {
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
 
+
         foreach ($inserAndDelete['delete'] as $deleteLabel) {
             $this->labelManager->delete($deleteLabel);
         }

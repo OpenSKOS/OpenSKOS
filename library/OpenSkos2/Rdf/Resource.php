@@ -317,12 +317,14 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $values = $this->getProperty($property);
 
+        /* TODO: Debugging
         if (count($values) > 1) {
             throw new OpenSkosException(
                 'Multiple values found for property "' . $property . '" while a single one was requested.'
                 . ' Values ' . implode(', ', $values)
             );
         }
+        */
 
         if (!empty($values)) {
             return $values[0];
