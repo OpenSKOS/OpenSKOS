@@ -158,8 +158,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             }
             
             $this->handleStatusAutomatedActions($concept, $form->getValues());
-            
-            $this->getConceptManager()->replaceAndCleanRelations($concept);
+
+            //@TODO: This is debug
+            //$this->getConceptManager()->replaceAndCleanRelations($concept);
         } else {
             return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
         }
