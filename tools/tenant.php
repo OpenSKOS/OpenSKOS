@@ -19,122 +19,124 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-use DI\Container;
 
-require_once 'autoload.inc.php';
-require_once 'Zend/Console/Getopt.php';
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
+use OpenSkos2\Rdf\Uri;
 
+require 'autoload.inc.php';
+require 'Zend/Console/Getopt.php';
+
+require_once 'utils_functions.php';
 
 $opts = array(
     'help|?' => 'Print this usage message',
     'env|e=s' => 'The environment to use (defaults to "production")',
-    'uri=s' => 'tenant uri',
-    'uuid=s' => 'tenant uuid',
     'code=s' => 'Tenant code (required)',
     'name=s' => 'Tenant name (required when creating a tenant)',
-    'disableSearchInOtherTenants=s' => 'disable Search In Other Tenants',
-    'enableStatussesSystem=s' => 'enable Statusses System',
     'email=s' => 'Admin email (required when creating a tenant)',
-    'password=s' => 'Password for the Admin account',
-    'apikey=s' => 'Api key for the Admin account',
-    'enableSkosXl=s' => 'enable skos xl labels',
-    'action=s' => 'create or delete'
+    'password=s' => 'Password for the Admin account'
 );
 $OPTS = new Zend_Console_Getopt($opts);
 
 if ($OPTS->help) {
-    echo str_replace('[ options ]', '[ options ] action', 
-        $OPTS->getUsageMessage());
+    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
     exit(0);
 }
 
-if (null === $OPTS->action) {
-    fwrite(STDERR, "required `action` argument\n");
+$args = $OPTS->getRemainingArgs();
+
+if (!$args || count($args) != 1) {
+    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
+    fwrite(STDERR, "Expected an actions (create|delete)\n");
     exit(1);
 }
+$action = $args[0];
 
-$action = $OPTS->action;
+$query = $OPTS->query;
 
 if (null === $OPTS->code) {
     fwrite(STDERR, "missing required `code` argument\n");
     exit(1);
 }
 
-if (null === $OPTS->apikey) {
-    fwrite(STDERR, "missing required `apikey` argument\n");
-    exit(1);
-}
+include 'bootstrap.inc.php';
 
-require_once dirname(__FILE__) . '/bootstrap.inc.php';
-require_once 'utils_functions.php';
-
-/* @var $diContainer Container */
+/* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-
-/**
- * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
- */
 $resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
+$tenantManager = $diContainer->make('\OpenSkos2\TenantManager');
 
-
-fwrite(STDOUT, "\n\n\n Starting script tenant... \n ");
 switch ($action) {
     case 'create':
-        
-         // create admin user for this tenant
+        if (null === $OPTS->name) {
+            fwrite(STDERR, "missing required `name` argument\n");
+            exit(1);
+        }
+        if (null === $OPTS->email) {
+            fwrite(STDERR, "missing required `email` argument\n");
+            exit(1);
+        }
+        if (null === $OPTS->password) {
+            $password = OpenSKOS_Db_Table_Users::pwgen(8);
+        } else {
+            $password = $OPTS->password;
+        }
+        try {
+
+            $tenantCode = $OPTS->code;
+            $tenantName = $OPTS->name;
+            $tenantEmail = $OPTS->email;
+
+            if (empty($tenantName)) {
+                $tenantName = $tenantCode;
+            }
+            $tenant = new Tenant();
+
+            $tenant->arrayToData(
+                array(
+                    'name' => $tenantName,
+                    'code'=> $tenantCode,
+                    'email'=> $tenantEmail,
+                )
+            );
+            $tenant->ensureMetadata();
+
+            insertResource($tenantManager, $tenant);
+        } catch (Zend_Db_Exception $e) {
+            fwrite(STDERR, $e->getMessage() . "\n");
+            exit(2);
+        }
         $model = new OpenSKOS_Db_Table_Users();
         $model->createRow(array(
-            'email' => $OPTS->email,
-            'name' => $OPTS->name,
-            'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($OPTS->password) . ')'),
-            'tenant' => $OPTS->code,
-            'apikey' => $OPTS->apikey,
+            'email' => $tenantEmail,
+            'name' => $tenantName,
+            'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($password) . ')'),
+            'tenant' => $tenantCode,
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
-
-
-        //create tenant 
-        $tenantRdf = createTenantRdf($OPTS->code, 
-            $OPTS->name, 
-            $OPTS->uri, 
-            $OPTS->uuid,
-            $OPTS->email,
-            $OPTS->disableSearchInOtherTenants, 
-            $OPTS->enableStatussesSystem, 
-            $OPTS->enableSkosXl, 
-            $resourceManager);
-        $resourceManager->insert($tenantRdf);
-        fwrite(STDOUT, 'A tenant has been created in the triple store with this uri: ' . 
-            $tenantRdf->getUri() . "\n");
-        fwrite(STDOUT, 'To check: try GET <host>/api/institution?id=' . 
-            $tenantRdf->getUri() . "\n");
-        fwrite(STDOUT, "Now Im about to add the user to "
-            . "the triple store ... \n\n");
-
-       
-        // add  admin user-info to triple store
-        //firsts get it from MySql 
-        $user = $resourceManager->fetchRowWithRetries($model, 'apikey = ' . $model->getAdapter()->quote($OPTS->apikey) . ' '
-            . 'AND tenant = ' . $model->getAdapter()->quote($OPTS->code)
-        );
-        // second, getFoafPersonMethod adds a user automatically to the triple tore
-        $useruri = $user->getFoafPerson()->getUri();
-
         fwrite(STDOUT, 'A tenant has been created with this user account:' . "\n");
         fwrite(STDOUT, "  - code: {$OPTS->code}\n");
         fwrite(STDOUT, "  - login: {$OPTS->email}\n");
-        fwrite(STDOUT, "  - password: {$OPTS->password}\n");
-        fwrite(STDOUT, "  - apikey: {$OPTS->apikey}\n");
-        fwrite(STDOUT, "  - user uri: {$useruri}\n");
+        fwrite(STDOUT, "  - password: {$password}\n");
+        break;
+
+    case 'delete':
+        /*
+        $tenant = $model->find($OPTS->code)->current();
+        if (null === $tenant) {
+            fwrite(STDERR, "Tenant `{$OPTS->code} does not exists\n");
+            exit(2);
+        }
+        $tenant->delete();
+        */
         break;
     default:
         fwrite(STDERR, "unkown action `{$action}`\n");
         exit(1);
 }
 
+
 exit(0);
-
-// php tenant.php --enableSkosXl=true --code=testcode8 --name=testtenant8 --disableSearchInOtherTenants=true --enableStatussesSystem=true --email=o4@mail.com --uri=http://ergens/xxx5 --uuid=yyy5 --password=xxx --action=create
-
-

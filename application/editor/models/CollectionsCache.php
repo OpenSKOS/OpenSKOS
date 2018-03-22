@@ -99,6 +99,7 @@ class Editor_Models_CollectionsCache
      */
     public function fetchAll()
     {
+
         $schemes = $this->cache->load(self::CONCEPT_CACHE_KEY . $this->requireTenantCode());
         if ($schemes === false) {
             /*

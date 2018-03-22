@@ -29,6 +29,7 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         static $form;
         if (null === $form) {
             $form = new Zend_Form();
+            /**/
             $form
                     ->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
                     ->addElement('text', 'organisationUnit', array('label' => _('Organisation unit')))

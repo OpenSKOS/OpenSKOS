@@ -34,6 +34,7 @@ class OpenSkos
     const SET = 'http://openskos.org/xmlns#set';
     const INSKOSCOLLECTION = 'http://openskos.org/xmlns#inSkosCollection';
     const CODE = 'http://openskos.org/xmlns#code';
+    const NAME = 'http://openskos.org/xmlns#name';      //TODO: Do we just need code?
     const DISABLESEARCHINOTERTENANTS = 'http://openskos.org/xmlns#disableSearchInOtherTenants';
     const ENABLESTATUSSESSYSTEMS = 'http://openskos.org/xmlns#enableStatussesSystem';
     const ALLOW_OAI = 'http://openskos.org/xmlns#allow_oai';

@@ -182,7 +182,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $params = $this->getRequest()->getParams();
             $collection = new \OpenSkos2\Collection();
             $form = $collection->getForm();
-            $collection->arrayToData( array('tenant' => $this->_tenant->code));
+            $collection->arrayToData( array('tenant' => $this->_tenant->getCode()));
             $collection->arrayToData( $params);
             $collection->generateUri();
 

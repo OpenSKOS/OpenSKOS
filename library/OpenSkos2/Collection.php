@@ -37,7 +37,8 @@ use OpenSkos2\SkosXl\Label;
 class Collection extends Resource
 {
 
-    const TYPE = Dcmi::DATASET;
+    //const TYPE = Dcmi::DATASET;
+    const TYPE = OpenSkos::SET;
 
 
     /**

@@ -103,7 +103,7 @@ class Editor_Models_ConceptSchemesCache
         if ($schemes === false) {
             $schemes = $this->sortSchemes(
                 $this->manager->fetch(
-                    [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
+                    [],
                     null,
                     null,
                     true

@@ -29,7 +29,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `apikey` VARCHAR(100) NULL DEFAULT NULL ,
   `active` CHAR(1) NOT NULL DEFAULT 'Y' ,
   `type` ENUM('editor','api','both') NOT NULL DEFAULT 'both' ,
-  `eppn` VARCHAR(100) NOT NULL ,
   `role` varchar(25) NOT NULL DEFAULT "guest",
   `searchOptions` BLOB,
   `conceptsSelection` BLOB,
@@ -37,8 +36,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `disableSearchProfileChanging` BOOLEAN,
   `uri` TEXT,
   PRIMARY KEY (`id`) ,
-  UNIQUE KEY `unique_user` (`email` ASC, `tenant` ASC) ,
-  UNIQUE KEY `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) )
+  UNIQUE KEY `unique_user` (`email` ASC, `tenant` ASC)
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8;
@@ -85,6 +83,10 @@ DEFAULT CHARACTER SET = utf8;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+
+
 
 
 INSERT INTO `namespace` (`prefix`, `uri`) VALUES

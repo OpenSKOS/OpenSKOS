@@ -620,7 +620,7 @@ class Institutions
     public function fetchAll()
     {
         if (!empty($this->institutions)) {
-            return $this->nstitutions;
+            return $this->institutions;
         }
         $insts = $this->db->fetchAll('select * from tenant');
         foreach ($insts as $inst) {

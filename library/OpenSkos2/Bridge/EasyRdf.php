@@ -31,6 +31,7 @@ use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\ConceptSchemeCollection;
+use OpenSkos2\Namespaces\Org;
 use OpenSkos2\SkosCollection;
 use OpenSkos2\SkosCollectionCollection;
 use OpenSkos2\Tenant;
@@ -49,7 +50,7 @@ class EasyRdf
 
     private static $allowedSubresources = [VCard::ORG, VCard::ADR];
     private static $skosTypes = [Tenant::TYPE, Collection::TYPE, ConceptScheme::TYPE,
-        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE];
+        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, Org::FORMALORG];
 
     /**
      * @param \EasyRdf\Graph $graph to $read
@@ -304,7 +305,7 @@ class EasyRdf
     private static function getTypeOfEasyRdfResource(\EasyRdf\Resource $resource)
     {
         $types = $resource->all(new \EasyRdf\Resource(Rdf::TYPE));
-        
+
         if ($types == null) {
             return null;
         }
@@ -317,7 +318,7 @@ class EasyRdf
             }
         }
         throw new InvalidArgumentException(
-            "Resource {$resource->getUri} does not have a proper skos type :( "
+            "Resource {$resource->getUri} does not have a proper skos type."
         );
     }
 }

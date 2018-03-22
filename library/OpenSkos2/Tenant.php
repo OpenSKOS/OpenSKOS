@@ -102,6 +102,11 @@ class Tenant extends Resource
 
     public function getName()
     {
+        return $this->getPropertySingleValue(OpenSkos::NAME);
+    }
+
+    public function getCode()
+    {
         return $this->getPropertySingleValue(OpenSkos::CODE);
     }
 
@@ -168,7 +173,7 @@ class Tenant extends Resource
      * override for a concerete resources when necessary
      */
     public function ensureMetadata(
-        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Tenant $tenant = null,
         \OpenSkos2\Collection $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
@@ -181,8 +186,12 @@ class Tenant extends Resource
             return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
 
+
+        $uuid = Uuid::uuid4();
+        $this->uri = "http://tenant/{$uuid}";
+
         $forFirstTimeInOpenSkos = [
-            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            OpenSkos::UUID => new Literal($uuid),
             DcTerms::DATESUBMITTED => $nowLiteral()
         ];
 
@@ -192,9 +201,10 @@ class Tenant extends Resource
             }
         }
 
-        $this->resolveCreator($person, $personManager);
-
-        $this->setModified($person);
+        if($person !== null) { //Person may be null, because a user links to a tenant. Chicken and Egg
+            $this->resolveCreator($person, $personManager);
+            $this->setModified($person);
+        }
     }
 
     // TODO: discuss the rules for generating Uri's for non-concepts
@@ -303,10 +313,15 @@ class Tenant extends Resource
 
     public function arrayToData($dataIn)
     {
+
         foreach ($dataIn as $key => $val){
+            print "set $key to $val\n";
             switch($key){
-                case 'name':
+                case 'code':
                     $this->setProperty(OpenSkos::CODE, new Literal($val));
+                    break;
+                case 'name':
+                    $this->setProperty(OpenSkos::NAME, new Literal($val));
                     break;
                 case 'organisationUnit':
                     $this->setProperty(VCard::ORGUNIT, new Literal($val));
