@@ -61,6 +61,7 @@ class Autocomplete
     public function search($options, &$numFound)
     {
 
+
         $helper = new QueryHelper();
 
         $parser = new ParserText();
@@ -246,8 +247,9 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-        
-        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+
+        $result =  $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        return $result;
     }
 
     /**

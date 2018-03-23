@@ -164,7 +164,6 @@ class Editor_Models_CollectionsCache
     {
         $schemes = $this->fetchAll();
 
-        print  var_export($schemes);
         foreach ($schemesUris as $uri) {
             $scheme = $schemes->findByUri($uri);
             if ($scheme) {

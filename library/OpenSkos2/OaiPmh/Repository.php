@@ -463,6 +463,7 @@ class Repository implements InterfaceRepository
     private function decodeResumptionToken($token)
     {
         $params = (array) json_decode(base64_decode($token));
+
         if (!empty($token) && is_null(json_decode(base64_decode($token)))) {
             throw new BadResumptionTokenException("Resumption token present but contains invalid data");
         }
