@@ -19,39 +19,32 @@
 
 namespace OpenSkos2\Export;
 
+use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
-use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Export\Serialiser\FormatFactory;
 use OpenSkos2\Search\Autocomplete;
 
 class Command
 {
     /**
-     * @var ResourceManager
-     */
-    private $resourceManager;
-    
-    /**
      * @var ConceptManager
      */
-    private $conceptManager;
+    protected $conceptManager;
     
     /**
      * Searcher for when search options are provided.
-     * @var \OpenSkos2\Search\Autocomplete
+     * @var Autocomplete
      */
     protected $searchAutocomplete;
 
     /**
-     * Command constructor.
-     * @param ResourceManager $resourceManager
+     * @param Autocomplete $searchAutocomplete
+     * @param ConceptManager $conceptManager
      */
     public function __construct(
-        ResourceManager $resourceManager,
         Autocomplete $searchAutocomplete,
         ConceptManager $conceptManager
     ) {
-        $this->resourceManager = $resourceManager;
         $this->searchAutocomplete = $searchAutocomplete;
         $this->conceptManager = $conceptManager;
     }
@@ -62,15 +55,24 @@ class Command
      */
     public function handle(Message $message)
     {
+        if ($message->getTenant()->getEnableSkosXl()) {
+            $excludeProperties = Concept::$classes['LexicalLabels'];
+        } else {
+            $excludeProperties = Concept::$classes['SkosXlLabels'];
+        }
+        
         $format = FormatFactory::create(
             $message->getFormat(),
             $message->getPropertiesToExport(),
             $this->conceptManager->fetchNamespaces(),
             $message->getMaxDepth(),
+            $excludeProperties,
             $this->conceptManager
         );
         
         $serialiser = new Serialiser(
+            $message->getTenant(),
+            $this->conceptManager,
             $format
         );
         
@@ -80,7 +82,6 @@ class Command
             $serialiser->setSearchAutocomplete($this->searchAutocomplete);
         } else {
             $serialiser->setUris($message->getUris());
-            $serialiser->setResourceManager($this->resourceManager);
         }
         
         if ($message->getOutputFilePath()) {

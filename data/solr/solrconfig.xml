@@ -15,7 +15,6 @@
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
     <lockType>simple</lockType>
-    <unlockOnStartup>true</unlockOnStartup>
   </indexConfig>
 
   <updateHandler class="solr.DirectUpdateHandler2">
@@ -146,7 +145,8 @@
     </requestHandler>
 
     <requestHandler name="/update" class="solr.UpdateRequestHandler" />
-    <requestHandler name="/update/json" class="solr.JsonUpdateRequestHandler"/>
+    <!-- removed in solr 5, but keep seperate json endpoint for backwards compatability -->
+    <requestHandler name="/update/json" class="solr.UpdateRequestHandler"/>
 
     <!-- ter vervanging van alle losse /admin/* handlers -->
     <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />

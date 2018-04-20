@@ -22,7 +22,9 @@ namespace OpenSkos2\Solr;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Object;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
@@ -83,6 +85,11 @@ class Document
         DcTerms::MODIFIED => ['d_modified', 'sort_d_modified_earliest'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
+        SkosXl::LITERALFORM => ['a_skosXlLiteralForm'],
+        Rdf::TYPE => ['s_rdfType'],
+        SkosXl::PREFLABEL => ['s_prefLabelXl'],
+        SkosXl::ALTLABEL => ['s_altLabelXl'],
+        SkosXl::HIDDENLABEL => ['s_hiddenLabelXl']
     ];
 
     /**

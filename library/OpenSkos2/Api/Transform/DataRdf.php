@@ -42,17 +42,27 @@ class DataRdf
      * @var array
      */
     private $propertiesList;
+    
+    /**
+     * @var array
+     */
+    private $excludePropertiesList;
 
     /**
      * @param Resource $concept
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
-    public function __construct(Resource $concept, $includeRdfHeader = true, $propertiesList = null)
-    {
+    public function __construct(
+        Resource $concept,
+        $includeRdfHeader = true,
+        $propertiesList = null,
+        $excludePropertiesList = []
+    ) {
         $this->concept = $concept;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
+        $this->excludePropertiesList = $excludePropertiesList;
 
         // @TODO - put it somewhere globally
         \EasyRdf\Format::registerSerialiser(
@@ -68,7 +78,7 @@ class DataRdf
      */
     public function transform()
     {
-        if (!empty($this->propertiesList)) {
+        if (!empty($this->propertiesList) || !empty($this->excludePropertiesList)) {
             $reducedResource = new Resource($this->concept->getUri());
             foreach ($this->concept->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
@@ -78,11 +88,18 @@ class DataRdf
         } else {
             $reducedResource = $this->concept;
         }
-
+        
+        $resourceTypes = [
+            \OpenSkos2\Concept::TYPE
+        ];
+        
         $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
         return $concept->serialise(
             'rdfxml_openskos',
-            [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader]
+            [
+                EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader,
+                EasyRdfOpenSkos::OPTION_RESOURCE_TYPES_TO_SERIALIZE => $resourceTypes
+            ]
         );
     }
 
@@ -93,6 +110,25 @@ class DataRdf
      */
     protected function doIncludeProperty($property)
     {
-        return empty($this->propertiesList) || in_array($property, $this->propertiesList);
+        //The exclude list specifies properties which properties should be skipped
+        //If a property is both in the include and exclude list we throw an error
+        
+        if (empty($this->propertiesList)) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (in_array($property, $this->propertiesList) === true) {
+            if (in_array($property, $this->excludePropertiesList) === false) {
+                return true;
+            } else {
+                throw new \OpenSkos2\Exception\InvalidArgumentException(
+                    'The property ' . $property . ' is present both in the include and exclude lists'
+                );
+            }
+        }
     }
 }

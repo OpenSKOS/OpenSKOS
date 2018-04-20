@@ -393,13 +393,21 @@ var EditorConcept = new Class({
     },
     getFirstPrefLabel: function () {
         var prefLabelText = '';
-        var prefLabels = $('Editconcept').getElements('input[name^=prefLabel]')
-
+        var prefLabels = $('Editconcept').getElements('input[name^=prefLabel]');
+        var xlPrefLabels = $('Editconcept').getElements('input[name^=skosXlPrefLabel] ~ .literalForm');
+        
         for (var i = (prefLabels.length - 1); i >= 0; i--) {
-            if (prefLabels[i].get('value') != '') {
+            if (prefLabels[i].get('value') !== '') {
                 prefLabelText = prefLabels[i].get('value');
             }
         }
+        
+        for (var i = (xlPrefLabels.length - 1); i >= 0; i--) {
+            if (xlPrefLabels[i].get('html') !== '') {
+                prefLabelText = xlPrefLabels[i].get('html');
+            }
+        }
+        
         return prefLabelText;
     },
     confirmDocPropertiesAreSaved: function () {

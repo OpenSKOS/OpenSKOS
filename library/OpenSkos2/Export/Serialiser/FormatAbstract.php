@@ -24,7 +24,6 @@ use OpenSkos2\Concept;
 
 abstract class FormatAbstract
 {
-    // @TODO Not all formats care for the properties to serialise
     /**
      * Array of properties to be serialised.
      * @var array
@@ -43,6 +42,12 @@ abstract class FormatAbstract
      * @var int
      */
     protected $maxDepth = 1;
+    
+    /**
+     * @var array
+     * @TODO this is not fully implemented everywhere
+     */
+    protected $excludePropertiesList;
     
     /**
      * Which resources should be output with their caption instead of their uri
@@ -110,6 +115,22 @@ abstract class FormatAbstract
     public function setMaxDepth($maxDepth)
     {
         $this->maxDepth = $maxDepth;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getExcludePropertiesList()
+    {
+        return $this->excludePropertiesList;
+    }
+
+    /**
+     * @param array $excludePropertiesList
+     */
+    public function setExcludePropertiesList($excludePropertiesList)
+    {
+        $this->excludePropertiesList = $excludePropertiesList;
     }
     
     /**

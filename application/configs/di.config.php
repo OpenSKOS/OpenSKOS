@@ -23,7 +23,7 @@
 use \Interop\Container\ContainerInterface;
 
 return [
-    'EasyRdf\Sparql\Client' => function (ContainerInterface $c) {
+    'OpenSkos2\EasyRdf\Sparql\Client' => function (ContainerInterface $c) {
         foreach (\OpenSkos2\Namespaces::getAdditionalNamespaces() as $prefix => $namespace) {
             EasyRdf\RdfNamespace::set($prefix, $namespace);
         }
@@ -33,7 +33,7 @@ return [
 
         EasyRdf\Http::getDefaultHttpClient()->setConfig(['timeout' => 100]);
 
-        return  new \EasyRdf\Sparql\Client(
+        return  new \OpenSkos2\EasyRdf\Sparql\Client(
             $sparqlOptions['queryUri'],
             $sparqlOptions['updateUri']
         );
@@ -65,5 +65,15 @@ return [
         }
 
         return $conceptsSchemesCache;
+    },
+    'OpenSkos2\ConceptManager' => function (ContainerInterface $c) {
+        $conceptManager = new OpenSkos2\ConceptManager(
+            $c->get('OpenSkos2\EasyRdf\Sparql\Client'),
+            $c->get('OpenSkos2\Solr\ResourceManager')
+        );
+        
+        $conceptManager->setLabelManager($c->get('OpenSkos2\SkosXl\LabelManager'));
+
+        return $conceptManager;
     }
 ];

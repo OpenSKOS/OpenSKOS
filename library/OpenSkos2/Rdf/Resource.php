@@ -20,6 +20,8 @@
 namespace OpenSkos2\Rdf;
 
 use OpenSkos2\Rdf\Object as RdfObject;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Namespaces as Namespaces;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
 use OpenSkos2\Exception\OpenSkosException;
@@ -160,9 +162,18 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isPropertyEmpty($predicate)
     {
-        return !isset($this->properties[$predicate])
-            || $this->properties[$predicate] === null
-            || $this->properties[$predicate] === '';
+        if (!$this->hasProperty($predicate)) {
+            return true;
+        }
+        
+        $allValuesAreEmpty = true;
+        foreach ($this->properties[$predicate] as $value) {
+            if (!$value->isEmpty()) {
+                $allValuesAreEmpty = false;
+                break;
+            }
+        }
+        return $allValuesAreEmpty;
     }
 
     /**
@@ -176,6 +187,17 @@ class Resource extends Uri implements ResourceIdentifier
             return (bool) $values[0]->getValue();
         }
         return false;
+    }
+    
+    /**
+     * @return array of RdfObject[]
+     */
+    public function getPropertiesSortedByKey()
+    {
+        $retArray = $this->properties;
+        ksort($retArray);
+        
+        return $retArray;
     }
 
     /**
@@ -202,22 +224,6 @@ class Resource extends Uri implements ResourceIdentifier
             return true;
         }
         return false;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUri()
-    {
-        return $this->uri;
-    }
-
-    /**
-     * @param string $uri
-     */
-    public function setUri($uri)
-    {
-        $this->uri = $uri;
     }
 
     /**
@@ -311,12 +317,14 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $values = $this->getProperty($property);
 
+        /* TODO: Debugging
         if (count($values) > 1) {
             throw new OpenSkosException(
                 'Multiple values found for property "' . $property . '" while a single one was requested.'
                 . ' Values ' . implode(', ', $values)
             );
         }
+        */
 
         if (!empty($values)) {
             return $values[0];

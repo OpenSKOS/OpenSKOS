@@ -20,7 +20,6 @@
 body {
   overflow: auto !important;
   background: #FFF !important;
-  width: 400px !important;
 }
 
 #AdvancedSearchOptions dd {

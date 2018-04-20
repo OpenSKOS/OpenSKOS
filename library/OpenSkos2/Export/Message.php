@@ -19,6 +19,8 @@
 
 namespace OpenSkos2\Export;
 
+use OpenSkos2\Tenant;
+
 class Message
 {
     protected $format;
@@ -28,6 +30,8 @@ class Message
     
     protected $searchOptions;
     protected $uris;
+    
+    protected $tenant;
     
     public function getFormat()
     {
@@ -88,9 +92,26 @@ class Message
     {
         $this->uris = $uris;
     }
-
-    public function __construct($format, $propertiesToExport, $maxDepth, $outputFilePath = null)
+    
+    /**
+     * @return Tenant
+     */
+    public function getTenant()
     {
+        return $this->tenant;
+    }
+
+    /**
+     * @param Tenant $tenant
+     */
+    public function setTenant(Tenant $tenant)
+    {
+        $this->tenant = $tenant;
+    }
+
+    public function __construct(Tenant $tenant, $format, $propertiesToExport, $maxDepth, $outputFilePath = null)
+    {
+        $this->tenant = $tenant;
         $this->format = $format;
         $this->propertiesToExport = $propertiesToExport;
         $this->maxDepth = $maxDepth;

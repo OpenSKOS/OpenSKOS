@@ -19,11 +19,13 @@
 
 namespace OpenSkos2\Export;
 
-use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Rdf\ResourceCollection;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Search\Autocomplete;
+use OpenSkos2\Tenant;
+use OpenSkos2\Concept;
+use OpenSkos2\ConceptManager;
 
 class Serialiser
 {
@@ -34,10 +36,16 @@ class Serialiser
     const EXPORT_STEP = 1000;
     
     /**
-     * The resource manager to use for fetching the resources to serialise.
-     * @var ResourceManager
+     * The tenant in which context is the export.
+     * @var Tenant
      */
-    protected $resourceManager;
+    protected $tenant;
+    
+    /**
+     * The concept manager to use for some concept related activities.
+     * @var ConceptManager
+     */
+    protected $conceptManager;
     
     /**
      * List of uris to export. Leave empty if search options are used (concepts only)
@@ -120,32 +128,14 @@ class Serialiser
     }
     
     /**
-     * Gets the resource manager to use for fetching the resources to serialise.
-     * @return ResourceManager
-     */
-    public function getResourceManager()
-    {
-        if (empty($this->resourceManager)) {
-            throw new OpenSkosException('Resource manager required during export.');
-        }
-        return $this->resourceManager;
-    }
-
-    /**
-     * Gets the resource manager to use for fetching the resources to serialise.
-     * @param ResourceManager $resourceManager
-     */
-    public function setResourceManager(ResourceManager $resourceManager)
-    {
-        $this->resourceManager = $resourceManager;
-    }
-
-    /**
+     * @param Tenant $tenant
+     * @param ConceptManager $conceptManager
      * @param FormatAbstract $format
-     * @param Object[]|string $searchPatterns
      */
-    public function __construct(FormatAbstract $format = null)
+    public function __construct(Tenant $tenant, ConceptManager $conceptManager, FormatAbstract $format)
     {
+        $this->tenant = $tenant;
+        $this->conceptManager = $conceptManager;
         $this->format = $format;
     }
     
@@ -190,6 +180,10 @@ class Serialiser
             $resources = $this->fetchResources($start, $step, $hasMore);
             
             foreach ($resources as $resource) {
+                if ($resource instanceof Concept && $this->tenant->getEnableSkosXl()) {
+                    $resource->loadFullXlLabels($this->conceptManager->getLabelManager());
+                }
+                
                 fwrite($streamHandle, $this->format->printResource($resource));
             }
         
@@ -216,7 +210,7 @@ class Serialiser
             
             $hasMore = ($start + $step) < $numFound;
         } elseif (!empty($this->uris)) {
-            $collection = $this->getResourceManager()->fetchByUris($this->uris);
+            $collection = $this->conceptManager->fetchByUris($this->uris);
             $hasMore = false;
         }
         

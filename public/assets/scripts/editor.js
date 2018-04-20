@@ -56,10 +56,3 @@ window.addEvent('load', function() {
 		e.target.removeClass('hover');
 	});
 });
-
-window.addEvent('hashchange', function() {
-	if ( ! Editor.Url.lastHashChangeIsManual) {
-		Editor.Url.read();
-	}
-	Editor.Url.lastHashChangeIsManual = false;
-});

@@ -34,7 +34,22 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiVersion 1.0.0
      * @apiDescription Create a SKOS Concept
      *
-     * Create a new SKOS concept based on the post data
+     * Create a new SKOS concept based on the post data.
+     *
+     * If the tenant is configured to use the new SKOS-XL labels then
+     * the new concept also needs to have its labels (pref, alt and hidden) defined in SKOS-XL format.
+     *
+     * e.g.
+     *
+     * &lt;skosxl:prefLabel>
+     *   &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/api/labels/d0e34b9f-d31d-4858-b4e7-3bcbdd377c26">
+     *   &lt;rdf:type rdf:resource="http://www.w3.org/2008/05/skos-xl#Label"/>
+     *   &lt;skosxl:literalForm xml:lang="nl">doodstraf&lt;/skosxl:literalForm>
+     *   &lt;openskos:tenant>beg&lt;/openskos:tenant>
+     *   &lt;/rdf:Description>
+     * &lt;/skosxl:prefLabel>
+     *
+     * instead of as defined in the example.
      *
      * @apiExample {String} Example request
      * <rdf:RDF
@@ -127,6 +142,21 @@ class Api_ConceptController extends Api_FindConceptsController
      *
      * Update the specified concept with the new data present in the request.
      *
+     * If the tenant is configured to use the new SKOS-XL labels then
+     * the new concept also needs to have its labels (pref, alt and hidden) defined in SKOS-XL format.
+     *
+     * e.g.
+     *
+     * &lt;skosxl:prefLabel>
+     *   &lt;rdf:Description rdf:about="http://data.beeldengeluid.nl/api/labels/d0e34b9f-d31d-4858-b4e7-3bcbdd377c26">
+     *   &lt;rdf:type rdf:resource="http://www.w3.org/2008/05/skos-xl#Label"/>
+     *   &lt;skosxl:literalForm xml:lang="nl">doodstraf&lt;/skosxl:literalForm>
+     *   &lt;openskos:tenant>beg&lt;/openskos:tenant>
+     *   &lt;/rdf:Description>
+     * &lt;/skosxl:prefLabel>
+     *
+     * instead of as defined in the example.
+     *
      * @apiExample {String} Example request
      *  <rdf:RDF
      *    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -155,7 +185,7 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
-     * @apiSuccess (201) {String} Concept uri
+     * @apiSuccess (200) {String} Concept uri
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   &lt;?xml version="1.0"?>
@@ -204,6 +234,7 @@ class Api_ConceptController extends Api_FindConceptsController
     {
         $request = $this->getPsrRequest();
         $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
+        /* @var $api \OpenSkos2\Api\Concept */
         $response = $api->update($request);
         $this->emitResponse($response);
     }

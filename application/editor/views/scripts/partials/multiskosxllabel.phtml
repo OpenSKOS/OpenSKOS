@@ -40,7 +40,7 @@ $labelManager = $diContainer->get('OpenSkos2\SkosXl\LabelManager');
                     <input type="hidden" name="<?= $this->inputName; ?>[]" value="<?= $labelUri?>" class="uri"/>
                     <span class="literalForm"><?= $literalForm->getValue()?></span>
                     <span class="skos-xl-label-remove"></span>
-                    <span class="skos-xl-label-edit" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'edit'], null, true)?>">(edit)</span>
+                        <span class="skos-xl-label-edit" href="<?= $this->url(['module' => 'editor', 'controller' => 'label', 'action' => 'edit'], null, true)?>">(edit)</span>
                 </div>
             <?php else:?>
                 <div>

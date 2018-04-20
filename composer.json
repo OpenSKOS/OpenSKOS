@@ -23,8 +23,10 @@
         }
     },
     "require-dev": {
+        "squizlabs/php_codesniffer": "^2.7",
         "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "^2.7"
+        "phing/phing": "^2.15",
+        "pear/http_request2": "^2.3"
     },
     "scripts": {
         "validate": [
@@ -35,6 +37,12 @@
         ],
         "post-install-cmd": [
             "bash contrib/setup.sh"
+        ],
+        "jena2solr": [
+            "docker exec -t openskos-php-fpm php tools/jena2solr.php -e production -v"
+        ],
+        "solr-create-core": [
+            "docker exec -t openskos-php-fpm ./vendor/bin/phing solr.create.core"
         ]
     }
 }

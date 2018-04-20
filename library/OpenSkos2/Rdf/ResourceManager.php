@@ -20,14 +20,13 @@
 namespace OpenSkos2\Rdf;
 
 use EasyRdf\Http;
-use EasyRdf\Sparql\Client;
+use OpenSkos2\EasyRdf\Sparql\Client;
 use OpenSkos2\Bridge\EasyRdf;
 use OpenSkos2\Exception\ResourceAlreadyExistsException;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Rdf as RdfNamespace;
-use OpenSkos2\Solr\ResourceManager as SolrResourceManager;
 use Asparagus\QueryBuilder;
 
 // @TODO A lot of things can be made without working with full documents, so that should not go through here
@@ -48,38 +47,11 @@ class ResourceManager
     protected $resourceType = null;
 
     /**
-     * @var \OpenSkos2\Solr\ResourceManager
-     */
-    protected $solrResourceManager;
-
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @return bool
-     */
-    public function getIsNoCommitMode()
-    {
-        return $this->solrResourceManager->getIsNoCommitMode();
-    }
-
-    /**
-     * Use that if inserting a large amount of resources.
-     * Call commit at the end.
-     * @param bool
-     */
-    public function setIsNoCommitMode($isNoCommitMode)
-    {
-        $this->solrResourceManager->setIsNoCommitMode($isNoCommitMode);
-    }
-
-    /**
      * @param Client $client
-     * @param SolrResourceManager $solrResourceManager
      */
-    public function __construct(Client $client, SolrResourceManager $solrResourceManager)
+    public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->solrResourceManager = $solrResourceManager;
     }
 
     /**
@@ -88,14 +60,58 @@ class ResourceManager
      */
     public function insert(Resource $resource)
     {
-        // Put type if we have it and it is missing.
+        if ($this->askForUri($resource->getUri())) {
+            throw new ResourceAlreadyExistsException(
+                'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+                . 'It may be with status:deleted.'
+            );
+        }
+        
+        // Set rdf:type if we have it and if it is missing.
         if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
             $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
         }
 
         $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
+    }
+    
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insertCollection(ResourceCollection $resourceCollection)
+    {
+        foreach ($resourceCollection as $resource) {
+            if ($this->askForUri($resource->getUri())) {
+                throw new ResourceAlreadyExistsException(
+                    'Failed to insert. Resource with uri "' . $resource->getUri() . '" already exists. '
+                    . 'It may be with status:deleted.'
+                );
+            }
+        }
+        
+        $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
+    }
 
-        $this->solrResourceManager->insert($resource);
+    /**
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function extend(Resource $resource)
+    {
+        // Set rdf:type if we have it and if it is missing.
+        if (!empty($this->resourceType) && $resource->isPropertyEmpty(RdfNamespace::TYPE)) {
+            $resource->setProperty(RdfNamespace::TYPE, new Uri($this->resourceType));
+        }
+
+        $this->insertWithRetry(EasyRdf::resourceToGraph($resource));
+    }
+
+    /**
+     * @param \OpenSkos2\Rdf\ResourceCollection $resourceCollection
+     */
+    public function extendCollection(ResourceCollection $resourceCollection)
+    {
+        $this->insertWithRetry(EasyRdf::resourceCollectionToGraph($resourceCollection));
     }
 
     /**
@@ -104,9 +120,10 @@ class ResourceManager
      */
     public function replace(Resource $resource)
     {
-        // @TODO Danger if insert fails. Need transaction or something.
-        $this->delete($resource);
-        $this->insert($resource);
+        $this->client->replace(
+            $resource->getUri(),
+            EasyRdf::resourceToGraph($resource)
+        );
     }
 
     /**
@@ -121,15 +138,11 @@ class ResourceManager
      */
     public function deleteSoft(Resource $resource, Uri $user = null)
     {
-        $resource->unsetProperty(OpenSkosNamespace::STATUS);
-        $status = new Literal(Resource::STATUS_DELETED);
-        $resource->addProperty(OpenSkosNamespace::STATUS, $status);
-
-        $resource->unsetProperty(OpenSkosNamespace::DATE_DELETED);
-        $resource->addProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+        $resource->setProperty(OpenSkosNamespace::STATUS, new Literal(Resource::STATUS_DELETED));
+        $resource->setProperty(OpenSkosNamespace::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
 
         if ($user) {
-            $resource->unsetProperty(OpenSkosNamespace::DELETEDBY, $user);
+            $resource->setProperty(OpenSkosNamespace::DELETEDBY, $user);
         }
 
         $this->replace($resource);
@@ -141,8 +154,6 @@ class ResourceManager
     public function delete(Uri $resource)
     {
         $this->client->update("DELETE WHERE {<{$resource->getUri()}> ?predicate ?object}");
-
-        $this->solrResourceManager->delete($resource);
     }
 
     /**
@@ -554,14 +565,6 @@ class ResourceManager
     }
 
     /**
-     * @return SolrResourceManager
-     */
-    public function getSolrManager()
-    {
-        return $this->solrResourceManager;
-    }
-
-    /**
      * Execute raw query
      * Retries on timeout, because when jena stays idle for some time, sometimes throws a timeout error.
      *
@@ -599,6 +602,8 @@ class ResourceManager
      */
     protected function insertWithRetry($data)
     {
+        return $this->client->insert($data);
+
         $maxTries = 3;
         $tries = 0;
         $ex = null;

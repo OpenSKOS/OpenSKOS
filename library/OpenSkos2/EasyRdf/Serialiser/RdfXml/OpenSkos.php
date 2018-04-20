@@ -25,6 +25,7 @@ use OpenSkos2\Exception\OpenSkosException;
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 {
     const OPTION_RENDER_ITEMS_ONLY = 'renderItemsOnly';
+    const OPTION_RESOURCE_TYPES_TO_SERIALIZE = 'serializableResourceTypes';
     
     protected $objects = [];
     private $outputtedResources = array();
@@ -45,11 +46,10 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         // store of the resource URIs we have serialised
         $this->outputtedResources = array();
 
-
-
         // Serialise URIs first
         foreach ($graph->resources() as $resource) {
-            if (!$resource->isBnode()) {
+            if (!$resource->isBnode() && $this->shouldBeSerialized($resource, $options)) {
+                /* @var $resource Resource */
                 $this->rdfxmlResource($resource, true);
             }
         }
@@ -102,12 +102,21 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         } else {
             $this->outputtedResources[$res->getUri()] = true;
         }
-
+        
         // If the resource has no properties - don't serialise it
         $properties = $res->propertyUris();
         if (count($properties) == 0) {
             return [];
         }
+        
+        $xmlString = $this->getResourceXmlString($res, $showNodeId, $depth);
+
+        $this->objects[] = str_replace('dc11:subject', 'dc:subject', $xmlString);
+    }
+    
+    protected function getResourceXmlString($res, $showNodeId, $depth)
+    {
+        $properties = $res->propertyUris();
         
         $type = $this->determineResType($res);
         if ($type) {
@@ -152,8 +161,8 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
             }
         }
         $xmlString .= "$indent</$type>\n";
-
-        $this->objects[] = str_replace('dc11:subject', 'dc:subject', $xmlString);
+        
+        return $xmlString;
     }
 
     /**
@@ -178,24 +187,25 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
                 if ($alreadyOutput or $rpcount > 1 or $pcount == 0) {
                     $tag .= " rdf:nodeID=\"".htmlspecialchars($obj->getBNodeId()).'"';
                 }
-            } else {
+            } elseif ($pcount == 0) {
+                // if we have resource with properties - it will be on its own, we should not put rdf:resource here.
+                
 //                if ($rpcount != 1 or $pcount == 0) { //  if ($alreadyOutput or $rpcount != 1 or $pcount == 0) {
                     $tag .= " rdf:resource=\"".htmlspecialchars($obj->getURI()).'"';
 //                }
             }
+            
+            if ($pcount > 0) {
+                $xml = $this->getResourceXmlString($obj, false, $depth + 1);
 
-            if ($alreadyOutput == false and $rpcount == 1 and $pcount > 0) {
-                $xml = $this->rdfxmlResource($obj, false, $depth+1);
-//                if ($xml) {
-//                    return "$tag>$xml$indent</$property>\n\n";
-//                } else {
-//                    return '';
-//                }
-            } //else {
-
-
+                if (!empty($xml)) {
+                    return "$tag>$xml$indent</$property>\n\n";
+                } else {
+                    return '';
+                }
+            } else {
                 return $tag."/>\n";
-            //}
+            }
         } elseif (is_object($obj) and $obj instanceof Literal) {
             $atrributes = "";
             $datatype = $obj->getDatatypeUri();
@@ -232,5 +242,26 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     protected function determineResType(Resource $res)
     {
         return $res->type();
+    }
+    
+    /**
+     * Determines if $resource should be serialized based on its rdf:type and $options
+     * @param type $resource
+     * @param type $options
+     * @return boolean
+     */
+    protected function shouldBeSerialized($resource, $options)
+    {
+        if (empty($options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
+            return true;
+        }
+        
+        if ($resource->get('rdf:type') !== null
+            && $resource->get('rdf:type')->getUri() !== null
+            && in_array($resource->get('rdf:type')->getUri(), $options[self::OPTION_RESOURCE_TYPES_TO_SERIALIZE])) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -20,13 +20,13 @@
 namespace OpenSkos2\OaiPmh;
 
 use DOMDocument;
-use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept as SkosConcept;
 use Picturae\OaiPmh\Implementation\Record\Header;
 use Picturae\OaiPmh\Interfaces\Record;
 use OpenSkos2\Api\Transform\DataRdf;
+use OpenSkos2\OaiPmh\Repository;
 
 class Concept implements Record
 {
@@ -39,15 +39,21 @@ class Concept implements Record
      * @var SetsMap
      */
     protected $setsMap;
+    
+    /**
+     *  @var string $metadataFormat
+     */
+    protected $metadataFormat;
 
     /**
      * @param SkosConcept $concept
      * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
      */
-    public function __construct(SkosConcept $concept, SetsMap $setsMap)
+    public function __construct(SkosConcept $concept, SetsMap $setsMap, $metadataFormat = null)
     {
         $this->concept = $concept;
         $this->setsMap = $setsMap;
+        $this->metadataFormat = $metadataFormat;
     }
 
     /**
@@ -106,7 +112,12 @@ class Concept implements Record
     {
         $metadata = new \DOMDocument();
         $metadata->loadXML(
-            (new DataRdf($this->concept))->transform()
+            (new DataRdf(
+                $this->concept,
+                true,
+                null,
+                $this->getExcludeProperties()
+            ))->transform()
         );
 
         return $metadata;
@@ -117,5 +128,31 @@ class Concept implements Record
      */
     public function getAbout()
     {
+    }
+    
+    /**
+     * @return \OpenSkos2\Concept
+     */
+    public function getConcept()
+    {
+        return $this->concept;
+    }
+    
+    /**
+     * Get a list of exclude properties based on metadata format requested
+     * @param \OpenSKOS_Db_Table_Row_Tenant $tenant
+     * @param \Zend\Diactoros\ServerRequest $request
+     */
+    private function getExcludeProperties()
+    {
+        $metadataFormat = $this->metadataFormat;
+        
+        if ($metadataFormat === Repository::PREFIX_OAI_RDF) {
+            return \OpenSkos2\Concept::$classes['SkosXlLabels'];
+        } elseif ($metadataFormat === Repository::PREFIX_OAI_RDF_XL) {
+            return \OpenSkos2\Concept::$classes['LexicalLabels'];
+        } else {
+            return [];
+        }
     }
 }
