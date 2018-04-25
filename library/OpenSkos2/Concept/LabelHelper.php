@@ -131,12 +131,15 @@ class LabelHelper
     {
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
 
-
+        $this->labelManager->setIsNoCommitMode(true);
         foreach ($inserAndDelete['delete'] as $deleteLabel) {
             $this->labelManager->delete($deleteLabel);
         }
 
         $this->labelManager->insertCollection($inserAndDelete['insert']);
+
+        $this->labelManager->commit();
+        $this->labelManager->setIsNoCommitMode(false);
     }
 
     /**
