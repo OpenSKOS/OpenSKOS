@@ -131,12 +131,18 @@ class LabelHelper
     {
         $inserAndDelete = $this->getLabelsForInsertAndDelete($concept);
 
-
+        $this->labelManager->setIsNoCommitMode(true);
         foreach ($inserAndDelete['delete'] as $deleteLabel) {
             $this->labelManager->delete($deleteLabel);
         }
 
         $this->labelManager->insertCollection($inserAndDelete['insert']);
+
+        /*
+         * Solr doesn't like multiple commits. Postpone the commit
+        $this->labelManager->commit();
+        $this->labelManager->setIsNoCommitMode(false);
+        */
     }
 
     /**

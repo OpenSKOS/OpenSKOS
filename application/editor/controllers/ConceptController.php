@@ -143,9 +143,11 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             OpenSKOS_Db_Table_Users::fromIdentity(),
             $this->getDI()->get('\OpenSkos2\PersonManager')
         );
+        $conceptManager = $this->getConceptManager();
+        $conceptManager->setIsNoCommitMode(true);
         
         $validator = new ResourceValidator(
-            $this->getConceptManager(),
+            $conceptManager,
             $this->getOpenSkos2Tenant()
         );
         
@@ -153,17 +155,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             if ($form->getIsCreate()) {
                 $concept->selfGenerateUri(
                     $this->getOpenSkos2Tenant(),
-                    $this->getConceptManager()
+                    $conceptManager
                 );
             }
             
             $this->handleStatusAutomatedActions($concept, $form->getValues());
 
-            $this->getConceptManager()->replaceAndCleanRelations($concept);
+            $conceptManager->replaceAndCleanRelations($concept);
         } else {
             return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
         }
-        
+
+        //We try to make this the only commit of the entire save process. Multiple commits have caused a lot of problems
+        //This commit should save all concepts and labels (even though conceptManager and labelHelper are different classes.`
+        $conceptManager->commit();
         $this->_helper->redirector('view', 'concept', 'editor', array('uri' => $concept->getUri()));
     }
 
