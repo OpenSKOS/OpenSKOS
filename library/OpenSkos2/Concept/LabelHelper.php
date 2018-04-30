@@ -138,8 +138,11 @@ class LabelHelper
 
         $this->labelManager->insertCollection($inserAndDelete['insert']);
 
+        /*
+         * Solr doesn't like multiple commits. Postpone the commit
         $this->labelManager->commit();
         $this->labelManager->setIsNoCommitMode(false);
+        */
     }
 
     /**
