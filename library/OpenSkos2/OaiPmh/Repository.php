@@ -329,6 +329,9 @@ class Repository implements InterfaceRepository
 
         $items = [];
         foreach ($concepts as $i => $concept) {
+            if ($params['metadataPrefix'] === self::PREFIX_OAI_RDF_XL) {
+                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+            }
             $items[] = new OaiConcept($concept, $this->getSetsMap());
         }
 
