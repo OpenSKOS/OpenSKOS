@@ -332,7 +332,7 @@ class Repository implements InterfaceRepository
             if ($params['metadataPrefix'] === self::PREFIX_OAI_RDF_XL) {
                 $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
             }
-            $items[] = new OaiConcept($concept, $this->getSetsMap());
+            $items[] = new OaiConcept($concept, $this->getSetsMap(), $params['metadataPrefix']);
         }
 
         $token = null;
