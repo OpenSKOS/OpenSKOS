@@ -178,7 +178,7 @@ class Api_ConceptController extends Api_FindConceptsController
      * @apiParam {String} tenant The institute code for your institute in the OpenSKOS portal
      * @apiParam {String} collection The collection code for the collection the concept must be put in
      * @apiParam {String} key A valid API key
-     * @apiSuccess (201) {String} Concept uri
+     * @apiSuccess (200) {String} Concept uri
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok
      *   &lt;?xml version="1.0"?>
@@ -225,7 +225,11 @@ class Api_ConceptController extends Api_FindConceptsController
      */
     public function putAction()
     {
-        parent::putAction();
+        $request = $this->getPsrRequest();
+        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
+        /* @var $api \OpenSkos2\Api\Concept */
+        $response = $api->update($request);
+        $this->emitResponse($response);
     }
     /**
      *

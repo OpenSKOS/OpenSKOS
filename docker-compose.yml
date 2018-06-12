@@ -1,0 +1,48 @@
+version: "3.3"
+services:
+  openskos-webserver:
+    image: phpdockerio/nginx:latest
+    container_name: openskos-webserver
+    volumes:
+        - .:/var/www/openskos
+        - ./data/docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+     - "9000:80"
+  openskos-php-fpm:
+    build: ./data/docker/php-fpm
+    container_name: openskos-php-fpm
+    volumes:
+      - .:/var/www/openskos
+      - ./data/docker/php-fpm/php-ini-overrides.ini:/etc/php5/fpm/conf.d/99-overrides.ini
+  openskos-jena:
+    build: ./data/docker/jena-fuseki
+    container_name: openskos-jena-fuseki
+    ports:
+     - "9001:3030"
+    environment:
+        ADMIN_PASSWORD : admin
+  openskos-solr:
+    build: ./data/docker/solr
+    container_name: openskos-solr
+    ports:
+     - "9002:8983"
+    volumes:
+        - ./data/solr:/opt/solr/server/solr/openskos
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - openskos
+      - /opt/solr/server/solr/openskos
+  openskos-mysql:
+    build: ./data/docker/mysql
+    container_name: openskos-mysql
+    ports:
+     - "9003:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD : secr3t
+    volumes:
+        - ./data/openskos-create.sql:/docker-entrypoint-initdb.d/openskos-create.sql
+networks:
+  openskos:
+    external:
+      name: openskos

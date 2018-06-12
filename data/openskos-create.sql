@@ -35,8 +35,10 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `defaultSearchProfileIds` VARCHAR(255),
   `disableSearchProfileChanging` BOOLEAN,
   `uri` TEXT,
+  `enableSkosXl` tinyint(1),
   PRIMARY KEY (`id`) ,
   UNIQUE KEY `unique_user` (`email` ASC, `tenant` ASC)
+)
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8;

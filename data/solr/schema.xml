@@ -122,10 +122,9 @@
                 <filter class="solr.LowerCaseFilterFactory"/>
             </analyzer>
         </fieldtype>
-        
+
         <!-- SOLR 4: <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/> -->
         <fieldType name="date" class="solr.TrieDateField" sortMissingLast="true" omitNorms="true"/>
-        
         <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
         
         <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">

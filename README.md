@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
 
-1. Install the OpenSKOS code
-===============================================================================
+1 Install the OpenSKOS code
+===========================
 Copy the code to a location of your choice.
 
 Make sure all files are readable by your webserver. Make sure the directories
@@ -12,11 +12,11 @@ For security reasons you can place the `data` directory outside your
 webserver's document root.
 
 1.1 Composer
--------------------------------------------------------------------------------
+------------
 Run composer install to install some dependencies like zend framework 1.12
 
 1.2 Configuration
--------------------------------------------------------------------------------
+-----------------
 To configure OpenSKOS you have to rename:
 
     APPROOT/application/configs/application.ini.dist
@@ -39,7 +39,7 @@ to show you more verbose error messages:
 
 
 1.2.1 OAI-PMH setup
--------------------------------------------------------------------------------
+-------------------
 OpenSKOS includes a OAI harvester. To configure OAI Service providers, use the
 "instances" part of the configuration. Two types of instances are supported:
 
@@ -66,7 +66,7 @@ You can define multiple instances by using a different key (in the above example
 the key `example1` is used).
 
 1.2.2 ConceptScheme ordering
--------------------------------------------------------------------------------
+----------------------------
 The application.ini allows you to change the order in which concept schemes are listed everywhere.
 The scheme order is made in this sequence:
  - group the schemes according to their collection
@@ -79,14 +79,14 @@ All listed collections that re not present in the DB will be skipped.
 In this way the ini supports collection ordering for more than 1 instances.
 
 2. Webserver with PHP support
-===============================================================================
+=============================
 You can install your favourite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
 adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html)
 
 2.1 Setting Up Your VHOST
--------------------------------------------------------------------------------
+-------------------------
 
 The following is a sample VHOST you might want to consider for your project.
 
@@ -109,7 +109,7 @@ The following is a sample VHOST you might want to consider for your project.
 ```
 
 3. Database setup
-===============================================================================
+=================
 Install your choice of Zend Framework supported Database engine (see
 http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
 access your database can be configured in the application's configuration.
@@ -126,7 +126,7 @@ where you can manage all the other entities of the application.
 
 
 4. Apache Jena Fuseki setup
-===============================================================================
+===========================
 Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
 
 Installing Fuseki 2 for development purposes:
@@ -143,7 +143,7 @@ Installing Fuseki 2 for development purposes:
 5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
 
 5. Apache Solr Setup
-===============================================================================
+====================
 You have to have a java VM installed prior to installing Solr!
 Download a 3.4 release of Apache Solr and extract it somewhere on your server:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
@@ -158,7 +158,7 @@ You can now start Solr (in this example with 1,024 MB memory assigned):
 
 
 6. Data Ingest
-===============================================================================
+==============
 Once you have the application running you can start adding data,
 managed in `collections`.
 
@@ -167,7 +167,7 @@ You can create a collection in the dashboard.
 There are three ways to populate a collection:
 
 6.1 REST-interface
--------------------------------------------------------------------------------
+------------------
 Send data via the REST-API, e.g. like this:
 
 > curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
@@ -181,7 +181,7 @@ which you assign to the user in the dashboard.
 
 
 6.2 Uploader
--------------------------------------------------------------------------------
+------------
 Upload a dataset (a SKOS/RDF file) via a form in the dashboard:Manage collections.
 Here you can provide many concepts within one file (XPath: `/rdf:RDF/rdf:Description`)
 
@@ -193,7 +193,7 @@ a CLI script intended to be run with a Cron like task runner.
 
 
 6.3 OAI ???
--------------------------------------------------------------------------------
+-----------
 Third possiblity is to replicate an existing dataset via OAI-PMH,
 either from other OpenSKOS-instances or from an external source providing SKOS-data.
 
@@ -206,15 +206,15 @@ another CLI script meant to be run as a cron-task.
 ???
 
 6.4 Migrate from OpenSKOS v1
--------------------------------------------------------------------------------
+----------------------------
 It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 instance directly into a v2 instance
 
 `tools/migrate.php --endpoint http://<solr server>:8180/ciss/<core name>/select`
 
 Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
 
-6.5
----
+6.5 API Documentation
+---------------------
 
 Generate API Documentation
 
@@ -267,3 +267,22 @@ Example of a command line
 php skos2openskos.php --setUri=http://htdl/clavas-org/set 
 --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
 --file=clavas-organisations.xml
+=======
+7 Development
+=============
+To test / develop the application you can run
+
+```
+docker-compose up --build
+docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
+```
+
+Go to `http://localhost:9001/manage.html?tab=datasets` login with admin / admin
+create a persistent dataset named `openskos`
+Create a test tenant / user in the openskos application
+
+```
+docker exec -it openskos-php-fpm php ./tools/tenant.php create -e development --code=pic --name=Picturae --email=test@example.com --password=test
+```
+
+Now you can login on http://localhost:9000/editor/login

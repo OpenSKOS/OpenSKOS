@@ -16,3 +16,4 @@ public/data/export/*
 /application/configs/application_corrupted.ini
 /application/configs/application_backup.ini
 /application/configs/custom.ini
+/data/solr/data/

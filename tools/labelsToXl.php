@@ -81,10 +81,9 @@ if (!empty($modifiedSince)) {
 }
 
 $offset = 0;
-$limit = 200;
+$limit = 50;
 $counter = 0;
 $add = $OPTS->add;
-$obsoleteconcepts = [];
 
 do {
     try {
@@ -98,6 +97,8 @@ do {
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
 
             foreach ($concepts as $concept) {
+
+
                 $counter ++;
                 
                 $logger->debug($concept->getUri());
@@ -107,24 +108,17 @@ do {
 
                     $insertAndDelete = $labelHelper->getLabelsForInsertAndDelete($concept);
 
+                    printf("To delete: %d\n", $insertAndDelete['delete']->count());
+                    printf("To insert: %d\n", $insertAndDelete['insert']->count());
 
                     $deleteResources->merge($insertAndDelete['delete']);
                     $inserResources->merge($insertAndDelete['insert']);
 
-                    if ($add) {
-                        foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
-                            $concept->setProperties($xlProperty, $concept->getProperty($xlProperty));
-                        }
-                        $conceptManager->replace($concept);
-                    } else {
-                        // Create concept only with xl labels to insert it as partial resource
-                        $partialConcept = new \OpenSkos2\Concept($concept->getUri());
-                        
-                        foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
-                            $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
-                        }
-                        
-                        $inserResources->append($partialConcept);
+
+                    // Create concept only with xl labels to insert it as partial resource
+                    $partialConcept = new \OpenSkos2\Concept($concept->getUri());
+                    foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
+                        $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
                     }
                 } catch (\Exception $ex) {
                     $logger->warning(
@@ -134,13 +128,16 @@ do {
                 }
             }
 
-
-            foreach ($deleteResources as $deleteResource) {
-                $resourceManager->delete($deleteResource);
-            }
-
-            if (!$add) {
-                $resourceManager->insertCollection($inserResources);
+            try{
+                foreach ($deleteResources as $deleteResource) {
+                    $resourceManager->delete($deleteResource);
+                }
+                $resourceManager->extendCollection($inserResources);
+            } catch (\Exception $ex) {
+                $logger->warning(
+                    'Problem adding the labels '
+                    . '". The message is: ' . $ex->getMessage()
+                );
             }
         }
     } catch (\Exception $ex) {
@@ -156,7 +153,6 @@ do {
     } else {
         $offset += $limit;
     }
-
     $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 

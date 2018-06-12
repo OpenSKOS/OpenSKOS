@@ -126,6 +126,8 @@ class ResourceManager
      */
     protected function updateWithRetries(UpdateQuery $update)
     {
+        $result = $this->solr->update($update);
+        return;
         // Sometimes solr update fails with timeout.
         $exception = null;
         $tries = 0;
