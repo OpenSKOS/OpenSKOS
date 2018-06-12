@@ -317,8 +317,13 @@ class EasyRdf
                 return $type->getUri();
             }
         }
+        return false;
+        /*Old code:
+         * The only place that called this function was testing for non-skos types anyway
+
         throw new InvalidArgumentException(
             "Resource {$resource->getUri} does not have a proper skos type."
         );
+        */
     }
 }

@@ -30,7 +30,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
     const RESPONSE_TYPE_HTML = 'html';
 
     /**
-     * @var $_tenant OpenSKOS_Db_Table_Row_Tenant
+     * @var $_tenant OpenSkos2\Tenant
      */
     protected $_tenant;
     

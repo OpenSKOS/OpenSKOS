@@ -105,17 +105,29 @@ class OpenSKOS_Db_Table_Users extends Zend_Db_Table
     protected function _uniqueFieldValue($fieldname, $value, $data)
     {
         //fetch the tenant:
-        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
+
         if (null === $tenant) {
             throw new Zend_Db_Table_Exception('This method needs a valid tenant from the Zend_Auth object');
         }
         $select = $this->select()
-                ->where('tenant=?', $tenant->code)
+                ->where('tenant=?', $tenant->getCode())
                 ->where($fieldname . '=?', $value);
         if (isset($data['id'])) {
             $select->where('NOT(id=?)', $data['id']);
         }
         return count($this->fetchAll($select)) === 0;
+    }
+
+    public static function getUsersForTenant($tenant)
+    {
+        $classname = __CLASS__;
+        $model = new $classname();
+
+        //fetch the tenant:
+        $select = $model->select()
+            ->where('tenant=?', $tenant->getCode());
+        return $model->fetchAll($select);
     }
 
     /**
