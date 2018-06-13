@@ -77,9 +77,8 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
                 FILTER(
                     ?subject != ' . $ntriple->serialize($concept) . '
                         && (
-                            ?status = \'' . Concept::STATUS_CANDIDATE . '\' 
-                            || ?status = \'' . Concept::STATUS_APPROVED . '\'
-                            || ?status = \'' . Concept::STATUS_REDIRECTED . '\'
+                            ?status != \''.Concept::STATUS_DELETED.'\' 
+                            && ?status != \''.Concept::STATUS_OBSOLETE.'\'
                         )
                 )';
 
