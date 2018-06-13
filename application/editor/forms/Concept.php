@@ -628,10 +628,13 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 throw new Exception\TenantNotFoundException('Tenant is not specified or could not be resolved.');
             }
 
-            //$enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
-            //$useXlLabels = (bool) $tenant['enableSkosXl'];
-            $useXlLabels = $tenant->getPropertySingleValue(OpenSkos::ENABLESKOSXL)->getValue() == 'true';
-            $enableStatusesSystem = $tenant->getPropertySingleValue(OpenSkos::ENABLESTATUSSESSYSTEMS)->getValue() == 'true';
+            $fIsTrue = function ($val){
+                //I think this covers all we can get back from Jena
+                return $val === '1' || $val === 1 || $val === 'true' || $val === true;
+            };
+
+            $useXlLabels = $fIsTrue($tenant->getPropertySingleValue(OpenSkos::ENABLESKOSXL)->getValue());
+            $enableStatusesSystem = $fIsTrue($tenant->getPropertySingleValue(OpenSkos::ENABLESTATUSSESSYSTEMS)->getValue());
 
             $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),

@@ -322,7 +322,7 @@ class ResourceManager
 
         try {
             $result = $this->fetchQuery($query, $type);
-// @TODO Add resourceType check.
+            // @TODO Add resourceType check.
         } catch (\Exception $exp) {
             throw new ResourceNotFoundException("Unable to fetch resource \n" . $exp->getMessage() . " (of $type) \n");
         }

@@ -50,7 +50,9 @@ class EasyRdf
 
     private static $allowedSubresources = [VCard::ORG, VCard::ADR];
     private static $skosTypes = [Tenant::TYPE, Collection::TYPE, ConceptScheme::TYPE,
-        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, Org::FORMALORG];
+        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, Org::FORMALORG,
+        Label::TYPE
+        ];
 
     /**
      * @param \EasyRdf\Graph $graph to $read

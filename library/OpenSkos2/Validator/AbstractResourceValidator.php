@@ -361,7 +361,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
                 $publisherUri = $tripleStoreSetTenant[0];
 
                 if ($tenantUri !== $publisherUri) {
-                    $this->error[] = "The set $setUri declared in the resource has the tenant "
+                    $this->errorMessages[] = "The set $setUri declared in the resource has the tenant "
                         . "with the uri $publisherUri which does not coincide with the uri $tenantUri of the "
                         . "tenant declared in the resource";
                     $secondRound = false;
@@ -372,7 +372,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if ($set->getTenant() != null) {
                 $publisherCode = $set->getTenant()->getValue();
                 if ($tenantCode !== $publisherCode) {
-                    $this->error[] = "The set $setUri declared in the resource has the tenant with "
+                    $this->errorMessages[] = "The set $setUri declared in the resource has the tenant with "
                         . "the code $publisherCode which does not coincide with the code $tenantCode of the tenant "
                         . "declared in the resource";
                     $secondRound = false;
