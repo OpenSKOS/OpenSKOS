@@ -18,7 +18,6 @@
  */
 use OpenSkos2\Namespaces\Skos;
 
-$tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $conceptSchemes = $diContainer->get('Editor_Models_ConceptSchemesCache')->fetchAll();
 ?>
