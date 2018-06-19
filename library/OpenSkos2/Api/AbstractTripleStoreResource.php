@@ -232,8 +232,12 @@ abstract class AbstractTripleStoreResource
     public function update(ServerRequestInterface $request)
     {
         $params = $this->getParams($request);
+        $parsedBody = $request->getParsedBody();
 
-        $tenant = $this->getTenantFromApiCall($params);
+        $apiKey = $this->getApiKey($request);
+
+        $user = $this->getUserByKey($apiKey);
+        $tenant = $this->getTenantFromApiCall($params, $user);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -297,6 +301,7 @@ abstract class AbstractTripleStoreResource
     {
         try {
             $params = $request->getQueryParams();
+            $parsedBody = $request->getParsedBody();
 
             if (empty($params['id'])) {
                 throw new InvalidArgumentException('Missing id parameter');
@@ -309,9 +314,10 @@ abstract class AbstractTripleStoreResource
                 throw new NotFoundException('Concept not found by id :' . $id, 404);
             }
 
-            $user = $this->getUserFromParams($params);
+            $apiKey = $this->getApiKey($request);
+            $user = $this->getUserByKey($apiKey);
 
-            $tenant = $this->getTenantFromApiCall($params);
+            $tenant = $this->getTenantFromApiCall($params, $user);
 
             $set = $this->getSet($params, $tenant);
 
@@ -433,8 +439,13 @@ abstract class AbstractTripleStoreResource
     private function handleCreate(ServerRequestInterface $request)
     {
         $params = $this->getParams($request);
+        $parsedBody = $request->getParsedBody();
 
-        $tenant = $this->getTenantFromApiCall($params);
+        $apiKey = $this->getApiKey($request);
+
+        $user = $this->getUserByKey($apiKey);
+
+        $tenant = $this->getTenantFromApiCall($params, $user);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -610,23 +621,23 @@ abstract class AbstractTripleStoreResource
      */
     protected function getSet($params, $tenant)
     {
+        $set = null;
+
         if ($this->customInit['backward_compatible']) {
             $setName = 'collection';
         } else {
             $setName = 'set';
         }
-        
-        if (empty($params[$setName])) {
-            throw new InvalidArgumentException("No $setName specified in the request parameters", 400);
-        }
 
-        $code = $params[$setName];
-        $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
-        if (!isset($set)) {
-            throw new InvalidArgumentException(
-                "No such $setName `$code`",
-                404
-            );
+        $code = isset($params[$setName]) ? $params[$setName] : false;
+        if ($code){
+            $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
+            if (!isset($set)) {
+                throw new InvalidArgumentException(
+                    "No such $setName `$code`",
+                    404
+                );
+            }
         }
         return $set;
     }

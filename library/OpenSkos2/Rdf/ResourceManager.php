@@ -933,7 +933,7 @@ class ResourceManager
 
         foreach ($relatedTerms as $relatedTerm) {
             if ($relatedConceptUri === $relatedTerm->getUri()) {
-                throw new \Exception("Related via $relationUri term $relatedConceptUri is alredy defined");
+                throw new \Exception("Related via $relationUri term $relatedConceptUri is already defined");
             }
         }
         return true;

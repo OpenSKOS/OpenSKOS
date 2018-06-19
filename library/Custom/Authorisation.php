@@ -66,14 +66,16 @@ class Authorisation implements \OpenSkos2\Interfaces\Authorisation
         $type = $this->resourceManager->getResourceType();
 
         if ($type !== Tenant::TYPE && $type !== Set::TYPE) {
-            $setIsValid = $this->checkSet($set, $resource);
-            if (!$setIsValid) {
-                $sets = $resource->getProperty(OpenSkos::SET);
-                throw new \Exception(
-                    'The set code ' . $set->getCode()->getValue() .
-                    " from request parameters does not match the set {$sets[0]} to which the resource refers"
-                    . ' (indirectly via schemes and collections if the resource is a concept)'
-                );
+            if($set !== null) {
+                $setIsValid = $this->checkSet($set, $resource);
+                if (!$setIsValid) {
+                    $sets = $resource->getProperty(OpenSkos::SET);
+                    throw new \Exception(
+                        'The set code ' . $set->getCode()->getValue() .
+                        " from request parameters does not match the set {$sets[0]} to which the resource refers"
+                        . ' (indirectly via schemes and collections if the resource is a concept)'
+                    );
+                }
             }
         }
         switch ($type) {

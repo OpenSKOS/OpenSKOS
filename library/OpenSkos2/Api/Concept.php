@@ -434,7 +434,6 @@ class Concept extends AbstractTripleStoreResource
 
         $tenant = $this->getTenantFromApiCall($params, $user);
 
-
         $set = $this->getSet($params, $tenant);
 
         try {
@@ -458,10 +457,13 @@ class Concept extends AbstractTripleStoreResource
     public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
 
-        $tenant = $this->getTenantFromApiCall($params);
+        $apiKey = $this->getApiKey($request);
 
-        $user = $this->getUserFromParams($params);
+        $user = $this->getUserByKey($apiKey);
+
+        $tenant = $this->getTenantFromApiCall($params, $user);
 
         $set = $this->getSet($params, $tenant);
         try {
