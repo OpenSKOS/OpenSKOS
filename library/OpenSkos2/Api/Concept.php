@@ -402,15 +402,38 @@ class Concept extends AbstractTripleStoreResource
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string api key if set else ''
+     */
+    private function getApiKey($request)
+    {
+        $params = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
+
+        $apiKey = '';
+        if(isset($params['key']) && $params['key']){
+            $apiKey = $params['key'];
+        }
+        elseif(isset($parsedBody['key']) && $parsedBody['key']){
+            $apiKey = $parsedBody['key'];
+        }
+        return $apiKey;
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return Response
      */
     public function addRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
 
-        $tenant = $this->getTenantFromParams($params);
+        $apiKey = $this->getApiKey($request);
 
-        $user = $this->getUserFromParams($params);
+        $user = $this->getUserByKey($apiKey);
+
+        $tenant = $this->getTenantFromApiCall($params, $user);
+
 
         $set = $this->getSet($params, $tenant);
 
@@ -436,7 +459,7 @@ class Concept extends AbstractTripleStoreResource
     {
         $params = $request->getQueryParams();
 
-        $tenant = $this->getTenantFromParams($params);
+        $tenant = $this->getTenantFromApiCall($params);
 
         $user = $this->getUserFromParams($params);
 

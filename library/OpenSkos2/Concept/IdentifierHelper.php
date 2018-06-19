@@ -56,6 +56,7 @@ class IdentifierHelper
     public function generateNotation(Concept &$concept)
     {
         // @TODO A raise condition is possible. The validation will fail in that case - so should not be problem.
+        //     B.Hillier. I think you meant 'Race Condition'. Is certainly possible; I've seen it happen.
         
         $notation = 1;
         
@@ -63,7 +64,7 @@ class IdentifierHelper
         if (!empty($maxNumericNotation)) {
             $notation = $maxNumericNotation + 1;
         }
-        
+
         $concept->addProperty(
             Skos::NOTATION,
             new Literal($notation)
@@ -98,15 +99,16 @@ class IdentifierHelper
         
         if ($concept->isPropertyEmpty(Skos::NOTATION)) {
             $uri = self::assembleUri(
-                $concept->getPropertySingleValue(OpenSkos::SET)
+                $concept->getPropertySingleValue(OpenSkos::SET),
+                $concept->getPropertySingleValue(OpenSkos::UUID)
             );
         } else {
             $uri = self::assembleUri(
                 $concept->getPropertySingleValue(OpenSkos::SET),
+                $concept->getPropertySingleValue(OpenSkos::UUID),
                 $concept->getProperty(Skos::NOTATION)[0]->getValue()
             );
         }
-        
         if ($this->conceptManager->askForUri($uri, true)) {
             throw new UriGenerationException(
                 'The generated uri "' . $uri . '" is already in use.'
@@ -120,17 +122,20 @@ class IdentifierHelper
     /**
      * Generates concept uri from collection and notation
      * @param string $setUri
+     * @param string $collectionUuid, optional: The generated UUID for this collection
      * @param string $firstNotation , optional. New uuid will be used if empty
      * @return string
      */
-    protected function assembleUri($setUri, $firstNotation = null)
+    protected function assembleUri($setUri, $collectionUuid = null, $firstNotation = null)
     {
         $separator = '/';
         
         $setUri = rtrim($setUri, $separator);
+
+        $uuidToPossiblyUse = $collectionUuid ? $collectionUuid : Uuid::uuid4();
         
         if (empty($firstNotation)) {
-            $uri = $setUri . $separator . Uuid::uuid4();
+            $uri = $setUri . $separator . $uuidToPossiblyUse;
         } else {
             $uri = $setUri . $separator . $firstNotation;
         }

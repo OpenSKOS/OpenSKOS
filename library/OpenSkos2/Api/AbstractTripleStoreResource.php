@@ -118,6 +118,17 @@ abstract class AbstractTripleStoreResource
         return $response;
     }
 
+    /*
+     * Tests if string is a uuid
+     * @param string $potentialUuid Thing that might be a Uuid
+     * @return boolean True is it's a uuid else false
+     */
+    private function isUuid($potentialUuid)
+    {
+        $res = preg_match('#^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$#i', $potentialUuid);
+        return $res;
+    }
+
     /**
      * Get openskos resource
      *
@@ -131,8 +142,15 @@ abstract class AbstractTripleStoreResource
 
         if ($id instanceof Uri) {
             $resource = $this->manager->fetchByUri($id, $rdfType);
-        } else {
+        }
+        elseif($this->isUuid($id)){
             $resource = $this->manager->fetchByUuid($id, $rdfType);
+        }
+        else{
+            //Previous versions of OpenSkos allowed fetch by notation; Beng used it!!!!
+            //  No agreement ever made we would deprecate this feature
+            $fullNotatationPredicate = sprintf("<%s>", \OpenSkos2\Namespaces\Skos::NOTATION);
+            $resource = $this->manager->fetchByUuid($id, $rdfType, $fullNotatationPredicate);
         }
 
         if (!$resource) {
@@ -215,7 +233,7 @@ abstract class AbstractTripleStoreResource
     {
         $params = $this->getParams($request);
 
-        $tenant = $this->getTenantFromParams($params);
+        $tenant = $this->getTenantFromApiCall($params);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -293,7 +311,7 @@ abstract class AbstractTripleStoreResource
 
             $user = $this->getUserFromParams($params);
 
-            $tenant = $this->getTenantFromParams($params);
+            $tenant = $this->getTenantFromApiCall($params);
 
             $set = $this->getSet($params, $tenant);
 
@@ -416,7 +434,7 @@ abstract class AbstractTripleStoreResource
     {
         $params = $this->getParams($request);
 
-        $tenant = $this->getTenantFromParams($params);
+        $tenant = $this->getTenantFromApiCall($params);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -678,14 +696,16 @@ abstract class AbstractTripleStoreResource
 
     /**
      * @param array $params
-     * @return Tenanthrows InvalidArgumentException
      */
-    protected function getTenantFromParams($params)
+    protected function getTenantFromApiCall($params, $user)
     {
-        if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 400);
+        if(isset($params['tenant']) && $params['tenant']){
+            $tenant = $this->getTenant($params['tenant'], $this->manager);
         }
-        return $this->getTenant($params['tenant'], $this->manager);
+        else{
+            $tenant = $user->tenant;
+        }
+        return $tenant;
     }
 
     /**

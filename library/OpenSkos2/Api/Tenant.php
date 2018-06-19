@@ -52,7 +52,7 @@ class Tenant extends AbstractTripleStoreResource
 
     // no set and tenatnt needed to implement institution API
 
-    protected function getTenantFromParams($params)
+    protected function getTenantFromApiCall($params)
     {
         return new \OpenSkos2\Tenant('http://dummy-tenant');
     }

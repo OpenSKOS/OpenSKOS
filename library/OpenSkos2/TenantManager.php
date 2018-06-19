@@ -34,10 +34,36 @@ class TenantManager extends ResourceManager
 
     protected $resourceType = Tenant::TYPE;
 
+    /*
+     * @param string $code Tenant Code
+     * @return array list of uuids of sets(collections) on the tenant
+     */
+    public function fetchSetCodesForTenant($code)
+    {
+        $query = "
+        SELECT ?collectionUuid
+        WHERE  { 
+          ?tenanturi  <http://openskos.org/xmlns#code> \"$code\" .
+          ?seturi  <http://purl.org/dc/terms/publisher> ?tenanturi .
+          ?seturi  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#ConceptScheme>.
+          ?seturi <http://openskos.org/xmlns#uuid> ?collectionUuid
+         
+        }";
+
+        $setCodes = array();
+        $response = $this->query($query);
+        if ($response !== null) {
+            foreach ($response as $triple){
+                $setCodes[] = $triple->collectionUuid->getValue();
+            }
+        }
+        return $setCodes;
+    }
     // used only for HTML representation
     public function fetchSetsForTenant($code)
     {
-        $query = 'SELECT ?seturi ?p ?o WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
+        $query = 'SELECT ?seturi ?p ?o 
+        WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
             . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
             . ' ?seturi  <' . Rdf::TYPE . '> <'.Collection::TYPE.'> .'
             . ' ?seturi  ?p ?o .}';
@@ -149,7 +175,7 @@ SELECT_URI;
 
     /**
      * Gets the RDF object for the logged in tenant
-     * @return logged in tenant or null
+     * @greturn logged in tenant or null
      */
     public static function getLoggedInTenant()
     {
