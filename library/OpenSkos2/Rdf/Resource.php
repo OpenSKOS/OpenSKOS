@@ -736,10 +736,10 @@ class Resource extends Uri implements ResourceIdentifier
             return false;
         }
         $val = $val->getValue();
-        if (strtolower($val) === "true" || $val==="1") {
+        if (strtolower($val) === "true" || $val==="1" || $val==="Y") {
             return true;
         }
-        if (strtolower($val) === "false" || $val==="0") {
+        if (strtolower($val) === "false" || $val==="0" || $val==="N") {
             return false;
         }
         throw new \Exception("Wrong value of a boolean element in the resource {$this->uri}");

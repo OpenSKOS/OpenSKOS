@@ -38,6 +38,17 @@ class CollectionManager extends ResourceManager
      * @var string NULL means any resource.
      */
     protected $resourceType = Collection::TYPE;
+
+    public function __call($name, $arguments)
+    {
+        if($name === 'fetchAllSets'){
+            return $this->fetchAllCollections($arguments[0]);
+        }
+        throw new \Exception(
+            "unresolvable call $name to ".__NAMESPACE__."/".__CLASS__
+        );
+
+    }
     
     /**
      * Soft delete resource , sets the openskos:status to deleted
@@ -80,7 +91,6 @@ class CollectionManager extends ResourceManager
      */
     public function getSchemeBySetUri($setUri, $filterUris = [])
     {
-        die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n<hr>");
         $uri = new Uri($setUri);
         $escaped = (new NTriple())->serialize($uri);
         $query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -127,6 +137,31 @@ class CollectionManager extends ResourceManager
             $retVal[] = $scheme;
         }
 
+        return $retVal;
+    }
+
+    public function fetchAllCollections($allowOAI)
+    {
+        $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
+            . 'DESCRIBE ?s {'
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+        $sets = $this->fetchQuery($query);
+        return $sets;
+    }
+
+    public function getUrisMap($tenantCode)
+    {
+        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE '
+            . '{ ?subject ?predicate ?object . ?subject <' .
+            OpenSkos::TENANT . '>  "'. $tenantCode . '". '
+            . ' ?subject <'.Rdf::TYPE.'> <'.Set::TYPE.'> } }';
+        $result = $this->query($query);
+        $retVal = [];
+        foreach ($result as $set) {
+            $retVal[$set->getUri()]['uri'] = $set->getUri();
+            $code = $set->getCode();
+            $retVal[$set->getUri()]['code'] = $code->getValue();
+        }
         return $retVal;
     }
 

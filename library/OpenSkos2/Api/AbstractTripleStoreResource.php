@@ -67,6 +67,8 @@ abstract class AbstractTripleStoreResource
      */
     protected $limit;
 
+    private $parsedParameters;
+
     /**
      * Get PSR-7 response for resource
      *
@@ -237,7 +239,7 @@ abstract class AbstractTripleStoreResource
         $apiKey = $this->getApiKey($request);
 
         $user = $this->getUserByKey($apiKey);
-        $tenant = $this->getTenantFromApiCall($params, $user);
+        $tenant = $this->getTenantFromApiCall($request, $user);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -252,7 +254,7 @@ abstract class AbstractTripleStoreResource
         try {
             $existingResource = $this->manager->fetchByUri((string) $resource->getUri());
 
-            $set = $this->getSet($params, $tenant);
+            $set = $this->getSet($request);
 
             $user = $this->getUserFromParams($params);
 
@@ -317,9 +319,9 @@ abstract class AbstractTripleStoreResource
             $apiKey = $this->getApiKey($request);
             $user = $this->getUserByKey($apiKey);
 
-            $tenant = $this->getTenantFromApiCall($params, $user);
+            $tenant = $this->getTenantFromApiCall($request, $user);
 
-            $set = $this->getSet($params, $tenant);
+            $set = $this->getSet($request);
 
             $authorisation = $this->manager->getAuthorisationObject();
             if (!empty($authorisation)) {
@@ -445,7 +447,7 @@ abstract class AbstractTripleStoreResource
 
         $user = $this->getUserByKey($apiKey);
 
-        $tenant = $this->getTenantFromApiCall($params, $user);
+        $tenant = $this->getTenantFromApiCall($request, $user);
 
         $resource = $this->getResourceFromRequest($request, $tenant);
 
@@ -456,7 +458,7 @@ abstract class AbstractTripleStoreResource
             );
         }
 
-        $set = $this->getSet($params, $tenant);
+        $set = $this->getSet($request);
 
         $user = $this->getUserFromParams($params);
 
@@ -590,7 +592,7 @@ abstract class AbstractTripleStoreResource
      * @return DOMDocument
      * @throws InvalidArgumentException
      */
-    private function getDomDocumentFromRequest(ServerRequestInterface $request)
+    protected function getDomDocumentFromRequest(ServerRequestInterface $request)
     {
         $xml = $request->getBody();
 
@@ -615,11 +617,10 @@ abstract class AbstractTripleStoreResource
 
     /**
      * @param $params
-     * @param Tenant $tenant
-     * @return Set
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @throws InvalidArgumentException
      */
-    protected function getSet($params, $tenant)
+    protected function getSet($request)
     {
         $set = null;
 
@@ -629,9 +630,11 @@ abstract class AbstractTripleStoreResource
             $setName = 'set';
         }
 
-        $code = isset($params[$setName]) ? $params[$setName] : false;
+
+        $code = $this->getMultiSourcedParameter($request, $setName);
         if ($code){
-            $set = $this->manager->fetchByUuid($code, Set::TYPE, 'openskos:code');
+            $set = $this->manager->fetchByUuid($code, OpenSkos::SET, 'openskos:code');
+
             if (!isset($set)) {
                 throw new InvalidArgumentException(
                     "No such $setName `$code`",
@@ -705,13 +708,74 @@ abstract class AbstractTripleStoreResource
         return $autoGenerateIdentifiers;
     }
 
-    /**
-     * @param array $params
+    /*
+     * We have dreamt up many ways of sending some parameters
+     * This unfortunate function tries to work out which one is being used here
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string the parameter tried to get
      */
-    protected function getTenantFromApiCall($params, $user)
+    protected function getMultiSourcedParameter($request, $parameter)
     {
-        if(isset($params['tenant']) && $params['tenant']){
-            $tenant = $this->getTenant($params['tenant'], $this->manager);
+        if($this->parsedParameters){
+            return $this->parsedParameters[$parameter];
+        }
+
+        $lookups = array('tenant', 'collection', 'set', 'key', 'autoGenerateIdentifiers'); //Values we're trying to look up
+
+        $params = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
+        $xmlParameters = array();
+
+        //Drag these out of the DOM
+        $doc = $this->getDomDocumentFromRequest($request);
+        // is a tenant, collection or api key set in the XML?
+        foreach ($lookups as $attributeName) {
+            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
+            if (!empty($value)) {
+                $xmlParameters[$attributeName] = $value;
+            }
+        }
+
+        foreach($lookups as $prm){
+            $foundVal = false;
+
+            //Let's try the XML first
+            if(isset($xmlParameters[$prm]) && $xmlParameters[$prm]){
+                $foundVal = $xmlParameters[$prm];
+            }
+            //Nope! Then the Query string
+            elseif (isset($params[$prm]) && $params[$prm]){
+                $foundVal = $params[$prm];
+            }
+            //Nope! Then the POST BODY
+            elseif(isset($parsedBody[$prm]) && $parsedBody[$prm]){
+                $foundVal = $parsedBody[$prm];
+            }
+            //Nope! Then the header parameters
+            elseif($request->getHeader($prm)){
+                $foundVal = $request->getHeader($prm)[0];
+            }
+
+            $this->parsedParameters[$prm] = $foundVal;
+        }
+
+        return $this->parsedParameters[$parameter];
+    }
+
+
+    /**
+     * Work out active tenant for this api call.
+     *   Could be passed either in the URI, or derived from the user's api key in the request body
+     * @param ServerRequestInterface $request
+     * @param OpenSKOS_Db_Table_Row_User user derived from apiKey
+     * @return \OpenSkos2\Tenant Active tenant
+     */
+    protected function getTenantFromApiCall(ServerRequestInterface $request, $user)
+    {
+        $paramTenant = $this->getMultiSourcedParameter( $request, 'tenant');
+
+        if($paramTenant){
+            $tenant = $this->getTenant($paramTenant, $this->manager);
         }
         else{
             $tenant = $user->tenant;

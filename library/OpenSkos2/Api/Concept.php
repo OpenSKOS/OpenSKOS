@@ -34,6 +34,8 @@ use OpenSkos2\Set;
 use OpenSkos2\PersonManager;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Search\Autocomplete;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\OpenSkos;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
@@ -71,6 +73,8 @@ class Concept extends AbstractTripleStoreResource
      * @var \OpenSkos2\Search\Autocomplete
      */
     private $searchAutocomplete;
+
+    private $parsedParameters;
 
     /**
      *
@@ -404,18 +408,12 @@ class Concept extends AbstractTripleStoreResource
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return string api key if set else ''
      */
-    private function getApiKey($request)
+    protected function getApiKey($request)
     {
         $params = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
-        $apiKey = '';
-        if(isset($params['key']) && $params['key']){
-            $apiKey = $params['key'];
-        }
-        elseif(isset($parsedBody['key']) && $parsedBody['key']){
-            $apiKey = $parsedBody['key'];
-        }
+        $apiKey = $this->getMultiSourcedParameter($request, 'key');
         return $apiKey;
     }
 
@@ -434,7 +432,7 @@ class Concept extends AbstractTripleStoreResource
 
         $tenant = $this->getTenantFromApiCall($params, $user);
 
-        $set = $this->getSet($params, $tenant);
+        $set = $this->getSet($request);
 
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
@@ -465,7 +463,7 @@ class Concept extends AbstractTripleStoreResource
 
         $tenant = $this->getTenantFromApiCall($params, $user);
 
-        $set = $this->getSet($params, $tenant);
+        $set = $this->getSet($request);
         try {
             $body = $this->preEditChecksRels($request, $user, $tenant, $set, true);
             $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);

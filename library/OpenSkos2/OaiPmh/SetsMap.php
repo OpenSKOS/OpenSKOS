@@ -48,7 +48,7 @@ class SetsMap
      * @param ConceptSchemeManager $schemeManager
      * @param \OpenSkos2\SetManager $setManager
      */
-    public function __construct(ConceptSchemeManager $schemeManager, \OpenSkos2\SetManager $setManager)
+    public function __construct(ConceptSchemeManager $schemeManager, $setManager)
     {
         $this->schemeManager = $schemeManager;
         $this->setManager = $setManager;

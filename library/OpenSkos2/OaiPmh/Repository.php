@@ -133,7 +133,7 @@ class Repository implements InterfaceRepository
      * @param string $repositoryName
      * @param string $baseUrl
      * @param array $adminEmails
-     * @param \OpenSkos2\Collection $collectionManager
+     * @param CollectionManager $collectionManager
      * @param string $description
      */
     public function __construct(
@@ -143,7 +143,7 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        CollectionsManager $collectionManager,
+        CollectionManager $collectionManager,
         $description = null
     ) {
     
@@ -320,7 +320,7 @@ class Repository implements InterfaceRepository
             $params['from'],
             $params['until'],
             $pSet['tenant'],
-            $pSet['collection'],
+            isset($pSet['collection']) ? $pSet['collection'] : '' ,
             $pSet['conceptScheme'],
             $numFound
         );

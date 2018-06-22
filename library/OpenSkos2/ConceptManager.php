@@ -420,7 +420,10 @@ class ConceptManager extends ResourceManagerWithSearch
             ->where('?subject', '<' . DcTerms::MODIFIED . '>', '?date')
             ->also('<' . Rdf::TYPE . '>', '<' . $this->resourceType . '>');
 
-        $result = $this->solrResourceManager->search('*:*', 1, 0, $numFound, ['sort_d_modified_earliest' => 'asc']);
+
+
+        $result = $this->solrResourceManager->search('status:*', 1, 0, $numFound, ['sort_d_modified_earliest' => 'asc']);
+
         $uri = current($result);
 
         if (!$uri) {

@@ -51,6 +51,11 @@ class Collection extends Resource
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
 
+    public function getAllowOai()
+    {
+        $val = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
+        return $this->toBool($val);
+    }
 
     /**
      * Returns title of collection
