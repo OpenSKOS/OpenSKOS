@@ -72,7 +72,7 @@ class Set extends AbstractTripleStoreResource
     
      // no set is needed to implement set API
     
-    protected function getSet($params, $tenant)
+    protected function getSet($request)
     {
         return new \OpenSkos2\Collection();
     }

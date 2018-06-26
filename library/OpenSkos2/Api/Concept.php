@@ -87,10 +87,6 @@ class Concept extends AbstractTripleStoreResource
         Autocomplete $searchAutocomplete,
         PersonManager $personManager
     ) {
-    
-
-
-
         $this->manager = $manager;
         $this->personManager = $personManager;
         $this->searchAutocomplete = $searchAutocomplete;
@@ -410,9 +406,6 @@ class Concept extends AbstractTripleStoreResource
      */
     protected function getApiKey($request)
     {
-        $params = $request->getQueryParams();
-        $parsedBody = $request->getParsedBody();
-
         $apiKey = $this->getMultiSourcedParameter($request, 'key');
         return $apiKey;
     }

@@ -182,6 +182,12 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
             if ($value instanceof Uri && $this->referenceCheckOn &&
                 !in_array($propertyUri, self::$nonresolvableURIs)) { //ERROR
+                if (!$this->resourceManager) {
+                    throw new \Exception(
+                        "Passed resource manager is null in this validator. "
+                        . "Proper content validation is not possible"
+                    );
+                }
                 if (!($exists = $this->resourceManager->askForUri(trim($value->getUri()), false, $type))) {
                     $this->errorMessages[] = "The resource (of type  $type) referred by uri " .
                         "{$value->getUri()} via the property $propertyUri is not found in this triple store ";
@@ -341,10 +347,18 @@ abstract class AbstractResourceValidator implements ValidatorInterface
 
     protected function checkSet($resource)
     {
-        $firstRound = $this->validateProperty($resource, OpenSkos::SET, true, true, false, false, \OpenSkos2\Collection::TYPE);
+        $firstRound = $this->validateProperty(
+            $resource,
+            OpenSkos::SET,
+            true,
+            true,
+            false,
+            false,
+            \OpenSkos2\Collection::TYPE
+        );
         $secondRound = true;
-        if ($firstRound) {
 
+        if ($firstRound) {
             $setUris = $resource->getSet();
             foreach ($setUris as $setUri) {
                 $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Collection::TYPE);

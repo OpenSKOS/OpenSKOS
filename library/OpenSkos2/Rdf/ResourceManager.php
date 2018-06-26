@@ -1034,9 +1034,14 @@ SELECT ?name WHERE {
   ?uri  <%s> ?name
 }
 SELECT_URI;
-        $query = sprintf($query, \Openskos2\Namespaces\Rdf::TYPE, \Openskos2\Namespaces\Org::FORMALORG, OpenSkosNamespace::CODE, $code, \Openskos2\Namespaces\OpenSkos::NAME);
-        highlight_string("<?php\n\$marker =\n" . var_export($query, true) . ";\n?>");  //FIND_ME_AGAIN
-        die("<hr>\n" . __FILE__ . " " . __LINE__ . "\n Marker <hr>");   //FIND_ME_AGAIN
+        $query = sprintf(
+            $query,
+            \Openskos2\Namespaces\Rdf::TYPE,
+            \Openskos2\Namespaces\Org::FORMALORG,
+            OpenSkosNamespace::CODE,
+            $code,
+            \Openskos2\Namespaces\OpenSkos::NAME
+        );
 
         $response = $this->query($query);
         if (count($response) > 1) {

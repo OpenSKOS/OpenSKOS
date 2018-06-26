@@ -13,9 +13,6 @@
         <testsuite name="Openskos Test Suite">
             <directory>tests</directory>
         </testsuite>
-        <testsuite name="Openskos Integration Test Suite">
-            <directory>integrationtests</directory>
-        </testsuite>
     </testsuites>
     <filter>
         <whitelist>
@@ -29,33 +26,4 @@
         <!--<log type="coverage-text" target="build/coverage.txt"/>-->
         <!--<log type="coverage-clover" target="build/logs/clover.xml"/>-->
     </logging>
-    <php>
-        <!-- integration test setting -->
-        <const name="API_BASE_URI" value = "http://localhost:80/public/api"/>
-        <const name="SOURCE_DIR" value = "/app/test"/>
-        <const name="TENANT_URI" value="http://test.com"/>
-        <const name="API_KEY_ADMIN" value="xxx"/>
-        <const name="API_KEY_EDITOR" value="yyy"/>
-        <const name="API_KEY_GUEST" value="zzz"/>
-        <const name="TENANT_CODE" value="example"/>
-        <const name="TENANT_NAME" value="test tenant"/>
-        <const name="SET_URI" value="http://set01/set01abc"/>
-        <const name="SET_CODE" value="set01"/>
-        <const name="SET_PAGE" value="http://set01/page"/>
-        <const name="SET_TITLE" value="Test Set 01"/>
-        <const name="SET_UUID" value="set01abc"/>
-        <const name="SCHEMA1_URI" value="http://scheme01/"/>
-        <const name="SCHEMA2_URI" value="https://scheme01/"/>
-        <const name="SCHEMA1_UUID" value="scheme01abc"/>
-        <const name="SCHEMA2_UUID" value="scheme02abc"/>
-        <const name="SCHEMA1_TITLE" value="test scheme 01"/>
-        <const name="SCHEMA2_TITLE" value="test scheme 02"/>
-        <const name="NUMBER_INSTITUTIONS" value="2"/> <!-- for testing get-institutions one institution is added -->
-        <const name="NUMBER_SETS" value="2"/> <!-- for testing get-sets one set is added -->
-        <const name="CALLBACK_NAME" value="abc"/>
-        <const name="PREF_LABEL" value="prefLabel"/>
-        <const name="ALT_LABEL" value="altLabel"/>
-        <const name="HIDDEN_LABEL" value="hiddenLabel"/>
-        <const name="NOTATION" value="notation"/>
-    </php>
 </phpunit>

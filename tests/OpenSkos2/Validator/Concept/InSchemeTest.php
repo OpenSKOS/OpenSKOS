@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: jsmit
@@ -16,32 +15,31 @@ use OpenSkos2\Rdf\Uri;
 class InSchemeTest extends \PHPUnit_Framework_TestCase
 {
 
+
     public function testValidate()
     {
-        $validator = new InScheme(false, false); // reference check is switched off
-        // reference check was not assumed when this test was created by Picturae
-        
+
+        $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $validator = new InScheme();
+        $validator->setResourceManager($conceptManagerMock);
+
         $concept = new Concept('http://example.com#1');
 
         //no scheme
         $this->assertFalse($validator->validate($concept));
 
-        $validator->emptyErrorMessages(); 
-        $validator->emptyWarningMessages();
-        $validator->emptyDanglingReferences();
-        
-        $concept->addProperty(Skos::INSCHEME, new Uri('http://example.com#scheme1'));
-        //1 scheme
-        $this->assertTrue($validator->validate($concept), implode(",",$validator->getErrorMessages()));
+        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme1'));
 
-        $validator->emptyErrorMessages(); 
-        $validator->emptyWarningMessages();
-        $validator->emptyDanglingReferences();
-        
-        $concept->addProperty(Skos::INSCHEME, new Uri('http://example.com#scheme2'));
+        $res = $validator->validate($concept);
+        //1 scheme
+        $this->assertTrue($validator->validate($concept));
+
+        $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme2'));
 
         //2 schemes
         $this->assertTrue($validator->validate($concept));
     }
-
 }
