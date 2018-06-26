@@ -95,10 +95,15 @@ class Collection extends Resource
     {
         static $form;
         if (null === $form) {
+            $currentURI = $this->uri;
+            if ($currentURI) {
+                $attribs = array('readonly' => 'true');
+            }
             $form = new \Zend_Form();
             $form
                     ->addElement('hidden', 'id', array('required' => $this->getPropertySingleValue(DcTerms::TITLE) ? true : false))
                     ->addElement('text', 'code', array('label' => _('Code'), 'required' => true))
+                    ->addElement('text', 'conceptBaseUri', array('label' => _('Concept Base Uri'), 'required' => true, 'attribs' => $attribs))
                     ->addElement('text', 'dc_title', array('label' => _('Title'), 'required' => true))
                     ->addElement('textarea', 'dc_description', array('label' => _('Description'), 'cols' => 80, 'row' => 5))
                     ->addElement('text', 'website', array('label' => _('Website')))
@@ -127,7 +132,6 @@ class Collection extends Resource
                     ->setCheckedValue('Y')
                     ->setUncheckedValue('N');
             /*
-             * TODO: What's a validator?
             $validator = new \Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
             $validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
             $form->getElement('code')->addValidator($validator);
@@ -189,13 +193,13 @@ class Collection extends Resource
         $dataOut = array();
 
         $dataOut['code'] = $dataOut['id'] = $this->getPropertySingleValue(OpenSkos::CODE);
-
+        $dataOut['conceptBaseUri'] = $dataOut['id'] = $this->getPropertySingleValue(OpenSkos::CONCEPTBASEURI);
         $dataOut['dc_title'] = $this->getPropertySingleValue( DcTerms::TITLE);
         $dataOut['dc_description'] = $this->getPropertySingleValue( DcTerms::DESCRIPTION);
         $dataOut['website'] = $this->getPropertySingleValue(OpenSkos::WEBPAGE);
         $dataOut['license'] = $this->getPropertySingleValue( DcTerms::LICENSE);
         //$dataOut['license_name'] = $this->getPropertySingleValue();
-        $dataOut['license_url'] = $this->getPropertySingleValue( Openskos::CONCEPTBASEURI);
+        $dataOut['license_url'] = $this->getPropertySingleValue( Openskos::LICENCE_URL);
         $dataOut['allow_oai'] = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
         $dataOut['OAI_baseURL'] = $this->getPropertySingleValue(OpenSkos::OAI_BASEURL);
 
@@ -218,6 +222,9 @@ class Collection extends Resource
                 case 'code':
                     $this->setProperty(OpenSkos::CODE, new Literal($val));
                     break;
+                case 'conceptBaseUri':
+                    $this->setProperty(OpenSkos::CONCEPTBASEURI, new Literal($val));
+                    break;
                 case 'dc_title':
                     $this->setProperty(DcTerms::TITLE, new Literal($val));
                     break;
@@ -231,7 +238,7 @@ class Collection extends Resource
                     $this->setProperty(DcTerms::LICENSE, new Uri($val));
                     break;
                 case 'license_url':
-                    $this->setProperty(OpenSkos::CONCEPTBASEURI, new Literal($val));
+                    $this->setProperty(OpenSkos::LICENCE_URL, new Literal($val));
                     break;
                 case 'allow_oai':
                     $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
@@ -257,11 +264,15 @@ class Collection extends Resource
         $apiOptions = \OpenSKOS_Application_BootstrapAccess::getOption('api');
         $baseUri = $apiOptions['baseUri'];
         $generatedUri = null;
-        // If we don't have uri yet - use base uri or generate one.
         if (empty($this->uri)) {
-            $generatedUri = rtrim($baseUri, '/') . '/collections/' . $this->getPropertyFlatValue(Openskos::CODE);
-            $this->uri = $generatedUri;
+            $conceptBaseUri = $this->getPropertySingleValue(OpenSkos::CONCEPTBASEURI)->getValue();
 
+            if ($conceptBaseUri) {
+                $generatedUri = $conceptBaseUri;
+            } else {
+                $generatedUri = rtrim($baseUri, '/') . '/collections/' . $this->getPropertyFlatValue(Openskos::CODE);
+            }
+            $this->uri = $generatedUri;
         }
 
         return $this->uri;

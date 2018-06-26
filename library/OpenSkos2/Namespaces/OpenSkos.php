@@ -40,6 +40,7 @@ class OpenSkos
     const ALLOW_OAI = 'http://openskos.org/xmlns#allow_oai';
     const OAI_BASEURL = 'http://openskos.org/xmlns#oai_baseURL';
     const CONCEPTBASEURI = 'http://openskos.org/xmlns#conceptBaseUri';
+    const LICENCE_URL = 'http://openskos.org/xmlns#licenceURL';
     const WEBPAGE = 'http://openskos.org/xmlns#webpage';
     const ENABLESKOSXL = 'http://openskos.org/xmlns#enableskosxl';
     const NOTATIONUNIQUEPERTENANT = 'http://openskos.org/xmlns#notationuniquepertenant';
