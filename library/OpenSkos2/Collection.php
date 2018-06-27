@@ -98,8 +98,7 @@ class Collection extends Resource
             $currentURI = $this->uri;
             if ($currentURI) {
                 $attribs = array('readonly' => 'true');
-            }
-            else{
+            } else {
                 $attribs = array();
             }
             $form = new \Zend_Form();

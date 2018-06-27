@@ -42,7 +42,7 @@ class Tenant extends Resource
 
     public function __get($name)
     {
-        if ($name === 'code'){
+        if ($name === 'code') {
             return $this->getCode()->getValue();
         }
 
@@ -51,7 +51,8 @@ class Tenant extends Resource
             'Undefined property via __get(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            E_USER_NOTICE
+        );
         return null;
     }
   
@@ -217,7 +218,7 @@ class Tenant extends Resource
             }
         }
 
-        if($person !== null) { //Person may be null, because a user links to a tenant. Chicken and Egg
+        if ($person !== null) { //Person may be null, because a user links to a tenant. Chicken and Egg
             $this->resolveCreator($person, $personManager);
             $this->setModified($person);
         }
@@ -249,9 +250,10 @@ class Tenant extends Resource
     /**
      * @param $code string Tenant Code
      */
-    public static function codeToUri($code){
+    public static function codeToUri($code)
+    {
 
-        $query = sprintf('SELECT ?uri WHERE { ?uri  <%s> "%s" } ' , OpenSkos::CODE, $code);
+        $query = sprintf('SELECT ?uri WHERE { ?uri  <%s> "%s" } ', OpenSkos::CODE, $code);
         $response = self::query($query);
         $items = [];
         foreach ($sparqlQueryResult as $resource) {
@@ -260,9 +262,6 @@ class Tenant extends Resource
             $items[$name] = $uri;
         }
         return $items;
-        return $result;
-
-
     }
     /**
      * @return Zend_Form
@@ -320,18 +319,17 @@ class Tenant extends Resource
         $dataOut['postalCode'] = $this->getPostalCode();
         $dataOut['countryName'] = $this->getCountryName();
 
-        $dataOut['enableStatusesSystem'] = $this->getEnableStatusesSystems( );
-        $dataOut['enableSkosXl'] = $this->getEnableSkosXl( );
+        $dataOut['enableStatusesSystem'] = $this->getEnableStatusesSystems();
+        $dataOut['enableSkosXl'] = $this->getEnableSkosXl();
 
         return $dataOut;
-
     }
 
     public function arrayToData($dataIn)
     {
 
-        foreach ($dataIn as $key => $val){
-            switch($key){
+        foreach ($dataIn as $key => $val) {
+            switch ($key) {
                 case 'code':
                     $this->setProperty(OpenSkos::CODE, new Literal($val));
                     break;
@@ -354,7 +352,7 @@ class Tenant extends Resource
                     $this->setProperty(VCard::LOCALITY, new Literal($val));
                     break;
                 case 'postalCode':
-                    $this->setProperty( VCard::PCODE, new Literal($val));
+                    $this->setProperty(VCard::PCODE, new Literal($val));
                     break;
                 case 'countryName':
                     $this->setProperty(VCard::COUNTRY, new Literal($val));
@@ -369,5 +367,4 @@ class Tenant extends Resource
         }
         return $this;
     }
-
 }
