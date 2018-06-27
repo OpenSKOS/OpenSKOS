@@ -31,7 +31,8 @@ use Rhumsaa\Uuid\Uuid;
 class Set extends Resource
 {
 
-    const TYPE = Dcmi::DATASET;
+    //const TYPE = Dcmi::DATASET;
+    const TYPE = OpenSkos::SET;
 
     public function __construct($uri = null)
     {

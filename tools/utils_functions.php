@@ -252,41 +252,28 @@ function insert_conceptscheme_or_skoscollection($setUri, $resourceManager,
     return $uri;
 }
 
-function createTenantRdf($code, 
-    $name, 
-    $uri, 
+function createTenantRdf(
+    $resourceManager,
+    $code,
+    $name,
+    $uri,
     $uuid,
     $email,
-    $disableSearchInOtherTenants, 
-    $enableStatussesSystem, 
-    $enableSkosXl, 
-    $resourceManager)
+    $website,
+    $organisationUnit,
+    $streetAddress,
+    $locality,
+    $postalCode,
+    $countryName,
+    $disableSearchInOtherTenants,
+    $enableStatussesSystem,
+    $enableSkosXl
+)
 {
 
-    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE, 
-        new Literal($code), 
+    $resources = $resourceManager->fetchSubjectForObject(OpenSkos::CODE,
+        new Literal($code),
         Tenant::TYPE);
-    if (count($resources) > 0) {
-        fwrite(STDERR, 'A tenant  with the code ' . $code . 
-            " has been already registered in the triple store. \n ");
-        exit(1);
-    }
-
-    $insts = $resourceManager->fetchSubjectForObject(VCard::ORGNAME, 
-        new Literal($name));
-    if (count($insts) > 0) {
-        fwrite(STDERR, "An institution with the name " . $name . 
-            " has been already registered in the triple store. \n");
-        exit(1);
-    }
-    
-    $insts2 = $resourceManager->fetchSubjectForObject(VCard::EMAIL, 
-        new Literal($email));
-    if (count($insts2) > 0) {
-        fwrite(STDERR, "An institution with the email " . $email . 
-            " has been already registered in the triple store. \n");
-        exit(1);
-    }
 
     $tenantResource = new Tenant();
     setID($tenantResource, $uri, $uuid, $resourceManager);
@@ -294,45 +281,26 @@ function createTenantRdf($code,
 
     $tenantResource->setProperty(OpenSkos::CODE, new Literal($code));
     $tenantResource->setProperty(VCard::EMAIL, new Literal($email));
-    
-    $blank1 = "_:genid_" . Uuid::uuid4();
-    $organisation = new Resource($blank1);
-    if (isset($name)) {
-        $organisation->setProperty(VCard::ORGNAME, new Literal($name));
-    }
-    
-    //$resourceManager->setLiteralWithEmptinessCheck($organisation, 
-    //vCard::ORGUNIT, " ");
-    $tenantResource->setProperty(VCard::ORG, $organisation);
-    //$resourceManager->setUriWithEmptinessCheck($tenantResource, 
-    //OpenSkos::WEBPAGE, " ");
-    //$resourceManager->setLiteralWithEmptinessCheck($tenantResource, 
-    //vCard::EMAIL, "");
-
-    $blank2 = "_:genid_" . Uuid::uuid4();
-    $adress = new Resource($blank2);
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
-    //vCard::STREET, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
-    //vCard::LOCALITY, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
-    //vCard::PCODE, "");
-    //$resourceManager->setLiteralWithEmptinessCheck($adress, 
-    //vCard::COUNTRY, "");
-    $tenantResource->setProperty(VCard::ADR, $adress);
+    $tenantResource->setProperty(OpenSkos::NAME, new Literal($name));
+    $tenantResource->setProperty(VCard::ORGUNIT, new Literal($organisationUnit));
+    $tenantResource->setProperty(OpenSkos::WEBPAGE, new Literal($website));
+    $tenantResource->setProperty(VCard::ADR, new Literal($streetAddress));
+    $tenantResource->setProperty(VCard::LOCALITY, new Literal($locality));
+    $tenantResource->setProperty( VCard::PCODE, new Literal($postalCode));
+    $tenantResource->setProperty(VCard::COUNTRY, new Literal($countryName));
 
     $disableBool = makeRdfBoolean($disableSearchInOtherTenants);
-    $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS, 
+    $tenantResource->setProperty(OpenSkos::DISABLESEARCHINOTERTENANTS,
         $disableBool);
-    
-    $enableStatussesBool = makeRdfBoolean($enableStatussesSystem); 
-    $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS, 
-        $enableStatussesBool);
+
+    $enableStatussesBool = makeRdfBoolean($enableStatussesSystem);
+    $tenantResource->setProperty(OpenSkos::ENABLESTATUSSESSYSTEMS,
+        new Literal($enableStatussesSystem));
 
     $enableSkosBool = makeRdfBoolean($enableSkosXl);
-    $tenantResource->setProperty(OpenSkos::ENABLESKOSXL,  
-        $enableSkosBool);
-    
+    $tenantResource->setProperty(OpenSkos::ENABLESKOSXL,
+        new Literal($enableSkosXl));
+
     return $tenantResource;
 }
 
@@ -650,20 +618,28 @@ class Institutions
             } else {
                $email = "unknown";
             }
-            if (!empty($row->enableStatussesSystem)) {
-               $enableStatussesSystem = $row->enableStatussesSystem; 
+            if (!empty($row->enableStatusesSystem)) {
+               $enableStatusesSystem = $row->enableStatusesSystem;
             } else {
-               $enableStatussesSystem = "false";
+               $enableStatusesSystem = "false";
             }
-            $tenant = createTenantRdf($row->code, 
+            $tenant = createTenantRdf(
+                $resourceManager,
+                $row->code,
                 $row->name, 
                 $uri, 
                 $uuid, 
                 $email,
-                $row->disableSearchInOtherTenants, 
-                $enableStatussesSystem, 
-                $skosXl, 
-                $resourceManager);
+                $row->website,
+                $row->organisationUnit,
+                $row->streetAddress,
+                $row->locality,
+                $row->postalCode,
+                $row->countryName,
+                $row->disableSearchInOtherTenants,
+                $enableStatusesSystem,
+                $skosXl
+            );
             $retVal[] = $tenant;
         }
         return $retVal;

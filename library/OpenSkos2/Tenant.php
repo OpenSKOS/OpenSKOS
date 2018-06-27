@@ -331,7 +331,6 @@ class Tenant extends Resource
     {
 
         foreach ($dataIn as $key => $val){
-            print "set $key to $val\n";
             switch($key){
                 case 'code':
                     $this->setProperty(OpenSkos::CODE, new Literal($val));

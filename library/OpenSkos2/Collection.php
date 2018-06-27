@@ -99,30 +99,55 @@ class Collection extends Resource
             if ($currentURI) {
                 $attribs = array('readonly' => 'true');
             }
+            else{
+                $attribs = array();
+            }
             $form = new \Zend_Form();
             $form
-                    ->addElement('hidden', 'id', array('required' => $this->getPropertySingleValue(DcTerms::TITLE) ? true : false))
+                    ->addElement('hidden', 'id', array(
+                        'required' => $this->getPropertySingleValue(DcTerms::TITLE) ? true : false))
                     ->addElement('text', 'code', array('label' => _('Code'), 'required' => true))
-                    ->addElement('text', 'conceptBaseUri', array('label' => _('Concept Base Uri'), 'required' => true, 'attribs' => $attribs))
+                    ->addElement('text', 'conceptBaseUri', array(
+                        'label' => _('Concept Base Uri'),
+                        'required' => true,
+                        'attribs' => $attribs))
                     ->addElement('text', 'dc_title', array('label' => _('Title'), 'required' => true))
-                    ->addElement('textarea', 'dc_description', array('label' => _('Description'), 'cols' => 80, 'row' => 5))
+                    ->addElement('textarea', 'dc_description', array(
+                        'label' => _('Description'),
+                        'cols' => 80,
+                        'row' => 5))
                     ->addElement('text', 'website', array('label' => _('Website')))
-                    ->addElement('select', 'license', array('label' => _('Standard Licence'), 'style' => 'width: 450px;'))
+                    ->addElement('select', 'license', array(
+                        'label' => _('Standard Licence'),
+                        'style' => 'width: 450px;'))
                     ->addElement('text', 'license_name', array('label' => _('Custom Licence (name)')))
                     ->addElement('text', 'license_url', array('label' => _('Custom (URL)')))
-                    ->addElement('checkbox', 'allow_oai', array('label' => _('Allow OpenSKOS OAI Harvesting')))
-                    ->addElement('select', 'OAI_baseURL', array('label' => _('OAI baseURL'), 'style' => 'width: 450px;'))
+                    ->addElement('checkbox', 'allow_oai', array(
+                        'label' => _('Allow OpenSKOS OAI Harvesting')
+                    ))
+                    ->addElement('select', 'OAI_baseURL', array(
+                        'label' => _('OAI baseURL'),
+                        'style' => 'width: 450px;'))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
                     ->addElement('reset', 'reset', array('label' => _('Reset')))
                     ->addElement('submit', 'cancel', array('label' => _('Cancel')))
-                    ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this collection and corresponding Concepts?') . '\');'))
+                    ->addElement('submit', 'delete', array(
+                        'label' => _('Delete'),
+                        'onclick' => 'return confirm(\'' .
+                            _('Are you sure you want to delete this collection and corresponding Concepts?') . '\');'))
                     ->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
             ;
             if (!$this->getPropertySingleValue(DcTerms::TITLE)) {
                 $form->removeElement('delete');
             }
+
+            //String too long for PHPCBF
+            $getAroundPHPCBF = "if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value";
+            $getAroundPHPCBF .= "=this.options[this.selectedIndex].text; ";
+            $getAroundPHPCBF .= "this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }";
+
             $l = $form->getElement('license')->setOptions(
-                array('onchange' => 'if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value=this.options[this.selectedIndex].text; this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }')
+                array('onchange' => $getAroundPHPCBF)
             );
             $l->addMultiOption('', _('choose a standard license  or type a custom one:'), '');
             foreach (\OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
@@ -194,17 +219,16 @@ class Collection extends Resource
 
         $dataOut['code'] = $dataOut['id'] = $this->getPropertySingleValue(OpenSkos::CODE);
         $dataOut['conceptBaseUri'] = $dataOut['id'] = $this->getPropertySingleValue(OpenSkos::CONCEPTBASEURI);
-        $dataOut['dc_title'] = $this->getPropertySingleValue( DcTerms::TITLE);
-        $dataOut['dc_description'] = $this->getPropertySingleValue( DcTerms::DESCRIPTION);
+        $dataOut['dc_title'] = $this->getPropertySingleValue(DcTerms::TITLE);
+        $dataOut['dc_description'] = $this->getPropertySingleValue(DcTerms::DESCRIPTION);
         $dataOut['website'] = $this->getPropertySingleValue(OpenSkos::WEBPAGE);
-        $dataOut['license'] = $this->getPropertySingleValue( DcTerms::LICENSE);
+        $dataOut['license'] = $this->getPropertySingleValue(DcTerms::LICENSE);
         //$dataOut['license_name'] = $this->getPropertySingleValue();
-        $dataOut['license_url'] = $this->getPropertySingleValue( Openskos::LICENCE_URL);
+        $dataOut['license_url'] = $this->getPropertySingleValue(Openskos::LICENCE_URL);
         $dataOut['allow_oai'] = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
         $dataOut['OAI_baseURL'] = $this->getPropertySingleValue(OpenSkos::OAI_BASEURL);
 
         return $dataOut;
-
     }
 
     /*
@@ -214,8 +238,8 @@ class Collection extends Resource
     {
         $dataOut = array();
 
-        foreach ($dataIn as $key => $val){
-            switch($key){
+        foreach ($dataIn as $key => $val) {
+            switch ($key) {
                 case 'tenant':
                     $this->setProperty(OpenSkos::TENANT, new Literal($val));
                     break;
@@ -247,11 +271,8 @@ class Collection extends Resource
                     $this->setProperty(OpenSkos::OAI_BASEURL, new Literal($val));
                     break;
             }
-
-
         }
         return $this;
-
     }
 
     /**
@@ -288,7 +309,15 @@ class Collection extends Resource
             $form = new \Zend_Form();
             $form
                 ->setAttrib('enctype', 'multipart/form-data')
-                ->addElement('file', 'xml', array('label' => _('File'), 'required' => true, 'validators' => array('NotEmpty' => array())));
+                ->addElement(
+                    'file',
+                    'xml',
+                    array(
+                        'label' => _('File'),
+                        'required' => true,
+                        'validators' => array('NotEmpty' => array())
+                    )
+                );
             $statusOptions = [
                 'label' => 'Status for imported concepts',
             ];
@@ -301,14 +330,32 @@ class Collection extends Resource
             $form->addElement('select', 'status', $statusOptions);
             $form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
             $editorOptions = \Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
-            $form->addElement('select', 'lang', array('label' => 'The default language to use if no "xml:lang" attribute is found', 'multiOptions' => $editorOptions['languages']));
-            $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeChecked status of imported concepts'));
-            $form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
-            $form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));
-            $form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));
+            $form->addElement('select', 'lang', array(
+                'label' => 'The default language to use if no "xml:lang" attribute is found',
+                'multiOptions' => $editorOptions['languages']));
+            $form->addElement(
+                'checkbox',
+                'toBeChecked',
+                array('label' => 'Sets the toBeChecked status of imported concepts')
+            );
+            $getAroundPHPCBF = "Purge. Delete all concept schemes found in the file. ";
+            $getAroundPHPCBF .= "(will also delete concepts inside them)";
+            $form->addElement('checkbox', 'purge', array(
+                'label' => $getAroundPHPCBF));
+            $form->addElement(
+                'checkbox',
+                'delete-before-import',
+                array('label' => _('Delete concepts in this collection before import'))
+            );
+            $getAroundPHPCBF = "Import contains only new concepts. Do not update any concepts if ";
+            $getAroundPHPCBF .= "they match by notation (or uri if useUriAsIdentifier is used).";
+            $form->addElement(
+                'checkbox',
+                'onlyNewConcepts',
+                array('label' => _($getAroundPHPCBF))
+            );
             $form->addElement('submit', 'submit', array('label' => 'Submit'));
         }
         return $form;
     }
-
 }
