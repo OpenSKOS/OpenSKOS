@@ -229,11 +229,14 @@ Visit: http://example.com/apidoc/
 
 Consult <baseruri>/apidoc
 
-5.7. Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1
+5.7. Migration from OpenSKOS-1 to OpenSKOS-2.2
 --------------------------------------------------------------------------------
 
-Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1 is split into two parts + optional 
-SkosXL transformation:
+In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
+Jena triple store.
+
+Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1 is split into two parts. 
+You may also incluse the optional SkosXL transformation:
 -- /tools/migrate_tenant_collection.php (migrates tenants and collections from MySQL 
 to institutions and sets of Triple store)
 -- /tools/migrate.php (migrates concepts, schemata and skos collections from Solr to 
@@ -261,7 +264,8 @@ labels are enabled and then one should run
 
 labelsToXl.php –add=1
 
-5.7. Import (/tools/skos2openskos.php)
+
+5.9. Import (/tools/skos2openskos.php)
 --------------------------------------------------------------------------------
 Example of a command line 
 php skos2openskos.php --setUri=http://htdl/clavas-org/set 

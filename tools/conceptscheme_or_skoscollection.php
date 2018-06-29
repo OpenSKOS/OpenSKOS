@@ -75,7 +75,7 @@ switch ($action) {
 
     break;
   default:
-    fwrite(STDERR, "unkown (not yet implemented) action `{$action}`\n");
+    fwrite(STDERR, "unknown (not yet implemented) action `{$action}`\n");
     exit(1);
 }
 

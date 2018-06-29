@@ -113,9 +113,7 @@ foreach ($tenants as $tenant) {
 $logger->info("Validating collections, creating  triple store sets");
 
 $collectionCache = new Collections($dbSource);
-print "Validating Collection\n\n";
 $sets = $collectionCache->validateCollections($resourceManager);
-print "Done Validating Collection\n\n";
 foreach ($sets as $set) {
     insertResource($resourceManager, $set);
 }
