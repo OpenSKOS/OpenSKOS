@@ -495,54 +495,65 @@ class Collections
             if ($row->conceptsBaseUrl) {
                 $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI, new Uri($row->conceptsBaseUrl));
             }
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE, 
-                    new Literal($row->code));
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT, 
-                    new Literal($row->tenant));
-                
-                $tenant = $resourceManager->fetchByUuid($row->tenant, 
-                    \OpenSkos2\Tenant::TYPE, 'openskos:code');
-                
-                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER, 
-                    new Uri($tenant->getUri()));
-                if (!empty($row->dc_title)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::TITLE, 
-                        new Literal($row->dc_title));
-                }
-                if (!empty($row->dc_description)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION, 
-                        new Literal($row->dc_description));
-                }
-                if (!empty($row->website)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::WEBPAGE, 
-                        new Uri($row->website));
-                }
-                if (!empty($row->license_url)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
-                        new Uri($row->license_url));
-                } else {
-                    if (!empty($row->license_name)) {
-                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
-                            new Literal($row->license_name));
-                    } else {
-                        $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE, 
-                            new Uri("http://creativecommons.org/licenses/by/4.0/"));
+            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::CODE,
+                new Literal($row->code));
+            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT,
+                new Literal($row->tenant));
+
+            $tenant = $resourceManager->fetchByUuid(
+                $row->tenant,
+                \OpenSkos2\Tenant::TYPE,
+                'openskos:code'
+            );
+            $set->setProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER,
+                new Uri($tenant->getUri()));
+            if (!empty($row->dc_title)) {
+                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::TITLE,
+                    new Literal($row->dc_title));
+            }
+            if (!empty($row->dc_description)) {
+                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::DESCRIPTION,
+                    new Literal($row->dc_description));
+            }
+            if (!empty($row->website)) {
+                //It was possible to fill any values in the old editor
+                $value = $row->website;
+                if(!filter_var($value, FILTER_VALIDATE_URL)){
+                    //Maybe they forgot the 'HTTP:'. It has happened.
+                    //Let's try this ugly solution. If they wanted 'https', they can fix it after import
+                    $value = "http://$value";
+                    if(!filter_var($value, FILTER_VALIDATE_URL)){
+                        //Ain't gonna happen then
+                        $value = '';
                     }
                 }
-                if (!empty($row->OAI_baseURL)) {
-                    $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL, 
-                        new Uri($row->OAI_baseURL));
-                }
-                $oai=makeRdfBoolean($row->allow_oai);
-                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI, 
-                    $oai);
-                
-                $retVal[] = $set;
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::WEBPAGE,
+                    new Uri($value));
             }
-        
+            if (!empty($row->license_url)) {
+                $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE,
+                    new Uri($row->license_url));
+            } else {
+                if (!empty($row->license_name)) {
+                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE,
+                        new Literal($row->license_name));
+                } else {
+                    $set->setProperty(\OpenSkos2\Namespaces\DcTerms::LICENSE,
+                        new Uri("http://creativecommons.org/licenses/by/4.0/"));
+                }
+            }
+            if (!empty($row->OAI_baseURL)) {
+                $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::OAI_BASEURL,
+                    new Uri($row->OAI_baseURL));
+            }
+            $oai=makeRdfBoolean($row->allow_oai);
+            $set->setProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI,
+                $oai);
+
+            $retVal[] = $set;
+        }
         return $retVal;
     }
-
 }
 
 class Institutions

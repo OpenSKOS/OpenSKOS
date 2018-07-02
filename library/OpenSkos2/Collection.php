@@ -112,12 +112,16 @@ class Collection extends Resource
             $form
                     ->addElement('hidden', 'id', array(
                         'required' => $this->getPropertySingleValue(DcTerms::TITLE) ? true : false))
-                    ->addElement('text', 'code', array('label' => _('Code'), 'required' => true))
+                    ->addElement('text', 'code', array('label' => _('Code'), 'attribs' =>array(
+                        'required' => true
+                    )))
                     ->addElement('text', 'conceptBaseUri', array(
                         'label' => _('Concept Base Uri'),
                         'required' => true,
                         'attribs' => $attribs))
-                    ->addElement('text', 'dc_title', array('label' => _('Title'), 'required' => true))
+                    ->addElement('text', 'dc_title', array('label' => _('Title'), 'attribs' => array(
+                        'required' => true
+                    )))
                     ->addElement('textarea', 'dc_description', array(
                         'label' => _('Description'),
                         'cols' => 80,
@@ -148,9 +152,9 @@ class Collection extends Resource
             }
 
             //String too long for PHPCBF
-            $getAroundPHPCBF = "if (this.selectedIndex>0) {this.form.elements[\'license_name\'].value";
+            $getAroundPHPCBF = "if (this.selectedIndex>0) {this.form.elements['license_name'].value";
             $getAroundPHPCBF .= "=this.options[this.selectedIndex].text; ";
-            $getAroundPHPCBF .= "this.form.elements[\'license_url\'].value=this.options[this.selectedIndex].value; }";
+            $getAroundPHPCBF .= "this.form.elements['license_url'].value=this.options[this.selectedIndex].value; }";
 
             $l = $form->getElement('license')->setOptions(
                 array('onchange' => $getAroundPHPCBF)
@@ -164,6 +168,9 @@ class Collection extends Resource
                     ->setUncheckedValue('N');
 
             $form->getElement('OAI_baseURL')->addValidator(new \OpenSKOS_Validate_Url());
+            $form->getElement('license_url')->addValidator(new \OpenSKOS_Validate_Url());
+            $form->getElement('website')->addValidator(new \OpenSKOS_Validate_Url());
+            $form->getElement('conceptBaseUri')->addValidator(new \OpenSKOS_Validate_Url());
             $formData = $this->dataToArray();
             if ($currentURI && !$formData['conceptBaseUri']) {
                 //This is a re-edit of a collection. Some legacy data won't have this filled
@@ -231,7 +238,6 @@ class Collection extends Resource
         $dataOut['dc_description'] = $this->getPropertySingleValue(DcTerms::DESCRIPTION);
         $dataOut['website'] = $this->getPropertySingleValue(OpenSkos::WEBPAGE);
         $dataOut['license_name'] = $this->getPropertySingleValue(DcTerms::LICENSE);
-        //$dataOut['license_name'] = $this->getPropertySingleValue();
         $dataOut['license_url'] = $this->getPropertySingleValue(Openskos::LICENCE_URL);
         $dataOut['allow_oai'] = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
         $dataOut['OAI_baseURL'] = $this->getPropertySingleValue(OpenSkos::OAI_BASEURL);
@@ -270,7 +276,9 @@ class Collection extends Resource
                     $this->setProperty(DcTerms::LICENSE, new Literal($val));
                     break;
                 case 'license_url':
-                    $this->setProperty(OpenSkos::LICENCE_URL, new Uri($val));
+                    if(filter_var($val, FILTER_VALIDATE_URL)) {
+                        $this->setProperty(OpenSkos::LICENCE_URL, new Uri($val));
+                    }
                     break;
                 case 'allow_oai':
                     $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
@@ -367,3 +375,4 @@ class Collection extends Resource
         return $form;
     }
 }
+

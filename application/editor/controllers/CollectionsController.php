@@ -182,18 +182,22 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $params = $this->getRequest()->getParams();
             $collection = new \OpenSkos2\Collection();
             $form = $collection->getForm();
-            $collection->arrayToData( array('tenant' => $this->_tenant->getCode()));
-            $collection->arrayToData( $params);
-            $collection->generateUri();
-
-            try {
-                $this->getCollectionsManager()->insert($collection);
-            } catch (Zend_Db_Statement_Exception $e) {
-                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+            if (!$form->isValid($this->getRequest()->getParams())) {
                 return $this->_forward('edit');
+            } else {
+                $collection->arrayToData(array('tenant' => $this->_tenant->getCode()));
+                $collection->arrayToData($params);
+                $collection->generateUri();
+
+                try {
+                    $this->getCollectionsManager()->insert($collection);
+                } catch (Zend_Db_Statement_Exception $e) {
+                    $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+                    return $this->_forward('edit');
+                }
+                $this->getHelper('FlashMessenger')->addMessage('Data saved');
+                $this->_helper->redirector('index');
             }
-            $this->getHelper('FlashMessenger')->addMessage('Data saved');
-            $this->_helper->redirector('index');
             return;
         }
 
