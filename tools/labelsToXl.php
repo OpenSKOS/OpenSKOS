@@ -78,8 +78,9 @@ if (!empty($modifiedSince)) {
 }
 
 $offset = 0;
-$limit = 200;
+$limit = 50;
 $counter = 0;
+
 do {
     try {
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
@@ -91,16 +92,23 @@ do {
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
 
             foreach ($concepts as $concept) {
+
+
                 $counter ++;
                 $logger->debug($concept->getUri());
+                printf("\n\nPROCESSING %s\n=============================\n", $concept->getUri());
 
                 try {
                     $labelHelper->assertLabels($concept, true);
 
                     $insertAndDelete = $labelHelper->getLabelsForInsertAndDelete($concept);
 
+                    printf("To delete: %d\n", $insertAndDelete['delete']->count());
+                    printf("To insert: %d\n", $insertAndDelete['insert']->count());
+
                     $deleteResources->merge($insertAndDelete['delete']);
                     $inserResources->merge($insertAndDelete['insert']);
+
 
                     // Create concept only with xl labels to insert it as partial resource
                     $partialConcept = new \OpenSkos2\Concept($concept->getUri());
@@ -110,31 +118,43 @@ do {
 
                     $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
+                    die ($ex->getMessage());
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
                         . '". The message is: ' . $ex->getMessage()
                     );
                 }
             }
-            
-            foreach ($deleteResources as $deleteResource) {
-                $resourceManager->delete($deleteResource);
+
+            try{
+                foreach ($deleteResources as $deleteResource) {
+                    $resourceManager->delete($deleteResource);
+                }
+                $resourceManager->extendCollection($inserResources);
+            } catch (\Exception $ex) {
+                die ($ex->getMessage());
+                $logger->warning(
+                    'Problem adding the labels '
+                    . '". The message is: ' . $ex->getMessage()
+                );
             }
-            
-            $resourceManager->insertCollection($inserResources);
         }
     } catch (\Exception $ex) {
+        die ($ex->getMessage());
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
         );
     }
+
     
     if (!empty($skipDone)) {
         $offset = 0; // if we skip done we need to work without pagination
     } else {
         $offset += $limit;
     }
+
+
     
     $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);

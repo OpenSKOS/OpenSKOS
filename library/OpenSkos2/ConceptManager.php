@@ -80,7 +80,7 @@ class ConceptManager extends ResourceManagerWithSearch
     public function replace(Resource $resource)
     {
         parent::replace($resource);
-        
+
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }

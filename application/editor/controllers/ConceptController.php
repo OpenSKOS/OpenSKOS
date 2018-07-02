@@ -22,6 +22,7 @@
 
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
@@ -29,6 +30,7 @@ use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Validator\Resource as ResourceValidator;
 use OpenSkos2\SkosXl\LabelManager;
+use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Exception\ResourceNotFoundException;
 use Zend\Diactoros\Response\JsonResponse;
 
@@ -141,9 +143,11 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             OpenSKOS_Db_Table_Users::fromIdentity(),
             $this->getDI()->get('\OpenSkos2\PersonManager')
         );
+        $conceptManager = $this->getConceptManager();
+        $conceptManager->setIsNoCommitMode(true);
         
         $validator = new ResourceValidator(
-            $this->getConceptManager(),
+            $conceptManager,
             $this->getOpenSkos2Tenant()
         );
         
@@ -151,17 +155,20 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             if ($form->getIsCreate()) {
                 $concept->selfGenerateUri(
                     $this->getOpenSkos2Tenant(),
-                    $this->getConceptManager()
+                    $conceptManager
                 );
             }
             
             $this->handleStatusAutomatedActions($concept, $form->getValues());
-            
-            $this->getConceptManager()->replaceAndCleanRelations($concept);
+
+            $conceptManager->replaceAndCleanRelations($concept);
         } else {
             return $this->_forward('edit', 'concept', 'editor', array('errors' => $validator->getErrorMessages()));
         }
-        
+
+        //We try to make this the only commit of the entire save process. Multiple commits have caused a lot of problems
+        //This commit should save all concepts and labels (even though conceptManager and labelHelper are different classes.`
+        $conceptManager->commit();
         $this->_helper->redirector('view', 'concept', 'editor', array('uri' => $concept->getUri()));
     }
 
@@ -366,7 +373,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             
             //!TODO Handle deleted all around the system.
             if ($concept->isDeleted()) {
-                throw new ResourceNotFoundException('The concpet was not found (it is deleted).');
+                throw new ResourceNotFoundException('This concept has been deleted and is no longer available.');
             }
             
             return $concept;
@@ -487,7 +494,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     protected function handleStatusAutomatedActions(Concept $concept, $formData)
     {
         if (!empty($formData['statusOtherConcept'])) {
-            
+
             if ($this->getConceptManager()->askForUri($formData['statusOtherConcept'])) {
                 $otherConcept = $this->getConceptManager()->fetchByUri($formData['statusOtherConcept']);
                 
@@ -505,10 +512,35 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 if ($concept->getStatus() == Concept::STATUS_REDIRECTED) {
                     foreach ($concept->retrieveLanguages() as $lang) {
                         if ($concept->hasPropertyInLanguage(Skos::PREFLABEL, $lang)) {
+
                             $otherConcept->addUniqueProperty(
                                 $formData['statusOtherConceptLabelToFill'],
                                 $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]
                             );
+
+
+                            //Redmine #34508. Also save the XL labels if XL is active.
+                            $tenant = $this->getOpenSkos2Tenant();
+                            if ($tenant->getEnableSkosXl() === true) {
+
+                                $label = new Label(Label::generateUri());
+                                $label->setProperty(SkosXl::LITERALFORM, $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]);
+                                $label->ensureMetadata();
+
+                                if ($formData['statusOtherConceptLabelToFill'] === Skos::HIDDENLABEL) {
+                                    $otherConcept->addUniqueProperty(
+                                        SkosXl::HIDDENLABEL,
+                                        $label
+                                    );
+                                }
+                                if ($formData['statusOtherConceptLabelToFill'] === Skos::ALTLABEL) {
+                                    $otherConcept->addUniqueProperty(
+                                        SkosXl::ALTLABEL,
+                                        $label
+                                    );
+                                }
+                            }
+
                         }
                     }
 

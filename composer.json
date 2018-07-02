@@ -37,6 +37,12 @@
         ],
         "post-install-cmd": [
             "bash contrib/setup.sh"
+        ],
+        "jena2solr": [
+            "docker exec -t openskos-php-fpm php tools/jena2solr.php -e production -v"
+        ],
+        "solr-create-core": [
+            "docker exec -t openskos-php-fpm ./vendor/bin/phing solr.create.core"
         ]
     }
 }

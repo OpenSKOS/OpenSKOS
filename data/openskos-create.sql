@@ -20,6 +20,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`tenant` (
   `countryName` VARCHAR(100) NULL DEFAULT NULL ,
   `disableSearchInOtherTenants` BOOLEAN,
   `enableStatusesSystem` BOOLEAN,
+  `enableSkosXl` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`code`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -111,7 +112,6 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
   INDEX `fk_user_tenant` (`tenant` ASC) ,
-  UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) ,
   CONSTRAINT `fk_user_tenant`
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )
