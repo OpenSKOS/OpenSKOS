@@ -20,6 +20,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`tenant` (
   `countryName` VARCHAR(100) NULL DEFAULT NULL ,
   `disableSearchInOtherTenants` BOOLEAN,
   `enableStatusesSystem` BOOLEAN,
+  `enableSkosXl` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`code`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -101,17 +102,16 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   `apikey` VARCHAR(100) NULL DEFAULT NULL ,
   `active` CHAR(1) NOT NULL DEFAULT 'Y' ,
   `type` ENUM('editor','api','both') NOT NULL DEFAULT 'both' ,
-  `eppn` VARCHAR(100) NOT NULL ,
   `role` varchar(25) NOT NULL DEFAULT "guest",
   `searchOptions` BLOB,
   `conceptsSelection` BLOB,
   `defaultSearchProfileIds` VARCHAR(255),
   `disableSearchProfileChanging` BOOLEAN,
   `uri` TEXT,
+  `enableSkosXl` tinyint(1),
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `unique_user` (`email` ASC, `tenant` ASC) ,
   INDEX `fk_user_tenant` (`tenant` ASC) ,
-  UNIQUE INDEX `eduPersonPrincipalName` (`eppn` ASC, `tenant` ASC) ,
   CONSTRAINT `fk_user_tenant`
     FOREIGN KEY (`tenant` )
     REFERENCES `openskos`.`tenant` (`code` )

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="openskos" default="install.dev" basedir="">
+    
+    <property name="env" value="development"/>
+    <property file="./build/build.properties"/>
+    <property file="./build/build-${env}.properties" override="true"/>
+    
+    <property name="environment" value="development"/>
+    <resolvepath propertyName="basedir" file="${project.basedir}/"/>
+    
+    <target name="install.dev" description="Setup dev environment">
+        <exec passthru="true" checkReturn="true" command="composer install -o" />
+        <phingcall target="solr.create.core" />
+        <phingcall target="config" />
+    </target>
+
+    <target name="config"
+            description="configure application for a specific environment">                
+        <copy overwrite="true"
+              file="${basedir}/application/configs/application.ini.dist"
+              tofile="${basedir}/application/configs/application.ini">
+            <filterchain>
+                <replaceregexp>
+                    <regexp pattern="solr\.host\s*=\s*.*" replace="solr.host=${solr.host}"/>
+                    <regexp pattern="solr\.port\s*=\s*.*" replace="solr.port=${solr.port}"/>
+                    <regexp pattern="solr\.context\s*=\s*.*" replace="solr.context=${solr.context}"/>
+                    <regexp pattern="db\.params\.host\s*=\s*localhost" replace="db.params.host=${db.server}"/>
+                    <regexp pattern="db\.params\.username\s*=\s*openskos" replace="db.params.username=${db.username}"/>
+                    <regexp pattern="db\.params\.password\s*=\s*openskos" replace="db.params.password=${db.password}"/>
+                    <regexp pattern="db\.params\.dbname\s*=\s*openskos" replace="db.params.dbname=${db.database}"/>                    
+                    <regexp pattern="@google-client-id@" replace="${oAuth2.google.clintId}"/>
+                    <regexp pattern="@google-client-secret@" replace="${oAuth2.google.clintSecret}"/>
+                    <regexp pattern="@api-base-uri@" replace="${api.baseUri}"/>
+                    <regexp pattern="@api-show-only-approved@" replace="${api.showOnlyApproved}"/>
+                    <regexp pattern="@editor-allow-notation-edit@" replace="${editor.allowNotationEdit}"/>
+                    <regexp pattern="sparql\.(query|update)Uri\s*=\s*.*?:3030/[^/]*/" replace="sparql.\1Uri=${jena.url}"/>
+                </replaceregexp>
+            </filterchain>
+        </copy>
+    </target>        
+                        
+    <target name="solr.create.core" description="Creates solr development">        
+        <property name="solr.docker.host" value="openskos-solr"/>         
+        <property name="solr.core.path" value="docs/solr"/> 
+        <property name="solr.core.name" value="openskos"/> 
+        <property name="solr.url.admin" value="http://openskos-solr:8983/solr/admin"/> 
+        
+        <echo msg="docker cp ${solr.core.path} ${solr.docker.host}:/opt/solr/server/solr/${solr.core.name}" />
+        <exec command="docker cp ${solr.core.path} ${solr.docker.host}:/opt/solr/server/solr/${solr.core.name}" escape="false" logoutput="true" />
+
+        <echo msg="docker exec --user root -i -t ${solr.docker.host} chown -R solr:solr /opt/solr/server/solr/${solr.core.name}" />
+        <exec command="docker exec --user root -i -t ${solr.docker.host} chown -R solr:solr /opt/solr/server/solr/${solr.core.name}" escape="false" logoutput="true" />
+
+        <echo msg="${solr.url.admin}/cores?action=CREATE&amp;name=${solr.core.name}&amp;instanceDir=${solr.core.name}" />
+        <http-request url="${solr.url.admin}/cores?action=CREATE&amp;name=${solr.core.name}&amp;instanceDir=${solr.core.name}" verbose="true" />
+    </target>    
+    
+</project>

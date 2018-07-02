@@ -37,13 +37,13 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
      * @apiVersion 1.0.0
      * @apiDescription Fetch all Collections/Sets in this repository
      *
-     * in RDF: /api/collections
+     * in RDF: <a href='/api/collections' target='_blank'>/api/collections</a>
      *
-     * in JSON: /api/collections?format=json
+     * in JSON: <a href='/api/collections?format=json' target='_blank'>/api/collections?format=json</a>
      *
-     * in JSONP: /api/collections?format=jsonp&callback=myCallback_1234
+     * in JSONP: <a href='/api/collections?format=jsonp&callback=myCallback_1234' target='_blank'>/api/collections?format=jsonp&callback=myCallback_1234</a>
      *
-     * in HTML: /api/collections?format=html
+     * in HTML: <a href='/api/collections?format=html' target='_blank'>/api/collections?format=html</a>
      *
      * @api {get} /api/collections Get collections details
      * @apiName GetCollections
@@ -122,18 +122,18 @@ class Api_CollectionsController extends OpenSKOS_Rest_Controller
      * @apiVersion 1.0.0
      * @apiDescription Fetch a Collection/Set from this repository
      *
-     * in RDF: /api/collections
+     * in RDF: <a href='/api/collections' target='_blank'>/api/collections</a>
      *
-     * in JSON: /api/collections/{id}?format=json
+     * in JSON: <a href='/api/collections/mi:gtaa?format=json' target='_blank'>/api/collections/{institution_code:collection_code}?format=json</a>
      *
-     * in JSONP: /api/collections/{id}?format=jsonp&callback=myCallback_1234
+     * in JSONP: <a href='/api/collections/mi:gtaa?format=jsonp&callback=myCallback_1234' target='_blank'>/api/collections/{institution_code:collection_code}?format=jsonp&callback=myCallback_1234</a>
      *
-     * in HTML: /api/collections/{id}?format=html
+     * in HTML: <a href='/api/collections/mi:gtaa?format=html' target='_blank'>/api/collections/{institution_code:collection_code}?format=html</a>
      *
      * @api {get} /api/collections/{id} Get collection details
      * @apiName GetCollection
      * @apiGroup Collections
-     * @apiParam id {String} Collection/set code
+     * @apiParam id {String} <institution_code>:<collection_code>
      * @apiSuccess (200) {String} XML
      * @apiSuccessExample {String} Success-Response
      *   HTTP/1.1 200 Ok

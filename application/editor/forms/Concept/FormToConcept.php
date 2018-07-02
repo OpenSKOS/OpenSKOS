@@ -200,9 +200,20 @@ class Editor_Forms_Concept_FormToConcept
             $user->tenant,
             $setUri,
             $user->getFoafPerson(),
+            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
             $personManager,
             $oldStatus
         );
+    }
+    
+    /**
+     * Get dependency injection container
+     * 
+     * @return \DI\Container
+     */
+    protected static function getDI()
+    {
+        return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
     }
     
     /**

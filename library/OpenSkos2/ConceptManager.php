@@ -27,20 +27,67 @@ use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\ResourceManager;
+use OpenSkos2\Rdf\ResourceManagerWithSearch;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\SkosXl\LabelManager;
 
-class ConceptManager extends ResourceManager
+class ConceptManager extends ResourceManagerWithSearch
 {
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
+    
+    /**
+     * @var LabelManager
+     */
+    protected $labelManager;
+    
+    /**
+     * @return LabelManager
+     */
+    public function getLabelManager()
+    {
+        return $this->labelManager;
+    }
 
     /**
-     * Deletes and then inserts the resource.
-     * For concepts also deletes all relations for which the concept is object.
+     * @param LabelManager $labelManager
+     */
+    public function setLabelManager(LabelManager $labelManager)
+    {
+        $this->labelManager = $labelManager;
+    }
+    
+    /**
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @throws ResourceAlreadyExistsException
+     */
+    public function insert(Resource $resource)
+    {
+        parent::insert($resource);
+        
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
+    }
+    
+    /**
+     * Deletes and then inserts the resourse.
+     * @param \OpenSkos2\Rdf\Resource $resource
+     */
+    public function replace(Resource $resource)
+    {
+        parent::replace($resource);
+
+        $labelHelper = new Concept\LabelHelper($this->labelManager);
+        $labelHelper->insertLabels($resource);
+    }
+
+    /**
+     * Deletes and then inserts the concept.
+     * Also deletes all relations for which the concept is object.
      * @param Concept $concept
      */
     public function replaceAndCleanRelations(Concept $concept)
@@ -48,7 +95,7 @@ class ConceptManager extends ResourceManager
         // @TODO Danger if one of the operations fail. Need transaction or something.
         // @TODO What to do with imports. When several concepts are imported at once.
         $this->deleteRelationsWhereObject($concept);
-        parent::replace($concept);
+        $this->replace($concept);
     }
 
     /**
@@ -148,6 +195,25 @@ class ConceptManager extends ResourceManager
             Skos::getInferredRelationsMap()[$relationType],
             new Uri($subjectUri)
         );
+    }
+    
+    /**
+     * Get all concepts that are related as subjects to the given label uri
+     * @param Label $label
+     * @return ConceptCollection
+     */
+    public function fetchByLabel($label)
+    {
+        $query = '
+                DESCRIBE ?subject
+                WHERE {
+                    ?subject ?predicate <' . $label->getUri() . '> .
+                    ?subject <' . \OpenSkos2\Namespaces\Rdf::TYPE . '> <' . \OpenSkos2\Concept::TYPE . '>
+                }';
+        
+        $concepts = $this->fetchQuery($query);
+        
+        return $concepts;
     }
 
     /**
@@ -250,27 +316,6 @@ class ConceptManager extends ResourceManager
             }
             $start += $step;
         } while (!(count($concepts) < $step));
-    }
-
-    /**
-     * Perform a full text query
-     * lucene / solr queries are possible
-     * for the available fields see schema.xml
-     *
-     * @param string $query
-     * @param int $rows
-     * @param int $start
-     * @param int &$numFound output Total number of found records.
-     * @param array $sorts
-     * @return ConceptCollection
-     */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null)
-    {
-        // @TODO There is nowhere in solr check for class:Concept, but all resources are there
-
-        return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
-        );
     }
 
     /**

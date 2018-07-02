@@ -156,7 +156,7 @@ var EditorControl = new Class({
     saveConcept: function () {
         var self = this;
         $('Editconcept').set('send', {
-            onComplete: function (responseHTML) {
+            onSuccess: function (responseHTML) {
                 self.stopLoading();
 
                 $('central-content').empty();
@@ -169,6 +169,12 @@ var EditorControl = new Class({
                     new TabPane('concept-scheme-tab-container', {}, false);
                     Editor.Relations.disableRelationLinks();
                 }
+            },
+            onFailure: function (response) {
+                // Show the error response
+                $('central-content').empty();
+                $('central-content').set('html', response.response);
+                $('central-content').addClass('error');
             }
         });
         $('Editconcept').send();
@@ -205,7 +211,7 @@ var EditorControl = new Class({
     },
     saveConceptScheme: function () {
         $('Editconceptscheme').set('send', {
-            onComplete: function (responseHTML) {
+            onSuccess: function (responseHTML) {
                 $('central-content').empty();
                 $('central-content').set('html', responseHTML);
 
@@ -216,6 +222,12 @@ var EditorControl = new Class({
                     // The save is successfull.
                     window.location.href = BASE_URL + '/editor/concept-scheme/index/';
                 }
+            },
+            onFailure: function (response) {
+                // Show the error response
+                $('central-content').empty();
+                $('central-content').set('html', response.response);
+                $('central-content').addClass('error');
             }
         });
         $('Editconceptscheme').send();

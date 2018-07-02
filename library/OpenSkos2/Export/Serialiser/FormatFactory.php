@@ -57,6 +57,7 @@ class FormatFactory
         $propertiesToSerialise = [],
         $namespaces = [],
         $maxDepth = 1,
+        $excludeProperties = [],
         $conceptManager = null
     ) {
         // @TODO Allow all easyrdf formats.
@@ -76,6 +77,7 @@ class FormatFactory
         
         // @TODO not all require properties, namespaces and max depth. Validate what is required and what not.
         $formatObject->setPropertiesToSerialise($propertiesToSerialise);
+        $formatObject->setExcludePropertiesList($excludeProperties);
         $formatObject->setNamespaces($namespaces);
         $formatObject->setMaxDepth($maxDepth);
         

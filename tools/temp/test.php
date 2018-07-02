@@ -56,6 +56,7 @@ class EchoLogger extends \Psr\Log\AbstractLogger
 
 // Test...
 
+ini_set('html_errors', false);
 $xml = '
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:skos="http://www.w3.org/2004/02/skos/core#"
@@ -63,14 +64,14 @@ $xml = '
          xmlns:dcterms="http://purl.org/dc/terms/"
          xmlns:openskos="http://openskos.org/xmlns#">
 
-  <rdf:Description rdf:about="http://openskos/api/collections/pic:gtaa/666">
+  <rdf:Description rdf:about="http://openskos/api/collections/pic:gtaa/222">
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
     <openskos:toBeChecked>0</openskos:toBeChecked>
     <openskos:status>candidate</openskos:status>
-    <skos:altLabel xml:lang="nl">Six Six Six</skos:altLabel>
-    <skos:altLabel xml:lang="nl">Six.Six.Six</skos:altLabel>
-    <skos:notation>666</skos:notation>
-    <skos:prefLabel xml:lang="nl">SixSixSix</skos:prefLabel>
+    <skos:altLabel xml:lang="nl">222</skos:altLabel>
+    <skos:altLabel xml:lang="nl">2.2.2</skos:altLabel>
+    <skos:notation>222</skos:notation>
+    <skos:prefLabel xml:lang="nl">2_2_2</skos:prefLabel>
 
     <skos:inScheme rdf:resource="http://openskos/api/collections/pic:gtaa/cs3"/>
     <dcterms:creator>amitsev</dcterms:creator>
@@ -113,7 +114,7 @@ $response = $client
     ->setParameterGet('collection', 'gtaa')
     ->setParameterGet('key', 'maldimirov')
     ->setParameterGet('autoGenerateIdentifiers', false)
-    ->request('PUT');
+    ->request('POST');
 
 echo PHP_EOL . $response->getBody() . PHP_EOL;
 

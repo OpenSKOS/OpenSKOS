@@ -20,11 +20,10 @@
 namespace OpenSkos2\Export\Serialiser\Format;
 
 use OpenSkos2\Rdf\Resource;
+use OpenSkos2\Api\Transform\DataRdf;
 use OpenSkos2\Export\Serialiser\FormatAbstract;
-use OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions as EasyRdfOpenSkos;
 use OpenSkos2\Export\Serialiser\Exception\RequiredNamespacesListException;
 
-// @TODO This class ignores properties to export.
 class Xml extends FormatAbstract
 {
     /**
@@ -74,11 +73,14 @@ class Xml extends FormatAbstract
      */
     public function printResource(Resource $resource)
     {
-        $graph = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($resource);
-        return $graph->serialise(
-            'rdfxml_openskos',
-            [EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => true]
+        $transform = new DataRdf(
+            $resource,
+            false,
+            [], // $this->getPropertiesToSerialise(), we don't have that here. Always include all properties.
+            $this->getExcludePropertiesList()
         );
+        
+        return $transform->transform();
     }
     
     /**
