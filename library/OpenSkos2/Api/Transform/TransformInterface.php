@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -24,7 +24,7 @@ namespace OpenSkos2\Api\Transform;
  */
 interface TransformInterface
 {
-    
+
     /**
      * Transform input to something else
      *

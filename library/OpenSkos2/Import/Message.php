@@ -24,6 +24,7 @@ use OpenSkos2\Rdf\Uri;
 
 class Message
 {
+
     /**
      * @var string file to import
      */
@@ -43,9 +44,7 @@ class Message
      * @var string
      */
     private $fallbackLanguage;
-
     private $deleteSchemes;
-
     private $clearSet;
 
     /**
@@ -61,20 +60,26 @@ class Message
     /**
      * @var bool
      */
+    private $removeDanglingReferences;
+
+    /**
+     * @var bool
+     */
     private $toBeChecked;
 
     /**
      * @var Person
      */
-    private $user;
+    private $person;
 
     /**
      * Message constructor.
-     * @param $user
+     * @param $person
      * @param $file
      * @param Uri $setUri
      * @param bool $ignoreIncomingStatus
      * @param string $importedConceptStatus
+     * @param bool $removeDanglingReferences
      * @param bool $noUpdates
      * @param bool $toBeChecked
      * @param string $fallbackLanguage
@@ -82,11 +87,12 @@ class Message
      * @param bool $deleteSchemes
      */
     public function __construct(
-        $user,
+        $person,
         $file,
         $setUri,
         $ignoreIncomingStatus,
         $importedConceptStatus,
+        $removeDanglingReferences,
         $noUpdates = false,
         $toBeChecked = false,
         $fallbackLanguage = null,
@@ -97,12 +103,13 @@ class Message
         $this->setUri = $setUri;
         $this->ignoreIncomingStatus = $ignoreIncomingStatus;
         $this->importedConceptStatus = $importedConceptStatus;
-        $this->noUpdates = $noUpdates;
+        $this->removeDanglingReferences = $removeDanglingReferences;
+        $this->noUpdates = $noUpdates; // create mode
         $this->toBeChecked = $toBeChecked;
         $this->fallbackLanguage = $fallbackLanguage;
         $this->clearSet = $clearSet;
         $this->deleteSchemes = $deleteSchemes;
-        $this->user = $user;
+        $this->person = $person;
     }
 
     /**
@@ -182,6 +189,11 @@ class Message
      */
     public function getUser()
     {
-        return $this->user;
+        return $this->person;
+    }
+
+    public function removeDanglingReferences()
+    {
+        return $this->removeDanglingReferences;
     }
 }

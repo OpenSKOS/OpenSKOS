@@ -19,8 +19,16 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
+use OpenSkos2\Rdf\Uri;
+
 require 'autoload.inc.php';
 require 'Zend/Console/Getopt.php';
+
+require_once 'utils_functions.php';
 
 $opts = array(
     'help|?' => 'Print this usage message',
@@ -55,7 +63,10 @@ if (null === $OPTS->code) {
 
 include 'bootstrap.inc.php';
 
-$model = new OpenSKOS_Db_Table_Tenants();
+/* @var $diContainer DI\Container */
+$diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManager');
+$tenantManager = $diContainer->make('\OpenSkos2\TenantManager');
 
 switch ($action) {
     case 'create':
@@ -73,20 +84,36 @@ switch ($action) {
             $password = $OPTS->password;
         }
         try {
-            $model->createRow(array(
-                'code' => $OPTS->code,
-                'name' => $OPTS->name
-            ))->save();
+
+            $tenantCode = $OPTS->code;
+            $tenantName = $OPTS->name;
+            $tenantEmail = $OPTS->email;
+
+            if (empty($tenantName)) {
+                $tenantName = $tenantCode;
+            }
+            $tenant = new Tenant();
+
+            $tenant->arrayToData(
+                array(
+                    'name' => $tenantName,
+                    'code'=> $tenantCode,
+                    'email'=> $tenantEmail,
+                )
+            );
+            $tenant->ensureMetadata();
+
+            insertResource($tenantManager, $tenant);
         } catch (Zend_Db_Exception $e) {
             fwrite(STDERR, $e->getMessage() . "\n");
             exit(2);
         }
         $model = new OpenSKOS_Db_Table_Users();
         $model->createRow(array(
-            'email' => $OPTS->email,
-            'name' => $OPTS->name,
+            'email' => $tenantEmail,
+            'name' => $tenantName,
             'password' => new Zend_Db_Expr('MD5(' . $model->getAdapter()->quote($password) . ')'),
-            'tenant' => $OPTS->code,
+            'tenant' => $tenantCode,
             'type' => OpenSKOS_Db_Table_Users::USER_TYPE_BOTH,
             'role' => OpenSKOS_Db_Table_Users::USER_ROLE_ADMINISTRATOR,
         ))->save();
@@ -95,13 +122,16 @@ switch ($action) {
         fwrite(STDOUT, "  - login: {$OPTS->email}\n");
         fwrite(STDOUT, "  - password: {$password}\n");
         break;
+
     case 'delete':
+        /*
         $tenant = $model->find($OPTS->code)->current();
         if (null === $tenant) {
             fwrite(STDERR, "Tenant `{$OPTS->code} does not exists\n");
             exit(2);
         }
         $tenant->delete();
+        */
         break;
     default:
         fwrite(STDERR, "unkown action `{$action}`\n");

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -19,9 +18,7 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Rdf\Uri;
-
 /**
  * This is now openskos set. Because the term collection referes to skos:collection
  */
@@ -48,7 +45,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         }
         return $model->fetchAll($select);
     }
-
     /**
      * @return Zend_Form
      */
@@ -60,35 +56,27 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             $form
                     ->setAttrib('enctype', 'multipart/form-data')
                     ->addElement('file', 'xml', array('label' => _('File'), 'required' => true, 'validators' => array('NotEmpty' => array())));
-
             $statusOptions = [
                 'label' => 'Status for imported concepts',
             ];
-
             if ($this->getTenant()['enableStatusesSystem']) {
                 $statusOptions['multiOptions'] = OpenSKOS_Concept_Status::statusesToOptions();
             } else {
                 $statusOptions['multiOptions'] = [OpenSKOS_Concept_Status::APPROVED];
                 $statusOptions['disabled'] = true;
             }
-
             $form->addElement('select', 'status', $statusOptions);
             $form->addElement('checkbox', 'ignoreIncomingStatus', array('label' => 'Ignore incoming status'));
-
             $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
             $form->addElement('select', 'lang', array('label' => 'The default language to use if no "xml:lang" attribute is found', 'multiOptions' => $editorOptions['languages']));
-
-            $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeCheked status of imported concepts'));
+            $form->addElement('checkbox', 'toBeChecked', array('label' => 'Sets the toBeChecked status of imported concepts'));
             $form->addElement('checkbox', 'purge', array('label' => 'Purge. Delete all concept schemes found in the file. (will also delete concepts inside them)'));
             $form->addElement('checkbox', 'delete-before-import', array('label' => _('Delete concepts in this collection before import')));
             $form->addElement('checkbox', 'onlyNewConcepts', array('label' => _('Import contains only new concepts. Do not update any concepts if they match by notation (or uri if useUriAsIdentifier is used).')));
-
             $form->addElement('submit', 'submit', array('label' => 'Submit'));
         }
-
         return $form;
     }
-
     public function getOaiJobForm()
     {
         static $form;
@@ -105,7 +93,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         }
         $form->getElement('from')->addValidator(new OpenSKOS_Validate_Datestring());
         $form->getElement('until')->addValidator(new OpenSKOS_Validate_Datestring());
-
         $harvester = new OpenSKOS_Oai_Pmh_Harvester($this);
         try {
             $sets = array('' => _('choose optional set:')) + $harvester->listSets()->toArray();
@@ -113,10 +100,8 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         } catch (OpenSKOS_Oai_Pmh_Harvester_Exception $e) {
             $form->getElement('set')->setMultiOptions(array('[' . _('Failed to load sets from OAI!') . ']'));
         }
-
         return $form;
     }
-
     public function getId()
     {
         return $this->tenant . ':' . $this->code;
@@ -145,7 +130,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         }
         return new Uri($this->uri);
     }
-
     /**
      * @return Zend_Form
      */
@@ -171,7 +155,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     ->addElement('submit', 'delete', array('label' => _('Delete'), 'onclick' => 'return confirm(\'' . _('Are you sure you want to delete this collection and corresponding Concepts?') . '\');'))
                     ->addDisplayGroup(array('submit', 'reset', 'cancel', 'delete'), 'buttons')
             ;
-
             if (!$this->id) {
                 $form->removeElement('delete');
             }
@@ -182,21 +165,16 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
             foreach (OpenSKOS_Db_Table_Collections::$licences as $key => $value) {
                 $l->addMultiOption($value, $key);
             }
-
             $form->getElement('allow_oai')
                     ->setCheckedValue('Y')
                     ->setUncheckedValue('N');
-
             $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
             $validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
             $form->getElement('code')->addValidator($validator);
-
             $form->getElement('OAI_baseURL')->addValidator(new OpenSKOS_Validate_Url());
             $form->setDefaults($this->toArray());
-
             //load OAI sources:
             $oai_providers = array('' => _('Pick a provider (or leave empty)...'));
-
             $bootstrap = $this->_getBootstrap();
             $instances = $bootstrap->getOption('instances');
             if (null !== $instances) {
@@ -235,16 +213,13 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                     }
                 }
             }
-
             if (!isset($oai_providers[$this->OAI_baseURL])) {
                 $oai_providers[$this->OAI_baseURL] = $this->OAI_baseURL;
             }
-
             $form->getElement('OAI_baseURL')->setMultiOptions($oai_providers);
         }
         return $form;
     }
-
     /**
      * @return Bootstrap
      */
@@ -252,7 +227,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     {
         return Zend_Controller_Front::getInstance()->getParam('bootstrap');
     }
-
     /**
      * @return OpenSKOS_Db_Table_Row_Tenant
      */
@@ -260,7 +234,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
     {
         return $this->findParentRow('OpenSKOS_Db_Table_Tenants');
     }
-
     /**
      * @return DOMDocument;
      */
@@ -271,10 +244,8 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         $doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
         $doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
         $doc->documentElement->setAttribute('xmlns:dcterms', 'http://purl.org/dc/terms/');
-
         return $doc;
     }
-
     public function toRdf($withCreator = true)
     {
         $helper = new Zend_View_Helper_ServerUrl();
@@ -283,7 +254,6 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
         foreach ($this as $key => $val) {
             $data[$key] = htmlspecialchars($val);
         }
-
         $doc = self::getRdfDocument();
         $root = $doc->documentElement->appendChild($doc->createElement('rdf:Description'));
         $root->setAttribute('rdf:about', $about);
@@ -298,14 +268,12 @@ class OpenSKOS_Db_Table_Row_Collection extends Zend_Db_Table_Row
                 $node->setAttribute('rdf:about', $data['license_url']);
             }
         }
-
         if ($data['website']) {
             $doc->documentElement->setAttribute('xmlns:owl', 'http://www.w3.org/2002/07/owl#');
             $node = $doc->createElement('owl:sameAs');
             $node->setAttribute('rdf:about', $data['website']);
             $root->appendChild($node);
         }
-
         if ($withCreator) {
             $tenant = $this->getTenant();
             $root->appendChild($doc->createElement('dcterms:creator', htmlspecialchars($tenant->name)))

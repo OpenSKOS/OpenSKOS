@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2\SkosXl;
 
 use OpenSkos2\Rdf\ResourceManagerWithSearch;
@@ -23,6 +24,7 @@ use OpenSkos2\SkosXl\Label;
 
 class LabelManager extends ResourceManagerWithSearch
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.

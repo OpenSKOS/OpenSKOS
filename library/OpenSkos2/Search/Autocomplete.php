@@ -19,11 +19,18 @@
 
 namespace OpenSkos2\Search;
 
-use OpenSkos2\Rdf\Resource;
 use Solarium\Core\Query\Helper as QueryHelper;
 
+// Meertens:
+// - 'collection' is not used as key in our version, use 'set' and 'skosCollection' instead
+// Picturae's changes starting from  28/10/2016 are taken.
+// in search $boost variable is moved  up in the loop for labels, otherwise 
+// for label with no languages it is not defined.
+//-- added new parameter 'wholeword' to handle switch betwen whole word search 
+//(prefix t_) and the part-of-word search (prefix a_)
 class Autocomplete
 {
+
     /**
      * @var \OpenSkos2\ConceptManager
      */
@@ -48,11 +55,12 @@ class Autocomplete
      * Perform a autocomplete search with a search profile from the editor
      *
      * @param array $options
+     *
      * @return \OpenSkos2\ConceptCollection
      */
     public function search($options, &$numFound)
     {
-        // @TODO Ensure all options are arrays.
+
 
         $helper = new QueryHelper();
 
@@ -85,31 +93,37 @@ class Autocomplete
             }
         }
 
+        $prefix = '';
+        //Meertens: the feature wholeworld  works only  when labels and/or properties are given as request parameters
+        if (isset($options['wholeword'])) {
+            if ($options['wholeword']) {
+                $prefix = 't_';
+            }
+        }
+
         // @TODO Better to use edismax qf
-
         $searchTextQueries = [];
-
         // labels
         if (!empty($options['label'])) {
             foreach ($options['label'] as $label) {
+                // boost important labels
+                $boost = '';
+                if ($label === 'prefLabel') {
+                    $boost = '^40';
+                }
+                if ($label === 'altLabel') {
+                    $boost = '^20';
+                }
+                if ($label === 'hiddenLabel') {
+                    $boost = '^10';
+                }
+
                 if (!empty($options['languages'])) {
                     foreach ($options['languages'] as $lang) {
-                        // boost important labels
-                        $boost = '';
-                        if ($label === 'prefLabel') {
-                            $boost = '^40';
-                        }
-                        if ($label === 'altLabel') {
-                            $boost = '^20';
-                        }
-                        if ($label === 'hiddenLabel') {
-                            $boost = '^10';
-                        }
-
-                        $searchTextQueries[] = 'a_' . $label . '_' . $lang . ':' . $searchText . $boost;
+                        $searchTextQueries[] = $prefix . $label . '_' . $lang . ':' . $searchText . $boost;
                     }
                 } else {
-                    $searchTextQueries[] = 'a_' . $label . ':' . $searchText . $boost;
+                    $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
                 }
             }
         }
@@ -119,10 +133,10 @@ class Autocomplete
             foreach ($options['properties'] as $property) {
                 if (!empty($options['languages'])) {
                     foreach ($options['languages'] as $lang) {
-                        $searchTextQueries[] = 'a_' . $property . '_' . $lang . ':' . $searchText;
+                        $searchTextQueries[] = $prefix . $property . '_' . $lang . ':' . $searchText;
                     }
                 } else {
-                    $searchTextQueries[] = 'a_' . $property . ':' . $searchText;
+                    $searchTextQueries[] = $prefix . $property . ':' . $searchText;
                 }
             }
         }
@@ -137,6 +151,8 @@ class Autocomplete
             $searchTextQueries[] = 's_uri:' . $searchText;
         }
 
+
+
         if (empty($searchTextQueries)) {
             $solrQuery = $searchText;
         } else {
@@ -144,7 +160,6 @@ class Autocomplete
         }
 
         // @TODO Use filter queries
-
         $optionsQueries = [];
 
         //status
@@ -155,23 +170,31 @@ class Autocomplete
                     . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['status']))
                     . '))';
             } else {
-                $optionsQueries[] = '-s_status:' . Resource::STATUS_DELETED;
+                $optionsQueries[] = '-s_status:' . \OpenSkos2\Concept::STATUS_DELETED;
             }
         }
 
-        // sets (collections)
-        if (!empty($options['collections'])) {
+        // sets (former tenant collections)
+        if (!empty($options['sets'])) {
             $optionsQueries[] = '('
                 . 's_set:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
+                . '))';
+        }
+
+        // skos collections
+        if (!empty($options['skosCollection'])) {
+            $optionsQueries[] = '('
+                . 's_inSkosCollection:('
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['skosCollection']))
                 . '))';
         }
 
         // schemes
-        if (!empty($options['conceptScheme'])) {
+        if (!empty($options['scheme'])) {
             $optionsQueries[] = '('
                 . 's_inScheme:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['scheme']))
                 . '))';
         }
 
@@ -204,9 +227,15 @@ class Autocomplete
             if (empty($solrQuery)) {
                 $solrQuery = $optionsQuery;
             } else {
-                $solrQuery .= ' AND (' . $optionsQuery . ')';
+                // a possible bug in solr version
+                if (trim($optionsQuery) != '-s_status:deleted') {
+                    $solrQuery .= ' AND (' . $optionsQuery . ')';
+                } else {
+                    $solrQuery .= ' AND -s_status:deleted';
+                }
             }
         }
+
 
         $interactionsQuery = $this->interactionsQuery($options, $helper, $parser);
         if (!empty($interactionsQuery)) {
@@ -218,8 +247,9 @@ class Autocomplete
         } else {
             $sorts = null;
         }
-        
-        return $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+
+        $result =  $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        return $result;
     }
 
     /**
@@ -237,12 +267,16 @@ class Autocomplete
                 'd_dateSubmited',
             ],
             'modified' => [
-                's_modifiedBy',
+                's_contributor',
                 'd_modified',
             ],
             'approved' => [
                 's_acceptedBy',
                 'd_dateAccepted',
+            ],
+            'deleted' => [
+                's_deletedBy',
+                'd_dateDeleted',
             ],
         ];
 

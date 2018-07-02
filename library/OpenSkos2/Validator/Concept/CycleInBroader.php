@@ -24,13 +24,9 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class CycleInBroader extends AbstractConceptValidator implements ResourceManagerAware
+class CycleInBroader extends AbstractConceptValidator
 {
-
-    use ResourceManagerAwareTrait;
 
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
@@ -50,7 +46,7 @@ class CycleInBroader extends AbstractConceptValidator implements ResourceManager
         $uri = new Uri($concept->getUri());
 
         $query = '?broader skos:broader+ ' . (new NTriple())->serialize($uri) . PHP_EOL
-                . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
+            . ' FILTER(?broader IN (' . (new NTriple())->serializeArray($broaderTerms) . '))';
 
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic broader relation detected for concept: {$concept->getUri()}";

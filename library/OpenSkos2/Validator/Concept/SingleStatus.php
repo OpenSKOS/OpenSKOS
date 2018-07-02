@@ -25,15 +25,29 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class SingleStatus extends AbstractConceptValidator
 {
+
     /**
      * @param Concept $concept
      * @return bool
      */
     protected function validateConcept(Concept $concept)
     {
-        if (count($concept->getProperty(OpenSkos::STATUS)) > 1) {
+        $statusses = $concept->getProperty(OpenSkos::STATUS);
+        if (count($statusses) > 1) {
             $this->errorMessages[] = 'Only single status is allowed.';
             return false;
+        }
+        if (count($statusses) < 1) {
+            $this->errorMessages[] = ' An obligatory field status is absent. ';
+            return false;
+        }
+        if (count($statusses) > 0) {
+            $status = $statusses[0]->getValue();
+            if (strtolower($status) !== $status) {
+                $this->errorMessages[] = 'Status ' . $status .
+                    ' is not valid since it must be all lowercase: ' . strtolower($status);
+                return false;
+            }
         }
         return true;
     }

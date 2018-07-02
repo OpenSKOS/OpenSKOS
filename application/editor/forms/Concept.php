@@ -627,10 +627,15 @@ class Editor_Forms_Concept extends OpenSKOS_Form
                 //@TODO: exceptions from inside this class do not show. How to make them bubble up to the frontend
                 throw new Exception\TenantNotFoundException('Tenant is not specified or could not be resolved.');
             }
-            
-            $enableStatusesSystem = (bool) $tenant['enableStatusesSystem'];
-            $useXlLabels = (bool) $tenant['enableSkosXl'];
-            
+
+            $fIsTrue = function ($val){
+                //I think this covers all we can get back from Jena
+                return $val === '1' || $val === 1 || $val === 'true' || $val === true;
+            };
+
+            $useXlLabels = $fIsTrue($tenant->getPropertySingleValue(OpenSkos::ENABLESKOSXL)->getValue());
+            $enableStatusesSystem = $fIsTrue($tenant->getPropertySingleValue(OpenSkos::ENABLESTATUSSESSYSTEMS)->getValue());
+
             $instance = new Editor_Forms_Concept([
                 'isCreate' => (null === $concept),
                 'currentStatus' => (null !== $concept ? $concept->getPropertyFlatValue(OpenSkos::STATUS) : null),

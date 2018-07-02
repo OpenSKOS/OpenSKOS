@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response\ResultSet;
 
 /**
@@ -29,7 +27,6 @@ class JsonpResponse extends JsonResponse
      * @var string
      */
     protected $callback;
-
     /**
      * @param \OpenSkos2\Api\ResourceResultSet $result
      * @param string $callback
@@ -46,7 +43,6 @@ class JsonpResponse extends JsonResponse
         $this->excludePropertiesList = $excludePropertiesList;
         $this->callback = $callback;
     }
-
     /**
      * Get response
      *

@@ -17,6 +17,7 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+
 class Editor_Forms_SearchOptions extends Zend_Form {
 
     /**
@@ -80,7 +81,8 @@ class Editor_Forms_SearchOptions extends Zend_Form {
                 ->buildCollections()
                 ->buildConceptSchemes();
 
-        if (!$this->_currentTenant->disableSearchInOtherTenants) {
+        //if (!$this->_currentTenant->disableSearchInOtherTenants) {
+        if (true) {
             $this->buildTenants();
         }
 
@@ -110,14 +112,15 @@ class Editor_Forms_SearchOptions extends Zend_Form {
      */
     protected function buildSearchProfiles()
     {
+        $tenantCode = $this->_getCurrentTenant()->getCode()->getValue();
         $profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
-        $profiles = $profilesModel->fetchAll($profilesModel->select()->where('tenant=?', $this->_getCurrentTenant()->code));
+        $profiles = $profilesModel->fetchAll($profilesModel->select()->where('tenant=?', $tenantCode));
         $profilesOptions = array();
         $profilesOptions[''] = _('Default');
         foreach ($profiles as $profile) {
             $profilesOptions[$profile->id] = $profile->name;
         }
-        $profilesOptions['custom'] = _('Custom');
+        $profilesOptions['options'] = _('Custom');
 
         $this->addElement('select', 'searchProfileId', array(
             'label' => _('Search Profile'),
@@ -180,7 +183,8 @@ class Editor_Forms_SearchOptions extends Zend_Form {
      */
     protected function buildStatuses()
     {
-        if ($this->_getCurrentTenant()['enableStatusesSystem']) {
+        $enableStatuses = (bool)($this->_getCurrentTenant()->getEnableStatusesSystems()->getValue());
+        if ($enableStatuses) {
             $statuses = array();
             if (isset($this->_searchOptions['statuses'])) {
                 $statuses = $this->_searchOptions['statuses'];
@@ -252,7 +256,8 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected function buildUserInteraction()
     {
         $modelUsers = new OpenSKOS_Db_Table_Users();
-        $users = $modelUsers->fetchAll($modelUsers->select()->where('tenant=?', $this->_getCurrentTenant()->code));
+        $tenantCode = $this->_getCurrentTenant()->getCode()->getValue();
+        $users = $modelUsers->fetchAll($modelUsers->select()->where('tenant=?', $tenantCode));
         $roles = OpenSKOS_Db_Table_Users::getUserRoles();
         $rolesOptions = array_combine($roles, $roles);
         $userData = array();
@@ -330,18 +335,24 @@ class Editor_Forms_SearchOptions extends Zend_Form {
      */
     protected function buildTenants()
     {
+        /*
         $modelTenants = new OpenSKOS_Db_Table_Tenants();
-        $tenants = $modelTenants->fetchAll();
+        */
+
+        $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+        $tenants = $tenantManager->fetch();
+
+
         $tenantsOptions = array();
         foreach ($tenants as $tenant) {
-            $tenantsOptions[$tenant->code] = $tenant->name;
+            $tenantsOptions[$tenant->getCode()->getValue()] = $tenant->getName()->getValue();
         }
 
         $this->addElement('multiselect', 'tenants', array(
             'label' => _('Tenants'),
             'multiOptions' => $tenantsOptions
         ));
-        $this->getElement('tenants')->setValue(array($this->_getCurrentTenant()->code));
+        $this->getElement('tenants')->setValue(array($this->_getCurrentTenant()->getCode()->getValue()));
         return $this;
     }
 
@@ -351,10 +362,21 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected function buildCollections()
     {
         $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
+        //$collections = $modelCollections->fetchAll($modelCollections->select()->where('tenant = ?', $this->_getCurrentTenant()->code));
+
+
+        // Clears the schemes cache when we start managing them.
+        $dataInjector =  Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $cache = $dataInjector->get('Editor_Models_CollectionsCache');
+        $cache->clearCache();
+
+        $collections= $cache->fetchAll();
+
+
         $collectionsOptions = array();
         foreach ($collections as $collection) {
-            $collectionsOptions[$collection->uri] = $collection->dc_title;
+            $uri = $collection->getUri();
+            $collectionsOptions[$uri] = $collection->getTitle();
         }
 
         $this->addElement('multiselect', 'collections', array(
@@ -433,13 +455,51 @@ class Editor_Forms_SearchOptions extends Zend_Form {
     protected function _getCurrentTenant()
     {
         if (!$this->_currentTenant) {
+
+            /*
             $this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
             if (null === $this->_currentTenant) {
                 throw new Zend_Exception('Tenant not found. Needed for request to the api.');
             }
+            */
+            $this->readTenant();
         }
 
         return $this->_currentTenant;
+    }
+
+
+    /**
+     * Get dependency injection container
+     *
+     * @return \DI\Container
+     */
+    public function getDI()
+    {
+        return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+    }
+
+    /**
+     * Read the Tenant record from RDF Store to the class's internal record.
+     * @throws Zend_Controller_Action_Exception
+     */
+    protected function readTenant()
+    {
+        $user = OpenSKOS_Db_Table_Users::requireFromIdentity();
+        $tenantCode = $user->tenant;
+
+        $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+
+        $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
+        $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+
+        if (!$openSkos2Tenant) {
+            throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
+        }
+
+        $this->_currentTenant = $openSkos2Tenant;
+        return $this;
+
     }
 
     /**

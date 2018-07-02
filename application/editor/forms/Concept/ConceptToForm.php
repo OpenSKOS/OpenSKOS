@@ -37,7 +37,7 @@ class Editor_Forms_Concept_ConceptToForm
      * @param string $prefLabel
      * @return array
      */
-    public static function getNewConceptFormData($language, $prefLabel, Tenant $tenant, LabelHelper $labelHelper)
+    public static function getNewConceptFormData($language, $prefLabel, \OpenSkos2\Tenant $tenant, LabelHelper $labelHelper)
     {
         if ($tenant === null) {
             throw new TenantNotFoundException('Tenant not specified');
@@ -63,7 +63,7 @@ class Editor_Forms_Concept_ConceptToForm
             ],
         ];
         
-        if ($tenant->getEnableSkosXl() === false) {
+        if ($tenant->isEnableSkosXl() === false) {
             $formData['prefLabel'] = [
                 [
                     'languageCode' => $language,
@@ -223,8 +223,11 @@ class Editor_Forms_Concept_ConceptToForm
         $formData['inScheme'] = [];
         $conceptSchemesCaptions = self::getDI()->get('Editor_Models_ConceptSchemesCache')
             ->fetchUrisCaptionsMap();
-        foreach ($concept->getProperty(Skos::INSCHEME) as $schemeUri) {
-            $schemeUri = (string) $schemeUri;
+
+        $allSchemeUris = $concept->getProperty(Skos::INSCHEME);
+        foreach ($concept->getProperty(Skos::INSCHEME) as $sUri) {
+            $schemeUri = (string) $sUri->getUri();
+
             $caption = $conceptSchemesCaptions[$schemeUri];
             $formData['inScheme'][$caption] = [$caption => $schemeUri];
         }

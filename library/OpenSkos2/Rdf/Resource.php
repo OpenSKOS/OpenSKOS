@@ -19,22 +19,92 @@
 
 namespace OpenSkos2\Rdf;
 
+use DateTime;
 use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Namespaces as Namespaces;
-use OpenSkos2\Namespaces\OpenSkos as OpenSkos;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Exception\OpenSkosException;
+use OpenSkos2\Exception\UriGenerationException;
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\Dc;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Rdf;
+use OpenSkos2\Namespaces\Skos;
+use Rhumsaa\Uuid\Uuid;
 
 class Resource extends Uri implements ResourceIdentifier
 {
-    /**
-     * @TODO Separate in StatusAwareResource class or something like that
-     * openskos:status value which marks a resource as deleted.
-     */
-    const STATUS_DELETED = 'deleted';
 
+    public static $classes = array(
+        'ConceptSchemes' => [
+            Skos::CONCEPTSCHEME,
+            Skos::INSCHEME,
+            Skos::HASTOPCONCEPT,
+            Skos::TOPCONCEPTOF,
+        ],
+        'LexicalLabels' => [
+            Skos::ALTLABEL,
+            Skos::HIDDENLABEL,
+            Skos::PREFLABEL,
+        ],
+        'SkosXlLabels' => [
+            SkosXl::PREFLABEL,
+            SkosXl::ALTLABEL,
+            SkosXl::HIDDENLABEL,
+        ],
+        'Notations' => [
+            Skos::NOTATION,
+        ],
+        'DocumentationProperties' => [
+            Skos::CHANGENOTE,
+            Skos::DEFINITION,
+            Skos::EDITORIALNOTE,
+            Skos::EXAMPLE,
+            Skos::HISTORYNOTE,
+            Skos::NOTE,
+            Skos::SCOPENOTE,
+        ],
+        'SemanticRelations' => [
+            Skos::BROADER,
+            Skos::BROADERTRANSITIVE,
+            Skos::NARROWER,
+            Skos::NARROWERTRANSITIVE,
+            Skos::RELATED,
+            Skos::SEMANTICRELATION,
+        ],
+        'SkosCollections' => [
+            OpenSkos::INSKOSCOLLECTION,
+            Skos::SKOSCOLLECTION,
+            Skos::ORDEREDCOLLECTION,
+            Skos::MEMBER,
+            Skos::MEMBERLIST,
+        ],
+        'MappingProperties' => [
+            Skos::BROADMATCH,
+            Skos::CLOSEMATCH,
+            Skos::EXACTMATCH,
+            Skos::MAPPINGRELATION,
+            Skos::NARROWMATCH,
+            Skos::RELATEDMATCH,
+        ],
+    );
     protected $properties = [];
+
+    /**
+     * @return null dummy manager for non-concept-type resources
+     */
+    public function getLabelManager()
+    {
+        return null;
+    }
+
+    public static function getLanguagedProperties()
+    {
+        $retVal = array_merge(self::$classes['DocumentationProperties'], [DcTerms::DESCRIPTION, DcTerms::TITLE]);
+        return $retVal;
+    }
 
     /**
      * @return array of RdfObject[]
@@ -54,6 +124,36 @@ class Resource extends Uri implements ResourceIdentifier
             return [];
         } else {
             return $this->properties[$predicate];
+        }
+    }
+
+    public function getCode()
+    {
+        return $this->getPropertySingleValue(OpenSkos::CODE);
+    }
+
+    public function getTenant()
+    {
+        return $this->getPropertySingleValue(OpenSkos::TENANT);
+    }
+
+    public function getPublisherUri()
+    {
+        return $this->getPropertySingleValue(DcTerms::PUBLISHER);
+    }
+
+    public function getSet()
+    {
+        return $this->getProperty(OpenSkos::SET);
+    }
+
+    public function getTitle()
+    {
+        $title = $this->getPropertySingleValue(DcTerms::TITLE);
+        if (isset($title)) {
+            return $title->getValue();
+        } else {
+            return new Literal("UNKNOWN");
         }
     }
 
@@ -88,7 +188,7 @@ class Resource extends Uri implements ResourceIdentifier
      *
      * @param string $predicate
      * @param RdfObject $value
-     * @return \OpenSkos2\Rdf\Resource
+     * @return Resource
      */
     public function addUniqueProperty($predicate, RdfObject $value)
     {
@@ -165,7 +265,7 @@ class Resource extends Uri implements ResourceIdentifier
         if (!$this->hasProperty($predicate)) {
             return true;
         }
-        
+
         $allValuesAreEmpty = true;
         foreach ($this->properties[$predicate] as $value) {
             if (!$value->isEmpty()) {
@@ -188,7 +288,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
         return false;
     }
-    
+
     /**
      * @return array of RdfObject[]
      */
@@ -196,7 +296,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $retArray = $this->properties;
         ksort($retArray);
-        
+
         return $retArray;
     }
 
@@ -214,24 +314,39 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     /**
-     * Check if the concept is deleted
-     * @TODO Separate in StatusAwareResource class or something like that
-     * @return boolean
-     */
-    public function isDeleted()
-    {
-        if ($this->getStatus() === self::STATUS_DELETED) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @return string
+     * @return Uri
      */
     public function getType()
     {
-        return current($this->getProperty(\OpenSkos2\Namespaces\Rdf::TYPE));
+        return current($this->getProperty(Rdf::TYPE));
+    }
+
+    public function getCreator()
+    {
+        if ($this->hasProperty(DcTerms::CREATOR)) {
+            $tmp = current($this->getProperty(DcTerms::CREATOR));
+            if ($tmp instanceof Literal) { // literal value for UNKNOWN only
+                return $tmp->getValue();
+            } else {
+                if ($tmp instanceof Uri) {
+                    return $tmp->getUri();
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public function getDateSubmitted()
+    {
+        return current($this->getProperty(DcTerms::DATESUBMITTED));
+    }
+
+    public function getUuid()
+    {
+        return $this->getPropertySingleValue(OpenSkos::UUID);
     }
 
     /**
@@ -249,7 +364,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function isBlankNode()
     {
-        return empty($this->uri) || preg_match('/^_:/', $this->uri);
+        return empty($this->uri) || preg_match('/^_:/', $this->uri) || strpos('node-', $this->uri);
     }
 
     /**
@@ -279,7 +394,7 @@ class Resource extends Uri implements ResourceIdentifier
     {
         $values = [];
         foreach ($this->getProperty($predicate) as $value) {
-            if ($value instanceof Literal && $value->getLanguage() == $language) {
+            if ($value instanceof Literal && $value->getLanguage() === $language) {
                 $values[] = $value;
             }
         }
@@ -296,9 +411,8 @@ class Resource extends Uri implements ResourceIdentifier
         $languages = [];
         foreach ($this->getProperties() as $property) {
             foreach ($property as $value) {
-                if ($value instanceof Literal
-                        && $value->getLanguage() !== null
-                        && !isset($languages[$value->getLanguage()])) {
+                if ($value instanceof Literal && $value->getLanguage() !== null &&
+                    !isset($languages[$value->getLanguage()])) {
                     $languages[$value->getLanguage()] = true;
                 }
             }
@@ -378,9 +492,161 @@ class Resource extends Uri implements ResourceIdentifier
     }
 
     /**
-     *
-     * @return \DateTime|null
+     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
+     * @param \OpenSkos2\Tenant $tenant
+     * @param \OpenSkos2\Collection $collection
+     * @param \OpenSkos2\Person $person
+     * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\SkosXl\LabelManager | null  $labelManager
+     * @param  \OpenSkos2\Rdf\Resource | null $existingResource,
+     * optional $existingResource of one of concrete child types used for update
+     * override for a concerete resources when necessary
      */
+    public function ensureMetadata(
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Collection $collection = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
+
+
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
+        };
+
+        $forFirstTimeInOpenSkos = [
+            OpenSkos::UUID => new Literal(Uuid::uuid4()),
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            OpenSkos::TENANT => $tenant->getCode(),
+            DcTerms::DATESUBMITTED => $nowLiteral()
+        ];
+
+        if (!empty($collection)) {
+            // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = new Uri($collection->getUri());
+        }
+
+        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
+            if (!$this->hasProperty($property)) {
+                $this->setProperty($property, $defaultValue);
+            }
+        }
+
+        $this->resolveCreator($person, $personManager);
+
+        $this->setModified($person);
+    }
+
+    /**
+     * Mark the concept as modified.
+     * @param Person $person
+     */
+    public function setModified(\OpenSKos2\Person $person)
+    {
+        $nowLiteral = function () {
+            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+        };
+
+        $personUri = new Uri($person->getUri());
+
+        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
+        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
+    }
+
+    /**
+     * Resolve the creator in all use cases:
+     * - dc:creator is set but dcterms:creator is not
+     * - dcterms:creator is set as Uri
+     * - dcterms:creator is set as literal value
+     * - no creator is set
+     * @param Person $person
+     * @param PersonManager $personManager
+     */
+    public function resolveCreator(\OpenSkos2\Person $person, \OpenSkos2\PersonManager $personManager)
+    {
+        $dcCreator = $this->getProperty(Dc::CREATOR);
+        $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
+
+        // Set the creator to the apikey user
+        if (empty($dcCreator) && empty($dcTermsCreator)) {
+            $this->setCreator(null, $person);
+            return;
+        }
+
+        // Check if the dc:Creator is Uri or Literal
+        if (!empty($dcCreator) && empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+
+            if ($dcCreator instanceof Literal) {
+                $dcTermsCreator = $personManager->fetchByName($dcCreator->getValue());
+            } elseif ($dcCreator instanceof Uri) {
+                $dcTermsCreator = $dcCreator;
+                $dcCreator = null;
+            } else {
+                throw Exception('dc:Creator is not Literal nor Uri. Something is very wrong.');
+            }
+
+            $this->setCreator($dcCreator, $dcTermsCreator); // it does not upcast
+            return;
+        }
+        // Check if the dcTerms:Creator is Uri or Literal
+        if (empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcTermsCreator = $dcTermsCreator[0];
+
+            if ($dcTermsCreator instanceof Literal) {
+                $dcCreator = $dcTermsCreator;
+                $dcTermsCreator = $personManager->fetchByName($dcTermsCreator->getValue());
+            } elseif ($dcTermsCreator instanceof Uri) {
+                // We are ok with this use case even if the Uri is not present in our system
+            } else {
+                throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
+            }
+
+            //$this->setCreator($dcCreator, $dcTermsCreator);
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+
+        // Resolve conflicting dc:Creator and dcTerms:Creator values
+        if (!empty($dcCreator) && !empty($dcTermsCreator)) {
+            $dcCreator = $dcCreator[0];
+            $dcTermsCreator = $dcTermsCreator[0];
+            try {
+                $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
+            } catch (ResourceNotFoundException $err) {
+                // We cannot find the resource so just leave values as they are
+                $dcTermsCreatorName = null;
+            }
+
+            if (!empty($dcTermsCreatorName) && $dcTermsCreatorName[0]->getValue() !== $dcCreator->getValue()) {
+                throw new OpenSkosException('dc:Creator and dcTerms:Creator names do not match.');
+            }
+
+            $this->setCreator($dcCreator, $dcTermsCreator);
+            return;
+        }
+    }
+
+    protected function setCreator($dcCreator, $dcTermsCreator)
+    {
+        if (!empty($dcCreator)) {
+            $this->setProperty(Dc::CREATOR, $dcCreator);
+        }
+
+        if (!empty($dcTermsCreator)) {
+            $this->setProperty(DcTerms::CREATOR, $dcTermsCreator);
+        }
+    }
+
+    /**
+     *
+     * @return DateTime|null
+     */
+    //Meertens: for us modified is not alwaus given, so if it absent
     public function getLatestModifyDate()
     {
         $dates = $this->getProperty(Namespaces\DcTerms::MODIFIED);
@@ -390,8 +656,8 @@ class Resource extends Uri implements ResourceIdentifier
 
         $latestDate = null;
         foreach ($dates as $date) {
-            /* @var $date \OpenSkos2\Rdf\Literal */
-            /* @var $dateTime \DateTime */
+            /* @var $date Literal */
+            /* @var $dateTime DateTime */
             $dateTime = $date->getValue();
             if (!$latestDate || $dateTime->getTimestamp() > $latestDate->getTimestamp()) {
                 $latestDate = $dateTime;
@@ -401,6 +667,7 @@ class Resource extends Uri implements ResourceIdentifier
         return $latestDate;
     }
 
+    // TODO: find usages, test and ask picturaa if of no use of buggy
     /**
      * @TODO Separate in StatusAwareResource class or something like that
      * @param string &$predicate
@@ -408,11 +675,73 @@ class Resource extends Uri implements ResourceIdentifier
      */
     protected function handleSpecialProperties(&$predicate, RdfObject &$value)
     {
+        // Validation throws an error when not all letters are lowercase while
+        // creating or updating an object
         // @TODO find better way and prevent hidden altering of the properties values in the Resource class.
-
         // Status is always transformed to lowercase.
-        if ($predicate == OpenSkos::STATUS) {
+        if ($predicate === OpenSkos::STATUS) {
             $value->setValue(strtolower($value->getValue()));
         }
+    }
+
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Collection $collection, $manager)
+    {
+        $customGen = $manager->getUriGenerateObject();
+        if (!empty($customGen)) {
+            return $customGen->generateUri($this);
+        }
+
+
+        $uuid = Uuid::uuid4();
+
+        if (!$this->isBlankNode()) {
+            throw new UriGenerationException(
+                'The resource already has an uri. Can not generate new one.'
+            );
+        }
+
+        $customInit = $manager->getCustomInitArray();
+        $uri = $this->assembleUri($tenant, $collection, $uuid, null, $customInit);
+
+
+        if ($manager->askForUri($uri, true)) {
+            throw new UriGenerationException(
+                'The generated uri "' . $uri . '" is already in use.'
+            );
+        }
+
+        $this->setUri($uri);
+
+        $this->setProperty(OpenSkos::UUID, new Literal($uuid));
+
+        return $uri;
+    }
+
+    // TODO: discuss the rules for generating Uri's for non-concepts
+    protected function assembleUri(
+        \OpenSkos2\Tenant $tenant = null,
+        \OpenSkos2\Collection $collection = null,
+        $uuid = null,
+        $notation = null,
+        $customInit = null
+    ) {
+    
+
+        return $collection->getUri() . "/" . $uuid;
+    }
+
+    protected function toBool($val)
+    {
+        if (empty($val)) {
+            return false;
+        }
+        $val = $val->getValue();
+        if (strtolower($val) === "true" || $val==="1" || $val==="Y") {
+            return true;
+        }
+        if (strtolower($val) === "false" || $val==="0" || $val==="N") {
+            return false;
+        }
+        throw new \Exception("Wrong value of a boolean element in the resource {$this->uri}");
     }
 }

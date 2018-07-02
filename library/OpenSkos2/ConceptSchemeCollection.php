@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -23,6 +23,7 @@ use OpenSkos2\Rdf\ResourceCollection;
 
 class ConceptSchemeCollection extends ResourceCollection
 {
+
     /**
      * What is the basic resource for this collection.
      * @var string NULL means any resource.

@@ -19,7 +19,6 @@
 
 namespace OpenSkos2\Solr;
 
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
@@ -36,8 +35,14 @@ use Solarium\QueryType\Update\Query\Document\DocumentInterface;
 /**
  * Get a solr document from a skos concept resource
  */
+// Meertens:
+// -- removed OpenSkos::MODIFIEDBY, Dc::CONTRIBUTOR, Dc::CREATOR.
+// -- added  OpenSkos:INSKOSKCOLLECTION,OpenSkos:DELTEDBY,OpenSkos:DATEDELETED
+// -- calls to getOldField are removed, since migration script contains translation of old fields
+// -- The Picturae's changes starting from 28/10/2016 are taken
 class Document
 {
+
     /**
      * @var Resource
      */
@@ -64,27 +69,28 @@ class Document
         Skos::PREFLABEL => ['s_prefLabel', 't_prefLabel', 'a_prefLabel', 'sort_s_prefLabel'],
         Skos::ALTLABEL => ['s_altLabel', 't_altLabel', 'a_altLabel', 'sort_s_altLabel'],
         Skos::HIDDENLABEL => ['s_hiddenLabel', 't_hiddenLabel', 'a_hiddenLabel', 'sort_s_hiddenLabel'],
-        Skos::DEFINITION => ['t_definition', 'a_definition'],
+        Skos::DEFINITION => ['t_definition', 'a_definition', 'definition'],
         Skos::EXAMPLE => ['t_example', 'a_example'],
         Skos::CHANGENOTE => ['t_changeNote', 'a_changeNote'],
         Skos::EDITORIALNOTE => ['t_editorialNote', 'a_editorialNote'],
         Skos::HISTORYNOTE => ['t_historyNote', 'a_historyNote'],
-        Skos::SCOPENOTE =>  ['t_scopeNote', 'a_scopeNote'],
-        Skos::NOTATION =>   ['s_notation', 't_notation', 'a_notation'],
-        Skos::INSCHEME =>   ['s_inScheme'],
+        Skos::SCOPENOTE => ['t_scopeNote', 'a_scopeNote'],
+        Skos::NOTATION => ['s_notation', 't_notation', 'a_notation'],
+        Skos::INSCHEME => ['s_inScheme', 'inScheme'],
+        OpenSkos::INSKOSCOLLECTION => ['s_inSkosCollection', 'inSkosCollection'],
         OpenSkos::STATUS => ['s_status'],
         OpenSkos::SET => ['s_set'],
         OpenSkos::TENANT => ['s_tenant'],
+        OpenSkos::UUID => ['s_uuid'],
         OpenSkos::TOBECHECKED => ['b_toBeChecked'],
         DcTerms::CREATOR => ['s_creator'],
-        Dc::CREATOR => ['s_creator'],
         DcTerms::DATESUBMITTED => ['d_dateSubmited'],
         DcTerms::CONTRIBUTOR => ['s_contributor'],
-        Dc::CONTRIBUTOR => ['s_contributor'],
-        OpenSkos::MODIFIEDBY => ['s_modifiedBy'],
         DcTerms::MODIFIED => ['d_modified', 'sort_d_modified_earliest'],
         OpenSkos::ACCEPTEDBY => ['s_acceptedBy'],
         DcTerms::DATEACCEPTED => ['d_dateAccepted'],
+        OpenSkos::DELETEDBY => ['s_deletedBy'],
+        OpenSkos::DATE_DELETED => ['d_dateDeleted'],
         SkosXl::LITERALFORM => ['a_skosXlLiteralForm'],
         Rdf::TYPE => ['s_rdfType'],
         SkosXl::PREFLABEL => ['s_prefLabelXl'],
@@ -113,8 +119,8 @@ class Document
         $this->document->uri = $this->resource->getUri();
         $properties = $this->resource->getProperties();
 
-        // Index old fields as well for backward compatibility.
-        $predicatesToOldField = array_flip(FieldsMaps::getOldToProperties());
+        // Index bare SKOS and OpenSKOs fields via their standart map to SKOS and OpenSKOS predicates
+        $predicateToField = array_flip(FieldsMaps::getSolrNamesToProperties());
 
         // Dc terms
         $dcTerms = DcTerms::getAllTerms();
@@ -127,11 +133,10 @@ class Document
             // Explicitly mapped fields
             $fields = $this->mapping[$predicate];
 
-            // Old fields
-            if (isset($predicatesToOldField[$predicate])) {
-                $fields[] = $predicatesToOldField[$predicate];
+            // bare (non-"_"-prefixed) fields
+            if (isset($predicateToField[$predicate])) {
+                $fields[] = $predicateToField[$predicate];
             }
-
             // Dc terms
             $dcTermKey = array_search($predicate, $dcTerms);
             if ($dcTermKey !== false) {
@@ -142,15 +147,15 @@ class Document
                 $this->mapValuesToField($field, $values, $this->document);
             }
         }
-
-        if ($this->resource instanceof Concept) {
-            $this->addConceptClasses($this->resource, $this->document);
-            $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
-            $this->document->b_isOrphan = $this->isOrphan();
-
-            $this->addMaxNumericNotation();
+        if ($this->resource->hasProperty(Rdf::TYPE)) {
+            $rdfType = $this->resource->getType();
+            if ($rdfType->getUri() === Concept::TYPE) {
+                $this->addConceptClasses($this->resource, $this->document);
+                $this->document->b_isTopConcept = !$this->resource->isPropertyEmpty(Skos::TOPCONCEPTOF);
+                $this->document->b_isOrphan = $this->isOrphan();
+                $this->addMaxNumericNotation();
+            }
         }
-
         return $this->document;
     }
 
@@ -192,7 +197,7 @@ class Document
     {
         foreach (['LexicalLabels', 'DocumentationProperties'] as $propertiesClass) {
             $values = [];
-            foreach (Concept::$classes[$propertiesClass] as $predicate) {
+            foreach (Resource::$classes[$propertiesClass] as $predicate) {
                 if ($concept->hasProperty($predicate)) {
                     $values = array_merge($values, $concept->getProperty($predicate));
                 }
@@ -324,7 +329,7 @@ class Document
                     }
                     break;
                 case Literal::TYPE_BOOL:
-                    return (bool)$value->getValue();
+                    return (bool) $value->getValue();
                 default:
                     return $value->getValue();
             }

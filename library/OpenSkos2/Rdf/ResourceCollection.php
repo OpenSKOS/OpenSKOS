@@ -23,15 +23,15 @@ use OpenSkos2\Exception\InvalidResourceTypeException;
 
 class ResourceCollection extends \ArrayObject
 {
-   //@todo add typehint and dockblocks
-    
+    //@todo add typehint and dockblocks
+
     /**
      * What is the basic resource for this collection.
      * Made to be extended and overwrited.
      * @var string NULL means any resource.
      */
     protected $resourceType = null;
-    
+
     /**
      * @param mixed $index
      * @param Resource $newval
@@ -44,17 +44,17 @@ class ResourceCollection extends \ArrayObject
                 'You can add only Resource objects in ResourceCollection'
             );
         }
-        
+
         if ($this->resourceType !== null && $newval->getType() != $this->resourceType) {
             throw new InvalidResourceTypeException(
                 'Can not insert resource of type <' . $newval->getType() . '>. '
                 . 'The collection requires type <' . $this->resourceType . '>'
             );
         }
-        
+
         parent::offsetSet($index, $newval);
     }
-    
+
     /**
      * Finds resource by the specified uri.
      * @param string $uri

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -23,4 +24,5 @@ namespace OpenSkos2\Exception;
  */
 class InvalidResourceTypeException extends OpenSkosException
 {
+    
 }

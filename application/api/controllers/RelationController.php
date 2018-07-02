@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -17,18 +16,19 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class API_RelationController extends OpenSKOS_Rest_Controller {
 
+use Zend\Diactoros\Response;
+use Zend\Diactoros\Stream;
+
+class API_RelationController extends OpenSKOS_Rest_Controller {
     public function indexAction()
     {
         $this->_501('GET');
     }
-
     public function getAction()
     {
         $this->_501('GET');
     }
-
     /**
      * @apiVersion 1.0.0
      * @apiDescription Add a relation to a SKOS Concept
@@ -67,16 +67,14 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     {
         $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
-        $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->addRelation($request);
+        $relation = $this->getDI()->get('\OpenSkos2\Api\Concept');
+        $response = $relation->addRelationTriple($request);
         $this->emitResponse($response);
     }
-
     public function putAction()
     {
         $this->_501('PUT');
     }
-
     /**
      * @apiVersion 1.0.0
      * @apiDescription Delete a relation of a SKOS Concept
@@ -102,8 +100,17 @@ class API_RelationController extends OpenSKOS_Rest_Controller {
     {
         $request = $this->getPsrRequest();
         /* @var $relation \OpenSkos2\Api\Relation */
-        $relation = $this->getDI()->get('\OpenSkos2\Api\Relation');
-        $response = $relation->deleteRelation($request);
+        $relation = $this->getDI()->get('\OpenSkos2\Api\Concept');
+        $response = $relation->deleteRelationTriple($request);
+        $this->emitResponse($response);
+    }
+    
+    
+    public function optionsAction()
+    {
+        $stream = new Stream('php://memory', 'wb+');
+        $stream->write('method options');
+        $response = (new Response($stream, 204));
         $this->emitResponse($response);
     }
 }

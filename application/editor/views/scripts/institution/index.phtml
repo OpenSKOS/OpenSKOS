@@ -51,9 +51,9 @@
 	<div id="collection-stats" class="box">
 		<p><?php echo $this->translate('You can share this information via the OpenSKOS API')?>:</p>
 		<ul>
-			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.rdf">in RDF (VCard)</a></li>
-			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.html">in HTML</a></li>
-			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->code), 'rest', true)?>.json">in JSON</a></li>
+			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->getCode()), 'rest', true)?>.rdf">in RDF (VCard)</a></li>
+			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->getCode()), 'rest', true)?>.html">in HTML</a></li>
+			<li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'institutions', 'id' => $this->tenant->getCode()), 'rest', true)?>.json">in JSON</a></li>
 		</ul>
 	</div>
 </div>

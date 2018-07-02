@@ -16,9 +16,9 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Dcmi;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\PersonManager;
@@ -30,6 +30,7 @@ use OpenSkos2\Rdf\Uri;
  */
 class Editor_Forms_Concept_FormToConcept
 {
+
     /**
      * Gets specific data from the concept and prepares it for the Editor_Forms_Concept
      * @param Concept $concept
@@ -38,21 +39,18 @@ class Editor_Forms_Concept_FormToConcept
      * @param OpenSKOS_Db_Table_Row_User $user
      */
     public static function toConcept(
-        Concept &$concept,
-        $formData,
-        ConceptSchemeManager $schemeManager,
-        OpenSKOS_Db_Table_Row_User $user,
-        PersonManager $personManager
-    ) {
+    Concept &$concept, $formData, ConceptSchemeManager $schemeManager, OpenSKOS_Db_Table_Row_User $user, PersonManager $personManager
+    )
+    {
         $oldStatus = $concept->getStatus();
-        
+
         self::translatedPropertiesToConcept($concept, $formData);
         self::flatPropertiesToConcept($concept, $formData);
         self::multiValuedNoLangPropertiesToConcept($concept, $formData);
         self::resourcesToConcept($concept, $formData);
         self::metadataToConcept($concept, $schemeManager, $user, $oldStatus, $personManager);
     }
-    
+
     /**
      * Properties like pref label, alt label etc.
      * @param Concept &$concept
@@ -76,7 +74,7 @@ class Editor_Forms_Concept_FormToConcept
             }
         }
     }
-    
+
     /**
      * Properties like pref label, alt label etc.
      * @param Concept &$concept
@@ -92,7 +90,7 @@ class Editor_Forms_Concept_FormToConcept
             }
         }
     }
-    
+
     /**
      * Properties like pref label, alt label etc.
      * @param Concept $concept
@@ -110,7 +108,7 @@ class Editor_Forms_Concept_FormToConcept
             }
         }
     }
-    
+
     /**
      * Schemes and relations to concept
      * @param Concept &$concept
@@ -118,10 +116,10 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function resourcesToConcept(Concept &$concept, $formData)
     {
-        // @TODO Select "asserted only" on update. Else after first update the inferred
-        // relations will get explicitly declared (asserted). Then unset can be removed as well.
+// @TODO Select "asserted only" on update. Else after first update the inferred
+// relations will get explicitly declared (asserted). Then unset can be removed as well.
         self::unsetAllRelations($concept);
-        
+
         $fieldToUris = function ($value) {
             $uris = [];
             if (!self::emptyStringOrNull($value)) {
@@ -133,7 +131,7 @@ class Editor_Forms_Concept_FormToConcept
             }
             return $uris;
         };
-        
+
         foreach (Editor_Forms_Concept::getResourceBasedFieldsMap() as $field => $property) {
             if (isset($formData[$field])) {
                 $concept->setProperties($property, $fieldToUris($formData[$field]));
@@ -141,10 +139,10 @@ class Editor_Forms_Concept_FormToConcept
                 $concept->unsetProperty($property);
             }
         }
-        
+
         self::filterTopConceptOf($concept);
     }
-    
+
     /**
      * Clear all relations of the concept before setting the relations from the form.
      * This will remove any hidden, inferred relations like boraderTransitive and narrowerTransitive.
@@ -153,11 +151,11 @@ class Editor_Forms_Concept_FormToConcept
      */
     protected static function unsetAllRelations(Concept &$concept)
     {
-        foreach (Skos::getRelationsTypes() as $relationType) {
+        foreach (Skos::getSkosRelations() as $relationType) {
             $concept->unsetProperty($relationType);
         }
     }
-    
+
     /**
      * Remove all top concept of for schemes which the concept is not inScheme.
      * @param Concept $concept
@@ -172,40 +170,53 @@ class Editor_Forms_Concept_FormToConcept
         }
         $concept->setProperties(Skos::TOPCONCEPTOF, $filteredTopConceptOf);
     }
-    
+
     /**
+      <<<<<<< HEAD
+     * Per scheme relations + mapping properties.
+     * @param Concept &$concept
+     * @param OpenSKOS_Db_Table_Row_Set $set
      * Metadata as set, tenant, modified date, creator and etc.
      * @param Concept $concept
+      >>>>>>> master
      * @param OpenSKOS_Db_Table_Row_User $user
      * @param ConceptSchemeManager $schemeManager
      * @param type $oldStatus
      * @param PersonManager $personManager A person manager :)
      */
     protected static function metadataToConcept(
-        Concept &$concept,
-        ConceptSchemeManager $schemeManager,
-        OpenSKOS_Db_Table_Row_User $user,
-        $oldStatus,
-        PersonManager $personManager
-    ) {
+    Concept &$concept, ConceptSchemeManager $schemeManager, OpenSKOS_Db_Table_Row_User $user, $oldStatus, PersonManager $personManager
+    )
+    {
         // Get concept set from the first scheme
-        $setUri = null;
+        $collection = null;
+        $collectionManager = self::getDI()->get('OpenSkos2\CollectionManager');
         if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $firstSchemeUri = $concept->getProperty(Skos::INSCHEME)[0];
             $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
-            $setUri = $firstScheme->getPropertySingleValue(OpenSkos::SET);
+            $collectionUri = $firstScheme->getProperty(OpenSkos::SET);
+            if(count($collectionUri) == 0){
+                throw new \OpenSkos2\Exception\ResourceNotFoundException(
+                    sprintf('No collection found for concept scheme "%s".', $firstSchemeUri)
+                );
+            }
+            $collection = $collectionManager->fetchByUri($collectionUri[0]->getUri());
         }
-        
+
+        $tenantManager = self::getDI()->get('OpenSkos2\TenantManager');
+        $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+        $tenant = $tenantManager->fetchByUuid($tenantUuid);
+
         $concept->ensureMetadata(
-            $user->tenant,
-            $setUri,
+            $tenant,
+            $collection,
             $user->getFoafPerson(),
-            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
             $personManager,
+            self::getDI()->get('OpenSkos2\SkosXl\LabelManager'),
             $oldStatus
         );
     }
-    
+
     /**
      * Get dependency injection container
      * 
@@ -225,4 +236,5 @@ class Editor_Forms_Concept_FormToConcept
     {
         return $value === null || $value === '';
     }
+
 }

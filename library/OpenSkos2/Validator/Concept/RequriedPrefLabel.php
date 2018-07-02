@@ -25,6 +25,7 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class RequriedPrefLabel extends AbstractConceptValidator
 {
+
     /**
      * Ensure the preflabel does not already exists in the scheme
      * @param Concept $concept
@@ -32,6 +33,10 @@ class RequriedPrefLabel extends AbstractConceptValidator
      */
     protected function validateConcept(Concept $concept)
     {
+        $enabledSkosXl =$this->tenant->isEnableSkosXl();
+        if ($enabledSkosXl) {
+            return true;
+        }
         $languages = $concept->retrieveLanguages();
         foreach ($languages as $language) {
             $prefLabel = $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $language);

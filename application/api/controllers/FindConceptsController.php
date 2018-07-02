@@ -17,19 +17,19 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
+require_once 'AbstractController.php';
+
+class Api_FindConceptsController extends AbstractController
+{
+
+    protected $isFindConcept;
 
     public function init()
     {
         parent::init();
-
-        $this->_helper->contextSwitch()
-                ->initContext($this->getRequestedFormat());
-
-        if ('html' == $this->_helper->contextSwitch()->getCurrentContext()) {
-            //enable layout:
-            $this->getHelper('layout')->enableLayout();
-        }
+        $this->apiResourceClass = 'OpenSkos2\Api\Concept';
+        $this->viewpath = "concept/";
+        $this->isFindFoncept = true;
     }
 
     /**
@@ -107,16 +107,16 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     {
         if (null === ($q = $this->getRequest()->getParam('q'))) {
             $this->getResponse()
-                    ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
+                ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
-
         $this->getHelper('layout')->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
-
-        $concept =$this->getDI()->make('OpenSkos2\Api\Concept');
-
+        $concept = $this->getDI()->make('OpenSkos2\Api\Concept');
         $context = $this->_helper->contextSwitch()->getCurrentContext();
+        if (!isset($context)) {
+            $context='rdf';
+        }
         $request = $this->getPsrRequest();
         $response = $concept->findConcepts($request, $context);
         $this->emitResponse($response);
@@ -191,90 +191,59 @@ class Api_FindConceptsController extends OpenSKOS_Rest_Controller {
     public function getAction()
     {
         $this->_helper->viewRenderer->setNoRender(true);
-
         $id = $this->getId();
-
         /* @var $apiConcept OpenSkos2\Api\Concept */
         $apiConcept = $this->getDI()->make('OpenSkos2\Api\Concept');
         $context = $this->_helper->contextSwitch()->getCurrentContext();
-
         $request = $this->getPsrRequest();
-        
+
         // Exception for html use ZF 1 easier with linking in the view
         if ('html' === $context) {
             /* @var $concept \OpenSkos2\Concept */
-            $concept = $apiConcept->getConcept($id);
-
+            $concept = $apiConcept->getResource($id);
+            $tenantCode = $concept->getTenant()->getValue();
+            $manager = $this->getConceptManager();
+            $tenant = $manager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
             $useXlLabels = $apiConcept->useXlLabels(
-                \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution()),
-                $request
+                $tenant, $request
             );
             if ($useXlLabels === true) {
-                $concept->loadFullXlLabels($this->getConceptManager()->getLabelManager());
+                $concept->loadFullXlLabels($manager->getLabelManager());
             }
-            
+
             $this->view->useXlLabels = $useXlLabels;
             $this->view->concept = $concept;
             return $this->renderScript('concept/get.phtml');
         }
-
-        $response = $apiConcept->getConceptResponse($request, $id, $context);
+        $response = $apiConcept->getResourceResponse($request, $id, $context);
         $this->emitResponse($response);
     }
 
     public function postAction()
     {
-        $this->_501('POST');
+        if ($this->isFindConcept) {
+            $this->_501('POST');
+        } else {
+            parent::postAction();
+        }
     }
 
     public function putAction()
     {
-        $this->_501('PUT');
+        if ($this->isFindConcept) {
+            $this->_501('POST');
+        } else {
+            parent::putAction();
+        }
     }
 
     public function deleteAction()
     {
-        $this->_501('DELETE');
+        if ($this->isFindConcept) {
+            $this->_501('POST');
+        } else {
+            parent::deleteAction();
+        }
     }
 
-    /**
-     * Get concept id
-     *
-     * @throws Zend_Controller_Exception
-     * @return string|\OpenSkos2\Rdf\Uri
-     */
-    private function getId()
-    {
-        $id = $this->getRequest()->getParam('id');
-        if (null === $id) {
-            throw new Zend_Controller_Exception('No id `' . $id . '` provided', 400);
-        }
-
-        if (strpos($id, 'http://') !== false || strpos($id, 'https://') !== false) {
-            return new OpenSkos2\Rdf\Uri($id);
-        }
-
-        /*
-         * this is for clients that need special routes like "http://data.beeldenegluid.nl/gtaa/123456"
-         * with this we can create a route in the config ini like this:
-         *
-         * resources.router.routes.route_id.type = "Zend_Controller_Router_Route_Regex"
-         * resources.router.routes.route_id.route = "gtaa\/(\d+)"
-         * resources.router.routes.route_id.defaults.module = "api"
-         * resources.router.routes.route_id.defaults.controller = "concept"
-         * resources.router.routes.route_id.defaults.action = "get"
-         * resources.router.routes.route_id.defaults.id_prefix = "http://data.beeldengeluid.nl/gtaa/"
-         * resources.router.routes.route_id.defaults.format = "html"
-         * resources.router.routes.route_id.map.1 = "id"
-         * resources.router.routes.route_id.reverse = "gtaa/%d"
-         */
-
-        $id_prefix = $this->getRequest()->getParam('id_prefix');
-        if (null !== $id_prefix) {
-            $id_prefix = str_replace('%tenant%', $this->getRequest()->getParam('tenant'), $id_prefix);
-            $id = new OpenSkos2\Rdf\Uri($id_prefix . $id);
-        }
-
-        return $id;
-    }
 }

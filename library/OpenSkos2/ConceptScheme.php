@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,18 +21,15 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Rdf\Literal;
-use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSKOS_Db_Table_Tenants;
-use Rhumsaa\Uuid\Uuid;
 
 class ConceptScheme extends Resource
 {
-    const TYPE = 'http://www.w3.org/2004/02/skos/core#ConceptScheme';
-    
+
+    const TYPE = Skos::CONCEPTSCHEME;
+
     /**
      * Resource constructor.
      * @param string $uri
@@ -42,111 +39,18 @@ class ConceptScheme extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-    
-    /**
-     * Gets preview title for the concept.
-     * @param string $language
-     * @return string
-     * @throws \Exception
-     */
-    public function getCaption($language = null)
+
+   
+   
+    public function getDescription()
     {
-        if ($this->hasPropertyInLanguage(DcTerms::TITLE, $language)) {
-            return $this->getPropertyFlatValue(DcTerms::TITLE, $language);
-        } else {
-            return $this->getPropertyFlatValue(DcTerms::TITLE);
-        }
-    }
-    
-    /**
-     * Get openskos:uuid if it exists
-     * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string|null
-     */
-    public function getUuid()
-    {
-        if ($this->hasProperty(OpenSkos::UUID)) {
-            return (string)$this->getPropertySingleValue(OpenSkos::UUID);
-        } else {
-            return null;
-        }
-    }
-    
-    /**
-     * Get openskos:set if it exists
-     * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string|null
-     */
-    public function getSet()
-    {
-        if ($this->hasProperty(OpenSkos::SET)) {
-            return (string)$this->getPropertySingleValue(OpenSkos::SET);
+        if ($this->hasProperty(DcTerms::DESCRIPTION)) {
+            return (string) $this->getPropertySingleValue(DcTerms::DESCRIPTION);
         } else {
             return null;
         }
     }
 
-    /**
-     * Get tenant
-     *
-     * @return Literal
-     */
-    public function getTenant()
-    {
-        $values = $this->getProperty(OpenSkos::TENANT);
-        if (isset($values[0])) {
-            return $values[0];
-        }
-    }
-    
-    /**
-     * Get institution row
-     * @TODO Remove dependency on OpenSKOS v1 library
-     * @return OpenSKOS_Db_Table_Row_Tenant
-     */
-    public function getInstitution()
-    {
-        // @TODO Remove dependency on OpenSKOS v1 library
-        $model = new OpenSKOS_Db_Table_Tenants();
-        return $model->find($this->getTenant())->current();
-    }
-    
-    /**
-     * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
-     * @param string $tenantCode
-     * @param Uri $set
-     * @param Uri $person
-     */
-    public function ensureMetadata($tenantCode, Uri $set, Uri $person)
-    {
-        //@TODO Combine with concept ensure metadata.
-        
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-        };
-        
-        $forFirstTimeInOpenSkos = [
-            OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Literal($tenantCode),
-            OpenSkos::SET => $set,
-            DcTerms::DATESUBMITTED => $nowLiteral(),
-        ];
-        
-        // Do not consider dcterms:creator if we have dc:creator
-        if (!$this->hasProperty(Dc::CREATOR)) {
-            $forFirstTimeInOpenSkos[DcTerms::CREATOR] = $person;
-        }
-        
-        foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
-            if (!$this->hasProperty($property)) {
-                $this->setProperty($property, $defaultValue);
-            }
-        }
-        
-        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->setProperty(OpenSkos::MODIFIEDBY, $person);
-    }
-    
     /**
      * Builds the path to the concept scheme icon.
      * Returns empty string if the file does not exist.
@@ -162,7 +66,7 @@ class ConceptScheme extends Resource
     {
         return self::buildIconPath($this->getUuid(), $tenant);
     }
-    
+
     /**
      *
      * Builds the path to the concept scheme icon.
@@ -171,39 +75,39 @@ class ConceptScheme extends Resource
      * @todo Moved from Editor_Models_ConceptScheme for backwards compatibility,
      * refactor later to not depend on the zend application
      * @param srtring $uuid
-     * @param OpenSKOS_Db_Table_Row_Tenant $tenant optional, Default null.
+     * @param \OpenSkos2\Tenant $tenant optional, Default null.
      * If not set the currently logged one will be used.
      * @return string
      */
     public static function buildIconPath($uuid, $tenant = null)
     {
         $editorOptions = \OpenSKOS_Application_BootstrapAccess::getBootstrap()->getOption('editor');
-        
+
         if (null === $tenant) {
-            $tenant = \OpenSKOS_Db_Table_Tenants::fromIdentity();
+            $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
         }
-        
+
         $ap = APPLICATION_PATH;
         // We always need tenant for getting icon path.
         if (null !== $tenant) {
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
-                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->code;
+                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->getCode();
             } else {
-                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->code;
+                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->getCode();
             }
-            
+
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignHttpPath'])) {
-                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->code;
+                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->getCode();
             } else {
-                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->code;
+                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->getCode();
             }
-            
+
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['extension'])) {
                 $iconsExtension = $editorOptions['schemeIcons']['extension'];
             } else {
                 $iconsExtension = 'png';
             }
-            
+
             if (is_file($iconsAssignPath . '/' . $uuid . '.' . $iconsExtension)) {
                 return $iconsAssignHttpPath . '/' . $uuid . '.' . $iconsExtension . '?nocache=' . time();
             } else {

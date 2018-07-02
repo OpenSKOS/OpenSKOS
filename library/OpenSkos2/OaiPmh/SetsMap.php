@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\OaiPmh;
 
 use \OpenSkos2\ConceptSchemeManager;
@@ -31,35 +29,30 @@ class SetsMap
      * @var ConceptSchemeManager
      */
     protected $schemeManager;
-
     /**
      *
-     * @var \OpenSKOS_Db_Table_Collections
+     * @var \OpenSkos2\SetManager
      */
-    protected $setsModel;
-
+    protected $setManager;
     /**
      * Stores map from tenants to sets.
      * @var array
      */
     protected $tenantsToSets = [];
-
     /**
      * Stores map from tenants and sets to schemes.
      * @var array
      */
     protected $setsToSchemes = [];
-
     /**
      * @param ConceptSchemeManager $schemeManager
-     * @param \OpenSKOS_Db_Table_Collections $setsModel
+     * @param \OpenSkos2\SetManager $setManager
      */
-    public function __construct(ConceptSchemeManager $schemeManager, \OpenSKOS_Db_Table_Collections $setsModel)
+    public function __construct(ConceptSchemeManager $schemeManager, $setManager)
     {
         $this->schemeManager = $schemeManager;
-        $this->setsModel = $setsModel;
+        $this->setManager = $setManager;
     }
-
     /**
      * Get data for sets
      * @param string $tenant
@@ -70,9 +63,9 @@ class SetsMap
     {
         $tenant = (string)$tenant;
         if (!isset($this->tenantsToSets[$tenant])) {
-            $this->tenantsToSets[$tenant] = $this->setsModel->getUrisMap($tenant);
+            $this->tenantsToSets[$tenant] = $this->setManager->getUrisMap($tenant);
         }
-
+        
         $sets = [];
         foreach ($setsUris as $setUri) {
             $setUri = (string)$setUri;
@@ -80,10 +73,8 @@ class SetsMap
                 $sets[] = $this->tenantsToSets[$tenant][$setUri];
             }
         }
-
         return $sets;
     }
-
     /**
      * Get data for schemes
      * @param string $tenant
@@ -98,15 +89,13 @@ class SetsMap
         if (!isset($this->setsToSchemes[$tenant])) {
             $this->setsToSchemes[$tenant] = [];
         }
-
         if (!isset($this->setsToSchemes[$tenant][$setUri])) {
             // @TODO tenant? in getSchemesByCollectionUri
-            $allSchemes = $this->schemeManager->getSchemesByCollectionUri($setUri);
+            $allSchemes = $this->schemeManager->getSchemeBySetUri($setUri);
             foreach ($allSchemes as $scheme) {
                 $this->setsToSchemes[$tenant][$setUri][$scheme->getUri()] = $scheme;
             }
         }
-
         $schemes = [];
         foreach ($schemesUris as $schemeUri) {
             $schemeUri = (string)$schemeUri;

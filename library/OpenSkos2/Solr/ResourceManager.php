@@ -25,8 +25,11 @@ use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\ResourceCollection;
 use Solarium\QueryType\Update\Query\Query as UpdateQuery;
 
+// Meertens: chnages staring from 21/10/2016 are taken,
+
 class ResourceManager
 {
+
     /**
      * @var Client
      */
@@ -139,7 +142,7 @@ class ResourceManager
         } while ($exception !== null && $tries < $maxTries);
 
         if ($exception !== null) {
-            throw $exception;
+            throw new \Exception($exception->getBody());
         }
     }
 
@@ -178,7 +181,6 @@ class ResourceManager
                 ->setRows($rows)
                 ->setFields(['uri'])
                 ->setQuery($query);
-        
         if (!empty($sorts)) {
             $select->setSorts($sorts);
         }
@@ -194,7 +196,6 @@ class ResourceManager
         }
 
         $solrResult = $this->solr->select($select);
-
         $numFound = $solrResult->getNumFound();
         
         $uris = [];
@@ -213,7 +214,6 @@ class ResourceManager
     public function getMaxFieldValue($query, $field)
     {
         // Solarium brakes stat results when we have long int, so we use ordering.
-
         $select = $this->solr->createSelect()
             ->setQuery($query)
             ->setRows(1)
@@ -221,8 +221,11 @@ class ResourceManager
             ->addField($field);
 
         $solrResult = $this->solr->select($select);
-
-        return $solrResult->getIterator()->current()->{$field};
+        if (count($solrResult->getIterator()) > 0) {
+            return $solrResult->getIterator()->current()->{$field};
+        } else {
+            return 0;
+        }
     }
 
     /**

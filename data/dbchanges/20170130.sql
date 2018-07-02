@@ -1,0 +1,4 @@
+ALTER TABLE user
+DROP COLUMN eppn;
+ALTER TABLE user
+ADD COLUMN uri varchar(256);

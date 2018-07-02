@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Export;
 
 use OpenSkos2\Concept;
@@ -36,7 +34,6 @@ class Command
      * @var Autocomplete
      */
     protected $searchAutocomplete;
-
     /**
      * @param Autocomplete $searchAutocomplete
      * @param ConceptManager $conceptManager
@@ -55,7 +52,7 @@ class Command
      */
     public function handle(Message $message)
     {
-        if ($message->getTenant()->getEnableSkosXl()) {
+        if ($message->getTenant()->isEnableSkosXl()) {
             $excludeProperties = Concept::$classes['LexicalLabels'];
         } else {
             $excludeProperties = Concept::$classes['SkosXlLabels'];

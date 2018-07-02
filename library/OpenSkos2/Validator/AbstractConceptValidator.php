@@ -24,10 +24,15 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 abstract class AbstractConceptValidator extends AbstractResourceValidator
 {
-    /**
-     * @param RdfResource $resource
-     * @return bool
-     */
+
+ 
+    public function __construct($referencecheckOn = true, $conceptReferenceCheckOn = true)
+    {
+        $this->resourceType = Concept::TYPE;
+        $this->referenceCheckOn = $referencecheckOn;
+        $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
+    }
+
     public function validate(RdfResource $resource)
     {
         if ($resource instanceof Concept) {

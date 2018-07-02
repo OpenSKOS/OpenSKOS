@@ -24,7 +24,8 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
     public function indexAction()
     {
         $this->_requireAccess('editor.users', 'index');
-        $this->view->users = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Users');
+        $this->view->users = OpenSKOS_Db_Table_Users::getUsersForTenant($this->_tenant);
+
     }
 
     public function viewAction()
@@ -89,7 +90,6 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
         } else {
             if ($userFromIdentity->isAllowed('editor.users', 'manage')) {
                 $formData = $form->getValues();
-                                
                 if (isset($formData['defaultSearchProfileIds'])) {
                     if (! empty($formData['defaultSearchProfileIds'])) {
                         $formData['defaultSearchProfileIds'] = implode(', ', $formData['defaultSearchProfileIds']);
@@ -97,7 +97,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
                         $formData['defaultSearchProfileIds'] = null;
                     }
                 }
-                                
+
                 $user
                     ->setFromArray($formData)
                     ->setFromArray(array('tenant' => $this->_tenant->code));
@@ -143,7 +143,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
         $model = new OpenSKOS_Db_Table_Users();
         if (null === ($id = $this->getRequest()->getParam('user'))) {
             //create a new user:
-            $user = $model->createRow(array('tenant' => $this->_tenant->code));
+            $user = $model->createRow(array('tenant' => $this->_tenant->getCode()));
         } else {
             $user = $model->find((int)$id)->current();
             if (null === $user) {
@@ -152,7 +152,7 @@ class Editor_UsersController extends OpenSKOS_Controller_Editor
             }
         }
 
-        if ($user->tenant != $this->_tenant->code) {
+        if ($user->tenant != $this->_tenant->getCode()) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You are not allowed to edit this user.'));
             $this->_helper->redirector('index');
         }

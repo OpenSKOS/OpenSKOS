@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Mark Lindeman
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\Namespaces\Skos;
+
+$di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$scheme = $this->resource;
+
+$conceptSchemeManager = $di->get('OpenSkos2\ConceptSchemeManager');
+$setManager = $di->get('OpenSkos2\SetManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
+$uri = $scheme->getUri();
+$uuid = $scheme->getUuid();
+$name = $scheme->getTitle();
+$set = $scheme->getSet();
+$setUri= $set[0]->getUri();
+$inst=$scheme ->getTenant();
+$tenantCode = $inst->getValue();
+$this->headTitle($name);
+?>
+
+
+<h2><?php echo $this->escape($name) ?></h2> 
+<div class="clear">
+    <dl>
+        <?php foreach ($this->resProperties as $key => $val): ?>
+            <?php if ($key === "type"): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
+            <?php endif ?>
+            <?php
+            if ($key === "set"):
+                $setinfo = $setManager->fetchSetTitleAndCodeByUri($setUri);
+                ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a href="<?php echo $this->url(array('controller' => 'collections', 'id' => $setinfo['code'])) ?>.html"><?php echo $setinfo['title'] ?></a></dd>
+            <?php endif ?>
+            <?php
+            if ($key === "tenant"):
+                $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
+                ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $tenantCode)) ?>.html"><?php echo $tenantName ?></a></dd>
+            <?php endif ?>
+            <?php if ($key === "description"): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><?php echo nl2br($val, true) ?></dd>
+            <?php endif ?>
+            <?php if (($key === "uuid") || ($key === "title") || ($key === "acceptedBy") || ($key === "creator") || (($key === "contributor"))): ?>
+                <dt><?php echo $key ?>:</dt>
+                <dd><?php echo $val ?></dd>
+            <?php endif ?>
+        <?php endforeach; ?>
+    </dl>
+
+
+
+</div>
+<h3>Alternative formats</h3>
+<ul>
+    <li><a class="json" href="<?php echo $this->url(['controller' => 'conceptscheme', 'id' => $uuid]) . '.json' ?>">JSON</a></li>
+    <li><a class="jsonp" href="<?php echo $this->url(['controller' => 'conceptscheme', 'id' => $uuid]) . '.jsonp?callback=myCallBack1234' ?>">JSONP</a></li>
+    <li><a class="rdf" href="<?php echo $this->url(['controller' => 'conceptscheme', 'id' => $uuid]) . '.rdf' ?>">RDF</a></li>
+</ul>
+
+<div>
+    <?php $concepts = $conceptSchemeManager->listConceptsForCluster($uri, Skos::INSCHEME); ?>
+
+    <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this scheme:</h3>
+    <?php
+    foreach ($concepts as $key => $value):
+        ?>
+        <li>
+            <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $value), 'rest') ?>.html">
+                <strong><?php echo $key ?></strong>
+            </a>
+        </li>
+    <?php endforeach ?>
+</div>

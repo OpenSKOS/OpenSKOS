@@ -84,7 +84,7 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	}
 	
 	/**
-	 * @return OpenSKOS_Db_Table_Row_Collection
+	 * @return OpenSKOS_Db_Table_Row_Set
 	 */
 	public function getCollection()
 	{

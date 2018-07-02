@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,7 +21,7 @@ namespace OpenSkos2\Namespaces;
 
 class Xsd
 {
+
     const NAME_SPACE = 'http://www.w3.org/2001/XMLSchema#';
-    
     const NONNEGATIVEINTEGER = 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger';
 }

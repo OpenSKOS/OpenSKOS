@@ -15,7 +15,7 @@
  * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
- */
+ */ /Users/olha/WorkProjects/open-skos-2/OpenSKOS2tempMeertens/public/xsd/openskos.xsd
 -->
 
 <xs:schema version="1.1"
@@ -39,10 +39,10 @@
     </xs:element>
     <xs:element name="toBeChecked" type="xs:boolean"/>
         
-    <xs:element name="collection"/>
+    <xs:element name="set"/>
     <xs:element name="uuid"/>
     <xs:element name="dateDeleted" />
     <xs:element name="deletedBy" />
     <xs:element name="acceptedBy" />
-    <xs:element name="modifiedBy" />
+    <xs:element name="timestamp" />
 </xs:schema>

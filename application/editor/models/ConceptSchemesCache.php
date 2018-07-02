@@ -103,7 +103,7 @@ class Editor_Models_ConceptSchemesCache
         if ($schemes === false) {
             $schemes = $this->sortSchemes(
                 $this->manager->fetch(
-                    [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
+                    [],
                     null,
                     null,
                     true
@@ -136,11 +136,11 @@ class Editor_Models_ConceptSchemesCache
      */
     public function fetchUrisCaptionsMap($inCollections = [])
     {
-        $shemes = $this->fetchAll();
+        $allSchemes = $this->fetchAll();
         $result = [];
-        foreach ($shemes as $scheme) {
+        foreach ($allSchemes as $scheme) {
             if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
-                $result[$scheme->getUri()] = $scheme->getCaption();
+                $result[$scheme->getUri()] = $scheme->getTitle();
             }
         }
         return $result;

@@ -21,7 +21,6 @@
  */
 class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
 {
-
     /**
      * @return Zend_Form
      */
@@ -30,6 +29,7 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         static $form;
         if (null === $form) {
             $form = new Zend_Form();
+            /**/
             $form
                     ->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
                     ->addElement('text', 'organisationUnit', array('label' => _('Organisation unit')))
@@ -49,8 +49,8 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
                     ))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
             ;
-
             $form->getElement('email')->addValidator(new Zend_Validate_EmailAddress());
+
             
             $form->getElement('enableStatusesSystem')->getDecorator('Label')
                     ->setTagClass('decorator-with-helptext hand-cursor')
@@ -64,7 +64,6 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         }
         return $form;
     }
-
     /**
      * @return DOMDocument;
      */
@@ -81,10 +80,8 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
             $doc->documentElement->setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
             $doc->documentElement->setAttribute('xmlns:v', 'http://www.w3.org/2006/vcard/ns#');
         }
-
         return $doc;
     }
-
     public function toRdf($forOAI = false)
     {
         $helper = new Zend_View_Helper_ServerUrl();
@@ -93,14 +90,11 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         foreach ($this as $key => $val) {
             $data[$key] = htmlspecialchars($val);
         }
-
         $doc = self::getRdfDocument($forOAI);
         $rootNode = true === $forOAI ? $doc->documentElement->firstChild : $doc->documentElement;
-
         $VCard = $rootNode->appendChild($doc->createElement('v:Vcard'));
         $VCard->setAttribute('rdf:about', $about);
         $VCard->appendChild($doc->createElement('v:fn', $data['name']));
-
         if ($this->website) {
             $VCard->setAttribute('v:url', $this->website);
         }
@@ -109,13 +103,10 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         if ($this->organisationUnit) {
             $node->appendChild($doc->createElement('v:organisation-unit', $data['organisationUnit']));
         }
-
         if ($this->email) {
             $VCard->appendChild($doc->createElement('v:email'))
                     ->setAttribute('rdf:about', 'mailto:' . $this->email);
         }
-
-
         $adr = $doc->createElement('v:adr');
         foreach (array('street-address', 'locality', 'postal-code', 'country-name') as $name) {
             $dbName = preg_replace_callback(
@@ -133,7 +124,6 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         if ($adr->childNodes->length) {
             $VCard->appendChild($adr);
         }
-
         return $doc;
     }
     
@@ -148,3 +138,4 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
             
     }
 }
+

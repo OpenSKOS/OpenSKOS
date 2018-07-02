@@ -21,60 +21,51 @@ namespace OpenSkos2\Api;
 
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\NotFoundException;
-use OpenSkos2\Converter\Text;
-use OpenSkos2\Namespaces;
-use OpenSkos2\Namespaces\OpenSkos;
-use OpenSKOS_Db_Table_Row_Collection;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
-use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\JsonpResponse;
+use OpenSkos2\Api\Response\ResultSet\JsonResponse;
 use OpenSkos2\Api\Response\ResultSet\RdfResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\RdfResponse as DetailRdfResponse;
-use OpenSkos2\Api\Exception\InvalidPredicateException;
-use OpenSkos2\Rdf\ResourceManager;
-use OpenSkos2\Rdf\Resource;
 use OpenSkos2\ConceptManager;
+use OpenSkos2\Tenant;
+use OpenSkos2\Set;
 use OpenSkos2\PersonManager;
-use OpenSkos2\FieldsMaps;
-use OpenSkos2\Validator\Resource as ResourceValidator;
-use OpenSkos2\Tenant as Tenant;
+use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Search\Autocomplete;
+use OpenSkos2\Namespaces;
+use OpenSkos2\Namespaces\OpenSkos;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response;
+use Psr\Http\Message\ServerRequestInterface as PsrServerRequestInterface;
 use Zend\Diactoros\Stream;
+use Zend\Diactoros\Response;
 
-/**
- * Map an API request from the old application to still work with the new backend on Jena
- */
-class Concept
+// Meerens: 
+// -- all concrete resource api classes extends AbstractTripleStoreResource . 
+// This abtsract class contains generic methods for get, create, update and delete for any 
+// kind of resource. 
+// -- Here in the Concept class only concept-secific "autocomplete" and "findConcepts" are implemented, 
+// the other methods can be found in the parent class.
+// -- ApiResponseTrait is not used any more.
+// -- Maximal time limit is changed at the begin of "fincConceptMethod" (by the constant set in the config),
+// and set back before the method return.
+// -- Maximal rows are set via the config's constant as well, 
+// not via $this->limit as it has been implemented by picturae
+// -- 'collection' is replaced by 'set'
+// -- added 'label' to options in findConcepts otherwise $options['label'] 
+// in autocomplete->search is useless (also see my e-mail 2/02 question
+// about "where translation prefLabel to t_prefLabel or a_prefLabel happens")
+// 
+//-- added new parameter 'wholeword' to handle switch between whole word 
+// search (prefix t_) and the part-of-word search (prefix a_)
+// // -- added 'properties' to options otherwise $options['properties'] in autocomplete->search is useless
+
+class Concept extends AbstractTripleStoreResource
 {
+
     use \OpenSkos2\Api\Response\ApiResponseTrait;
-
-    const QUERY_DESCRIBE = 'describe';
-    const QUERY_COUNT = 'count';
-
-    /**
-     * Resource manager
-     *
-     * @var ResourceManager
-     */
-    private $manager;
-
-    /**
-     * Concept manager
-     *
-     * @var ConceptManager
-     */
-    private $conceptManager;
-
-    /**
-     * Person manager
-     *
-     * @var PersonManager
-     */
-    private $personManager;
 
     /**
      * Search autocomplete
@@ -83,29 +74,25 @@ class Concept
      */
     private $searchAutocomplete;
 
-    /**
-     * Amount of concepts to return
-     *
-     * @var int
-     */
-    private $limit = 20;
+    private $parsedParameters;
 
     /**
      *
-     * @param ResourceManager $manager
-     * @param ConceptManager $conceptManager
-     * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
+     * @param ConceptManager $manager
+     * @param Autocomplete $searchAutocomplete
+     * @param PersonManager $personManager
      */
     public function __construct(
-        ResourceManager $manager,
-        ConceptManager $conceptManager,
-        \OpenSkos2\Search\Autocomplete $searchAutocomplete,
+        ConceptManager $manager,
+        Autocomplete $searchAutocomplete,
         PersonManager $personManager
     ) {
         $this->manager = $manager;
-        $this->conceptManager = $conceptManager;
-        $this->searchAutocomplete = $searchAutocomplete;
         $this->personManager = $personManager;
+        $this->searchAutocomplete = $searchAutocomplete;
+        $this->customInit = $this->manager->getCustomInitArray();
+        $this->deletionIntegrityCheck = new \OpenSkos2\IntegrityCheck($manager);
+        $this->limit = $this->customInit['limit'];
     }
 
     /**
@@ -121,21 +108,23 @@ class Concept
      * @return ResponseInterface
      * @throws InvalidArgumentException
      */
-    public function findConcepts(ServerRequestInterface $request, $context)
+    public function findConcepts(PsrServerRequestInterface $request, $context)
     {
+        set_time_limit($this->customInit["maximal_time_limit"]);
+
         $params = $request->getQueryParams();
 
         // offset
         $start = 0;
         if (!empty($params['start'])) {
-            $start = (int)$params['start'];
+            $start = (int) $params['start'];
         }
-
         // limit
         $limit = $this->limit;
         if (isset($params['rows']) && $params['rows'] < 1001) {
-            $limit = (int)$params['rows'];
+            $limit = (int) $params['rows'];
         }
+
 
         $options = [
             'start' => $start,
@@ -143,30 +132,82 @@ class Concept
             'status' => [\OpenSkos2\Concept::STATUS_CANDIDATE, \OpenSkos2\Concept::STATUS_APPROVED],
         ];
 
-        /* @var $tenant Tenant */
+
+        // tenants ???
+        // it used to be a non-obligatory multiple parameter, now is obligatory and the only one
         $tenant = null;
         if (isset($params['tenant'])) {
-            $tenant = $this->getTenantFromParams($params);
-            $options['tenants'] = [$tenant->getCode()];
+            $tenant = $this->manager->fetchByUuid($params['tenant'], \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            $tenantCode = $tenant->getCode();
+            $options['tenants'][] = $tenantCode->getValue();
         }
 
-        // collection -> set in OpenSKOS 2
-        if (isset($params['collection'])) {
-            $collection = $this->getCollection($params, $tenant);
-            $options['collections'] = [$collection->getUri()];
+        // sets
+        $setCodes = [];
+        if ($this->customInit['backward_compatible']) {
+            $setName = 'collection';
+        } else {
+            $setName = 'set';
+        }
+        if (isset($params[$setName])) {
+            $setCodes = explode(' ', trim($params[$setName]));
+            foreach ($setCodes as $setcode) {
+                $set = $this->manager->fetchByUuid($setcode, Set::TYPE, 'openskos:code');
+                $options['sets'][] = $set->getUri();
+            }
+        } else {
+            if (isset($params['setUri'])) {
+                $setUris = explode(' ', trim($params['setUri']));
+                foreach ($setUris as $setUri) {
+                    $options['sets'][] = $setUri;
+                }
+            }
         }
 
-        // conceptScheme
+        // concept scheme
         if (isset($params['scheme'])) {
-            $options['conceptScheme'] = [$params['scheme']];
+            $options['scheme'] = explode(' ', trim($params['scheme']));
         }
+
+        // skos collection
+        if (isset($params['skosCollection'])) {
+            $options['skosCollection'] = explode(' ', trim($params['skosCollection']));
+        }
+
 
         // search query
         if (isset($params['q'])) {
             $options['searchText'] = $params['q'];
         }
 
+        if (isset($params['label'])) {
+            $options['label'] = explode(' ', trim($params['label']));
+        }
+
+        if (isset($params['properties'])) {
+            $options['properties'] = explode(' ', trim($params['properties']));
+        }
+
+        if (isset($params['sorts'])) {
+            $sortmap = $this->prepareSortsForSolr($params['sorts']);
+            $options['sorts'] = $sortmap;
+        }
+
+        if (isset($params['status'])) {
+            $options['status'] = explode(' ', trim($params['status']));
+        }
+
+        $options['wholeword'] = false;
+        if (isset($params['wholeword'])) {
+            if ($params['wholeword'] === 'true') {
+                $options['wholeword'] = true;
+            }
+        }
+
+
         $concepts = $this->searchAutocomplete->search($options, $total);
+
+        set_time_limit($this->customInit["normal_time_limit"]);
 
         $result = new ResourceResultSet($concepts, $total, $start, $limit);
 
@@ -176,11 +217,12 @@ class Concept
             $propertiesList = [];
         }
 
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
         if ($this->useXlLabels($tenant, $request) === true) {
             foreach ($concepts as $concept) {
-                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+                $concept->loadFullXlLabels($this->manager->getLabelManager());
             }
         }
 
@@ -202,7 +244,6 @@ class Concept
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
-
         return $response;
     }
 
@@ -215,21 +256,13 @@ class Concept
      * @throws InvalidArgumentException
      * @return ResponseInterface
      */
-    public function getConceptResponse(ServerRequestInterface $request, $uuid, $context)
+    public function getResourceResponse(ServerRequestInterface $request, $id, $context)
     {
-        $concept = $this->getConcept($uuid);
 
-        if (!($concept instanceof \OpenSkos2\Concept || $concept instanceof \OpenSkos2\ConceptScheme)) {
-            throw new InvalidArgumentException(
-                'The requested resource was found, but is not supported by this endpoint - "concept/get".',
-                400
-            );
-        }
-
-        //TODO: make tenant openskos2tenant
-        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($concept->getInstitution());
+        $concept = $this->getResource($id);
 
         $params = $request->getQueryParams();
+
 
         if (isset($params['fl'])) {
             $propertiesList = $this->fieldsListToProperties($params['fl']);
@@ -237,11 +270,14 @@ class Concept
             $propertiesList = [];
         }
 
+        $tenantCode = $concept->getTenant()->getValue();
+        $tenant = $this->manager->fetchByUuid($tenantCode, Tenant::TYPE, 'openskos:code');
+
         $excludePropertiesList = $this->getExcludeProperties($tenant, $request);
 
-        if ($concept instanceof \OpenSkos2\Concept
-                && $excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
-            $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
+
+        if ($excludePropertiesList === \OpenSkos2\Concept::$classes['LexicalLabels']) {
+            $concept->loadFullXlLabels($this->manager->getLabelManager());
         }
 
         switch ($context) {
@@ -262,7 +298,6 @@ class Concept
             default:
                 throw new InvalidArgumentException('Invalid context: ' . $context);
         }
-
         return $response;
     }
 
@@ -290,126 +325,16 @@ class Concept
      * @throws Exception\DeletedException
      * @return \OpenSkos2\Concept
      */
-    public function getConcept($id)
+    public function getResource($id)
     {
         /* @var $concept \OpenSkos2\Concept */
-        if ($id instanceof \OpenSkos2\Rdf\Uri) {
-            $concept = $this->manager->fetchByUri($id);
-        } else {
-            $concept = $this->manager->fetchByUuid($id);
-        }
-
-        if (!$concept) {
-            throw new NotFoundException('Concept not found by id: ' . $id, 404);
-        }
+        $concept = parent::getResource($id);
 
         if ($concept->isDeleted()) {
             throw new Exception\DeletedException('Concept ' . $id . ' is deleted', 410);
         }
 
         return $concept;
-    }
-
-    /**
-     * Create the concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function create(ServerRequestInterface $request)
-    {
-        try {
-            $response = $this->handleCreate($request);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-        return $response;
-    }
-
-    /**
-     * Update a concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function update(ServerRequestInterface $request)
-    {
-        $concept = $this->getConceptFromRequest($request);
-
-        if (!$this->manager->askForUri((string)$concept->getUri())) {
-            return $this->getErrorResponse(404, 'Concept not found try insert');
-        }
-
-        try {
-            $existingConcept = $this->manager->fetchByUri((string)$concept->getUri());
-
-            $params = $this->getParams($request);
-
-            $tenant = $this->getTenantFromParams($params);
-
-            $collection = $this->getCollection($params, $tenant);
-            $user = $this->getUserFromParams($params);
-
-            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
-
-            $this->checkConceptXl($concept, $tenant);
-
-            $concept->ensureMetadata(
-                $tenant->getCode(),
-                $collection->getUri(),
-                $user->getFoafPerson(),
-                $this->conceptManager->getLabelManager(),
-                $this->personManager,
-                $existingConcept->getStatus()
-            );
-
-            $this->validate($concept, $tenant);
-
-            $this->conceptManager->replaceAndCleanRelations($concept);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-
-        return $this->getSuccessResponse($this->loadResourceToRdf($concept));
-    }
-
-    /**
-     * Perform a soft delete on a concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws InvalidArgumentException
-     * @throws NotFoundException
-     */
-    public function delete(ServerRequestInterface $request)
-    {
-        try {
-            $params = $request->getQueryParams();
-            if (empty($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter');
-            }
-
-            $id = $params['id'];
-            /* @var $concept \OpenSkos2\Concept */
-            $concept = $this->manager->fetchByUri($id);
-            if (!$concept) {
-                throw new NotFoundException('Concept not found by id :' . $id, 404);
-            }
-
-            if ($concept->isDeleted()) {
-                throw new NotFoundException('Concept already deleted :' . $id, 410);
-            }
-
-            $user = $this->getUserFromParams($params);
-
-            $this->resourceEditAllowed($concept, $concept->getInstitution(), $user);
-
-            $this->manager->deleteSoft($concept);
-        } catch (ApiException $ex) {
-            return $this->getErrorResponse($ex->getCode(), $ex->getMessage());
-        }
-
-        return $this->getSuccessResponse($this->loadResourceToRdf($concept), 202);
     }
 
     /**
@@ -430,7 +355,7 @@ class Concept
         if ($xlParam === false) {
             return false;
         } else {
-            if ($tenant !== null && $tenant->getEnableSkosXl() === true) {
+            if ($tenant !== null && $tenant->isEnableSkosXl() === true) {
                 return true;
             } else {
                 if ($tenant === null) {
@@ -449,159 +374,14 @@ class Concept
     }
 
     /**
-     * Loads the resource from the db and transforms it to rdf.
-     * @param Resource $resource
-     * @return string
-     */
-    protected function loadResourceToRdf(Resource $resource)
-    {
-        $loadedResource = $this->manager->fetchByUri($resource->getUri());
-
-        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($loadedResource->getInstitution());
-        if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->getEnableSkosXl()) {
-            $loadedResource->loadFullXlLabels($this->conceptManager->getLabelManager());
-
-            // remove the skos labels if skosxl is activaeted
-            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#prefLabel');
-            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#altLabel');
-            $loadedResource->unsetProperty('http://www.w3.org/2004/02/skos/core#hiddenLabel');
-        }
-
-        return (new Transform\DataRdf($loadedResource))->transform();
-    }
-
-    /**
-     * Gets a list (array or string) of fields and try to recognise the properties from it.
-     * @param array $fieldsList
-     * @return array
-     * @throws InvalidPredicateException
-     */
-    protected function fieldsListToProperties($fieldsList)
-    {
-        if (!is_array($fieldsList)) {
-            $fieldsList = array_map('trim', explode(',', $fieldsList));
-        }
-
-        $propertiesList = [];
-        $fieldsMap = FieldsMaps::getOldToProperties();
-
-        // Tries to search for the field in fields map.
-        // If not found there tries to expand it from short property.
-        // If not that - just pass it as it is.
-        foreach ($fieldsList as $field) {
-            if (!empty($field)) {
-                if (isset($fieldsMap[$field])) {
-                    $propertiesList[] = $fieldsMap[$field];
-                } else {
-                    $propertiesList[] = Namespaces::expandProperty($field);
-                }
-            }
-        }
-
-        // Check if we have a nice properties list at the end.
-        foreach ($propertiesList as $propertyUri) {
-            if ($propertyUri == 'uri') {
-                continue;
-            }
-            if (filter_var($propertyUri, FILTER_VALIDATE_URL) == false) {
-                throw new InvalidPredicateException(
-                    'The field "' . $propertyUri . '" from fields list is not recognised.'
-                );
-            }
-        }
-
-        return $propertiesList;
-    }
-
-    /**
-     * Applies all validators to the concept.
-     * @param \OpenSkos2\Concept $concept
-     * @param Tenant $tenant
-     * @throws InvalidArgumentException
-     */
-    protected function validate(\OpenSkos2\Concept $concept, Tenant $tenant)
-    {
-        $validator = new ResourceValidator(
-            $this->conceptManager,
-            $tenant
-        );
-
-
-        if (!$validator->validate($concept)) {
-            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
-        }
-    }
-
-    /**
-     * Handle the action of creating the concept
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws InvalidArgumentException
-     */
-    private function handleCreate(ServerRequestInterface $request)
-    {
-        $resource = $this->getConceptFromRequest($request);
-
-        if (!$resource->isBlankNode() && $this->manager->askForUri((string)$resource->getUri())) {
-            throw new InvalidArgumentException(
-                'The concept with uri ' . $resource->getUri() . ' already exists. Use PUT instead.',
-                400
-            );
-        }
-
-        $params = $this->getParams($request);
-
-        $tenant = $this->getTenantFromParams($params);
-        $collection = $this->getCollection($params, $tenant, $resource);
-        $user = $this->getUserFromParams($params);
-
-        if ($resource instanceof \OpenSkos2\Concept) {
-            $this->checkConceptXl($resource, $tenant);
-
-            $resource->ensureMetadata(
-                $tenant->getCode(),
-                $collection->getUri(),
-                $user->getFoafPerson(),
-                $this->conceptManager->getLabelManager(),
-                $this->personManager
-            );
-        } else {
-            $resource->ensureMetadata(
-                $tenant->getCode(),
-                $collection->getUri(),
-                $user->getFoafPerson()
-            );
-        }
-
-        $autoGenerateUri = $this->checkConceptIdentifiers($params, $resource);
-        if ($autoGenerateUri) {
-            $resource->selfGenerateUri(
-                $tenant,
-                $this->conceptManager
-            );
-        }
-
-        $this->validate($resource, $tenant);
-
-        if ($resource instanceof \OpenSkos2\Concept) {
-            $this->conceptManager->insert($resource);
-        } else {
-            $this->manager->insert($resource);
-        }
-
-        return $this->getSuccessResponse($this->loadResourceToRdf($resource), 201);
-    }
-
-    /**
      * Check if there are both xl labels and simple labels.
      * @param \OpenSkos2\Concept $concept
-     * @param Tenant $tenant
+     * @param \OpenSkos2\Tenant $tenant
      * @throws InvalidArgumentException
      */
-    protected function checkConceptXl(\OpenSkos2\Concept $concept, Tenant $tenant)
+    protected function checkConceptXl(\OpenSkos2\Concept $concept, \OpenSkos2\Tenant $tenant)
     {
-        if ($tenant->getEnableSkosXl()) {
+        if ($tenant->isEnableSkosXl()) {
             if ($concept->hasSimpleLabels()) {
                 throw new InvalidArgumentException(
                     'The concept contains simple labels. '
@@ -621,229 +401,179 @@ class Concept
     }
 
     /**
-     * Get request params, including parameters send in XML body
-     *
-     * @param ServerRequestInterface $request
-     * @return array
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string api key if set else ''
      */
-    private function getParams(ServerRequestInterface $request)
+    protected function getApiKey($request)
+    {
+        $apiKey = $this->getMultiSourcedParameter($request, 'key');
+        return $apiKey;
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return Response
+     */
+    public function addRelationTriple(PsrServerRequestInterface $request)
     {
         $params = $request->getQueryParams();
-        $doc = $this->getDomDocumentFromRequest($request);
-        // is a tenant, collection or api key set in the XML?
-        foreach (array('tenant', 'collection', 'key', 'autoGenerateIdentifiers') as $attributeName) {
-            $value = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, $attributeName);
-            if (!empty($value)) {
-                $params[$attributeName] = $value;
-            }
-        }
-        return $params;
-    }
+        $parsedBody = $request->getParsedBody();
 
-    /**
-     * Get the skos concept from the request to insert or update
-     * does some validation to see if the xml is valid
-     *
-     * @param ServerRequestInterface $request
-     * @return \OpenSkos2\Concept
-     * @throws InvalidArgumentException
-     */
-    private function getConceptFromRequest(ServerRequestInterface $request)
-    {
-        $doc = $this->getDomDocumentFromRequest($request);
+        $apiKey = $this->getApiKey($request);
 
-        // remove the api key
-        $doc->documentElement->removeAttributeNS(OpenSkos::NAME_SPACE, 'key');
+        $user = $this->getUserByKey($apiKey);
 
-        $resource = (new Text($doc->saveXML()))->getResources(\OpenSkos2\Concept::$classes['SkosXlLabels']);
+        $tenant = $this->getTenantFromApiCall($params, $user);
 
-        if ($resource->count() != 1) {
-            throw new InvalidArgumentException(
-                'Expected exactly one concept, got ' . $resource->count(),
-                412
-            );
+        $set = $this->getSet($request);
+
+        try {
+            $body = $this->preEditChecksRels($request, $user, $tenant, $set, false);
+            $this->manager->addRelationTriple($body['concept'], $body['type'], $body['related']);
+        } catch (ApiException $exc) {
+            return $this->getErrorResponse($exc->getCode(), $exc->getMessage());
         }
 
-        if (!isset($resource[0]) || !$resource[0] instanceof \OpenSkos2\Concept) {
-            throw new InvalidArgumentException('XML Could not be converted to SKOS Concept', 400);
-        }
-
-        /** @var $concept \OpenSkos2\Concept **/
-        $concept = $resource[0];
-
-        // Is a tenant in the custom openskos xml attributes but not in the rdf add the values to the concept
-        $xmlTenant = $doc->documentElement->getAttributeNS(OpenSkos::NAME_SPACE, 'tenant');
-        if (!$concept->getTenant() && !empty($xmlTenant)) {
-            $concept->addUniqueProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($xmlTenant));
-        }
-
-        // If there still is no tenant add it from the query params
-        $params = $request->getQueryParams();
-        if (!$concept->getTenant() && isset($params['tenant'])) {
-            $concept->addUniqueProperty(OpenSkos::TENANT, new \OpenSkos2\Rdf\Literal($params['tenant']));
-        }
-
-        if (!$concept->getTenant()) {
-            throw new InvalidArgumentException('No tenant specified', 400);
-        }
-
-        return $concept;
-    }
-
-    /**
-     * Get dom document from request
-     *
-     * @param ServerRequestInterface $request
-     * @return \DOMDocument
-     * @throws InvalidArgumentException
-     */
-    private function getDomDocumentFromRequest(ServerRequestInterface $request)
-    {
-        $xml = $request->getBody();
-        if (!$xml) {
-            throw new InvalidArgumentException('No RDF-XML recieved', 400);
-        }
-
-        $doc = new \DOMDocument();
-        if (!@$doc->loadXML($xml)) {
-            throw new InvalidArgumentException('Recieved RDF-XML is not valid XML', 400);
-        }
-
-        //do some basic tests
-        if ($doc->documentElement->nodeName != 'rdf:RDF') {
-            throw new InvalidArgumentException(
-                'Recieved RDF-XML is not valid: '
-                . 'expected <rdf:RDF/> rootnode, got <'.$doc->documentElement->nodeName.'/>',
-                400
-            );
-        }
-
-        return $doc;
-    }
-
-    /**
-     * @param $params
-     * @param Tenant|null $tenant
-     * @return OpenSKOS_Db_Table_Row_Collection
-     * @throws InvalidArgumentException
-     */
-    private function getCollection($params, $tenant)
-    {
-        if (empty($params['collection'])) {
-            throw new InvalidArgumentException('No collection specified', 400);
-        }
-        $code = $params['collection'];
-        $model = new \OpenSKOS_Db_Table_Collections();
-        $collection = $model->findByCode($code, $tenant->getCode());
-        if (null === $collection) {
-            throw new InvalidArgumentException(
-                'No such collection `'.$code.'` in this tenant.',
-                404
-            );
-        }
-        return $collection;
-    }
-
-    /**
-     * Get error response
-     *
-     * @param integer $status
-     * @param string $message
-     * @return ResponseInterface
-     */
-    protected function getErrorResponse($status, $message)
-    {
         $stream = new Stream('php://memory', 'wb+');
-        $stream->write($message);
-        $response = (new Response($stream, $status, ['X-Error-Msg' => $message]));
+        $stream->write('Relations added');
+        $response = (new Response())
+            ->withBody($stream);
         return $response;
     }
 
     /**
-     * Get success response
-     *
-     * @param string $message
-     * @param int    $status
-     * @return ResponseInterface
+     * @param PsrServerRequestInterface $request
+     * @return Response
      */
-    private function getSuccessResponse($message, $status = 200)
+    public function deleteRelationTriple(PsrServerRequestInterface $request)
     {
+        $params = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
+
+        $apiKey = $this->getApiKey($request);
+
+        $user = $this->getUserByKey($apiKey);
+
+        $tenant = $this->getTenantFromApiCall($params, $user);
+
+        $set = $this->getSet($request);
+        try {
+            $body = $this->preEditChecksRels($request, $user, $tenant, $set, true);
+            $this->manager->deleteRelationTriple($body['concept'], $body['type'], $body['related']);
+        } catch (Exception $e) {
+            return $this->getErrorResponseFromException($e);
+        }
+
         $stream = new Stream('php://memory', 'wb+');
-        $stream->write($message);
-        $response = (new Response($stream, $status))
-            ->withHeader('Content-Type', 'text/xml; charset="utf-8"');
+        $stream->write('Relation deleted');
+        $response = (new Response())
+            ->withBody($stream);
         return $response;
     }
 
-    /**
-     * Check if we need to generate or not concept identifiers (uri).
-     * Validates any existing identifiers.
-     *
-     * @param array $params
-     * @param \OpenSkos2\Concept $concept
-     * @return bool If an uri must be autogenerated
-     * @throws InvalidArgumentException
-     */
-    private function checkConceptIdentifiers(array $params, \OpenSkos2\Concept $concept)
+    private function preEditChecksRels(PsrServerRequestInterface $request, $user, $tenant, $set, $toBeDeleted)
     {
 
-        // We return if an uri must be autogenerated
-        $autoGenerateIdentifiers = false;
-        if (!empty($params['autoGenerateIdentifiers'])) {
-            $autoGenerateIdentifiers = filter_var(
-                $params['autoGenerateIdentifiers'],
-                FILTER_VALIDATE_BOOLEAN
-            );
+        $body = $request->getParsedBody();
+        if (!isset($body['concept'])) {
+            throw new ApiException('Missing concept', 400);
+        }
+        if (!isset($body['related'])) {
+            throw new ApiException('Missing related', 400);
+        }
+        if (!isset($body['type'])) {
+            throw new ApiException('Missing type', 400);
         }
 
-        if ($autoGenerateIdentifiers) {
-            if (!$concept->isBlankNode()) {
-                throw new InvalidArgumentException(
-                    'Parameter autoGenerateIdentifiers is set to true, but the '
-                    . 'xml already contains uri (rdf:about).',
-                    400
-                );
+        try {
+            $this->manager->fetchByUri($body['concept'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
+        }
+
+        try {
+            $this->manager->fetchByUri($body['related'], Skos::CONCEPT);
+        } catch (\Exception $ex) {
+            throw new ApiException($ex->getMessage(), 404);
+        }
+
+        $validURI = $this->manager->isRelationURIValid($body['type']); // throws an exception otherwise
+        
+        if (!$toBeDeleted) {
+            try {
+                $this->manager->
+                    relationTripleIsDuplicated($body['concept'], $body['related'], $body['type']);
+                $this->manager->
+                    relationTripleCreatesCycle($body['concept'], $body['related'], $body['type']);
+            } catch (\Exception $ex) {
+                throw new ApiException($ex->getMessage(), 400);
             }
+        }
+
+        $authorisation = $this->manager->getAuthorisationObject();
+
+        $concept = $this->manager->fetchByUri($body['concept'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            // throws an exception if not allowed
+            $authorisation->resourceEditAllowed($user, $tenant, $set, $concept);
+        }
+        $relatedConcept = $this->manager->fetchByUri($body['related'], $this->manager->getResourceType());
+        if (!empty($authorisation)) {
+            $authorisation->resourceEditAllowed(
+                $user,
+                $tenant,
+                $set,
+                $relatedConcept
+            ); // throws an exception if not allowed
+        }
+        return $body;
+    }
+
+    private function prepareSortsForSolr($sortstring)
+    {
+        $sortlist = explode(" ", $sortstring);
+        $l = count($sortlist);
+        $sortmap = [];
+        $i = 0;
+        while ($i < $l - 1) { // the last element will be worked-on after the loop is finished
+            $j = $i;
+            $i++;
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$j]);
+            $sortorder = 'asc';
+            if ($sortlist[$i] === "asc" || $sortlist[$i] === 'desc') {
+                $sortorder = $sortlist[$i];
+                $i++;
+            }
+            $sortmap[$sortfield] = $sortorder;
+        };
+        if ($sortlist[$l - 1] !== 'asc' && $sortlist[$l - 1] !== 'desc') {
+// field name is the last and no order after it
+            $sortfield = $this->prepareSortFieldForSolr($sortlist[$l - 1]); // Fix "@nl" to "_nl"
+            $sortmap[$sortfield] = 'asc';
+        };
+        return $sortmap;
+    }
+
+    private function prepareSortFieldForSolr($term)
+    {
+        // translate field name  to am internal sort-field name
+        if (substr($term, 0, 5) === "sort_" || substr($term, strlen($term) - 3, 1) === "_") {
+// is already an internal presentation ready for solr, starts with sort_* or *_langcode
+            return $term;
+        }
+        if ($this->isDateField($term)) {
+            return "sort_d_" . $term;
         } else {
-            // Is uri missing
-            if ($concept->isBlankNode()) {
-                throw new InvalidArgumentException(
-                    'Uri (rdf:about) is missing from the xml. You may consider using autoGenerateIdentifiers.',
-                    400
-                );
+            if (strpos($term, "@") !== false) {
+                return str_replace("@", "_", $term);
+            } else {
+                return "sort_s_" . $term;
             }
         }
-
-        return $autoGenerateIdentifiers;
     }
 
-    /**
-     * @param array $params
-     * @return Tenant
-     * @throws InvalidArgumentException
-     */
-    private function getTenantFromParams($params)
+    private function isDateField($term)
     {
-        if (empty($params['tenant'])) {
-            throw new InvalidArgumentException('No tenant specified', 400);
-        }
-
-        $openSkos2Tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($this->getTenant($params['tenant']));
-
-        return $openSkos2Tenant;
-    }
-
-    /**
-     *
-     * @param array $params
-     * @return \OpenSKOS_Db_Table_Row_User
-     * @throws InvalidArgumentException
-     */
-    private function getUserFromParams($params)
-    {
-        if (empty($params['key'])) {
-            throw new InvalidArgumentException('No key specified', 400);
-        }
-        return $this->getUserByKey($params['key']);
+        return ($term === "dateAccepted" || $term === "dateSubmitted" || $term === "modified");
     }
 }

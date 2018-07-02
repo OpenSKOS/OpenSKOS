@@ -21,6 +21,7 @@ namespace OpenSkos2\Rdf;
 
 interface Object
 {
+
     /**
      * Output the object as string.
      * @return string

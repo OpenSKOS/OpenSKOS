@@ -26,12 +26,17 @@ use OpenSkos2\Rdf\Resource;
  * Transform Resource to a RDF string.
  * Provide backwards compatibility to the API output from OpenSKOS 1 as much as possible
  */
+// Meertens: this class is used not only for concepts but for the other resources represented in triple store,
+// Therefore we do not have a private variable "concept", but we have "resource" instead.
+// Picturae's changes after 26/10/2016 are present.
+
 class DataRdf
 {
+
     /**
      * @var Resource
      */
-    private $concept;
+    private $resource;
 
     /**
      * @var bool
@@ -49,17 +54,17 @@ class DataRdf
     private $excludePropertiesList;
 
     /**
-     * @param Resource $concept
+     * @param Resource $resource
      * @param bool $includeRdfHeader
      * @param array $propertiesList Properties to serialize.
      */
     public function __construct(
-        Resource $concept,
+        Resource $resource,
         $includeRdfHeader = true,
         $propertiesList = null,
         $excludePropertiesList = []
     ) {
-        $this->concept = $concept;
+        $this->resource = $resource;
         $this->includeRdfHeader = $includeRdfHeader;
         $this->propertiesList = $propertiesList;
         $this->excludePropertiesList = $excludePropertiesList;
@@ -72,29 +77,30 @@ class DataRdf
     }
 
     /**
-     * Transform the concept to xml string
+     * Transform the resouce to xml string
      *
      * @return string
      */
     public function transform()
     {
         if (!empty($this->propertiesList) || !empty($this->excludePropertiesList)) {
-            $reducedResource = new Resource($this->concept->getUri());
-            foreach ($this->concept->getProperties() as $property => $values) {
+            $reducedResource = new Resource($this->resource->getUri());
+            foreach ($this->resource->getProperties() as $property => $values) {
                 if ($this->doIncludeProperty($property)) {
                     $reducedResource->setProperties($property, $values);
                 }
             }
         } else {
-            $reducedResource = $this->concept;
+            $reducedResource = $this->resource;
         }
-        
+
         $resourceTypes = [
-            \OpenSkos2\Concept::TYPE
+           $this->resource->getType()
         ];
         
-        $concept = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
-        return $concept->serialise(
+        $resource = \OpenSkos2\Bridge\EasyRdf::resourceToGraph($reducedResource);
+       
+        return $resource->serialise(
             'rdfxml_openskos',
             [
                 EasyRdfOpenSkos::OPTION_RENDER_ITEMS_ONLY => !$this->includeRdfHeader,
@@ -120,6 +126,7 @@ class DataRdf
                 return false;
             }
         }
+        
         
         if (in_array($property, $this->propertiesList) === true) {
             if (in_array($property, $this->excludePropertiesList) === false) {

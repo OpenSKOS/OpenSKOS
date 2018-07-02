@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,26 +15,21 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Concept;
 use OpenSkos2\Namespaces;
-
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-
 /* @var $concept \OpenSkos2\Concept */
 $concept = $this->concept;
-
 /* @var $conceptManager \OpenSkos2\ConceptManager */
 $conceptManager = $di->get('OpenSkos2\ConceptManager');
-
+/* @var $tenantManager \OpenSkos2\ConceptManager */
+$tenantManager = $di->get('OpenSkos2\TenantManager');
 /* @var $useSkosXlLabels boolean */
 $useXlLabels = $this->useXlLabels;
-
 $lang = Zend_Controller_Front::getInstance()->getRequest()->getParam('lang');
 $title = $concept->getCaption($lang);
-
 $this->headTitle($title);
 ?>
 <h2><?=$this->escape($title)?></h2>
@@ -49,17 +43,13 @@ $this->headTitle($title);
             ],
             'rest'
         )?>.html">
-            <?=$this->escape($concept->getInstitution()->name)?>
+            <?=$this->escape($tenantManager->fetchTenantNameByCode($concept->getTenant()->getValue()))?>
         </a>
     </dd>
     
-    <?php
-        $setsModel = new OpenSKOS_Db_Table_Collections();
-    ?>
-    
     <?php foreach ($concept->getProperty(OpenSkos::SET) as $setUri):?>
         <?php
-            $set = $setsModel->findByUri($setUri->getUri());
+            $set = $conceptManager->fetchByUri($setUri->getUri(), \OpenSkos2\Set::TYPE);
         ?>
         <dt><?=$this->translate('Set')?>:</dt>
         <dd>
@@ -67,10 +57,10 @@ $this->headTitle($title);
             <a href="<?=$this->url(array(
                                 'module' => 'api',
                                 'controller' => 'collections',
-                                'id' => $set->getId()
+                                'id' => (string)$set->getCode()
                             ), 'rest'
             )?>.html">
-                <?= $set->dc_title?>
+                <?= (string)$set->getTitle()?>
             </a>
         <?php else:?>
             <?= $setUri->getUri()?>
@@ -89,7 +79,7 @@ $this->headTitle($title);
 
 <?php if ($concept->hasProperty(Skos::INSCHEME)):?>
     <?php
-        $schemes = $di->get('OpenSkos2\ConceptSchemeManager')->fetchByUris($concept->getProperty(Skos::INSCHEME));
+        $schemes = $conceptManager->fetchByUris($concept->getProperty(Skos::INSCHEME), \OpenSkos2\ConceptScheme::TYPE);
     ?>
     <h3><?=$this->translate('inScheme')?></h3>
     <ul>

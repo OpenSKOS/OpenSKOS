@@ -37,13 +37,13 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         $options = $this->getSearchOptions($searchForm);
         $options['sorts'] = ['sort_s_prefLabel' => 'asc'];
-        
+
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
         $concepts = $search->search($options, $numFound);
-        
+
         $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
-        
+
         $result = [
             'concepts' => $preview->convertToLinksData($concepts),
             'numFound' => $numFound,
@@ -51,7 +51,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             'conceptSchemeOptions' => $this->_getConceptSchemeOptions(),
             'profileOptions' => $this->_getProfilesSelectOptions(),
         ];
-        
+
         $response = new Zend\Diactoros\Response\JsonResponse($result);
         $this->emitResponse($response);
     }
@@ -300,7 +300,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         $userOptions = $this->getCurrentUser()->getSearchOptions();
         $searchForm = Editor_Forms_Search::factory();
-        
+
         if ($this->getCurrentUser()->disableSearchProfileChanging) {
             if (isset($searchOptions['allowedConceptScheme'])) {
                 $userOptions['allowedConceptScheme'] = $searchOptions['allowedConceptScheme'];
@@ -360,8 +360,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
 
         // Change search profile if needed and allowed. Change concept schemes if needed.
         $profileId = $this->getRequest()->getParam('searchProfileId', '');
-        if ($detailedSearchOptions['searchProfileId'] != $profileId
-                || !isset($detailedSearchOptions['searchProfileId'])) {
+        if (!isset($detailedSearchOptions['searchProfileId']) ||
+            $detailedSearchOptions['searchProfileId'] != $profileId  ) {
             $this->_switchUserToSearchProfile($loggedUser, $profileId);
             $detailedSearchOptions = $loggedUser->getSearchOptions();
             
@@ -392,7 +392,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             if ($searchOptions['allowedConceptScheme'] != $detailedSearchOptions['allowedConceptScheme']) {
                 $detailedSearchOptions['allowedConceptScheme'] = $searchOptions['allowedConceptScheme'];
             }
-            
+
             $loggedUser->setSearchOptions($detailedSearchOptions);
         }
         
@@ -406,7 +406,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             
             $loggedUser->setSearchOptions($detailedSearchOptions);
         }
-        
+
         return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
     }
     

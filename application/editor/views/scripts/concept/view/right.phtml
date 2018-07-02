@@ -28,7 +28,7 @@ use OpenSkos2\Namespaces\Skos;
                     <li id="tab_<?php echo $schemeUri ?>" class="concept-tab-link tab<?php if ($isFirst): $isFirst = false ?> active<?php endif ?>">
                         <a <?php if ($isFirst): $isFirst = false ?> class="active"<?php endif ?> href="#" id="scheme_<?php echo $schemeUri; ?>">
                             <?php $conceptScheme = $this->conceptSchemes->findByUri($schemeUri);?>
-                            <?php echo $conceptScheme ? $conceptScheme->getCaption() : $schemeUri; ?>
+                            <?php echo $conceptScheme ? $conceptScheme->getTitle() : $schemeUri; ?>
                         </a>
                     </li>
                 <?php endforeach ?>

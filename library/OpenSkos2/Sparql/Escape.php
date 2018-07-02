@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,7 +21,7 @@ namespace OpenSkos2\Sparql;
 
 class Escape
 {
-    
+
     /**
      * Escape array of literals
      *
@@ -47,7 +47,7 @@ class Escape
         $ol = new \OpenSkos2\Rdf\Literal($literal);
         return (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($ol);
     }
-    
+
     /**
      * Escape uri to use in sparql
      *
@@ -59,7 +59,7 @@ class Escape
         $ouri = new \OpenSkos2\Rdf\Uri($uri);
         return (new \OpenSkos2\Rdf\Serializer\NTriple())->serialize($ouri);
     }
-    
+
     /**
      * Escape uri to use in sparql
      *

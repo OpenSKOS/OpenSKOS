@@ -26,11 +26,12 @@ use OpenSkos2\Export\Serialiser\Exception\RequiredPropertiesListException;
 
 class Csv extends FormatAbstract
 {
+
     /**
      * @var ConceptManager
      */
     protected $conceptManager;
-    
+
     /**
      * @param ConceptManager $conceptManager
      */
@@ -39,7 +40,7 @@ class Csv extends FormatAbstract
         parent::__construct();
         $this->conceptManager = $conceptManager;
     }
-    
+
     /**
      * Gets the array of properties to be serialised.
      * @return array
@@ -54,7 +55,7 @@ class Csv extends FormatAbstract
         }
         return $this->propertiesToSerialise;
     }
-    
+
     /**
      * Creates the header of the output.
      * @return string
@@ -66,7 +67,7 @@ class Csv extends FormatAbstract
             array_map(['OpenSkos2\Namespaces', 'shortenProperty'], $this->getPropertiesToSerialise())
         );
     }
-    
+
     /**
      * Serialises a single resource.
      * @return string
@@ -75,7 +76,7 @@ class Csv extends FormatAbstract
     {
         return $this->stringPutCsv($this->prepareResourceDataForCsv($resource));
     }
-    
+
     /**
      * Creates the footer of the output.
      * @return string
@@ -84,7 +85,7 @@ class Csv extends FormatAbstract
     {
         return '';
     }
-    
+
     /**
      * Prepare concept data for exporting in csv format.
      *
@@ -107,7 +108,7 @@ class Csv extends FormatAbstract
                     if (count($values) > 1) {
                         $resourceData[$property] = implode(';', $values);
                     } else {
-                        $resourceData[$property] = (string)$values[0];
+                        $resourceData[$property] = (string) $values[0];
                     }
                 }
             } else {
@@ -117,7 +118,7 @@ class Csv extends FormatAbstract
 
         return $resourceData;
     }
-    
+
     /**
      * Puts csv in string.
      * @param array $data
@@ -132,7 +133,7 @@ class Csv extends FormatAbstract
         fclose($streamHandle);
         return $result;
     }
-    
+
     /**
      * Get the captions of all concepts linked with the property
      * @param Resource $resource
@@ -143,22 +144,22 @@ class Csv extends FormatAbstract
         if ($this->conceptManager === null) {
             throw new Exception('Concept manager is null');
         }
-        
+
         if (!$this->conceptManager instanceof ConceptManager) {
             throw new Exception(
                 'Concept manager expected to be of type ConceptManager but is instead '
                 . get_class($this->conceptManager)
             );
         }
-        
+
         $captions = [];
-        
+
         foreach ($resource->getProperty($property) as $conceptUri) {
             $captions[] = $this->conceptManager->fetchByUri($conceptUri)->getCaption();
         }
-        
+
         sort($captions, SORT_FLAG_CASE);
-        
+
         if (count($captions) === 0) {
             return '';
         } elseif (count($captions) === 1) {

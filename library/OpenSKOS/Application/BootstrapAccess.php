@@ -19,11 +19,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-/**
+/** 
  * Provides a shortcut for getting the application configuration options.
  * 
  * @author a_mitsev
  */
+
 class OpenSKOS_Application_BootstrapAccess
 {
 	/**
@@ -40,7 +41,7 @@ class OpenSKOS_Application_BootstrapAccess
 	{
 		$bootstrap = self::getBootstrap();
 		
-		if ($bootstrap->hasOption($key)) {
+        if ($bootstrap->hasOption($key)) {
 			return $bootstrap->getOption($key);
 		} else {
 			throw new Zend_Exception('Getting configuration option failed. Option "' . $key . '" not found.');

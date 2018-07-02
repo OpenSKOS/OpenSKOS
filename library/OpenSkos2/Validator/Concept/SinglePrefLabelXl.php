@@ -22,16 +22,11 @@ namespace OpenSkos2\Validator\Concept;
 use OpenSkos2\Concept;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\OpenSkosException;
 
-class SinglePrefLabelXl extends AbstractConceptValidator implements ResourceManagerAware
+class SinglePrefLabelXl extends AbstractConceptValidator
 {
-    
-    use ResourceManagerAwareTrait;
-    
     /**
      * Validate if a concept's xl labels are pairwise disjoint as stated in
      * https://www.w3.org/TR/skos-reference/#xl-Label
