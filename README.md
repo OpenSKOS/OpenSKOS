@@ -224,56 +224,57 @@ npm run doc
 ```
 Visit: http://example.com/apidoc/
 
-5.6. Using API
+6.6. Using the API
 --------------------------------------------------------------------------------
 
-Consult <baseruri>/apidoc
+Full HTML documentation of the API is supplied and is available in HTML at `<baseruri>/apidoc`
 
-5.7. Migration from OpenSKOS-1 to OpenSKOS-2.2
+7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
 --------------------------------------------------------------------------------
+
+_**WARNING:** OpenSKOS 2.2.0-rc1 is a release candidate and not yet approved for production. It is very strongly 
+recommended to back up all data before performing the following steps_
 
 In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
 Jena triple store.
 
-Migration from OpenSKOS-1 to OpenSKOS-2.0/2.1 is split into two parts. 
-You may also incluse the optional SkosXL transformation:
--- /tools/migrate_tenant_collection.php (migrates tenants and collections from MySQL 
+To migrate from OpenSKOS 1.0 or 2.1 to 2.2, please perform the following step.
+
+-- `/tools/migrate_tenant_collection.php` (migrates tenants and collections from MySQL 
 to institutions and sets of Triple store)
--- /tools/migrate.php (migrates concepts, schemata and skos collections from Solr to 
-the triple store)
--- /tools/optionally labelsToXl.php (this is a picturae script slightly extended by 
+
+-- optionally `/tools/labelsToXl.php` (this is a picturae script slightly extended by 
 Meertens), if skos xl labels are demanded.
 
 Examples of the corresponding command lines are:
 
-php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
---db-password=geheim --db-username=ookgeheim --debug=1
+`php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
+--db-password=geheim --db-username=ookgeheim --debug=1`
 
-and
+Adding skos xl labels is also possible since version 2.1. To activate, first edit the tenant to enable SkosXL, and then 
+update Jena with: 
 
-php migrate.php --endpoint=http://localhost:8984/solr/collection1/select 
---tenant=meertens --db-hostname=localhost --db-database=geheim  
---db-username=geheim --db-password=geheim --purge=1 --defaultSet="isocat"
+`labelsToXl.php –add=1`
 
-Run the second script only after the first run, otherwise validation errors 
-will be reported because of referencing e.g. from concept schemata to the sets 
-and tenants which are not yet in the triple store.
+The SOLR schema.xml file has been updated in version 2.2. Having completed the migration, please 
+empty the core, and then update the schema.xml file. Then fill the Solr database with the script: 
 
-Adding skos xl labels is possible after updating the tenant so that skos-xl 
-labels are enabled and then one should run
-
-labelsToXl.php –add=1
+`php tools/jena2solr.php`
 
 
-5.9. Import (/tools/skos2openskos.php)
+7.2. Import (`/tools/skos2openskos.php`)
 --------------------------------------------------------------------------------
-Example of a command line 
+Example of a command line:
+
+```
 php skos2openskos.php --setUri=http://htdl/clavas-org/set 
 --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
 --file=clavas-organisations.xml
-=======
-7 Development
-=============
+```
+
+8 Development using Docker
+-------------
+
 To test / develop the application you can run
 
 ```
