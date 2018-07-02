@@ -276,7 +276,7 @@ class Collection extends Resource
                     $this->setProperty(DcTerms::LICENSE, new Literal($val));
                     break;
                 case 'license_url':
-                    if(filter_var($val, FILTER_VALIDATE_URL)) {
+                    if (filter_var($val, FILTER_VALIDATE_URL)) {
                         $this->setProperty(OpenSkos::LICENCE_URL, new Uri($val));
                     }
                     break;
@@ -375,4 +375,3 @@ class Collection extends Resource
         return $form;
     }
 }
-
