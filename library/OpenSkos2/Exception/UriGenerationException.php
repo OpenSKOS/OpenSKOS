@@ -21,5 +21,5 @@ namespace OpenSkos2\Exception;
 
 class UriGenerationException extends OpenSkosException
 {
-
+    
 }

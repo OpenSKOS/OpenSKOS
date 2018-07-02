@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
 use OpenSkos2\Namespaces\Rdf;
@@ -25,8 +26,9 @@ use OpenSkos2\Rdf\Uri;
 
 class Person extends Resource
 {
-    const TYPE = 'http://xmlns.com/foaf/0.1/Person';
-    
+
+    const TYPE = Foaf::PERSON;
+
     /**
      * Resource constructor.
      * @param string $uri
@@ -36,7 +38,7 @@ class Person extends Resource
         parent::__construct($uri);
         $this->addProperty(Rdf::TYPE, new Uri(self::TYPE));
     }
-    
+
     /**
      * Gets name of person
      * @param string $language

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,7 +19,6 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 class OpenSKOS_Db_Table_Tenants extends Zend_Db_Table
 {
 	protected $_name = 'tenant';
@@ -37,9 +37,7 @@ class OpenSKOS_Db_Table_Tenants extends Zend_Db_Table
      * @var string
      */
     protected $_rowsetClass = 'OpenSKOS_Db_Table_Rowset_Tenant';
-
     protected $_dependentTables = array('OpenSKOS_Db_Table_Collections');
-
     /**
      * @return OpenSKOS_Db_Table_Row_Tenant
      */
@@ -58,7 +56,6 @@ class OpenSKOS_Db_Table_Tenants extends Zend_Db_Table
         return $model->find($code)->current();
     }
 }
-
 class OpenSKOS_Db_Table_Rowset_Tenant extends Zend_Db_Table_Rowset
 {
 	public function toRdf()

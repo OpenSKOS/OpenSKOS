@@ -30,7 +30,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
 
         $solr = new \Solarium\QueryType\Update\Query\Document\Document();
         $skosSolr = new \OpenSkos2\Solr\Document($resource, $solr);
-
+         
         $doc = $skosSolr->getDocument();
 
         $this->assertEquals(123, $doc->notation);

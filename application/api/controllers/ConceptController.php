@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,19 +15,17 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 require_once 'FindConceptsController.php';
 
 class Api_ConceptController extends Api_FindConceptsController
 {
-
     public function init()
     {
         $this->getHelper('layout')->disableLayout();
         $this->getHelper('viewRenderer')->setNoRender(true);
         parent::init();
+        $this->isFindConcept = false;
     }
-
     /**
      *
      * @apiVersion 1.0.0
@@ -129,12 +126,8 @@ class Api_ConceptController extends Api_FindConceptsController
      */
     public function postAction()
     {
-        $request = $this->getPsrRequest();
-        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
-        $response = $api->create($request);
-        $this->emitResponse($response);
+        parent::postAction();
     }
-
     /**
      *
      * @apiVersion 1.0.0
@@ -238,7 +231,6 @@ class Api_ConceptController extends Api_FindConceptsController
         $response = $api->update($request);
         $this->emitResponse($response);
     }
-
     /**
      *
      * @apiVersion 1.0.0
@@ -294,9 +286,6 @@ class Api_ConceptController extends Api_FindConceptsController
      */
     public function deleteAction()
     {
-        $request = $this->getPsrRequest();
-        $api = $this->getDI()->make('\OpenSkos2\Api\Concept');
-        $response = $api->delete($request);
-        $this->emitResponse($response);
+        parent::deleteAction();
     }
 }

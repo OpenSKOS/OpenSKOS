@@ -34,6 +34,7 @@ use OpenSkos2\ConceptManager;
 // @TODO remove scripts and zend dependency.
 class Rtf extends FormatAbstract
 {
+
     /**
      * @var ConceptManager
      */
@@ -55,16 +56,17 @@ class Rtf extends FormatAbstract
         DcTerms::MODIFIED => 'DM',
         DcTerms::CREATOR => 'C',
     );
-    
+
     /**
      * @var Zend_View
      */
     protected $view;
-    
+
     /**
      * @var string
      */
     protected $template;
+
     
     /**
      * @param ConceptManager $conceptManager
@@ -77,11 +79,13 @@ class Rtf extends FormatAbstract
         // @TODO Do we want to be dependent on zend here.
         $this->view = new \Zend_View();
         $this->view->setBasePath(__DIR__);
+
         $this->conceptManager = $conceptManager;
         
+
         $this->template = 'rtf.phtml';
     }
-    
+
     /**
      * Gets the array of properties to be serialised.
      * @return array
@@ -96,7 +100,7 @@ class Rtf extends FormatAbstract
         }
         return $this->propertiesToSerialise;
     }
-    
+
     /**
      * Creates the header of the output.
      * @return string
@@ -107,10 +111,10 @@ class Rtf extends FormatAbstract
             ->assign('renderHeader', true)
             ->assign('renderBody', false)
             ->assign('renderFooter', false);
-        
+
         return $this->view->render($this->template);
     }
-    
+
     /**
      * Serialises a single resource.
      * @return string
@@ -120,15 +124,15 @@ class Rtf extends FormatAbstract
         $this->view->data = [
             $this->prepareResourceDataForRtf($resource)
         ];
-        
+
         $this->view
             ->assign('renderHeader', false)
             ->assign('renderBody', true)
             ->assign('renderFooter', false);
-        
+
         return $this->view->render($this->template);
     }
-    
+
     /**
      * Creates the footer of the output.
      * @return string
@@ -139,10 +143,10 @@ class Rtf extends FormatAbstract
             ->assign('renderHeader', false)
             ->assign('renderBody', false)
             ->assign('renderFooter', true);
-        
+
         return $this->view->render($this->template);
     }
-    
+
     /**
      * Prepares concept data for exporting in rtf format.
      *
@@ -152,7 +156,7 @@ class Rtf extends FormatAbstract
     protected function prepareResourceDataForRtf(Resource $resource)
     {
         $resourceData = [];
-        
+
         // Adds title
         $previewLabel = $resource->getUri();
         if ($resource instanceof Concept) {
@@ -160,7 +164,7 @@ class Rtf extends FormatAbstract
             $previewLabel = $resource->getCaption();
         }
         $resourceData['previewLabel'] = $this->constructRtfFieldData('previewLabel', $previewLabel);
-        
+
         // Adds rest of fields.
         $resourceData['fields'] = [];
         foreach ($this->getPropertiesToSerialise() as $predicate) {
@@ -187,7 +191,7 @@ class Rtf extends FormatAbstract
                     if ($property instanceof Literal) {
                         $resourceData['fields'][] = $this->constructRtfFieldData(
                             $predicate,
-                            (string)$property,
+                            (string) $property,
                             $property->getLanguage()
                         );
                     } elseif ($property instanceof Uri) {
@@ -199,7 +203,7 @@ class Rtf extends FormatAbstract
                 }
             }
         }
-        
+
         // @TODO Resolve narrowers. Related to issue #22757
 //        // Get concept children (narrowers)
 //        if ($this->get('maxDepth') > 1) {
@@ -228,7 +232,7 @@ class Rtf extends FormatAbstract
             $result['fieldTitle'] = $this->rtfFieldsTitlesMap[$field];
         } else {
             $shortenField = Namespaces::shortenProperty($field);
-            
+
             $fieldTitleParts = preg_split(
                 '/(?=[A-Z])/',
                 substr($shortenField, strpos($shortenField, ':') + 1)
@@ -278,7 +282,7 @@ class Rtf extends FormatAbstract
     {
         return '\u' . hexdec(bin2hex(iconv('UTF-8', 'UTF-16BE', $matches[1]))) . '?';
     }
-    
+
     protected function getConceptCaption($uri)
     {
         if ($this->conceptManager === null) {
@@ -322,8 +326,7 @@ class Rtf extends FormatAbstract
 //        }
 //        return $result;
     }
-    
-    
+
     /**
      * @TODO Make such method globally
      * @param Uri $uri

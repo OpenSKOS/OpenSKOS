@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -37,17 +37,17 @@ class CycleBroaderAndNarrower extends AbstractConceptValidator
     {
         $broaderTerms = $this->buildArray($concept->getProperty(Skos::BROADER));
         $narrowerTerms = $this->buildArray($concept->getProperty(Skos::NARROWER));
-        
+
         $duplicate = array_intersect($broaderTerms, $narrowerTerms);
-        
+
         if (empty($duplicate)) {
             return true;
         }
-        
+
         $this->errorMessages[] = 'Duplicate found in broader and narrower';
         return false;
     }
-    
+
     /**
      * Build array with strings
      *
@@ -58,7 +58,7 @@ class CycleBroaderAndNarrower extends AbstractConceptValidator
     {
         $new = [];
         foreach ($values as $val) {
-            $new[] = (string)$val;
+            $new[] = (string) $val;
         }
         return $new;
     }

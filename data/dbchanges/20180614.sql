@@ -1,0 +1,3 @@
+ALTER TABLE `job`
+DROP COLUMN `set`,
+ADD COLUMN `set_uuid` VARCHAR(40) NULL AFTER `user`;

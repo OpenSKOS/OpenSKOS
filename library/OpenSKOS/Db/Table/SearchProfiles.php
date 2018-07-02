@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * OpenSKOS
  *
@@ -18,13 +19,10 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
-
 class OpenSKOS_Db_Table_SearchProfiles extends Zend_Db_Table
 {
 	protected $_name = 'search_profiles';
 	protected $_primary = 'id';
-
 	/**
 	 * Classname for row
 	 *

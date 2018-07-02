@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response\Detail;
 
 use OpenSkos2\Api\Response\DetailResponse;
@@ -38,6 +36,7 @@ class JsonResponse extends DetailResponse
             $this->propertiesList,
             $this->excludePropertiesList
         ))->transform();
-        return new \Zend\Diactoros\Response\JsonResponse($body);
+        $correctedBody = $this->addAuxtoBody($body);
+        return new \Zend\Diactoros\Response\JsonResponse($correctedBody);
     }
 }

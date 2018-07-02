@@ -20,24 +20,26 @@
 namespace OpenSkos2\Validator\Concept;
 
 use OpenSkos2\Concept;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Validator\AbstractConceptValidator;
 
 class RelatedToSelf extends AbstractConceptValidator
 {
+
     /**
      * @param Concept $concept
      * @return bool
      */
     protected function validateConcept(Concept $concept)
     {
-        $relationFields = array_merge(Concept::$classes['SemanticRelations'], Concept::$classes['MappingProperties']);
+        $relationFields = array_merge(Resource::$classes['SemanticRelations'], Resource::$classes['MappingProperties']);
 
         $ownUri = $concept->getUri();
         foreach ($relationFields as $field) {
             foreach ($concept->getProperty($field) as $object) {
                 if ($object->getUri() == $ownUri) {
-                    $this->errorMessages[] =
-                        'The concept can not be related to itself or there is a transitive relation cycle.';
+                    $this->errorMessages[] = 'The concept can not be related to itself or '
+                        . 'there is a transitive relation cycle.';
                     return false;
                 }
             }

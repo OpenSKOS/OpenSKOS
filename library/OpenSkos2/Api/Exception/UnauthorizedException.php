@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,4 +21,5 @@ namespace OpenSkos2\Api\Exception;
 
 class UnauthorizedException extends ApiException
 {
+    
 }

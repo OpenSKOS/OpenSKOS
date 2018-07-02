@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schema name="spatial" version="1.0">
-
+    
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
@@ -8,12 +8,13 @@
 
         <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
         <field name="tenant" type="string" indexed="true" stored="false" required="false"/>
-        <field name="collection" type="string" indexed="true" stored="false" required="false"/>
+        <field name="set" type="string" indexed="true" stored="false" required="false"/>
         <field name="status" type="string" indexed="true" stored="false" required="false"/>
         <field name="toBeChecked" type="boolean" indexed="true" stored="false" required="false"/>
         <field name="notation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
 
         <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="inSkosCollection" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
 
         <field name="LexicalLabels" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
@@ -101,19 +102,20 @@
         <copyField source="a_*" dest="autocomplete" />
 
         <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
+
     </fields>
 
-    <defaultSearchField>search</defaultSearchField>
-
+     <defaultSearchField>search</defaultSearchField>
+    
     <uniqueKey>uri</uniqueKey>
-
+    
     <types>
         <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
-
+        
         <fieldType name="long" class="solr.TrieLongField" omitNorms="true"/>
-
+        
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
-
+        
         <fieldtype name="string_lowercase" class="solr.TextField" positionIncrementGap="100">
             <analyzer>
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -121,15 +123,16 @@
             </analyzer>
         </fieldtype>
 
+        <!-- SOLR 4: <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/> -->
         <fieldType name="date" class="solr.TrieDateField" sortMissingLast="true" omitNorms="true"/>
-
         <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
-
+        
         <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">
             <analyzer type="index">
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
                 <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
+                <!-- SOLR 4: <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30" side="front"/>-->
                 <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="30"/>
             </analyzer>
             <analyzer type="query">
@@ -137,8 +140,8 @@
                 <filter class="solr.LowerCaseFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
-         </fieldType>
-
+        </fieldType>
+        
         <fieldtype name="text" class="solr.TextField" positionIncrementGap="100">
             <analyzer type="index">
                 <tokenizer class="solr.WhitespaceTokenizerFactory"/>
@@ -153,22 +156,22 @@
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
         </fieldtype>
-
+        
         <fieldType name="textSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
             <analyzer>
                 <!-- KeywordTokenizer does no actual tokenizing, so the entire input string is preserved as a single token -->
                 <tokenizer class="solr.KeywordTokenizerFactory"/>
-
+                
                 <!-- The LowerCase TokenFilter does what you expect, which can be when you want your sorting to be case insensitive -->
                 <filter class="solr.LowerCaseFilterFactory"/>
-
+                
                 <!-- The TrimFilter removes any leading or trailing whitespace -->
                 <filter class="solr.TrimFilterFactory"/>
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
             </analyzer>
         </fieldType>
-
+        
     </types>
-
+    
     <solrQueryParser defaultOperator="AND"/>
 </schema>

@@ -1,0 +1,5 @@
+data.dir=./openskos/data
+replication.enablemaster=false
+replication.enableslave=false
+#in case you use replication: enable master/slave and put your full URI here:
+#replication.masteruri=http://myreplicationserver:8080/solr

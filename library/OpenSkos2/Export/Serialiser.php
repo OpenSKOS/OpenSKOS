@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Export;
 
 use OpenSkos2\Rdf\ResourceCollection;
@@ -78,7 +76,6 @@ class Serialiser
     {
         return $this->uris;
     }
-
     /**
      * Gets the options to use to fetch resources from the search autocomplete (concepts only).
      * @return array
@@ -87,7 +84,6 @@ class Serialiser
     {
         return $this->searchOptions;
     }
-
     /**
      * Sets the list of uris to export. Leave empty if search options are used (concepts only)
      * @param array $uris
@@ -96,7 +92,6 @@ class Serialiser
     {
         $this->uris = $uris;
     }
-
     /**
      * Sets the options to use to fetch resources from the search autocomplete (concepts only).
      * @param array $searchOptions
@@ -117,7 +112,6 @@ class Serialiser
         }
         return $this->searchAutocomplete;
     }
-
     /**
      * Sets searcher for when search options are provided.
      * @param \OpenSkos2\Search\Autocomplete $searchAutocomplete
@@ -180,7 +174,7 @@ class Serialiser
             $resources = $this->fetchResources($start, $step, $hasMore);
             
             foreach ($resources as $resource) {
-                if ($resource instanceof Concept && $this->tenant->getEnableSkosXl()) {
+                if ($resource instanceof Concept && $this->tenant->isEnableSkosXl()) {
                     $resource->loadFullXlLabels($this->conceptManager->getLabelManager());
                 }
                 

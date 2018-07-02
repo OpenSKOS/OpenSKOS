@@ -18,6 +18,10 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Namespaces\DcTerms;
 ?>
 <?php $this->headTitle($this->translate('Manage collections'))?>
 
@@ -40,8 +44,8 @@
 		<?php foreach ($this->collections as $i => $collection):?>
 		<tr class="<?php echo $i % 2 ? 'even' : 'uneven'?>">
 			<th scope="row"><?php echo $i+1?></th>
-			<td><a href="<?php echo $this->url(array('action' => 'edit', 'collection' => $collection->code))?>"><?php echo $collection->code?></a></td>
-			<td><?php echo $collection->dc_title?></td>
+			<td><a href="<?php echo $this->url(array('action' => 'edit', 'collection' => $collection->getPropertySingleValue(OpenSkos::CODE)))?>"><?php echo $collection->getPropertySingleValue(OpenSkos::CODE)?></a></td>
+			<td><?php echo $collection->getPropertySingleValue(DcTerms::TITLE)?></td>
 		</tr>
 		<?php endforeach?>
 	</tbody>

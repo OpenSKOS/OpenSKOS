@@ -21,6 +21,7 @@ namespace OpenSkos2\Rdf;
 
 class Uri implements Object, ResourceIdentifier
 {
+
     /**
      * @var string
      */

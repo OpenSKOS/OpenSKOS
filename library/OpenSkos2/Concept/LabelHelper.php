@@ -19,7 +19,6 @@
 namespace OpenSkos2\Concept;
 
 use OpenSkos2\Namespaces\SkosXl;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Concept;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Rdf\Literal;
@@ -54,16 +53,19 @@ class LabelHelper
      */
     public function assertLabels(Concept &$concept, $forceCreationOfXl = false)
     {
-        /* @var $tenant OpenSKOS_Db_Table_Row_Tenant */
-        $tenant = $concept->getInstitution();
+        
+        /* @var $tenant \OpenSkos2\Tenant */
+        $tenantCode = $concept->getTenant();
+        $tenant = $this->labelManager->fetchByUuid($tenantCode->getValue(), \OpenSkos2\Tenant::TYPE, 'openskos:code');
+            
         if (empty($tenant)) {
             throw new TenantNotFoundException(
                 'Could not determine tenant for concept.'
             );
         }
 
-        $useXlLabels = (bool)$tenant['enableSkosXl'];
-
+        $useXlLabels = $tenant->isEnableSkosXl();
+        
         foreach (Concept::$labelsMap as $xlLabelProperty => $simpleLabelProperty) {
             $fullXlLabels = [];
             foreach ($concept->getProperty($xlLabelProperty) as $labelValue) {
@@ -106,8 +108,13 @@ class LabelHelper
                     if (!$simpleLabel->isInArray($xlLabelsLiterals)) {
                         $label = new Label(Label::generateUri());
                         $label->setProperty(SkosXl::LITERALFORM, $simpleLabel);
-                        $label->ensureMetadata();
-
+                        $tenantCode = $concept->getTenant()->getValue();
+                        $tenant = $this->labelManager->fetchByUuid(
+                            $tenantCode,
+                            \OpenSkos2\Tenant::TYPE,
+                            'openskos:code'
+                        );
+                        $label->ensureMetadata($tenant);
                         $concept->addProperty($xlLabelProperty, $label);
 
                         $xlLabelsLiterals[] = $simpleLabel;
@@ -178,8 +185,14 @@ class LabelHelper
                     continue; // It is just an uri - nothing to do with it.
                 }
 
-                $label->ensureMetadata();
-
+                $tenantCode = $concept->getTenant();
+                $tenant = $this->labelManager->fetchByUuid(
+                    $tenantCode->getValue(),
+                    \OpenSkos2\Tenant::TYPE,
+                    'openskos:code'
+                );
+                $label->ensureMetadata($tenant);
+                
                 // Fetch, insert or replace label
                 if ($labelExists) {
                     $deleteLabels->append($label);
@@ -214,8 +227,7 @@ class LabelHelper
 
         $label = new Label(Label::generateUri());
         $label->addProperty(SkosXl::LITERALFORM, $rdfLiteral);
-        $label->ensureMetadata();
-
+        $label->ensureMetadata($tenant);
         $this->labelManager->insert($label);
 
         return $label;

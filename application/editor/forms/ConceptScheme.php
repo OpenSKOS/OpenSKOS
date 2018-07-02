@@ -103,8 +103,10 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         $this->addElement('hidden', 'uuid', array('decorators' => array()));
         
         // Collections
-        $modelCollections = new OpenSKOS_Db_Table_Collections();
-        $collectionOptions = $modelCollections->getUriToTitleMap($this->_getCurrentTenant()->code);
+        $modelCollections = $this->getDI()->get('Editor_Models_CollectionsCache');
+        $modelCollections->setTenantCode($this->_getCurrentTenant()->getCode()->getValue());
+
+        $collectionOptions = $modelCollections->fetchUrisMap();
         
         $this->addElement('select', 'collection', array(
                 'label' => _('Collection:'),
@@ -206,7 +208,7 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         $this->getElement('dcterms_description')->setValue(array(array('languageCode' => $this->_defaultLanguage, 'value' => array(''))));
         
         $this->addElement(new OpenSKOS_Form_Element_Multitextarea('dcterms_creator', 'Creator'));
-        $this->getElement('dcterms_creator')->setValue(array(array('languageCode' => $this->_defaultLanguage, 'value' => array($this->_getCurrentTenant()->name))));
+        $this->getElement('dcterms_creator')->setValue(array(array('languageCode' => $this->_defaultLanguage, 'value' => array($this->_getCurrentTenant()->getName()))));
         
         $this->addElement('hidden', 'wrapLeftBottom', array(
             'decorators' => array('ViewHelper', array('HtmlTag', array('tag' => 'div', 'closeOnly'  => true)))
@@ -239,7 +241,9 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
     protected function _getCurrentTenant()
     {
         if (! $this->_currentTenant) {
-            $this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+            //$this->_currentTenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+            $this->readTenant();
+
             if (null === $this->_currentTenant) {
                 throw new Zend_Exception('Tenant not found. Needed for request to the api.');
             }
@@ -247,7 +251,43 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
     
         return $this->_currentTenant;
     }
-    
+    /**
+     * Read the Tenant record from RDF Store to the class's internal record.
+     * @throws Zend_Controller_Action_Exception
+     */
+    protected function readTenant()
+    {
+
+        $tenantCode = $this->getCurrentUser()->tenant;
+
+        $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+
+        $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
+        $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+
+        if (!$openSkos2Tenant) {
+            throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
+        }
+
+        $this->_currentTenant = $openSkos2Tenant;
+        return $this;
+
+    }
+
+    /**
+     * Gets the current user.
+     *
+     * @return OpenSKOS_Db_Table_Row_User
+     */
+    public function getCurrentUser()
+    {
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        if (null === $user) {
+            throw new Zend_Controller_Action_Exception('User not found', 404);
+        }
+        return $user;
+    }
+
     /**
      * @return array
      */

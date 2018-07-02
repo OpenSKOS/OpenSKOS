@@ -26,7 +26,7 @@ use OpenSkos2\Namespaces\Skos;
             <span><?php echo $this->translate('URI:'); ?> </span>
             <?php echo $this->currentConcept->getUri(); ?>
         </div>
-        <?php if ($this->currentConcept->getInstitution()['enableStatusesSystem']): ?>
+        <?php if ($this->tenant->getPropertyFlatValue(OpenSkos::ENABLESTATUSSESSYSTEMS)): ?>
             <div class="item" id="concept-status">
                 <span><?php echo $this->translate('Status:'); ?> </span>
                 <?php echo ($this->currentConcept->isPropertyEmpty(OpenSkos::STATUS) ? $this->translate('undefined') : $this->translate($this->currentConcept->getPropertyFlatValue(OpenSkos::STATUS))); ?>

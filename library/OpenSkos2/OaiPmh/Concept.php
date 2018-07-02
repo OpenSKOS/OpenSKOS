@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\OaiPmh;
 
 use DOMDocument;
@@ -34,7 +32,6 @@ class Concept implements Record
      * @var SkosConcept $concept
      */
     protected $concept;
-
     /**
      * @var SetsMap
      */
@@ -44,7 +41,6 @@ class Concept implements Record
      *  @var string $metadataFormat
      */
     protected $metadataFormat;
-
     /**
      * @param SkosConcept $concept
      * @param \OpenSkos2\OaiPmh\SetsMap $setsMap
@@ -55,7 +51,6 @@ class Concept implements Record
         $this->setsMap = $setsMap;
         $this->metadataFormat = $metadataFormat;
     }
-
     /**
      * Get header
      * @return Header
@@ -63,7 +58,6 @@ class Concept implements Record
     public function getHeader()
     {
         $concept = $this->concept;
-
         if (!$concept->isDeleted()) {
             $datestamp = $concept->getLatestModifyDate();
         } else {
@@ -73,11 +67,12 @@ class Concept implements Record
                 $datestamp = $concept->getLatestModifyDate();
             }
         }
-
         $setSpecs = [];
         foreach ($concept->getProperty(OpenSkos::TENANT) as $tenant) {
             $setSpecs[] = (string)$tenant;
-            foreach ($this->setsMap->getSets($tenant, $concept->getProperty(OpenSkos::SET)) as $set) {
+            $setUris = $concept->getProperty(OpenSkos::SET);
+            $oaiSets = $this->setsMap->getSets($tenant, $setUris);
+            foreach ($oaiSets as $set) {
                 $setSpecs[] = $tenant . ':' . $set->code;
                 $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
                 foreach ($schemes as $scheme) {
@@ -85,7 +80,6 @@ class Concept implements Record
                 }
             }
         }
-
         /*
          * @TODO: Fix once migration works correctly
          * We should be able to just fetch a single value, but due to bad data in the old system we will
@@ -94,7 +88,6 @@ class Concept implements Record
          */
         // $uuid = $concept->getPropertySingleValue(OpenSKOS::UUID);
         $uuid = $concept->getProperty(OpenSKOS::UUID)[0]->getValue();
-
         return new Header(
             $uuid,
             $datestamp,
@@ -102,7 +95,6 @@ class Concept implements Record
             $concept->isDeleted()
         );
     }
-
     /**
      * Convert skos concept to \DomDocument to use as metadata in OAI-PMH Interface
      *
@@ -119,10 +111,8 @@ class Concept implements Record
                 $this->getExcludeProperties()
             ))->transform()
         );
-
         return $metadata;
     }
-
     /**
      * @return DomDocument|null
      */

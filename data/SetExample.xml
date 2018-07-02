@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:openskos = "http://openskos.org/xmlns#"
+xmlns:dcterms = "http://purl.org/dc/terms/"
+xmlns:dcmitype = "http://purl.org/dc/dcmitype#">
+    <rdf:Description rdf:about="http://mi/a62c629e-a6b7-41bf-b5ca-4530deffd3c4">
+<openskos:uuid>a62c629e-a6b7-41bf-b5ca-4530deffd3c4s</openskos:uuid>
+        <openskos:code>set4</openskos:code>
+        <dcterms:title>CLARIN collection 4</dcterms:title>
+        <dcterms:licence rdf:resource="http://creativecommons.org/licenses/by/4.0/"></dcterms:licence>
+        <dcterms:publisher rdf:resource="https://openskos.meertens.knaw.nl/api/institution/meertens"></dcterms:publisher>
+        <openskos:OAI_baseURL rdf:resource="https://openskos.meertens.knaw.nl/api/ergens"/>
+        <openskos:allow_oai>true</openskos:allow_oai>
+        <openskos:conceptBaseUri>http://example.com/collection-example</openskos:conceptBaseUri>
+        <openskos:webpage rdf:resource="http://ergens"/>
+    </rdf:Description>
+</rdf:RDF>
+
+<!-- Dataset definition: 
+Data encoded in a defined structure.
+Comment:	Examples include lists, tables, and databases. A dataset may be useful for direct machine processing.
+-->

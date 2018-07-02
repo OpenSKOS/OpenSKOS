@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -19,6 +19,15 @@
 
 namespace OpenSkos2\Api\Exception;
 
-class ApiException extends \Exception
+use Exception;
+
+class ApiException extends Exception
 {
+
+    public function __construct($message, $code, $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->code = $code;
+        $this->message = $message;
+    }
 }

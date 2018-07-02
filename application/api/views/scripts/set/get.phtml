@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * OpenSKOS
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GPLv3 license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   OpenSKOS
+ * @package    OpenSKOS
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
+ * @author     Mark Lindeman
+ * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\SkosCollection;
+
+$di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+$set = $this->resource;
+
+/* @var $collectionManager \OpenSkos2\CollectionManager */
+$collectionManager = $di->get('OpenSkos2\CollectionManager');
+$tenantManager = $di->get('OpenSkos2\TenantManager');
+$code = $set->getCode();
+$uri = $set->getUri();
+$name = $set->getTitle()->getValue();
+$tenantCode = $set->getTenant()->getValue();
+$this->headTitle($name);
+?>
+
+
+<h2><?php echo $this->escape($name) ?></h2> 
+<div class="clear">
+    <div id="collection-form">
+        <dl>
+            <?php foreach ($this->resProperties as $key => $val):?>
+                <?php if ($key === "publisher") { continue;} ?>
+                 <dt><?php echo $key ?>:</dt>
+                <?php
+                if ($key === "tenant"):
+                    $tenantName = $tenantManager->fetchTenantNameByCode($tenantCode);
+                    ?>
+                    <dd><a href="<?php echo $this->url(array('controller' => 'institutions', 'id' => $tenantCode)) ?>.html"><?php echo "name '$tenantName', code '{$tenantCode}'"  ?></a></dd>
+                <?php endif ?>
+                <?php if ($key === "type"): ?>
+                    <dd><a rel="external" href="<?= $val ?>"><?php echo $val ?></a></dd>
+                <?php endif ?>
+                <?php if ($key === "description"): ?>
+                    <dd><?php echo nl2br($val, true) ?></dd>
+                <?php endif ?>
+                <?php if (($key === "uuid") || ($key === "code") || ($key === "title") || ($key === "allow_oai")): ?>
+                    <dd><?php echo $val ?></dd>
+                <?php endif ?>
+                <?php if ($key === "webpage" || $key === "conceptBaseUri" || $key === "oai_baseURL" || $key === "license"): ?>
+                    <dd><a rel="external" href="<?php echo $val ?>"><?php echo $val ?></a></dd>
+                <?php endif ?>
+            <?php endforeach; ?>
+        </dl>
+
+        <?php $schemata = $collectionManager->fetchInhabitantsForSet($uri, ConceptScheme::TYPE); ?>
+        <h3>Concept Schemes (<?php echo count($schemata); ?>)</h3>
+        <ul>
+            <?php foreach ($schemata as $key => $value): ?>
+                <li> 
+                    <a href="<?php echo $this->url(array('controller' => 'conceptscheme', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
+
+        <?php $skoscollections = $collectionManager->fetchInhabitantsForSet($uri, SkosCollection::TYPE); ?>
+        <h3>Skos collections (<?php echo count($skoscollections) ?>) </h3>
+        <ul>
+            <?php foreach ($skoscollections as $key => $value): ?>
+                <li> 
+                    <a href="<?php echo $this->url(array('controller' => 'skoscollection', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
+        <?php $concepts = $collectionManager->listConceptsForSet($uri); ?>
+        <h3>SKOS Concepts (<?php echo count($concepts); ?>) in this set:</h3>
+        <ul>
+            <?php foreach ($concepts as $key => $value): ?>
+                <li>
+                    <a href="<?php echo $this->url(array('controller' => 'concept', 'id' => $value), 'rest') ?>.html">
+                        <?php echo $key ?>
+                    </a>
+                </li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+
+    <h3>Alternative formats</h3>
+    <ul>
+        
+    <li><a class="json" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.json'?>">JSON</a></li>
+	<li><a class="jsonp" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.jsonp?callback=myCallBack1234'?>">JSONP</a></li>
+	<li><a class="rdf" href="<?php echo $this->url(['controller'=>'collections', 'id'=>$code]).'.rdf'?>">RDF</a></li>
+    </ul>
+
+
+

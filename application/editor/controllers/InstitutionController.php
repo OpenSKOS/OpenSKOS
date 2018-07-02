@@ -31,7 +31,7 @@ class Editor_InstitutionController extends OpenSKOS_Controller_Editor
     public function saveAction()
     {
         $this->_requireAccess('editor.institution');
-        
+
         if (!$this->getRequest()->isPost()) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
             $this->_helper->redirector('index');
@@ -40,9 +40,24 @@ class Editor_InstitutionController extends OpenSKOS_Controller_Editor
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('index');
         } else {
-            $this->_tenant->setFromArray($form->getValues())->save();
-            $this->getHelper('FlashMessenger')->addMessage(_('Data saved'));
+            $this->_tenant->arrayToData( $form->getValues());
+            //->setFromArray(array('tenant' => $this->_tenant->code));
+            try {
+                $this->getTenantManager()->replace($this->_tenant);
+            } catch (Zend_Db_Statement_Exception $e) {
+                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+                return $this->_forward('edit');
+            }
+            $this->getHelper('FlashMessenger')->addMessage('Data saved');
             $this->_helper->redirector('index');
         }
+    }
+
+    /**
+     * @return OpenSkos2\CollectionManager
+     */
+    protected function getTenantManager()
+    {
+        return $this->getDI()->get('\OpenSkos2\TenantManager');
     }
 }

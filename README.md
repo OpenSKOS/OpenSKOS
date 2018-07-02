@@ -224,8 +224,57 @@ npm run doc
 ```
 Visit: http://example.com/apidoc/
 
-7 Development
-=============
+6.6. Using the API
+--------------------------------------------------------------------------------
+
+Full HTML documentation of the API is supplied and is available in HTML at `<baseruri>/apidoc`
+
+7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
+--------------------------------------------------------------------------------
+
+_**WARNING:** OpenSKOS 2.2.0-rc1 is a release candidate and not yet approved for production. It is very strongly 
+recommended to back up all data before performing the following steps_
+
+In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
+Jena triple store.
+
+To migrate from OpenSKOS 1.0 or 2.1 to 2.2, please perform the following step.
+
+-- `/tools/migrate_tenant_collection.php` (migrates tenants and collections from MySQL 
+to institutions and sets of Triple store)
+
+-- optionally `/tools/labelsToXl.php` (this is a picturae script slightly extended by 
+Meertens), if skos xl labels are demanded.
+
+Examples of the corresponding command lines are:
+
+`php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
+--db-password=geheim --db-username=ookgeheim --debug=1`
+
+Adding skos xl labels is also possible since version 2.1. To activate, first edit the tenant to enable SkosXL, and then 
+update Jena with: 
+
+`labelsToXl.php –add=1`
+
+The SOLR schema.xml file has been updated in version 2.2. Having completed the migration, please 
+empty the core, and then update the schema.xml file. Then fill the Solr database with the script: 
+
+`php tools/jena2solr.php`
+
+
+7.2. Import (`/tools/skos2openskos.php`)
+--------------------------------------------------------------------------------
+Example of a command line:
+
+```
+php skos2openskos.php --setUri=http://htdl/clavas-org/set 
+--userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
+--file=clavas-organisations.xml
+```
+
+8 Development using Docker
+-------------
+
 To test / develop the application you can run
 
 ```

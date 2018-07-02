@@ -16,11 +16,10 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /**
  * Script to index the solr from jena manually.
  * No need for regular use - just in case of some changes in the solr schema. 
- * Run the file as : php tools/indexSolr.php -e environment
+ * Run the file as : php tools/indexSolr.php -e environment ???
  */
 require dirname(__FILE__) . '/autoload.inc.php';
 
@@ -29,6 +28,7 @@ $opts = [
     'debug' => 'Show debug info.',
     'modified|m=s' => 'Process only those modified after that date.',
     'skipDone|s' => 'Skip concepts which are done.',
+    'add' => 'add skos xl labels for existing concepts'
 ];
 
 try {
@@ -50,9 +50,9 @@ if ($OPTS->getOption('debug')) {
     $logLevel = \Monolog\Logger::DEBUG;
 }
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler(
-    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM,
-    $logLevel
+    \Monolog\Handler\ErrorLogHandler::OPERATING_SYSTEM, $logLevel
 ));
+
 
 /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
 $resourceManager = $diContainer->make('OpenSkos2\Rdf\ResourceManagerWithSearch');
@@ -65,28 +65,33 @@ $labelHelper = $diContainer->make('OpenSkos2\Concept\LabelHelper');
 
 $query = '-status:deleted';
 
+$query .= 'AND s_rdfType:"http://www.w3.org/2004/02/skos/core#Concept"';
+
 // Should concepts which have pref label xl already be skipped.
 $skipDone = $OPTS->getOption('skipDone');
 if (!empty($skipDone)) {
     $query .= ' AND -s_prefLabelXl:*';
 }
 
+   
 // Process only concpets modified after the specified date.
 $modifiedSince = $OPTS->getOption('modified');
 if (!empty($modifiedSince)) {
-    $query .= ' AND d_modified:[' . $modifiedSince .  ' TO *]';
+    $query .= ' AND d_modified:[' . $modifiedSince . ' TO *]';
 }
 
 $offset = 0;
 $limit = 50;
 $counter = 0;
+$add = $OPTS->add;
 
 do {
     try {
+        
         $concepts = $conceptManager->search($query, $limit, $offset, $numFound);
 
         $logger->info('Total: ' . $numFound);
-        
+
         if ($concepts->count() > 0) {
             $deleteResources = new \OpenSkos2\Rdf\ResourceCollection([]);
             $inserResources = new \OpenSkos2\Rdf\ResourceCollection([]);
@@ -95,8 +100,8 @@ do {
 
 
                 $counter ++;
+                
                 $logger->debug($concept->getUri());
-                printf("\n\nPROCESSING %s\n=============================\n", $concept->getUri());
 
                 try {
                     $labelHelper->assertLabels($concept, true);
@@ -115,10 +120,7 @@ do {
                     foreach (\OpenSkos2\Concept::$classes['SkosXlLabels'] as $xlProperty) {
                         $partialConcept->setProperties($xlProperty, $concept->getProperty($xlProperty));
                     }
-
-                    $inserResources->append($partialConcept);
                 } catch (\Exception $ex) {
-                    die ($ex->getMessage());
                     $logger->warning(
                         'Problem with the labels for "' . $concept->getUri()
                         . '". The message is: ' . $ex->getMessage()
@@ -132,7 +134,6 @@ do {
                 }
                 $resourceManager->extendCollection($inserResources);
             } catch (\Exception $ex) {
-                die ($ex->getMessage());
                 $logger->warning(
                     'Problem adding the labels '
                     . '". The message is: ' . $ex->getMessage()
@@ -140,7 +141,6 @@ do {
             }
         }
     } catch (\Exception $ex) {
-        die ($ex->getMessage());
         $logger->warning(
             'Problem processing concepts from ' . $offset . ', limit ' . $limit
             . '". The message is: ' . $ex->getMessage()
@@ -153,9 +153,6 @@ do {
     } else {
         $offset += $limit;
     }
-
-
-    
     $logger->info('Concepts processed so far: ' . $counter);
 } while (count($concepts) > 0);
 

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,7 +21,7 @@ namespace OpenSkos2\Api\Response;
 
 interface ResponseInterface
 {
-    
+
     /**
      * @return \Psr\Http\Message\ResponseInterface
      */

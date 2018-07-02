@@ -37,10 +37,14 @@ class Editor_Forms_ConceptScheme_FormToConceptScheme
     public static function toConceptScheme(
         ConceptScheme &$conceptScheme,
         $formData,
-        OpenSKOS_Db_Table_Row_User $user
+        OpenSKOS_Db_Table_Row_User $user,
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Collection $collection,
+        \OpenSkos2\PersonManager $pManager
+
     ) {
         self::translatedPropertiesToConceptScheme($conceptScheme, $formData);
-        self::metadataToConceptScheme($conceptScheme, $formData, $user);
+        self::metadataToConceptScheme($conceptScheme, $formData, $user, $tenant, $collection, $pManager);
         self::uriToConceptScheme($conceptScheme, $formData);
         self::collectionToConceptScheme($conceptScheme, $formData);
     }
@@ -78,12 +82,18 @@ class Editor_Forms_ConceptScheme_FormToConceptScheme
     protected static function metadataToConceptScheme(
         ConceptScheme &$conceptScheme,
         $formData,
-        OpenSKOS_Db_Table_Row_User $user
+        OpenSKOS_Db_Table_Row_User $user,
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Collection $collection,
+        \OpenSkos2\PersonManager $pManager
     ) {
+
+
         $conceptScheme->ensureMetadata(
-            $user->tenant,
-            new Uri($formData['collection']),
-            $user->getFoafPerson()
+            $tenant,
+            $collection,
+            $user->getFoafPerson(),
+            $pManager
         );
     }
     

@@ -24,12 +24,16 @@ class Editor_JobsController extends OpenSKOS_Controller_Editor
     public function indexAction()
     {
         $this->_requireAccess('editor.jobs', 'index');
-        
+
+        $di = $this->getDI();
+        $tenantManager = $di->get('OpenSkos2\TenantManager');
+        $tenantUri = $this->_tenant->getUri();
+        $setsForTenant = $tenantManager->fetchSetCodesForTenant($this->_tenant->getCode());
+
         $select = Zend_Db_Table::getDefaultAdapter()->select()
             ->from('job')
             ->join('user', 'user.id=job.user', array('user' => 'name'))
-            ->join('collection', 'collection.id=job.collection', array('collection' => 'dc_title'))
-            ->where('collection.tenant=?', $this->_tenant->code)
+            ->where('set_uuid IN (?)', $setsForTenant)
             ->order('created desc')
             ->order('started asc');
         if (null!== ($this->view->hideFinishedJobs = $this->getRequest()->getParam('hide-finished-jobs'))) {

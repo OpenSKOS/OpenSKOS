@@ -26,6 +26,7 @@ use OpenSkos2\Export\Serialiser\Exception\RequiredNamespacesListException;
 
 class Xml extends FormatAbstract
 {
+
     /**
      * Gets array of namespaces which are used in the collection which will be serialised.
      * @var array
@@ -39,7 +40,7 @@ class Xml extends FormatAbstract
         }
         return $this->namespaces;
     }
-    
+
     public function __construct()
     {
         // @TODO - put it somewhere globally
@@ -48,7 +49,7 @@ class Xml extends FormatAbstract
             '\OpenSkos2\EasyRdf\Serialiser\RdfXml\OpenSkosAsDescriptions'
         );
     }
-    
+
     /**
      * Creates the header of the output.
      * @return string
@@ -58,15 +59,15 @@ class Xml extends FormatAbstract
         $namespaces = [];
         foreach ($this->getNamespaces() as $key => $uri) {
             $namespaces[] = 'xmlns:' . $key . '="' . $uri . '"';
-            
+
             // @TODO - put it somewhere globally
             \EasyRdf\RdfNamespace::set($key, $uri);
         }
-        
+
         return '<?xml version="1.0" encoding="utf-8" ?>' . PHP_EOL
             . '<rdf:RDF ' . implode(PHP_EOL, $namespaces) . '>' . PHP_EOL;
     }
-    
+
     /**
      * Serialises a single resource.
      * @return string
@@ -82,7 +83,7 @@ class Xml extends FormatAbstract
         
         return $transform->transform();
     }
-    
+
     /**
      * Creates the footer of the output.
      * @return string

@@ -30,6 +30,7 @@ use OpenSkos2\Rdf\Resource;
 
 class ConceptSchemeManager extends ResourceManager
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
@@ -52,7 +53,7 @@ class ConceptSchemeManager extends ResourceManager
         
         $resource->setUri(rtrim($resource->getUri(), '/') . '/deleted');
         
-        $resource->setProperty(OpenSkos::STATUS, new Literal(Resource::STATUS_DELETED));
+        $resource->setProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_DELETED));
         $resource->setProperty(OpenSkos::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
 
         if ($user) {
@@ -62,26 +63,32 @@ class ConceptSchemeManager extends ResourceManager
         $this->replace($resource);
     }
 
+    //TODO: check conditions when it can be deleted
+    public function canBeDeleted($uri)
+    {
+        return parent::CanBeDeleted($uri);
+    }
+
     /**
-     * Get all scheme's by collection URI
+     * Get all scheme's by set URI
      *
-     * @param string $collectionUri e.g http://openskos.org/api/collections/rce:TEST
+     * @param string $setUri e.g http://openskos.org/api/collections/rce:TEST
      * @param array $filterUris
      * @return ResourceCollection
      */
-    public function getSchemesByCollectionUri($collectionUri, $filterUris = [])
+    public function getSchemeBySetUri($setUri, $filterUris = [])
     {
-        $uri = new Uri($collectionUri);
+        $uri = new Uri($setUri);
         $escaped = (new NTriple())->serialize($uri);
         $query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX openskos: <http://openskos.org/xmlns#>
-            PREFIX dc: <http://purl.org/dc/terms/>
+            PREFIX dcterms: <http://purl.org/dc/terms/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                 SELECT ?subject ?title ?uuid
                 WHERE {
                     ?subject rdf:type skos:ConceptScheme;
-                    <' . OpenSkos::SET .  '> ' . $escaped . ';
-                    dc:title ?title;
+                    <' . OpenSkos::SET . '> ' . $escaped . ';
+                    dcterms:title ?title;
                     openskos:uuid ?uuid;
             ';
 
@@ -95,7 +102,7 @@ class ConceptSchemeManager extends ResourceManager
 
         $result = $this->query($query);
 
-        $collection = new ResourceCollection();
+        $retVal = new ResourceCollection();
         foreach ($result as $row) {
             $uri = $row->subject->getUri();
 
@@ -112,11 +119,11 @@ class ConceptSchemeManager extends ResourceManager
                 $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($row->uuid->getValue()));
             }
 
-            $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new Uri($collectionUri));
+            $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new Uri($setUri));
 
-            $collection[] = $scheme;
+            $retVal[] = $scheme;
         }
 
-        return $collection;
+        return $retVal;
     }
 }

@@ -164,7 +164,7 @@ class OpenSKOS_Form_Element_Multi extends Zend_Form_Element_Multi
         if (null !== $view) {
             $this->setView($view);
         }
-        
+
         return $this->_view->partial($this->_partialView, array(
                     'inputName' => $this->groupName,
                     'inputValues' => $this->groupValues,

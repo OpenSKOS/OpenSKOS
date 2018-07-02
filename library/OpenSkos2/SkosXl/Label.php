@@ -16,6 +16,7 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2\SkosXl;
 
 use OpenSkos2\Rdf\Resource;
@@ -29,6 +30,7 @@ use OpenSkos2\Namespaces\DcTerms;
 
 class Label extends Resource
 {
+
     const TYPE = SkosXl::LABEL;
 
     /**
@@ -71,8 +73,24 @@ class Label extends Resource
     /**
      * Ensure all mandatory properties are set before label is written in DB
      */
-    public function ensureMetadata()
-    {
+    public function ensureMetadata(
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Collection $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
+        $forceCreationOfXl = false
+    ) {
+    
+        $currentTenant = $this->getTenant();
+        
+        //Ensure tenant is set
+        $tenantCodeValue = $tenant->getCode()->getValue();
+        if (empty($currentTenant) && !empty($tenantCodeValue)) {
+            $this->setProperty(OpenSkos::TENANT, $tenant->getCode());
+        }
+        
         //Ensure date modified is updated
         $nowLiteral = new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         $this->setProperty(DcTerms::MODIFIED, $nowLiteral);

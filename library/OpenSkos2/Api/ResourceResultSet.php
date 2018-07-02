@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -25,32 +25,33 @@ namespace OpenSkos2\Api;
  */
 class ResourceResultSet
 {
+
     /**
      * Total
      * @var int
      */
     private $total;
-    
+
     /**
      * Resource
      * @var \OpenSkos2\Rdf\ResourceCollection
      */
     private $resources;
-    
+
     /**
      * Offset from total result
      *
      * @var int
      */
     private $start;
-    
+
     /**
      * Number of rows limit
      *
      * @var int
      */
     private $limit;
-    
+
     /**
      * @param \OpenSkos2\Rdf\ResourceCollection $resources
      * @param int $total
@@ -73,7 +74,7 @@ class ResourceResultSet
     {
         return $this->total;
     }
-    
+
     /**
      *
      * @return \OpenSkos2\Rdf\ResourceCollection
@@ -82,7 +83,7 @@ class ResourceResultSet
     {
         return $this->resources;
     }
-    
+
     /**
      * Get offset
      *
@@ -92,7 +93,7 @@ class ResourceResultSet
     {
         return $this->start;
     }
-    
+
     /**
      * @return int
      */

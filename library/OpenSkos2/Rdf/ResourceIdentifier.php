@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -20,6 +21,7 @@ namespace OpenSkos2\Rdf;
 
 interface ResourceIdentifier
 {
+
     /**
      * @return string
      */

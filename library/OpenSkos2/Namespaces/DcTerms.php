@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -20,8 +21,9 @@ namespace OpenSkos2\Namespaces;
 
 class DcTerms
 {
+
     const NAME_SPACE = 'http://purl.org/dc/terms/';
-    
+
     /**
      * exception to the rule because abstract is a reserved keyword
      */
@@ -63,7 +65,7 @@ class DcTerms
     const LICENSE = 'http://purl.org/dc/terms/license';
     const MEDIATOR = 'http://purl.org/dc/terms/mediator';
     const MEDIUM = 'http://purl.org/dc/terms/medium';
-    const MODIFIED = 'http://purl.org/dc/terms/modified';
+    const MODIFIED = 'http://purl.org/dc/terms/modified'; // datum
     const PROVENANCE = 'http://purl.org/dc/terms/provenance';
     const PUBLISHER = 'http://purl.org/dc/terms/publisher';
     const REFERENCES = 'http://purl.org/dc/terms/references';
@@ -80,7 +82,7 @@ class DcTerms
     const TITLE = 'http://purl.org/dc/terms/title';
     const TYPE = 'http://purl.org/dc/terms/type';
     const VALID = 'http://purl.org/dc/terms/valid';
-    
+
     /**
      * Gets all terms in that class.
      * @return array key => predicate
@@ -90,15 +92,15 @@ class DcTerms
         $oClass = new \ReflectionClass(__CLASS__);
         $constants = $oClass->getConstants();
         unset($constants['NAME_SPACE']);
-        
+
         $constants['ABSTRACT'] = $constants['DC_ABSTRACT'];
         unset($constants['DC_ABSTRACT']);
-        
+
         $result = [];
         foreach ($constants as $key => $predicate) {
             $result[strtolower($key)] = $predicate;
         }
-        
+
         return $result;
     }
 }

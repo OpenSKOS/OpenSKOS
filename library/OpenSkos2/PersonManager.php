@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceManager;
@@ -41,17 +39,14 @@ class PersonManager extends ResourceManager
         $result = $this->fetch([
             Foaf::NAME => new Literal($name)
         ]);
-
         if (count($result) == 0) {
             return null;
         }
-
         if (count($result) > 1) {
             throw new \RuntimeException(
                 'More than 1 users use the name "' . $name . '"'
             );
         }
-
         return $result[0];
     }
 }
