@@ -40,6 +40,13 @@ class Collection extends Resource
     //const TYPE = Dcmi::DATASET;
     const TYPE = OpenSkos::SET;
 
+    /**
+     * @return Bootstrap
+     */
+    protected function getBootstrap()
+    {
+        return \Zend_Controller_Front::getInstance()->getParam('bootstrap');
+    }
 
     /**
      * Resource constructor.
@@ -155,17 +162,17 @@ class Collection extends Resource
             $form->getElement('allow_oai')
                     ->setCheckedValue('Y')
                     ->setUncheckedValue('N');
-            /*
-            $validator = new \Zend_Validate_Callback(array($this->getTable(), 'uniqueCode'));
-            $validator->setMessage("code '%value%' already exists", Zend_Validate_Callback::INVALID_VALUE);
-            $form->getElement('code')->addValidator($validator);
-             */
+
             $form->getElement('OAI_baseURL')->addValidator(new \OpenSKOS_Validate_Url());
-            $form->setDefaults($this->dataToArray());
+            $formData = $this->dataToArray();
+            if ($currentURI && !$formData['conceptBaseUri']) {
+                //This is a re-edit of a collection. Some legacy data won't have this filled
+                $formData['conceptBaseUri'] = $formData['id'] = $currentURI;
+            }
+            $form->setDefaults($formData);
             //load OAI sources:
             $oai_providers = array('' => _('Pick a provider (or leave empty)...'));
-            /*
-            $bootstrap = $this->_getBootstrap();
+            $bootstrap = $this->getBootstrap();
             $instances = $bootstrap->getOption('instances');
             if (null !== $instances) {
                 foreach ($instances as $instance) {
@@ -203,11 +210,13 @@ class Collection extends Resource
                     }
                 }
             }
-            if (!isset($oai_providers[$this->OAI_baseURL])) {
-                $oai_providers[$this->OAI_baseURL] = $this->OAI_baseURL;
+            if (isset($formData['OAI_baseURL'])) {
+                $oaiVal =$formData['OAI_baseURL']->getValue();
+                if (!isset($oai_providers[$oaiVal])) {
+                    $oai_providers[$oaiVal] = $oaiVal;
+                }
             }
             $form->getElement('OAI_baseURL')->setMultiOptions($oai_providers);
-            */
         }
         return $form;
     }
@@ -221,7 +230,7 @@ class Collection extends Resource
         $dataOut['dc_title'] = $this->getPropertySingleValue(DcTerms::TITLE);
         $dataOut['dc_description'] = $this->getPropertySingleValue(DcTerms::DESCRIPTION);
         $dataOut['website'] = $this->getPropertySingleValue(OpenSkos::WEBPAGE);
-        $dataOut['license'] = $this->getPropertySingleValue(DcTerms::LICENSE);
+        $dataOut['license_name'] = $this->getPropertySingleValue(DcTerms::LICENSE);
         //$dataOut['license_name'] = $this->getPropertySingleValue();
         $dataOut['license_url'] = $this->getPropertySingleValue(Openskos::LICENCE_URL);
         $dataOut['allow_oai'] = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
@@ -257,11 +266,11 @@ class Collection extends Resource
                 case 'website':
                     $this->setProperty(OpenSkos::WEBPAGE, new Literal($val));
                     break;
-                case 'license':
-                    $this->setProperty(DcTerms::LICENSE, new Uri($val));
+                case 'license_name':
+                    $this->setProperty(DcTerms::LICENSE, new Literal($val));
                     break;
                 case 'license_url':
-                    $this->setProperty(OpenSkos::LICENCE_URL, new Literal($val));
+                    $this->setProperty(OpenSkos::LICENCE_URL, new Uri($val));
                     break;
                 case 'allow_oai':
                     $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
