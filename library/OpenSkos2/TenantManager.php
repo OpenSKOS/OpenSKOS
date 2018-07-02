@@ -45,7 +45,9 @@ class TenantManager extends ResourceManager
         WHERE  { 
           ?tenanturi  <http://openskos.org/xmlns#code> \"$code\" .
           ?seturi  <http://purl.org/dc/terms/publisher> ?tenanturi .
-          ?seturi  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#ConceptScheme>.
+          ?seturi  
+              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> 
+              <http://www.w3.org/2004/02/skos/core#ConceptScheme>.
           ?seturi <http://openskos.org/xmlns#uuid> ?collectionUuid
          
         }";
@@ -53,7 +55,7 @@ class TenantManager extends ResourceManager
         $setCodes = array();
         $response = $this->query($query);
         if ($response !== null) {
-            foreach ($response as $triple){
+            foreach ($response as $triple) {
                 $setCodes[] = $triple->collectionUuid->getValue();
             }
         }
@@ -186,14 +188,10 @@ SELECT_URI;
 
 
         $user = \OpenSKOS_Db_Table_Users::requireFromIdentity();
-        if($user) {
+        if ($user) {
             $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
             $tenant = $tenantManager->fetchByUuid($tenantUuid);
         }
-
         return $tenant;
-
     }
-
 }
-

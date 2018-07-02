@@ -371,7 +371,8 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function fetchMaxNumericNotationFromIndex(Tenant $tenant)
     {
-        //Oh Help! Olha changed this to use $tenant->getUri. I have no idea why, but I'm sure she had a reason. However, it's broken stuff
+        //Oh Help! Olha changed this to use $tenant->getUri.
+        // I have no idea why, but I'm sure she had a reason. However, now lots of stuff is broken
 
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
@@ -422,7 +423,13 @@ class ConceptManager extends ResourceManagerWithSearch
 
 
 
-        $result = $this->solrResourceManager->search('status:*', 1, 0, $numFound, ['sort_d_modified_earliest' => 'asc']);
+        $result = $this->solrResourceManager->search(
+            'status:*',
+            1,
+            0,
+            $numFound,
+            ['sort_d_modified_earliest' => 'asc']
+        );
 
         $uri = current($result);
 

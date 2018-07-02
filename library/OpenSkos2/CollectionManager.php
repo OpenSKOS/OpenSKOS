@@ -41,13 +41,12 @@ class CollectionManager extends ResourceManager
 
     public function __call($name, $arguments)
     {
-        if($name === 'fetchAllSets'){
+        if ($name === 'fetchAllSets') {
             return $this->fetchAllCollections($arguments[0]);
         }
         throw new \Exception(
             "unresolvable call $name to ".__NAMESPACE__."/".__CLASS__
         );
-
     }
     
     /**
@@ -210,5 +209,4 @@ class CollectionManager extends ResourceManager
         }
         return $collectionsMap;
     }
-
 }

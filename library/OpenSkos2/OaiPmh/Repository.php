@@ -320,7 +320,7 @@ class Repository implements InterfaceRepository
             $params['from'],
             $params['until'],
             $pSet['tenant'],
-            isset($pSet['collection']) ? $pSet['collection'] : '' ,
+            isset($pSet['collection']) ? $pSet['collection'] : '',
             $pSet['conceptScheme'],
             $numFound
         );

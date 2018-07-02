@@ -21,7 +21,6 @@ namespace OpenSkos2;
 
 use OpenSkos2\Rdf\ResourceCollection;
 
-
 class SetCollectionxxx extends ResourceCollection
 {
 
