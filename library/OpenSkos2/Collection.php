@@ -218,7 +218,7 @@ class Collection extends Resource
                 }
             }
             if (isset($formData['OAI_baseURL'])) {
-                $oaiVal =$formData['OAI_baseURL']->getValue();
+                $oaiVal =$formData['OAI_baseURL']->getUri();
                 if (!isset($oai_providers[$oaiVal])) {
                     $oai_providers[$oaiVal] = $oaiVal;
                 }
@@ -284,7 +284,7 @@ class Collection extends Resource
                     $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
                     break;
                 case 'OAI_baseURL':
-                    $this->setProperty(OpenSkos::OAI_BASEURL, new Literal($val));
+                    $this->setProperty(OpenSkos::OAI_BASEURL, new Uri($val));
                     break;
             }
         }

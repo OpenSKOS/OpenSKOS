@@ -62,7 +62,10 @@ class Editor_Models_ConceptSchemesCache
         if (empty($this->tenantCode)) {
             throw new OpenSkosException('Tenant code is required for editor cache.');
         }
-        return $this->tenantCode;
+        //Have to strip some characters from the cache
+        $tenantCode = preg_replace('#[^a-zA-Z0-9_]#', '_', $this->tenantCode);
+
+        return $tenantCode;
     }
 
     /**

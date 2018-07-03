@@ -78,8 +78,9 @@ All unlisted collections will be ordered after the listed ones.
 All listed collections that re not present in the DB will be skipped.
 In this way the ini supports collection ordering for more than 1 instances.
 
-2. Webserver with PHP support
-=============================
+2 Webserver with PHP support
+-------------------------
+
 You can install your favourite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
@@ -248,8 +249,7 @@ Meertens), if skos xl labels are demanded.
 
 Examples of the corresponding command lines are:
 
-`php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
---db-password=geheim --db-username=ookgeheim --debug=1`
+`php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim --db-password=geheim --db-username=ookgeheim --debug=1`
 
 Adding skos xl labels is also possible since version 2.1. To activate, first edit the tenant to enable SkosXL, and then 
 update Jena with: 
