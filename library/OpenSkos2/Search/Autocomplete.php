@@ -196,6 +196,12 @@ class Autocomplete
                 . 's_inScheme:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['scheme']))
                 . '))';
+        } elseif (!empty($options['conceptScheme'])) {
+            //B.Hillier reinstated this search. The editor still used it
+            $optionsQueries[] = '('
+                . 's_inScheme:('
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
+                . '))';
         }
 
         // tenants

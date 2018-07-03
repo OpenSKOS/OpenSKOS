@@ -284,7 +284,9 @@ class Collection extends Resource
                     $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
                     break;
                 case 'OAI_baseURL':
-                    $this->setProperty(OpenSkos::OAI_BASEURL, new Uri($val));
+                    if (filter_var($val, FILTER_VALIDATE_URL)) {
+                        $this->setProperty(OpenSkos::OAI_BASEURL, new Uri($val));
+                    }
                     break;
             }
         }
