@@ -40,9 +40,9 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
         //B.Hillier: Why, why, WHY do we install two copies of the same library under the same namespace.
         // Different enviromnents choose a different library! Ugly fix to catch this non-compatible function call
         try {
-            parent::checkSerialiseParams($format);
-        } catch (\InvalidArgumentException $e) {
             parent::checkSerialiseParams($graph, $format);
+        } catch (\InvalidArgumentException $e) {
+            parent::checkSerialiseParams($format);
         }
 
 
