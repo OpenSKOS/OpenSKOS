@@ -22,6 +22,7 @@ namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 use EasyRdf\Literal;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
+use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Exception\OpenSkosException;
 
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
@@ -35,7 +36,16 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
 
     public function serialise(Graph $graph, $format, array $options = array())
     {
-        parent::checkSerialiseParams($format);
+
+        //B.Hillier: Why, why, WHY do we install two copies of the same library under the same namespace.
+        // Different enviromnents choose a different library! Ugly fix to catch this non-compatible function call
+        try {
+            parent::checkSerialiseParams($format);
+        } catch (\InvalidArgumentException $e) {
+            parent::checkSerialiseParams($graph, $format);
+        }
+
+
         if ($format != 'rdfxml_openskos') {
             throw new OpenSkosException(
                 "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"
