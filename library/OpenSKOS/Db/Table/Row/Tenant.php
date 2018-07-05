@@ -127,11 +127,11 @@ class OpenSKOS_Db_Table_Row_Tenant extends Zend_Db_Table_Row
         return $doc;
     }
     
-    public static function createOpenSkos2Tenant(OpenSKOS_Db_Table_Row_Tenant $tenant)
+    public static function createOpenSkos2Tenant(OpenSKOS_Db_Table_Row_Tenant $tenant, $labelsUniquePerTenant = true)
     {
         return new \OpenSkos2\Tenant(
             $tenant['code'],
-            true,
+            $labelsUniquePerTenant,
             true,
             $tenant['enableSkosXl']
         );
