@@ -274,9 +274,11 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
         if ($tenant === null) {
             $tenant = $this->getCurrentUser()->tenant;
         }
-        
+        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant']) ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
+
         if ($tenant !== null) {
-            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
+            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant, $uniquePerTenant);
         }
         
         return $openSkos2Tenant;
