@@ -306,7 +306,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
         $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant']) ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
 
-        if ($tenant !== null) {
+        if (isset($tenant) && $tenant !== null) {
             $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant, $uniquePerTenant);
         }
 
