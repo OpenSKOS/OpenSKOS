@@ -26,6 +26,7 @@ $options = [
     'uri|u=s'   => 'Index single uri e.g -u http://data.beeldengeluid.nl/gtaa/356512',
     'verbose|v' => 'Verbose',
     'modified|m=s' => 'Index only those modified after that date.',
+    'offset|o=s' => 'Offset to start indexing from (handy for resuming index action).',
     'skipDeleted|s' => 'Skip check of deleted files.',
     'help|h'    => 'Show this help',
 ];
@@ -82,7 +83,8 @@ if (empty($uri)) {
 
 $logger->info('Total in Jena: ' . $total);
 
-$rows = 10000;
+//$rows = 10000;
+$rows = 5000;
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
@@ -122,16 +124,25 @@ if ($doDeleteFromSolr) {
 
 $logger->info('Start indexing to Solr');
 // Update all resources from Jena to Solr
-$offset = 0;
+if ($OPTS->getOption('offset')) {
+    $offset = (int)($OPTS->getOption('offset'));
+} else {
+    $offset = 0;
+}
+
+print "\n";
 while ($offset < $total) {
+    $counter = $offset;
     $pageStart = microtime(true);
     
     $resources = $resourceManager->fetchQuery($fetchResources . ' OFFSET ' . $offset);
-    
+    $interimTime = $pageTime = round(microtime(true) - $pageStart, 3);
+    $logger->debug("Jena fetch in pageTime: $pageTime");
+
     $offset = $offset + $rows;
-    
+
     foreach ($resources as $resource) {
-        
+
         //$logger->debug($resource->getUri());
 
         try {
@@ -140,14 +151,24 @@ while ($offset < $total) {
             echo $exc->getMessage() . PHP_EOL;
             echo $exc->getTraceAsString() . PHP_EOL;
         }
+        if ($OPTS->getOption('verbose')) {
+            print "\r";
+            print " $counter " . spinner();
+        }
+        $counter++;
     }
-    
+
     $solrResourceManager->commit();
-    
+    $pageTime = round(microtime(true) - $pageStart, 3);
+    $logger->debug(sprintf("\nSolr Write in pageTime: %.4f", $pageTime - $interimTime));
+
     $commited =  count($resources);
     $pageTime = round(microtime(true) - $pageStart, 3);
     $processTime = round(microtime(true) - $scriptStart, 3);
     $logger->debug("Offset: $offset, Commited: $commited, pageTime: $pageTime, totalTime: $processTime");
+    if ($OPTS->getOption('verbose')) {
+        print "\n";
+    }
 }
 
 $logger->debug('Total in Jena: ' . $total);
@@ -254,4 +275,15 @@ function removeDeletedResourcesFromSolr(
     }
     
     return $deleted;
+}
+
+function spinner(){
+    static $values = array('|', '/', '-', '\\');
+    static $ptr = 0;
+
+    $ptr++;
+    if ($ptr == 4){
+        $ptr = 0;
+    }
+    return $values[$ptr];
 }
