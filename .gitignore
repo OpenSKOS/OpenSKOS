@@ -5,6 +5,7 @@ cache/
 .sass-cache/
 public/data/export/*
 /data/uploads/
+/data/solr/
 /public/data/icons/
 /vendor/
 /nbproject/
