@@ -83,8 +83,14 @@ if (empty($uri)) {
 
 $logger->info('Total in Jena: ' . $total);
 
+/*
+ * Rows setting:
+ * Docker containers seem to get into trouble with values above a 1000. Keep it at that when using docker
+ *
+ * For dedicated Jena/Solr servers, A value of around 10000 seem to work well
+ */
 //$rows = 10000;
-$rows = 5000;
+$rows = 1000;
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
@@ -130,6 +136,7 @@ if ($OPTS->getOption('offset')) {
     $offset = 0;
 }
 
+
 print "\n";
 while ($offset < $total) {
     $counter = $offset;
@@ -141,8 +148,22 @@ while ($offset < $total) {
 
     $offset = $offset + $rows;
 
+    $timeTenRecordsAgo = 0;
     foreach ($resources as $resource) {
 
+        if ($counter % 10 == 0){
+            if($timeTenRecordsAgo != 0){
+                if(microtime(true) - $timeTenRecordsAgo > 4){
+                    //More than 5 seconds for 10 records. Perhaps Solr needs a rest
+                    print "\n";
+                    $logger->debug("Pausing for Solr");
+                    print "\n";
+                    sleep(30);
+
+                }
+            }
+            $timeTenRecordsAgo = microtime(true);
+        }
         //$logger->debug($resource->getUri());
 
         try {
