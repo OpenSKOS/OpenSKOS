@@ -83,8 +83,7 @@ if (empty($uri)) {
 
 $logger->info('Total in Jena: ' . $total);
 
-//$rows = 10000;
-$rows = 5000;
+$rows = 10000;
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
