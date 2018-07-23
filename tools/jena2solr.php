@@ -28,6 +28,10 @@ $options = [
     'modified|m=s' => 'Index only those modified after that date.',
     'offset|o=s' => 'Offset to start indexing from (handy for resuming index action).',
     'skipDeleted|s' => 'Skip check of deleted files.',
+    'solrHost=s' => 'Override Solr host that is in the config file.',
+    'solrContext=s' => 'Override Solr context (path) that is in  the config file.',
+    'jenaQueryUri=s' => 'Override the Jena query endpoint that is the config file.',
+    'solrPort=s' => 'Override Solr port that is the config file.',
     'help|h'    => 'Show this help',
 ];
 
@@ -63,8 +67,44 @@ $uri = $OPTS->getOption('uri');
 // Used to record time it takes for the script execution
 $scriptStart = microtime(true);
 
+
+
+$solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
+$solrHost = $OPTS->getOption('solrHost') ? $OPTS->getOption('solrHost') : $solr['host'];
+$solrPort = $OPTS->getOption('solrPort') ? $OPTS->getOption('solrPort') : $solr['port'];
+$solrPath = $OPTS->getOption('solrContext') ? $OPTS->getOption('solrContext') : $solr['context'];
+
+$solrClient = new Solarium\Client([
+    'endpoint' => [
+        'localhost' => [
+            'host' => $solrHost,
+            'port' => $solrPort,
+            'path' => $solrPath,
+            'timeout' => 300,
+        ]
+    ]
+]);
+
+
+$solrResourceManager = new \OpenSkos2\Solr\ResourceManager($solrClient);
+
+// @TODO Why is that OpenSKOS_Application_BootstrapAccess needed?
+$sparqlOptions = OpenSKOS_Application_BootstrapAccess::getOption('sparql');
+
+\EasyRdf\Http::getDefaultHttpClient()->setConfig(['timeout' => 100]);
+
+
+$jenaQueryUri = $OPTS->getOption('jenaQueryUri') ? $OPTS->getOption('jenaQueryUri') : $sparqlOptions['queryUri'];
+$jenaUpdateUri = $sparqlOptions['updateUri']; //We actually don't use this, but our client object wants it.
+
+$sparqlClient = new \OpenSkos2\EasyRdf\Sparql\Client(
+    $jenaQueryUri,
+    $jenaUpdateUri
+);
+
+
 /* @var $resourceManager \OpenSkos2\Rdf\ResourceManagerWithSearch */
-$resourceManager = $diContainer->make('\OpenSkos2\Rdf\ResourceManagerWithSearch');
+$resourceManager = new \OpenSkos2\Rdf\ResourceManagerWithSearch($sparqlClient, $solrResourceManager);
 
 $resourceTypes = [
     \OpenSkos2\Concept::TYPE,
@@ -90,7 +130,7 @@ $logger->info('Total in Jena: ' . $total);
  * For dedicated Jena/Solr servers, A value of around 10000 seem to work well
  */
 //$rows = 10000;
-$rows = 1000;
+$rows = 10;
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
@@ -104,8 +144,16 @@ if ($uri) {
     ";
 }
 
+
+
+
+
 /* @var $solrResourceManager \OpenSkos2\Solr\ResourceManager */
-$solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
+//$solrResourceManager = $diContainer->make('\OpenSkos2\Solr\ResourceManager');
+
+
+
+
 $solrResourceManager->setIsNoCommitMode(true);
 
 $doDeleteFromSolr = true;
