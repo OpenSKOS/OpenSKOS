@@ -129,8 +129,8 @@ $logger->info('Total in Jena: ' . $total);
  *
  * For dedicated Jena/Solr servers, A value of around 10000 seem to work well
  */
-//$rows = 10000;
-$rows = 10;
+$rows = 10000;
+//$rows = 10;
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
