@@ -210,7 +210,7 @@ SELECT_TENANTS;
 
         $results = array();
 
-        foreach($response as $tenant){
+        foreach ($response as $tenant) {
             $results[$tenant->uri->getUri()] =
                 array(
                     'code' => $tenant->code->getValue(),
