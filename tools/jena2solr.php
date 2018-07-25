@@ -31,6 +31,7 @@ $options = [
     'solrHost=s' => 'Override Solr host that is in the config file.',
     'solrContext=s' => 'Override Solr context (path) that is in  the config file.',
     'jenaQueryUri=s' => 'Override the Jena query endpoint that is the config file.',
+    'jenaRows=s' => 'Number of Jena rows to process with each fetch',
     'solrPort=s' => 'Override Solr port that is the config file.',
     'help|h'    => 'Show this help',
 ];
@@ -123,7 +124,6 @@ if (empty($uri)) {
 
 $logger->info('Total in Jena: ' . $total);
 
-$rows = 10000;
 /*
  * Rows setting:
  * Docker containers seem to get into trouble with values above a 1000. Keep it at that when using docker
@@ -131,6 +131,9 @@ $rows = 10000;
  * For dedicated Jena/Solr servers, A value of around 10000 seem to work well
  */
 $rows = 10000;
+if($OPTS->getOption('jenaRows')){
+    $rows = $OPTS->getOption('jenaRows');
+}
 
 if ($uri) {
     $fetchResources = "DESCRIBE <$uri>";
