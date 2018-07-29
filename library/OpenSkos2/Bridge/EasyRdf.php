@@ -20,11 +20,10 @@
 namespace OpenSkos2\Bridge;
 
 use EasyRdf\Graph;
-use OpenSkos2\Collection;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\VCard;
 use OpenSkos2\Set;
-use OpenSkos2\CollectionCollection;
+use OpenSkos2\SetCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
@@ -49,7 +48,7 @@ class EasyRdf
 {
 
     private static $allowedSubresources = [VCard::ORG, VCard::ADR];
-    private static $skosTypes = [Tenant::TYPE, Collection::TYPE, ConceptScheme::TYPE,
+    private static $skosTypes = [Tenant::TYPE, Set::TYPE, ConceptScheme::TYPE,
         SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, Org::FORMALORG,
         Label::TYPE
         ];
@@ -217,8 +216,8 @@ class EasyRdf
                     return new ConceptScheme($uri);
                 case SkosCollection::TYPE:
                     return new SkosCollection($uri);
-                case Collection::TYPE:
-                    return new Collection($uri);
+                case Set::TYPE:
+                    return new Set($uri);
                 case Tenant::TYPE:
                     return new Tenant($uri);
                 case RelationType::TYPE:
@@ -250,8 +249,8 @@ class EasyRdf
                 return new ConceptSchemeCollection();
             case SkosCollection::TYPE:
                 return new SkosCollectionCollection();
-            case Collection::TYPE:
-                return new CollectionCollection();
+            case Set::TYPE:
+                return new SetCollection();
             case Tenant::TYPE:
                 return new TenantCollection();
             case RelationType::TYPE:

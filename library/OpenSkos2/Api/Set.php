@@ -23,7 +23,7 @@ class Set extends AbstractTripleStoreResource
      * @param \OpenSkos2\PersonManager $personManager
      */
     public function __construct(
-        \OpenSkos2\CollectionManager $manager,
+        \OpenSkos2\SetManager $manager,
         \OpenSkos2\Search\Autocomplete $searchAutocomplete,
         \OpenSkos2\PersonManager $personManager
     ) {
@@ -40,7 +40,7 @@ class Set extends AbstractTripleStoreResource
      *
      * @param string|Uri $id
      * @throws NotFoundException
-     * @return a sublcass of \OpenSkos2\Collection
+     * @return a sublcass of \OpenSkos2\Set
      */
     public function getResource($id)
     {
@@ -58,7 +58,7 @@ class Set extends AbstractTripleStoreResource
         }
 
         if (!$collection) {
-            throw new NotFoundException('Collection not found by uri/uuid/code: ' . $id, 404);
+            throw new NotFoundException('Collection (aka Set) not found by uri/uuid/code: ' . $id, 404);
         }
         return $collection;
     }
@@ -74,6 +74,17 @@ class Set extends AbstractTripleStoreResource
     
     protected function getSet($request)
     {
-        return new \OpenSkos2\Collection();
+        return new \OpenSkos2\Set();
     }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string api key if set else ''
+     */
+    protected function getApiKey($request)
+    {
+        $apiKey = $this->getMultiSourcedParameter($request, 'key');
+        return $apiKey;
+    }
+
 }

@@ -195,7 +195,7 @@ class Concept extends Resource
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Collection $set = null,
+        \OpenSkos2\Set $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
         \OpenSkos2\SkosXl\LabelManager $labelManager = null,
@@ -282,7 +282,7 @@ class Concept extends Resource
      * Requires a URI from to an openskos set
      * @return string
      */
-    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Collection $collection, $conceptManager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $collection, $conceptManager)
     {
         $customGen = $conceptManager->getUriGenerateObject();
         if (!empty($customGen)) {

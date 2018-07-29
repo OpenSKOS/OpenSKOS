@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:openskos="http://openskos.org/xmlns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype#">
+    <rdf:Description rdf:type="http://openskos.org/xmlns#set">
+        <openskos:code>clavas</openskos:code>
+        <dcterms:title xml:lang="en">CLARIN vocabs</dcterms:title>
+        <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/4.0/"/>
+        <dcterms:publisher rdf:resource="http://tenant/e4bb2cae-8390-4c35-b989-35d3fa2b7121"/>
+        <openskos:OAI_baseURL rdf:resource="https://vocabularies.clarin.eu/clavas/public/api/clarin"/>
+        <openskos:allow_oai>false</openskos:allow_oai>
+        <openskos:conceptBaseUri>https://vocabularies.clarin.eu/clavas/public/api/set/</openskos:conceptBaseUri>
+        <openskos:webpage rdf:resource="http://www.clarin.eu/"/>
+    </rdf:Description>
+</rdf:RDF>
