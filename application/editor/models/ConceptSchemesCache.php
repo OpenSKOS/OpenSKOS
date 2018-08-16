@@ -141,8 +141,10 @@ class Editor_Models_ConceptSchemesCache
     {
         $allSchemes = $this->fetchAll();
         $result = [];
+
         foreach ($allSchemes as $scheme) {
-            if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
+            $set = $scheme->getSet();
+            if (empty($inCollections) || in_array($set[0]->getUri(), $inCollections)) {
                 $result[$scheme->getUri()] = $scheme->getTitle();
             }
         }

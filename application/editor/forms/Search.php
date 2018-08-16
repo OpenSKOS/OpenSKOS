@@ -108,7 +108,8 @@ class Editor_Forms_Search extends OpenSKOS_Form
     {
         $loggedUser = OpenSKOS_Db_Table_Users::requireFromIdentity();
         $userForSearch = $this->getUserForSearch();
-        $userOptions = $userForSearch->getSearchOptions($loggedUser['id'] != $userForSearch['id']);
+        $loadFromDB = $loggedUser['id'] != $userForSearch['id'];
+        $userOptions = $userForSearch->getSearchOptions($loadFromDB);
 
         $inCollections = array();
         if (isset($userOptions['collections'])) {
