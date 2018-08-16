@@ -95,6 +95,7 @@ class Autocomplete
 
         $prefix = '';
         //Meertens: the feature wholeworld  works only  when labels and/or properties are given as request parameters
+        $prefix = 'a_';
         if (isset($options['wholeword'])) {
             if ($options['wholeword']) {
                 $prefix = 't_';
