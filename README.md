@@ -84,9 +84,7 @@ All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
 adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html)
 
-2.1 Setting Up Your VHOST
--------------------------
-
+## 2.1 Setting Up Your VHOST
 The following is a sample VHOST you might want to consider for your project.
 
 ```
@@ -107,8 +105,7 @@ The following is a sample VHOST you might want to consider for your project.
 </VirtualHost>
 ```
 
-3. Database setup
-=================
+# 3. Database setup
 Install your choice of Zend Framework supported Database engine (see
 http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
 access your database can be configured in the application's configuration.
@@ -124,8 +121,7 @@ With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
 
 
-4. Apache Jena Fuseki setup
-===========================
+# 4. Apache Jena Fuseki setup
 Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
 
 Installing Fuseki 2 for development purposes:
@@ -141,8 +137,7 @@ Installing Fuseki 2 for development purposes:
   1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
 5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
 
-5. Apache Solr Setup
-====================
+# 5. Apache Solr Setup
 You have to have a java VM installed prior to installing Solr!
 Download a 3.4 release of Apache Solr and extract it somewhere on your server:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
@@ -156,8 +151,7 @@ You can now start Solr (in this example with 1,024 MB memory assigned):
     java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
 
 
-6. Data Ingest
-==============
+# 6. Data Ingest
 Once you have the application running you can start adding data,
 managed in `collections`.
 
@@ -165,8 +159,7 @@ You can create a collection in the dashboard.
 
 There are three ways to populate a collection:
 
-6.1 REST-interface
-------------------
+## 6.1 REST-interface
 Send data via the REST-API, e.g. like this:
 
 > curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
@@ -179,8 +172,7 @@ Also, you have to identify the tenant and provide the API key,
 which you assign to the user in the dashboard.
 
 
-6.2 Uploader
-------------
+## 6.2 Uploader
 Upload a dataset (a SKOS/RDF file) via a form in the dashboard:Manage collections.
 Here you can provide many concepts within one file (XPath: `/rdf:RDF/rdf:Description`)
 
@@ -191,8 +183,7 @@ The import job can be started with `./tools/jobs.php`,
 a CLI script intended to be run with a Cron like task runner.
 
 
-6.3 OAI ???
------------
+## 6.3 OAI ???
 Third possiblity is to replicate an existing dataset via OAI-PMH,
 either from other OpenSKOS-instances or from an external source providing SKOS-data.
 
@@ -204,17 +195,14 @@ The harvest job can be started with ./tools/harvest.php,
 another CLI script meant to be run as a cron-task.
 ???
 
-6.4 Migrate from OpenSKOS v1
-----------------------------
+## 6.4 Migrate from OpenSKOS v1
 It is possible to migrate the data from the SOLR core used by a OpenSKOS v1 instance directly into a v2 instance
 
 `tools/migrate.php --endpoint http://<solr server>:8180/ciss/<core name>/select`
 
 Once this is complete the data from the v1 instance will be available in the triple store used by OpenSKOS v2.
 
-6.5 API Documentation
----------------------
-
+## 6.5 API Documentation
 Generate API Documentation
 
 ```
@@ -223,8 +211,7 @@ npm run doc
 ```
 Visit: http://example.com/apidoc/
 
-7 Development
-=============
+## 7 Development
 To test / develop the application you can run
 
 ```
