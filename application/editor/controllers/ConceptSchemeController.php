@@ -297,15 +297,15 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
     
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadPath'])) {
-            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getCode();
         }
-    
+
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadHttpPath'])) {
-            $iconsUploadHttpPath = $editorOptions['schemeIcons']['uploadHttpPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadHttpPath = $editorOptions['schemeIcons']['uploadHttpPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadHttpPath = Editor_Forms_UploadIcon::DEFAULT_UPLOAD_HTTP_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadHttpPath = Editor_Forms_UploadIcon::DEFAULT_UPLOAD_HTTP_PATH . '/' . $this->_tenant->getCode();
         }
     
         $rawIcons = scandir($iconsUploadPath);
