@@ -541,6 +541,17 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                                 }
                             }
 
+                            //Update modification date
+                            $nowLiteral = function () {
+                                return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+                            };
+
+                            $user = OpenSKOS_Db_Table_Users::fromIdentity();
+                            $person = $user->getFoafPerson();
+
+                            $otherConcept->setProperty(DcTerms::MODIFIED, $nowLiteral());
+                            $otherConcept->setProperty(OpenSkos::MODIFIEDBY, $person);
+
                         }
                     }
 
