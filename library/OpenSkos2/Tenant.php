@@ -291,6 +291,7 @@ class Tenant extends Resource
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
             ;
             $form->getElement('email')->addValidator(new \Zend_Validate_EmailAddress());
+            $form->getElement('website')->addValidator(new \OpenSKOS_Validate_Url());
 
 
             $form->getElement('enableStatusesSystem')->getDecorator('Label')

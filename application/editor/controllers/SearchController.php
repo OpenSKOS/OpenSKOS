@@ -139,7 +139,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $user = OpenSKOS_Db_Table_Users::requireFromIdentity();
 
         // Reset defaults
-        if ((bool) $request->getParam('resetDefaults', false)) {
+        if ((bool) $form->getValue('resetDefaults', false)) {
             $defaultProfile = $user->getFirstDefaultSearchProfile();
             if ($defaultProfile !== null) {
                 return $this->_forward(
@@ -154,7 +154,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         }
 
         // Switch profile.
-        if ((bool) $request->getParam('switchProfile', false)) {
+        if ((bool) $form->getValue('switchProfile', false)) {
             return $this->_forward('show-form', 'search', 'editor');
         }
 
@@ -164,8 +164,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $profilesModel = new OpenSKOS_Db_Table_SearchProfiles();
 
         // Save profile as new one.
-        if ((bool) $request->getParam('saveAs', false)) {
-            $profileName = $request->getParam('searchProfileNameSaveAs', '');
+        if ((bool) $form->getValue('saveAs', false)) {
+            $profileName = $form->getValue('searchProfileNameSaveAs', '');
             if (empty($profileName)) {
                 $form->getElement('searchProfileNameSaveAs')->addError(_('Please fill a profile name.'));
                 return $this->_forward('show-form');
@@ -181,10 +181,11 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             );
         }
 
-        $profileId = intval($request->getParam('searchProfileId', ''));
-        
-        if (empty($profileId) && (bool) $request->getParam('save', false)) {
-            $profileName = $request->getParam('searchProfileName', '');
+        $profileId = intval(isset($options['searchProfileId']) ? $options['searchProfileId'] : '');
+        $profileId = $form->getValue('searchProfileId', false);
+
+        if (empty($profileId) && (bool) $form->getValue('save', false)) {
+            $profileName = $form->getValue('searchProfileName', '');
             if (empty($profileName)) {
                 $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));
                 return $this->_forward('show-form');
@@ -204,8 +205,8 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         if (!empty($profileId)) {
             $profile = $profilesModel->find($profileId)->current();
         }
-        
-        if ((bool) $request->getParam('save', false) || (bool) $request->getParam('delete', false)) {
+
+        if ((bool) $form->getValue('save', false) || (bool) $form->getValue('delete', false)) {
             if (!empty($profileId)) {
                 if (!($user->isAllowed('editor.manage-search-profiles', null) ||
                         $user->id == $profile->creatorUserId)) {
@@ -213,14 +214,19 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                     return $this->_forward('show-form');
                 }
 
-                if ((bool) $request->getParam('save', false)) {
-                    $profileName = $request->getParam('searchProfileName', '');
+                if ((bool) $form->getValue('save', false)) {
+                    $profileName = $form->getValue('searchProfileName', '');
+                    /*
                     if (empty($profileName)) {
                         $form->getElement('searchProfileName')->addError(_('Please fill a profile name.'));
                         return $this->_forward('show-form');
                     }
+                    */
 
-                    $profile->name = $profileName;
+                    if (!empty($profileName)) {
+                        $profile->name = $profileName;
+                    }
+
                     $profile->setSearchOptions($options);
                     $profile->save();
                     return $this->_forward(
@@ -231,7 +237,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
                     );
                 }
 
-                if ((bool) $request->getParam('delete', false)) {
+                if ((bool) $form->getValue('delete', false)) {
                     $profile->delete();
                     return $this->_forward('show-form', 'search', 'editor', array('reInitForm' => true));
                 }
@@ -242,7 +248,7 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         }
 
         // Save options for the user
-        if ((bool) $request->getParam('ok', false)) {
+        if ((bool) $form->getValue('ok', false)) {
             if ($profile !== null) {
                 $originalOptions = $profile->getSearchOptions();
                 

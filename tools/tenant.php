@@ -104,6 +104,13 @@ switch ($action) {
             $tenant->ensureMetadata();
 
             insertResource($tenantManager, $tenant);
+
+            $model = new OpenSKOS_Db_Table_MaxNumericNotation();
+            $model->createRow(array(
+                'tenant_code' => $tenantCode,
+                'max_numeric_notation' => 1
+            ))->save();
+
         } catch (Zend_Db_Exception $e) {
             fwrite(STDERR, $e->getMessage() . "\n");
             exit(2);

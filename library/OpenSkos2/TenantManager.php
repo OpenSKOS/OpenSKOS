@@ -194,4 +194,29 @@ SELECT_URI;
         }
         return $tenant;
     }
+
+    public function getAllTenants()
+    {
+        $query = <<<SELECT_TENANTS
+SELECT ?uri ?code ?uuid WHERE { 
+  ?uri  <%s> <%s>.
+  ?uri  <%s> ?code.
+  ?uri  <%s> ?uuid
+}
+SELECT_TENANTS;
+        $query = sprintf($query, Rdf::TYPE, Org::FORMALORG, OpenSkosNamespace::CODE, OpenSkos::UUID);
+
+        $response = $this->query($query);
+
+        $results = array();
+
+        foreach ($response as $tenant) {
+            $results[$tenant->uri->getUri()] =
+                array(
+                    'code' => $tenant->code->getValue(),
+                    'uuid' => $tenant->uuid->getValue(),
+                );
+        }
+        return $results;
+    }
 }
