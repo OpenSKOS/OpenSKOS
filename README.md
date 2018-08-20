@@ -73,7 +73,7 @@ All unlisted collections will be ordered after the listed ones.
 All listed collections that re not present in the DB will be skipped.
 In this way the ini supports collection ordering for more than 1 instances.
 
-# 2 Webserver with PHP support
+# 2. Webserver with PHP support
 You can install your favourite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
@@ -209,9 +209,9 @@ Visit: http://example.com/apidoc/
 ## 6.6. Using the API
 Full HTML documentation of the API is supplied and is available in HTML at `<baseruri>/apidoc`
 
-# 7. ?
+# 7. Development
 
-7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
+## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
 _**WARNING:** OpenSKOS 2.2.0-rc1 is a release candidate and not yet approved for production. It is very strongly 
 recommended to back up all data before performing the following steps_
 
@@ -241,7 +241,7 @@ empty the core, and then update the schema.xml file. Then fill the Solr database
 `php tools/jena2solr.php`
 
 
-7.2. Import (`/tools/skos2openskos.php`)
+## 7.2. Import (`/tools/skos2openskos.php`)
 Example of a command line:
 
 ```
