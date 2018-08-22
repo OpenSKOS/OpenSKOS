@@ -572,9 +572,12 @@ class ResourceManager
                 $object = '?' . $i;
                 if (isset($data['ignoreLanguage']) && $data['ignoreLanguage']) {
                     // Get only the simple string literal to compare without language.
-                    $object = 'str(' . $object . ')';
+                    $object = 'lcase(str(' . $object . '))';
+                    $newFilter[] = $object . ' ' . $operator . ' ' . strtolower((new NTriple())->serialize($val));
                 }
-                $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
+                else {
+                    $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
+                }
             }
             $filters[] = '(' . implode(' || ', $newFilter) . ') ';
         }
