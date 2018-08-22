@@ -574,8 +574,7 @@ class ResourceManager
                     // Get only the simple string literal to compare without language.
                     $object = 'lcase(str(' . $object . '))';
                     $newFilter[] = $object . ' ' . $operator . ' ' . strtolower((new NTriple())->serialize($val));
-                }
-                else {
+                } else {
                     $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
                 }
             }
