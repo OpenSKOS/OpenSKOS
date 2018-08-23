@@ -88,9 +88,9 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	 */
 	public function getCollection()
 	{
-		static $collection;
-		if (null === $collection) {
-			$collection = $this->findParentRow('OpenSKOS_Db_Table_Collections');
+		static $set;
+		if (null === $set) {
+			$set = $this->findParentRow('OpenSKOS_Db_Table_Collections');
 		}
 		return $collection;
 	}

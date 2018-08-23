@@ -24,7 +24,11 @@
 <ul>
 	<li>
 		<em><?php echo $this->translate('Collection')?>:</em>
-		<a href="<?php echo $this->url(array('controller' => 'collections', 'action' => 'edit', 'collection' => $this->collection->code))?>"><?php echo $this->collection->dc_title?></a>
+		<a href="<?php echo $this->url(array(
+		        'controller' => 'collections',
+                'action' => 'edit',
+                'collection' => $this->set->getProperty(\OpenSkos2\Namespaces\OpenSkos::CODE)[0]->getValue()
+        ))?>"><?php echo $this->set->getProperty(\OpenSkos2\Namespaces\Dc::TITLE)[0]->getValue()?></a>
 	</li>
 	<li>
 		<em><?php echo $this->translate('Delete before import')?>:</em>

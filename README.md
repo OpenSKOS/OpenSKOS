@@ -261,6 +261,13 @@ empty the core, and then update the schema.xml file. Then fill the Solr database
 
 `php tools/jena2solr.php`
 
+Max notations are now maintained in a separate MySQL table. Use the script `./data/dbchanges/20180724.sql` to update the 
+db schema.
+
+Then execute:
+`php tools/updateMaxNotation.php`
+
+
 
 7.2. Import (`/tools/skos2openskos.php`)
 --------------------------------------------------------------------------------

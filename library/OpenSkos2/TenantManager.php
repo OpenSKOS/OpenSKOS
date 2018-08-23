@@ -38,25 +38,28 @@ class TenantManager extends ResourceManager
      * @param string $code Tenant Code
      * @return array list of uuids of sets(collections) on the tenant
      */
-    public function fetchSetCodesForTenant($code)
+    public function fetchSetUrisForTenant($code)
     {
-        $query = "
-        SELECT ?collectionUuid
-        WHERE  { 
-          ?tenanturi  <http://openskos.org/xmlns#code> \"$code\" .
-          ?seturi  <http://purl.org/dc/terms/publisher> ?tenanturi .
-          ?seturi  
-              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> 
-              <http://www.w3.org/2004/02/skos/core#ConceptScheme>.
-          ?seturi <http://openskos.org/xmlns#uuid> ?collectionUuid
-         
-        }";
+        $query = <<<SELECT_SETS
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix rdf-syntax: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix SKOS: <http://www.w3.org/2004/02/skos/core#>
+prefix OPENSKOS: <http://openskos.org/xmlns#>
 
+SELECT ?setUri
+WHERE  { 
+  ?tenanturi  OPENSKOS:code "%s" 
+  .?seturi  dcterms:publisher ?tenanturi 
+  .?seturi rdf-syntax:type OPENSKOS:set
+  .?seturi OPENSKOS:conceptBaseUri ?setUri
+}
+SELECT_SETS;
+        $query = sprintf($query, $code);
         $setCodes = array();
         $response = $this->query($query);
         if ($response !== null) {
             foreach ($response as $triple) {
-                $setCodes[] = $triple->collectionUuid->getValue();
+                $setCodes[] = $triple->setUri->getUri();
             }
         }
         return $setCodes;
