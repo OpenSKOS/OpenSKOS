@@ -97,7 +97,14 @@ class Editor_JobsController extends OpenSKOS_Controller_Editor
         $fileDetails = $export->getExportFileDetails();
         $filePath = $export->getExportFilesDirPath() . $job->info;
 
-        $this->getHelper('file')->sendFile($fileDetails['fileName'], $filePath, $fileDetails['mimeType']);
+        if(file_exists($filePath)){
+            $this->getHelper('file')->sendFile($fileDetails['fileName'], $filePath, $fileDetails['mimeType']);
+        } else {
+            $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(
+                _('The export file for this job is no longer available')
+            );
+            return $this->_helper->redirector('view', 'jobs', 'editor', array('job' => $job->id));
+        }
     }
 
     /**
