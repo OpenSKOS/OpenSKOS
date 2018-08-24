@@ -111,14 +111,18 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     {
         $this->_requireAccess('editor.collections', 'manage');
 
-        $collection = $this->_getCollection();
+        $collections = $this->_getCollection();
+        $collection = $collections[0];
+        $set_uri = $collection->getProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI)[0]->getUri();
+        $tenant_code = $collection->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT)[0]->getValue();
+        //TODO: Tenant
 
         $form = $collection->getUploadForm();
         $formData = $this->_request->getPost();
         if ($form->isValid($formData)) {
             $upload = new Zend_File_Transfer_Adapter_Http();
             $path = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('upload_path');
-            $tenant_path = $path .'/'.$set->tenant;
+            $tenant_path = $path .'/'.$tenant_code;
             if (!is_dir($tenant_path)) {
                 if (!@mkdir($tenant_path, 0777, true)) {
                     $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Failed to create upload folder'));
@@ -156,7 +160,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
                 'onlyNewConcepts' => (int)$formData['onlyNewConcepts'] == 1,
             );
             $job = $model->fetchNew()->setFromArray(array(
-                'set' => $set->id,
+                'set_uri' => $set_uri,
                 'user' => Zend_Auth::getInstance()->getIdentity()->id,
                 'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT,
                 'parameters' => serialize($parameters),
