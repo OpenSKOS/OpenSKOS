@@ -65,6 +65,8 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
         $this->_requireAccess('editor.collections', 'manage');
 
         $collection = $this->_getCollection();
+
+        $set_uri = $collection[0]->getUri();
         if (!$collection->OAI_baseURL) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('This collection does not appear to have a OAI Server as source.'));
             $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
@@ -94,7 +96,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $parameters['deletebeforeimport'] = (int)$parameters['deletebeforeimport'] == 1;
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray(array(
-                'set' => $set->id,
+                'set_uri' => $set_uri,
                 'user' => Zend_Auth::getInstance()->getIdentity()->id,
                 'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST,
                 'parameters' => serialize($parameters),
