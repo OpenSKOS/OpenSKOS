@@ -266,7 +266,6 @@ class Editor_Models_Export
      */
     public function isTimeConsumingExport()
     {
-        return true; //FIND_ME_AGAIN
         // Export is slow if depth is more than 1
         if ($this->get('maxDepth') > 1) {
             return true;
