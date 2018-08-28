@@ -342,16 +342,18 @@ class Editor_Models_Export
      */
     protected function createExportMessage()
     {
+
+        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
         $fieldsToExport = $this->get('fieldsToExport');
         if (empty($fieldsToExport)) {
             $fieldsToExport = $this->getExportableConceptFields();
         }
         
         $user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
-        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant(
-            OpenSKOS_Db_Table_Tenants::fromCode($user->tenant)
-        );
-        
+        $tenant = $tenantManager->fetchTenantFromCode($user->tenant);
+
         $message = new Message(
             $tenant,
             $this->get('format'),
