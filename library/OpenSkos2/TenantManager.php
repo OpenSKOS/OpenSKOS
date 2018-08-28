@@ -164,6 +164,29 @@ SELECT_URI;
         return $response[0]->uuid->getValue();
     }
 
+    public function fetchTenantFromCode($code)
+    {
+        $query = <<<SELECT_URI
+DESCRIBE ?uri {
+    SELECT ?uri WHERE { 
+      ?uri  <%s> <%s>.
+      ?uri  <%s> "%s".
+    }
+}
+SELECT_URI;
+        $query = sprintf($query, Rdf::TYPE, Org::FORMALORG, OpenSkosNamespace::CODE, $code);
+
+        $response = $this->fetchQuery($query);
+
+        if (count($response) > 1) {
+            throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
+        }
+        if (count($response) < 1) {
+            throw new \Exception("the institution with the code $code is not found");
+        }
+        return $response[0];
+    }
+
 
     /**
      * @param Uri $resource

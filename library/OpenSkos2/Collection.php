@@ -77,15 +77,12 @@ class Collection extends Resource
      */
     public function getJobs($task = null)
     {
-        return array();
-        //new records do not have jobs:
-        if (null === $this->id) {
-            return array();
-        }
+
+
 
         $model = new OpenSKOS_Db_Table_Jobs();
         $select = $model->select()
-            ->where('collection=?', $this->id)
+            ->where('set_uri=?', $this->uri)
             ->where('finished IS NULL')
             ->order('created desc')
             ->order('started asc');
