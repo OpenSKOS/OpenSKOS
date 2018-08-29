@@ -521,11 +521,16 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
                             //Redmine #34508. Also save the XL labels if XL is active.
                             $tenant = $this->getOpenSkos2Tenant();
-                            if ($tenant->getEnableSkosXl() === true) {
+
+                            $literal = $tenant->getEnableSkosXl();
+                            $val = $literal->getValue();
+                            $useXl = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+
+                            if ($useXl === true) {
 
                                 $label = new Label(Label::generateUri());
                                 $label->setProperty(SkosXl::LITERALFORM, $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]);
-                                $label->ensureMetadata();
+                                $label->ensureMetadata($tenant);
 
                                 if ($formData['statusOtherConceptLabelToFill'] === Skos::HIDDENLABEL) {
                                     $otherConcept->addUniqueProperty(
