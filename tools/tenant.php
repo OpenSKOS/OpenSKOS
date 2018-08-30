@@ -97,8 +97,10 @@ switch ($action) {
             $tenant->arrayToData(
                 array(
                     'name' => $tenantName,
-                    'code'=> $tenantCode,
+                    'code' => $tenantCode,
                     'email'=> $tenantEmail,
+                    'enableStatusesSystem' => "false",
+                    'enableSkosXl' => "false"
                 )
             );
             $tenant->ensureMetadata();
