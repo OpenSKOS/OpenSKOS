@@ -13,17 +13,17 @@ webserver's document root.
 
 1.1 Composer
 ------------
-Run composer install to install some dependencies like zend framework 1.12
+Run `composer install` to install some dependencies like zend framework 1.12
 
 1.2 Configuration
 -----------------
 To configure OpenSKOS you have to rename:
 
-    APPROOT/application/configs/application.ini.dist
+`APPROOT/application/configs/application.ini.dist`
 
 to
 
-    APPROOT/application/configs/application.ini
+`APPROOT/application/configs/application.ini`
 
 Now you can edit the `APPROOT/application/configs/application.ini`.
 
@@ -34,9 +34,10 @@ configuration section marked by the Environment Variable `APPLICATION_ENV` (see
 If you experience any problems you may want to modify settings in the config,
 to show you more verbose error messages:
 
+```ini
     resources.frontController.params.displayExceptions=1
     phpSettings.display_errors = 1
-
+```
 
 1.2.1 OAI-PMH setup
 -------------------
@@ -48,12 +49,15 @@ OpenSKOS includes a OAI harvester. To configure OAI Service providers, use the
 
 The setup for "openskos" types is easy:
 
+```ini
     instances.openskos.type=openskos
     instances.openskos.url=http://HOSTNAME
     instances.openskos.label=YOUR LABEL
+```
 
 For "external" types use this syntax:
 
+```ini
     instances.example1.type=external
     instances.example1.url=http://HOSTNAME
     instances.example1.label=EXAMPLE LABEL
@@ -61,6 +65,7 @@ For "external" types use this syntax:
     instances.example1.metadataPrefix=METADATAPREFIX
     #optional:
     instances.example1.set=SETSPEC
+```
 
 You can define multiple instances by using a different key (in the above example
 the key `example1` is used).
@@ -73,7 +78,7 @@ The scheme order is made in this sequence:
  - order the groups by the desired collection order
  - sort the schemes inside each group alphabetically
 
-The collection order can be set in the ini by setting the editor.schemeOrder.collections[]="<collectionUri>"
+The collection order can be set in the ini by setting the `editor.schemeOrder.collections[]="<collectionUri>"`
 All unlisted collections will be ordered after the listed ones.
 All listed collections that re not present in the DB will be skipped.
 In this way the ini supports collection ordering for more than 1 instances.
@@ -91,7 +96,7 @@ adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html)
 
 The following is a sample VHOST you might want to consider for your project.
 
-```
+```apache_conf
 <VirtualHost *:80>
    DocumentRoot "/PATH/TO/CODE/public"
    ServerName YOUR.SERVER.NAME
@@ -120,7 +125,9 @@ Once you have created an empty database, you have to run the SQL script
 
 You also have to run the php-script to create a tenant:
 
-    php APPROOT/tools/tenant.php --code INST_CODE --name INST_NAME --email EMAIL --password PWD create
+```sh
+php APPROOT/tools/tenant.php --code INST_CODE --name INST_NAME --email EMAIL --password PWD create
+```
 
 With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
@@ -155,8 +162,9 @@ http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 You can now start Solr (in this example with 1,024 MB memory assigned):
 
+```sh
     java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
-
+```
 
 6. Data Ingest
 ==============
@@ -171,7 +179,9 @@ There are three ways to populate a collection:
 ------------------
 Send data via the REST-API, e.g. like this:
 
-> curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
+```sh
+curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
+```
 
 You find the required format of the input data described in the API-docs under:
 http://openskos.org/api#concept-create
@@ -219,7 +229,7 @@ Once this is complete the data from the v1 instance will be available in the tri
 
 Generate API Documentation
 
-```
+```sh
 npm install
 npm run doc
 ```
@@ -249,7 +259,10 @@ Meertens), if skos xl labels are demanded.
 
 Examples of the corresponding command lines are:
 
-`php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim --db-password=geheim --db-username=ookgeheim --debug=1`
+```
+php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
+--db-password=geheim --db-username=ookgeheim --debug=1
+```
 
 Adding skos xl labels is also possible since version 2.1. To activate, first edit the tenant to enable SkosXL, and then 
 update Jena with: 
@@ -273,7 +286,7 @@ Then execute:
 --------------------------------------------------------------------------------
 Example of a command line:
 
-```
+```sh
 php skos2openskos.php --setUri=http://htdl/clavas-org/set 
 --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
 --file=clavas-organisations.xml
@@ -284,8 +297,9 @@ php skos2openskos.php --setUri=http://htdl/clavas-org/set
 
 To test / develop the application you can run
 
-```
+```sh
 docker-compose up --build
+composer install
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 
