@@ -107,8 +107,8 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 
             $user =  OpenSKOS_Db_Table_Users::fromIdentity();
             $tenantManager = $this->getDI()->get('OpenSkos2\TenantManager');
-            $collectionManager = $this->getDI()->get('OpenSkos2\CollectionManager');
-            $collection = $collectionManager->fetchByUri($formData['collection']);
+            $setManager = $this->getDI()->get('OpenSkos2\SetManager');
+            $collection = $setManager->fetchByUri($formData['collection']);
             $personManager = $this->getDI()->get('OpenSkos2\PersonManager');
 
 
@@ -145,9 +145,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 
         $getConceptSchemesWithDeleteJob = $this->_getConceptSchemesWithDeleteJob();
         if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme->getUri()])) {
-            $collections = new OpenSKOS_Db_Table_Collections();
-            $collection = $collections->findByUri((string)$conceptScheme->getPropertySingleValue(OpenSkos::SET));
-            
+
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray([
                     'set_uri' => $set_uri,

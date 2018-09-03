@@ -17,15 +17,15 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-use OpenSkos2\CollectionManager;
-use OpenSkos2\CollectionCollection;
+use OpenSkos2\SetManager;
+use OpenSkos2\SetCollection;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\Exception\OpenSkosException;
 
-class Editor_Models_CollectionsCache
+class Editor_Models_SetsCache
 {
     const CONCEPT_CACHE_KEY = 'CONCEPT_CACHE_KEY';
     
@@ -35,7 +35,7 @@ class Editor_Models_CollectionsCache
     protected $tenantCode;
     
     /**
-     * @var CollectionManager
+     * @var SetManager
      */
     protected $manager;
     
@@ -79,10 +79,10 @@ class Editor_Models_CollectionsCache
     
     /**
      * @param string $tenantCode
-     * @param CollectionManager $manager
+     * @param SetManager $manager
      * @param Zend_Cache_Core $cache
      */
-    public function __construct(CollectionManager $manager, Zend_Cache_Core $cache)
+    public function __construct(SetManager $manager, Zend_Cache_Core $cache)
     {
         $this->manager = $manager;
         $this->cache = $cache;
@@ -98,7 +98,7 @@ class Editor_Models_CollectionsCache
     
     /**
      * Fetches all schemes.
-     * @return CollectionCollection
+     * @return SetCollection
      */
     public function fetchAll()
     {

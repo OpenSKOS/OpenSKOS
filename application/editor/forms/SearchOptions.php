@@ -367,7 +367,7 @@ class Editor_Forms_SearchOptions extends Zend_Form {
 
         // Clears the schemes cache when we start managing them.
         $dataInjector =  Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-        $cache = $dataInjector->get('Editor_Models_CollectionsCache');
+        $cache = $dataInjector->get('Editor_Models_SetsCache');
         $cache->clearCache();
 
         $collections= $cache->fetchAll();

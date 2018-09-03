@@ -68,9 +68,9 @@ return [
 
         return $conceptsSchemesCache;
     },
-    'Editor_Models_CollectionsCache' => function (ContainerInterface $c) {
-        $collectionsCache = new Editor_Models_CollectionsCache(
-            $c->get('OpenSkos2\CollectionManager'),
+    'Editor_Models_SetsCache' => function (ContainerInterface $c) {
+        $collectionsCache = new Editor_Models_SetsCache(
+            $c->get('OpenSkos2\SetManager'),
             OpenSKOS_Cache::getCache()
         );
 
