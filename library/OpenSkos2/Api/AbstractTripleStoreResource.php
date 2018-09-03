@@ -304,7 +304,7 @@ abstract class AbstractTripleStoreResource
             $parsedBody = $request->getParsedBody();
 
             if (empty($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter');
+                throw new InvalidArgumentException('Missing id parameter', 400);
             }
 
             $id = $params['id'];
