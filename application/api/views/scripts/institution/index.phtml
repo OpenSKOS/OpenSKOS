@@ -29,7 +29,7 @@ $this->headTitle ('Institutions')?>
 <dl>
 
 <h2><?php echo 'Institutions'?></h2>
-<p>These are the avaliable institutions in this repository:</p>
+<p>The following institutions are available:</p>
 <ul>
 	<?php foreach ($allTenants as $tenant):
         $tenantRdf = $tenantManager->fetchByUuid($tenant['uuid']);
