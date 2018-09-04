@@ -149,8 +149,8 @@ class FieldsMaps
             'narrowMatch' => Skos::NARROWMATCH,
             'relatedMatch' => Skos::RELATEDMATCH,
             'topConceptOf' => Skos::TOPCONCEPTOF,
-            'created_timestamp' => DcTerms::CREATED,
-            'modified_timestamp' => DcTerms::MODIFIED,
+            //'created_timestamp' => DcTerms::CREATED,
+            //'modified_timestamp' => DcTerms::MODIFIED,
             'dc_contributor' => Dc::CONTRIBUTOR,
         ];
     }
