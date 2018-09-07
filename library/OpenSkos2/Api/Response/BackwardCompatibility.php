@@ -40,12 +40,25 @@ class BackwardCompatibility
         } else {
             $enableSkosXl = $newStyleBody["enableSkosXl"];
         }
-        
+
+        $name = null;
+
+        if (isset($newStyleBody["vcard_org"]["vcard_orgname"])) {
+            $name = $newStyleBody["vcard_org"]["vcard_orgname"];
+        } elseif (isset($newStyleBody['name'])) {
+            $name = $newStyleBody["name"];
+        }
         $oldStyleBodyArray = [
             "code" => ($newStyleBody["code"]),
-            "name" => ($newStyleBody["vcard_org"]["vcard_orgname"]),
-            "disableSearchInOtherTenants" => ($newStyleBody["disableSearchInOtherTenants"]),
-            "enableStatussesSystem" => ($newStyleBody["enableStatussesSystem"]),
+            "name" => $name,
+            "disableSearchInOtherTenants" => (
+                isset($newStyleBody["disableSearchInOtherTenants"])
+                    ? $newStyleBody["disableSearchInOtherTenants"]
+                    : "false"
+            ),
+            "enableStatussesSystem" => (
+                isset($newStyleBody["enableStatussesSystem"]) ? $newStyleBody["enableStatussesSystem"] : "false"
+            ),
             "enableSkosXl"=> ($enableSkosXl),
         ];
         

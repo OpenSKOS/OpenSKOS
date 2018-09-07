@@ -27,7 +27,7 @@ use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org as Org;
 use OpenSkos2\Tenant;
-use OpenSkos2\Collection;
+use OpenSkos2\Set;
 
 class TenantManager extends ResourceManager
 {
@@ -70,7 +70,7 @@ SELECT_SETS;
         $query = 'SELECT ?seturi ?p ?o 
         WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
             . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-            . ' ?seturi  <' . Rdf::TYPE . '> <'.Collection::TYPE.'> .'
+            . ' ?seturi  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .'
             . ' ?seturi  ?p ?o .}';
         $response = $this->query($query);
         if ($response !== null) {
@@ -87,7 +87,7 @@ SELECT_SETS;
     {
         $query = "DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { "
             . "?subject <" . DcTerms::PUBLISHER . "> <$tenantUri>. "
-            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Collection::TYPE.">.} }";
+            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Set::TYPE.">.} }";
         $response = $this->query($query);
         return $response;
     }
@@ -109,7 +109,7 @@ SELECT_SETS;
                     $retVal[$seturi]['dcterms_description'] = $triple->o->getValue();
                     continue;
                 case OpenSkos::WEBPAGE:
-                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getValue();
+                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getUri();
                     continue;
                 case OpenSkos::CODE:
                     $retVal[$seturi]['openskos_code'] = $triple->o->getValue();

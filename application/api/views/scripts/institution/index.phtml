@@ -22,21 +22,25 @@
 $di = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $list = $this->resource;
 $tenantManager = $di->get('OpenSkos2\TenantManager');
+$allTenants = $tenantManager->getAllTenants();
 $this->headTitle ('Institutions')?>
 
 <div class="clear">
 <dl>
 
 <h2><?php echo 'Institutions'?></h2>
-<p>These are the avaliable institutions in this repository:</p>
+<p>The following institutions are available:</p>
 <ul>
-	<?php foreach ($list as $key=>$value):
-            ?>
-	<li>
-		<a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $value), 'rest')?>.html">
-			<strong><?php echo $key?></strong>
-		</a>
-	</li>
+	<?php foreach ($allTenants as $tenant):
+        $tenantRdf = $tenantManager->fetchByUuid($tenant['uuid']);
+        $name = $tenantRdf->getProperty(\OpenSkos2\Namespaces\OpenSkos::NAME)[0]->getValue();
+        $code = $tenantRdf->getProperty(\OpenSkos2\Namespaces\OpenSkos::CODE)[0]->getValue();
+    ?>
+        <li>
+            <a href="<?php echo $this->url(array('controller'=>'institutions', 'id' => $code), 'rest')?>.html">
+                <strong><?php echo $name?></strong>
+            </a>
+        </li>
 	<?php endforeach?>
 </ul>
 <h3>Alternative formats</h3>

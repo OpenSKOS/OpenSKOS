@@ -5,6 +5,7 @@ namespace OpenSkos2\Api;
 use DOMDocument;
 use OpenSkos2\Api\Exception\ApiException;
 use OpenSkos2\Api\Exception\InvalidPredicateException;
+use OpenSkos2\Api\Exception\DeletedException;
 use OpenSkos2\Api\Exception\NotFoundException;
 use OpenSkos2\Api\Response\Detail\JsonpResponse as DetailJsonpResponse;
 use OpenSkos2\Api\Response\Detail\JsonResponse as DetailJsonResponse;
@@ -304,7 +305,7 @@ abstract class AbstractTripleStoreResource
             $parsedBody = $request->getParsedBody();
 
             if (empty($params['id'])) {
-                throw new InvalidArgumentException('Missing id parameter');
+                throw new InvalidArgumentException('Missing id parameter', 400);
             }
 
             $id = $params['id'];
@@ -358,7 +359,10 @@ abstract class AbstractTripleStoreResource
         $loadedResource = $this->manager->fetchByUri($resource->getUri());
 
 
-        $tenant = $this->manager->fetchByUri($loadedResource->getPublisherUri(), \OpenSkos2\Tenant::TYPE);
+        //POST MM terms will have a publisher URI
+        $publisherUri = $loadedResource->getPublisherUri();
+
+        $tenant = $this->manager->fetchByUri($publisherUri, \OpenSkos2\Tenant::TYPE);
 
         if ($loadedResource instanceof \OpenSkos2\Concept && $tenant->isEnableSkosXl()) {
             $loadedResource->loadFullXlLabels($this->manager->getLabelManager());

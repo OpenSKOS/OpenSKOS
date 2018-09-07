@@ -225,6 +225,7 @@ class DataArray
             OpenSkos::CODE,
             OpenSkos::OAI_BASEURL,
             OpenSkos::WEBPAGE,
+            OpenSkos::NAME,
             Rdf::TYPE,
             VCard::ADR,
             VCard::COUNTRY,

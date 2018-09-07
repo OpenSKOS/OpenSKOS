@@ -494,7 +494,7 @@ class Resource extends Uri implements ResourceIdentifier
     /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
      * @param \OpenSkos2\Tenant $tenant
-     * @param \OpenSkos2\Collection $collection
+     * @param \OpenSkos2\Set $set
      * @param \OpenSkos2\Person $person
      * @param \OpenSkos2\PersonManager $personManager
      * @param \OpenSkos2\SkosXl\LabelManager | null  $labelManager
@@ -504,7 +504,7 @@ class Resource extends Uri implements ResourceIdentifier
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant,
-        \OpenSkos2\Collection $collection = null,
+        \OpenSkos2\Set $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
         \OpenSkos2\SkosXl\LabelManager $labelManager = null,
@@ -525,9 +525,9 @@ class Resource extends Uri implements ResourceIdentifier
             DcTerms::DATESUBMITTED => $nowLiteral()
         ];
 
-        if (!empty($collection)) {
+        if (!empty($set)) {
             // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
-            $forFirstTimeInOpenSkos[OpenSkos::SET] = new Uri($collection->getUri());
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = new Uri($set->getUri());
         }
 
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
@@ -684,7 +684,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
     }
 
-    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Collection $collection, $manager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $set, $manager)
     {
         $customGen = $manager->getUriGenerateObject();
         if (!empty($customGen)) {
@@ -701,7 +701,7 @@ class Resource extends Uri implements ResourceIdentifier
         }
 
         $customInit = $manager->getCustomInitArray();
-        $uri = $this->assembleUri($tenant, $collection, $uuid, null, $customInit);
+        $uri = $this->assembleUri($tenant, $set, $uuid, null, $customInit);
 
 
         if ($manager->askForUri($uri, true)) {
@@ -720,14 +720,14 @@ class Resource extends Uri implements ResourceIdentifier
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri(
         \OpenSkos2\Tenant $tenant = null,
-        \OpenSkos2\Collection $collection = null,
+        \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
         $customInit = null
     ) {
     
 
-        return $collection->getUri() . "/" . $uuid;
+        return $set->getUri() . "/" . $uuid;
     }
 
     protected function toBool($val)

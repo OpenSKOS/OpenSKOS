@@ -110,7 +110,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
 
         $concertSchemeManager = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager');
-        $collectionManager = $this->getDI()->get('\OpenSkos2\CollectionManager');
+        $setManager = $this->getDI()->get('\OpenSkos2\SetManager');
         $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
 
         $concept = $this->_getConcept();
@@ -143,7 +143,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $inCollection = $concept->getPropertySingleValue(OpenSkos::SET);
 
-        $collection = $collectionManager->fetchByUri($inCollection);
+        $collection = $setManager->fetchByUri($inCollection);
 
         /*Reminder: Big merge conflict resolved here. Check it's working */
         $conceptManager = $this->getConceptManager();

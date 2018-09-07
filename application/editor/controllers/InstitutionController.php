@@ -54,7 +54,7 @@ class Editor_InstitutionController extends OpenSKOS_Controller_Editor
     }
 
     /**
-     * @return OpenSkos2\CollectionManager
+     * @return OpenSkos2\TenantManager
      */
     protected function getTenantManager()
     {

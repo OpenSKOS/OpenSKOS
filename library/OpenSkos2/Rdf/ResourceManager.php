@@ -423,20 +423,13 @@ class ResourceManager
     public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
     {
         /*
-          DESCRIBE ?subject {
-          SELECT DISTINCT ?subject
-          WHERE {
-          ?subject ?predicate ?object
-          }
-          ORDER BY ?subject
-          LIMIT 10
-          OFFSET 0
-          }
+         * @TODO B.Hillier 31-8-2018.
+         * Not ideal that this class has to be aware of the resourceTypes of its descendants
          */
         if (!empty($this->resourceType)) {
             $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
             if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME ||
-                $this->resourceType === \OpenSkos2\Collection::TYPE) {
+                $this->resourceType === \OpenSkos2\Set::TYPE) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);
