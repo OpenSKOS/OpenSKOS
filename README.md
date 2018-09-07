@@ -280,6 +280,12 @@ db schema.
 Then execute:
 `php tools/updateMaxNotation.php`
 
+-- Publisher URI
+And extra triple needs to be added to concepts to allow continued functioning of OpenSKOS.
+
+`php tools/fillConceptPublisher.php`
+
+
 
 
 7.2. Import (`/tools/skos2openskos.php`)
