@@ -40,7 +40,7 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`user` (
   UNIQUE KEY `unique_user` (`email` ASC, `tenant` ASC)
 )
 ENGINE = InnoDB
-AUTO_INCREMENT = 5
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8;
 
 
@@ -49,8 +49,8 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
   `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `set` INT(11) NOT NULL , 
   `user` INT(11) NOT NULL ,
+  `set_uuid` VARCHAR(40) NULL,
   `task` VARCHAR(100) NULL DEFAULT NULL ,
   `parameters` TEXT NULL DEFAULT NULL ,
   `created` DATETIME NULL DEFAULT NULL ,
@@ -68,8 +68,35 @@ CREATE  TABLE IF NOT EXISTS `openskos`.`job` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 7
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8;
+
+
+
+
+CREATE TABLE IF NOT EXISTS `job` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) NOT NULL,
+  `set_uri` varchar(255) DEFAULT NULL,
+  `task` varchar(100) DEFAULT NULL,
+  `parameters` text,
+  `created` datetime DEFAULT NULL,
+  `started` datetime DEFAULT NULL,
+  `finished` datetime DEFAULT NULL,
+  `status` enum('SUCCESS','ERROR') DEFAULT NULL,
+  `info` text,
+  PRIMARY KEY (`id`),
+  KEY `task` (`task`),
+  KEY `finished` (`finished`),
+  KEY `fk_job_user` (`user`),
+  CONSTRAINT `fk_job_user`
+    FOREIGN KEY (`user`)
+    REFERENCES `user` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE )
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+DEFAULT CHARSET=utf8;
 
 -- -----------------------------------------------------
 -- Table `openskos`.`notations`
@@ -81,6 +108,29 @@ CREATE TABLE IF NOT EXISTS `openskos`.`notations` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
+-- -----------------------------------------------------
+-- Table `openskos`.`search_profiles`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `openskos`.`search_profiles` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(150) NOT NULL,
+  `searchOptions` BLOB,
+  `creatorUserId` INT,
+  `tenant` CHAR(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_search_profile_user`
+    FOREIGN KEY (`creatorUserId`)
+    REFERENCES `openskos`.`user` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_search_profile_tenant`
+    FOREIGN KEY (`tenant`)
+    REFERENCES `openskos`.`tenant` (`code`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

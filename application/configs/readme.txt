@@ -106,7 +106,7 @@ distinguish them. May be used in custom uri generation.
 
 ## options.uuid_regexp_prefixes ##
 
-When pure uuid is used, without prefices, must be an empty string:
+When pure uuid is used, without prefixes, must be an empty string:
 
 options.uuid_regexp_prefixes = ''
 

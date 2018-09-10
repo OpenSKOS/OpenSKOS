@@ -34,11 +34,21 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     protected $objects = [];
     private $outputtedResources = array();
 
+    /**
+     * Method to serialise an EasyRdf\Graph to RDF/XML
+     *
+     * @param Graph  $graph  An EasyRdf\Graph object.
+     * @param string $format The name of the format to convert to.
+     * @param array  $options
+     *
+     * @return string The RDF in the new desired format.
+     * @throws Exception
+     */
     public function serialise(Graph $graph, $format, array $options = array())
     {
 
-        //B.Hillier: Why, why, WHY do we install two copies of the same library under the same namespace.
-        // Different enviromnents choose a different library! Ugly fix to catch this non-compatible function call
+        //The older versions the EasyRdfSerialiser expected one argument here;
+        // Newer versions want two
         try {
             parent::checkSerialiseParams($graph, $format);
         } catch (\InvalidArgumentException $e) {

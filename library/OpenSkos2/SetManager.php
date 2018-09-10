@@ -24,6 +24,11 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Rdf\Literal;
+use OpenSkos2\Rdf\ResourceCollection;
+use OpenSkos2\Rdf\Serializer\NTriple;
+use OpenSkos2\Rdf\Uri;
+use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Set;
 
 class SetManager extends ResourceManager
@@ -43,6 +48,100 @@ class SetManager extends ResourceManager
 
     public function fetchAllSets($allowOAI)
     {
+        $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
+            . 'DESCRIBE ?s {'
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+        $sets = $this->fetchQuery($query);
+        return $sets;
+    }
+    /**
+     * Soft delete resource , sets the openskos:status to deleted
+     * and add a delete date.
+     *
+     * Be careful you need to add the full resource as it will be deleted and added again
+     * do not only give a uri or part of the graph
+     *
+     * @param \OpenSkos2\Rdf\Resource $resource
+     * @param Uri $user
+     */
+    public function deleteSoft(Resource $resource, Uri $user = null)
+    {
+        $this->delete($resource);
+
+        $resource->setUri(rtrim($resource->getUri(), '/') . '/deleted');
+
+        $resource->setProperty(OpenSkos::STATUS, new Literal(\OpenSkos2\Concept::STATUS_DELETED));
+        $resource->setProperty(OpenSkos::DATE_DELETED, new Literal(date('c'), null, Literal::TYPE_DATETIME));
+
+        if ($user) {
+            $resource->setProperty(OpenSkos::DELETEDBY, $user);
+        }
+
+        $this->replace($resource);
+    }
+
+
+    /**
+     * Get all scheme's by set URI
+     *
+     * @param string $setUri e.g http://openskos.org/api/collections/rce:TEST
+     * @param array $filterUris
+     * @return ResourceCollection
+     */
+    public function getSchemeBySetUri($setUri, $filterUris = [])
+    {
+        $uri = new Uri($setUri);
+        $escaped = (new NTriple())->serialize($uri);
+        $query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX openskos: <http://openskos.org/xmlns#>
+            PREFIX dcterms: <http://purl.org/dc/terms/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                SELECT ?subject ?title ?uuid
+                WHERE {
+                    ?subject rdf:type skos:ConceptScheme;
+                    <' . OpenSkos::SET . '> ' . $escaped . ';
+                    dcterms:title ?title;
+                    openskos:uuid ?uuid;
+            ';
+
+        if (!empty($filterUris)) {
+            $query .= 'FILTER (?subject = '
+                . implode(' || ?subject = ', array_map([$this, 'valueToTurtle'], $filterUris))
+                . ')';
+        }
+
+        $query .= '}';
+
+        $result = $this->query($query);
+
+        $retVal = new ResourceCollection();
+        foreach ($result as $row) {
+            $uri = $row->subject->getUri();
+
+            if (empty($uri)) {
+                continue;
+            }
+
+            $scheme = new ConceptScheme($uri);
+            if (!empty($row->title)) {
+                $scheme->addProperty(DcTerms::TITLE, new Literal($row->title->getValue()));
+            }
+
+            if (!empty($row->uuid)) {
+                $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new Literal($row->uuid->getValue()));
+            }
+
+            $scheme->addProperty(\OpenSkos2\Namespaces\OpenSkos::SET, new Uri($setUri));
+
+            $retVal[] = $scheme;
+        }
+
+        return $retVal;
+    }
+
+    public function fetchAllCollections($allowOAI)
+    {
+        throw new \Exception("Please use the function `fetchAllSets'");
         $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
             . 'DESCRIBE ?s {'
             . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
@@ -84,6 +183,8 @@ class SetManager extends ResourceManager
         return $retVal;
     }
 
+    /*
+     * Is this dead code
     public function translateMySqlCollectionToRdfSet($collectionMySQL)
     {
         $setResource = new Set();
@@ -103,6 +204,7 @@ class SetManager extends ResourceManager
         $this->setUriWithEmptinessCheck($setResource, OpenSkos::CONCEPTBASEURI, $collectionMySQL['conceptsBaseUrl']);
         return $setResource;
     }
+     */
 
    
     
@@ -145,5 +247,20 @@ class SetManager extends ResourceManager
         $retval['code'] = $response[0]->code->getValue();
         $retval['title'] = $response[0]->title->getValue();
         return $retval;
+    }
+    /**
+     * Gets map with uri as key and title as value.
+     *
+     * @param string $tenant
+     * @return array
+     */
+    public function getUriToTitleMap($tenant)
+    {
+        $sets = $this->fetchAll($this->select()->where('tenant=?', $tenant));
+        $setsMap = array();
+        foreach ($sets as $set) {
+            $setsMap[(string)$set->getUri()] = $set->dc_title;
+        }
+        return $setsMap;
     }
 }

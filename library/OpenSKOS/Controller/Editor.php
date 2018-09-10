@@ -306,9 +306,8 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
         $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant']) ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
 
-        if (isset($tenant) && $tenant !== null) {
-            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant, $uniquePerTenant);
-        }
+        $lit = new \OpenSkos2\Rdf\Literal ($uniquePerTenant ? 'true' : false);
+        $openSkos2Tenant->setProperty(\OpenSkos2\Namespaces\OpenSkos::NOTATIONUNIQUEPERTENANT, $lit);
 
         $this->_tenant = $openSkos2Tenant;
         return $this;

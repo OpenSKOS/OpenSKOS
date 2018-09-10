@@ -190,7 +190,7 @@ class Editor_Forms_Concept_FormToConcept
     {
         // Get concept set from the first scheme
         $collection = null;
-        $collectionManager = self::getDI()->get('OpenSkos2\CollectionManager');
+        $setManager = self::getDI()->get('OpenSkos2\SetManager');
         if (!$concept->isPropertyEmpty(Skos::INSCHEME)) {
             $firstSchemeUri = $concept->getProperty(Skos::INSCHEME)[0];
             $firstScheme = $schemeManager->fetchByUri($firstSchemeUri);
@@ -200,7 +200,7 @@ class Editor_Forms_Concept_FormToConcept
                     sprintf('No collection found for concept scheme "%s".', $firstSchemeUri)
                 );
             }
-            $collection = $collectionManager->fetchByUri($collectionUri[0]->getUri());
+            $collection = $setManager->fetchByUri($collectionUri[0]->getUri());
         }
 
         $tenantManager = self::getDI()->get('OpenSkos2\TenantManager');

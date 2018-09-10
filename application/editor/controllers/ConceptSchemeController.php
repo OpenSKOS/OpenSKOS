@@ -107,8 +107,8 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
 
             $user =  OpenSKOS_Db_Table_Users::fromIdentity();
             $tenantManager = $this->getDI()->get('OpenSkos2\TenantManager');
-            $collectionManager = $this->getDI()->get('OpenSkos2\CollectionManager');
-            $collection = $collectionManager->fetchByUri($formData['collection']);
+            $setManager = $this->getDI()->get('OpenSkos2\SetManager');
+            $collection = $setManager->fetchByUri($formData['collection']);
             $personManager = $this->getDI()->get('OpenSkos2\PersonManager');
 
 
@@ -139,15 +139,16 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         $user = $this->getCurrentUser();
         $conceptScheme = $this->_getConceptScheme();
-        
+
+        $set_uri = $conceptScheme->getProperty(\OpenSkos2\Namespaces\OpenSkos::SET)[0]->getUri();;
+
+
         $getConceptSchemesWithDeleteJob = $this->_getConceptSchemesWithDeleteJob();
         if (! isset($getConceptSchemesWithDeleteJob[$conceptScheme->getUri()])) {
-            $collections = new OpenSKOS_Db_Table_Collections();
-            $collection = $collections->findByUri((string)$conceptScheme->getPropertySingleValue(OpenSkos::SET));
-            
+
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray([
-                    'collection' => $collection->id,
+                    'set_uri' => $set_uri,
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_DELETE_CONCEPT_SCHEME,
                     'parameters' => serialize(array('uri' => $conceptScheme->getUri())),
@@ -236,15 +237,15 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadPath'])) {
-            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getCode();
         }
     
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
-            $iconsAssignPath = APPLICATION_PATH . $editorOptions['schemeIcons']['assignPath'] . '/' . $this->_tenant->getName();
+            $iconsAssignPath = APPLICATION_PATH . $editorOptions['schemeIcons']['assignPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsAssignPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $this->_tenant->getName();
+            $iconsAssignPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $this->_tenant->getCode();
         }
     
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['extension'])) {
@@ -252,7 +253,6 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         } else {
             $iconsExtension = 'png';
         }
-    
         copy($iconsUploadPath . '/' . $iconToAssign, $iconsAssignPath . '/' . $scheme->getUuid() . '.' . $iconsExtension);
     
         // Clears the schemes cache after an icon is assigned.
@@ -261,7 +261,7 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $this->getHelper('json')->sendJson([
             'status' => 'ok',
             'result' => [
-                'newIconPath' => $scheme->getIconPath(OpenSKOS_Db_Table_Tenants::fromIdentity())
+                'newIconPath' => $scheme->getIconPath($this->_tenant)
             ]
         ]);
     }
@@ -278,9 +278,9 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
     
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadPath'])) {
-            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getCode();
         }
     
         unlink($iconsUploadPath . '/' . $iconToDelete);
@@ -297,15 +297,15 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
     
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadPath'])) {
-            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getCode();
         }
-    
+
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadHttpPath'])) {
-            $iconsUploadHttpPath = $editorOptions['schemeIcons']['uploadHttpPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadHttpPath = $editorOptions['schemeIcons']['uploadHttpPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadHttpPath = Editor_Forms_UploadIcon::DEFAULT_UPLOAD_HTTP_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadHttpPath = Editor_Forms_UploadIcon::DEFAULT_UPLOAD_HTTP_PATH . '/' . $this->_tenant->getCode();
         }
     
         $rawIcons = scandir($iconsUploadPath);
@@ -329,15 +329,15 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
 
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['uploadPath'])) {
-            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . $editorOptions['schemeIcons']['uploadPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getName();
+            $iconsUploadPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_UPLOAD_PATH . '/' . $this->_tenant->getCode();
         }
     
         if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
-            $iconsAssignPath = APPLICATION_PATH . $editorOptions['schemeIcons']['assignPath'] . '/' . $this->_tenant->getName();
+            $iconsAssignPath = APPLICATION_PATH . $editorOptions['schemeIcons']['assignPath'] . '/' . $this->_tenant->getCode();
         } else {
-            $iconsAssignPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $this->_tenant->getName();
+            $iconsAssignPath = APPLICATION_PATH . Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $this->_tenant->getCode();
         }
     
         if (! is_dir($iconsUploadPath)) {
@@ -359,11 +359,13 @@ class Editor_ConceptSchemeController extends OpenSKOS_Controller_Editor
         
         if (!empty($uri)) {
             $conceptScheme = $this->getConceptSchemeManager()->fetchByUri($uri);
-            
+
             //!TODO Handle deleted all around the system.
+            /*
             if ($conceptScheme->isDeleted()) {
                 throw new ResourceNotFoundException('The concpet scheme was not found (it is deleted).');
             }
+            */
             
             return $conceptScheme;
         } else {

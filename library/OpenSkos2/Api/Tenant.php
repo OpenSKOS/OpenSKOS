@@ -49,22 +49,4 @@ class Tenant extends AbstractTripleStoreResource
     {
         return ['key'];
     }
-
-    /**
-     * No set or tenant required for this section of the api!
-     *
-     * @param array $params
-     * @param OpenSKOS_Db_Table_Row_User user derived from apiKey
-     * @return \OpenSkos2\Tenant Active tenant
-     */
-
-    protected function getTenantFromApiCall($params, $user)
-    {
-        return new \OpenSkos2\Tenant('http://dummy-tenant');
-    }
-
-    protected function getSet($params, $tenant)
-    {
-        return new \OpenSkos2\Set();
-    }
 }

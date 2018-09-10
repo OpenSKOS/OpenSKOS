@@ -114,10 +114,11 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $collectionsConceptSchemesMap = [];
         $conceptSchemes = $this->getDI()->get('Editor_Models_ConceptSchemesCache')->fetchAll();
         foreach ($conceptSchemes as $scheme) {
-            if (!isset($collectionsConceptSchemesMap[$scheme->getSet()])) {
-                $collectionsConceptSchemesMap[$scheme->getSet()] = [];
+            $setUri = $scheme->getSet()[0]->getUri();
+            if (!isset($collectionsConceptSchemesMap[$setUri])) {
+                $collectionsConceptSchemesMap[$setUri] = [];
             }
-            $collectionsConceptSchemesMap[$scheme->getSet()][] = $scheme->getUri();
+            $collectionsConceptSchemesMap[$setUri][] = $scheme->getUri();
         }
 
         $this->view->assign('collectionsConceptSchemesMap', $collectionsConceptSchemesMap);

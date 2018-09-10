@@ -103,6 +103,7 @@ class FieldsMaps
             'contributor' => DcTerms::CONTRIBUTOR,
             'acceptedBy' => OpenSkos::ACCEPTEDBY,
             'deletedBy' => OpenSkos::DELETEDBY,
+            'name' => OpenSkos::NAME,
             'vcard_adr' => VCard::ADR,
             'vcard_org' => VCard::ORG,
             'vcard_orgname' => VCard::ORGNAME,
@@ -148,16 +149,9 @@ class FieldsMaps
             'narrowMatch' => Skos::NARROWMATCH,
             'relatedMatch' => Skos::RELATEDMATCH,
             'topConceptOf' => Skos::TOPCONCEPTOF,
-            'created_timestamp' => DcTerms::CREATED,
-            'modified_timestamp' => DcTerms::MODIFIED,
-            'dcterms_dateAccepted' => DcTerms::DATEACCEPTED,
-            'dcterms_modified' => DcTerms::MODIFIED,
-            'dcterms_creator' => DcTerms::CREATOR,
-            'dc_creator' => Dc::CREATOR,
-            'dcterms_dateSubmitted' => DcTerms::DATESUBMITTED,
-            'dcterms_contributor' => DcTerms::CONTRIBUTOR,
+            //'created_timestamp' => DcTerms::CREATED,
+            //'modified_timestamp' => DcTerms::MODIFIED,
             'dc_contributor' => Dc::CONTRIBUTOR,
-            'dcterms_title' => DcTerms::TITLE,
         ];
     }
     

@@ -43,6 +43,7 @@ use OpenSkos2\Validator\Concept\SingleStatus;
 use OpenSkos2\Validator\Concept\TopConceptOf;
 use OpenSkos2\Validator\Concept\UniqueNotation;
 use OpenSkos2\Validator\Concept\UniquePreflabelInScheme;
+use OpenSkos2\Validator\Concept\UniquePreflabelInTenant;
 use OpenSkos2\Validator\Concept\UniqueUuid;
 use OpenSkos2\Validator\ConceptScheme\Creator as SchemaCreator;
 use OpenSkos2\Validator\ConceptScheme\Description as SchemaDescription;
@@ -349,7 +350,6 @@ class Resource
             new SinglePrefLabel(),
             new UniqueNotation(),
             new RequriedPrefLabel(),
-            new UniquePreflabelInScheme(),
             new UniqueUuid(),
             new DuplicateBroader(),
             new DuplicateNarrower(),
@@ -364,6 +364,16 @@ class Resource
             new \OpenSkos2\Validator\Concept\OpenSkosSet(),
             new DisjointXlLabels()
         ];
+        $editorOptions = \Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant'])
+                            ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
+        if ($uniquePerTenant) {
+            $validators[] = new UniquePreflabelInTenant();
+        } else {
+            $validators[] = new UniquePreflabelInScheme();
+        }
+
+
         $validators = $this->refineValidators($validators);
         return $validators;
     }
