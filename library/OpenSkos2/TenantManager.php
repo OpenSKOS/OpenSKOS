@@ -49,9 +49,8 @@ prefix OPENSKOS: <http://openskos.org/xmlns#>
 SELECT ?setUri
 WHERE  { 
   ?tenanturi  OPENSKOS:code "%s" 
-  .?seturi  dcterms:publisher ?tenanturi 
-  .?seturi rdf-syntax:type OPENSKOS:set
-  .?seturi OPENSKOS:conceptBaseUri ?setUri
+  .?setUri  dcterms:publisher ?tenanturi 
+  .?setUri rdf-syntax:type OPENSKOS:set
 }
 SELECT_SETS;
         $query = sprintf($query, $code);

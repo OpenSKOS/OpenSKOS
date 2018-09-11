@@ -32,7 +32,7 @@ use OpenSkos2\ConceptScheme;
 use OpenSkos2\ConceptSchemeCollection;
 use OpenSkos2\Namespaces\Org;
 use OpenSkos2\SkosCollection;
-use OpenSkos2\SkosSetCollection;
+use OpenSkos2\SkosCollectionCollection;
 use OpenSkos2\Tenant;
 use OpenSkos2\TenantCollection;
 use OpenSkos2\RelationType;
@@ -248,7 +248,7 @@ class EasyRdf
             case ConceptScheme::TYPE:
                 return new ConceptSchemeCollection();
             case SkosCollection::TYPE:
-                return new SkosSetCollection();
+                return new SkosCollectionCollection();
             case Set::TYPE:
                 return new SetCollection();
             case Tenant::TYPE:

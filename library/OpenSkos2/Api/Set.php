@@ -23,7 +23,7 @@ class Set extends AbstractTripleStoreResource
      * @param \OpenSkos2\PersonManager $personManager
      */
     public function __construct(
-        \OpenSkos2\CollectionManager $manager,
+        \OpenSkos2\SetManager $manager,
         \OpenSkos2\Search\Autocomplete $searchAutocomplete,
         \OpenSkos2\PersonManager $personManager
     ) {
