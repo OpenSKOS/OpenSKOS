@@ -146,7 +146,7 @@ class Repository implements InterfaceRepository
         SetManager $setManager,
         $description = null
     ) {
-    
+
 
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
@@ -426,9 +426,9 @@ class Repository implements InterfaceRepository
         $return['tenant'] = $tenant;
         $rdfSetId = null;
         if (!empty($arrSet[1])) {
-            $rdfSet = $this->setManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
+            $rdfSet = $this->rdfSetManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
-                $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
+                $allowed = $rdfSet->getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
                 if (!(bool) $allowed) {
                     throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]);
                 }

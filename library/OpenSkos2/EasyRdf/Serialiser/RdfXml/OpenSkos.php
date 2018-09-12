@@ -44,7 +44,7 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
      * @return string The RDF in the new desired format.
      * @throws Exception
      */
-    public function serialise(Graph $graph, $format, array $options = array())
+    public function serialise($graph, $format, array $options = array())
     {
 
         //The older versions the EasyRdfSerialiser expected one argument here;
