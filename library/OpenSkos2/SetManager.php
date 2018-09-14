@@ -151,10 +151,16 @@ class SetManager extends ResourceManager
 
     public function getUrisMap($tenantCode)
     {
-        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE '
-            . '{ ?subject ?predicate ?object . ?subject <' .
-            OpenSkos::TENANT . '>  "'. $tenantCode . '". '
-            . ' ?subject <'.Rdf::TYPE.'> <'.Set::TYPE.'> } }';
+        $query = <<<QUERY_SETS
+        DESCRIBE ?subject {
+            SELECT ?subject  WHERE {
+                ?subject <%s> <%s>  .
+                ?subject <%s>  "%s"
+            } 
+        }
+QUERY_SETS;
+        $query = sprintf($query, Rdf::TYPE, Set::TYPE, OpenSkos::TENANT, $tenantCode);
+        $query = preg_replace('/\s+/', ' ', $query);
         $result = $this->query($query);
         $retVal = [];
         foreach ($result as $set) {
