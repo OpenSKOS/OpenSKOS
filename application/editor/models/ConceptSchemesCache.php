@@ -62,7 +62,10 @@ class Editor_Models_ConceptSchemesCache
         if (empty($this->tenantCode)) {
             throw new OpenSkosException('Tenant code is required for editor cache.');
         }
-        return $this->tenantCode;
+        //Have to strip some characters from the cache
+        $tenantCode = preg_replace('#[^a-zA-Z0-9_]#', '_', $this->tenantCode);
+
+        return $tenantCode;
     }
 
     /**
@@ -138,8 +141,10 @@ class Editor_Models_ConceptSchemesCache
     {
         $allSchemes = $this->fetchAll();
         $result = [];
+
         foreach ($allSchemes as $scheme) {
-            if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
+            $set = $scheme->getSet();
+            if (empty($inCollections) || in_array($set[0]->getUri(), $inCollections)) {
                 $result[$scheme->getUri()] = $scheme->getTitle();
             }
         }

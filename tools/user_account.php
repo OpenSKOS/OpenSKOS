@@ -102,7 +102,7 @@ foreach ($must_params as $name) {
 
 check_if_admin($OPTS->code, $OPTS->adminkey, $resourceManager, $model);
 
-fwrite(STDOUT, "\n\n\n Strating add-user script \n ");
+fwrite(STDOUT, "\n\n\n Starting add-user script \n ");
 switch ($action) {
   case 'create':
     // create user

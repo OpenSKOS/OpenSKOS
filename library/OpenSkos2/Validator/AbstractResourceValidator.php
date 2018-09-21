@@ -354,14 +354,14 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             true,
             false,
             false,
-            \OpenSkos2\Collection::TYPE
+            \OpenSkos2\Set::TYPE
         );
         $secondRound = true;
 
         if ($firstRound) {
             $setUris = $resource->getSet();
             foreach ($setUris as $setUri) {
-                $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Collection::TYPE);
+                $set = $this->resourceManager->fetchByUri($setUri, \OpenSkos2\Set::TYPE);
 
                 $tenantUri = $resource->getPublisherUri()->getUri();
 

@@ -122,6 +122,9 @@ msgstr "Job not found"
 msgid "Collection not found"
 msgstr "Collection not found"
 
+msgid "The export file for this job is no longer available"
+msgstr "The export file for this job is no longer available"
+
 #: ../application/editor/controllers/JobsController.php:121
 msgid "You are not allowed to edit this job."
 msgstr "You are not allowed to edit this job."

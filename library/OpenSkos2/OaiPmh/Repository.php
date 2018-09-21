@@ -22,7 +22,7 @@ namespace OpenSkos2\OaiPmh;
 use DateTime;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptManager;
-use OpenSkos2\CollectionManager;
+use OpenSkos2\SetManager;
 use OpenSkos2\ConceptSchemeManager;
 use OpenSkos2\Search\Autocomplete;
 use OpenSkos2\Search\ParserText;
@@ -133,7 +133,7 @@ class Repository implements InterfaceRepository
      * @param string $repositoryName
      * @param string $baseUrl
      * @param array $adminEmails
-     * @param CollectionManager $collectionManager
+     * @param SetManager $setManager
      * @param string $description
      */
     public function __construct(
@@ -143,10 +143,10 @@ class Repository implements InterfaceRepository
         $repositoryName,
         $baseUrl,
         array $adminEmails,
-        CollectionManager $collectionManager,
+        SetManager $setManager,
         $description = null
     ) {
-    
+
 
         $this->conceptManager = $conceptManager;
         $this->schemeManager = $schemeManager;
@@ -154,7 +154,7 @@ class Repository implements InterfaceRepository
         $this->repositoryName = $repositoryName;
         $this->baseUrl = $baseUrl;
         $this->adminEmails = $adminEmails;
-        $this->rdfSetManager = $collectionManager;
+        $this->rdfSetManager = $setManager;
         $this->description = $description;
     }
 
@@ -222,8 +222,8 @@ class Repository implements InterfaceRepository
                 $uuid = $uuidProp->getValue();
                 $schemeSpec = $spec . ':' . $uuid;
                 $title = $scheme->getTitle();
-                $name = $title->getValue();
-                $items[] = new Set($schemeSpec, $name);
+                //$name = $title->getValue();
+                $items[] = new Set($schemeSpec, $title);
             }
         }
         return new SetList($items);
@@ -289,6 +289,12 @@ class Repository implements InterfaceRepository
             $pSet['conceptScheme'],
             $numFound
         );
+        if (isset($from) && $from && date_format($from, 'YmdHis') === '19700101000000') {
+            //The unix Epoch gets converted to integer zero the the resumption token. I can't seem to get around it
+            $tosub = new \DateInterval('PT01S');
+            $from->sub($tosub);
+        }
+
         $items = [];
         foreach ($concepts as $i => $concept) {
             /* @var $concept Concept */
@@ -420,9 +426,9 @@ class Repository implements InterfaceRepository
         $return['tenant'] = $tenant;
         $rdfSetId = null;
         if (!empty($arrSet[1])) {
-            $rdfSet = $this->collectionManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
+            $rdfSet = $this->rdfSetManager->fetchByUuid($arrSet[1], \OpenSkos2\Set::TYPE, 'openskos:code');
             if ($rdfSet) {
-                $allowed = $rdfSet->getSingleValueProperty(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
+                $allowed = $rdfSet->getPropertySingleValue(\OpenSkos2\Namespaces\OpenSkos::ALLOW_OAI);
                 if (!(bool) $allowed) {
                     throw new BadArgumentException('OAi harvesting is not allowed on set  ' . $arrSet[1]);
                 }
@@ -601,17 +607,25 @@ class Repository implements InterfaceRepository
             throw new BadArgumentException('Invalid identifier ' . $identifier);
         }
 
-        $regexps = explode(',', $custom['uuid_regexp_prefixes']);
-        foreach ($regexps as $regexp) {
-            $matches = [];
-            $ok = preg_match($regexp, $identifier, $matches);
-            if ($ok) {
-                $length = strlen($matches[0]);
-                $uuid = substr($identifier, $length);
-                if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
-                    return $uuid;
+        //CLAVAS has introduces configurable RegEx prefixes for OAIPHM identifiers
+        //However, the rest of the world doesn't need them.
+
+        $ok = false;
+        if ($custom['uuid_regexp_prefixes']) {
+            $regexps = explode(',', $custom['uuid_regexp_prefixes']);
+            foreach ($regexps as $regexp) {
+                $matches = [];
+                $ok = preg_match($regexp, $identifier, $matches);
+                if ($ok) {
+                    $length = strlen($matches[0]);
+                    $uuid = substr($identifier, $length);
+                    if (\Rhumsaa\Uuid\Uuid::isValid($uuid)) {
+                        return $uuid;
+                    }
                 }
             }
+        } else {
+            $ok = true;
         }
 
         throw new BadArgumentException('Invalid identifier ' . $identifier);

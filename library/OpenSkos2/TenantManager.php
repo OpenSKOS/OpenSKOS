@@ -27,7 +27,7 @@ use OpenSkos2\Rdf\ResourceManager;
 use OpenSkos2\Namespaces\OpenSkos as OpenSkosNamespace;
 use OpenSkos2\Namespaces\Org as Org;
 use OpenSkos2\Tenant;
-use OpenSkos2\Collection;
+use OpenSkos2\Set;
 
 class TenantManager extends ResourceManager
 {
@@ -38,25 +38,27 @@ class TenantManager extends ResourceManager
      * @param string $code Tenant Code
      * @return array list of uuids of sets(collections) on the tenant
      */
-    public function fetchSetCodesForTenant($code)
+    public function fetchSetUrisForTenant($code)
     {
-        $query = "
-        SELECT ?collectionUuid
-        WHERE  { 
-          ?tenanturi  <http://openskos.org/xmlns#code> \"$code\" .
-          ?seturi  <http://purl.org/dc/terms/publisher> ?tenanturi .
-          ?seturi  
-              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> 
-              <http://www.w3.org/2004/02/skos/core#ConceptScheme>.
-          ?seturi <http://openskos.org/xmlns#uuid> ?collectionUuid
-         
-        }";
+        $query = <<<SELECT_SETS
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix rdf-syntax: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix SKOS: <http://www.w3.org/2004/02/skos/core#>
+prefix OPENSKOS: <http://openskos.org/xmlns#>
 
+SELECT ?setUri
+WHERE  { 
+  ?tenanturi  OPENSKOS:code "%s" 
+  .?setUri  dcterms:publisher ?tenanturi 
+  .?setUri rdf-syntax:type OPENSKOS:set
+}
+SELECT_SETS;
+        $query = sprintf($query, $code);
         $setCodes = array();
         $response = $this->query($query);
         if ($response !== null) {
             foreach ($response as $triple) {
-                $setCodes[] = $triple->collectionUuid->getValue();
+                $setCodes[] = $triple->setUri->getUri();
             }
         }
         return $setCodes;
@@ -67,7 +69,7 @@ class TenantManager extends ResourceManager
         $query = 'SELECT ?seturi ?p ?o 
         WHERE  { ?tenanturi  <' . OpenSkos::CODE . "> '" . $code . "' ."
             . ' ?seturi  <' . DcTerms::PUBLISHER . '> ?tenanturi .'
-            . ' ?seturi  <' . Rdf::TYPE . '> <'.Collection::TYPE.'> .'
+            . ' ?seturi  <' . Rdf::TYPE . '> <'.Set::TYPE.'> .'
             . ' ?seturi  ?p ?o .}';
         $response = $this->query($query);
         if ($response !== null) {
@@ -84,7 +86,7 @@ class TenantManager extends ResourceManager
     {
         $query = "DESCRIBE ?subject  {SELECT DISTINCT ?subject WHERE { "
             . "?subject <" . DcTerms::PUBLISHER . "> <$tenantUri>. "
-            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Collection::TYPE.">.} }";
+            . "?subject <" . Rdf::TYPE . "> <".\OpenSkos2\Set::TYPE.">.} }";
         $response = $this->query($query);
         return $response;
     }
@@ -106,7 +108,7 @@ class TenantManager extends ResourceManager
                     $retVal[$seturi]['dcterms_description'] = $triple->o->getValue();
                     continue;
                 case OpenSkos::WEBPAGE:
-                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getValue();
+                    $retVal[$seturi]['openskos_webpage'] = $triple->o->getUri();
                     continue;
                 case OpenSkos::CODE:
                     $retVal[$seturi]['openskos_code'] = $triple->o->getValue();
@@ -161,6 +163,29 @@ SELECT_URI;
         return $response[0]->uuid->getValue();
     }
 
+    public function fetchTenantFromCode($code)
+    {
+        $query = <<<SELECT_URI
+DESCRIBE ?uri {
+    SELECT ?uri WHERE { 
+      ?uri  <%s> <%s>.
+      ?uri  <%s> "%s".
+    }
+}
+SELECT_URI;
+        $query = sprintf($query, Rdf::TYPE, Org::FORMALORG, OpenSkosNamespace::CODE, $code);
+
+        $response = $this->fetchQuery($query);
+
+        if (count($response) > 1) {
+            throw new \Exception("Something went very wrong: there more than 1 institution with the code $code");
+        }
+        if (count($response) < 1) {
+            throw new \Exception("the institution with the code $code is not found");
+        }
+        return $response[0];
+    }
+
 
     /**
      * @param Uri $resource
@@ -193,5 +218,30 @@ SELECT_URI;
             $tenant = $tenantManager->fetchByUuid($tenantUuid);
         }
         return $tenant;
+    }
+
+    public function getAllTenants()
+    {
+        $query = <<<SELECT_TENANTS
+SELECT ?uri ?code ?uuid WHERE { 
+  ?uri  <%s> <%s>.
+  ?uri  <%s> ?code.
+  ?uri  <%s> ?uuid
+}
+SELECT_TENANTS;
+        $query = sprintf($query, Rdf::TYPE, Org::FORMALORG, OpenSkosNamespace::CODE, OpenSkos::UUID);
+
+        $response = $this->query($query);
+
+        $results = array();
+
+        foreach ($response as $tenant) {
+            $results[$tenant->uri->getUri()] =
+                array(
+                    'code' => $tenant->code->getValue(),
+                    'uuid' => $tenant->uuid->getValue(),
+                );
+        }
+        return $results;
     }
 }

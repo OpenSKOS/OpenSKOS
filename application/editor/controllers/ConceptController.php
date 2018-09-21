@@ -110,7 +110,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
     {
 
         $concertSchemeManager = $this->getDI()->get('\OpenSkos2\ConceptSchemeManager');
-        $collectionManager = $this->getDI()->get('\OpenSkos2\CollectionManager');
+        $setManager = $this->getDI()->get('\OpenSkos2\SetManager');
         $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
 
         $concept = $this->_getConcept();
@@ -143,7 +143,7 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $inCollection = $concept->getPropertySingleValue(OpenSkos::SET);
 
-        $collection = $collectionManager->fetchByUri($inCollection);
+        $collection = $setManager->fetchByUri($inCollection);
 
         /*Reminder: Big merge conflict resolved here. Check it's working */
         $conceptManager = $this->getConceptManager();
@@ -521,11 +521,16 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
                             //Redmine #34508. Also save the XL labels if XL is active.
                             $tenant = $this->getOpenSkos2Tenant();
-                            if ($tenant->getEnableSkosXl() === true) {
+
+                            $literal = $tenant->getEnableSkosXl();
+                            $val = $literal->getValue();
+                            $useXl = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+
+                            if ($useXl === true) {
 
                                 $label = new Label(Label::generateUri());
                                 $label->setProperty(SkosXl::LITERALFORM, $concept->retrievePropertyInLanguage(Skos::PREFLABEL, $lang)[0]);
-                                $label->ensureMetadata();
+                                $label->ensureMetadata($tenant);
 
                                 if ($formData['statusOtherConceptLabelToFill'] === Skos::HIDDENLABEL) {
                                     $otherConcept->addUniqueProperty(
@@ -540,6 +545,17 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                                     );
                                 }
                             }
+
+                            //Update modification date
+                            $nowLiteral = function () {
+                                return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+                            };
+
+                            $user = OpenSKOS_Db_Table_Users::fromIdentity();
+                            $person = $user->getFoafPerson();
+
+                            $otherConcept->setProperty(DcTerms::MODIFIED, $nowLiteral());
+                            $otherConcept->setProperty(OpenSkos::MODIFIEDBY, $person);
 
                         }
                     }

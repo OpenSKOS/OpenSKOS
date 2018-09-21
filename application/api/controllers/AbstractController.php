@@ -197,13 +197,20 @@ abstract class AbstractController extends OpenSKOS_Rest_Controller
                 $shortHTMLName = $this->shortenForHTML($propname);
                 $retVal[$shortHTMLName] = implode(', ', $vals);
             } else { // recursive elements of organisation
-                if ($vals !== null && isset($vals) && is_array($vals))
+                /* B.Hillier: 3-9-2018
+                 * This code is causing an exception, but I have no idea why it's even here
+                 * I've commented it out; if nothing is broken I think we can safely delete.
+                 */
+                /*
+                if ($vals !== null && isset($vals) && is_array($vals)){
                     if (count($vals) > 0) {
                         foreach ($vals[0]->getProperties() as $key => $val2) {
                             $shortName2 = $this->shortenForHTML($key);
                             $retVal[$shortName2] = implode(', ', $val2);
                         }
                     }
+                }
+                */
             }
         }
         return $retVal;

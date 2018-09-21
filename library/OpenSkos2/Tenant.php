@@ -191,7 +191,7 @@ class Tenant extends Resource
      */
     public function ensureMetadata(
         \OpenSkos2\Tenant $tenant = null,
-        \OpenSkos2\Collection $set = null,
+        \OpenSkos2\Set $set = null,
         \OpenSkos2\Person $person = null,
         \OpenSkos2\PersonManager $personManager = null,
         \OpenSkos2\SkosXl\LabelManager $labelManager = null,
@@ -227,7 +227,7 @@ class Tenant extends Resource
     // TODO: discuss the rules for generating Uri's for non-concepts
     protected function assembleUri(
         \OpenSkos2\Tenant $tenant = null,
-        \OpenSkos2\Collection $collection = null,
+        \OpenSkos2\Set $set = null,
         $uuid = null,
         $notation = null,
         $customInit = null
@@ -291,6 +291,7 @@ class Tenant extends Resource
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
             ;
             $form->getElement('email')->addValidator(new \Zend_Validate_EmailAddress());
+            $form->getElement('website')->addValidator(new \OpenSKOS_Validate_Url());
 
 
             $form->getElement('enableStatusesSystem')->getDecorator('Label')

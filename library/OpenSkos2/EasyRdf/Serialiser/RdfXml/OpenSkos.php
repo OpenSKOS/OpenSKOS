@@ -22,6 +22,7 @@ namespace OpenSkos2\EasyRdf\Serialiser\RdfXml;
 use EasyRdf\Literal;
 use EasyRdf\Resource;
 use EasyRdf\Graph;
+use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Exception\OpenSkosException;
 
 class OpenSkos extends \EasyRdf\Serialiser\RdfXml
@@ -33,9 +34,28 @@ class OpenSkos extends \EasyRdf\Serialiser\RdfXml
     protected $objects = [];
     private $outputtedResources = array();
 
-    public function serialise(Graph $graph, $format, array $options = array())
+    /**
+     * Method to serialise an EasyRdf\Graph to RDF/XML
+     *
+     * @param Graph  $graph  An EasyRdf\Graph object.
+     * @param string $format The name of the format to convert to.
+     * @param array  $options
+     *
+     * @return string The RDF in the new desired format.
+     * @throws Exception
+     */
+    public function serialise($graph, $format, array $options = array())
     {
-        parent::checkSerialiseParams($format);
+
+        //The older versions the EasyRdfSerialiser expected one argument here;
+        // Newer versions want two
+        try {
+            parent::checkSerialiseParams($graph, $format);
+        } catch (\InvalidArgumentException $e) {
+            parent::checkSerialiseParams($format);
+        }
+
+
         if ($format != 'rdfxml_openskos') {
             throw new OpenSkosException(
                 "\\OpenSkos2\\EasyRdf\\Serialiser\\RdfXml\\OpenSkos does not support: {$format}"

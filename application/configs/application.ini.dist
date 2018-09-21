@@ -48,6 +48,7 @@ editor.export.filesHttpPath = "/data/export/"
 
 ; Editor behaviour
 editor.allowNotationEdit = "@editor-allow-notation-edit@"
+editor.labelsUniquePerTenant = "0"
 
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"

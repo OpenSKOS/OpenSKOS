@@ -103,7 +103,7 @@ class Editor_Forms_ConceptScheme extends OpenSKOS_Form
         $this->addElement('hidden', 'uuid', array('decorators' => array()));
         
         // Collections
-        $modelCollections = $this->getDI()->get('Editor_Models_CollectionsCache');
+        $modelCollections = $this->getDI()->get('Editor_Models_SetsCache');
         $modelCollections->setTenantCode($this->_getCurrentTenant()->getCode()->getValue());
 
         $collectionOptions = $modelCollections->fetchUrisMap();

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -9,20 +8,17 @@
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * http://www.gnu.org/licenses/gpl-3.0.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
  *
  * @category   OpenSKOS
  * @package    OpenSKOS
- * @copyright  Copyright (c) 2015 Picturae (http://www.picturae.com)
- * @author     Picturae
+ * @copyright  Copyright (c) 2011 Pictura Database Publishing. (http://www.pictura-dp.nl)
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
-namespace OpenSkos2;
-
-use OpenSkos2\Rdf\ResourceCollection;
-
-class SetCollection extends ResourceCollection
+class OpenSKOS_Db_Table_Row_MaxNumericNotation extends Zend_Db_Table_Row
 {
 
-    protected $resourceType = Set::TYPE;
 }

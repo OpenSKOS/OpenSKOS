@@ -95,6 +95,7 @@ class Autocomplete
 
         $prefix = '';
         //Meertens: the feature wholeworld  works only  when labels and/or properties are given as request parameters
+        $prefix = 'a_';
         if (isset($options['wholeword'])) {
             if ($options['wholeword']) {
                 $prefix = 't_';
@@ -195,6 +196,12 @@ class Autocomplete
             $optionsQueries[] = '('
                 . 's_inScheme:('
                 . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['scheme']))
+                . '))';
+        } elseif (!empty($options['conceptScheme'])) {
+            //B.Hillier reinstated this search. The editor still used it
+            $optionsQueries[] = '('
+                . 's_inScheme:('
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['conceptScheme']))
                 . '))';
         }
 

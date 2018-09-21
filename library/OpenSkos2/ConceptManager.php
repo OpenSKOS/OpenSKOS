@@ -263,7 +263,7 @@ class ConceptManager extends ResourceManagerWithSearch
         $start = 0;
         $step = 100;
         do {
-            $relations = $this->fetch($patterns, $start, $step);
+            $relations = $this->fetchOnSubject($patterns, $start, $step);
             foreach ($relations as $relation) {
                 $allRelations->append($relation);
             }

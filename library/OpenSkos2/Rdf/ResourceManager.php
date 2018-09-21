@@ -423,20 +423,13 @@ class ResourceManager
     public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
     {
         /*
-          DESCRIBE ?subject {
-          SELECT DISTINCT ?subject
-          WHERE {
-          ?subject ?predicate ?object
-          }
-          ORDER BY ?subject
-          LIMIT 10
-          OFFSET 0
-          }
+         * @TODO B.Hillier 31-8-2018.
+         * Not ideal that this class has to be aware of the resourceTypes of its descendants
          */
         if (!empty($this->resourceType)) {
             $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
             if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME ||
-                $this->resourceType === \OpenSkos2\Collection::TYPE) {
+                $this->resourceType === \OpenSkos2\Set::TYPE) {
                 $simplePatterns = array_merge($newPatterns, $simplePatterns);
             } else {
                 $simplePatterns = array_merge($simplePatterns, $newPatterns);
@@ -477,6 +470,72 @@ class ResourceManager
                 return strcmp($resource1->getUri(), $resource2->getUri());
             }
         );
+        return $resources;
+    }
+
+    /**
+     * Fetches full resources using just Subject.
+     * This is the pre-Meertens merge version. Meertens merge introduced a high impact change
+     *     that broke some things
+     * There is hardcoded order by uri.
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param int $offset
+     * @param int $limit
+     * @param bool $ignoreDeleted Do not fetch resources which have openskos:status deleted.
+     * @return ResourceCollection
+     */
+    public function fetchOnSubject($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
+    {
+
+        if (!empty($this->resourceType)) {
+            $newPatterns = [RdfNamespace::TYPE => new Uri($this->resourceType)];
+
+            if ($this->resourceType === \OpenSkos2\Namespaces\Skos::CONCEPTSCHEME) {
+                $simplePatterns = array_merge($newPatterns, $simplePatterns);
+            } else {
+                $simplePatterns = array_merge($simplePatterns, $newPatterns);
+            }
+        }
+
+        $query = 'DESCRIBE ?subject {' . PHP_EOL;
+
+        $query .= 'SELECT DISTINCT ?subject' . PHP_EOL;
+        $where = $this->simplePatternsToQuery($simplePatterns, '?subject');
+
+        if ($ignoreDeleted) {
+            $where .= 'OPTIONAL { ?subject <' . OpenSkosNamespace::STATUS . '> ?status } . ';
+            $where .= 'FILTER (!bound(?status) || ?status != \'' . Resource::STATUS_DELETED . '\')';
+        }
+
+        $query .= 'WHERE { ' . $where . '}';
+
+        // We need some order
+        // @TODO provide possibility to order on other predicates.
+        // This will need to create ?subject ?predicate ?o1 .... ORDER BY ?o1
+        $query .= PHP_EOL . 'ORDER BY ?subject';
+
+        if ($limit !== null) {
+            $query .= PHP_EOL . 'LIMIT ' . $limit;
+        }
+
+        if ($offset !== null) {
+            $query .= PHP_EOL . 'OFFSET ' . $offset;
+        }
+
+        $query .= '}'; // end sub select
+
+        $resources = $this->fetchQuery($query);
+
+        // The order by part does not apply to the resources with describe.
+        // So we need to order them again.
+        // @TODO Find other solution - sort in jena, not here.
+        // @TODO provide possibility to order on other predicates.
+        $resources->uasort(
+            function (Resource $resource1, Resource $resource2) {
+                return strcmp($resource1->getUri(), $resource2->getUri());
+            }
+        );
+
         return $resources;
     }
 
@@ -572,9 +631,11 @@ class ResourceManager
                 $object = '?' . $i;
                 if (isset($data['ignoreLanguage']) && $data['ignoreLanguage']) {
                     // Get only the simple string literal to compare without language.
-                    $object = 'str(' . $object . ')';
+                    $object = 'lcase(str(' . $object . '))';
+                    $newFilter[] = $object . ' ' . $operator . ' ' . strtolower((new NTriple())->serialize($val));
+                } else {
+                    $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
                 }
-                $newFilter[] = $object . ' ' . $operator . ' ' . (new NTriple())->serialize($val);
             }
             $filters[] = '(' . implode(' || ', $newFilter) . ') ';
         }

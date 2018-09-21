@@ -167,23 +167,31 @@ class Editor_Models_Export
      */
     public function exportWithBackgroundJob()
     {
+
+        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
         $user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
 
-        $tenant = OpenSKOS_Db_Table_Tenants::fromCode($user->tenant);
+        $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
+        $tenantUri = $tenant->getUri();
 
-        $tenantCollections = $tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
-        if (!$tenantCollections->count()) {
+        $tenantSets = $tenantManager->fetchSetsForTenantUri($tenantUri);
+        $sets = \OpenSkos2\Bridge\EasyRdf::graphToResourceCollection($tenantSets);
+
+        if (!$sets->count()) {
             throw new Zend_Exception('Current tenant does not have any collections. At least one is required.', 404);
         }
 
         // We use the first collection of the tenant for the export job,
         // because the collection is important for the jobs,
         // but the export is not related to any specific collection.
-        $firstTenantCollection = $tenantCollections->current();
+        $firstTenantSet = $sets[0];
+        $set_uri = $firstTenantSet->getUri();
 
         $model = new OpenSKOS_Db_Table_Jobs();
         $job = $model->fetchNew()->setFromArray(array(
-                    'collection' => $firstTenantCollection->id,
+                    'set_uri' => $set_uri,
                     'user' => $user->id,
                     'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_EXPORT,
                     'parameters' => serialize(
@@ -334,16 +342,18 @@ class Editor_Models_Export
      */
     protected function createExportMessage()
     {
+
+        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
         $fieldsToExport = $this->get('fieldsToExport');
         if (empty($fieldsToExport)) {
             $fieldsToExport = $this->getExportableConceptFields();
         }
         
         $user = OpenSKOS_Db_Table_Users::requireById($this->get('userId'));
-        $tenant = \OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant(
-            OpenSKOS_Db_Table_Tenants::fromCode($user->tenant)
-        );
-        
+        $tenant = $tenantManager->fetchTenantFromCode($user->tenant);
+
         $message = new Message(
             $tenant,
             $this->get('format'),
