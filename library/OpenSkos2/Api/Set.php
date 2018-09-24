@@ -74,6 +74,16 @@ class Set extends AbstractTripleStoreResource
     
     protected function getSet($request)
     {
-        return new \OpenSkos2\Collection();
+        return new \OpenSkos2\Set();
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string api key if set else ''
+     */
+    protected function getApiKey($request)
+    {
+        $apiKey = $this->getMultiSourcedParameter($request, 'key');
+        return $apiKey;
     }
 }

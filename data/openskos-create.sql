@@ -132,6 +132,17 @@ CREATE TABLE IF NOT EXISTS `openskos`.`search_profiles` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
+-- -----------------------------------------------------
+-- Table `openskos`.`max_numeric_notation`
+-- -----------------------------------------------------
+CREATE TABLE `max_numeric_notation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_code` varchar(45) DEFAULT NULL,
+  `max_numeric_notation` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
