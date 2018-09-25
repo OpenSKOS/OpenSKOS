@@ -52,12 +52,20 @@ class SetManager extends ResourceManager
     public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
     {
         /*
-         * This function is a work around for the fact the query that resourceManager->fetch generates takes up
-         *  to 5 minutes on the Beeld en Geluid Jena server.
+         * This function is an Ugly, UGLY work around for the fact the query that
+         *  resourceManager->fetch generates takes up to 5 minutes on the Beeld en Geluid Jena server.
          * After much trial and error, it seems the best result is to fetch all sets and then filter out the tenants
          *  in PHP
          *
          */
+
+        if (!in_array(\OpenSkos2\Namespaces\OpenSkos::TENANT, array_keys($simplePatterns))) {
+            //The parent has already got a function for this type
+            return parent::fetch($simplePatterns, $offset, $limit, $ignoreDeleted);
+        }
+
+
+
         //Of course, the function $this->getAllSets doesn't actually fetch all sets. So we do it here :-(
         $query = <<<FETCH_ALL_SETS
 DESCRIBE ?subject
@@ -196,23 +204,16 @@ FETCH_ALL_SETS;
 
     public function getUrisMap($tenantCode)
     {
-        $query = <<<QUERY_SETS
-        DESCRIBE ?subject {
-            SELECT ?subject  WHERE {
-                ?subject <%s> <%s>  .
-                ?subject <%s>  "%s"
-            } 
-        }
-QUERY_SETS;
-        $query = sprintf($query, Rdf::TYPE, Set::TYPE, OpenSkos::TENANT, $tenantCode);
-        $query = preg_replace('/\s+/', ' ', $query);
-        $result = $this->query($query);
+        $simplePatterns = [OpenSkos::TENANT => new Literal($tenantCode)];
+        $result = $this->fetch($simplePatterns);
+
         $retVal = [];
         foreach ($result as $set) {
             $retVal[$set->getUri()]['uri'] = $set->getUri();
             $code = $set->getCode();
             $retVal[$set->getUri()]['code'] = $code->getValue();
         }
+
         return $retVal;
     }
 
