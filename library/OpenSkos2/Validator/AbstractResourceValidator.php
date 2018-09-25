@@ -176,7 +176,7 @@ abstract class AbstractResourceValidator implements ValidatorInterface
             if ($isUnique) {
                 if (!($this->uniquenessCheck($resource, $propertyUri, $value))) {
                     $this->errorMessages[] = "The resource of type {$this->resourceManager->getResourceType()} with "
-                        . "the property  $propertyUri set to  $value has been already registered; {$this->isForUpdate}";
+                        . "the property  $propertyUri set to  $value has already been registered; {$this->isForUpdate}";
                 }
             }
 

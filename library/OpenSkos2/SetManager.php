@@ -40,6 +40,51 @@ class SetManager extends ResourceManager
      */
     protected $resourceType = Set::TYPE;
 
+
+    /**
+     * Fetches full resources.
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param int $offset
+     * @param int $limit
+     * @param bool $ignoreDeleted Do not fetch resources which have openskos:status deleted.
+     * @return ResourceCollection
+     */
+    public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
+    {
+        /*
+         * This function is a work around for the fact the query that resourceManager->fetch generates takes up
+         *  to 5 minutes on the Beeld en Geluid Jena server.
+         * After much trial and error, it seems the best result is to fetch all sets and then filter out the tenants
+         *  in PHP
+         *
+         */
+        //Of course, the function $this->getAllSets doesn't actually fetch all sets. So we do it here :-(
+        $query = <<<FETCH_ALL_SETS
+DESCRIBE ?subject
+{
+  SELECT ?subject
+  WHERE{
+    ?subject a <%s>
+  }
+  ORDER BY ?subject
+}
+FETCH_ALL_SETS;
+        $query = sprintf($query, $this->resourceType);
+        $resources = $this->fetchQuery($query);
+
+        $tenantCode = $simplePatterns[\OpenSkos2\Namespaces\OpenSkos::TENANT]->getValue();
+
+        $resultSet = array();
+        foreach ($resources as $res) {
+            $resTenantCode  = $res->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT)[0]->getValue();
+            if ($resTenantCode === $tenantCode) {
+                $resultSet[] = $res;
+            }
+        }
+        return $resultSet;
+    }
+
+
     //TODO: check conditions when it can be deleted
     public function canBeDeleted($uri)
     {
