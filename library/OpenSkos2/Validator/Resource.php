@@ -364,7 +364,7 @@ class Resource
             new \OpenSkos2\Validator\Concept\OpenSkosSet(),
             new DisjointXlLabels()
         ];
-        $editorOptions = \Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $editorOptions = \OpenSKOS_Application_BootstrapAccess::getOption('editor');
         $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant'])
                             ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
         if ($uniquePerTenant) {
