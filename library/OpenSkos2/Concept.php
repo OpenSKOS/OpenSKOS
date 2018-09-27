@@ -67,6 +67,27 @@ class Concept extends Resource
             self::STATUS_EXPIRED,
         ];
     }
+    /**
+     * Get list of all available concept statuses with description.
+     * @return array
+     */
+    public static function getAvailableStatusesWithDescriptions()
+    {
+        return [
+           self::STATUS_CANDIDATE      => "A newly added concept",
+           self::STATUS_APPROVED       => "Candidate that was inspected and approved",
+           self::STATUS_REDIRECTED     => "Proposed concept was found to be better represented by another concept. " .
+               "The redirected concept will be maintained for convenience and will contain a forward note to the " .
+               "target concept.",
+           self::STATUS_NOT_COMPLIANT  => "Concept is not compliant with the GTAA standard, but is maintained for " .
+               " convenience of the creator. It can become obsolete when no longer necessary.",
+           self::STATUS_REJECTED       => "Substandard quality",
+           self::STATUS_OBSOLETE       => "This concept is no longer necessary, may be succeeded by another concept",
+           self::STATUS_DELETED        => "All concept metadata is deleted",
+            //B.Hillier This status doesn't seem to be used anywhere. Is is Meertens custom controller specific?
+           //self::STATUS_EXPIRED        => ""
+        ];
+    }
 
     public static $labelsMap = [
         SkosXl::PREFLABEL => Skos::PREFLABEL,
