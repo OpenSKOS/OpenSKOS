@@ -82,6 +82,14 @@ class EasyRdf
         return $collection;
     }
 
+    /*
+     * $resource Resource to convert to OpenSkos resource
+     * $allowedChildrenTypes Which types can be accepted as child resources (Used mainly for XL labels. Other accepted
+     *                         types are hardcoded
+     * $alreadyAddedAsChild Flagged once child resource has been added.
+     *
+     * WARNING: This function is recursive, and will call itself indefinitely to add child resources.
+     */
     protected static function toOpenskosResource($resource, $allowedChildrenTypes, &$alreadyAddedAsChild)
     {
         /** @var $resource \EasyRdf\Resource */
@@ -118,8 +126,6 @@ class EasyRdf
                         if (in_array($propertyUri, self::$allowedSubresources)) {
                             $subResource = self::toOpenskosSubResource($propertyValue);
                             $openskosResource->addProperty($propertyUri, $subResource);
-                            continue;
-                        } else {
                             continue;
                         }
                     }
