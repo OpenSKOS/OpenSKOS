@@ -10,8 +10,8 @@
 [
     r1: (?x skos:narrower ?y) -> (?y skos:broader ?x) .
     r2: (?x skos:broader ?y) -> (?y skos:narrower ?x) .
-    r3: (?x skos:narrowMatch ?y) -> (?y skos:broaderMatch ?x) .
-    r4: (?x skos:broaderMatch ?y) -> (?y skos:narrowMatch ?x) .
+    r3: (?x skos:narrowMatch ?y) -> (?y skos:broadMatch ?x) .
+    r4: (?x skos:broadMatch ?y) -> (?y skos:narrowMatch ?x) .
     r5: (?x skos:topConceptOf ?y) -> (?y skos:hasTopConcept ?x) .
     r6: (?x skos:hasTopConcept ?y) -> (?y skos:topConceptOf ?x) .
     
