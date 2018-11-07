@@ -782,7 +782,19 @@ abstract class AbstractTripleStoreResource
         if ($paramTenant) {
             $tenant = $this->getTenant($paramTenant, $this->manager);
         } else {
-            $tenant = $user->tenant;
+            throw new InvalidArgumentException('No tenant specified or no tenant in an accepted format', 400);
+
+            /*
+             * Some older version of OpenSkos would call up the tenant from the user's API key, if none was readable
+             *   from the API call.
+             *
+             * Currently agreed with Beeld and Geluid to throw a 400 instead,
+             *   but the old behaviour is easy to restore if desired.
+             *
+
+                $paramTenant = $user->tenant;
+                $tenant = $this->getTenant($paramTenant, $this->manager);
+             */
         }
         return $tenant;
     }
