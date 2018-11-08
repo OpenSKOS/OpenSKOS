@@ -108,6 +108,15 @@ class Resource
     private $errorMessages = [];
 
     /**
+     * In theory holds all error codes matching the error messages
+     *
+     * In practice, is only handling a few cases at the moment
+     *
+     * @var array
+     */
+    private $errorCodes = [];
+
+    /**
      * Holds all warning messages
      *
      * @var array
@@ -180,6 +189,16 @@ class Resource
     }
 
     /**
+     * Get error codes
+     *
+     * @return array
+     */
+    public function getErrorCodes()
+    {
+        return $this->errorCodes;
+    }
+
+    /**
      * Get warning messages
      *
      * @return array
@@ -215,6 +234,12 @@ class Resource
             foreach ($validator->getErrorMessages() as $message) {
                 $this->errorMessages[] = $message;
             }
+            if (method_exists($validator, "getErrorCodes")) {
+                foreach ($validator->getErrorCodes() as $code) {
+                    $this->errorCodes[] = $code;
+                }
+            }
+
             foreach ($validator->getWarningMessages() as $message) {
                 $this->warningMessages[] = "Validator's WARNING: $message. \n";
             }

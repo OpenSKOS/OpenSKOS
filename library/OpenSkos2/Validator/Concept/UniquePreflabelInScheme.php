@@ -30,6 +30,17 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 class UniquePreflabelInScheme extends AbstractConceptValidator
 {
 
+
+    /**
+     * @var array
+     */
+    protected $errorCodes = [];
+
+    public function getErrorCodes()
+    {
+        return $this->errorCodes;
+    }
+
     /**
      * Ensure the preflabel does not already exists in the scheme
      *
@@ -44,6 +55,7 @@ class UniquePreflabelInScheme extends AbstractConceptValidator
             foreach ($schemes as $scheme) {
                 if ($this->labelExistsInScheme($concept, $label, $scheme)) {
                     $this->errorMessages[] = "The pref label $label already exists in the concept scheme $scheme";
+                    $this->errorCodes[] = 409;
                     return false;
                 }
             }

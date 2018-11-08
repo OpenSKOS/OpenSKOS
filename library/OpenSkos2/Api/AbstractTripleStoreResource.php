@@ -429,7 +429,15 @@ abstract class AbstractTripleStoreResource
             true
         );
         if (!$validator->validate($resource)) {
-            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), 400);
+            $errorCode = 400;
+            if (method_exists($validator, "getErrorCodes")) {
+                $someCodes = $validator->getErrorCodes();
+                if (count($someCodes) > 0) {
+                    $errorCode = $validator->getErrorCodes()[0];
+                }
+            }
+
+            throw new InvalidArgumentException(implode(' ', $validator->getErrorMessages()), $errorCode);
         }
     }
 

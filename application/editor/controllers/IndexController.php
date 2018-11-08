@@ -19,10 +19,48 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+
+
+use EasyRdf\Graph;
+
 class Editor_IndexController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
     {
+    /**
+     * Basic serialisation example
+     *
+     * This example create a simple FOAF graph in memory and then
+     * serialises it to the page in the format of choice.
+     *
+     * @package    EasyRdf
+     * @copyright  Copyright (c) 2009-2013 Nicholas J Humfrey
+     * @license    http://unlicense.org/
+     */
+    $graph = new \EasyRdf\Graph();
+    $me = $graph->resource('http://www.example.com/joe#me', 'foaf:Person');
+    $me->set('foaf:name', 'Joseph Bloggs');
+    $me->set('foaf:title', 'Mr');
+    $me->set('foaf:nick', 'Joe');
+    $me->add('foaf:homepage', $graph->resource('http://example.com/joe/'));
+    // I made these up; they are not officially part of FOAF
+    $me->set('foaf:dateOfBirth', new \EasyRdf\Literal\Date('1980-09-08'));
+    $me->set('foaf:height', 1.82);
+    $project = $graph->newBnode('foaf:Project');
+    $project->set('foaf:name', "Joe's current project");
+    $project->set('foaf:title', "What is says on the tin!");
+    $me->set('foaf:currentProject', $project);
+
+
+    $serialiser =  new \EasyRdf\Serialiser\JsonLd();
+    $res = $serialiser->serialise($graph, 'jsonld');
+    header('content-type: application/json');
+    print $res;
+    exit;
+
+
+
+        /*
         $schemesCache = $this->getDI()->get('Editor_Models_ConceptSchemesCache');
         $user =  OpenSKOS_Db_Table_Users::requireFromIdentity();
         $tenant = $this->readTenant()->getOpenSkos2Tenant();
@@ -36,5 +74,6 @@ class Editor_IndexController extends OpenSKOS_Controller_Editor
         $this->view->assign('oActiveTenant', $tenant);
 
         $this->view->assign('searchForm', Editor_Forms_Search::getInstance());
+        */
     }
 }
