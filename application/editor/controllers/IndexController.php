@@ -36,6 +36,6 @@ class Editor_IndexController extends OpenSKOS_Controller_Editor
         $this->view->assign('oActiveTenant', $tenant);
 
         $this->view->assign('searchForm', Editor_Forms_Search::getInstance());
-        */
+
     }
 }
