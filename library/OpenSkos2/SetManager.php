@@ -103,7 +103,7 @@ FETCH_ALL_SETS;
     {
         $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
             . 'DESCRIBE ?s {'
-            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:boolean . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
     }
@@ -197,7 +197,7 @@ FETCH_ALL_SETS;
         throw new \Exception("Please use the function `fetchAllSets'");
         $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
             . 'DESCRIBE ?s {'
-            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:boolean . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
     }

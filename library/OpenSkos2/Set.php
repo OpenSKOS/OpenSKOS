@@ -292,6 +292,35 @@ class Set extends Resource
         return $form;
     }
 
+    /*
+     * Intended for the AllowOAIPHM field
+     */
+    protected function toBoolean($value)
+    {
+        $retval = false;
+        if ($value === true ||
+            $value === 1 ||
+            strtolower($value) === "true" ||
+            strtolower($value) === "yes" ||
+            strtolower($value) === "y"        //I'm normally expecting this one.
+        ) {
+            $retval = true;
+        }
+        return $retval;
+    }
+
+    /*
+     * Intended for the AllowOAIPHM field
+     */
+    protected function booleanToCheckbox($value)
+    {
+        $retval = 'N';
+        if ($this->toBoolean($value)) {
+            $retval = 'Y';
+        }
+        return $retval;
+    }
+
     protected function dataToArray()
     {
         $dataOut = array();
@@ -303,8 +332,11 @@ class Set extends Resource
         $dataOut['website'] = $this->getPropertySingleValue(OpenSkos::WEBPAGE);
         $dataOut['license_name'] = $this->getPropertySingleValue(DcTerms::LICENSE);
         $dataOut['license_url'] = $this->getPropertySingleValue(Openskos::LICENCE_URL);
-        $dataOut['allow_oai'] = $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
         $dataOut['OAI_baseURL'] = $this->getPropertySingleValue(OpenSkos::OAI_BASEURL);
+
+
+        $allowOai =     $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
+        $dataOut['allow_oai'] = $this->booleanToCheckbox($allowOai->getValue());
 
         return $dataOut;
     }
@@ -345,7 +377,7 @@ class Set extends Resource
                     }
                     break;
                 case 'allow_oai':
-                    $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($val));
+                    $this->setProperty(OpenSkos::ALLOW_OAI, new Literal($this->toBoolean($val), null, 'xsd:boolean'));
                     break;
                 case 'OAI_baseURL':
                     if (filter_var($val, FILTER_VALIDATE_URL)) {
