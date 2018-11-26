@@ -287,7 +287,7 @@ class Repository implements InterfaceRepository
             $numFound
         );
 
-        if (date_format($from, 'YmdHis') === '19700101000000') {
+        if ($from && date_format($from, 'YmdHis') === '19700101000000') {
             //The unix Epoch gets converted to integer zero the the resumption token. I can't seem to get around it
             $tosub = new \DateInterval('PT01S');
             $from->sub($tosub);
