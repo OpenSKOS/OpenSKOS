@@ -93,9 +93,9 @@ class Autocomplete
             }
         }
 
-        $searchTextWild = sprintf('(%s)', $searchText);
-        $searchTextPlain = preg_replace('#\*$#', '', $searchText);
-        $searchTextPlain = sprintf('(%s)', preg_replace('#^\*#', '', $searchText));
+        $searchTextWild = $searchText;
+        //$searchTextPlain = preg_replace('#\*$#', '', $searchText);
+        $searchTextPlain = preg_replace('#\ #', '\\ ', $searchText);
 
 
         $prefix = '';
@@ -114,18 +114,18 @@ class Autocomplete
             foreach ($options['label'] as $label) {
                 // boost important labels
                 $boost = '';
-                $searchText = $searchTextWild;
+                $searchText = $searchTextPlain;
                 if ($label === 'prefLabel') {
                     $boost = '^40';
-                    $searchText = $searchTextPlain;
+                    //$searchText = $searchTextPlain;
                 }
                 if ($label === 'altLabel') {
                     $boost = '^20';
-                    $searchText = $searchTextPlain;
+                    //$searchText = $searchTextPlain;
                 }
                 if ($label === 'hiddenLabel') {
                     $boost = '^10';
-                    $searchText = $searchTextPlain;
+                    //$searchText = $searchTextPlain;
                 }
 
                 if (!empty($options['languages'])) {
@@ -137,7 +137,7 @@ class Autocomplete
                 }
             }
         }
-        $searchText = $searchTextWild;
+        $searchText = $searchTextPlain;
 
         // notes
         if (!empty($options['properties'])) {
