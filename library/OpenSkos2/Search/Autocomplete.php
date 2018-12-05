@@ -117,15 +117,12 @@ class Autocomplete
                 $searchText = $searchTextPlain;
                 if ($label === 'prefLabel') {
                     $boost = '^40';
-                    //$searchText = $searchTextPlain;
                 }
                 if ($label === 'altLabel') {
                     $boost = '^20';
-                    //$searchText = $searchTextPlain;
                 }
                 if ($label === 'hiddenLabel') {
                     $boost = '^10';
-                    //$searchText = $searchTextPlain;
                 }
 
                 if (!empty($options['languages'])) {
@@ -136,8 +133,8 @@ class Autocomplete
                     $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
                 }
             }
+            $searchText = $searchTextPlain;
         }
-        $searchText = $searchTextPlain;
 
         // notes
         if (!empty($options['properties'])) {
