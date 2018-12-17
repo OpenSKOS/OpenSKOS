@@ -336,7 +336,7 @@ class Set extends Resource
 
 
         $allowOai =     $this->getPropertySingleValue(OpenSkos::ALLOW_OAI);
-        $dataOut['allow_oai'] = $this->booleanToCheckbox($allowOai->getValue());
+        $dataOut['allow_oai'] = isset($allowOai) ? $this->booleanToCheckbox($allowOai->getValue()) : 'N';
 
         return $dataOut;
     }
