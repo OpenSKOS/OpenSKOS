@@ -143,7 +143,12 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $inCollection = $concept->getPropertySingleValue(OpenSkos::SET);
 
-        $collection = $setManager->fetchByUri($inCollection);
+        //It could be that the user is saving a new concept with no concept scheme.
+        //  In that case, we let the validator find the issue, instead of letting fetchByUri throw an exception
+        $collection = null;
+        if($inCollection) {
+            $collection = $setManager->fetchByUri($inCollection);
+        }
 
         /*Reminder: Big merge conflict resolved here. Check it's working */
         $conceptManager = $this->getConceptManager();
