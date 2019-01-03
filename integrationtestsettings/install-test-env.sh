@@ -2,7 +2,7 @@
 
 #install apache2
 
-cp  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/application.ini /home/travis/build/OpenSKOS/OpenSKOS/application/configs/application.ini 
+cp  ${TRAVIS_BUILD_DIR}/integrationtestsettings/application.ini ${TRAVIS_BUILD_DIR}/application/configs/application.ini
 
 # install solr:
 
@@ -15,8 +15,8 @@ mkdir /opt/solr
 cp -r /tmp/solr/solr-5.5.4/* /opt/solr 
 mkdir -p /opt/solr/server/solr/openskos/conf 
 touch /opt/solr/server/solr/openskos/core.properties
-cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/solrconfig.xml /opt/solr/server/solr/openskos/conf/solrconfig.xml
-cp /home/travis/build/OpenSKOS/OpenSKOS/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
+cp ${TRAVIS_BUILD_DIR}/data/solr/solrconfig.xml /opt/solr/server/solr/openskos/conf/solrconfig.xml
+cp ${TRAVIS_BUILD_DIR}/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
 chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh 
 
 # install fuseki:
@@ -25,12 +25,12 @@ mv /opt/apache-jena-fuseki-2.3.0 /opt/apache-jena-fuseki
 chmod -R ugo+rw /opt/apache-jena-fuseki 
 chmod +x /opt/apache-jena-fuseki/fuseki-server /opt/apache-jena-fuseki/bin/* 
 mkdir -p /opt/apache-jena-fuseki/run 
-cp -r /home/travis/build/OpenSKOS/OpenSKOS/data/fuseki/configuration /opt/apache-jena-fuseki/run/configuration
+cp -r ${TRAVIS_BUILD_DIR}/data/fuseki/configuration /opt/apache-jena-fuseki/run/configuration
 mkdir /opt/apache-jena-fuseki/logs
-chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-fuseki.sh 
+chmod 755 ${TRAVIS_BUILD_DIR}/integrationtestsettings/start-fuseki.sh
 
 #mysql
-chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-create.sql 
+chmod 755  ${TRAVIS_BUILD_DIR}/integrationtestsettings/openskos-create.sql
 
 # initialisation
-chmod 755  /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos-init.sh
+chmod 755  ${TRAVIS_BUILD_DIR}/integrationtestsettings/openskos-init.sh
