@@ -14,9 +14,6 @@ matrix:
     - php: hhvm
 
 before_install:
-  - echo $TRAVIS_BUILD_DIR
-  - ls $TRAVIS_BUILD_DIR
-  - exit
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi -y
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -24,7 +21,7 @@ before_install:
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo find /etc/apache2 -print
-  - sudo cp $TRAVIS_BUILD_DIR/OpenSKOS/integrationtestsettings/openskos.conf /etc/apache2/sites-available/
+  - sudo cp $TRAVIS_BUILD_DIR/integrationtestsettings/openskos.conf /etc/apache2/sites-available/
   - sudo a2dissite 000-default
   - sudo a2ensite openskos
   - sudo service apache2 restart
@@ -35,7 +32,7 @@ before_install:
 install:
   - composer install --dev --prefer-dist
   - sudo rm -rf /var/www/html 
-  - sudo ln -s $TRAVIS_BUILD_DIR/OpenSKOS /var/www/html
+  - sudo ln -s $TRAVIS_BUILD_DIR /var/www/html
   - sudo usermod -a -G travis www-data
   - sudo groups www-data
   - find $TRAVIS_BUILD_DIR -type d -exec chmod ugo+x {} \;
