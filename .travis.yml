@@ -21,7 +21,7 @@ before_install:
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo find /etc/apache2 -print
-  - sudo cp $HOME/build/OpenSKOS/OpenSKOS/integrationtestsettings/openskos.conf /etc/apache2/sites-available/
+  - sudo cp $TRAVIS_BUILD_DIR/OpenSKOS/OpenSKOS/integrationtestsettings/openskos.conf /etc/apache2/sites-available/
   - sudo a2dissite 000-default
   - sudo a2ensite openskos
   - sudo service apache2 restart
@@ -32,10 +32,10 @@ before_install:
 install:
   - composer install --dev --prefer-dist
   - sudo rm -rf /var/www/html 
-  - sudo ln -s $HOME/build/OpenSKOS/OpenSKOS /var/www/html
+  - sudo ln -s $TRAVIS_BUILD_DIR/OpenSKOS/OpenSKOS /var/www/html
   - sudo usermod -a -G travis www-data
   - sudo groups www-data
-  - find $HOME/build -type d -exec chmod ugo+x {} \;
+  - find $TRAVIS_BUILD_DIR -type d -exec chmod ugo+x {} \;
   - chmod -R ugo+rwx cache
   - chmod -R ugo+rwx data
   - chmod -R ugo+rwx public/data
