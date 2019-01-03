@@ -17,10 +17,10 @@ mkdir -p /opt/solr/server/solr/openskos/conf
 touch /opt/solr/server/solr/openskos/core.properties
 cp ${TRAVIS_BUILD_DIR}/data/solr/solrconfig.xml /opt/solr/server/solr/openskos/conf/solrconfig.xml
 cp ${TRAVIS_BUILD_DIR}/data/solr/schema.xml /opt/solr/server/solr/openskos/conf/schema.xml
-chmod 755 /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/start-solr.sh 
+chmod 755 ${TRAVIS_BUILD_DIR}/integrationtestsettings/start-solr.sh
 
 # install fuseki:
-tar -zxvf /home/travis/build/OpenSKOS/OpenSKOS/integrationtestsettings/apache-jena-fuseki-2.3.0.tar.gz -C /opt
+tar -zxvf ${TRAVIS_BUILD_DIR}/integrationtestsettings/apache-jena-fuseki-2.3.0.tar.gz -C /opt
 mv /opt/apache-jena-fuseki-2.3.0 /opt/apache-jena-fuseki
 chmod -R ugo+rw /opt/apache-jena-fuseki 
 chmod +x /opt/apache-jena-fuseki/fuseki-server /opt/apache-jena-fuseki/bin/* 
