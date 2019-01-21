@@ -84,6 +84,7 @@ In this way the ini supports collection ordering for more than 1 instances.
 You can install your favourite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
+
 adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html or otherwise: https://docs.zendframework.com/zend-db/adapter/)
 
 ## 2.1 Setting Up Your VHOST
@@ -126,6 +127,7 @@ where you can manage all the other entities of the application.
 
 
 # 4. Apache Jena Fuseki setup
+
 Openskos is compatible with Fuseki 2 or Fuzeki 3 for storage. It has been tested up to Fuzeki 3.8 (the latest stable version at time of writing)
 
 Installing Fuseki 2 for development purposes:
@@ -140,7 +142,6 @@ Installing Fuseki 2 for development purposes:
 `./fuseki-server --update`
   1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
 5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
-
 
 ## 4.1 Jena Updates
 Several bug fixes were made to the rules/openskos.ttl file in October 2018, on both the OpenSkos 2.2 (Master at time of
@@ -233,6 +234,7 @@ npm install
 npm run doc
 ```
 Visit: http://example.com/apidoc/
+
 
 ## 6.6. Using the API
 Full HTML documentation of the API is supplied and is available in HTML at `<baseruri>/apidoc`
