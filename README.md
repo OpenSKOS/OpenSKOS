@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
 
-1 Install the OpenSKOS code
-===========================
+# 1. Install the OpenSKOS code
 Copy the code to a location of your choice.
 
 Make sure all files are readable by your webserver. Make sure the directories
@@ -11,19 +10,19 @@ Make sure all files are readable by your webserver. Make sure the directories
 For security reasons you can place the `data` directory outside your
 webserver's document root.
 
+
 1.1 Composer
 ------------
-Run composer install to install some dependencies like zend framework 1.12
+Run `composer install` to install some dependencies such as zend framework 1.12
 
-1.2 Configuration
------------------
+## 1.2 Configuration
 To configure OpenSKOS you have to rename:
 
-    APPROOT/application/configs/application.ini.dist
+`APPROOT/application/configs/application.ini.dist`
 
 to
 
-    APPROOT/application/configs/application.ini
+`APPROOT/application/configs/application.ini`
 
 Now you can edit the `APPROOT/application/configs/application.ini`.
 
@@ -34,12 +33,12 @@ configuration section marked by the Environment Variable `APPLICATION_ENV` (see
 If you experience any problems you may want to modify settings in the config,
 to show you more verbose error messages:
 
+```ini
     resources.frontController.params.displayExceptions=1
     phpSettings.display_errors = 1
+```
 
-
-1.2.1 OAI-PMH setup
--------------------
+### 1.2.1 OAI-PMH setup
 OpenSKOS includes a OAI harvester. To configure OAI Service providers, use the
 "instances" part of the configuration. Two types of instances are supported:
 
@@ -48,12 +47,15 @@ OpenSKOS includes a OAI harvester. To configure OAI Service providers, use the
 
 The setup for "openskos" types is easy:
 
+```ini
     instances.openskos.type=openskos
     instances.openskos.url=http://HOSTNAME
     instances.openskos.label=YOUR LABEL
+```
 
 For "external" types use this syntax:
 
+```ini
     instances.example1.type=external
     instances.example1.url=http://HOSTNAME
     instances.example1.label=EXAMPLE LABEL
@@ -61,19 +63,19 @@ For "external" types use this syntax:
     instances.example1.metadataPrefix=METADATAPREFIX
     #optional:
     instances.example1.set=SETSPEC
+```
 
 You can define multiple instances by using a different key (in the above example
 the key `example1` is used).
 
-1.2.2 ConceptScheme ordering
-----------------------------
+### 1.2.2 ConceptScheme ordering
 The application.ini allows you to change the order in which concept schemes are listed everywhere.
 The scheme order is made in this sequence:
  - group the schemes according to their collection
  - order the groups by the desired collection order
  - sort the schemes inside each group alphabetically
 
-The collection order can be set in the ini by setting the editor.schemeOrder.collections[]="<collectionUri>"
+The collection order can be set in the ini by setting the `editor.schemeOrder.collections[]="<collectionUri>"`
 All unlisted collections will be ordered after the listed ones.
 All listed collections that re not present in the DB will be skipped.
 In this way the ini supports collection ordering for more than 1 instances.
@@ -82,12 +84,13 @@ In this way the ini supports collection ordering for more than 1 instances.
 You can install your favourite webserver with PHP support.
 All development and testing was done using Apache/2.2.15 with PHP 5.3.8
 Make sure your PHP installation supports at least one supported Database
-adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html or otherwise: https://docs.zendframework.com/zend-db/adapter/ )
+
+adapters (see http://framework.zend.com/manual/en/zend.db.adapter.html or otherwise: https://docs.zendframework.com/zend-db/adapter/)
 
 ## 2.1 Setting Up Your VHOST
 The following is a sample VHOST you might want to consider for your project.
 
-```
+```apache_conf
 <VirtualHost *:80>
    DocumentRoot "/PATH/TO/CODE/public"
    ServerName YOUR.SERVER.NAME
@@ -107,7 +110,7 @@ The following is a sample VHOST you might want to consider for your project.
 
 # 3. Database setup
 Install your choice of Zend Framework supported Database engine (see
-http://framework.zend.com/manual/en/zend.db.adapter.html). The credentials to
+http://framework.zend.com/manual/en/zend.db.adapter.html or otherwise: https://docs.zendframework.com/zend-db/adapter/). The credentials to
 access your database can be configured in the application's configuration.
 
 Once you have created an empty database, you have to run the SQL script
@@ -115,14 +118,17 @@ Once you have created an empty database, you have to run the SQL script
 
 You also have to run the php-script to create a tenant:
 
-    php APPROOT/tools/tenant.php --code INST_CODE --name INST_NAME --email EMAIL --password PWD create
+```sh
+php APPROOT/tools/tenant.php --code INST_CODE --name INST_NAME --email EMAIL --password PWD create
+```
 
 With this account created you can login into the dashboard,
 where you can manage all the other entities of the application.
 
 
 # 4. Apache Jena Fuseki setup
-Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
+
+Openskos is compatible with Fuseki 2 or Fuzeki 3 for storage. It has been tested up to Fuzeki 3.8 (the latest stable version at time of writing)
 
 Installing Fuseki 2 for development purposes:
 
@@ -137,9 +143,16 @@ Installing Fuseki 2 for development purposes:
   1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
 5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
 
+## 4.1 Jena Updates
+Several bug fixes were made to the rules/openskos.ttl file in October 2018, on both the OpenSkos 2.2 (Master at time of
+ update ) and Meertens Merge (Development at time of update) branches. When upgrading to these versions, please update 
+ the configuration files on the Jena server to the versions located in `./data/fuseki/configuration`.   
+
 # 5. Apache Solr Setup
 You have to have a java VM installed prior to installing Solr!
-Download a 3.4 release of Apache Solr and extract it somewhere on your server:
+The version of Solr used during development was 7.4.0. Other versions going back to Solr 4 are supported, but it will be 
+necessary to adapt the Solr configuration files to the syntax for these versions.
+
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 - go to the `example` directory and create a directory named `openskos`
@@ -148,8 +161,17 @@ http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 You can now start Solr (in this example with 1,024 MB memory assigned):
 
+```sh
     java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
+```
 
+## 5.1 Solr Updates
+The Solr configuration file was substantially altered during the Meertens Merge project. If upgrading, you will need
+to take the example `solrconfig.xml` and `schema.xml` from `./data/solr`, and adapt them to your Solr version.
+
+After updating the configuration, you should delete the contents of the Solr database and re-index using the 
+`./tools/jena2Solr.php` script. If you skip this step, OpenSkos will remain functional, but the internal content of the 
+Solr core will become inconsistent as records are updated.
 
 # 6. Data Ingest
 Once you have the application running you can start adding data,
@@ -162,7 +184,9 @@ There are three ways to populate a collection:
 ## 6.1 REST-interface
 Send data via the REST-API, e.g. like this:
 
-> curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
+```sh
+curl -H "Accept: text/xml" -X POST -T sample-concept.rdf http://localhost/OpenSKOS/public/api/concept
+```
 
 You find the required format of the input data described in the API-docs under:
 http://openskos.org/api#concept-create
@@ -205,17 +229,81 @@ Once this is complete the data from the v1 instance will be available in the tri
 ## 6.5 API Documentation
 Generate API Documentation
 
-```
+```sh
 npm install
 npm run doc
 ```
 Visit: http://example.com/apidoc/
 
-## 7 Development
-To test / develop the application you can run
+
+## 6.6. Using the API
+Full HTML documentation of the API is supplied and is available in HTML at `<baseruri>/apidoc`
+
+# 7. Development
+
+## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2
+_**WARNING:** It is very strongly recommended to back up all data before performing the following steps_
+
+In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
+Jena triple store.
+
+To migrate from OpenSKOS 1.0 or 2.1 to 2.2, first read sections 4.1 and 5.1 about updating the Jena and Solr 
+configurations. Both steps are necessary when upgrading to OpenSkos 2.2
+
+Then perform the following steps:
+
+-- `/tools/migrate_tenant_collection.php` (migrates tenants and collections from MySQL 
+to institutions and sets of Triple store)
+
+-- optionally `/tools/labelsToXl.php` (this is a picturae script slightly extended by 
+Meertens), if skos xl labels are demanded.
+
+Examples of the corresponding command lines are:
 
 ```
+php migrate_tenant_collection.php --db-hostname=localhost --db-database=geheim 
+--db-password=geheim --db-username=ookgeheim --debug=1
+```
+
+Adding skos xl labels is also possible since version 2.1. To activate, first edit the tenant to enable SkosXL, and then 
+update Jena with: 
+
+`labelsToXl.php –add=1`
+
+The SOLR schema.xml file has been updated in version 2.2. Having completed the migration, please 
+empty the core, and then update the schema.xml file. Then fill the Solr database with the script: 
+
+`php tools/jena2solr.php`
+
+Max notations are now maintained in a separate MySQL table. Use the script `./data/dbchanges/20180724.sql` to update the 
+db schema.
+
+Then execute:
+`php tools/updateMaxNotation.php`
+
+-- Publisher URI
+And extra triple needs to be added to concepts to allow continued functioning of OpenSKOS.
+
+`php tools/fillConceptPublisher.php`
+
+
+
+
+## 7.2. Import (`/tools/skos2openskos.php`)
+Example of a command line:
+
+```sh
+php skos2openskos.php --setUri=http://htdl/clavas-org/set 
+--userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f 
+--file=clavas-organisations.xml
+```
+
+# 8 Development using Docker
+To test / develop the application you can run
+
+```sh
 docker-compose up --build
+composer install
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 

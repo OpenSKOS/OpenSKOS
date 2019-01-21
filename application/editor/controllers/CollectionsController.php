@@ -19,30 +19,44 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+use OpenSkos2\ConceptScheme;
+use OpenSkos2\Namespaces\OpenSkos;
+use OpenSkos2\Rdf\Literal;
+
 class Editor_CollectionsController extends OpenSKOS_Controller_Editor
 {
     public function indexAction()
     {
         $this->_requireAccess('editor.collections', 'index');
 
-        $this->view->collections = $this->_tenant->findDependentRowset('OpenSKOS_Db_Table_Collections');
+        // Clears the schemes cache when we start managing them.
+        $cache = $this->getDI()->get('Editor_Models_SetsCache');
+        $cache->clearCache();
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
 
-        $model = new OpenSKOS_Db_Table_Collections();
+        $this->view->collections= $cache->fetchAll();
     }
 
     public function editAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
 
-        $collection = $this->_getCollection();
+        $set = $this->_getSet()[0];
 
-        if (! OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.delete-all-concepts-in-collection', null)) {
-            $collection->getUploadForm()->removeElement('delete-before-import');
+        if(!$set) { //Inserting a new set?
+            $set = new \OpenSkos2\Set();
         }
 
-        $this->view->assign('collection', $collection);
-        $this->view->assign('jobs', $collection->getJobs());
-        $this->view->assign('harvestjobs', $collection->getJobs(OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST));
+
+        /*
+        if (! OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.delete-all-concepts-in-collection', null)) {
+            $set->getUploadForm()->removeElement('delete-before-import');
+        }
+        */
+
+        $this->view->assign('set', $set);
+        $this->view->assign('jobs', $set->getJobs());
+        $this->view->assign('harvestjobs', $set->getJobs(OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST));
         $this->view->assign('max_upload_size', Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('max_upload_size'));
     }
 
@@ -50,17 +64,19 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     {
         $this->_requireAccess('editor.collections', 'manage');
 
-        $collection = $this->_getCollection();
-        if (!$collection->OAI_baseURL) {
+        $set = $this->_getSet();
+
+        $set_uri = $set[0]->getUri();
+        if (!$set->OAI_baseURL) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('This collection does not appear to have a OAI Server as source.'));
-            $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+            $this->_helper->redirector('edit', null, null, array('collection' => $set->code));
             return;
         }
-        $form = $collection->getOaiJobForm();
+        $form = $set->getOaiJobForm();
         $formData = $this->_request->getPost();
         if ($form->isValid($formData)) {
             $parameters = $form->getValues();
-            $parameters['url'] = $collection->OAI_baseURL;
+            $parameters['url'] = $set->OAI_baseURL;
             if (isset($parameters['from']) && $parameters['from']) {
                 $parameters['from'] = strtotime($parameters['from']);
             }
@@ -80,7 +96,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             $parameters['deletebeforeimport'] = (int)$parameters['deletebeforeimport'] == 1;
             $model = new OpenSKOS_Db_Table_Jobs();
             $job = $model->fetchNew()->setFromArray(array(
-                'collection' => $collection->id,
+                'set_uri' => $set_uri,
                 'user' => Zend_Auth::getInstance()->getIdentity()->id,
                 'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_HARVEST,
                 'parameters' => serialize($parameters),
@@ -90,25 +106,29 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             return $this->_forward('edit');
         }
         $this->getHelper('FlashMessenger')->addMessage(_('An OAI Harvest job is scheduled'));
-        $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+        $this->_helper->redirector('edit', null, null, array('set' => $set->code));
     }
 
     public function importAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
 
-        $collection = $this->_getCollection();
+        $collections = $this->_getSet();
+        $set = $collections[0];
+        $set_uri = $set->getProperty(\OpenSkos2\Namespaces\OpenSkos::CONCEPTBASEURI)[0]->getUri();
+        $tenant_code = $set->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT)[0]->getValue();
+        //TODO: Tenant
 
-        $form = $collection->getUploadForm();
+        $form = $set->getUploadForm();
         $formData = $this->_request->getPost();
         if ($form->isValid($formData)) {
             $upload = new Zend_File_Transfer_Adapter_Http();
             $path = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('upload_path');
-            $tenant_path = $path .'/'.$collection->tenant;
+            $tenant_path = $path .'/'.$tenant_code;
             if (!is_dir($tenant_path)) {
                 if (!@mkdir($tenant_path, 0777, true)) {
                     $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('Failed to create upload folder'));
-                    $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+                    $this->_helper->redirector('edit', null, null, array('set' => $set->code));
                     return;
                 }
             }
@@ -142,7 +162,7 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
                 'onlyNewConcepts' => (int)$formData['onlyNewConcepts'] == 1,
             );
             $job = $model->fetchNew()->setFromArray(array(
-                'collection' => $collection->id,
+                'set_uri' => $set_uri,
                 'user' => Zend_Auth::getInstance()->getIdentity()->id,
                 'task' => OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT,
                 'parameters' => serialize($parameters),
@@ -152,38 +172,59 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
             return $this->_forward('edit');
         }
         $this->getHelper('FlashMessenger')->addMessage(_('An import job is scheduled'));
-        $this->_helper->redirector('edit', null, null, array('collection' => $collection->code));
+        $this->_helper->redirector('edit', null, null, array('set' => $set->code));
     }
 
     public function saveAction()
     {
         $this->_requireAccess('editor.collections', 'manage');
-
         if (!$this->getRequest()->isPost()) {
             $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('No POST data recieved'));
             $this->_helper->redirector('index');
         }
-        $collection = $this->_getCollection();
+        $set = $this->_getSet()[0];
 
-        if (null!==$this->getRequest()->getParam('delete')) {
-            if (!$collection->id) {
-                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty collection.'));
+        if(!$set) { //Inserting a new set?
+            $params = $this->getRequest()->getParams();
+            $set = new \OpenSkos2\Set();
+            $form = $set->getForm();
+            if (!$form->isValid($this->getRequest()->getParams())) {
+                return $this->_forward('edit');
+            } else {
+                $set->arrayToData(array('tenant' => $this->_tenant->getCode()));
+                $set->arrayToData($params);
+                $set->generateUri();
+
+                try {
+                    $this->getSetsManager()->insert($set);
+                } catch (Zend_Db_Statement_Exception $e) {
+                    $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
+                    return $this->_forward('edit');
+                }
+                $this->getHelper('FlashMessenger')->addMessage('Data saved');
                 $this->_helper->redirector('index');
             }
-            $collection->delete();
-            $this->getHelper('FlashMessenger')->addMessage(_('The collection has been deleted, it might take a while before changes are committed to our system.'));
+            return;
+        }
+
+        if (null!==$this->getRequest()->getParam('delete')) {
+            if (!$set->id) {
+                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(_('You can not delete an empty set.'));
+                $this->_helper->redirector('index');
+            }
+            $set->delete();
+            $this->getHelper('FlashMessenger')->addMessage(_('The set has been deleted, it might take a while before changes are committed to our system.'));
             $this->_helper->redirector('index');
         }
 
-        $form = $collection->getForm();
+        $form = $set->getForm();
         if (!$form->isValid($this->getRequest()->getParams())) {
             return $this->_forward('edit');
         } else {
-            $collection
-                ->setFromArray($form->getValues())
-                ->setFromArray(array('tenant' => $this->_tenant->code));
+            $set->arrayToData( $form->getValues());
+                //->setFromArray(array('tenant' => $this->_tenant->code));
             try {
-                $collection->save();
+                $this->getSetsManager()->replace($set);
             } catch (Zend_Db_Statement_Exception $e) {
                 $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage($e->getMessage());
                 return $this->_forward('edit');
@@ -194,21 +235,38 @@ class Editor_CollectionsController extends OpenSKOS_Controller_Editor
     }
 
     /**
-     * @return OpenSKOS_Db_Table_Row_Collection
+     * @return OpenSKOS_Db_Table_Row_Set
      */
-    protected function _getCollection()
+    protected function _getSet()
     {
-        $model = new OpenSKOS_Db_Table_Collections();
-        if (null === ($code = $this->getRequest()->getParam('collection'))) {
-            //create a new collection:
-            $collection = $model->createRow(array('tenant' => $this->_tenant->code));
-        } else {
-            $collection = $model->findByCode($code, $this->_tenant->code);
-            if (null === $collection) {
-                $this->getHelper('FlashMessenger')->setNamespace('error')->addMessage(sprintf(_('Collection `%s` not found', $code)));
-                $this->_helper->redirector('index');
+        $code = $this->getRequest()->getParam('collection');
+
+        if (!empty($code)) {
+            $set = $this->getSetsManager()->fetch(
+                [
+                 OpenSkos::CODE => new Literal($code)
+                ]
+            );
+
+            //!TODO Handle deleted all around the system.
+            /*
+            if ($collection->isDeleted()) {
+                throw new ResourceNotFoundException('The concept scheme has been deleted and is no longer available.');
             }
+            */
+
+            return $set;
+        } else {
+            return null;
         }
-        return $collection;
     }
+
+    /**
+     * @return OpenSkos2\SetManager
+     */
+    protected function getSetsManager()
+    {
+        return $this->getDI()->get('\OpenSkos2\SetManager');
+    }
+
 }

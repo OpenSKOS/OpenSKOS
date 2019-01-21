@@ -38,6 +38,7 @@ return [
             $sparqlOptions['updateUri']
         );
     },
+
     'Solarium\Client' => function (ContainerInterface $c) {
 
         $solr = OpenSKOS_Application_BootstrapAccess::getOption('solr');
@@ -59,12 +60,27 @@ return [
             OpenSKOS_Cache::getCache()
         );
 
-        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        $tenant = $user->tenant;
         if (!empty($tenant)) {
-            $conceptsSchemesCache->setTenantCode($tenant->code);
+            $conceptsSchemesCache->setTenantCode($tenant);
         }
 
         return $conceptsSchemesCache;
+    },
+    'Editor_Models_SetsCache' => function (ContainerInterface $c) {
+        $collectionsCache = new Editor_Models_SetsCache(
+            $c->get('OpenSkos2\SetManager'),
+            OpenSKOS_Cache::getCache()
+        );
+
+        $user = OpenSKOS_Db_Table_Users::fromIdentity();
+        $tenant = $user->tenant;
+        if (!empty($tenant)) {
+            $collectionsCache->setTenantCode($tenant);
+        }
+
+        return $collectionsCache;
     },
     'OpenSkos2\ConceptManager' => function (ContainerInterface $c) {
         $conceptManager = new OpenSkos2\ConceptManager(

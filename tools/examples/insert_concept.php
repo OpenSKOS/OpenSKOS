@@ -17,6 +17,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
 
+/**
+ * Does not work for Meertens, for which Validator\Resource has much more parameters
+ * 
+ */
 require dirname(__FILE__) . '/../autoload.inc.php';
 
 use OpenSkos2\Namespaces\DcTerms;

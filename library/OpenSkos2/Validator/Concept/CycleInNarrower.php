@@ -24,13 +24,9 @@ use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Rdf\Serializer\NTriple;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 
-class CycleInNarrower extends AbstractConceptValidator implements ResourceManagerAware
+class CycleInNarrower extends AbstractConceptValidator
 {
-
-    use ResourceManagerAwareTrait;
 
     /**
      * Validate if a concept will make a cyclic relationship, this is supported by SKOS
@@ -50,7 +46,7 @@ class CycleInNarrower extends AbstractConceptValidator implements ResourceManage
         $uri = new Uri($concept->getUri());
 
         $query = '?narrower skos:narrower+ ' . (new NTriple())->serialize($uri) . PHP_EOL
-                . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($narrowerTerms) . '))';
+            . ' FILTER(?narrower IN (' . (new NTriple())->serializeArray($narrowerTerms) . '))';
         if ($this->resourceManager->ask($query)) {
             $this->errorMessages[] = "Cyclic narrower relation detected for concept: {$concept->getUri()}";
 

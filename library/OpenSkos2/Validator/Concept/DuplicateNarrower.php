@@ -25,6 +25,7 @@ use OpenSkos2\Validator\AbstractConceptValidator;
 
 class DuplicateNarrower extends AbstractConceptValidator
 {
+
     /**
      * @param Concept $concept
      * @return bool

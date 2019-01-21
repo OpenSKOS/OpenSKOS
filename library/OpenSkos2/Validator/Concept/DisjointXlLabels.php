@@ -23,14 +23,11 @@ use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\OpenSkosException;
 
-class DisjointXlLabels extends AbstractConceptValidator implements ResourceManagerAware
+class DisjointXlLabels extends AbstractConceptValidator
 {
-    use ResourceManagerAwareTrait;
     
     /**
      * Validate if a concept's xl labels are pairwise disjoint as stated in

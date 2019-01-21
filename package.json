@@ -1,7 +1,7 @@
 {
   "name": "openskos",
   "version": "1.0.0",
-  "description": "Openskos editor",
+  "description": "OpenSKOS backend",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -13,21 +13,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/picturae/OpenSKOS.git"
+    "url": "git+https://github.com/OpenSKOS/OpenSKOS.git"
   },
-  "author": "Picturae",
+  "author": "Picturae, Meertens institute",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/picturae/OpenSKOS/issues"
+    "url": "https://github.com/OpenSKOS/OpenSKOS/issues"
   },
-  "homepage": "https://github.com/picturae/OpenSKOS#readme",
+  "homepage": "https://github.com/OpenSKOS/OpenSKOS#readme",
   "devDependencies": {
     "apidoc": "^0.16"
   },
   "apidoc": {
-    "title": "OpenSKOS Editor",
+    "title": "OpenSKOS backend",
+    "url": "<protocol>://<server>/public",
     "version": "1.0.0",
-    "description": "OpenSKOS provides an API and editor for SKOS concepts: http://www.w3.org/2004/02/skos/"
+    "template": {
+        "forceLanguage": "en"
+    },
+    "description": "OpenSKOS provides an API for OpenSKOS institutions, sets and relation types, and SKOS concept schemata, collections and concepts "
   },
   "dependencies": {
     "apidoc": "^0.16.1"

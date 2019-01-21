@@ -21,14 +21,22 @@ namespace OpenSkos2\Bridge;
 
 use EasyRdf\Graph;
 use OpenSkos2\Namespaces\Rdf;
-use OpenSkos2\Collection;
-use OpenSkos2\CollectionCollection;
+use OpenSkos2\Namespaces\VCard;
+use OpenSkos2\Set;
+use OpenSkos2\SetCollection;
 use OpenSkos2\SkosXl\Label;
 use OpenSkos2\SkosXl\LabelCollection;
 use OpenSkos2\Concept;
 use OpenSkos2\ConceptCollection;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\ConceptSchemeCollection;
+use OpenSkos2\Namespaces\Org;
+use OpenSkos2\SkosCollection;
+use OpenSkos2\SkosCollectionCollection;
+use OpenSkos2\Tenant;
+use OpenSkos2\TenantCollection;
+use OpenSkos2\RelationType;
+use OpenSkos2\RelationTypeCollection;
 use OpenSkos2\Person;
 use OpenSkos2\Exception\InvalidArgumentException;
 use OpenSkos2\Rdf\Literal;
@@ -38,6 +46,13 @@ use OpenSkos2\Rdf\Uri;
 
 class EasyRdf
 {
+
+    private static $allowedSubresources = [VCard::ORG, VCard::ADR];
+    private static $skosTypes = [Tenant::TYPE, Set::TYPE, ConceptScheme::TYPE,
+        SkosCollection::TYPE, Concept::TYPE, Person::TYPE, RelationType::TYPE, Org::FORMALORG,
+        Label::TYPE
+        ];
+
     /**
      * @param \EasyRdf\Graph $graph to $read
      * @param string $expectedType If expected type is set, a collection of that type will be enforced.
@@ -47,32 +62,39 @@ class EasyRdf
     public static function graphToResourceCollection(Graph $graph, $expectedType = null, $allowedChildrenTypes = [])
     {
         $collection = self::createResourceCollection($expectedType);
-
         $alreadyAddedAsChild = [];
+
         foreach ($graph->resources() as $resource) {
             if (isset($alreadyAddedAsChild[$resource->getUri()])) {
                 // We skip resources which are part of other resource
                 continue;
             }
-            
-            $openskosResource = self::toOpenskosResource($resource, $allowedChildrenTypes, $alreadyAddedAsChild);
 
+           
+            $openskosResource = self::toOpenskosResource($resource, $allowedChildrenTypes, $alreadyAddedAsChild);
             if ($openskosResource === false) {
                 // Filter out resources which are not fully described.
                 continue;
             }
-            
             $collection[] = $openskosResource;
         }
-        
+
         return $collection;
     }
-    
+
+    /*
+     * $resource Resource to convert to OpenSkos resource
+     * $allowedChildrenTypes Which types can be accepted as child resources (Used mainly for XL labels. Other accepted
+     *                         types are hardcoded
+     * $alreadyAddedAsChild Flagged once child resource has been added.
+     *
+     * WARNING: This function is recursive, and will call itself indefinitely to add child resources.
+     */
     protected static function toOpenskosResource($resource, $allowedChildrenTypes, &$alreadyAddedAsChild)
     {
         /** @var $resource \EasyRdf\Resource */
-        $type = $resource->get('rdf:type');
-
+        $type = self::getTypeOfEasyRdfResource($resource);
+                
         // Filter out resources which are not fully described.
         if (!$type) {
             return false;
@@ -82,13 +104,13 @@ class EasyRdf
             $resource->getUri(),
             $type
         );
-
+        
         foreach ($resource->propertyUris() as $propertyUri) {
             // We already have the rdf type proprty from the resource creation. No need to put it again.
             if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
                 continue;
             }
-            
+
             foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
                 if ($propertyValue instanceof \EasyRdf\Literal) {
                     $openskosResource->addProperty(
@@ -100,6 +122,14 @@ class EasyRdf
                         )
                     );
                 } elseif ($propertyValue instanceof \EasyRdf\Resource) {
+                    if ($propertyValue->isBNode()) {
+                        if (in_array($propertyUri, self::$allowedSubresources)) {
+                            $subResource = self::toOpenskosSubResource($propertyValue);
+                            $openskosResource->addProperty($propertyUri, $subResource);
+                            continue;
+                        }
+                    }
+
                     // Check if it is an allowed fully described child resource.
                     if (in_array($propertyUri, $allowedChildrenTypes)) {
                         $childResource = self::toOpenskosResource($propertyValue, [], $alreadyAddedAsChild);
@@ -109,16 +139,48 @@ class EasyRdf
                             continue;
                         }
                     }
-                    
-                    // Not a fully described resource so we just add the uri.
+
+                    // Not a fully described resource or not a subresource so we just add the uri.
                     $openskosResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
                 }
             }
         }
-        
+
         return $openskosResource;
     }
-    
+
+    protected static function toOpenskosSubResource($resource)
+    {
+        $openskosResource = new Resource($resource->getUri());
+
+        foreach ($resource->propertyUris() as $propertyUri) {
+            // We already have the rdf type proprty from the resource creation. No need to put it again.
+            if ($propertyUri === Rdf::TYPE && $openskosResource->hasProperty(Rdf::TYPE)) {
+                throw new InvalidArgumentException(
+                    "Unexpected value found for property {$resource->getUri} is a subresource "
+                    . "and should not have type. "
+                );
+            }
+
+            foreach ($resource->all(new \EasyRdf\Resource($propertyUri)) as $propertyValue) {
+                if ($propertyValue instanceof \EasyRdf\Literal) {
+                    $openskosResource->addProperty(
+                        $propertyUri,
+                        new Literal(
+                            $propertyValue->getValue(),
+                            $propertyValue->getLang(),
+                            $propertyValue->getDatatypeUri()
+                        )
+                    );
+                } elseif ($propertyValue instanceof \EasyRdf\Uri) {
+                    $openskosResource->addProperty($propertyUri, new Uri($propertyValue->getUri()));
+                }
+            }
+        }
+
+        return $openskosResource;
+    }
+
     /**
      * @param Resource $resource
      * @return Graph
@@ -126,12 +188,10 @@ class EasyRdf
     public static function resourceToGraph(Resource $resource)
     {
         $graph = new Graph();
-        
         self::fromOpenSkosResource($resource, $graph);
-
         return $graph;
     }
-    
+
     /**
      * @param ResourceCollection $collection
      * @return Graph
@@ -139,14 +199,13 @@ class EasyRdf
     public static function resourceCollectionToGraph(ResourceCollection $collection)
     {
         $graph = new Graph();
-        
+
         foreach ($collection as $resource) {
             self::fromOpenSkosResource($resource, $graph);
         }
-
         return $graph;
     }
-    
+
     /**
      * Creates a resource matching the give type.
      * @param string $uri
@@ -156,13 +215,19 @@ class EasyRdf
     protected static function createResource($uri, $type)
     {
         if ($type) {
-            switch ($type->getUri()) {
+            switch ($type) {
                 case Concept::TYPE:
                     return new Concept($uri);
                 case ConceptScheme::TYPE:
                     return new ConceptScheme($uri);
-                case Collection::TYPE:
-                    return new Collection($uri);
+                case SkosCollection::TYPE:
+                    return new SkosCollection($uri);
+                case Set::TYPE:
+                    return new Set($uri);
+                case Tenant::TYPE:
+                    return new Tenant($uri);
+                case RelationType::TYPE:
+                    return new RelationType($uri);
                 case Person::TYPE:
                     return new Person($uri);
                 case Label::TYPE:
@@ -174,7 +239,7 @@ class EasyRdf
             return new Resource($uri);
         }
     }
-    
+
     /**
      * Creates a resource collection for the desired type.
      * @param string $type
@@ -188,8 +253,14 @@ class EasyRdf
                 return new ConceptCollection();
             case ConceptScheme::TYPE:
                 return new ConceptSchemeCollection();
-            case Collection::TYPE:
-                return new CollectionCollection();
+            case SkosCollection::TYPE:
+                return new SkosCollectionCollection();
+            case Set::TYPE:
+                return new SetCollection();
+            case Tenant::TYPE:
+                return new TenantCollection();
+            case RelationType::TYPE:
+                return new RelationTypeCollection();
             case Label::TYPE:
                 return new LabelCollection();
             default:
@@ -206,7 +277,6 @@ class EasyRdf
     protected static function fromOpenSkosResource(Resource $resource, \EasyRdf\Graph $graph)
     {
         $easyResource = new \EasyRdf\Resource($resource->getUri(), $graph);
-        
         foreach ($resource->getProperties() as $propName => $property) {
             foreach ($property as $value) {
                 /**
@@ -214,12 +284,12 @@ class EasyRdf
                  */
                 if ($value instanceof Literal) {
                     $val = $value->getValue();
-                    
+
                     // Convert timestamp to string
                     if ($val instanceof \DateTime) {
                         $val = $val->format(\DATE_W3C);
                     }
-                    
+
                     $easyResource->addLiteral(
                         $propName,
                         new \EasyRdf\Literal($val, $value->getLanguage(), $value->getType())
@@ -235,7 +305,32 @@ class EasyRdf
                 }
             }
         }
-        
+
         return $easyResource;
+    }
+    
+    private static function getTypeOfEasyRdfResource(\EasyRdf\Resource $resource)
+    {
+        $types = $resource->all(new \EasyRdf\Resource(Rdf::TYPE));
+
+        if ($types == null) {
+            return null;
+        }
+        if (count($types)=== 0) {
+            return null;
+        }
+        foreach ($types as $type) {
+            if (in_array($type->getUri(), self::$skosTypes)) {
+                return $type->getUri();
+            }
+        }
+        return false;
+        /*Old code:
+         * The only place that called this function was testing for non-skos types anyway
+
+        throw new InvalidArgumentException(
+            "Resource {$resource->getUri} does not have a proper skos type."
+        );
+        */
     }
 }

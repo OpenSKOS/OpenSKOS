@@ -16,22 +16,18 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 /**
  * This is now openskos set. Because the term collection referes to skos:collection
  */
 class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
 {
-
     protected $_name = 'collection';
-
     /**
      * Classname for row
      *
      * @var string
      */
     protected $_rowClass = 'OpenSKOS_Db_Table_Row_Collection';
-
     /**
      * Classname for rowset
      *
@@ -60,7 +56,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
     protected $_dependentTables = array(
         'OpenSKOS_Db_Table_Jobs'
     );
-
     public function findByCode($code, $tenant = null)
     {
         $select = $this->select()->where('code=?', $code);
@@ -78,7 +73,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
         }
         return $this->fetchRow($select);
     }
-
     public function uniqueCode($code, Array $data)
     {
         //fetch the tenant:
@@ -94,7 +88,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
         }
         return count($this->fetchAll($select)) === 0;
     }
-
     /**
      * Gets map with uri as key and title as value.
      * 
@@ -126,7 +119,6 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
         }
         return $collectionsMap;
     }
-
     /**
      * Fetches all SQL result rows as an associative array.
      *
@@ -146,29 +138,23 @@ class OpenSKOS_Db_Table_Collections extends Zend_Db_Table
     {
         if (!($where instanceof Zend_Db_Table_Select)) {
             $select = $this->select();
-
             if ($where !== null) {
                 $this->_where($select, $where);
             }
-
             if ($order !== null) {
                 $this->_order($select, $order);
             }
-
             if ($count !== null || $offset !== null) {
                 $select->limit($count, $offset);
             }
         } else {
             $select = $where;
         }
-
         return $this->getAdapter()->fetchAssoc($select);
     }
 }
-
 class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset
 {
-
     public function toRdf()
     {
         $doc = OpenSKOS_Db_Table_Row_Collection::getRdfDocument();
@@ -178,3 +164,4 @@ class OpenSKOS_Db_Table_Rowset_Collection extends Zend_Db_Table_Rowset
         return $doc;
     }
 }
+

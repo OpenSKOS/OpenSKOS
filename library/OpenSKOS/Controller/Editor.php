@@ -30,7 +30,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
     const RESPONSE_TYPE_HTML = 'html';
 
     /**
-     * @var $_tenant OpenSKOS_Db_Table_Row_Tenant
+     * @var $_tenant OpenSkos2\Tenant
      */
     protected $_tenant;
     
@@ -47,18 +47,27 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
             }
         }
 
-        $tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
-        if (null === $tenant) {
-            throw new Zend_Controller_Action_Exception('Tenant not found', 404);
-        }
-        $tenant->getForm()->setAction($this->getFrontController()->getRouter()->assemble(array('action' => 'save')));
-        $this->_tenant = $tenant;
+        //$tenant = OpenSKOS_Db_Table_Tenants::fromIdentity();
+        $this->readTenant();
+
+        $this->_tenant->getForm()->setAction($this->getFrontController()->getRouter()->assemble(array('action' => 'save')));
+        //$this->_tenant = $tenant;
 
         $this->_helper->_layout->setLayout('editor');
         $this->view->navigation()
                 ->setAcl(Zend_Registry::get(OpenSKOS_Application_Resource_Acl::REGISTRY_KEY))
                 ->setRole(OpenSKOS_Db_Table_Users::fromIdentity()->role)
                 ->setContainer($this->_getNavigationContainer());
+    }
+    /**
+     * @return OpenSKOS_Db_Table_Row_Tenant
+     */
+    public static function fromIdentity()
+    {
+        if (!Zend_Auth::getInstance()->hasIdentity()) {
+            return;
+        }
+        return self::fromCode(Zend_Auth::getInstance()->getIdentity()->tenant);
     }
 
     /**
@@ -254,6 +263,7 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
      */
     protected function getOpenSkosDbTableRowTenant()
     {
+        die("Calling for table ");
         $tenant = $this->_tenant;
         
         if ($tenant === null) {
@@ -268,17 +278,39 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
      */
     protected function getOpenSkos2Tenant()
     {
-        $tenant = $this->_tenant;
-        $openSkos2Tenant = null;
-        
-        if ($tenant === null) {
-            $tenant = $this->getCurrentUser()->tenant;
+        if (!isset ($this->_tenant)) {
+            throwException("Initialize OpenSKOS_Controller_Editor before calling getOpenSkosTenant()");
         }
-        
-        if ($tenant !== null) {
-            $openSkos2Tenant = OpenSKOS_Db_Table_Row_Tenant::createOpenSkos2Tenant($tenant);
+        return $this->_tenant;
+    }
+
+
+    /**
+     * Read the Tenant record from RDF Store to the class's internal record.
+     * @throws Zend_Controller_Action_Exception
+     */
+    protected function readTenant()
+    {
+
+        $tenantCode = $this->getCurrentUser()->tenant;
+
+        $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+
+        $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
+        $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+
+        if (!$openSkos2Tenant) {
+            throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
         }
-        
-        return $openSkos2Tenant;
+
+        $editorOptions = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $uniquePerTenant = isset($editorOptions['labelsUniquePerTenant']) ? ((bool)$editorOptions['labelsUniquePerTenant']) : false;
+
+        $lit = new \OpenSkos2\Rdf\Literal ($uniquePerTenant ? 'true' : false);
+        $openSkos2Tenant->setProperty(\OpenSkos2\Namespaces\OpenSkos::NOTATIONUNIQUEPERTENANT, $lit);
+
+        $this->_tenant = $openSkos2Tenant;
+        return $this;
+
     }
 }

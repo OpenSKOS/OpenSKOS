@@ -34,23 +34,42 @@ use OpenSkos2\SkosXl\LabelManager;
 
 class ConceptManager extends ResourceManagerWithSearch
 {
+
     /**
      * What is the basic resource for this manager.
      * @var string NULL means any resource.
      */
     protected $resourceType = Concept::TYPE;
-    
+
     /**
      * @var LabelManager
      */
     protected $labelManager;
-    
+
     /**
      * @return LabelManager
      */
     public function getLabelManager()
     {
         return $this->labelManager;
+    }
+    
+     /**
+     * @return LabelManager
+     */
+    public function getSolrManager()
+    {
+        return $this->solrResourceManager;
+    }
+
+    // uses and overrides the parent's method
+    public function findResourceById($id, $resourceType)
+    {
+        $concept = parent::findResourceById($id, $resourceType);
+        if ($concept->isDeleted()) {
+            throw new \Exception('Resource with id ' . $id . ' is deleted');
+        }
+        return $concept;
     }
 
     /**
@@ -60,7 +79,7 @@ class ConceptManager extends ResourceManagerWithSearch
     {
         $this->labelManager = $labelManager;
     }
-    
+
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @throws ResourceAlreadyExistsException
@@ -72,7 +91,7 @@ class ConceptManager extends ResourceManagerWithSearch
         $labelHelper = new Concept\LabelHelper($this->labelManager);
         $labelHelper->insertLabels($resource);
     }
-    
+
     /**
      * Deletes and then inserts the resourse.
      * @param \OpenSkos2\Rdf\Resource $resource
@@ -92,8 +111,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function replaceAndCleanRelations(Concept $concept)
     {
-        // @TODO Danger if one of the operations fail. Need transaction or something.
-        // @TODO What to do with imports. When several concepts are imported at once.
+
         $this->deleteRelationsWhereObject($concept);
         $this->replace($concept);
     }
@@ -129,10 +147,11 @@ class ConceptManager extends ResourceManagerWithSearch
         $query->filter($filter);
 
         $result = $this->query($query);
-
         $items = [];
+        $i = 0;
         foreach ($result as $literal) {
-            $items[] = $literal->returnLabel->getValue();
+            $items[$i] = $literal->returnLabel->getValue();
+            $i++;
         }
         return $items;
     }
@@ -147,7 +166,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function addRelation($uri, $relationType, $uris)
     {
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelations(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -180,7 +199,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function deleteRelation($subjectUri, $relationType, $objectUri)
     {
-        if (!in_array($relationType, Skos::getRelationsTypes(), true)) {
+        if (!in_array($relationType, Skos::getSkosRelations(), true)) {
             throw new Exception\InvalidArgumentException('Relation type not supported: ' . $relationType);
         }
 
@@ -196,7 +215,7 @@ class ConceptManager extends ResourceManagerWithSearch
             new Uri($subjectUri)
         );
     }
-    
+
     /**
      * Get all concepts that are related as subjects to the given label uri
      * @param Label $label
@@ -210,9 +229,9 @@ class ConceptManager extends ResourceManagerWithSearch
                     ?subject ?predicate <' . $label->getUri() . '> .
                     ?subject <' . \OpenSkos2\Namespaces\Rdf::TYPE . '> <' . \OpenSkos2\Concept::TYPE . '>
                 }';
-        
+
         $concepts = $this->fetchQuery($query);
-        
+
         return $concepts;
     }
 
@@ -244,7 +263,7 @@ class ConceptManager extends ResourceManagerWithSearch
         $start = 0;
         $step = 100;
         do {
-            $relations = $this->fetch($patterns, $start, $step);
+            $relations = $this->fetchOnSubject($patterns, $start, $step);
             foreach ($relations as $relation) {
                 $allRelations->append($relation);
             }
@@ -260,7 +279,7 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function deleteRelationsWhereObject(Concept $concept)
     {
-        foreach (Skos::getRelationsTypes() as $relationType) {
+        foreach (Skos::getSkosRelations() as $relationType) {
             $this->deleteMatchingTriples('?subject', $relationType, $concept);
         }
     }
@@ -273,11 +292,11 @@ class ConceptManager extends ResourceManagerWithSearch
     public function askForPrefLabel($prefLabel)
     {
         return $this->askForMatch([
-            [
-                'predicate' => Skos::PREFLABEL,
-                'value' => new Literal($prefLabel),
-                'ignoreLanguage' => true
-            ]
+                [
+                    'predicate' => Skos::PREFLABEL,
+                    'value' => new Literal($prefLabel),
+                    'ignoreLanguage' => true
+                ]
         ]);
     }
 
@@ -293,7 +312,7 @@ class ConceptManager extends ResourceManagerWithSearch
         do {
             $concepts = $this->fetch(
                 [
-                    Skos::INSCHEME => $scheme,
+                Skos::INSCHEME => $scheme,
                 ],
                 $start,
                 $step
@@ -319,18 +338,47 @@ class ConceptManager extends ResourceManagerWithSearch
     }
 
     /**
+     * Perform a full text query
+     * lucene / solr queries are possible
+     * for the available fields see schema.xml
+     *
+     * @param string $query
+     * @param int $rows
+     * @param int $start
+     * @param int &$numFound output Total number of found records.
+     * @param array $sorts
+     * @return ConceptCollection
+     */
+    
+   
+    public function search(
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null
+    ) {
+
+        return $this->fetchByUris(
+            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
+        );
+    }
+
+    /**
      * Gets the current max numeric notation for all concepts. Fast.
      * @param \OpenSkos2\Tenant $tenant
      * @return int|null
      */
     public function fetchMaxNumericNotationFromIndex(Tenant $tenant)
     {
+        //Oh Help! Olha changed this to use $tenant->getUri.
+        // I have no idea why, but I'm sure she had a reason. However, now lots of stuff is broken
+
         // Gets the maximum of all max_numeric_notation fields
         $max = $this->solrResourceManager->getMaxFieldValue(
-            'tenant:' . $tenant->getCode(),
+            'tenant:"' . $tenant->getCode() . '"',
             'max_numeric_notation'
         );
-
         return intval($max);
     }
 
@@ -373,7 +421,16 @@ class ConceptManager extends ResourceManagerWithSearch
             ->where('?subject', '<' . DcTerms::MODIFIED . '>', '?date')
             ->also('<' . Rdf::TYPE . '>', '<' . $this->resourceType . '>');
 
-        $result = $this->solrResourceManager->search('*:*', 1, 0, $numFound, ['sort_d_modified_earliest' => 'asc']);
+
+
+        $result = $this->solrResourceManager->search(
+            'status:*',
+            1,
+            0,
+            $numFound,
+            ['sort_d_modified_earliest' => 'asc']
+        );
+
         $uri = current($result);
 
         if (!$uri) {
@@ -391,5 +448,79 @@ class ConceptManager extends ResourceManagerWithSearch
         }
 
         return $now;
+    }
+
+    /**
+     * Delete relations between two skos concepts.
+     * Deletes in both directions (narrower and broader for example).
+     * @param string $subjectUri
+     * @param string $relationType
+     * @param string $objectUri
+     * @throws Exception\InvalidArgumentException
+     */
+    public function deleteRelationTriple($subjectUri, $relationType, $objectUri)
+    {
+
+        $this->deleteMatchingTriples(
+            new Uri($subjectUri),
+            $relationType,
+            new Uri($objectUri)
+        );
+        $inverses = array_merge(Skos::getInverseRelationsMap(), $this->getCustomInverses());
+        $this->deleteMatchingTriples(
+            new Uri($objectUri),
+            $inverses[$relationType],
+            new Uri($subjectUri)
+        );
+    }
+
+    /**
+     * Add relations to a skos concept
+     *
+     * @param string $uri
+     * @param string $relationType
+     * @param array|string $uris
+     * @throws Exception\InvalidArgumentException
+     */
+    public function addRelationTriple($uri, $relationType, $uris)
+    {
+        // @TODO Add check everywhere we may need it.
+        if (in_array($relationType, [Skos::BROADERTRANSITIVE, Skos::NARROWERTRANSITIVE])) {
+            throw new Exception\InvalidArgumentException(
+                'Relation type "' . $relationType . '" will be inferred. Not supported explicitly.'
+            );
+        }
+
+        $graph = new \EasyRdf\Graph();
+
+        if (!is_array($uris)) {
+            $uris = [$uris];
+        }
+        foreach ($uris as $related) {
+            $graph->addResource($uri, $relationType, $related);
+        }
+
+        $this->client->insert($graph);
+    }
+    
+
+    public function fetchNameUri()
+    {
+        $query = "SELECT ?uri ?name WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name ."
+            . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
+    }
+    
+    
+    public function fetchNameSearchID()
+    {
+        $query = "SELECT ?name ?searchid WHERE { ?uri  <" . Skos::PREFLABEL . "> ?name . "
+        . "?uri  <" . OpenSkosNameSpace::UUID . "> ?searchid ."
+        . " ?uri  <" . RdfNameSpace::TYPE . "> <".\OpenSkos2\Concept::TYPE.">. }";
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
     }
 }

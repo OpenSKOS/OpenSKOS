@@ -16,33 +16,26 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
 namespace OpenSkos2;
 
-use OpenSkos2\Exception\UriGenerationException;
-use OpenSkos2\Exception\OpenSkosException;
-use OpenSkos2\Exception\ResourceNotFoundException;
-use OpenSkos2\Namespaces\OpenSkos;
+use Exception;
 use OpenSkos2\Namespaces\DcTerms;
-use OpenSkos2\Namespaces\Dc;
+use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\SkosXl;
-use OpenSkos2\Namespaces\Foaf;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Resource;
 use OpenSkos2\Rdf\Uri;
-use OpenSkos2\Tenant;
-use OpenSkos2\Person;
-use OpenSkos2\ConceptManager;
 use OpenSkos2\PersonManager;
-use OpenSKOS_Db_Table_Row_Tenant;
-use OpenSKOS_Db_Table_Tenants;
 use Rhumsaa\Uuid\Uuid;
 use OpenSkos2\SkosXl\LabelManager;
 use OpenSkos2\SkosXl\Label;
 
 class Concept extends Resource
 {
+
     const TYPE = 'http://www.w3.org/2004/02/skos/core#Concept';
 
     /**
@@ -55,7 +48,8 @@ class Concept extends Resource
     const STATUS_REJECTED = 'rejected';
     const STATUS_OBSOLETE = 'obsolete';
     const STATUS_DELETED = 'deleted';
-    
+    const STATUS_EXPIRED = 'expired';
+
     /**
      * Get list of all available concept statuses.
      * @return array
@@ -70,62 +64,31 @@ class Concept extends Resource
             self::STATUS_REJECTED,
             self::STATUS_OBSOLETE,
             self::STATUS_DELETED,
+            self::STATUS_EXPIRED,
         ];
     }
-    
-    public static $classes = array(
-        'ConceptSchemes' => [
-            Skos::CONCEPTSCHEME,
-            Skos::INSCHEME,
-            Skos::HASTOPCONCEPT,
-            Skos::TOPCONCEPTOF,
-        ],
-        'LexicalLabels' => [
-            Skos::PREFLABEL,
-            Skos::ALTLABEL,
-            Skos::HIDDENLABEL,
-        ],
-        'SkosXlLabels' => [
-            SkosXl::PREFLABEL,
-            SkosXl::ALTLABEL,
-            SkosXl::HIDDENLABEL,
-        ],
-        'Notations' => [
-            Skos::NOTATION,
-        ],
-        'DocumentationProperties' => [
-            Skos::CHANGENOTE,
-            Skos::DEFINITION,
-            Skos::EDITORIALNOTE,
-            Skos::EXAMPLE,
-            Skos::HISTORYNOTE,
-            Skos::NOTE,
-            Skos::SCOPENOTE,
-        ],
-        'SemanticRelations' => [
-            Skos::BROADER,
-            Skos::BROADERTRANSITIVE,
-            Skos::NARROWER,
-            Skos::NARROWERTRANSITIVE,
-            Skos::RELATED,
-            Skos::SEMANTICRELATION,
-        ],
-        'ConceptCollections' => [
-            Skos::COLLECTION,
-            Skos::ORDEREDCOLLECTION,
-            Skos::MEMBER,
-            Skos::MEMBERLIST,
-        ],
-        'MappingProperties' => [
-            Skos::BROADMATCH,
-            Skos::CLOSEMATCH,
-            Skos::EXACTMATCH,
-            Skos::MAPPINGRELATION,
-            Skos::NARROWMATCH,
-            Skos::RELATEDMATCH,
-        ],
-    );
-    
+    /**
+     * Get list of all available concept statuses with description.
+     * @return array
+     */
+    public static function getAvailableStatusesWithDescriptions()
+    {
+        return [
+           self::STATUS_CANDIDATE      => "A newly added concept",
+           self::STATUS_APPROVED       => "Candidate that was inspected and approved",
+           self::STATUS_REDIRECTED     => "Proposed concept was found to be better represented by another concept. " .
+               "The redirected concept will be maintained for convenience and will contain a forward note to the " .
+               "target concept.",
+           self::STATUS_NOT_COMPLIANT  => "Concept is not compliant with the GTAA standard, but is maintained for " .
+               " convenience of the creator. It can become obsolete when no longer necessary.",
+           self::STATUS_REJECTED       => "Substandard quality",
+           self::STATUS_OBSOLETE       => "This concept is no longer necessary, may be succeeded by another concept",
+           self::STATUS_DELETED        => "All concept metadata is deleted",
+            //B.Hillier This status doesn't seem to be used anywhere. Is is Meertens custom controller specific?
+           //self::STATUS_EXPIRED        => ""
+        ];
+    }
+
     public static $labelsMap = [
         SkosXl::PREFLABEL => Skos::PREFLABEL,
         SkosXl::ALTLABEL => Skos::ALTLABEL,
@@ -143,10 +106,32 @@ class Concept extends Resource
     }
 
     /**
+     * Check if the resource is deleted
+     * @TODO Separate in StatusAwareResource class or something like that
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        if ($this->getStatus() === self::STATUS_DELETED) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getSkosCollection()
+    {
+        if (!$this->hasProperty(OpenSkos::INSKOSCOLLECTION)) {
+            return null;
+        } else {
+            return $this->getProperty(OpenSkos::INSKOSCOLLECTION)[0]->getValue();
+        }
+    }
+
+    /**
      * Gets preview title for the concept.
      * @param string $language
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCaption($language = null)
     {
@@ -156,46 +141,7 @@ class Concept extends Resource
             return $this->getPropertyFlatValue(Skos::PREFLABEL);
         }
     }
-    
-    /**
-     * Get openskos:uuid if it exists
-     * Identifier for backwards compatability. Always use uri as identifier.
-     * @return string|null
-     */
-    public function getUuid()
-    {
-        if ($this->hasProperty(OpenSkos::UUID)) {
-            return (string)$this->getPropertySingleValue(OpenSkos::UUID);
-        } else {
-            return null;
-        }
-    }
 
-    /**
-     * Get tenant
-     *
-     * @return Literal
-     */
-    public function getTenant()
-    {
-        $values = $this->getProperty(OpenSkos::TENANT);
-        if (isset($values[0])) {
-            return $values[0];
-        }
-    }
-    
-    /**
-     * Get institution row
-     * @TODO Remove dependency on OpenSKOS v1 library
-     * @return OpenSKOS_Db_Table_Row_Tenant
-     */
-    public function getInstitution()
-    {
-        // @TODO Remove dependency on OpenSKOS v1 library
-        $model = new OpenSKOS_Db_Table_Tenants();
-        return $model->find($this->getTenant())->current();
-    }
-    
     /**
      * Checks if the concept is top concept for the specified scheme.
      * @param string $conceptSchemeUri
@@ -209,7 +155,7 @@ class Concept extends Resource
             return false;
         }
     }
-    
+
     /**
      * Does the concept have any relations or mapping properties.
      * @return bool
@@ -217,8 +163,8 @@ class Concept extends Resource
     public function hasAnyRelations()
     {
         $relationProperties = array_merge(
-            self::$classes['SemanticRelations'],
-            self::$classes['MappingProperties']
+            Resource::$classes['SemanticRelations'],
+            Resource::$classes['MappingProperties']
         );
         foreach ($relationProperties as $relationProperty) {
             if (!$this->isPropertyEmpty($relationProperty)) {
@@ -227,7 +173,7 @@ class Concept extends Resource
         }
         return false;
     }
-    
+
     /**
      * Does the concept has any xl labels in it.
      * @return boolean
@@ -239,10 +185,10 @@ class Concept extends Resource
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Does the concept has any xl labels in it.
      * @return boolean
@@ -254,95 +200,85 @@ class Concept extends Resource
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Ensures the concept has metadata for tenant, set, creator, date submited, modified and other like this.
-     * @param string $tenantCode
-     * @param Uri $set
-     * @param Uri $person
-     * @param LabelManager $labelManager
-     * @param string , optional $oldStatus
+     * @param \OpenSkos2\Tenant $tenant
+     * @param \OpenSkos2\Set $set
+     * @param \OpenSkos2\Person $person
+     * @param \OpenSkos2\PersonManager $personManager
+     * @param \OpenSkos2\LabelManager $labelManager,
+     * @param  Resource $existingConcept, optional $existingResource of one of concrete child types used for update
+     * $oldStatus will be derived from $existingResource
      */
     public function ensureMetadata(
-        $tenantCode,
-        $set,
-        Uri $person,
-        LabelManager $labelManager,
-        PersonManager $personManager,
-        $oldStatus = null,
+        \OpenSkos2\Tenant $tenant,
+        \OpenSkos2\Set $set = null,
+        \OpenSkos2\Person $person = null,
+        \OpenSkos2\PersonManager $personManager = null,
+        \OpenSkos2\SkosXl\LabelManager $labelManager = null,
+        $existingConcept = null,
         $forceCreationOfXl = false
     ) {
+    
+
         $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
+            return new Literal(date('c'), null, Literal::TYPE_DATETIME);
         };
-        
-        $personUri = new Uri($person->getUri());
-        
+
         $forFirstTimeInOpenSkos = [
             OpenSkos::UUID => new Literal(Uuid::uuid4()),
-            OpenSkos::TENANT => new Literal($tenantCode),
+            DcTerms::PUBLISHER => new Uri($tenant->getUri()),
+            OpenSkos::TENANT => $tenant->getCode(),
             // @TODO Make status dependent on if the tenant has statuses system enabled.
             OpenSkos::STATUS => new Literal(Concept::STATUS_CANDIDATE),
-            DcTerms::DATESUBMITTED => $nowLiteral(),
+            DcTerms::DATESUBMITTED => $nowLiteral()
         ];
-        
+
         if (!empty($set)) {
-            if (!($set instanceof Uri)) {
-                throw new OpenSkosException('The set must be instance of Uri');
-            }
             // @TODO Aways make sure we have a set defined. Maybe a default set for the tenant.
-            $forFirstTimeInOpenSkos[OpenSkos::SET] = $set;
+            $forFirstTimeInOpenSkos[OpenSkos::SET] = new Uri($set->getUri());
         }
-        
+
         foreach ($forFirstTimeInOpenSkos as $property => $defaultValue) {
             if (!$this->hasProperty($property)) {
                 $this->setProperty($property, $defaultValue);
             }
         }
-        
+
         $this->resolveCreator($person, $personManager);
-        
+
         $this->setModified($person);
-        
-        $this->handleStatusChange($person, $oldStatus);
-        
+
+        $this->handleStatusChange($person, $existingConcept);
+
         // Create all asserted labels
         $labelHelper = new Concept\LabelHelper($labelManager);
         $labelHelper->assertLabels($this, $forceCreationOfXl);
     }
-    
-    /**
-     * Mark the concept as modified.
-     * @param Uri|Person $person
-     */
-    public function setModified($person)
-    {
-        $nowLiteral = function () {
-            return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
-        };
-        
-        $personUri = new Uri($person->getUri());
-        
-        $this->setProperty(DcTerms::MODIFIED, $nowLiteral());
-        $this->setProperty(OpenSkos::MODIFIEDBY, $personUri);
-    }
-    
+
     /**
      * Handle change in status.
-     * @param Uri|Person $person
-     * @param string $oldStatus
+     * @param Person $person
+     * @param currentStatus string Current status of concept
      */
-    public function handleStatusChange($person, $oldStatus = null)
+    public function handleStatusChange($person, $currentStatus = null)
     {
+        if ($currentStatus == null) {
+            $oldStatus = null;
+        } else {
+            $oldStatus = $currentStatus;
+        }
+
         $nowLiteral = function () {
             return new Literal(date('c'), null, \OpenSkos2\Rdf\Literal::TYPE_DATETIME);
         };
-        
+
         $personUri = new Uri($person->getUri());
-        
+
         // Status is updated
         if ($oldStatus != $this->getStatus()) {
             $this->unsetProperty(DcTerms::DATEACCEPTED);
@@ -361,21 +297,26 @@ class Concept extends Resource
             }
         }
     }
-    
+
     /**
      * Generates an uri for the concept.
-     * Requires a URI from to an openskos collection
+     * Requires a URI from to an openskos set
      * @return string
      */
-    public function selfGenerateUri(Tenant $tenant, ConceptManager $conceptManager)
+    public function selfGenerateUri(\OpenSkos2\Tenant $tenant, \OpenSkos2\Set $collection, $conceptManager)
     {
+        $customGen = $conceptManager->getUriGenerateObject();
+        if (!empty($customGen)) {
+            return $customGen->generateUri($this);
+        }
+
         $identifierHelper = new Concept\IdentifierHelper($tenant, $conceptManager);
-        
+
         $uri = $identifierHelper->generateUri($this);
-        
+
         return $uri;
     }
-    
+
     /**
      * Loads the XL labels and replaces the default URI value with the full resource
      * @param LabelManager $labelManager
@@ -391,93 +332,25 @@ class Concept extends Resource
                     $fullXlLabels[] = $labelManager->fetchByUri($xlLabel);
                 }
             }
-
             $this->setProperties($xlLabelPredicate, $fullXlLabels);
         }
     }
-    
-    /**
-     * Resolve the creator in all use cases:
-     * - dc:creator is set but dcterms:creator is not
-     * - dcterms:creator is set as Uri
-     * - dcterms:creator is set as literal value
-     * - no creator is set
-     * @param Person $person
-     * @param PersonManager $personManager
-     */
-    public function resolveCreator(Person $person, PersonManager $personManager)
-    {
-        $dcCreator = $this->getProperty(Dc::CREATOR);
-        $dcTermsCreator = $this->getProperty(DcTerms::CREATOR);
-        
-        // Set the creator to the apikey user
-        if (empty($dcCreator) && empty($dcTermsCreator)) {
-            $this->setCreator(null, $person);
-            return;
-        }
-        
-        // Check if the dc:Creator is Uri or Literal
-        if (!empty($dcCreator) && empty($dcTermsCreator)) {
-            $dcCreator = $dcCreator[0];
-            
-            if ($dcCreator instanceof Literal) {
-                $dcTermsCreator = $personManager->fetchByName($dcCreator->getValue());
-            } elseif ($dcCreator instanceof Uri) {
-                $dcTermsCreator = $dcCreator;
-                $dcCreator = null;
-            } else {
-                throw Exception('dc:Creator is not Literal nor Uri. Something is very wrong.');
-            }
-            
-            $this->setCreator($dcCreator, $dcTermsCreator);
-            return;
-        }
 
-        // Check if the dcTerms:Creator is Uri or Literal
-        if (empty($dcCreator) && !empty($dcTermsCreator)) {
-            $dcTermsCreator = $dcTermsCreator[0];
-            
-            if ($dcTermsCreator instanceof Literal) {
-                $dcCreator = $dcTermsCreator;
-                $dcTermsCreator = $personManager->fetchByName($dcTermsCreator->getValue());
-            } elseif ($dcTermsCreator instanceof Uri) {
-                // We are ok with this use case even if the Uri is not present in our system
-            } else {
-                throw new OpenSkosException('dcTerms:Creator is not Literal nor Uri. Something is very wrong.');
-            }
-            
-            $this->setCreator($dcCreator, $dcTermsCreator);
-            return;
-        }
-        
-        // Resolve conflicting dc:Creator and dcTerms:Creator values
-        if (!empty($dcCreator) && !empty($dcTermsCreator)) {
-            $dcCreator = $dcCreator[0];
-            $dcTermsCreator = $dcTermsCreator[0];
-            try {
-                $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
-            } catch (ResourceNotFoundException $err) {
-                // We cannot find the resource so just leave values as they are
-                $dcTermsCreatorName = null;
-            }
-            
-            if (!empty($dcTermsCreatorName) && $dcTermsCreatorName[0]->getValue() !== $dcCreator->getValue()) {
-                throw new OpenSkosException('dc:Creator and dcTerms:Creator names do not match.');
-            }
-            
-            $this->setCreator($dcCreator, $dcTermsCreator);
-            return;
-        }
+    public function fetchNameUri()  // pref Label -> uri for concepts
+    {
+        $query = 'SELECT ?uri ?name WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . }';
+        $response = $this->query($query);
+        $result = $this->makeNameUriMap($response);
+        return $result;
     }
     
-    protected function setCreator($dcCreator, $dcTermsCreator)
+    
+    public function fetchNameSearchID() //pref Label -> uuid for concepts
     {
-        if (!empty($dcCreator)) {
-            $this->setProperty(Dc::CREATOR, $dcCreator);
-        }
-        
-        if (!empty($dcTermsCreator)) {
-            $this->setProperty(DcTerms::CREATOR, $dcTermsCreator);
-        }
+        $query = 'SELECT ?name ?searchid WHERE { ?uri  <' . Skos::PREFLABEL . '> ?name . ?uri  <' .
+        OpenSkosNameSpace::UUID . '> ?searchid }';
+        $response = $this->query($query);
+        $result = $this->makeNameSearchIDMap($response);
+        return $result;
     }
 }

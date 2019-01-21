@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenSKOS
  *
@@ -18,27 +19,35 @@
  * @author     Alexandar Mitsev
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+// VOORBEELD: php skos2openskos.php --setUri=http://htdl/clavas-org/set --userUri=http://localhost:89/clavas/public/api/users/4d1140e5-f5ff-45da-b8de-3d8a2c28415f --file=clavas-organisations.xml
+
 include dirname(__FILE__) . '/autoload.inc.php';
 
 $opts = array(
-    'env|e=s' => 'The environment to use (defaults to "production")',
-    'file|f=s' => 'File to import',
-    'userUri|u=s' => 'Uri of the user that is doing the import',
-    'tenant|t=s' => 'Tenant into which the data should be imported'
+  'env|e=s' => 'The environment to use (defaults to "production")',
+  'file|f=s' => 'File to import',
+  'userUri|u=s' => 'Uri of the user who is doing the import',
+  'setUri=s' => 'Set uri',
+  'removeDangling=s' => 'Remove dangling references as well' 
 );
 
 try {
-    $OPTS = new Zend_Console_Getopt($opts);
+  $OPTS = new Zend_Console_Getopt($opts);
 } catch (Zend_Console_Getopt_Exception $e) {
-    fwrite(STDERR, $e->getMessage()."\n");
-    echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
-    exit(1);
+  fwrite(STDERR, $e->getMessage() . "\n");
+  echo str_replace('[ options ]', '[ options ] action', $OPTS->getUsageMessage());
+  exit(1);
 }
 
 include dirname(__FILE__) . '/bootstrap.inc.php';
 
-// Test....
+$removeDangling = false;
+if ($OPTS->removeDangling === "yes") {
+  $removeDangling = true;  
+}
 
+$old_time = time();
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
@@ -46,25 +55,51 @@ $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContain
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
 $resourceManager = $diContainer->get('OpenSkos2\Rdf\ResourceManager');
-$user = $resourceManager->fetchByUri($OPTS->userUri);
+$conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
+$personManager = $diContainer->get('OpenSkos2\PersonManager');
+
+$person = $resourceManager->fetchByUri($OPTS->userUri, \OpenSkos2\Person::TYPE);
+$set = $resourceManager->fetchByUri($OPTS->setUri, \OpenSkos2\Set::TYPE);
+$publisher = $set->getProperty(\OpenSkos2\Namespaces\DcTerms::PUBLISHER);
+if (count($publisher)<1) {
+  echo str_replace('Something went very wrong: the set '. $OPTS->setUri. 'does not have a publisher.');
+  exit(1); 
+}
+$tenant = $resourceManager->fetchByUri($publisher[0]->getUri(), \OpenSkos2\Tenant::TYPE);
+
 
 $logger = new \Monolog\Logger("Logger");
 $logger->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 
-$conceptManager = $diContainer->get('OpenSkos2\ConceptManager');
-$personManager = $diContainer->get('OpenSkos2\PersonManager');
-$tenant = new \OpenSkos2\Tenant($OPTS->tenant);
 
-$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
-$importer->setLogger($logger);
-$message = new \OpenSkos2\Import\Message(
-    $user, $OPTS->file, new \OpenSkos2\Rdf\Uri('http://example.com/collection#1'), true, OpenSKOS_Concept_Status::CANDIDATE,
-    false, true, 'nl', true, false
+$check_concept_references = null;
+
+
+ /** Recall Message's constructor parameters to see what is going on
+   /**
+   * Message constructor.
+   * @param $person
+   * @param $file
+   * @param Uri $setUri
+   * @param bool $ignoreIncomingStatus
+   * @param string $importedConceptStatus
+   * @param bool $removeDanglingReferences
+   * @param bool $noUpdates
+   * @param bool $toBeChecked
+   * @param string $fallbackLanguage
+   * @param bool $clearSet
+   * @param bool $deleteSchemes
+   */
+
+$message = new \OpenSkos2\Import\Message( // $removeDanglingReferences = false
+  $person, $OPTS->file, new \OpenSkos2\Rdf\Uri($OPTS->setUri), true, OpenSKOS_Concept_Status::CANDIDATE, $removeDangling, true, false, 'en', false, false
 );
+$importer = new \OpenSkos2\Import\Command($resourceManager, $conceptManager, $personManager, $tenant);
+
+$importer->setLogger($logger);
 
 $importer->handle($message);
 
 
+echo "Done\n";
 
-
-echo "done!";

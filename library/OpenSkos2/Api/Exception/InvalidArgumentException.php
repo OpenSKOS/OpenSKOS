@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,5 +21,5 @@ namespace OpenSkos2\Api\Exception;
 
 class InvalidArgumentException extends ApiException
 {
-
+    
 }

@@ -10,7 +10,7 @@
     
     <target name="install.dev" description="Setup dev environment">
         <exec passthru="true" checkReturn="true" command="composer install -o" />
-        <phingcall target="solr.create.core" />
+       <!--<phingcall target="solr.create.core" />-->
         <phingcall target="config" />
     </target>
 

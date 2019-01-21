@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,8 +21,7 @@ namespace OpenSkos2\Sparql;
 
 class Operator
 {
-    
+
     const EQUAL = '=';
-    
     const NOT_EQUAL = '!=';
 }

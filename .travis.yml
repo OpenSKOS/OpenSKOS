@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 
 language: php
 
@@ -6,15 +6,47 @@ php:
   - 5.4
   - 5.5
   - 5.6
-  - 7.0
-  - hhvm
 
 matrix:
   allow_failures:
     - php: hhvm
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi -y
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo find /etc/apache2 -print
+  - sudo cp $TRAVIS_BUILD_DIR/integrationtestsettings/openskos.conf /etc/apache2/sites-available/
+  - sudo a2dissite 000-default
+  - sudo a2ensite openskos
+  - sudo service apache2 restart
+  - sudo ps aux | egrep '(apache|httpd)'
+  
+  
+
 install:
   - composer install --dev --prefer-dist
+  - sudo rm -rf /var/www/html 
+  - sudo ln -s $TRAVIS_BUILD_DIR /var/www/html
+  - sudo usermod -a -G travis www-data
+  - sudo groups www-data
+  - find $TRAVIS_BUILD_DIR -type d -exec chmod ugo+x {} \;
+  - chmod -R ugo+rwx cache
+  - chmod -R ugo+rwx data
+  - chmod -R ugo+rwx public/data
+  - sudo service apache2 restart
+  - cd integrationtestsettings
+  - chmod +x install-test-env.sh
+  - ./install-test-env.sh
+  - ./start-solr.sh &
+  - ./start-fuseki.sh &
+  - mysql < openskos-create.sql
+  - ./openskos-init.sh
+  - cd ..
+  - ls
 
 script:
  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/

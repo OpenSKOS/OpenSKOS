@@ -21,14 +21,13 @@ use OpenSkos2\FieldsMaps;
 
 class Api_AutocompleteController extends OpenSKOS_Rest_Controller
 {
+
     public function init()
     {
         parent::init();
-
         if ($this->getRequest()->getParam('format', 'json') == 'html') {
             throw new Exception('Html format is not supported for autocomplete', 400);
         }
-
         $this->_helper->contextSwitch()
             ->initContext($this->getRequest()->getParam('format', 'json'));
         $this->view->setEncoding('UTF-8');
@@ -54,20 +53,18 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     public function indexAction()
     {
         $request = $this->getRequest();
-
         if (null === ($q = $request->getParam('q'))) {
             $this->getResponse()
                 ->setHeader('X-Error-Msg', 'Missing required parameter `q`');
             throw new Zend_Controller_Exception('Missing required parameter `q`', 400);
         }
-
         $result = $this->getConceptManager()->autoComplete(
-            $q,
-            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
-            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $q, 
+            FieldsMaps::resolveField($request->getParam('searchLabel', 'prefLabel')), 
+            FieldsMaps::resolveField($request->getParam('returnLabel', 'prefLabel')), 
             $request->getParam('lang')
         );
-
+        
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
             json_encode($result)
@@ -134,15 +131,14 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     public function getAction()
     {
         $request = $this->getRequest();
-
         $q = $request->getParam('id');
         $result = $this->getConceptManager()->autoComplete(
-            $q,
-            FieldsMaps::resolveOldField($request->getParam('searchLabel', 'prefLabel')),
-            FieldsMaps::resolveOldField($request->getParam('returnLabel', 'prefLabel')),
+            $q, 
+            FieldsMaps::resolveField($request->getParam('searchLabel', 'prefLabel')), 
+            FieldsMaps::resolveField($request->getParam('returnLabel', 'prefLabel')), 
             $request->getParam('lang')
         );
-
+        
         $this->_helper->contextSwitch()->setAutoJsonSerialization(false);
         $this->getResponse()->setBody(
             json_encode($result)
@@ -163,4 +159,5 @@ class Api_AutocompleteController extends OpenSKOS_Rest_Controller
     {
         $this->_501('DELETE');
     }
+
 }

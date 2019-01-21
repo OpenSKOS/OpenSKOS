@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Export;
 
 use OpenSkos2\Tenant;
@@ -37,17 +35,14 @@ class Message
     {
         return $this->format;
     }
-
     public function getMaxDepth()
     {
         return $this->maxDepth;
     }
-
     public function getOutputFilePath()
     {
         return $this->outputFilePath;
     }
-
     public function getPropertiesToExport()
     {
         return $this->propertiesToExport;
@@ -57,37 +52,30 @@ class Message
     {
         $this->format = $format;
     }
-
     public function setMaxDepth($maxDepth)
     {
         $this->maxDepth = $maxDepth;
     }
-
     public function setOutputFilePath($outputFilePath)
     {
         $this->outputFilePath = $outputFilePath;
     }
-
     public function setPropertiesToExport($propertiesToExport)
     {
         $this->propertiesToExport = $propertiesToExport;
     }
-
     public function getSearchOptions()
     {
         return $this->searchOptions;
     }
-
     public function getUris()
     {
         return $this->uris;
     }
-
     public function setSearchOptions($searchOptions)
     {
         $this->searchOptions = $searchOptions;
     }
-
     public function setUris($uris)
     {
         $this->uris = $uris;
@@ -100,7 +88,6 @@ class Message
     {
         return $this->tenant;
     }
-
     /**
      * @param Tenant $tenant
      */
@@ -108,7 +95,6 @@ class Message
     {
         $this->tenant = $tenant;
     }
-
     public function __construct(Tenant $tenant, $format, $propertiesToExport, $maxDepth, $outputFilePath = null)
     {
         $this->tenant = $tenant;

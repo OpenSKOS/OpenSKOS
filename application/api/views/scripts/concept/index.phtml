@@ -17,9 +17,9 @@
  */
 ?>
 <?php
-$exampleResolveURI = 'http://data.beeldengeluid.nl/gtaa/28586';
-$exampleResolveUUID = '82c2614c-3859-ed11-4e55-e993c06fd9fe';
-$exampleResolveLabel = 'doodstraf';
+$exampleResolveURI = 'http://hdl.handle.net/11148/CCR_C-4430_ee9b9819-8c50-2962-29d7-84a450bd0af2';
+$exampleResolveUUID = 'CCR_C-4430_ee9b9819-8c50-2962-29d7-84a450bd0af2';
+$exampleResolveLabel = 'testing';
 ?>
 <h2><?php echo $this->escape('OpenSKOS Concept resolver') ?></h2>
 <p>Use this API to resolve a concept.</p>
@@ -56,7 +56,7 @@ $exampleResolveLabel = 'doodstraf';
                 in JSON: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=json"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=json</a>
             </li>
             <li>
-                in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=jsonp?callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=jsonp?callback=myCallback_1234</a>
+                in JSONP: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=jsonp&callback=myCallback_1234"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=jsonp&amp;callback=myCallback_1234</a>
             </li>
             <li>
                 in XML: <a href="<?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&format=xml"><?php echo $this->url(array('controller' => 'concept')) ?>?id=<?php echo $exampleResolveURI ?>&amp;format=xml</a>

@@ -1,5 +1,4 @@
 <?php
-use Doctrine\Common\Cache\ArrayCache;
 
 /**
  * OpenSKOS
@@ -22,6 +21,9 @@ use Doctrine\Common\Cache\ArrayCache;
  */
 class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
+
+    protected $_cache;
+
     protected function _initDefaultTimeZone()
     {
         date_default_timezone_set('UTC');
@@ -32,9 +34,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $this->bootstrap('frontController');
         $front = $this->getResource('FrontController');
         $restRoute = new Zend_Rest_Route(
-            $front,
-            array(),
-            array('api')
+            $front, array(), array('api')
         );
         $front->getRouter()->addRoute('rest', $restRoute);
     }
@@ -43,14 +43,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         $this->bootstrap('frontController');
         $this->getResource('FrontController')->getRouter()->addRoute(
-            'xmlns',
-            new Zend_Controller_Router_Route(
-                'xmlns',
-                [
-                    'module' => 'api',
-                    'controller' => 'xmlns',
-                    'action' => 'index'
-                ]
+            'xmlns', new Zend_Controller_Router_Route(
+            'xmlns', [
+            'module' => 'api',
+            'controller' => 'xmlns',
+            'action' => 'index'
+            ]
             )
         );
     }
@@ -59,8 +57,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // register the OpenSKOS action helpers
         Zend_Controller_Action_HelperBroker::addPath(
-            APPLICATION_PATH . '/../library/OpenSKOS/Controller/Action/Helper',
-            'OpenSKOS_Controller_Action_Helper'
+            APPLICATION_PATH . '/../library/OpenSKOS/Controller/Action/Helper', 'OpenSKOS_Controller_Action_Helper'
         );
     }
 
@@ -93,4 +90,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         Zend_Controller_Front::getInstance()->setDispatcher($dispatcher);
     }
+    
 }

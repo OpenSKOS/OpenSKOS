@@ -20,12 +20,14 @@
 namespace OpenSkos2\Api\Response\ResultSet;
 
 use OpenSkos2\Api\Response\ResultSetResponse;
+use OpenSkos2\Api\Response\BackwardCompatibility;
 
 /**
  * Provide the json output for find-* api
  */
 class JsonResponse extends ResultSetResponse
 {
+
     /**
      * Get response
      *
@@ -35,7 +37,7 @@ class JsonResponse extends ResultSetResponse
     {
         return new \Zend\Diactoros\Response\JsonResponse($this->getResponseData());
     }
-    
+
     /**
      * Gets the response data.
      * @return array
@@ -66,9 +68,22 @@ class JsonResponse extends ResultSetResponse
                 $this->propertiesList,
                 $this->excludePropertiesList
             ))->transform();
-            $docs[] = $nResource;
+            // default backward compatible
+            if (count($this->customInit) === 0) {
+                $backwardCompatible = true;
+            } else {
+                $backwardCompatible= $this->customInit['backward_compatible'];
+            }
+            if ($backwardCompatible) {
+                $nResource2 = (new BackwardCompatibility())->backwardCompatibilityMap(
+                    $nResource,
+                    $resource->getType()->getUri()
+                );
+            } else {
+                $nResource2 = $nResource;
+            }
+            $docs[] = $nResource2;
         }
-
         return $docs;
     }
 }

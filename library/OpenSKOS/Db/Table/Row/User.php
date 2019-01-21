@@ -1,5 +1,4 @@
 <?php
-
 /**
  * OpenSKOS
  *
@@ -21,17 +20,14 @@
  */
 class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
 {
-
     /**
      * @var int
      */
     const USER_HISTORY_SIZE = 100;
-
     /**
      * @var int
      */
     const USER_SELECTION_SIZE = 100;
-
     /**
      * @return Zend_Form
      */
@@ -61,9 +57,7 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             $form->getElement('type')
                     ->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$types, OpenSKOS_Db_Table_Users::$types))
                     ->setSeparator(' ');
-
             $form->getElement('role')->addMultiOptions(array_combine(OpenSKOS_Db_Table_Users::$roles, OpenSKOS_Db_Table_Users::$roles));
-
             $searchProfilesModel = new OpenSKOS_Db_Table_SearchProfiles();
             $select = $searchProfilesModel->select();
             if (Zend_Auth::getInstance()->hasIdentity()) {
@@ -75,22 +69,17 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 $searchProfilesOptions[$profile->id] = $profile->name;
             }
             $form->getElement('defaultSearchProfileIds')->addMultiOptions($searchProfilesOptions);
-
             $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueEmail'));
             $validator
                     ->setMessage(_("there is already a user with e-mail address '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
-
             $form->getElement('email')
                     ->addValidator($validator)
                     ->addValidator(new Zend_Validate_EmailAddress());
-
             $validator = new Zend_Validate_Callback(array($this, 'needApiKey'));
             $validator
                     ->setMessage(_("An API Key is required for users that have access to the API"), Zend_Validate_Callback::INVALID_VALUE);
-
             $form->getElement('type')
                     ->addValidator($validator, true);
-
             $validator = new Zend_Validate_Callback(array($this->getTable(), 'uniqueApiKey'));
             $validator
                     ->setMessage(_("there is already a user with API key '%value%'"), Zend_Validate_Callback::INVALID_VALUE);
@@ -98,11 +87,9 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addValidator(new Zend_Validate_Alnum())
                     ->addValidator($validator)
                     ->addValidator(new Zend_Validate_StringLength(array('min' => 6)));
-
             $userData = $this->toArray();
             $userData['defaultSearchProfileIds'] = explode(', ', $userData['defaultSearchProfileIds']);
             $form->setDefaults($userData);
-
             if (!$this->id || (Zend_Auth::getInstance()->hasIdentity() && Zend_Auth::getInstance()->getIdentity()->id == $this->id)) {
                 $form->removeElement('delete');
                 if (!OpenSKOS_Db_Table_Users::fromIdentity()->isAllowed('editor.users', 'manage')) {
@@ -117,10 +104,8 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 }
             }
         }
-
         return $form;
     }
-
     public function needApiKey($usertype, Array $data)
     {
         if (OpenSKOS_Db_Table_Users::isApiAllowed($usertype)) {
@@ -129,18 +114,15 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             return true;
         }
     }
-
     public function setPassword($password)
     {
         $this->password = md5($password);
         return $this;
     }
-
     public function isApiAllowed()
     {
         return OpenSKOS_Db_Table_Users::isApiAllowed($this->type);
     }
-
     /**
      *
      * @param A Zend Resource identifier $resource
@@ -154,7 +136,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             return Zend_Registry::get($key)->isAllowed($this->role, $resource, $privilege);
         }
     }
-
     public function didIBlockMyselfFromTheEditor()
     {
         $id = Zend_Auth::getInstance()->getIdentity()->id;
@@ -162,23 +143,17 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             return false;
         return !OpenSKOS_Db_Table_Users::isEditorAllowed($this->type, $this->role);
     }
-
     public function setSearchOptions($optionsData)
     {
         if (isset($optionsData['searchProfileId']) && !$this->isAllowedToUseSearchProfile($optionsData['searchProfileId'])) {
-
             throw new Exception('The selected search profile is not allowed for that user.');
         }
-
         $this->searchOptions = serialize($optionsData);
         $this->save();
-
         $userOptions = new Zend_Session_Namespace('userOptions');
         $userOptions->searchOptions = $optionsData;
-
         return $this;
     }
-
     public function getSearchOptions($loadFromDb = false)
     {
         $searchOptions = array();
@@ -200,33 +175,26 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 $searchOptions = unserialize($this->searchOptions);
             }
         }
-
         // If the user has old search profile settings wich are not allowed for him - use the first of the default search profiles.
         if (isset($searchOptions['searchProfileId']) && !$this->isAllowedToUseSearchProfile($searchOptions['searchProfileId'])) {
-
             $searchOptions = array();
-
             $firstProfile = $this->getFirstDefaultSearchProfile();
             if ($firstProfile !== null) {
                 $searchOptions = $firstProfile->getSearchOptions();
             }
         }
-
         return $searchOptions;
     }
-
     public function getUserHistory()
     {
         $conceptsManager = $this->getDI()->get('OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($this->getUserHistoryUris());
     }
-
     public function getUserHistoryUris()
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
         return isset($userOptions->userHistory) ? $userOptions->userHistory : array();
     }
-
     public function updateUserHistory($identifier)
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -235,12 +203,10 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         }
         array_unshift($userOptions->userHistory, $identifier);
         $userOptions->userHistory = array_unique($userOptions->userHistory);
-
         if (count($userOptions->userHistory) > self::USER_HISTORY_SIZE) {
             array_pop($userOptions->userHistory);
         }
     }
-
     public function removeFromUserHistory($identifier)
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -249,7 +215,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         }
         unset($userOptions->userHistory[array_search($identifier, $userOptions->userHistory)]);
     }
-
     public function clearUserHistory()
     {
         $userOptions = new Zend_Session_Namespace('userOptions');
@@ -257,7 +222,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             $userOptions->userHistory = array();
         }
     }
-
     /**
      * Adds multiple concepts to the user's selection - both in session and in the db.
      *
@@ -267,7 +231,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     public function addConceptsToSelection($uris)
     {
         $selection = $this->getConceptsSelectionUris();
-
         $isSelectionChanged = false;
         if (!empty($uris)) {
             foreach ($uris as $uri) {
@@ -277,21 +240,17 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                 }
             }
         }
-
         if ($isSelectionChanged && count($selection) > self::USER_SELECTION_SIZE) {
             return false;
         }
-
         if ($isSelectionChanged) {
             $userOptions = new Zend_Session_Namespace('userOptions');
             $userOptions->conceptsSelection = $selection;
             $this->conceptsSelection = serialize($selection);
             $this->save();
         }
-
         return true;
     }
-
     /**
      * Gets the concepts from the selection
      *
@@ -303,7 +262,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $conceptsManager = $this->getDI()->get('OpenSkos2\ConceptManager');
         return $conceptsManager->fetchByUris($selection);
     }
-
     /**
      * Gets the concepts selection uris from session or from database (if not in session).
      * Adds them to session if they are not there.
@@ -325,7 +283,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             }
         }
     }
-
     /**
      * @return OpenSKOS_Db_Table_Row_User
      */
@@ -336,7 +293,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $this->conceptsSelection = serialize($userOptions->conceptsSelection);
         $this->save();
     }
-
     /**
      * Removes a single concept from user's selection.
      *
@@ -349,14 +305,12 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $conceptInd = array_search($uri, $selection);
         if ($conceptInd !== false) {
             unset($selection[$conceptInd]);
-
             $userOptions = new Zend_Session_Namespace('userOptions');
             $userOptions->conceptsSelection = $selection;
             $this->conceptsSelection = serialize($userOptions->conceptsSelection);
             $this->save();
         }
     }
-
     /**
      * Sets the user search options to his default profile options if they are not already set.
      *
@@ -371,7 +325,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
             $this->save();
         }
     }
-
     /**
      * Gets list of the search profiles for the user.
      * @return OpenSKOS_Db_Table_Row_SearchProfile[]
@@ -381,17 +334,13 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
         $profiles = array();
         if (!empty($this->defaultSearchProfileIds)) {
             $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);
-
             $profilesModels = new OpenSKOS_Db_Table_SearchProfiles();
-
             foreach ($defaultSearchProfilesIds as $profileId) {
                 $profiles[] = $profilesModels->find($profileId)->current();
             }
         }
-
         return $profiles;
     }
-
     /**
      * Gets the first of the search profiles for the user.
      * @return OpenSKOS_Db_Table_Row_SearchProfile
@@ -400,15 +349,12 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     {
         if (!empty($this->defaultSearchProfileIds)) {
             $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);
-
             $profilesModels = new OpenSKOS_Db_Table_SearchProfiles();
-
             return $profilesModels->find($defaultSearchProfilesIds[0])->current();
         } else {
             return null;
         }
     }
-
     /**
      * Gets the first of the search profiles for the user.
      * @return OpenSKOS_Db_Table_Row_SearchProfile
@@ -416,14 +362,12 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     public function isAllowedToUseSearchProfile($profileKey)
     {
         if ($this->disableSearchProfileChanging && !empty($this->defaultSearchProfileIds)) {
-
             $defaultSearchProfilesIds = explode(', ', $this->defaultSearchProfileIds);
             return in_array($profileKey, $defaultSearchProfilesIds);
         } else {
             return true;
         }
     }
-
     /**
      * @param $autoSave bool , default: true If uri is generated, should it be saved in the database
      * @return \OpenSkos2\Person
@@ -435,29 +379,23 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
         $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
-
         if (!$this->uri) {
             $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
-
             if ($autoSave) {
                 $this->save();
             }
         }
-
         try {
             return $resourceManager->fetchByUri($this->uri);
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
-
             if ($autoSave) {
                 $resourceManager->insert($person);
             }
-
             return $person;
         }
     }
-
     /**
      * Get dependency injection container
      *
@@ -467,7 +405,6 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
     {
         return Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
     }
-
     /**
      * @TODO temp function for base api uri
      */

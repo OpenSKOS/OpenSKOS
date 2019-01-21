@@ -76,21 +76,21 @@ class OpenSKOS_Db_Table_Row_Job extends Zend_Db_Table_Row
 	{
 		if ($this->task == self::JOB_TASK_IMPORT) {
 			$params = $this->getParams();
-			if (!@unlink($params['destination'] .'/'.$params['name'])) {
-				throw new Zend_Db_Table_Row_Exception(_('Failed to delete file').' `'.$params['name'].'`');
-			}
+			//B.Hillier: 24th Aug 2018. Removed a check on whether a file existed.
+            // If the file wasn't there for whatever reason, the job could not be deleted.
+			@unlink($params['destination'] .'/'.$params['name']);
 		}
 		return parent::delete();
 	}
 	
 	/**
-	 * @return OpenSKOS_Db_Table_Row_Collection
+	 * @return OpenSKOS_Db_Table_Row_Set
 	 */
 	public function getCollection()
 	{
-		static $collection;
-		if (null === $collection) {
-			$collection = $this->findParentRow('OpenSKOS_Db_Table_Collections');
+		static $set;
+		if (null === $set) {
+			$set = $this->findParentRow('OpenSKOS_Db_Table_Collections');
 		}
 		return $collection;
 	}

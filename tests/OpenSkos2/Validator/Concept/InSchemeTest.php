@@ -18,7 +18,14 @@ class InSchemeTest extends \PHPUnit_Framework_TestCase
 
     public function testValidate()
     {
+
+        $conceptManagerMock = $this->getMockBuilder('\OpenSkos2\ConceptManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $validator = new InScheme();
+        $validator->setResourceManager($conceptManagerMock);
+
         $concept = new Concept('http://example.com#1');
 
         //no scheme
@@ -26,6 +33,7 @@ class InSchemeTest extends \PHPUnit_Framework_TestCase
 
         $concept->addProperty(SKOS::INSCHEME, new Uri('http://example.com#scheme1'));
 
+        $res = $validator->validate($concept);
         //1 scheme
         $this->assertTrue($validator->validate($concept));
 

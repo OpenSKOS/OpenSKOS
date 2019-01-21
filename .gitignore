@@ -5,10 +5,16 @@ cache/
 .sass-cache/
 public/data/export/*
 /data/uploads/
+/data/solr/
 /public/data/icons/
 /vendor/
 /nbproject/
 /node_modules/
 /public/apidoc/
+/apidoc/
 /public/oaidoc/
+/application/configs/application.ini_backup.dist
+/application/configs/application_corrupted.ini
+/application/configs/application_backup.ini
+/application/configs/custom.ini
 /data/solr/data/

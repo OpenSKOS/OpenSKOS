@@ -24,6 +24,7 @@ $opts = array(
     'env|e=s' => 'The environment to use (defaults to "production")',
     'code|c=s' => 'Tenant code (optional, default is all Tenants)',
     'job|j=i' => 'Job ID (optional, default is all Jobs)',
+    'tenant|x=s' => 'Tenant code',
     'task|t=s' => 'Only jobs for the specified task. Options: "import", "export", "harvest", "delete_concept_scheme",'
     . '"all", "noExport". (optional, default is "noExport")'
 );
@@ -75,6 +76,9 @@ Zend_Db_Table::setDefaultAdapter(
 /* @var $diContainer DI\Container */
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 
+$setManager = $diContainer->get('OpenSkos2\SetManager');
+$tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
 /**
  * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
  */
@@ -84,13 +88,16 @@ switch ($action) {
     case 'list':
         $db = Zend_Db_Table::getDefaultAdapter();
         $select = $db->select()
-                ->from('job', array('id', 'collection', 'created', 'parameters', 'task'))
-                ->join('collection', 'collection.id=job.collection', array('tenant', 'collectioncode' => 'code'))
+                ->from('job', array('id', 'set_uri', 'created', 'parameters', 'task'))
+                //->join('collection', 'collection.id=job.collection', array('tenant', 'collectioncode' => 'code'))
                 ->where('finished IS NULL')
                 ->order('created asc')
                 ->where('started IS NULL');
         if ($OPTS->tenant) {
-            $select->where('collection.tenant=?', $OPTS->tenant);
+
+            $setsForTenant = $tenantManager->fetchSetUrisForTenant($OPTS->tenant);
+
+            $select->where('set_uri IN (?)', $setsForTenant);
         }
         if ($OPTS->task && $OPTS->task != 'all') {
             if ($OPTS->task == 'noExport') {
@@ -101,13 +108,12 @@ switch ($action) {
         }
 
         $rows = $db->fetchAll($select);
-        $columns = array('id', 'tenant', 'collection', 'created', 'task');
+        $columns = array('id', 'tenant', 'set_uri', 'created', 'task');
         echo fwrite(STDOUT, implode("\t", $columns) . "\n");
         foreach ($rows as $row) {
             $params = OpenSKOS_Db_Table_Jobs::getParams($row['parameters']);
             fwrite(STDOUT, "{$row['id']}\t");
-            fwrite(STDOUT, "{$row['tenant']}\t");
-            fwrite(STDOUT, str_pad($row['collectioncode'], strlen('collection'), ' ', STR_PAD_RIGHT) . "\t");
+            fwrite(STDOUT, str_pad($row['set_uri'], 60, ' ', STR_PAD_RIGHT) . "\t");
             fwrite(STDOUT, "{$row['created']}\t");
             fwrite(STDOUT, "{$row['task']}\t");
             if ($row['task'] === OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT) {
@@ -174,7 +180,10 @@ switch ($action) {
             $job = $jobs[0];
 
             /** @var OpenSKOS_Db_Table_Row_Job $job */
-            $set = $job->getCollection();
+
+            $set = $setManager->fetchByUri($job->set_uri);
+            $tenantCode = $set->getTenant()->getValue();
+            $tenant = $tenantManager->fetchTenantFromCode($tenantCode);
             switch ($job->task) {
                 case OpenSKOS_Db_Table_Row_Job::JOB_TASK_IMPORT:
                     //init importer
@@ -190,9 +199,7 @@ switch ($action) {
                         $resourceManager,
                         $diContainer->get('OpenSkos2\ConceptManager'),
                         $diContainer->get('OpenSkos2\PersonManager'),
-                        new \OpenSkos2\Tenant(
-                            $job->getCollection()->getTenant()['code']
-                        )
+                        $tenant
                     );
 
                     $jobLogger = $job->getLogger();

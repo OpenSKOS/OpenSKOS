@@ -23,15 +23,23 @@ use OpenSkos2\Concept;
 use OpenSkos2\Namespaces\Skos;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Validator\AbstractConceptValidator;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAware;
-use OpenSkos2\Validator\DependencyAware\ResourceManagerAwareTrait;
-use OpenSkos2\Validator\DependencyAware\TenantAware;
-use OpenSkos2\Validator\DependencyAware\TenantAwareTrait;
 
-class UniquePreflabelInScheme extends AbstractConceptValidator implements ResourceManagerAware, TenantAware
+// Meertens: the code is fully taken from Picturae except declarations of Traits,
+// which were removed; they are unused.
+
+class UniquePreflabelInScheme extends AbstractConceptValidator
 {
-    use ResourceManagerAwareTrait;
-    use TenantAwareTrait;
+
+
+    /**
+     * @var array
+     */
+    protected $errorCodes = [];
+
+    public function getErrorCodes()
+    {
+        return $this->errorCodes;
+    }
 
     /**
      * Ensure the preflabel does not already exists in the scheme
@@ -46,12 +54,12 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
         foreach ($preflabel as $label) {
             foreach ($schemes as $scheme) {
                 if ($this->labelExistsInScheme($concept, $label, $scheme)) {
-                    $this->errorMessages[] = 'The pref label already exists in that concept scheme.';
+                    $this->errorMessages[] = "The pref label $label already exists in the concept scheme $scheme";
+                    $this->errorCodes[] = 409;
                     return false;
                 }
             }
         }
-
         return true;
     }
 
@@ -75,9 +83,9 @@ class UniquePreflabelInScheme extends AbstractConceptValidator implements Resour
         $escapedScheme = $ntriple->serialize($scheme);
 
         $query = '
-                ?subject <'.Skos::PREFLABEL.'> ' . $escapedLabel . ' .
-                ?subject <'.Skos::INSCHEME.'> ' . $escapedScheme . ' .
-                ?subject <'.OpenSkos::STATUS .'> ?status
+                ?subject <' . Skos::PREFLABEL . '> ' . $escapedLabel . ' .
+                ?subject <' . Skos::INSCHEME . '> ' . $escapedScheme . ' .
+                ?subject <' . OpenSkos::STATUS . '> ?status
                 FILTER(
                     ?subject != ' . $ntriple->serialize($concept) . '
                         && (

@@ -1,0 +1,14 @@
+Info: There was an attempt to duplicate a relation: array(3) {
+  [0]=>
+  string(83) "http://openskos.meertens.knaw.nl/Organisations/a7d21d5e-7b78-409d-862f-84c667a2e96e"
+  [1]=>
+  string(43) "http://www.w3.org/2004/02/skos/core#broader"
+  [2]=>
+  object(OpenSkos2\Rdf\Resource)#151 (2) {
+    ["properties":protected]=>
+    array(0) {
+    }
+    ["uri":protected]=>
+    string(83) "http://openskos.meertens.knaw.nl/Organisations/1e44bb80-725c-459d-b2ee-e980548ca4fa"
+  }
+}

@@ -21,7 +21,6 @@
  */
 class OpenSKOS_Db_Table_Row_SearchProfile extends Zend_Db_Table_Row
 {
-
     /**
      * Sets search options
      *
@@ -31,7 +30,6 @@ class OpenSKOS_Db_Table_Row_SearchProfile extends Zend_Db_Table_Row
     {
         $this->searchOptions = serialize($options);
     }
-
     /**
      * Gets search options
      *
@@ -40,14 +38,13 @@ class OpenSKOS_Db_Table_Row_SearchProfile extends Zend_Db_Table_Row
     public function getSearchOptions()
     {
         $savedOptions = unserialize($this->searchOptions);
-
         // Merge with default options to be sure that we have correct value
         // for any new options which are not saved in the profile.
         $defaultOptions = array();
         if (class_exists('Editor_Forms_SearchOptions')) {
             $defaultOptions = Editor_Forms_SearchOptions::getDefaultSearchOptions();
         }
-
         return array_merge($defaultOptions, $savedOptions);
     }
 }
+

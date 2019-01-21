@@ -65,7 +65,7 @@ $this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
 	<thead>
 		<tr>
 			<th><input type="checkbox" id="checkall"/></th>
-			<th><?php echo $this->translate('Collection')?></th>
+			<th><?php echo $this->translate('Set')?></th>
 			<th><?php echo $this->translate('Created')?></th>
 			<th><?php echo $this->translate('Started')?></th>
 			<th><?php echo $this->translate('Finished')?></th>
@@ -78,7 +78,7 @@ $this->headScript(Zend_View_Helper_HeadScript::SCRIPT, $js);
 		<?php foreach ($this->jobs as $job):?>
 		<tr>
 			<td><input type="checkbox" class="jobCb" name="job[]" value="<?php echo $job['id']?>"/></td>
-			<td><?php echo $job['collection']?></td>
+			<td>&lt;<?php echo $job['set_uri']?>&gt;</td>
 			<td><?php echo $job['created']?></td>
 			<td><?php echo $job['started']?$job['started']:'-'?></td>
 			<td><?php echo $job['finished']?$job['finished']:'-'?></td>

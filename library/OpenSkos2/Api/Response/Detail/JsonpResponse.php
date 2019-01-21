@@ -1,5 +1,4 @@
 <?php
-
 /*
  * OpenSKOS
  *
@@ -16,7 +15,6 @@
  * @author     Picturae
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
-
 namespace OpenSkos2\Api\Response\Detail;
 
 use OpenSkos2\Api\Response\DetailResponse;
@@ -31,7 +29,6 @@ class JsonpResponse extends DetailResponse
      * @var string
      */
     private $callback;
-
     /**
      * @param \OpenSkos2\Rdf\Resource $resource
      * @param string $callback
@@ -58,6 +55,7 @@ class JsonpResponse extends DetailResponse
     {
         $stream = new \Zend\Diactoros\Stream('php://memory', 'wb+');
         $body = (new \OpenSkos2\Api\Transform\DataArray($this->resource, $this->propertiesList))->transform();
+        $body = $this->addAuxToBody($body);
         $jsonp = $this->callback . '(' . json_encode($body) . ');';
         $stream->write($jsonp);
         $response = (new \Zend\Diactoros\Response($stream))

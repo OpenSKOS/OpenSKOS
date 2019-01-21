@@ -13,7 +13,6 @@ appnamespace = "Application"
 autoloadernamespaces[] = OpenSKOS_
 autoloadernamespaces[] = Net_
 
-
 ; this path will be used for import files
 ; it is not required to put this directory inside your DocumentRoot
 ; make sure this directory is writable by your webserver!
@@ -33,15 +32,15 @@ editor.schemeIcons.height=16
 editor.schemeIcons.extension="png"
 
 ; Schemes order based on collections. FOR LIVE
-editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/gtaa"
-editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/nongtaa"
-editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/gtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/nongtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
 
 ; Schemes order based on collections. FOR ACCEPT
-editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:gtaa"
-editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nongtaa"
-editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
-editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nonmatch"
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:gtaa"
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nongtaa"
+;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nonmatch"
 
 ; Export configuration
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
@@ -49,6 +48,7 @@ editor.export.filesHttpPath = "/data/export/"
 
 ; Editor behaviour
 editor.allowNotationEdit = "@editor-allow-notation-edit@"
+editor.labelsUniquePerTenant = "0"
 
 ; overwrite the homepage by setting this option
 ; make sure there is a script named "index/index.phtml"
@@ -133,7 +133,13 @@ oAuth2.google.clientSecret = "@google-client-secret@"
 api.baseUri = "@api-base-uri@"
 api.showOnlyApproved = "@api-show-only-approved@"
 
+; optional
+; end optional
+
 [staging : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.frontController.params.displayExceptions = 1
 
 [testing : production]
 phpSettings.display_startup_errors = 1

@@ -21,5 +21,5 @@ namespace OpenSkos2\Solr\Exception;
 
 class InvalidValue extends \Exception
 {
-
+    
 }

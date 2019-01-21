@@ -18,8 +18,13 @@
  * @author     Mark Lindeman
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
  */
+
+
+use OpenSkos2\Namespaces\DcTerms;
+use OpenSkos2\Namespaces\OpenSkos;
+
 ?>
-<?php if ($this->collection->id):?>
+<?php if ($this->set->getPropertySingleValue(DcTerms::TITLE)):?>
 <?php $this->headTitle($this->translate('Edit collection'))?>
 <?php else:?>
 <?php $this->headTitle($this->translate('Create collection'))?>
@@ -27,15 +32,15 @@
 
 <div>
 	<div id="collection-form">
-	<?php echo $this->collection->getForm()->setAction($this->url(array('action' => 'save')))?>
+	<?php echo $this->set->getForm()->setAction($this->url(array('action' => 'save')))?>
 	</div>
-	<?php if ($this->collection->id):?>
+	<?php if ($this->set->getPropertySingleValue(DcTerms::TITLE)):?>
 	<div id="collection-stats" class="box">
                 <?php /*
                 @TODO Implement the list of reources per class.
 		<h3>SKOS Concepts per class:</h3>
 		<ul>
-			<?php foreach ($this->collection->getClasses() as $class => $count):?>
+			<?php foreach ($this->set->getClasses() as $class => $count):?>
 			<li><?php echo OpenSKOS_Rdf_Parser::$namespaces['skos'].$class?>: <?php echo number_format($count, 0)?></li>
 			<?php endforeach?>
 		</ul>
@@ -53,7 +58,7 @@
 			);
 		?></p>
 		<?php else:?>
-		<?php echo $this->collection->getOaiJobForm()->setAction($this->url(array('action' => 'harvest')))?>
+		<?php echo $this->set->getOaiJobForm()->setAction($this->url(array('action' => 'harvest')))?>
 		<?php endif?>
 		<?php else:?>
 			<p>OAI LAST UPDATE</p>
@@ -64,7 +69,7 @@
 		<br/>
 		<?php echo $this->translate('See <a href="%s">API documentation</a> for supported formats.', $this->url(array('module' => 'api'), null, true).'#concept-crud')?>
 		</p>
-		<?php echo $this->collection->getUploadform()->setAction($this->url(array('action' => 'import')))?>
+		<?php echo $this->set->getUploadform()->setAction($this->url(array('action' => 'import')))?>
 		<?php if (count($this->jobs)):?>
 		<h3><?php echo $this->translate('Current import jobs for this collection')?></h3>
 		<table style="width: 100%;">
@@ -92,13 +97,13 @@
 	<?php endif?>
 </div>
 
-<?php if ($this->collection->id):?>
+<?php if ($this->set->getPropertySingleValue(DcTerms::TITLE)):?>
 <div class="share-collection">
     <p>You can share this information via the OpenSKOS API:</p>
     <ul>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.rdf">in RDF</a></li>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.html">in HTML</a></li>
-        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->collection->getId()), 'rest', true)?>.json">in JSON</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->set->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.rdf">in RDF</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->set->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.html">in HTML</a></li>
+        <li><a href="<?php echo $this->url(array('module' => 'api', 'controller'=>'collections', 'id' => $this->set->getPropertySingleValue(OpenSkos::CODE)), 'rest', true)?>.json">in JSON</a></li>
     </ul>
 </div>
 <?php endif?>

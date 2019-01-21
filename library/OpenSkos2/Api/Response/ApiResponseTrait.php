@@ -22,10 +22,8 @@ namespace OpenSkos2\Api\Response;
 use OpenSkos2\Api\Exception\InvalidArgumentException;
 use OpenSkos2\Api\Exception\UnauthorizedException;
 use OpenSkos2\Rdf\Resource;
-use OpenSkos2\Namespaces\OpenSkos;
 use OpenSKOS_Db_Table_Row_Tenant;
 use OpenSKOS_Db_Table_Row_User;
-use OpenSKOS_Db_Table_Tenants;
 use OpenSKOS_Db_Table_Users;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -55,15 +53,18 @@ trait ApiResponseTrait
      * Get tenant
      *
      * @param string $tenantCode
-     * @return OpenSKOS_Db_Table_Row_Tenant
+     * @param \OpenSkos2\Rdf\ResourceManager $manager
+     * @return \OpenSkos2\Tenant
      * @throws InvalidArgumentException
      */
-    protected function getTenant($tenantCode)
+    protected function getTenant($tenantCode, \OpenSkos2\Rdf\ResourceManager $manager)
     {
-        $model = new OpenSKOS_Db_Table_Tenants();
-        $tenant = $model->find($tenantCode)->current();
+        $tenant = $manager->fetchByUuid($tenantCode, \OpenSkos2\Tenant::TYPE, 'openskos:code');
         if (null === $tenant) {
-            throw new InvalidArgumentException('No such tenant: `'.$tenantCode.'`', 404);
+            throw new InvalidArgumentException(
+                "No such tenant $tenantCode",
+                404
+            );
         }
         return $tenant;
     }
@@ -90,6 +91,8 @@ trait ApiResponseTrait
 
         return $user;
     }
+    
+    
 
     /**
      * Check if the user is from the given tenant
@@ -100,26 +103,9 @@ trait ApiResponseTrait
      * @param OpenSKOS_Db_Table_Row_User $user
      * @throws UnauthorizedException
      */
-    public function resourceEditAllowed(
-        Resource $resource,
-        OpenSKOS_Db_Table_Row_Tenant $tenant,
-        OpenSKOS_Db_Table_Row_User $user
-    ) {
-        if ($user->tenant !== $tenant->code) {
-            throw new UnauthorizedException('Tenant does not match user given', 403);
-        }
-
-        $resourceTenant = current($resource->getProperty(OpenSkos::TENANT));
-        if ($tenant->code !== (string)$resourceTenant) {
-            throw new UnauthorizedException(
-                'User has tenant '
-                . $user->code
-                . ' but resource has tenant '
-                . $resourceTenant,
-                403
-            );
-        }
-
-        return true;
-    }
+    // Meertens: we do not define this method resourceEditAllowed here
+    // we have moved resourceEditingAllowed methods to the Custom directory
+    // so that the developers of the given institution can adjust it for their own requirements
+    // alos, there are different authorisation requirements for different sorts of resources
+    // (e.g. compare concept scheme and concepts, different roles are allowed to do different things)
 }

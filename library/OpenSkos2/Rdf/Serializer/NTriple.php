@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -21,7 +21,7 @@ namespace OpenSkos2\Rdf\Serializer;
 
 class NTriple
 {
-        
+
     /**
      * Serialize an array when retrieving data from
      *
@@ -34,7 +34,7 @@ class NTriple
         foreach ($property as $object) {
             $values[] = $this->serialize($object);
         }
-        
+
         return implode(', ', $values);
     }
 
@@ -47,23 +47,23 @@ class NTriple
     public function serialize(\OpenSkos2\Rdf\Object $object)
     {
         $serializer = new \EasyRdf\Serialiser\Ntriples();
-        
+
         if ($object instanceof \OpenSkos2\Rdf\Literal) {
             return $serializer->serialiseValue([
-                'type' => 'literal',
-                'value' => $object->getValue(),
-                'lang' => $object->getLanguage()
+                    'type' => 'literal',
+                    'value' => $object->getValue(),
+                    'lang' => $object->getLanguage()
             ]);
         } elseif ($object instanceof \OpenSkos2\Rdf\Uri) {
             return $serializer->serialiseValue([
-                'type' => 'uri',
-                'value' => $object->getUri()
+                    'type' => 'uri',
+                    'value' => $object->getUri()
             ]);
         } else {
             throw new Exception\InvalidArgumentException('Invalid object: ' . get_class($object));
         }
     }
-    
+
     /**
      *
      * @return \OpenSkos2\Rdf\Serializer\NTriple

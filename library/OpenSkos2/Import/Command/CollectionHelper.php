@@ -20,6 +20,8 @@
 namespace OpenSkos2\Import\Command;
 
 use OpenSkos2\Concept;
+use OpenSkos2\Set;
+use OpenSkos2\Person;
 use OpenSkos2\ConceptScheme;
 use OpenSkos2\Namespaces\DcTerms;
 use OpenSkos2\Namespaces\OpenSkos;
@@ -59,6 +61,17 @@ class CollectionHelper implements LoggerAwareInterface
     protected $tenant;
     
     /**
+     * @var Set
+     */
+    protected $set;
+    
+    /**
+     * @var Person
+     */
+    protected $person;
+    
+    
+    /**
      * @var Message
      */
     protected $message;
@@ -81,6 +94,8 @@ class CollectionHelper implements LoggerAwareInterface
         $this->personManager = $personManager;
         $this->tenant = $tenant;
         $this->message = $message;
+        $this->set = $this->resourceManager->fetchByUri($message->getSetUri(), Set::TYPE);
+        $this->person = $message->getUser();
     }
 
     /**
@@ -102,8 +117,10 @@ class CollectionHelper implements LoggerAwareInterface
 
             if ($resourceToInsert instanceof Concept) {
                 $this->prepareConcept($resourceToInsert, $alreadyExists);
+                $this->logger->info("Has prepared concept {$resourceToInsert->getUri()}");
             } elseif ($resourceToInsert instanceof ConceptScheme) {
-                $this->prepareConceptScheme($resourceToInsert);
+                $this->prepareConceptScheme($resourceToInsert, $alreadyExists);
+                $this->logger->info("Has prepared concept scheme {$resourceToInsert->getUri()}");
             }
         }
         
@@ -120,11 +137,13 @@ class CollectionHelper implements LoggerAwareInterface
     protected function prepareConcept(Concept &$concept, $alreadyExists)
     {
         if ($concept->isBlankNode()) {
-            $concept->selfGenerateUri($this->tenant, $this->conceptManager);
+            $concept->selfGenerateUri($this->tenant, $this->set, $this->conceptManager);
         }
 
         if ($alreadyExists) {
-            $currentVersion = $this->resourceManager->fetchByUri($concept->getUri());
+            $currentVersion = $this->resourceManager->fetchByUri($concept->getUri(), Concept::TYPE);
+        } else {
+            $currentVersion = null;
         }
 
         // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
@@ -166,14 +185,16 @@ class CollectionHelper implements LoggerAwareInterface
                 }
             }
         }
+        
+        
 
         $concept->ensureMetadata(
-            $this->tenant->getCode(),
-            $this->message->getSetUri(),
-            $this->message->getUser(),
-            $this->conceptManager->getLabelManager(),
+            $this->tenant,
+            $this->set,
+            $this->person,
             $this->personManager,
-            $alreadyExists ? $currentVersion->getStatus(): null,
+            $this->conceptManager->getLabelManager(),
+            $currentVersion,
             true
         );
     }
@@ -182,12 +203,33 @@ class CollectionHelper implements LoggerAwareInterface
      * Makes concept scheme specific changes prior to import.
      * @param ConceptScheme &$conceptScheme
      */
-    protected function prepareConceptScheme(ConceptScheme &$conceptScheme)
+    protected function prepareConceptScheme(ConceptScheme &$conceptScheme, $alreadyExists)
     {
+        if ($conceptScheme->isBlankNode()) {
+            $conceptScheme->selfGenerateUri($this->tenant, $this->set, $this->conceptManager);
+        }
+        if ($alreadyExists) {
+            $currentVersion = $this->resourceManager->fetchByUri($conceptScheme->getUri(), Concept::TYPE);
+        } else {
+            $currentVersion = null;
+        }
+      
+      // @TODO Is that $currentVersion/DATESUBMITTED logic needed at all. Remove and test.
+        if ($alreadyExists && $currentVersion->hasProperty(DcTerms::DATESUBMITTED)) {
+            $conceptScheme->setProperty(
+                DcTerms::DATESUBMITTED,
+                $currentVersion->getProperty(DcTerms::DATESUBMITTED)[0]
+            );
+        }
+
         $conceptScheme->ensureMetadata(
-            $this->tenant->getCode(),
-            $this->message->getSetUri(),
-            $this->message->getUser()
+            $this->tenant,
+            $this->set,
+            $this->person,
+            $this->personManager,
+            $this->conceptManager->getLabelManager(),
+            $currentVersion,
+            true
         );
     }
 }

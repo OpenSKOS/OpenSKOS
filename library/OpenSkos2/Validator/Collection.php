@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * OpenSKOS
  * 
  * LICENSE
@@ -20,7 +20,7 @@
 namespace OpenSkos2\Validator;
 
 use OpenSkos2\Tenant;
-use OpenSkos2\Concept;
+use OpenSkos2\Set;
 use OpenSkos2\ConceptManager;
 use OpenSkos2\Exception\InvalidResourceException;
 use OpenSkos2\Rdf\Resource;
@@ -32,6 +32,7 @@ use Psr\Log\NullLogger;
 
 class Collection
 {
+
     /**
      * @var ResourceManager
      */
@@ -46,14 +47,17 @@ class Collection
      * @var Tenant
      */
     protected $tenant;
-    
+    protected $set;
+    protected $isForUpdate;
+    protected $referenceCheckOn;
+    protected $conceptReferenceCheckOn;
     /**
      * Holds all error messages
      *
      * @var array
      */
     private $errorMessages = [];
-    
+
     /**
      * Logger
      *
@@ -67,18 +71,24 @@ class Collection
      */
     public function __construct(
         ResourceManager $resourceManager,
-        ConceptManager $conceptManager,
-        Tenant $tenant = null,
+        $isForUpdate,
+        Tenant $tenant,
+        Set $set,
+        $referencecheckOn,
+        $conceptReferenceCheckOn = false,
         LoggerInterface $logger = null
     ) {
         if ($logger === null) {
             $logger = new NullLogger();
         }
-        
+
         $this->logger = $logger;
         $this->resourceManager = $resourceManager;
-        $this->conceptManager = $conceptManager;
         $this->tenant = $tenant;
+        $this->set = $set;
+        $this->isForUpdate = $isForUpdate;
+        $this->conceptReferenceCheckOn = $conceptReferenceCheckOn;
+        $this->referenceCheckOn = $referencecheckOn;
     }
 
     /**
@@ -93,7 +103,7 @@ class Collection
             $validator = $this->getResourceValidator($resource);
             if (!$validator->validate($resource)) {
                 $errorsFound = true;
-                
+                   
                 $this->errorMessages[] = 'Errors for resource "' . $resource->getUri() . '" '
                     . implode(', ', $validator->getErrorMessages());
             }
@@ -102,10 +112,10 @@ class Collection
         if ($errorsFound) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Get error messages
      *
@@ -115,7 +125,7 @@ class Collection
     {
         return $this->errorMessages;
     }
-    
+
     /**
      * Get resource validator by resource type
      * @param Resource $resource
@@ -123,10 +133,14 @@ class Collection
      */
     private function getResourceValidator($resource)
     {
-        if ($resource instanceof Concept) {
-            return new \OpenSkos2\Validator\Resource($this->conceptManager, $this->tenant, $this->logger);
-        }
-        
-        return new \OpenSkos2\Validator\Resource($this->resourceManager, $this->tenant, $this->logger);
+        return new \OpenSkos2\Validator\Resource(
+            $this->resourceManager,
+            $this->isForUpdate,
+            $this->tenant,
+            $this->set,
+            $this->referenceCheckOn,
+            $this->conceptReferenceCheckOn,
+            $this->logger
+        );
     }
 }

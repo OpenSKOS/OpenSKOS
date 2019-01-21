@@ -23,6 +23,7 @@ use OpenSkos2\Rdf\Resource as RdfResource;
 
 interface ValidatorInterface
 {
+
     /**
      * @param RdfResource $resource
      * @return bool
