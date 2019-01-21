@@ -239,9 +239,8 @@ Full HTML documentation of the API is supplied and is available in HTML at `<bas
 
 # 7. Development
 
-## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
-_**WARNING:** OpenSKOS 2.2.0-rc1 is a release candidate and not yet approved for production. It is very strongly 
-recommended to back up all data before performing the following steps_
+## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2
+_**WARNING:** It is very strongly recommended to back up all data before performing the following steps_
 
 In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
 Jena triple store.
