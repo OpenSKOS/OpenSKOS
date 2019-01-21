@@ -93,6 +93,11 @@ class Autocomplete
             }
         }
 
+        $searchTextWild = $searchText;
+        //$searchTextPlain = preg_replace('#\*$#', '', $searchText);
+        $searchTextPlain = preg_replace('#\ #', '\\ ', $searchText);
+
+
         $prefix = '';
         //Meertens: the feature wholeworld  works only  when labels and/or properties are given as request parameters
         $prefix = 'a_';
@@ -109,6 +114,7 @@ class Autocomplete
             foreach ($options['label'] as $label) {
                 // boost important labels
                 $boost = '';
+                $searchText = $searchTextPlain;
                 if ($label === 'prefLabel') {
                     $boost = '^40';
                 }
@@ -127,6 +133,7 @@ class Autocomplete
                     $searchTextQueries[] = $prefix . $label . ':' . $searchText . $boost;
                 }
             }
+            $searchText = $searchTextPlain;
         }
 
         // notes

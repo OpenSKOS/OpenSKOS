@@ -114,7 +114,7 @@ class Editor_JobsController extends OpenSKOS_Controller_Editor
     {
         $set_uri = $job->set_uri;
         $di = $this->getDI();
-        $setManager = $di->get('OpenSkos2\setManager');
+        $setManager = $di->get('OpenSkos2\SetManager');
         $set = $setManager->fetchByUri($set_uri);
         return $set;
     }

@@ -73,10 +73,10 @@ class Concept implements Record
             $setUris = $concept->getProperty(OpenSkos::SET);
             $oaiSets = $this->setsMap->getSets($tenant, $setUris);
             foreach ($oaiSets as $set) {
-                $setSpecs[] = $tenant . ':' . $set->code;
-                $schemes = $this->setsMap->getSchemes($tenant, $set->uri, $concept->getProperty(Skos::INSCHEME));
+                $setSpecs[] = $tenant . ':' . $set['code'];
+                $schemes = $this->setsMap->getSchemes($tenant, $set['uri'], $concept->getProperty(Skos::INSCHEME));
                 foreach ($schemes as $scheme) {
-                    $setSpecs[] = $tenant . ':' . $set->code . ':' . $scheme->getUuid();
+                    $setSpecs[] = $tenant . ':' . $set['code'] . ':' . $scheme->getUuid();
                 }
             }
         }

@@ -126,7 +126,7 @@ where you can manage all the other entities of the application.
 
 
 # 4. Apache Jena Fuseki setup
-Openskos uses Fuseki 2 for storage. At the time of writing this doc latest stable version is 2.3.0
+Openskos is compatible with Fuseki 2 or Fuzeki 3 for storage. It has been tested up to Fuzeki 3.8 (the latest stable version at time of writing)
 
 Installing Fuseki 2 for development purposes:
 
@@ -141,9 +141,17 @@ Installing Fuseki 2 for development purposes:
   1. The docs say that Fuseki requires Java 7, but if you have the error `Unsupported major.minor version 52.0` try updating your Java, or go for Java 8 directly.
 5. Now you will have the fuseki server up and running on [http://localhost:3030/](http://localhost:3030/) with "openskos" dataset defined. This is also the default config in openskos' `application.ini.dist` - item `sparql`
 
+
+## 4.1 Jena Updates
+Several bug fixes were made to the rules/openskos.ttl file in October 2018, on both the OpenSkos 2.2 (Master at time of
+ update ) and Meertens Merge (Development at time of update) branches. When upgrading to these versions, please update 
+ the configuration files on the Jena server to the versions located in `./data/fuseki/configuration`.   
+
 # 5. Apache Solr Setup
 You have to have a java VM installed prior to installing Solr!
-Download a 3.4 release of Apache Solr and extract it somewhere on your server:
+The version of Solr used during development was 7.4.0. Other versions going back to Solr 4 are supported, but it will be 
+necessary to adapt the Solr configuration files to the syntax for these versions.
+
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 - go to the `example` directory and create a directory named `openskos`
@@ -155,6 +163,14 @@ You can now start Solr (in this example with 1,024 MB memory assigned):
 ```sh
     java -Dsolr.solr.home="./openskos" -Xms1024m -Xmx1024m -jar start.jar
 ```
+
+## 5.1 Solr Updates
+The Solr configuration file was substantially altered during the Meertens Merge project. If upgrading, you will need
+to take the example `solrconfig.xml` and `schema.xml` from `./data/solr`, and adapt them to your Solr version.
+
+After updating the configuration, you should delete the contents of the Solr database and re-index using the 
+`./tools/jena2Solr.php` script. If you skip this step, OpenSkos will remain functional, but the internal content of the 
+Solr core will become inconsistent as records are updated.
 
 # 6. Data Ingest
 Once you have the application running you can start adding data,
@@ -223,14 +239,16 @@ Full HTML documentation of the API is supplied and is available in HTML at `<bas
 
 # 7. Development
 
-## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2-rc
-_**WARNING:** OpenSKOS 2.2.0-rc1 is a release candidate and not yet approved for production. It is very strongly 
-recommended to back up all data before performing the following steps_
+## 7.1. Migration from OpenSKOS-1 to OpenSKOS-2.2
+_**WARNING:** It is very strongly recommended to back up all data before performing the following steps_
 
 In OpenSkos 2.2 Tenants and Collections in MySQL have been migrated from MySQL to the 
 Jena triple store.
 
-To migrate from OpenSKOS 1.0 or 2.1 to 2.2, please perform the following step.
+To migrate from OpenSKOS 1.0 or 2.1 to 2.2, first read sections 4.1 and 5.1 about updating the Jena and Solr 
+configurations. Both steps are necessary when upgrading to OpenSkos 2.2
+
+Then perform the following steps:
 
 -- `/tools/migrate_tenant_collection.php` (migrates tenants and collections from MySQL 
 to institutions and sets of Triple store)

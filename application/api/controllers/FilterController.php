@@ -57,6 +57,18 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
    *   {"uri":"http://mertens/knaw/formalorganization_bd9df26b-313c-445a-ab4e-3467b0429494", "title":"example.com"}
    * ], 
    * "http://openskos.org/xmlns#status":
+   *
+   * [
+   *  "candidate":"A newly added concept",
+   *  "approved":"Candidate that was inspected and approved",
+   *  "redirected":"Proposed concept was found to be better represented by another concept. The redirected concept will be maintained for convenience and will contain a forward note to the target concept.",
+   *  "not_compliant":"Concept is not compliant with the GTAA standard, but is maintained for convenience of the creator. It can become obsolete when no longer necessary.",
+   *  "rejected":"Substandard quality",
+   *  "obsolete":"This concept is no longer necessary, may be succeeded by another concept.",
+   *  "deleted":"All concept metadata is deleted.",
+   * ]
+   *
+   *
    *    ["candidate", "approved", "redirected", "not_compliant", "rejected", "obsolete", "deleted", "expired"]
    * }
    *
@@ -91,7 +103,7 @@ class Api_FilterController extends OpenSKOS_Rest_Controller {
       $response = $api->fetchFiltersForRelations();
     } else {
       $response = $api->fetchFilters();
-      $statusses = Concept::getAvailableStatuses();
+      $statusses = Concept::getAvailableStatusesWithDescriptions();
       $response[OpenSkos::STATUS] = $statusses;
     }
     return $this->getResponse()->setBody(json_encode($response, JSON_UNESCAPED_SLASHES));

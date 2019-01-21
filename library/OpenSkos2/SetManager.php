@@ -40,6 +40,59 @@ class SetManager extends ResourceManager
      */
     protected $resourceType = Set::TYPE;
 
+
+    /**
+     * Fetches full resources.
+     * @param Object[] $simplePatterns Example: [Skos::NOTATION => new Literal('AM002'),]
+     * @param int $offset
+     * @param int $limit
+     * @param bool $ignoreDeleted Do not fetch resources which have openskos:status deleted.
+     * @return ResourceCollection
+     */
+    public function fetch($simplePatterns = [], $offset = null, $limit = null, $ignoreDeleted = false)
+    {
+        /*
+         * This function is an Ugly, UGLY work around for the fact the query that
+         *  resourceManager->fetch generates takes up to 5 minutes on the Beeld en Geluid Jena server.
+         * After much trial and error, it seems the best result is to fetch all sets and then filter out the tenants
+         *  in PHP
+         *
+         */
+
+        if (!in_array(\OpenSkos2\Namespaces\OpenSkos::TENANT, array_keys($simplePatterns))) {
+            //The parent has already got a function for this type
+            return parent::fetch($simplePatterns, $offset, $limit, $ignoreDeleted);
+        }
+
+
+
+        //Of course, the function $this->getAllSets doesn't actually fetch all sets. So we do it here :-(
+        $query = <<<FETCH_ALL_SETS
+DESCRIBE ?subject
+{
+  SELECT ?subject
+  WHERE{
+    ?subject a <%s>
+  }
+  ORDER BY ?subject
+}
+FETCH_ALL_SETS;
+        $query = sprintf($query, $this->resourceType);
+        $resources = $this->fetchQuery($query);
+
+        $tenantCode = $simplePatterns[\OpenSkos2\Namespaces\OpenSkos::TENANT]->getValue();
+
+        $resultSet = array();
+        foreach ($resources as $res) {
+            $resTenantCode  = $res->getProperty(\OpenSkos2\Namespaces\OpenSkos::TENANT)[0]->getValue();
+            if ($resTenantCode === $tenantCode) {
+                $resultSet[] = $res;
+            }
+        }
+        return $resultSet;
+    }
+
+
     //TODO: check conditions when it can be deleted
     public function canBeDeleted($uri)
     {
@@ -50,7 +103,7 @@ class SetManager extends ResourceManager
     {
         $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
             . 'DESCRIBE ?s {'
-            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:boolean . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
     }
@@ -144,24 +197,23 @@ class SetManager extends ResourceManager
         throw new \Exception("Please use the function `fetchAllSets'");
         $query = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
             . 'DESCRIBE ?s {'
-            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:bool . } }';
+            . 'select ?s where {?s <'.OpenSkos::ALLOW_OAI.'>  "' . $allowOAI . '"^^xsd:boolean . } }';
         $sets = $this->fetchQuery($query);
         return $sets;
     }
 
     public function getUrisMap($tenantCode)
     {
-        $query = 'DESCRIBE ?subject {SELECT DISTINCT ?subject  WHERE '
-            . '{ ?subject ?predicate ?object . ?subject <' .
-            OpenSkos::TENANT . '>  "'. $tenantCode . '". '
-            . ' ?subject <'.Rdf::TYPE.'> <'.Set::TYPE.'> } }';
-        $result = $this->query($query);
+        $simplePatterns = [OpenSkos::TENANT => new Literal($tenantCode)];
+        $result = $this->fetch($simplePatterns);
+
         $retVal = [];
         foreach ($result as $set) {
             $retVal[$set->getUri()]['uri'] = $set->getUri();
             $code = $set->getCode();
             $retVal[$set->getUri()]['code'] = $code->getValue();
         }
+
         return $retVal;
     }
 
