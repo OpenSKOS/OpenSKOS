@@ -313,7 +313,7 @@ php skos2openskos.php --setUri=http://htdl/clavas-org/set
 To test / develop the application go to the root folder, and run: 
 
 ```sh
-docker-compose up --build
+docker-compose up 
 composer install
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
