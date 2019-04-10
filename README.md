@@ -337,9 +337,11 @@ sparql.queryUri=http://openskos-jena-fuseki:3030/openskos/query
 sparql.updateUri=http://openskos-jena-fuseki:3030/openskos/update
 ```
 
-You can then create an empty graph with the name _openskos_ in the Jena interface at http://localhost:7001. 
+>**Configuring Jena**
+>
+>You can then create an empty graph with the name _openskos_ in the Jena interface at http://localhost:9001. 
 The admin username:password combination is `admin` and `admin`.
-Here you can create a persistent dataset named `openskos`
+Here you can create a **persistent** dataset named `openskos`
 
 Under the section `; Database configuration:` add the following
 
