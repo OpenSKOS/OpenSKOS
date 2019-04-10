@@ -1,6 +1,16 @@
 [![Build Status](https://travis-ci.org/picturae/OpenSKOS.svg)](https://travis-ci.org/picturae/OpenSKOS)
 
 # 1. Install the OpenSKOS code
+
+***
+
+> ___Docker development___
+>
+> Docker images were added to the OpenSkos project in 2017. If you wish to develop using docker, please proceed to 
+section 8
+
+***
+
 Copy the code to a location of your choice.
 
 Make sure all files are readable by your webserver. Make sure the directories
@@ -297,7 +307,10 @@ php skos2openskos.php --setUri=http://htdl/clavas-org/set
 ```
 
 # 8 Development using Docker
-To test / develop the application you can run
+
+## 8.1 Installing docker
+
+To test / develop the application go to the root folder, and run: 
 
 ```sh
 docker-compose up --build
@@ -305,8 +318,43 @@ composer install
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 
-Go to `http://localhost:9001/manage.html?tab=datasets` login with admin / admin
-create a persistent dataset named `openskos`
+
+## 8.2 Updating the configuration
+
+Then copy the file `./application/configs/application.ini.dist` to `./application/configs/application.ini`  
+
+Under the section `; Solr configuration:` add the following:
+```
+solr.host=openskos-solr
+solr.port=8983
+solr.context=/solr/openskos
+
+```
+
+Under the section '; Apache Jena Fuseki configuration:' add the following
+```
+sparql.queryUri=http://openskos-jena-fuseki:3030/openskos/query
+sparql.updateUri=http://openskos-jena-fuseki:3030/openskos/update
+```
+
+You can then create an empty graph with the name _openskos_ in the Jena interface at http://localhost:7001. 
+The admin username:password combination is `admin` and `admin`.
+Here you can create a persistent dataset named `openskos`
+
+Under the section `; Database configuration:` add the following
+
+```
+resources.db.adapter=pdo_mysql
+resources.db.params.host=openskos-mysql
+resources.db.params.username=root
+resources.db.params.password=secr3t
+resources.db.params.charset=utf8
+resources.db.params.dbname=openskos
+resources.db.isDefaultTableAdapter = true
+```
+
+## 8.3 Running OpenSkos
+
 Create a test tenant / user in the openskos application
 
 ```
