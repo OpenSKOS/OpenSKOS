@@ -42,6 +42,11 @@ services:
         MYSQL_ROOT_PASSWORD : secr3t
     volumes:
         - ./data/openskos-create.sql:/docker-entrypoint-initdb.d/openskos-create.sql
+  openskos-memcached:
+    image: 'bitnami/memcached:1'
+    container_name: openskos-memcached
+    ports:
+      - "11211:11211"
 networks:
   openskos:
     external:
