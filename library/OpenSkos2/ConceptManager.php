@@ -359,9 +359,23 @@ class ConceptManager extends ResourceManagerWithSearch
         $sorts = null
     ) {
 
-        return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
-        );
+        $uriList = $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts);
+        $resultCollection = $this->fetchByUris($uriList);
+
+        return $resultCollection;
+    }
+
+    public function searchInSolr(
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null
+    ) {
+
+        $uriList = $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, null, true);
+
+        return $uriList;
     }
 
     /**

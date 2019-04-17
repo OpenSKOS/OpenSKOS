@@ -160,7 +160,6 @@ class Autocomplete
         }
 
 
-
         if (empty($searchTextQueries)) {
             $solrQuery = $searchText;
         } else {
@@ -262,7 +261,11 @@ class Autocomplete
             $sorts = null;
         }
 
-        $result =  $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        if (isset($options['retrieve_from_solr']) && $options['retrieve_from_solr']) {
+            $result = $this->manager->searchInSolr($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        } else {
+            $result = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        }
         return $result;
     }
 

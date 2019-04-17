@@ -38,14 +38,19 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $options = $this->getSearchOptions($searchForm);
         $options['sorts'] = ['sort_s_prefLabel' => 'asc'];
 
+        /* Retrieve from Solr, to prevent heavy use of Jena */
+        $options['retrieve_from_solr'] = true;
+
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
         $concepts = $search->search($options, $numFound);
 
         $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
 
+        $processed_concepts = $preview->convertSolrToLinksData($concepts);
+
         $result = [
-            'concepts' => $preview->convertToLinksData($concepts),
+            'concepts' => $processed_concepts,
             'numFound' => $numFound,
             'status' => 'ok',
             'conceptSchemeOptions' => $this->_getConceptSchemeOptions(),

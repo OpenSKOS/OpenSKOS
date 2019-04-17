@@ -284,11 +284,6 @@ class Editor_Forms_Search extends OpenSKOS_Form
             $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
             $openSkos2Tenant = $tenantManager->getCachedTenant();
 
-            /*
-            $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
-            $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
-            */
-
             if (!$openSkos2Tenant) {
                 throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
             }

@@ -9,16 +9,16 @@
         <field name="uuid" type="string" indexed="true" stored="false" required="false"/>
         <field name="tenant" type="string" indexed="true" stored="false" required="false"/>
         <field name="set" type="string" indexed="true" stored="false" required="false"/>
-        <field name="status" type="string" indexed="true" stored="false" required="false"/>
+        <field name="status" type="string" indexed="true" stored="true" required="false"/>
         <field name="toBeChecked" type="boolean" indexed="true" stored="false" required="false"/>
         <field name="notation" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
 
-        <field name="inScheme" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="inScheme" type="string" indexed="true" stored="true" required="false" multiValued="true"/>
         <field name="inSkosCollection" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="topConceptOf" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
 
         <field name="LexicalLabels" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="prefLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="prefLabel" type="string_lowercase" indexed="true" stored="true" required="false" multiValued="true"/>
         <field name="altLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="hiddenLabel" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
 
@@ -33,7 +33,7 @@
         <field name="editorialNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="example" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="historyNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
-        <field name="scopeNote" type="string_lowercase" indexed="true" stored="false" required="false" multiValued="true"/>
+        <field name="scopeNote" type="string_lowercase" indexed="true" stored="true" required="false" multiValued="true"/>
 
         <field name="broader" type="string" indexed="true" stored="false" required="false" multiValued="true"/>
         <field name="narrower" type="string" indexed="true" stored="false" required="false" multiValued="true"/>

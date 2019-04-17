@@ -174,12 +174,19 @@ class ResourceManager
      * @param array $sorts
      * @return array Array of uris
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null, array $filterQueries = null)
-    {
+    public function search(
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null,
+        array $filterQueries = null,
+        $full_retrieve = false
+    ) {
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
-                ->setFields(['uri'])
+                ->setFields(['uri', 'prefLabel', 'inScheme', 'scopeNote', 'status' ])
                 ->setQuery($query);
         if (!empty($sorts)) {
             $select->setSorts($sorts);
@@ -198,12 +205,20 @@ class ResourceManager
         $solrResult = $this->solr->select($select);
         $numFound = $solrResult->getNumFound();
         
-        $uris = [];
-        foreach ($solrResult as $doc) {
-            $uris[] = $doc->uri;
+        $return_data = [];
+
+
+        if ($full_retrieve) {
+            //Return an array of URI's
+            $return_data = $solrResult->getDocuments();
+        } else {
+            //Return an array of URI's
+            foreach ($solrResult as $doc) {
+                $return_data[] = $doc->uri;
+            }
         }
         
-        return $uris;
+        return $return_data;
     }
 
     /**
