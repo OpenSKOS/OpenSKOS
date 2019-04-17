@@ -172,7 +172,9 @@ class ResourceManager
      * @param int $start
      * @param int &$numFound output Total number of found records.
      * @param array $sorts
+     * @param boolean $full_retrieve true = retrieve full Solr dataset; false = retrieve only URI's.
      * @return array Array of uris
+     *
      */
     public function search(
         $query,
