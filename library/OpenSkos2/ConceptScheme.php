@@ -85,21 +85,26 @@ class ConceptScheme extends Resource
 
         if (null === $tenant) {
             $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
+            $tenantCode = $tenant->getCode();
+        } elseif (gettype($tenant) === 'string') {
+            $tenantCode = $tenant;
+        } else {
+            $tenantCode = $tenant->getCode();
         }
 
         $ap = APPLICATION_PATH;
         // We always need tenant for getting icon path.
         if (null !== $tenant) {
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignPath'])) {
-                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenant->getCode();
+                $iconsAssignPath = $ap . $editorOptions['schemeIcons']['assignPath'] . '/' . $tenantCode;
             } else {
-                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenant->getCode();
+                $iconsAssignPath = $ap . \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_PATH . '/' . $tenantCode;
             }
 
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['assignHttpPath'])) {
-                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenant->getCode();
+                $iconsAssignHttpPath = $editorOptions['schemeIcons']['assignHttpPath'] . '/' . $tenantCode;
             } else {
-                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenant->getCode();
+                $iconsAssignHttpPath = \Editor_Forms_UploadIcon::DEFAULT_ASSIGN_HTTP_PATH . '/' . $tenantCode;
             }
 
             if (isset($editorOptions['schemeIcons']) && isset($editorOptions['schemeIcons']['extension'])) {

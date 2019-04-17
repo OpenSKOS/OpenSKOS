@@ -291,13 +291,8 @@ class OpenSKOS_Controller_Editor extends Zend_Controller_Action {
      */
     protected function readTenant()
     {
-
-        $tenantCode = $this->getCurrentUser()->tenant;
-
         $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
-
-        $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
-        $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+        $openSkos2Tenant = $tenantManager->cacheLoggedInTenant()->getCachedTenant();
 
         if (!$openSkos2Tenant) {
             throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);

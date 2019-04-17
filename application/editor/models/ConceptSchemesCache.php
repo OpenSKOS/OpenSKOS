@@ -168,7 +168,7 @@ class Editor_Models_ConceptSchemesCache
                     'caption',
                     DcTerms::TITLE
                 ]);
-                $schemeMeta['iconPath'] = $scheme->getIconPath();
+                $schemeMeta['iconPath'] = $scheme->getIconPath($this->tenantCode);
                 $result[] = $schemeMeta;
             }
         }

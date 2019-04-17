@@ -34,6 +34,8 @@ class TenantManager extends ResourceManager
 
     protected $resourceType = Tenant::TYPE;
 
+    private $loggedInTenant = null;
+
     /*
      * @param string $code Tenant Code
      * @return array list of uuids of sets(collections) on the tenant
@@ -219,6 +221,40 @@ SELECT_URI;
         }
         return $tenant;
     }
+
+    /**
+     * @function cacheLoggedInTenant Caches the logged in tenant for later retrieval.
+     *              This to avoid repeated calls to retreive the tenant object from code
+     * @return $this
+     */
+    public function cacheLoggedInTenant()
+    {
+
+        $tenant = null;
+
+        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+
+
+        $user = \OpenSKOS_Db_Table_Users::requireFromIdentity();
+        if ($user) {
+            $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+            $tenant = $tenantManager->fetchByUuid($tenantUuid);
+        }
+        $this->loggedInTenant = $tenant;
+
+        return $this;
+    }
+
+    /**
+     * @function getCachedTenant Retrieve tenant cached earlier
+     * @return null
+     */
+    public function getCachedTenant()
+    {
+        return $this->loggedInTenant;
+    }
+
 
     public function getAllTenants()
     {
