@@ -101,13 +101,9 @@ resources.cachemanager.general.frontend.name=Core
 resources.cachemanager.general.frontend.customFrontendNaming=false
 resources.cachemanager.general.frontend.options.lifetime=7200
 resources.cachemanager.general.frontend.options.automatic_serialization=true
-resources.cachemanager.general.backend.name = Memcached
-resources.cachemanager.general.backend.options.servers.1.host = <memcache host or ip here>
-resources.cachemanager.general.backend.options.servers.1.port = 11211
-resources.cachemanager.general.backend.options.servers.1.persistent = true
-resources.cachemanager.general.backend.options.servers.1.weight = 1
-resources.cachemanager.general.backend.options.servers.1.timeout = 5
-resources.cachemanager.general.backend.options.servers.1.retry_interval = 15
+resources.cachemanager.general.backend.name=File
+resources.cachemanager.general.backend.customBackendNaming=false
+resources.cachemanager.general.backend.options.cache_dir=APPLICATION_PATH "/../cache"
 resources.cachemanager.general.frontendBackendAutoload=false
 
 ;; PLUGINS ;;

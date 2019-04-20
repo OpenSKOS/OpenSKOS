@@ -15,7 +15,7 @@ RUN apt-get update \
     && apt-key add dotdeb.gpg \
     && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 \
     && apt-get update && apt-get install -y --no-install-recommends curl ca-certificates nano \
-    php5-cli php5-curl php5-json php5-mcrypt php5-mysql php5-xdebug php5-xsl php5-intl php5-memcache \
+    php5-cli php5-curl php5-json php5-mcrypt php5-mysql php5-xdebug php5-xsl php5-intl \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apt-get -y --no-install-recommends install php5-fpm \
     && apt-get -y --no-install-recommends install procps git \
