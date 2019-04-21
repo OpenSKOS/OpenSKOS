@@ -160,16 +160,18 @@ class Editor_Models_ConceptSchemesCache
     {
         $shemes = $this->fetchAll();
         $result = [];
-        foreach ($shemesUris as $uri) {
-            $scheme = $shemes->findByUri($uri);
-            if ($scheme) {
-                $schemeMeta = $scheme->toFlatArray([
-                    'uri',
-                    'caption',
-                    DcTerms::TITLE
-                ]);
-                $schemeMeta['iconPath'] = $scheme->getIconPath($this->tenantCode);
-                $result[] = $schemeMeta;
+        if (isset($shemesUris) && is_array($shemesUris)) {
+            foreach ($shemesUris as $uri) {
+                $scheme = $shemes->findByUri($uri);
+                if ($scheme) {
+                    $schemeMeta = $scheme->toFlatArray([
+                        'uri',
+                        'caption',
+                        DcTerms::TITLE
+                    ]);
+                    $schemeMeta['iconPath'] = $scheme->getIconPath($this->tenantCode);
+                    $result[] = $schemeMeta;
+                }
             }
         }
         return $result;
