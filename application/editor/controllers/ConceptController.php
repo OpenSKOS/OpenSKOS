@@ -424,7 +424,14 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
                 if (!$concept->isPropertyEmpty($userProperty)) {
                     foreach ($concept->getProperty($userProperty) as $user) {
                         if ($user instanceof Uri && $personManager->askForUri($user)) {
-                            $usersNames[] = $personManager->fetchByUri($user)->getCaption();
+                            try {
+                                $userRdf = $personManager->fetchByUri($user);
+                                $usersNames[] = $userRdf->getCaption();
+                            }
+                            catch (\Exception $e) {
+                                //Annoying that askForUri throws an exception instead of just returning null
+                                $usersNames[] = $user->getUri();
+                            }
                         } elseif ($user instanceof Uri) {
                             $usersNames[] = $user->getUri();
                         } else {

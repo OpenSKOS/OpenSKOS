@@ -224,24 +224,27 @@ SELECT_URI;
 
     /**
      * @function cacheLoggedInTenant Caches the logged in tenant for later retrieval.
-     *              This to avoid repeated calls to retreive the tenant object from code
+     *              This to avoid repeated calls to retrieve the tenant object from code
+     * @param $force_reset Re-read even if a value is already retrieved for tenant
      * @return $this
      */
-    public function cacheLoggedInTenant()
+    public function cacheLoggedInTenant($force_reset = false)
     {
 
-        $tenant = null;
+        if (is_null($this->loggedInTenant) || $force_reset === true) {
+            $tenant = null;
 
-        $diContainer =  \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
-        $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
+            $diContainer = \Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
+            $tenantManager = $diContainer->get('OpenSkos2\TenantManager');
 
 
-        $user = \OpenSKOS_Db_Table_Users::requireFromIdentity();
-        if ($user) {
-            $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
-            $tenant = $tenantManager->fetchByUuid($tenantUuid);
+            $user = \OpenSKOS_Db_Table_Users::requireFromIdentity();
+            if ($user) {
+                $tenantUuid = $tenantManager->getTenantUuidFromCode($user->tenant);
+                $tenant = $tenantManager->fetchByUuid($tenantUuid);
+            }
+            $this->loggedInTenant = $tenant;
         }
-        $this->loggedInTenant = $tenant;
 
         return $this;
     }
