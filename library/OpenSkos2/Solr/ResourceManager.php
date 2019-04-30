@@ -162,6 +162,35 @@ class ResourceManager
         $this->solr->update($update);
     }
 
+
+    /**
+     * @function doesMatchingPrefLabelExist
+     * @param $value Value of PrefLabel
+     * @return boolean true if matching label found, else false
+     *
+     * Notes: The field prefLabel is searched; this will exist even if using XL
+     *
+     */
+    public function doesMatchingPrefLabelExist($value)
+    {
+
+        $solrSearchTerm = sprintf('prefLabel:"%s"', $value);
+
+        // Solarium brakes stat results when we have long int, so we use ordering.
+        $select = $this->solr->createSelect();
+
+        $select->setStart(0)
+            ->setRows(1)
+            ->setFields(['prefLabel'])
+            ->setQuery($solrSearchTerm);
+
+        $solrResult = $this->solr->select($select);
+
+        $has_match = ($solrResult->count() > 0);
+
+        return $has_match;
+    }
+
     /**
      * Perform a full text query
      * lucene / solr queries are possible
@@ -244,6 +273,9 @@ class ResourceManager
             return 0;
         }
     }
+
+
+
 
     /**
      * Send a commit request to solr
