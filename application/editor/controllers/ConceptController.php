@@ -416,6 +416,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
 
+        //URI caching to reduce the number of Jena queries to a minimum
+        $uriCache = array();
+
         foreach ($footerFields as $field => $properties) {
             $usersNames = [];
             $dates = [];
@@ -423,17 +426,21 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             foreach ($properties['user'] as $userProperty) {
                 if (!$concept->isPropertyEmpty($userProperty)) {
                     foreach ($concept->getProperty($userProperty) as $user) {
-                        if ($user instanceof Uri && $personManager->askForUri($user)) {
-                            try {
-                                $userRdf = $personManager->fetchByUri($user);
-                                $usersNames[] = $userRdf->getCaption();
+                        if ($user instanceof Uri ) {
+                            $userKey = $user->getUri();
+                            if(isset($uriCache[$userKey])){
+                                $usersNames[] = $uriCache[$userKey];
                             }
-                            catch (\Exception $e) {
-                                //Annoying that askForUri throws an exception instead of just returning null
-                                $usersNames[] = $user->getUri();
+                            else{
+                                try {
+                                    $userRdf = $personManager->fetchByUri($user);
+                                    $usersNames[] = $uriCache[$userKey] = $userRdf->getCaption();
+                                }
+                                catch (\Exception $e) {
+                                    //Annoying that askForUri throws an exception instead of just returning null
+                                    $usersNames[] = $uriCache[$userKey] = $user->getUri();
+                                }
                             }
-                        } elseif ($user instanceof Uri) {
-                            $usersNames[] = $user->getUri();
                         } else {
                             $usersNames[] = $user->getValue();
                         }
