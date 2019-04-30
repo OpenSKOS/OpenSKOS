@@ -71,6 +71,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $builder = new \DI\ContainerBuilder();
         $builder->addDefinitions(APPLICATION_PATH . '/configs/di.config.php');
 
+        /*
         if (APPLICATION_ENV === 'production') {
             $resources = OpenSKOS_Application_BootstrapAccess::getOption('resources');
             $cacheFolder = $resources['cachemanager']['general']['backend']['options']['cache_dir'];
@@ -78,6 +79,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         } else {
             $cache = new \Doctrine\Common\Cache\ArrayCache();
         }
+        */
+        $cache = new \Doctrine\Common\Cache\ArrayCache();
         $builder->setDefinitionCache($cache);
 
         $container = $builder->build();
