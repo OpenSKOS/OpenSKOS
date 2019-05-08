@@ -27,7 +27,7 @@ use OpenSkos2\Exception\OpenSkosException;
 
 class Editor_Models_SetsCache
 {
-    const CONCEPT_CACHE_KEY = 'CONCEPT_CACHE_KEY';
+    const SET_CACHE_KEY = 'SET_CACHE_KEY';
     
     /**
      * @var string 
@@ -52,7 +52,28 @@ class Editor_Models_SetsCache
     {
         return $this->tenantCode;
     }
-    
+
+    /**
+     * @function getMyCacheKey Returns the cache key this class will use
+     * @return string The Cache key
+     */
+    private function getMyCacheKey(){
+        //If there's an instance uuid, get that first
+        $resources = OpenSKOS_Application_BootstrapAccess::getOption('resources');
+        $uuid = '';
+
+        if(isset($resources['cachemanager']['general']['instance_uuid'])){
+            $uuid = $resources['cachemanager']['general']['instance_uuid'];
+        }
+        $tenantCode = $this->requireTenantCode();
+        $cache_key = sprintf("%s_%s_%s", $uuid, self::SET_CACHE_KEY, $tenantCode);  ;
+
+        //There are restrictions on permitted cache keys
+        $cache_key = preg_replace('#[^a-zA-Z0-9_]#', '_', $cache_key);
+
+        return $cache_key;
+    }
+
     /**
      * Get tenant for which the cache is done.
      * @return string
@@ -76,7 +97,7 @@ class Editor_Models_SetsCache
     {
         $this->tenantCode = $tenantCode;
     }
-    
+
     /**
      * @param string $tenantCode
      * @param SetManager $manager
@@ -89,43 +110,37 @@ class Editor_Models_SetsCache
     }
     
     /**
-     * Clears the concept schemes cache.
+     * Clears the Set cache.
      */
     public function clearCache()
     {
-        $this->cache->clean();
+        /*
+         * Switched to Memcache. A flush all had too many consequences, so switch remove and be alert for the
+         *  consequences
+         */
+        $cache_key = $this->getMyCacheKey();
+        $this->cache->remove($cache_key);
     }
     
     /**
-     * Fetches all schemes.
+     * Fetches all sets.
      * @return SetCollection
      */
     public function fetchAll()
     {
 
-        $schemes = $this->cache->load(self::CONCEPT_CACHE_KEY . $this->requireTenantCode());
-        if ($schemes === false) {
-            /*
-            $schemes = $this->sortSchemes(
-                $this->manager->fetch(
-                    [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
-                    null,
-                    null,
-                    true
-                )
-            );
-            */
-            $schemes = $this->manager->fetch(
+        $cache_key = $this->getMyCacheKey();
+        $sets = $this->cache->load($cache_key);
+        if ($sets === false) {
+            $sets = $this->manager->fetch(
                 [OpenSkos::TENANT => new Literal($this->requireTenantCode())],
                 null,
                 null,
                 true
             );
-
-            $this->cache->save($schemes, self::CONCEPT_CACHE_KEY . $this->requireTenantCode());
+            $this->cache->save($sets, $cache_key);
         }
-
-        return $schemes;
+        return $sets;
     }
     
     /**
@@ -134,49 +149,49 @@ class Editor_Models_SetsCache
      */
     public function fetchUrisMap()
     {
-        $schemes = $this->fetchAll();
+        $sets = $this->fetchAll();
         $result = [];
-        foreach ($schemes as $scheme) {
-            $result[$scheme->getUri()] = $scheme;
+        foreach ($sets as $set) {
+            $result[$set->getUri()] = $set;
         }
         return $result;
     }
     
     /**
      * Fetches uri -> caption map.
-     * @return ConceptScheme[]
+     * @return Set[]
      */
     public function fetchUrisCaptionsMap($inCollections = [])
     {
-        $allSchemes = $this->fetchAll();
+        $allSets = $this->fetchAll();
         $result = [];
-        foreach ($allSchemes as $scheme) {
-            if (empty($inCollections) || in_array($scheme->getSet(), $inCollections)) {
-                $result[$scheme->getUri()] = $scheme->getCaption();
+        foreach ($allSets as $set) {
+            if (empty($inCollections) || in_array($set->getSet(), $inCollections)) {
+                $result[$set->getUri()] = $set->getCaption();
             }
         }
         return $result;
     }
     
     /**
-     * Fetches array with concept schemes meta data.
-     * @param array $schemesUris
+     * Fetches array with sets meta data.
+     * @param array $setsUris
      * @return array
      */
-    public function fetchConceptSchemesMeta($schemesUris)
+    public function fetchConceptSetsMeta($setsUris)
     {
-        $schemes = $this->fetchAll();
+        $sets = $this->fetchAll();
 
-        foreach ($schemesUris as $uri) {
-            $scheme = $schemes->findByUri($uri);
-            if ($scheme) {
-                $schemeMeta = $scheme->toFlatArray([
+        foreach ($setsUris as $uri) {
+            $set = $sets->findByUri($uri);
+            if ($set) {
+                $setMeta = $set->toFlatArray([
                     'uri',
                     'caption',
                     DcTerms::TITLE
                 ]);
-                $schemeMeta['iconPath'] = $scheme->getIconPath();
-                $result[] = $schemeMeta;
+                $setMeta['iconPath'] = $set->getIconPath();
+                $result[] = $setMeta;
             }
         }
         return $result;
