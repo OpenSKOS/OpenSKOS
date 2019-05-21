@@ -619,7 +619,7 @@ class Resource extends Uri implements ResourceIdentifier
             try {
                 $uri = $dcTermsCreator->getUri();
                 $creator = $personManager->fetchByUri($uri);
-                $dcTermsCreatorName = $creator->getProperty(Foaf::Name);
+                $dcTermsCreatorName = $creator->getProperty(Foaf::NAME);
             } catch (ResourceNotFoundException $err) {
                 // We cannot find the resource so just leave values as they are
                 $dcTermsCreatorName = null;
