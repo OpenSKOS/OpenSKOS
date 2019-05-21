@@ -88,7 +88,7 @@ class Editor_Models_ConceptPreview
             $conceptData = array(
                 'uri' => $concept['uri'],
                 'caption' => $concept['prefLabel'][0],
-                Namespaces::shortenProperty(OpenSkos::STATUS) => $concept['status'][0],
+                Namespaces::shortenProperty(OpenSkos::STATUS) => $concept['status'],
                 Namespaces::shortenProperty(Skos::SCOPENOTE) => $concept['scopeNote'][0],
             );
 
