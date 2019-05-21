@@ -32,7 +32,7 @@
      criteria -->
     <autoCommit>
       <maxDocs>10000</maxDocs> <!-- maximum uncommited docs before autocommit triggered -->
-      <maxTime>15000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
+      <maxTime>30000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
       <openSearcher>false</openSearcher> <!-- SOLR 4.0.  Optionally don't open a searcher on hard commit.  This is useful to minimize the size of transaction logs that keep track of uncommitted updates. -->
     </autoCommit> 
       
@@ -46,7 +46,7 @@
                    triggering a new soft commit.
       -->
     <autoSoftCommit>
-        <maxTime>1000</maxTime>
+        <maxTime>30000</maxTime>
     </autoSoftCommit>         
   </updateHandler>
 
@@ -84,8 +84,8 @@
 
     <query>
           <maxBooleanClauses>1024</maxBooleanClauses>
-          <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
-          <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+          <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+          <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
           <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
           <enableLazyFieldLoading>true</enableLazyFieldLoading>
           <queryResultWindowSize>10</queryResultWindowSize>

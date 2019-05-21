@@ -18,6 +18,9 @@ autoloadernamespaces[] = Net_
 ; make sure this directory is writable by your webserver!
 upload_path = APPLICATION_PATH "/../data/uploads"
 
+;Option to turn of Solr commits, and allow the Solr engine to do it all
+editor.no_commits = "false"
+
 editor.languages.nl="Dutch"
 editor.languages.en="English"
 editor.languages.fr="French"

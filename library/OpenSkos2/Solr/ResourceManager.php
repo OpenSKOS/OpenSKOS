@@ -282,7 +282,7 @@ class ResourceManager
     public function commit()
     {
         $update = $this->solr->createUpdate();
-        $update->addCommit();
+        //$update->addCommit();
         return $this->solr->update($update);
     }
 
