@@ -182,10 +182,10 @@ class Autocomplete
         }
 
         // sets (former tenant collections)
-        if (!empty($options['sets'])) {
+        if (!empty($options['collections'])) {
             $optionsQueries[] = '('
                 . 's_set:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
                 . '))';
         }
 
