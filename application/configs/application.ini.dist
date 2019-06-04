@@ -35,15 +35,15 @@ editor.schemeIcons.height=16
 editor.schemeIcons.extension="png"
 
 ; Schemes order based on collections. FOR LIVE
-;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/gtaa"
-;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/nongtaa"
-;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/gtaa"
+editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/nongtaa"
+editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
 
 ; Schemes order based on collections. FOR ACCEPT
-;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:gtaa"
-;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nongtaa"
-;editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
-;editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nonmatch"
+editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:gtaa"
+editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nongtaa"
+editor.schemeOrder.collections[]="http://data.beeldengeluid.nl/expired"
+editor.schemeOrder.collections[]="http://accept.openskos.beeldengeluid.nl.pictura-dp.nl/api/collections/beng:nonmatch"
 
 ; Export configuration
 editor.export.filesPath = APPLICATION_PATH "/../public/data/export/"
