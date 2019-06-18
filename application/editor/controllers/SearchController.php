@@ -271,10 +271,12 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             $checkOptions = Editor_Forms_SearchOptions::formValues2Options(
                 array_merge($this->getSearchOptionsForm()->getValues(true), $options)
             );
-            
+
+            /*
             if ($checkOptions != $originalOptions) {
                 $options['searchProfileId'] = 'custom';
             }
+            */
             
             $user->setSearchOptions($options);
             return $this->_forward('set-options-success');
