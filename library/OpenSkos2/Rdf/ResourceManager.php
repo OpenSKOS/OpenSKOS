@@ -317,7 +317,7 @@ class ResourceManager
                 ->where($serializedURI, '?property', '?object')->filterNotExists('?object', 'rdf:type', '?sometype');
 
         if (isset($type)) {
-            $query = $query->also('?subject', 'rdf:type', "<$type>");
+            $query = $query->also($serializedURI, 'rdf:type', "<$type>");
         }
 
         try {
