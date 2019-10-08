@@ -1,8 +1,10 @@
 #!/bin/sh
 
 DIR=$(dirname $0)
+LOGFILE=${2:-/dev/null}
 
-echo 'DOCKER INSTALL'
 $DIR/ext-docker.php $1 | while read ext; do
-  docker-php-ext-install -j$(nproc) $ext
+  if [ -z "${ext}" ]; then continue; fi
+  echo "      - ${ext}"
+  docker-php-ext-install -j$(nproc) $ext &>${LOGFILE} || { cat ${LOGFILE} ; exit 1 ; }
 done

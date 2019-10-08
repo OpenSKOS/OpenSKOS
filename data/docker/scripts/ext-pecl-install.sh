@@ -1,9 +1,11 @@
 #!/bin/sh
 
 DIR=$(dirname $0)
+LOGFILE=${2:-/dev/null}
 
-echo 'PECL INSTALL'
 $DIR/ext-pecl.php $1 | while read ext; do
-  pecl install $ext
-  docker-php-ext-enable $ext
+  if [ -z "${ext}" ]; then continue; fi
+  echo "      - ${ext}"
+  pecl install $ext &>${LOGFILE} || { cat ${LOGFILE} ; exit 1 ; }
+  docker-php-ext-enable $ext &>${LOGFILE} || { cat ${LOGFILE} ; exit 1 ; }
 done
