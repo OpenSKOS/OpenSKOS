@@ -13,6 +13,7 @@ RUN apk add \
   autoconf \
   build-base \
   curl-dev \
+  gettext-dev \
   git \
   icu-dev \
   libmcrypt-dev \
