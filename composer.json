@@ -1,5 +1,6 @@
 {
     "require": {
+        "php": ">=5.4 | <=7.1",
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
         "easyrdf/easyrdf": ">=0.10.0-alpha",
