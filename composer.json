@@ -2,6 +2,7 @@
     "require": {
         "php": ">=5.4 | <=7.1",
         "ext-curl": "*",
+        "ext-gettext": "*",
         "ext-intl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
