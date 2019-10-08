@@ -25,17 +25,17 @@ minor=$(echo "${target}" | tr '.' ' ' | awk '{print $2}')
 major=$(echo "${target}" | tr '.' ' ' | awk '{print $1}')
 
 # Download/update memcached repo
-[ -d "/usr/src/ext-memcached" ] && {
-  cd /usr/src/ext-memcached
+[ -d "/usr/src/php/ext/memcached" ] && {
+  cd /usr/src/php/ext/memcached
   git fetch --all
 } || {
-  git clone https://github.com/php-memcached-dev/php-memcached /usr/src/ext-memcached
-  cd /usr/src/ext-memcached
+  git clone https://github.com/php-memcached-dev/php-memcached /usr/src/php/ext/memcached
+  cd /usr/src/php/ext/memcached
   git fetch --all
 }
 
 # Go to the ext-memcached source
-cd /usr/src/ext-memcached
+cd /usr/src/php/ext/memcached
 git checkout "php${major}"
 git pull
 
