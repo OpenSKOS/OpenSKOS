@@ -9,11 +9,12 @@ services:
     ports:
      - "9000:80"
   openskos-php-fpm:
-    build: ./data/docker/php-fpm
+    build:
+      context: ./
+      dockerfile: ./data/docker/php-fpm/Dockerfile
     container_name: openskos-php-fpm
     volumes:
       - .:/var/www/openskos
-      - ./data/docker/php-fpm/php-ini-overrides.ini:/etc/php5/fpm/conf.d/99-overrides.ini
   openskos-jena:
     build: ./data/docker/jena-fuseki
     container_name: openskos-jena-fuseki
