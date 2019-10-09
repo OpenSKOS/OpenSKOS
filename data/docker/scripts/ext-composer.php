@@ -28,15 +28,5 @@ $dependencies = array_map(function( $dependency ) {
   return substr( $dependency, 4 );
 }, $dependencies);
 
-// Remove ones with a custom install script
-$dependencies = array_filter( $dependencies, function( $dependency ) use ($dir) {
-  return !file_exists($dir . '/ext/' . $dependency . '.sh');
-});
-
-// Remove the ones known to docker
-$dependencies = array_filter( $dependencies, function( $dependency ) use ($docker_exts) {
-  return !in_array($dependency, $docker_exts);
-});
-
 // Return a list of extensions to install
 echo implode(PHP_EOL, $dependencies) . PHP_EOL;

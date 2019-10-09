@@ -45,4 +45,4 @@ phpize
 make $MAKEOPTS
 make install
 
-docker-php-ext-enable memcached
+echo "extension=memcached.so" >> /usr/local/lib/php.ini

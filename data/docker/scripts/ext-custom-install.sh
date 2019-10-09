@@ -3,8 +3,9 @@
 DIR=$(dirname $0)
 LOGFILE=${2:-/dev/null}
 
-ls $DIR/ext/ | while read installer; do
+$DIR/ext-composer.php $1 | grep -v -f "${DIR}/ext-list.txt" | while read ext; do
   if [ -z "${ext}" ]; then continue; fi
-  echo "      - ${ext%.sh}"
-  $DIR/ext/${installer} &>${LOGFILE} || { cat ${LOGFILE} ; exit 1 ; }
+  if ! [ -f "${DIR}/ext/${ext}.sh" ]; then continue; fi
+  echo "      - ${ext}"
+  $DIR/ext/${ext}.sh &>${LOGFILE} || { cat ${LOGFILE} ; exit 1 ; }
 done
