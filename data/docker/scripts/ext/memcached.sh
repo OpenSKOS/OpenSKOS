@@ -12,7 +12,7 @@ export MAKEOPTS="-j$(($(ncpu)+1))"
 export CFLAGS=
 export CONFOPTS=
 
-# Gentoo stuff
+# Gentoo support
 if [ -f /etc/portage/make.conf ]; then
   source /etc/portage/make.conf
 fi
@@ -40,9 +40,9 @@ git checkout "php${major}"
 git pull
 
 # Compile & install ext-memcached
-phpize
-./configure --disable-memcached-sasl
-make $MAKEOPTS
-make install
+phpize || exit 1
+./configure --disable-memcached-sasl || exit 1
+make $MAKEOPTS || exit 1
+make install || exit 1
 
 echo "extension=memcached.so" >> /usr/local/lib/php.ini

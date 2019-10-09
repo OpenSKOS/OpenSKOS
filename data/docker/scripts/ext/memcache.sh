@@ -1,8 +1,55 @@
 #!/bin/sh
 
-DIR=$(dirname $0)
-LOGFILE=${2:-/dev/null}
+ncpu() {
+  if command -v nproc &>/dev/null; then
+    nproc
+  else
+    echo 1
+  fi
+}
 
-# Reason: 3.0.8 doesn't work with php7
-pecl install memcache-2.2.7 || exit 1
-docker-php-ext-enable memcache || exit 1
+export MAKEOPTS="-j$(($(ncpu)+1))"
+export CFLAGS=
+export CONFOPTS=
+
+# Gentoo support
+if [ -f /etc/portage/make.conf ]; then
+  source /etc/portage/make.conf
+fi
+
+# Detect PHP version
+target="$(php -v | head -1 | awk '{print $2}')"
+
+# Decode minor & major versions
+minor=$(echo "${target}" | tr '.' ' ' | awk '{print $2}')
+major=$(echo "${target}" | tr '.' ' ' | awk '{print $1}')
+
+# PECL memcache for php <7
+if [ "${major}" -lt 7 ]; then
+  pecl install memcache || exit 1
+  docker-php-ext-enable memcache || exit 1
+  exit 0
+fi
+
+# Download/update memcache repo
+[ -d "/usr/src/php/ext/memcache" ] && {
+  cd /usr/src/php/ext/memcache
+  git fetch --all
+} || {
+  git clone https://github.com/websupport-sk/pecl-memcache /usr/src/php/ext/memcache
+  cd /usr/src/php/ext/memcache
+  git fetch --all
+}
+
+# Go to the ext-memcache source
+cd /usr/src/php/ext/memcached
+git checkout "NON_BLOCKING_IO_php${major}"
+git pull
+
+# Compile & install ext-memcache
+phpize
+./configure --enable-memcache --with-php-config=$(which php-config)
+make $MAKEOPTS
+cp modules/memcache.so $(php-config --extension-dir)/memcache.so
+
+echo "zend_extension=$(php-config --extension-dir)/memcache.so" >> $(php-config --prefix)/etc/php/conf.d/memcache.ini
