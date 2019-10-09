@@ -7,6 +7,10 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 # Update all packages
 RUN apk update
 RUN apk upgrade
+RUN apk add docker-cli
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php composer-setup.php --install-dir=/usr/bin --filename=composer
+RUN rm composer-setup.php
 
 # Add dependency libraries
 RUN apk add \
