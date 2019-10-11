@@ -308,13 +308,29 @@ php skos2openskos.php --setUri=http://htdl/clavas-org/set
 
 # 8 Development using Docker
 
+### TL;DR;
+```sh
+cd APPROOT/application/config/
+cp application.ini.dist application.ini
+patch -p1 < application.ini.development.diff
+cd APPROOT
+
+docker-compose up 
+composer install
+
+# go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri
+
+docker exec -it openskos-php-fpm php tools/tenant.php --code CODE --name NAME --email EMAIL --password PASSWORD create
+
+# go to localhost:9000 and log in using your just-created credentials
+```
+
 ## 8.1 Installing docker
 
 To test / develop the application go to the root folder, and run: 
 
 ```sh
-docker-compose up 
-composer install
+# The following MIGHT be needed
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 

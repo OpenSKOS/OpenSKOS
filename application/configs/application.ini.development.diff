@@ -1,0 +1,43 @@
+--- a/application.ini	2019-10-10 22:13:48.769029427 +0200
++++ b/application.ini	2019-10-10 22:33:38.342066324 +0200
+@@ -86,15 +86,15 @@
+ resources.acl.foo=bar
+ 
+ ; Solr configuration:
+-solr.host = localhost
++solr.host = openskos-solr
+ solr.port = 8983
+-solr.context = /solr
++solr.context = /solr/beg-production
+ 
+ ; Database configuration:
+ resources.db.adapter=pdo_mysql
+-resources.db.params.host=localhost
+-resources.db.params.username=openskos
+-resources.db.params.password=openskos
++resources.db.params.host=openskos-mysql
++resources.db.params.username=root
++resources.db.params.password=secr3t
+ resources.db.params.charset=utf8
+ resources.db.params.dbname=openskos
+ resources.db.isDefaultTableAdapter = true
+@@ -112,7 +112,7 @@
+ resources.cachemanager.general.backend.options.servers.1.weight = 1
+ resources.cachemanager.general.backend.options.servers.1.timeout = 5
+ resources.cachemanager.general.backend.options.servers.1.retry_interval = 15
+-resources.cachemanager.general.instance_uuid = ''
++resources.cachemanager.general.instance_uuid = '176ad31b-aac7-4c20-877c-7c2932fa082d'
+ 
+ ;; PLUGINS ;;
+ resources.frontController.plugins.autoload="OpenSKOS_Controller_Plugin_Autoload"
+@@ -130,8 +130,8 @@
+ resources.view.options.doctype=XHTML1_STRICT
+ 
+ ; Apache Jena Fuseki configuration:
+-sparql.queryUri = http://localhost:3030/openskos/query
+-sparql.updateUri = http://localhost:3030/openskos/update
++sparql.queryUri = http://openskos-jena:3030/openskos-beg-test/query
++sparql.updateUri = http://openskos-jena:3030/openskos-beg-test/update
+ 
+ ; Client id and client secret configured in https://console.developers.google.com
+ oAuth2.google.clientId = "@google-client-id@"
