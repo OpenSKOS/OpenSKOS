@@ -20,6 +20,9 @@ services:
     container_name: openskos-jena-fuseki
     ports:
      - "9001:3030"
+    networks:
+      - default
+      - openskos
     environment:
         ADMIN_PASSWORD : admin
   openskos-solr:
@@ -43,6 +46,9 @@ services:
         MYSQL_ROOT_PASSWORD : secr3t
     volumes:
         - ./data/openskos-create.sql:/docker-entrypoint-initdb.d/openskos-create.sql
+    networks:
+      - default
+      - openskos
   openskos-memcached:
     image: 'bitnami/memcached:1'
     container_name: openskos-memcached

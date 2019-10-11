@@ -310,13 +310,11 @@ php skos2openskos.php --setUri=http://htdl/clavas-org/set
 
 ### TL;DR;
 ```sh
-cd APPROOT/application/config/
-cp application.ini.dist application.ini
-patch -p1 < application.ini.development.diff
-cd APPROOT
+composer install [--ignore-platform-reqs]
+php vendor/bin/phing config
 
+docker network create openskos
 docker-compose up 
-composer install
 
 # go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri
 
