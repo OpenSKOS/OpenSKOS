@@ -330,7 +330,8 @@ docker exec -it openskos-php-fpm php tools/tenant.php --code CODE --name NAME --
 To test / develop the application go to the root folder, and run: 
 
 ```sh
-# The following MIGHT be needed
+docker-compose up
+composer install
 docker exec -it openskos-php-fpm ./vendor/bin/phing install.dev
 ```
 
