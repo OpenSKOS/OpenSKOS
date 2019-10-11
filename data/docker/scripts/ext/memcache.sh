@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 ncpu() {
   if command -v nproc &>/dev/null; then
     nproc
@@ -47,9 +48,9 @@ git checkout "NON_BLOCKING_IO_php${major}"
 git pull
 
 # Compile & install ext-memcache
-phpize
-./configure --enable-memcache --with-php-config=$(which php-config)
-make $MAKEOPTS
+phpize || exit 1
+./configure --enable-memcache --with-php-config=$(which php-config) || exit 1
+make $MAKEOPTS || exit 1
 cp modules/memcache.so $(php-config --extension-dir)/memcache.so
 
-echo "zend_extension=$(php-config --extension-dir)/memcache.so" >> $(php-config --prefix)/etc/php/conf.d/memcache.ini
+docker-php-ext-enable memcache || exit 1
