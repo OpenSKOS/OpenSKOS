@@ -11,6 +11,9 @@ matrix:
   allow_failures:
     - php: hhvm
 
+services:
+  - mysql
+
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi -y
@@ -25,6 +28,7 @@ before_install:
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
   - data/docker/scripts/ext/memcache.sh
+  - php -m
 
 install:
   - composer install --dev --prefer-dist
