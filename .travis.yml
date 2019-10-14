@@ -24,8 +24,7 @@ before_install:
   - sudo a2ensite openskos
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
-  - phpenv config-add data/travis/php$(php -v | head -1 | tr '.' ' ' | awk '{print $2}').ini
-  - php -m
+  - data/docker/scripts/ext/memcache.sh
 
 install:
   - composer install --dev --prefer-dist
