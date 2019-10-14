@@ -53,6 +53,5 @@ install:
   - ls
 
 script:
-  - which phpunit
   - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
-  - phpunit
+  - ./vendor/bin/phpunit

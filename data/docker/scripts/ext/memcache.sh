@@ -27,7 +27,14 @@ major=$(echo "${target}" | tr '.' ' ' | awk '{print $1}')
 # PECL memcache for php <7
 if [ "${major}" -lt 7 ]; then
   printf "\n" | pecl install memcache || exit 1
-  echo "extension=memcache.so" >> $(php-config --prefix)/lib/php.ini
+  if command -v docker-php-ext-enable &>/dev/null; then
+    docker-php-ext-enable memcache || exit 1
+  else
+    echo "extension=memcache.so" >> $(php-config --prefix)/lib/php.ini
+    if command -v phpenv &>/dev/null; then
+      phpenv config-add $(php-config --prefix)/lib/php.ini
+    fi
+  fi
   exit 0
 fi
 
@@ -52,4 +59,11 @@ printf "\n" | ./configure --enable-memcache || exit 1
 make $MAKEOPTS || exit 1
 make install || exit 1
 
-echo "extension=memcache.so" >> $(php-config --prefix)/lib/php.ini
+if command -v docker-php-ext-enable &>/dev/null; then
+  docker-php-ext-enable memcache || exit 1
+else
+  echo "extension=memcache.so" >> $(php-config --prefix)/lib/php.ini
+  if command -v phpenv &>/dev/null; then
+    phpenv config-add $(php-config --prefix)/lib/php.ini
+  fi
+fi
