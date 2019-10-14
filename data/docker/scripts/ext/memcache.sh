@@ -8,6 +8,13 @@ ncpu() {
   fi
 }
 
+if [ -z "${PHP}" ]; then
+  export PHP=$(which php)
+fi
+if [ -z "${PHPIZE}" ]; then
+  export PHPIZE=$(which phpize)
+fi
+
 export MAKEOPTS="-j$(($(ncpu)+1))"
 export CFLAGS=
 export CONFOPTS=
@@ -18,7 +25,7 @@ if [ -f /etc/portage/make.conf ]; then
 fi
 
 # Detect PHP version
-target="$(php -v | head -1 | awk '{print $2}')"
+target="$(${PHP} -v | head -1 | awk '{print $2}')"
 
 # Decode minor & major versions
 minor=$(echo "${target}" | tr '.' ' ' | awk '{print $2}')
@@ -47,7 +54,7 @@ git checkout "NON_BLOCKING_IO_php${major}"
 git pull
 
 # Compile & install ext-memcache
-printf "\n" | phpize || exit 1
+printf "\n" | ${PHPIZE} || exit 1
 printf "\n" | ./configure --enable-memcache --with-php-config=$(which php-config) || exit 1
 make $MAKEOPTS || exit 1
 cp modules/memcache.so $(php-config --extension-dir)/memcache.so
