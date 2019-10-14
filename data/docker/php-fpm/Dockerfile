@@ -16,6 +16,7 @@ RUN rm composer-setup.php
 RUN apk add \
   autoconf \
   build-base \
+  bash \
   curl-dev \
   gettext-dev \
   git \

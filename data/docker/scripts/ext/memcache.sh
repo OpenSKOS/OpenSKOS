@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/usr/bin/env bash
 
 ncpu() {
   if command -v nproc &>/dev/null; then
