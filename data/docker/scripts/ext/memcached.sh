@@ -49,7 +49,4 @@ if command -v docker-php-ext-enable &>/dev/null; then
   docker-php-ext-enable memcache || exit 1
 else
   echo "extension=memcached.so" >> $(php-config --prefix)/lib/php.ini
-  if command -v phpenv &>/dev/null; then
-    phpenv config-add $(php-config --prefix)/lib/php.ini
-  fi
 fi
