@@ -52,4 +52,4 @@ printf "\n" | ./configure --enable-memcache --with-php-config=$(which php-config
 make $MAKEOPTS || exit 1
 cp modules/memcache.so $(php-config --extension-dir)/memcache.so
 
-docker-php-ext-enable memcache || exit 1
+echo "extension=memcached.so" >> /usr/local/lib/php.ini
