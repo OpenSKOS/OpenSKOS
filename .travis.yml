@@ -24,7 +24,8 @@ before_install:
   - sudo a2ensite openskos
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
-  - sudo phpenv config-add data/travis/php.ini
+  - phpenv config-add data/travis/php.ini
+  - whoami
 
 install:
   - composer install --dev --prefer-dist
