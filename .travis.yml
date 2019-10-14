@@ -28,6 +28,7 @@ before_install:
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
   - sudo env PATH="$PATH" data/docker/scripts/ext/memcache.sh
+  - phpenv config-add data/travis/php$(php -v | head -1 | tr '.' ' ' | awk '{print $2}').ini
   - php -m
 
 install:
