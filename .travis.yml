@@ -27,7 +27,7 @@ before_install:
   - sudo a2ensite openskos
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
-  - sudo PHP=$(which php) PHPIZE=$(which phpize) data/docker/scripts/ext/memcache.sh
+  - sudo env PATH="$PATH" data/docker/scripts/ext/memcache.sh
   - php -m
 
 install:
