@@ -25,6 +25,7 @@ before_install:
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
   - phpenv config-add data/travis/php.ini
+  - php -m
 
 install:
   - composer install --dev --prefer-dist
