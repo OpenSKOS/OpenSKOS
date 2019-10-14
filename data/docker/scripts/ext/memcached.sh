@@ -45,4 +45,4 @@ printf "\n" | ./configure --disable-memcached-sasl || exit 1
 make $MAKEOPTS || exit 1
 make install || exit 1
 
-echo "extension=memcached.so" >> /usr/local/lib/php.ini
+echo "extension=memcached.so" >> $(php-config --prefix)/lib/php.ini
