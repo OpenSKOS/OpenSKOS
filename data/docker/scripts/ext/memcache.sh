@@ -48,7 +48,7 @@ git pull
 
 # Compile & install ext-memcache
 printf "\n" | phpize || exit 1
-./configure --enable-memcache --with-php-config=$(which php-config) || exit 1
+printf "\n" | ./configure --enable-memcache --with-php-config=$(which php-config) || exit 1
 make $MAKEOPTS || exit 1
 cp modules/memcache.so $(php-config --extension-dir)/memcache.so
 

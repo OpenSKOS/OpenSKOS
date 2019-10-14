@@ -41,7 +41,7 @@ git pull
 
 # Compile & install ext-memcached
 printf "\n" | phpize || exit 1
-./configure --disable-memcached-sasl || exit 1
+printf "\n" | ./configure --disable-memcached-sasl || exit 1
 make $MAKEOPTS || exit 1
 make install || exit 1
 
