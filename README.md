@@ -318,6 +318,9 @@ docker-compose up
 
 # go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri
 
+sudo chmod 777 data/solr
+sudo chmod 666 data/solr/*
+sudo chown -R 8983:8983 data/solr
 docker exec -it openskos-php-fpm php vendor/bin/phing solr.create.core
 docker exec -it openskos-php-fpm php tools/tenant.php --code CODE --name NAME --email EMAIL --password PASSWORD create
 docker exec -it openskos-php-fpm php tools/jena2solr.php
