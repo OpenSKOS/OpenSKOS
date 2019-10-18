@@ -37,6 +37,9 @@ services:
       - solr-precreate
       - openskos
       - /opt/solr/server/solr/openskos
+    networks:
+      - default
+      - openskos
   openskos-mysql:
     build: ./data/docker/mysql
     container_name: openskos-mysql

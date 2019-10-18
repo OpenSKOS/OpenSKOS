@@ -318,7 +318,9 @@ docker-compose up
 
 # go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri
 
+docker exec -it openskos-php-fpm php vendor/bin/phing solr.create.core
 docker exec -it openskos-php-fpm php tools/tenant.php --code CODE --name NAME --email EMAIL --password PASSWORD create
+docker exec -it openskos-php-fpm php tools/jena2solr.php
 
 # go to localhost:9000 and log in using your just-created credentials
 ```
