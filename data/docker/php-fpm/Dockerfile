@@ -39,9 +39,6 @@ RUN scripts/ext-pecl-install.sh composer.json install-log
 RUN scripts/ext-custom-install.sh composer.json install-log
 RUN php -m
 
-# # The following runs FPM and removes all its extraneous log output on top of what your app outputs to stdout
-# CMD /usr/sbin/php-fpm7.1 -F 2>&1 | sed -u 's,.*: \"\(.*\)$,\1,'| sed -u 's,"$,,' 1>&1
-
 # Set the workdir for script usage
 WORKDIR "/var/www/openskos"
 
