@@ -29,6 +29,8 @@ RUN apk add \
 # Our extension detector needs this
 RUN docker-php-ext-install json
 
+COPY data/docker/php-fpm/php-ini-overrides.ini /usr/local/etc/php/php.ini
+
 # Install exts as defined in composer.json
 COPY data/docker/scripts scripts
 COPY composer.json .
