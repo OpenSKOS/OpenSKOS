@@ -15,6 +15,7 @@ services:
     container_name: openskos-php-fpm
     volumes:
       - .:/var/www/openskos
+      - ./data/docker/php-fpm/Dockerfile:/usr/local/etc/php/conf.d/99-overrides.ini
   openskos-jena:
     build: ./data/docker/jena-fuseki
     container_name: openskos-jena-fuseki
