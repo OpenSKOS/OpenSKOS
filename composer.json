@@ -1,5 +1,18 @@
 {
     "require": {
+        "php": ">=5.4 | <=7.1",
+        "ext-curl": "*",
+        "ext-gettext": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-mcrypt": "*",
+        "ext-memcache": "*",
+        "ext-mysqli": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-xsl": "*",
+        "ext-zip": "*",
         "league/oauth2-client": "0.9.*",
         "zendframework/zendframework1": "1.*",
         "easyrdf/easyrdf": ">=0.10.0-alpha",

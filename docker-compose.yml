@@ -9,16 +9,21 @@ services:
     ports:
      - "9000:80"
   openskos-php-fpm:
-    build: ./data/docker/php-fpm
+    build:
+      context: ./
+      dockerfile: ./data/docker/php-fpm/Dockerfile
     container_name: openskos-php-fpm
     volumes:
       - .:/var/www/openskos
-      - ./data/docker/php-fpm/php-ini-overrides.ini:/etc/php5/fpm/conf.d/99-overrides.ini
+      - ./data/docker/php-fpm/php-ini-overrides.ini:/usr/local/etc/php/conf.d/99-overrides.ini
   openskos-jena:
     build: ./data/docker/jena-fuseki
     container_name: openskos-jena-fuseki
     ports:
      - "9001:3030"
+    networks:
+      - default
+      - openskos
     environment:
         ADMIN_PASSWORD : admin
   openskos-solr:
@@ -33,6 +38,9 @@ services:
       - solr-precreate
       - openskos
       - /opt/solr/server/solr/openskos
+    networks:
+      - default
+      - openskos
   openskos-mysql:
     build: ./data/docker/mysql
     container_name: openskos-mysql
@@ -42,6 +50,9 @@ services:
         MYSQL_ROOT_PASSWORD : secr3t
     volumes:
         - ./data/openskos-create.sql:/docker-entrypoint-initdb.d/openskos-create.sql
+    networks:
+      - default
+      - openskos
   openskos-memcached:
     image: 'bitnami/memcached:1'
     container_name: openskos-memcached
