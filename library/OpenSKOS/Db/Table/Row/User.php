@@ -379,17 +379,35 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
         $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
-        if (!$this->uri) {
-            $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
+        $uuid = null;
+        if ($this->uri) {
+            $uuidParts = explode('/', $this->uri);
+            $uuid = array_pop($uuidParts);
+        } else {
+            $uuid = \Rhumsaa\Uuid\Uuid::uuid64();
+            $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . $uuid;
             if ($autoSave) {
                 $this->save();
             }
         }
+
         try {
-            return $resourceManager->fetchByUri($this->uri);
+            $person = $resourceManager->fetchByUri($this->uri);
+
+            // Add UUID if it's missing
+            // Intended for already-existing persons
+            if (!$person->hasProperty(\OpenSkos2\Namespaces\OpenSkos::UUID)) {
+                $person->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new \Openskos2\Rdf\Literal($uuid));
+                if ($autoSave) {
+                    $resourceManager->replace($person);
+                }
+            }
+
+            return $person;
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+            $person->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
             if ($autoSave) {
                 $resourceManager->insert($person);
             }
