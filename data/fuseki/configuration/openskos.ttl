@@ -17,29 +17,32 @@ tdb:GraphTDB rdfs:subClassOf ja:Model .
         fuseki:serviceReadGraphStore        "get" ;
         fuseki:serviceReadWriteGraphStore   "data" ;
         fuseki:serviceUpdate                "update" ;
-        fuseki:serviceUpload                "upload"
-.
+        fuseki:serviceUpload                "upload" ;
+        .
 
 <#openskos> 
-        a       ja:RDFDataset ;    
+        a       ja:RDFDataset ;
         ja:defaultGraph <#modelDft> ;
-.
+        .
 
 <#modelDft>
         a       ja:InfModel ;
         ja:baseModel <#tdbGraph> ;
-	ja:reasoner [
-		ja:rulesFrom <file:rules/skos>
-	]
-.
+        ja:reasoner [
+          ja:rulesFrom <file:rules/skos.ttl>
+        ] ;
+        .
 
 <#tdbDataset>
         a             tdb:DatasetTDB ;
-        tdb:location  "run/databases/openskos" ;
-        ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "30000" ] 
-.
+        tdb:location  "/fuseki/databases/openskos" ;
+        ja:context [
+          ja:cxtName "arq:queryTimeout" ;
+          ja:cxtValue "30000"
+        ] ;
+        .
 
 <#tdbGraph> 
         a tdb:GraphTDB ;
-        tdb:dataset <#tdbDataset>
-.
+        tdb:dataset <#tdbDataset> ;
+        .

@@ -316,7 +316,7 @@ php vendor/bin/phing config
 docker network create openskos
 docker-compose up 
 
-# go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri
+# go to localhost:9001 and create a dataset matching in name with application.ini sparql.queryUri if it's missing
 
 sudo chmod 777 data/solr
 sudo chmod 666 data/solr/*

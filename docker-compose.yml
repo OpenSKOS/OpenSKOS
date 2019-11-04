@@ -26,6 +26,8 @@ services:
       - openskos
     environment:
         ADMIN_PASSWORD : admin
+    volumes:
+      - ./data/fuseki/configuration:/fuseki/configuration
   openskos-solr:
     build: ./data/docker/solr
     container_name: openskos-solr
