@@ -6,7 +6,6 @@
         "ext-intl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "ext-mcrypt": "*",
         "ext-memcache": "*",
         "ext-mysqli": "*",
         "ext-pdo": "*",
