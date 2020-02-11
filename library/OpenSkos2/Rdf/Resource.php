@@ -24,7 +24,6 @@ use OpenSkos2\Rdf\Object as RdfObject;
 use OpenSkos2\Rdf\Literal;
 use OpenSkos2\Rdf\Uri;
 use OpenSkos2\Namespaces;
-use OpenSkos2\Namespaces\SkosXl;
 use OpenSkos2\Exception\OpenSkosException;
 use OpenSkos2\Exception\UriGenerationException;
 use OpenSkos2\Namespaces\DcTerms;
@@ -32,6 +31,8 @@ use OpenSkos2\Namespaces\Dc;
 use OpenSkos2\Namespaces\OpenSkos;
 use OpenSkos2\Namespaces\Rdf;
 use OpenSkos2\Namespaces\Skos;
+use OpenSkos2\Namespaces\Foaf;
+use OpenSkos2\Namespaces\SkosXl;
 use Rhumsaa\Uuid\Uuid;
 
 class Resource extends Uri implements ResourceIdentifier
@@ -616,7 +617,9 @@ class Resource extends Uri implements ResourceIdentifier
             $dcCreator = $dcCreator[0];
             $dcTermsCreator = $dcTermsCreator[0];
             try {
-                $dcTermsCreatorName = $personManager->fetchByUri($dcTermsCreator->getUri())->getProperty(Foaf::NAME);
+                $uri = $dcTermsCreator->getUri();
+                $creator = $personManager->fetchByUri($uri);
+                $dcTermsCreatorName = $creator->getProperty(Foaf::NAME);
             } catch (ResourceNotFoundException $err) {
                 // We cannot find the resource so just leave values as they are
                 $dcTermsCreatorName = null;

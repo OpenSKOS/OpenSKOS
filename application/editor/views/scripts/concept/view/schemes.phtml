@@ -20,6 +20,10 @@ use OpenSkos2\Namespaces\Skos;
 
 $diContainer = Zend_Controller_Front::getInstance()->getDispatcher()->getContainer();
 $conceptSchemes = $diContainer->get('Editor_Models_ConceptSchemesCache')->fetchAll();
+
+$tenantManager = $diContainer->get('\OpenSkos2\TenantManager');
+$openSkos2Tenant = $tenantManager->getCachedTenant();
+
 ?>
 
 <?php if (!$this->concept->isPropertyEmpty(Skos::INSCHEME)): ?>
@@ -28,7 +32,7 @@ $conceptSchemes = $diContainer->get('Editor_Models_ConceptSchemesCache')->fetchA
             $scheme = $conceptSchemes->findByUri($schemeUri);
             if (!empty($scheme)) {
                 $imgTitle = $scheme->getCaption();
-                $iconPath = $scheme->getIconPath();
+                $iconPath = $scheme->getIconPath($openSkos2Tenant);
             }
         ?>
         <?php if (!empty($iconPath)): ?>

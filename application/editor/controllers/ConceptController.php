@@ -183,7 +183,15 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         //We try to make this the only commit of the entire save process. Multiple commits have caused a lot of problems
         //This commit should save all concepts and labels (even though conceptManager and labelHelper are different classes.`
-        $conceptManager->commit();
+
+        $editor_settings = Zend_Controller_Front::getInstance()->getParam('bootstrap')->getOption('editor');
+        $no_commits = isset($editor_settings['no_commits']) ?
+            ((boolean) filter_var($editor_settings['no_commits'], FILTER_VALIDATE_BOOLEAN)) : false;
+
+        if (! $no_commits) {
+            //With large datasets, we include an option no let the Solr manager handle autocommits
+            $conceptManager->commit();
+        }
         $this->_helper->redirector('view', 'concept', 'editor', array('uri' => $concept->getUri()));
     }
 
@@ -416,6 +424,9 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
 
         $personManager = $this->getDI()->get('\OpenSkos2\PersonManager');
 
+        //URI caching to reduce the number of Jena queries to a minimum
+        $uriCache = array();
+
         foreach ($footerFields as $field => $properties) {
             $usersNames = [];
             $dates = [];
@@ -423,10 +434,21 @@ class Editor_ConceptController extends OpenSKOS_Controller_Editor
             foreach ($properties['user'] as $userProperty) {
                 if (!$concept->isPropertyEmpty($userProperty)) {
                     foreach ($concept->getProperty($userProperty) as $user) {
-                        if ($user instanceof Uri && $personManager->askForUri($user)) {
-                            $usersNames[] = $personManager->fetchByUri($user)->getCaption();
-                        } elseif ($user instanceof Uri) {
-                            $usersNames[] = $user->getUri();
+                        if ($user instanceof Uri ) {
+                            $userKey = $user->getUri();
+                            if(isset($uriCache[$userKey])){
+                                $usersNames[] = $uriCache[$userKey];
+                            }
+                            else{
+                                try {
+                                    $userRdf = $personManager->fetchByUri($user);
+                                    $usersNames[] = $uriCache[$userKey] = $userRdf->getCaption();
+                                }
+                                catch (\Exception $e) {
+                                    //Annoying that askForUri throws an exception instead of just returning null
+                                    $usersNames[] = $uriCache[$userKey] = $user->getUri();
+                                }
+                            }
                         } else {
                             $usersNames[] = $user->getValue();
                         }

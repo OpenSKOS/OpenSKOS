@@ -282,9 +282,7 @@ class Editor_Forms_Search extends OpenSKOS_Form
             $tenantCode = $user->tenant;
 
             $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
-
-            $tenantUuid = $tenantManager->getTenantUuidFromCode($tenantCode);
-            $openSkos2Tenant = $tenantManager->fetchByUuid($tenantUuid);
+            $openSkos2Tenant = $tenantManager->getCachedTenant();
 
             if (!$openSkos2Tenant) {
                 throw new Zend_Controller_Action_Exception('Tenant record not readable', 404);
@@ -335,20 +333,23 @@ class Editor_Forms_Search extends OpenSKOS_Form
      * Merge search options
      * @param array $formOptions
      * @param array $profileOptions
+     * @param array $tenant Object of Logged in tenant
      * @return array
      */
-    public static function mergeSearchOptions($formOptions, $profileOptions)
+    public static function mergeSearchOptions($formOptions, $profileOptions, $tenant = null)
     {
         // Merge concept schemes options.
-        if (isset($formOptions['allowedConceptScheme']) && ! empty($formOptions['allowedConceptScheme'])) {
+        if (isset($formOptions['allowedConceptScheme']) && !empty($formOptions['allowedConceptScheme'])) {
             $profileOptions['conceptScheme'] = $formOptions['allowedConceptScheme'];
             unset($formOptions['allowedConceptScheme']);
         }
-        
+
         $options = array_merge($formOptions, $profileOptions);
-        
+
+        if ($tenant === null) {
+            $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
+        }
         // Remove any status options if status system is disabled.
-        $tenant = \OpenSkos2\TenantManager::getLoggedInTenant();
 
         if (!$tenant->isEnableStatusesSystems()){
             $options['status'] = [];

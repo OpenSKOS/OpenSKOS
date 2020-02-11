@@ -160,7 +160,6 @@ class Autocomplete
         }
 
 
-
         if (empty($searchTextQueries)) {
             $solrQuery = $searchText;
         } else {
@@ -183,10 +182,10 @@ class Autocomplete
         }
 
         // sets (former tenant collections)
-        if (!empty($options['sets'])) {
+        if (!empty($options['collections'])) {
             $optionsQueries[] = '('
                 . 's_set:('
-                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['sets']))
+                . implode(' OR ', array_map([$helper, 'escapePhrase'], $options['collections']))
                 . '))';
         }
 
@@ -262,7 +261,11 @@ class Autocomplete
             $sorts = null;
         }
 
-        $result =  $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        if (isset($options['retrieve_from_solr']) && $options['retrieve_from_solr']) {
+            $result = $this->manager->searchInSolr($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        } else {
+            $result = $this->manager->search($solrQuery, $options['rows'], $options['start'], $numFound, $sorts);
+        }
         return $result;
     }
 

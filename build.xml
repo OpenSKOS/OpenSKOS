@@ -34,6 +34,14 @@
                     <regexp pattern="@api-show-only-approved@" replace="${api.showOnlyApproved}"/>
                     <regexp pattern="@editor-allow-notation-edit@" replace="${editor.allowNotationEdit}"/>
                     <regexp pattern="sparql\.(query|update)Uri\s*=\s*.*?:3030/[^/]*/" replace="sparql.\1Uri=${jena.url}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.name\s*=\s*.*" replace="resources.cachemanager.general.backend.name=${resources.cachemanager.general.backend.name}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.host\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.host=${resources.cachemanager.general.backend.options.servers.1.host}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.port\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.port=${resources.cachemanager.general.backend.options.servers.1.port}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.persistent\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.persistent=${resources.cachemanager.general.backend.options.servers.1.persistent}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.weight\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.weight=${resources.cachemanager.general.backend.options.servers.1.weight}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.timeout\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.timeout=${resources.cachemanager.general.backend.options.servers.1.timeout}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.backend\.options\.servers\.1\.retry_interval\s*=\s*.*" replace="resources.cachemanager.general.backend.options.servers.1.retry_interval=${resources.cachemanager.general.backend.options.servers.1.retry_interval}"/>
+                    <regexp pattern="resources\.cachemanager\.general\.instance_uuid\s*=\s*.*" replace="resources.cachemanager.general.instance_uuid=${resources.cachemanager.general.instance_uuid}"/>
                 </replaceregexp>
             </filterchain>
         </copy>

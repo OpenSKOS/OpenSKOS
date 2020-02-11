@@ -287,7 +287,8 @@ class Repository implements InterfaceRepository
             $pSet['tenant'],
             $pSet['rdfSet'],
             $pSet['conceptScheme'],
-            $numFound
+            $numFound,
+            ($metadataFormat === self::PREFIX_OAI_RDF_XL)
         );
         if (isset($from) && $from && date_format($from, 'YmdHis') === '19700101000000') {
             //The unix Epoch gets converted to integer zero the the resumption token. I can't seem to get around it
@@ -297,10 +298,6 @@ class Repository implements InterfaceRepository
 
         $items = [];
         foreach ($concepts as $i => $concept) {
-            /* @var $concept Concept */
-            if ($metadataFormat === self::PREFIX_OAI_RDF_XL) {
-                $concept->loadFullXlLabels($this->conceptManager->getLabelManager());
-            }
             $items[] = new OaiConcept($concept, $this->getSetsMap(), $metadataFormat);
         }
         $token = null;
@@ -553,10 +550,9 @@ class Repository implements InterfaceRepository
         $tenant = null,
         $collection = null,
         $scheme = null,
-        &$numFound = null
+        &$numFound = null,
+        $skosXl = false
     ) {
-    
-
         $searchOptions = [
             'start' => $offset,
             'rows' => $limit,
@@ -589,7 +585,48 @@ class Repository implements InterfaceRepository
         } else {
             $searchOptions['searchText'] = '';
         }
-        return $this->searchAutocomplete->search($searchOptions, $numFound);
+
+        $concepts = $this->searchAutocomplete->search($searchOptions, $numFound);
+        if ($skosXl === true) {
+            $this->batchFetchXl($concepts);
+        }
+        return $concepts;
+    }
+
+    /**
+     * Fetch all XL labels for each concept and add them.
+     */
+    private function batchFetchXl(\OpenSkos2\ConceptCollection $concepts)
+    {
+        $labels = [];
+        foreach ($concepts as $concept) {
+            foreach (Concept::$classes['SkosXlLabels'] as $xlLabelPredicate) {
+                $fullXlLabels = [];
+                foreach ($concept->getProperty($xlLabelPredicate) as $xlLabel) {
+                    if (!$xlLabel instanceof Label) {
+                        $labels[] = $xlLabel;
+                    }
+                }
+            }
+        }
+
+        $manager = $this->conceptManager->getLabelManager();
+        $data = $manager->fetchByUris($labels);
+
+        foreach ($concepts as $concept) {
+            foreach (Concept::$classes['SkosXlLabels'] as $xlLabelPredicate) {
+                $fullXlLabels = [];
+                foreach ($concept->getProperty($xlLabelPredicate) as $xlLabel) {
+                    if (!$xlLabel instanceof Label) {
+                        foreach ($data as $label) {
+                            if ($xlLabel->getUri() === $label->getUri()) {
+                                $concept->setProperties($xlLabelPredicate, [$label]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private function validOAIidentifier($identifier)

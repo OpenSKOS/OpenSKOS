@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!-- OpenSKOS @ Solr 7.4.0 -->
 <config>
-  <luceneMatchVersion>4.4</luceneMatchVersion>
+  <luceneMatchVersion>7.1.0</luceneMatchVersion>
 
   <!-- set this via the core's properties file -->
   <dataDir>${solr.core.data.dir:}</dataDir>
 
   <indexConfig>
     <useCompoundFile>false</useCompoundFile>
+    <!--
     <mergeFactor>100</mergeFactor>
-    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
-    <ramBufferSizeMB>32</ramBufferSizeMB>
     <maxMergeDocs>2147483647</maxMergeDocs>
+    -->
+    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
+    <ramBufferSizeMB>128</ramBufferSizeMB>
+    <mergePolicyFactory class="org.apache.solr.index.TieredMergePolicyFactory">
+        <int name="maxMergeAtOnce">10</int>
+        <int name="segmentsPerTier">20</int>
+    </mergePolicyFactory>
     <maxFieldLength>10000</maxFieldLength>
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
@@ -32,7 +39,7 @@
      criteria -->
     <autoCommit>
       <maxDocs>10000</maxDocs> <!-- maximum uncommited docs before autocommit triggered -->
-      <maxTime>15000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
+      <maxTime>60000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
       <openSearcher>false</openSearcher> <!-- SOLR 4.0.  Optionally don't open a searcher on hard commit.  This is useful to minimize the size of transaction logs that keep track of uncommitted updates. -->
     </autoCommit> 
       
@@ -46,7 +53,7 @@
                    triggering a new soft commit.
       -->
     <autoSoftCommit>
-        <maxTime>1000</maxTime>
+        <maxTime>60000</maxTime>
     </autoSoftCommit>         
   </updateHandler>
 
@@ -84,8 +91,8 @@
 
     <query>
           <maxBooleanClauses>1024</maxBooleanClauses>
-          <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
-          <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256"/>
+          <filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+          <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
           <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
           <enableLazyFieldLoading>true</enableLazyFieldLoading>
           <queryResultWindowSize>10</queryResultWindowSize>
@@ -132,11 +139,11 @@
     </requestHandler>
 
     <requestHandler name="/update" class="solr.UpdateRequestHandler" />
-    <!-- removed in solr 5, but keep seperate json endpoint for backwards compatability -->
-    <requestHandler name="/update/json" class="solr.UpdateRequestHandler"/>
-
-    <!-- ter vervanging van alle losse /admin/* handlers -->
-    <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
+    <requestHandler name="/update/json" class="solr.UpdateRequestHandler">
+        <lst name="defaults">
+            <str name="stream.contentType">application/json</str>
+        </lst>
+    </requestHandler>
 
     <requestHandler name="/admin/ping" class="PingRequestHandler">
         <lst name="defaults">

@@ -162,6 +162,35 @@ class ResourceManager
         $this->solr->update($update);
     }
 
+
+    /**
+     * @function doesMatchingPrefLabelExist
+     * @param $value Value of PrefLabel
+     * @return boolean true if matching label found, else false
+     *
+     * Notes: The field prefLabel is searched; this will exist even if using XL
+     *
+     */
+    public function doesMatchingPrefLabelExist($value)
+    {
+
+        $solrSearchTerm = sprintf('prefLabel:"%s"', $value);
+
+        // Solarium brakes stat results when we have long int, so we use ordering.
+        $select = $this->solr->createSelect();
+
+        $select->setStart(0)
+            ->setRows(1)
+            ->setFields(['prefLabel'])
+            ->setQuery($solrSearchTerm);
+
+        $solrResult = $this->solr->select($select);
+
+        $has_match = ($solrResult->count() > 0);
+
+        return $has_match;
+    }
+
     /**
      * Perform a full text query
      * lucene / solr queries are possible
@@ -174,12 +203,19 @@ class ResourceManager
      * @param array $sorts
      * @return array Array of uris
      */
-    public function search($query, $rows = 20, $start = 0, &$numFound = 0, $sorts = null, array $filterQueries = null)
-    {
+    public function search(
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null,
+        array $filterQueries = null,
+        $full_retrieve = false
+    ) {
         $select = $this->solr->createSelect();
         $select->setStart($start)
                 ->setRows($rows)
-                ->setFields(['uri'])
+                ->setFields(['uri', 'prefLabel', 'inScheme', 'scopeNote', 'status' ])
                 ->setQuery($query);
         if (!empty($sorts)) {
             $select->setSorts($sorts);
@@ -198,12 +234,20 @@ class ResourceManager
         $solrResult = $this->solr->select($select);
         $numFound = $solrResult->getNumFound();
         
-        $uris = [];
-        foreach ($solrResult as $doc) {
-            $uris[] = $doc->uri;
+        $return_data = [];
+
+
+        if ($full_retrieve) {
+            //Return an array of URI's
+            $return_data = $solrResult->getDocuments();
+        } else {
+            //Return an array of URI's
+            foreach ($solrResult as $doc) {
+                $return_data[] = $doc->uri;
+            }
         }
         
-        return $uris;
+        return $return_data;
     }
 
     /**
@@ -228,6 +272,9 @@ class ResourceManager
         }
     }
 
+
+
+
     /**
      * Send a commit request to solr
      * @return \Solarium\QueryType\Update\Result
@@ -235,7 +282,7 @@ class ResourceManager
     public function commit()
     {
         $update = $this->solr->createUpdate();
-        $update->addCommit();
+        //$update->addCommit();
         return $this->solr->update($update);
     }
 

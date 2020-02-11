@@ -41,11 +41,11 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
                     ->addElement('text', 'tenant', array('label' => _('Tenant'), 'readonly' => true, 'disabled' => true))
                     ->addElement('text', 'name', array('label' => _('Name'), 'required' => true))
                     ->addElement('text', 'email', array('label' => _('E-mail'), 'required' => true))
-                    ->addElement('password', 'pw1', array('label' => _('Password'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('StringLength', false, array(4, 30)), array('identical', false, array('token' => 'pw2')))))
-                    ->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1')))))
+                    ->addElement('password', 'pw1', array('label' => _('Password'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('StringLength', false, array(4, 30)), array('identical', false, array('token' => 'pw2'))), 'autocomplete' => 'off'))
+                    ->addElement('password', 'pw2', array('label' => _('Password (check)'), 'maxlength' => 100, 'size' => 15, 'validators' => array(array('identical', false, array('token' => 'pw1'))), 'autocomplete' => 'off'))
                     ->addElement('select', 'role', array('label' => _('Role'), 'required' => true))
                     ->addElement('radio', 'type', array('label' => _('Usertype'), 'required' => true))
-                    ->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false))
+                    ->addElement('text', 'apikey', array('label' => _('API Key (required for API users)'), 'required' => false, 'autocomplete' => 'off'))
                     ->addElement('multiselect', 'defaultSearchProfileIds', array('label' => _('Search Profile Id'), 'required' => false))
                     ->addElement('checkbox', 'disableSearchProfileChanging', array('label' => _('Disable changing search profile'), 'required' => false))
                     ->addElement('submit', 'submit', array('label' => _('Submit')))
@@ -379,17 +379,35 @@ class OpenSKOS_Db_Table_Row_User extends Zend_Db_Table_Row
          * @var $resourceManager \OpenSkos2\Rdf\ResourceManager
          */
         $resourceManager = $diContainer->get('\OpenSkos2\Rdf\ResourceManager');
-        if (!$this->uri) {
-            $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . \Rhumsaa\Uuid\Uuid::uuid4();
+        $uuid = null;
+        if ($this->uri) {
+            $uuidParts = explode('/', $this->uri);
+            $uuid = array_pop($uuidParts);
+        } else {
+            $uuid = \Rhumsaa\Uuid\Uuid::uuid64();
+            $this->uri = rtrim($this->getBaseApiUri(), '/') . '/users/' . $uuid;
             if ($autoSave) {
                 $this->save();
             }
         }
+
         try {
-            return $resourceManager->fetchByUri($this->uri);
+            $person = $resourceManager->fetchByUri($this->uri);
+
+            // Add UUID if it's missing
+            // Intended for already-existing persons
+            if (!$person->hasProperty(\OpenSkos2\Namespaces\OpenSkos::UUID)) {
+                $person->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new \Openskos2\Rdf\Literal($uuid));
+                if ($autoSave) {
+                    $resourceManager->replace($person);
+                }
+            }
+
+            return $person;
         } catch (\OpenSkos2\Exception\ResourceNotFoundException $e) {
             $person = new \OpenSkos2\Person($this->uri);
             $person->addProperty(\OpenSkos2\Namespaces\Foaf::NAME, new \OpenSkos2\Rdf\Literal($this->name));
+            $person->addProperty(\OpenSkos2\Namespaces\OpenSkos::UUID, new \OpenSkos2\Rdf\Literal($uuid));
             if ($autoSave) {
                 $resourceManager->insert($person);
             }

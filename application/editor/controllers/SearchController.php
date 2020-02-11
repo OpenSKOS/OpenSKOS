@@ -38,14 +38,19 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $options = $this->getSearchOptions($searchForm);
         $options['sorts'] = ['sort_s_prefLabel' => 'asc'];
 
+        /* Retrieve from Solr, to prevent heavy use of Jena */
+        $options['retrieve_from_solr'] = true;
+
         /* @var $search \OpenSkos2\Search\Autocomplete */
         $search = $this->getDI()->get('\OpenSkos2\Search\Autocomplete');
         $concepts = $search->search($options, $numFound);
 
         $preview = $this->getDI()->get('Editor_Models_ConceptPreview');
 
+        $processed_concepts = $preview->convertSolrToLinksData($concepts);
+
         $result = [
-            'concepts' => $preview->convertToLinksData($concepts),
+            'concepts' => $processed_concepts,
             'numFound' => $numFound,
             'status' => 'ok',
             'conceptSchemeOptions' => $this->_getConceptSchemeOptions(),
@@ -266,10 +271,12 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             $checkOptions = Editor_Forms_SearchOptions::formValues2Options(
                 array_merge($this->getSearchOptionsForm()->getValues(true), $options)
             );
-            
+
+            /*
             if ($checkOptions != $originalOptions) {
                 $options['searchProfileId'] = 'custom';
             }
+            */
             
             $user->setSearchOptions($options);
             return $this->_forward('set-options-success');
@@ -362,7 +369,11 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
         $detailedSearchOptions = $userForSearch->getSearchOptions(true);
 
         if ($loggedUser['id'] !== $userForSearch['id']) {
-            return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+
+            $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+            $openSkos2Tenant = $tenantManager->getCachedTenant();
+
+            return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions, $openSkos2Tenant);
         }
 
         // Change search profile if needed and allowed. Change concept schemes if needed.
@@ -414,7 +425,10 @@ class Editor_SearchController extends OpenSKOS_Controller_Editor {
             $loggedUser->setSearchOptions($detailedSearchOptions);
         }
 
-        return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions);
+        $tenantManager = $this->getDI()->get('\OpenSkos2\TenantManager');
+        $openSkos2Tenant = $tenantManager->getCachedTenant();
+
+        return Editor_Forms_Search::mergeSearchOptions($searchOptions, $detailedSearchOptions, $openSkos2Tenant);
     }
     
     /**

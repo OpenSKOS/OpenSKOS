@@ -291,6 +291,18 @@ class ConceptManager extends ResourceManagerWithSearch
      */
     public function askForPrefLabel($prefLabel)
     {
+        $solrManager = $this->solrResourceManager;
+
+        $res = $solrManager->doesMatchingPrefLabelExist($prefLabel);
+
+        return $res;
+
+        /*
+         * We've switched back to using Solr for checking prefLabels, for performance reasons
+         * The old Jena check was this code, should you ever need to restore it
+         *
+         */
+        /*
         return $this->askForMatch([
                 [
                     'predicate' => Skos::PREFLABEL,
@@ -298,6 +310,7 @@ class ConceptManager extends ResourceManagerWithSearch
                     'ignoreLanguage' => true
                 ]
         ]);
+        */
     }
 
     /**
@@ -359,9 +372,23 @@ class ConceptManager extends ResourceManagerWithSearch
         $sorts = null
     ) {
 
-        return $this->fetchByUris(
-            $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts)
-        );
+        $uriList = $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts);
+        $resultCollection = $this->fetchByUris($uriList);
+
+        return $resultCollection;
+    }
+
+    public function searchInSolr(
+        $query,
+        $rows = 20,
+        $start = 0,
+        &$numFound = 0,
+        $sorts = null
+    ) {
+
+        $uriList = $this->solrResourceManager->search($query, $rows, $start, $numFound, $sorts, null, true);
+
+        return $uriList;
     }
 
     /**

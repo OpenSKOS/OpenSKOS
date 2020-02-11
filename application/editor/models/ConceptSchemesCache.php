@@ -52,6 +52,28 @@ class Editor_Models_ConceptSchemesCache
     {
         return $this->tenantCode;
     }
+
+
+    /**
+     * @function getMyCacheKey Returns the cache key this class will use
+     * @return string The Cache key
+     */
+    private function getMyCacheKey(){
+        //If there's an instance uuid, get that first
+        $resources = OpenSKOS_Application_BootstrapAccess::getOption('resources');
+        $uuid = '';
+
+        if(isset($resources['cachemanager']['general']['instance_uuid'])){
+            $uuid = $resources['cachemanager']['general']['instance_uuid'];
+        }
+        $tenantCode = $this->requireTenantCode();
+        $cache_key = sprintf("%s_%s_%s", $uuid, self::CONCEPT_SCHEMES_CACHE_KEY, $tenantCode);  ;
+
+        //There are restrictions on permitted cache keys
+        $cache_key = preg_replace('#[^a-zA-Z0-9_]#', '_', $cache_key);
+
+        return $cache_key;
+    }
     
     /**
      * Get tenant for which the cache is done.
@@ -93,7 +115,12 @@ class Editor_Models_ConceptSchemesCache
      */
     public function clearCache()
     {
-        $this->cache->clean();
+        /*
+         * Switched to Memcache. A flush all had too many consequences, so switch remove and be alert for the
+         *  consequences
+         */
+        $cache_key = $this->getMyCacheKey();
+        $this->cache->remove($cache_key);
     }
     
     /**
@@ -102,7 +129,8 @@ class Editor_Models_ConceptSchemesCache
      */
     public function fetchAll()
     {
-        $schemes = $this->cache->load(self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
+        $cache_key = $this->getMyCacheKey();
+        $schemes = $this->cache->load($cache_key);
         if ($schemes === false) {
             $schemes = $this->sortSchemes(
                 $this->manager->fetch(
@@ -113,7 +141,7 @@ class Editor_Models_ConceptSchemesCache
                 )
             );
             
-            $this->cache->save($schemes, self::CONCEPT_SCHEMES_CACHE_KEY . $this->requireTenantCode());
+            $this->cache->save($schemes, $cache_key);
         }
         
         return $schemes;
@@ -160,16 +188,18 @@ class Editor_Models_ConceptSchemesCache
     {
         $shemes = $this->fetchAll();
         $result = [];
-        foreach ($shemesUris as $uri) {
-            $scheme = $shemes->findByUri($uri);
-            if ($scheme) {
-                $schemeMeta = $scheme->toFlatArray([
-                    'uri',
-                    'caption',
-                    DcTerms::TITLE
-                ]);
-                $schemeMeta['iconPath'] = $scheme->getIconPath();
-                $result[] = $schemeMeta;
+        if (isset($shemesUris) && is_array($shemesUris)) {
+            foreach ($shemesUris as $uri) {
+                $scheme = $shemes->findByUri($uri);
+                if ($scheme) {
+                    $schemeMeta = $scheme->toFlatArray([
+                        'uri',
+                        'caption',
+                        DcTerms::TITLE
+                    ]);
+                    $schemeMeta['iconPath'] = $scheme->getIconPath($this->tenantCode);
+                    $result[] = $schemeMeta;
+                }
             }
         }
         return $result;

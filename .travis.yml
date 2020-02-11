@@ -3,13 +3,16 @@ sudo: true
 language: php
 
 php:
-  - 5.4
-  - 5.5
   - 5.6
+  - 7.0
+  - 7.1
 
 matrix:
   allow_failures:
     - php: hhvm
+
+services:
+  - mysql
 
 before_install:
   - sudo apt-get update
@@ -24,8 +27,9 @@ before_install:
   - sudo a2ensite openskos
   - sudo service apache2 restart
   - sudo ps aux | egrep '(apache|httpd)'
-  
-  
+  - sudo env PATH="$PATH" data/docker/scripts/ext/memcache.sh
+  - phpenv config-add data/travis/php$(php -v | head -1 | tr '.' ' ' | awk '{print $2}').ini
+  - php -m
 
 install:
   - composer install --dev --prefer-dist
@@ -49,5 +53,5 @@ install:
   - ls
 
 script:
- - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
- - phpunit
+  - ./vendor/bin/phpcs --standard=PSR2 library/OpenSkos2/
+  - ./vendor/bin/phpunit
